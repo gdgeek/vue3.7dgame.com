@@ -359,8 +359,6 @@ const goInternal = (path: string) => {
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
   gap: 22px;
   padding: 30px;
-  border: var(--border-width) solid var(--border-color);
-  border-radius: 24px;
   background:
     radial-gradient(
       circle at top left,
@@ -373,6 +371,8 @@ const goInternal = (path: string) => {
       var(--bg-card) 48%,
       color-mix(in srgb, var(--primary-color) 4%, var(--bg-hover)) 100%
     );
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 24px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -383,27 +383,27 @@ const goInternal = (path: string) => {
   align-items: center;
   justify-content: center;
   padding: 6px 12px;
-  border-radius: 999px;
-  background: var(--overview-soft-bg-strong);
-  color: var(--overview-soft-text);
   font-size: 12px;
   font-weight: 700;
+  color: var(--overview-soft-text);
   letter-spacing: 0.08em;
+  background: var(--overview-soft-bg-strong);
+  border-radius: 999px;
 }
 
 .overview-hero__content h3 {
   margin: 10px 0 14px;
-  color: var(--text-primary);
   font-size: 34px;
   line-height: 1.15;
+  color: var(--text-primary);
 }
 
 .overview-hero__content p {
   max-width: 620px;
   margin: 0;
-  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.9;
+  color: var(--text-secondary);
 }
 
 .overview-actions {
@@ -423,9 +423,9 @@ const goInternal = (path: string) => {
   width: 100%;
   max-width: 460px;
   overflow: hidden;
+  background: var(--bg-card);
   border: var(--border-width) solid var(--overview-soft-border);
   border-radius: 22px;
-  background: var(--bg-card);
   box-shadow: var(--shadow-sm);
 }
 
@@ -439,8 +439,8 @@ const goInternal = (path: string) => {
 .platform-shell__top span {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
   background: color-mix(in srgb, var(--primary-color) 32%, var(--border-color));
+  border-radius: 50%;
 }
 
 .platform-shell__body {
@@ -459,11 +459,11 @@ const goInternal = (path: string) => {
 
 .platform-shell__nav {
   padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--bg-card);
   border: var(--border-width) solid var(--overview-soft-border);
   border-radius: 12px;
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-size: 13px;
 }
 
 .platform-shell__main {
@@ -485,13 +485,13 @@ const goInternal = (path: string) => {
   justify-content: center;
   min-height: 92px;
   padding: 16px;
-  border: var(--border-width) solid var(--overview-soft-border);
-  border-radius: 18px;
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--primary-color) 8%, var(--bg-card)) 0%,
     var(--bg-card) 100%
   );
+  border: var(--border-width) solid var(--overview-soft-border);
+  border-radius: 18px;
 }
 
 .platform-shell__panel--wide {
@@ -505,29 +505,29 @@ const goInternal = (path: string) => {
 
 .platform-shell__panel span,
 .platform-shell__footer {
-  color: var(--text-secondary);
   font-size: 12px;
+  color: var(--text-secondary);
 }
 
 .platform-shell__panel strong {
   margin-top: 8px;
-  color: var(--text-primary);
   font-size: 18px;
+  color: var(--text-primary);
 }
 
 .platform-shell__footer {
   padding: 14px 16px;
+  line-height: 1.6;
+  background: var(--bg-card);
   border: var(--border-width) solid var(--overview-soft-border);
   border-radius: 16px;
-  background: var(--bg-card);
-  line-height: 1.6;
 }
 
 .overview-section {
   padding: 24px;
+  background: var(--bg-card);
   border: var(--border-width) solid var(--border-color);
   border-radius: 22px;
-  background: var(--bg-card);
   box-shadow: var(--shadow-sm);
 }
 
@@ -575,13 +575,13 @@ const goInternal = (path: string) => {
 .highlight-card,
 .integration-card {
   padding: 20px;
-  border: var(--border-width) solid var(--border-color);
-  border-radius: 20px;
   background: linear-gradient(
     180deg,
     var(--bg-card) 0%,
     color-mix(in srgb, var(--primary-color) 2%, var(--bg-card)) 100%
   );
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 20px;
 }
 
 .module-card p,
@@ -591,22 +591,22 @@ const goInternal = (path: string) => {
 .integration-card p,
 .advantage-list li {
   margin: 10px 0 0;
-  color: var(--text-secondary);
   line-height: 1.8;
+  color: var(--text-secondary);
 }
 
 .module-card__meta {
   display: flex;
-  margin-top: 16px;
   padding: 12px 14px;
-  border-radius: 14px;
+  margin-top: 16px;
   background: var(--overview-soft-bg);
+  border-radius: 14px;
 }
 
 .module-card__meta span {
-  color: var(--overview-soft-text);
   font-size: 13px;
   font-weight: 700;
+  color: var(--overview-soft-text);
 }
 
 .capability-card__index {
@@ -615,21 +615,21 @@ const goInternal = (path: string) => {
   justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: 14px;
+  font-weight: 800;
+  color: var(--text-inverse);
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--primary-color) 88%, white) 0%,
     var(--primary-color) 100%
   );
-  color: var(--text-inverse);
-  font-weight: 800;
+  border-radius: 14px;
 }
 
 .journey-card {
   padding: 20px;
+  background: color-mix(in srgb, var(--primary-color) 2%, var(--bg-card));
   border: var(--border-width) solid var(--border-color);
   border-radius: 20px;
-  background: color-mix(in srgb, var(--primary-color) 2%, var(--bg-card));
 }
 
 .journey-steps {
@@ -643,13 +643,13 @@ const goInternal = (path: string) => {
   flex-direction: column;
   gap: 12px;
   padding: 18px;
-  border: var(--border-width) solid var(--overview-soft-border);
-  border-radius: 18px;
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--primary-color) 6%, var(--bg-card)) 0%,
     var(--bg-card) 100%
   );
+  border: var(--border-width) solid var(--overview-soft-border);
+  border-radius: 18px;
 }
 
 .journey-step__number {
@@ -658,10 +658,10 @@ const goInternal = (path: string) => {
   justify-content: center;
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  background: var(--overview-soft-bg-strong);
-  color: var(--overview-soft-text);
   font-weight: 800;
+  color: var(--overview-soft-text);
+  background: var(--overview-soft-bg-strong);
+  border-radius: 12px;
 }
 
 .highlight-list {
@@ -673,9 +673,9 @@ const goInternal = (path: string) => {
 
 .highlight-list__item {
   padding: 16px;
+  background: var(--bg-hover);
   border: var(--border-width) solid var(--border-color);
   border-radius: 16px;
-  background: var(--bg-hover);
 }
 
 .highlight-list__item strong {
@@ -686,11 +686,11 @@ const goInternal = (path: string) => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 14px 0 0;
   padding-left: 20px;
+  margin: 14px 0 0;
 }
 
-@media (max-width: 1200px) {
+@media (width <= 1200px) {
   .overview-hero,
   .overview-grid--3,
   .overview-grid--5,
@@ -699,7 +699,7 @@ const goInternal = (path: string) => {
   }
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .overview-grid--2,
   .platform-shell__body,
   .platform-shell__row {
@@ -707,7 +707,7 @@ const goInternal = (path: string) => {
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .overview-hero {
     padding: 22px;
     border-radius: 20px;

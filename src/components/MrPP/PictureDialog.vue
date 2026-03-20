@@ -17,11 +17,11 @@
             <div
               class="box-item"
               style="
-                text-align: center;
-                min-height: 300px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                min-height: 300px;
+                text-align: center;
               "
               v-loading="imageLoading"
             >
@@ -29,7 +29,7 @@
                 v-show="!imageLoading"
                 id="image"
                 ref="image"
-                style="height: 300px; width: auto"
+                style="width: auto; height: 300px"
                 :src="picture"
                 fit="contain"
                 @load="onImageLoad"

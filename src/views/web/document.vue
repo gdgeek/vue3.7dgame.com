@@ -54,8 +54,8 @@ onMounted(() => {
 
   .el-button {
     display: flex;
-    align-items: center;
     gap: 4px;
+    align-items: center;
 
     .el-icon {
       font-size: 20px;

@@ -180,20 +180,20 @@ const formatDate = (dateStr?: string) => {
 
 .list-container {
   width: 100%;
-  background: var(--bg-card, #ffffff);
-  border-radius: var(--radius-md, 20px);
-  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
   overflow: hidden;
+  background: var(--bg-card, #fff);
+  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-md, 20px);
 }
 
 .list-header {
   display: flex;
   align-items: center;
   padding: 14px 24px;
-  background: var(--bg-hover, #f8fafc);
   font-size: var(--font-size-sm, 13px);
   font-weight: var(--font-weight-medium, 500);
   color: var(--text-secondary, #64748b);
+  background: var(--bg-hover, #f8fafc);
   border-bottom: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
 }
 
@@ -206,10 +206,10 @@ const formatDate = (dateStr?: string) => {
   display: flex;
   align-items: center;
   padding: 16px 24px;
-  background: var(--bg-card, #ffffff);
+  cursor: pointer;
+  background: var(--bg-card, #fff);
   border-bottom: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
   transition: all var(--transition-fast, 0.15s ease);
-  cursor: pointer;
 
   &:last-child {
     border-bottom: none;
@@ -230,11 +230,11 @@ const formatDate = (dateStr?: string) => {
 
 // Column definitions
 .col-checkbox {
-  width: 40px;
-  flex-shrink: 0;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: 40px;
 
   :deep(.el-checkbox__inner) {
     border-radius: 6px;
@@ -242,49 +242,49 @@ const formatDate = (dateStr?: string) => {
 }
 
 .col-name {
-  flex: 1;
   display: flex;
-  align-items: center;
+  flex: 1;
   gap: 16px;
+  align-items: center;
   min-width: 0;
 }
 
 .col-size {
+  flex-shrink: 0;
   width: 100px;
-  text-align: right;
+  padding-right: 24px;
   font-size: var(--font-size-sm, 13px);
   color: var(--text-secondary, #64748b);
-  flex-shrink: 0;
-  padding-right: 24px;
+  text-align: right;
 }
 
 .col-date {
+  flex-shrink: 0;
   width: 120px;
-  text-align: right;
+  padding-right: 24px;
   font-size: var(--font-size-sm, 13px);
   color: var(--text-secondary, #64748b);
-  flex-shrink: 0;
-  padding-right: 24px;
+  text-align: right;
 }
 
 .col-actions {
+  flex-shrink: 0;
   width: 48px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 // Thumbnail styles
 .item-thumb {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: 52px;
   height: 52px;
-  border-radius: var(--radius-sm, 12px);
   overflow: hidden;
   background: var(--bg-hover, #f8fafc);
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  border-radius: var(--radius-sm, 12px);
   transition: transform var(--transition-fast, 0.15s ease);
 
   img {
@@ -304,27 +304,27 @@ const formatDate = (dateStr?: string) => {
 
 // Item name
 .item-name {
+  overflow: hidden;
   font-size: var(--font-size-md, 14px);
   font-weight: var(--font-weight-medium, 500);
   color: var(--text-primary, #1e293b);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 // Actions icon
 .actions-icon {
+  padding: 6px;
   font-size: 22px;
   color: var(--text-secondary, #64748b);
   cursor: pointer;
-  padding: 6px;
   border-radius: var(--radius-sm, 12px);
-  transition: all var(--transition-fast, 0.15s ease);
   opacity: 0.6;
+  transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    background: var(--bg-active, #e2e8f0);
     color: var(--text-primary, #1e293b);
+    background: var(--bg-active, #e2e8f0);
     opacity: 1;
   }
 }
@@ -334,7 +334,7 @@ const formatDate = (dateStr?: string) => {
 }
 
 // Responsive adjustments
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .list-header,
   .list-row {
     padding: 12px 16px;

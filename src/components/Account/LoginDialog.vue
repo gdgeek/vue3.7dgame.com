@@ -106,14 +106,14 @@ defineExpose({
 <style scoped lang="scss">
 .login-dialog {
   :deep(.el-dialog) {
-    border-radius: 16px;
     overflow: hidden;
     background-color: var(--bg-card, #fff);
-    box-shadow: var(--shadow-xl, 0 12px 32px rgba(0, 0, 0, 0.1));
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl, 0 12px 32px rgb(0 0 0 / 10%));
 
     .el-dialog__header {
-      margin: 0;
       padding: 20px 24px 0;
+      margin: 0;
       text-align: center;
     }
 
@@ -141,8 +141,8 @@ defineExpose({
 .login-header {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 12px;
+  align-items: center;
 
   .login-logo {
     width: 60px;
@@ -152,10 +152,10 @@ defineExpose({
   }
 
   .login-title {
+    margin: 0;
     font-size: 20px;
     font-weight: 600;
     color: var(--text-primary, #333);
-    margin: 0;
   }
 }
 
@@ -172,18 +172,18 @@ defineExpose({
 
   :deep(.el-tabs__nav) {
     display: flex;
-    width: 100%;
     justify-content: center;
+    width: 100%;
   }
 
   :deep(.el-tabs__item) {
     flex: 1;
-    text-align: center;
+    height: auto;
     padding: 6px 0;
     font-size: 15px;
     font-weight: 500;
     color: var(--text-secondary, #666);
-    height: auto;
+    text-align: center;
     transition: all 0.3s ease;
 
     &.is-active,
@@ -198,9 +198,9 @@ defineExpose({
 
   .tab-label {
     display: flex;
+    gap: 8px;
     align-items: center;
     justify-content: center;
-    gap: 8px;
 
     .el-icon {
       font-size: 18px;
@@ -215,8 +215,8 @@ defineExpose({
   .wechat-login {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 16px;
+    align-items: center;
     padding: 16px 0;
 
     .wechat-tips {
@@ -225,8 +225,8 @@ defineExpose({
 
       p {
         margin: 6px 0;
-        color: var(--text-muted, #888);
         font-size: 14px;
+        color: var(--text-muted, #888);
       }
     }
   }
@@ -236,9 +236,9 @@ defineExpose({
   text-align: center;
 
   .agreement-text {
+    margin: 4px 0;
     font-size: 13px;
     color: var(--text-muted, #888);
-    margin: 4px 0;
 
     a {
       color: var(--primary-color, #00baff);
@@ -246,7 +246,7 @@ defineExpose({
       transition: color 0.2s;
 
       &:hover {
-        color: var(--primary-hover, #0099dd);
+        color: var(--primary-hover, #09d);
         text-decoration: underline;
       }
     }
@@ -278,7 +278,7 @@ defineExpose({
   }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (width <= 480px) {
   .login-dialog {
     :deep(.el-dialog) {
       width: 90% !important;

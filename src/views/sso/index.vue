@@ -49,8 +49,8 @@ onMounted(async () => {
 <style scoped>
 .sso-container {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   height: 100vh;
   font-size: 18px;
   color: #666;

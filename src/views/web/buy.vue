@@ -20,17 +20,17 @@ const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 <style lang="scss" scoped>
 .app-container {
   position: relative;
-  min-height: 100vh;
-  background-color: #ffffff;
-  width: 100%;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  background-color: #fff;
 
   &.dark-theme {
-    background-color: #121212;
     color: #fff;
+    background-color: #121212;
   }
 }
 </style>

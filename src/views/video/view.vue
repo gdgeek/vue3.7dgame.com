@@ -12,13 +12,13 @@
               <video
                 id="video"
                 controls="true"
-                style="height: 300px; width: auto"
+                style="width: auto; height: 300px"
               >
                 <source v-if="file !== null" id="src" :src="file" />
               </video>
               <video
                 id="new_video"
-                style="height: 100%; width: auto"
+                style="width: auto; height: 100%"
                 hidden
                 @canplaythrough="dealWith"
               ></video>

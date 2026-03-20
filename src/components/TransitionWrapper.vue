@@ -38,8 +38,8 @@ defineExpose({
 <style scoped lang="scss">
 .transition-wrapper {
   width: 100%;
-  transition: all 0.3s ease;
   opacity: 1;
+  transition: all 0.3s ease;
   transform: translateX(0);
 
   // 动画状态

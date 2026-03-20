@@ -66,16 +66,16 @@ const category = computed(() => props.category ?? true);
 
 <style lang="scss" scoped>
 .home-tabs {
+  overflow: hidden;
   background: var(--bg-card);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   box-shadow: var(--shadow-sm);
 
   :deep(.el-tabs__header) {
+    margin: 0;
     background: var(--bg-hover);
     border-bottom: var(--border-width) solid var(--border-color);
-    margin: 0;
   }
 
   :deep(.el-tabs__nav) {
@@ -83,13 +83,13 @@ const category = computed(() => props.category ?? true);
   }
 
   :deep(.el-tabs__item) {
-    color: var(--text-secondary);
+    height: 44px;
+    padding: 0 var(--spacing-lg);
     font-size: var(--font-size-md);
     font-weight: 500;
-    border: none !important;
-    padding: 0 var(--spacing-lg);
-    height: 44px;
     line-height: 44px;
+    color: var(--text-secondary);
+    border: none !important;
     transition: color var(--transition-fast);
 
     &:hover {
@@ -97,9 +97,9 @@ const category = computed(() => props.category ?? true);
     }
 
     &.is-active {
+      font-weight: 600;
       color: var(--primary-color);
       background: var(--bg-card);
-      font-weight: 600;
     }
   }
 

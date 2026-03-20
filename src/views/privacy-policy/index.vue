@@ -58,38 +58,38 @@ const handleTabClick = () => {
 
 <style lang="scss" scoped>
 .privacy-policy {
-  padding: 30px;
   max-width: 1200px;
-  margin: 0 auto;
   height: 100%;
+  padding: 30px;
+  margin: 0 auto;
 
-  @media screen and (max-width: 768px) {
+  @media screen and (width <= 768px) {
+    width: 100%;
     padding: 15px;
     overflow-x: hidden;
-    width: 100%;
   }
 
   .policy-tabs {
     margin-bottom: 30px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
     border-radius: 4px;
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 5%);
 
     :deep(.el-tabs__header) {
       margin-bottom: 0;
     }
 
     :deep(.el-tabs__nav) {
-      width: 100%;
       display: flex;
+      width: 100%;
     }
 
     :deep(.el-tabs__item) {
       flex: 1;
-      text-align: center;
+      height: 50px;
       font-size: 16px;
       font-weight: 500;
-      height: 50px;
       line-height: 50px;
+      text-align: center;
       transition: all 0.3s;
 
       &.is-active {

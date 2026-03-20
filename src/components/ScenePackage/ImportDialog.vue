@@ -187,9 +187,9 @@ const resetState = () => {
 }
 
 .upload-icon {
+  margin-bottom: 8px;
   font-size: 48px;
   color: var(--el-text-color-placeholder);
-  margin-bottom: 8px;
 }
 
 .upload-text {
@@ -198,14 +198,14 @@ const resetState = () => {
 }
 
 .upload-text em {
-  color: var(--el-color-primary);
   font-style: normal;
+  color: var(--el-color-primary);
 }
 
 .upload-tip {
+  margin-top: 8px;
   font-size: 12px;
   color: var(--el-text-color-placeholder);
-  margin-top: 8px;
   text-align: center;
 }
 
@@ -218,9 +218,9 @@ const resetState = () => {
 }
 
 .loading-icon {
+  margin-bottom: 16px;
   font-size: 48px;
   color: var(--el-color-primary);
-  margin-bottom: 16px;
 }
 
 .loading-text {

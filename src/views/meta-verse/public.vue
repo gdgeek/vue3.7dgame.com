@@ -406,50 +406,50 @@ const goToScene = (item: VerseData) => {
 
 <style scoped lang="scss">
 .hero-header {
-  background: #f8fafc;
   padding: 12px 20px;
   margin-bottom: 10px;
+  background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
 
   .toolbar-main {
     display: flex;
-    align-items: center;
     gap: 12px;
+    align-items: center;
   }
 
   .hero-subtitle {
+    margin: 0;
+    overflow: hidden;
     font-size: 14px;
     line-height: 1.5;
     color: #64748b;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .hero-search-box {
     position: relative;
-    width: 280px;
     flex-shrink: 0;
+    width: 280px;
 
     .search-icon {
       position: absolute;
-      left: 16px;
       top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
+      left: 16px;
       font-size: 18px;
+      color: #94a3b8;
+      transform: translateY(-50%);
     }
 
     .hero-search-input {
       width: 100%;
       height: 42px;
       padding: 0 12px 0 44px;
-      border: 1px solid #e2e8f0;
-      border-radius: 21px;
-      background: #fff;
       font-size: 14px;
       color: #1e293b;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 21px;
       outline: none;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -459,7 +459,7 @@ const goToScene = (item: VerseData) => {
 
       &:focus {
         border-color: #03a9f4;
-        box-shadow: 0 0 0 3px rgba(3, 169, 244, 0.1);
+        box-shadow: 0 0 0 3px rgb(3 169 244 / 10%);
       }
     }
   }
@@ -468,34 +468,34 @@ const goToScene = (item: VerseData) => {
     flex-shrink: 0;
 
     .filter-btn {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
       height: 42px;
       padding: 0 16px;
-      border: 1px solid #e2e8f0;
-      border-radius: 21px;
-      background: #fff;
-      color: #334155;
       font-size: 14px;
       font-weight: 500;
+      color: #334155;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 21px;
       transition: all 0.2s ease;
 
       &:hover {
-        border-color: #cbd5e1;
         background: #f8fafc;
+        border-color: #cbd5e1;
       }
     }
 
     .filter-icon {
-      color: #64748b;
       font-size: 14px;
+      color: #64748b;
     }
 
     .filter-arrow {
-      color: #94a3b8;
       font-size: 12px;
+      color: #94a3b8;
     }
   }
 }
@@ -508,16 +508,16 @@ const goToScene = (item: VerseData) => {
   }
 
   .item-thumb {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
     width: 52px;
     height: 52px;
-    border-radius: 12px;
     overflow: hidden;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    border-radius: 12px;
 
     img {
       width: 100%;
@@ -535,29 +535,29 @@ const goToScene = (item: VerseData) => {
   .col-author,
   .col-date {
     width: 120px;
-    text-align: right;
+    padding-right: 24px;
+    overflow: hidden;
     font-size: 13px;
     color: #64748b;
-    padding-right: 24px;
-    white-space: nowrap;
-    overflow: hidden;
+    text-align: right;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .btn-hover-action {
-    opacity: 0;
-    visibility: hidden;
-    height: 28px;
-    padding: 0 16px;
-    margin-left: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
+    height: 28px;
+    padding: 0 16px;
+    margin-left: 8px;
     font-size: 12px;
+    color: white;
+    visibility: hidden;
     background: #03a9f4;
     border: none;
-    color: white;
+    border-radius: 14px;
+    opacity: 0;
     transition: all 0.25s ease;
 
     &:hover {
@@ -567,18 +567,18 @@ const goToScene = (item: VerseData) => {
 
   :deep(.list-row:hover) {
     .btn-hover-action {
-      opacity: 1;
       visibility: visible;
+      opacity: 1;
     }
   }
 }
 
 .verse-preview {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
 
   img {
     width: 100%;
@@ -619,10 +619,10 @@ const goToScene = (item: VerseData) => {
 }
 
 .description-text {
+  margin: 0;
   font-size: 14px;
   line-height: 1.6;
   color: var(--text-secondary, #64748b);
-  margin: 0;
   white-space: pre-wrap;
 }
 

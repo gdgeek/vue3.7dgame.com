@@ -1236,19 +1236,19 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .verse-scene {
-  height: calc(100vh - 60px);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow: hidden;
 }
 
 .content {
-  height: 100%;
+  display: block;
   width: 100%;
+  height: 100%;
+  background: var(--bg-card, #fff);
   border: 0;
   outline: none;
-  display: block;
-  background: var(--bg-card, #fff);
 }
 </style>
 

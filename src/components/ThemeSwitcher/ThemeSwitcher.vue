@@ -139,8 +139,8 @@ function handleResetColor() {
 
 .section-header {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   margin-bottom: 16px;
 
   .svg-inline--fa {
@@ -164,35 +164,35 @@ function handleResetColor() {
 
 .theme-card {
   display: flex;
-  align-items: center;
   gap: 16px;
+  align-items: center;
   padding: 12px;
-  background: var(--bg-card, #ffffff);
+  text-align: left;
+  cursor: pointer;
+  background: var(--bg-card, #fff);
   border: 2px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-md, 16px);
-  cursor: pointer;
   transition: all 0.2s;
-  text-align: left;
 
   &:hover {
     border-color: var(--border-color-hover, #94a3b8);
   }
 
   &.active {
+    background: var(--primary-light, rgb(0 186 255 / 5%));
     border-color: var(--primary-color, #00baff);
-    background: var(--primary-light, rgba(0, 186, 255, 0.05));
   }
 }
 
 .theme-preview {
-  width: 80px;
-  height: 56px;
-  border-radius: 8px;
-  overflow: hidden;
+  position: relative;
   display: flex;
   flex-shrink: 0;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  position: relative;
+  width: 80px;
+  height: 56px;
+  overflow: hidden;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 8px;
 
   .preview-sidebar {
     width: 16px;
@@ -200,37 +200,37 @@ function handleResetColor() {
   }
 
   .preview-content {
-    flex: 1;
-    background: #f0f4f8;
-    padding: 4px;
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 3px;
+    padding: 4px;
+    background: #f0f4f8;
   }
 
   .preview-header {
     height: 8px;
-    background: #ffffff;
+    background: #fff;
     border-radius: 2px;
   }
 
   .preview-cards {
-    flex: 1;
     display: flex;
+    flex: 1;
     gap: 3px;
   }
 
   .preview-card {
     flex: 1;
-    background: #ffffff;
-    border-radius: 4px;
+    background: #fff;
     border: 1px solid #e2e8f0;
+    border-radius: 4px;
   }
 
   // 日间模式预览 (modern-blue)
   &.modern-blue {
     .preview-sidebar {
-      background: #ffffff;
+      background: #fff;
       border-right: 1px solid #e2e8f0;
     }
 
@@ -239,9 +239,9 @@ function handleResetColor() {
     }
 
     .preview-card {
-      border-radius: 6px;
       border-color: #e2e8f0;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
     }
   }
 
@@ -263,18 +263,18 @@ function handleResetColor() {
 
     .preview-card {
       background: #151921;
-      border-radius: 4px;
       border-color: #21262d;
+      border-radius: 4px;
     }
 
     // 蓝色高亮点缀
     &::after {
-      content: "";
       position: absolute;
       top: 8px;
       left: 20px;
       width: 4px;
       height: 4px;
+      content: "";
       background: #2d68ff;
       border-radius: 50%;
       box-shadow: 0 0 6px #2d68ff;
@@ -286,27 +286,27 @@ function handleResetColor() {
     .preview-sidebar {
       background: #080a0f;
       border-right: 1px solid #00f2ff;
-      box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
+      box-shadow: 0 0 8px rgb(0 242 255 / 30%);
     }
 
     .preview-content {
       background: #0b0e14;
       background-image:
-        linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+        linear-gradient(rgb(0 242 255 / 3%) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(0 242 255 / 3%) 1px, transparent 1px);
       background-size: 8px 8px;
     }
 
     .preview-header {
-      background: rgba(18, 24, 32, 0.85);
+      background: rgb(18 24 32 / 85%);
       border-radius: 2px;
     }
 
     .preview-card {
-      background: rgba(18, 24, 32, 0.85);
+      background: rgb(18 24 32 / 85%);
+      border-color: rgb(0 242 255 / 20%);
       border-radius: 3px;
-      border-color: rgba(0, 242, 255, 0.2);
-      box-shadow: 0 0 4px rgba(0, 242, 255, 0.2);
+      box-shadow: 0 0 4px rgb(0 242 255 / 20%);
     }
   }
 
@@ -321,24 +321,24 @@ function handleResetColor() {
     }
 
     .preview-header {
-      background: #ffffff;
+      background: #fff;
       border-radius: 4px;
     }
 
     .preview-card {
-      border-radius: 8px;
       border-color: #ffe4db;
       border-width: 2px;
+      border-radius: 8px;
     }
 
     // 波浪装饰
     &::after {
-      content: "";
       position: absolute;
+      right: 0;
       bottom: 0;
       left: 16px;
-      right: 0;
       height: 8px;
+      content: "";
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10'%3E%3Cpath fill='%23FF6B35' fill-opacity='0.15' d='M0,5 Q25,0 50,5 T100,5 L100,10 L0,10 Z'/%3E%3C/svg%3E");
       background-size: cover;
     }
@@ -349,8 +349,8 @@ function handleResetColor() {
     border-radius: 4px;
 
     .preview-sidebar {
-      background: #ffffff;
-      border-right: 2px solid #000000;
+      background: #fff;
+      border-right: 2px solid #000;
     }
 
     .preview-content {
@@ -359,14 +359,14 @@ function handleResetColor() {
 
     .preview-header {
       background: #fff000;
+      border: 1px solid #000;
       border-radius: 2px;
-      border: 1px solid #000000;
     }
 
     .preview-card {
+      border: 2px solid #000;
       border-radius: 2px;
-      border: 2px solid #000000;
-      box-shadow: 2px 2px 0 #000000;
+      box-shadow: 2px 2px 0 #000;
     }
   }
 
@@ -380,29 +380,29 @@ function handleResetColor() {
     }
 
     .preview-content {
-      background: #ffffff;
+      background: #fff;
     }
 
     .preview-header {
       background: #fafafa;
-      border-radius: 0;
       border-bottom: 1px solid #e0e0e0;
+      border-radius: 0;
     }
 
     .preview-card {
-      border-radius: 0;
       border-color: #e0e0e0;
+      border-radius: 0;
       box-shadow: none;
     }
   }
 }
 
 .theme-info {
-  flex: 1;
-  min-width: 0;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .theme-name {
@@ -412,21 +412,21 @@ function handleResetColor() {
 }
 
 .theme-desc {
+  overflow: hidden;
   font-size: 13px;
   color: var(--text-muted, #94a3b8);
-  white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .check-icon {
+  flex-shrink: 0;
   font-size: 24px;
   color: var(--primary-color, #00baff);
-  flex-shrink: 0;
 }
 
 // 响应式
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .theme-desc {
     display: none;
   }
@@ -451,59 +451,59 @@ function handleResetColor() {
 }
 
 .color-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  background: var(--preset-color);
-  cursor: pointer;
-  transition: all 0.2s;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  background: var(--preset-color);
+  border: 2px solid transparent;
+  border-radius: 50%;
+  transition: all 0.2s;
 
   &:hover {
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   &.active {
     border-color: var(--text-primary, #1e293b);
     box-shadow:
-      0 0 0 2px var(--bg-card, #ffffff),
+      0 0 0 2px var(--bg-card, #fff),
       0 0 0 4px var(--preset-color);
   }
 
   .color-check {
     font-size: 18px;
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    color: #fff;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
   }
 }
 
 .custom-color-row {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
 }
 
 .custom-color-label {
   display: flex;
-  align-items: center;
   gap: 6px;
+  align-items: center;
   padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
   background: var(--bg-hover, #f8fafc);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-full, 9999px);
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--text-secondary, #64748b);
   transition: all 0.2s;
 
   &:hover {
-    border-color: var(--border-color-hover, #94a3b8);
     color: var(--text-primary, #1e293b);
+    border-color: var(--border-color-hover, #94a3b8);
   }
 
   .svg-inline--fa {
@@ -514,10 +514,10 @@ function handleResetColor() {
     width: 24px;
     height: 24px;
     padding: 0;
-    border: none;
-    border-radius: 50%;
     cursor: pointer;
     background: transparent;
+    border: none;
+    border-radius: 50%;
 
     &::-webkit-color-swatch-wrapper {
       padding: 0;
@@ -532,21 +532,21 @@ function handleResetColor() {
 
 .reset-btn {
   display: flex;
-  align-items: center;
   gap: 4px;
+  align-items: center;
   padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
   background: transparent;
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-full, 9999px);
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--text-muted, #94a3b8);
   transition: all 0.2s;
 
   &:hover {
-    border-color: var(--danger-color, #ef4444);
     color: var(--danger-color, #ef4444);
-    background: var(--danger-light, rgba(239, 68, 68, 0.1));
+    background: var(--danger-light, rgb(239 68 68 / 10%));
+    border-color: var(--danger-color, #ef4444);
   }
 
   .svg-inline--fa {

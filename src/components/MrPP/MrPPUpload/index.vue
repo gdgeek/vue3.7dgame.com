@@ -229,21 +229,21 @@ const select = async () => {
 }
 
 .box-card-header h3 {
-  margin: 0 0 4px 0;
+  margin: 0 0 4px;
 }
 
 .header-declared {
-  color: #909399;
   font-size: 13px;
+  color: #909399;
 }
 
 .size-limit-badge {
-  background-color: #409eff;
-  color: #fff;
   padding: 4px 10px;
-  border-radius: 4px;
   font-size: 12px;
+  color: #fff;
   white-space: nowrap;
+  background-color: #409eff;
+  border-radius: 4px;
 }
 
 .progress-item {

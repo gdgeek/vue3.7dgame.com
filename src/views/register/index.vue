@@ -47,7 +47,7 @@
             <img
               :src="domainStore.icon || '/favicon.ico'"
               alt=""
-              style="margin-left: 10px; width: auto"
+              style="width: auto; margin-left: 10px"
             />
             <span class="project_title">{{ domainStore.title }}</span>
           </span>
@@ -120,25 +120,25 @@
     <el-card
       v-if="!isMobile"
       style="
-        height: 7%;
-        width: 100%;
         display: flex;
-        justify-content: flex-end;
         align-items: center;
+        justify-content: flex-end;
+        width: 100%;
+        height: 7%;
       "
     >
       <div class="background-screen-max">
-        <div style="display: flex; align-items: center; gap: 10px"></div>
+        <div style="display: flex; gap: 10px; align-items: center"></div>
       </div>
     </el-card>
 
     <el-card v-if="isMobile" style="width: 100%">
       <div class="background-screen-max">
         <div
-          style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+          style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center"
         ></div>
         <div
-          style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+          style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center"
         ></div>
       </div>
     </el-card>
@@ -196,11 +196,10 @@ body {
   align-items: center;
   width: 102%;
   height: 7%;
+  padding: 10px;
   margin-right: 10px;
   background-color: var(--bg-secondary, #f1f1f1);
-
   transition: background-color 0.3s ease;
-  padding: 10px;
 }
 
 .logo {
@@ -217,7 +216,7 @@ body {
 
 .project_title {
   margin-left: 10px;
-  font-family: "KaiTi", sans-serif;
+  font-family: KaiTi, sans-serif;
   // font-size: 14px;
   font-weight: 600;
   color: var(--text-primary, #333);
@@ -229,7 +228,7 @@ body {
 
 .header-right {
   position: absolute;
-  top: 0px;
+  top: 0;
   right: 10px;
   display: flex;
   align-items: center;
@@ -239,12 +238,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    margin-right: 20px;
     width: 100%;
     padding: 10px;
+    margin-right: 20px;
 
     &.mobile {
-      margin-right: 0px;
+      margin-right: 0;
     }
   }
 }
@@ -257,16 +256,16 @@ body {
 
   .login-title {
     margin: 20px 0;
-    font-family: "KaiTi", sans-serif;
+    font-family: KaiTi, sans-serif;
     font-weight: bold;
-    text-align: center;
     color: var(--text-primary);
+    text-align: center;
   }
 
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 10px 0px 10px 0px;
+    padding: 10px 0;
     margin-top: 36px;
   }
 
@@ -280,14 +279,14 @@ body {
   }
 
   .login-link a {
-    font-family: "KaiTi", sans-serif;
+    font-family: KaiTi, sans-serif;
     font-size: 16px;
     color: var(--primary-color, rgb(28 160 212));
   }
 
   .error-message {
     margin-top: 10px;
-    font-family: "KaiTi", sans-serif;
+    font-family: KaiTi, sans-serif;
     color: var(--danger-color, red);
     text-align: center;
   }
@@ -295,17 +294,16 @@ body {
 
 .box {
   position: relative;
-  height: auto;
   width: 400px;
   max-width: 100%;
-  padding: 10px 10px 10px 10px;
+  height: auto;
+  padding: 10px;
   margin: 0 auto;
   margin-bottom: 20px;
-  border-radius: 5px;
-  background-color: var(--bg-card, #fff);
   overflow: hidden;
-
-  transition: all 0.3s ease;
+  background-color: var(--bg-card, #fff);
   border: 1px solid transparent; // Consistent border handling
+  border-radius: 5px;
+  transition: all 0.3s ease;
 }
 </style>

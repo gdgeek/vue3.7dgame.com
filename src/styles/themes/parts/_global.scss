@@ -13,10 +13,10 @@
 
 // 页面背景
 body {
-  background: var(--bg-page);
-  background-image: var(--bg-page-gradient);
   font-family: var(--font-family);
   color: var(--text-primary, var(--ar-text-primary));
+  background: var(--bg-page);
+  background-image: var(--bg-page-gradient);
   transition:
     background var(--transition-slow, 0.3s),
     color var(--transition-slow, 0.3s);
@@ -24,17 +24,14 @@ body {
 
 // 背景装饰图案
 body::before {
-  content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
   background-image: var(--decoration-pattern, none);
   background-repeat: repeat;
   opacity: var(--decoration-opacity, 0);
-  pointer-events: none;
-  z-index: 0;
 }
 
 // ============================================
@@ -43,8 +40,8 @@ body::before {
 
 // 资源库容器
 .resource-library {
-  background: var(--bg-page) !important;
   font-family: var(--font-family) !important;
+  background: var(--bg-page) !important;
 
   .header-divider {
     background: var(--border-color) !important;
@@ -78,8 +75,8 @@ body::before {
   }
 
   .upload-btn-secondary {
-    border-color: var(--primary-color) !important;
     color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
     border-radius: var(--radius-md) !important;
 
     &:hover {
@@ -88,14 +85,14 @@ body::before {
   }
 
   .page-btn {
-    border-color: var(--border-color) !important;
-    background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
     border-radius: var(--radius-md) !important;
 
     &:hover:not(:disabled) {
-      border-color: var(--primary-color) !important;
       color: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
     }
   }
 
@@ -116,9 +113,9 @@ body::before {
       border-color var(--transition-normal) !important;
 
     &:hover {
-      transform: var(--card-hover-transform) !important;
-      box-shadow: var(--card-hover-shadow) !important;
       border-color: var(--border-color-active) !important;
+      box-shadow: var(--card-hover-shadow) !important;
+      transform: var(--card-hover-transform) !important;
     }
 
     .card-cover {
@@ -177,10 +174,10 @@ body::before {
 
 // 统一列表视图样式（资源、实体、场景）
 .resource-list {
+  overflow: hidden !important;
   background: var(--bg-card) !important;
   border: var(--border-width) solid var(--border-color) !important;
   border-radius: var(--radius-lg) !important;
-  overflow: hidden !important;
   box-shadow: var(--shadow-sm) !important;
 
   .list-table {
@@ -194,37 +191,44 @@ body::before {
     }
 
     th {
-      background: var(--bg-hover) !important;
       font-size: 13px !important;
       font-weight: 600 !important;
       color: var(--text-secondary) !important;
-      border-bottom: var(--border-width) solid var(--border-color) !important;
       white-space: nowrap !important;
+      background: var(--bg-hover) !important;
+      border-bottom: var(--border-width) solid var(--border-color) !important;
     }
 
     // 统一列宽
     .col-edit-action {
       width: 100px !important;
     }
+
     .col-name {
       min-width: 200px !important;
     }
+
     .col-entities {
       width: 100px !important;
       text-align: center !important;
     }
+
     .col-tags {
       width: 160px !important;
     }
+
     .col-visibility {
       width: 100px !important;
     }
+
     .col-author {
       width: 120px !important;
     }
+
     .col-created_at {
       width: 130px !important;
     }
+
     .col-actions {
       width: 70px !important;
       text-align: right !important;
@@ -244,9 +248,9 @@ body::before {
     }
 
     td {
-      border-bottom: var(--border-width) solid var(--border-color) !important;
       color: var(--text-primary) !important;
       vertical-align: middle !important;
+      border-bottom: var(--border-width) solid var(--border-color) !important;
     }
 
     &:last-child td {
@@ -258,29 +262,29 @@ body::before {
     }
 
     .col-entities {
-      text-align: center !important;
       color: var(--text-secondary) !important;
+      text-align: center !important;
     }
   }
 
   // 名称单元格
   .name-cell {
     display: flex !important;
-    align-items: center !important;
     gap: 12px !important;
+    align-items: center !important;
   }
 
   // 缩略图
   .row-thumbnail {
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: var(--radius-sm) !important;
-    background: var(--bg-secondary) !important;
-    overflow: hidden !important;
     display: flex !important;
+    flex-shrink: 0 !important;
     align-items: center !important;
     justify-content: center !important;
-    flex-shrink: 0 !important;
+    width: 44px !important;
+    height: 44px !important;
+    overflow: hidden !important;
+    background: var(--bg-secondary) !important;
+    border-radius: var(--radius-sm) !important;
 
     img {
       width: 100% !important;
@@ -296,27 +300,27 @@ body::before {
 
   // 文件名
   .file-name {
+    overflow: hidden !important;
     font-weight: 500 !important;
     color: var(--text-primary) !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
     text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 
   // 进入编辑按钮
   .enter-editor-btn {
     height: 34px !important;
     padding: 0 16px !important;
-    border: none !important;
-    border-radius: var(--radius-sm) !important;
-    background: var(--primary-color) !important;
-    color: var(--text-inverse) !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    cursor: pointer !important;
-    transition: all var(--transition-fast) !important;
+    color: var(--text-inverse) !important;
     white-space: nowrap !important;
+    cursor: pointer !important;
+    background: var(--primary-color) !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
     opacity: 0 !important;
+    transition: all var(--transition-fast) !important;
 
     &:hover {
       background: var(--primary-hover) !important;
@@ -334,18 +338,18 @@ body::before {
   .list-tag {
     display: inline-block !important;
     padding: 3px 10px !important;
-    background: var(--primary-light) !important;
-    color: var(--primary-color) !important;
     font-size: 12px !important;
     font-weight: 500 !important;
-    border-radius: var(--radius-full) !important;
+    color: var(--primary-color) !important;
     white-space: nowrap !important;
+    background: var(--primary-light) !important;
+    border-radius: var(--radius-full) !important;
   }
 
   .more-tags {
+    margin-left: 2px !important;
     font-size: 12px !important;
     color: var(--text-muted) !important;
-    margin-left: 2px !important;
   }
 
   .no-tag {
@@ -355,8 +359,8 @@ body::before {
   // 可见性单元格
   .visibility-cell {
     display: inline-flex !important;
-    align-items: center !important;
     gap: 5px !important;
+    align-items: center !important;
     font-size: 13px !important;
 
     .svg-inline--fa {
@@ -385,11 +389,11 @@ body::before {
     justify-content: center !important;
     width: 34px !important;
     height: 34px !important;
-    border: none !important;
-    border-radius: var(--radius-sm) !important;
-    background: transparent !important;
     color: var(--text-secondary) !important;
     cursor: pointer !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
     transition: all var(--transition-fast) !important;
 
     .svg-inline--fa {
@@ -397,8 +401,8 @@ body::before {
     }
 
     &:hover {
-      background: var(--bg-active) !important;
       color: var(--text-primary) !important;
+      background: var(--bg-active) !important;
     }
   }
 
@@ -407,26 +411,26 @@ body::before {
     position: absolute !important;
     top: 100% !important;
     right: 0 !important;
+    z-index: 100 !important;
     min-width: 150px !important;
+    padding: 6px !important;
+    overflow: hidden !important;
     background: var(--bg-card) !important;
     border: var(--border-width) solid var(--border-color) !important;
     border-radius: var(--radius-md) !important;
     box-shadow: var(--shadow-lg) !important;
-    z-index: 100 !important;
-    overflow: hidden !important;
-    padding: 6px !important;
   }
 
   .menu-item {
     display: flex !important;
-    align-items: center !important;
     gap: 10px !important;
+    align-items: center !important;
     padding: 10px 14px !important;
     font-size: 14px !important;
     color: var(--text-primary) !important;
     cursor: pointer !important;
-    transition: background var(--transition-fast) !important;
     border-radius: calc(var(--radius-md) - 6px) !important;
+    transition: background var(--transition-fast) !important;
 
     .svg-inline--fa {
       font-size: 18px !important;
@@ -453,8 +457,8 @@ body::before {
 
 // 详情面板
 .detail-panel {
-  background: var(--bg-card) !important;
   font-family: var(--font-family) !important;
+  background: var(--bg-card) !important;
 
   .panel-header {
     border-bottom: var(--border-width) solid var(--border-color) !important;
@@ -469,15 +473,15 @@ body::before {
     border-radius: var(--radius-sm) !important;
 
     &:hover {
-      background: var(--danger-color) !important;
       color: var(--text-inverse) !important;
+      background: var(--danger-color) !important;
     }
   }
 
   .preview-module {
+    background: var(--bg-hover) !important;
     border: var(--border-width) solid var(--border-color) !important;
     border-radius: var(--radius-lg) !important;
-    background: var(--bg-hover) !important;
   }
 
   .preview-window {
@@ -490,13 +494,13 @@ body::before {
 
   // 详情面板 - 修改名称按钮（小图标按钮）
   .name-display .edit-btn {
-    background: var(--primary-light) !important;
     color: var(--primary-color) !important;
+    background: var(--primary-light) !important;
     border: 1px solid transparent !important;
 
     &:hover {
-      background: var(--primary-color) !important;
       color: var(--text-inverse) !important;
+      background: var(--primary-color) !important;
     }
   }
 
@@ -504,16 +508,16 @@ body::before {
     color: var(--text-muted) !important;
 
     &:hover {
-      background: var(--bg-hover) !important;
       color: var(--primary-color) !important;
+      background: var(--bg-hover) !important;
     }
   }
 
   .name-input {
+    color: var(--text-primary) !important;
+    background: var(--bg-card) !important;
     border: var(--border-width) solid var(--border-color) !important;
     border-radius: var(--radius-sm) !important;
-    background: var(--bg-card) !important;
-    color: var(--text-primary) !important;
 
     &:focus {
       border-color: var(--primary-color) !important;
@@ -522,8 +526,8 @@ body::before {
   }
 
   .cancel-btn {
-    background: var(--bg-hover) !important;
     color: var(--text-secondary) !important;
+    background: var(--bg-hover) !important;
     border-radius: var(--radius-sm) !important;
 
     &:hover {
@@ -532,8 +536,8 @@ body::before {
   }
 
   .save-btn {
-    background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
+    background: var(--primary-color) !important;
     border-radius: var(--radius-sm) !important;
 
     &:hover {
@@ -555,13 +559,13 @@ body::before {
   }
 
   .panel-footer {
-    border-top: var(--border-width) solid var(--border-color) !important;
     background: var(--bg-card) !important;
+    border-top: var(--border-width) solid var(--border-color) !important;
   }
 
   .download-btn {
-    background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
+    background: var(--primary-color) !important;
     border-radius: var(--radius-md) !important;
 
     &:hover {
@@ -583,8 +587,8 @@ body::before {
 .custom-confirm-dialog,
 .custom-input-dialog {
   .el-dialog {
-    border-radius: var(--radius-lg) !important;
     background: var(--bg-card) !important;
+    border-radius: var(--radius-lg) !important;
   }
 
   .el-dialog__header {
@@ -598,6 +602,7 @@ body::before {
 
     &.warning {
       background: var(--warning-light) !important;
+
       .confirm-icon {
         color: var(--warning-color) !important;
       }
@@ -605,6 +610,7 @@ body::before {
 
     &.danger {
       background: var(--danger-light) !important;
+
       .confirm-icon {
         color: var(--danger-color) !important;
       }
@@ -612,6 +618,7 @@ body::before {
 
     &.info {
       background: var(--info-light) !important;
+
       .confirm-icon {
         color: var(--info-color) !important;
       }
@@ -619,6 +626,7 @@ body::before {
 
     &.success {
       background: var(--success-light) !important;
+
       .confirm-icon {
         color: var(--success-color) !important;
       }
@@ -639,24 +647,24 @@ body::before {
   }
 
   .custom-input {
+    color: var(--text-primary) !important;
+    background: var(--bg-hover) !important;
     border: var(--border-width) solid var(--border-color) !important;
     border-radius: var(--radius-md) !important;
-    background: var(--bg-hover) !important;
-    color: var(--text-primary) !important;
 
     &::placeholder {
       color: var(--text-muted) !important;
     }
 
     &:focus {
-      border-color: var(--primary-color) !important;
       background: var(--bg-card) !important;
+      border-color: var(--primary-color) !important;
     }
   }
 
   .btn-primary {
-    background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
+    background: var(--primary-color) !important;
     border-radius: var(--radius-full) !important;
 
     &:hover {
@@ -665,20 +673,20 @@ body::before {
   }
 
   .btn-secondary {
-    border: var(--border-width) solid var(--border-color) !important;
-    background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
+    background: var(--bg-card) !important;
+    border: var(--border-width) solid var(--border-color) !important;
     border-radius: var(--radius-full) !important;
 
     &:hover {
-      border-color: var(--text-secondary) !important;
       color: var(--text-primary) !important;
+      border-color: var(--text-secondary) !important;
     }
   }
 
   .btn-danger {
-    background: var(--danger-color) !important;
     color: var(--text-inverse) !important;
+    background: var(--danger-color) !important;
     border-radius: var(--radius-full) !important;
 
     &:hover {
@@ -690,11 +698,11 @@ body::before {
 // 资源头部
 .resource-header {
   .search-input {
+    font-family: var(--font-family) !important;
+    color: var(--text-primary) !important;
+    background: var(--bg-card) !important;
     border: var(--border-width) solid var(--border-color) !important;
     border-radius: var(--radius-full) !important;
-    background: var(--bg-card) !important;
-    color: var(--text-primary) !important;
-    font-family: var(--font-family) !important;
 
     &::placeholder {
       color: var(--text-muted) !important;
@@ -707,8 +715,8 @@ body::before {
   }
 
   .upload-btn {
-    background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
+    background: var(--primary-color) !important;
     border-radius: var(--radius-full) !important;
 
     &:hover {
@@ -717,14 +725,14 @@ body::before {
   }
 
   .view-toggle-btn {
-    border: var(--border-width) solid var(--border-color) !important;
-    background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
+    background: var(--bg-card) !important;
+    border: var(--border-width) solid var(--border-color) !important;
     border-radius: var(--radius-sm) !important;
 
     &.active {
-      background: var(--primary-light) !important;
       color: var(--primary-color) !important;
+      background: var(--primary-light) !important;
       border-color: var(--primary-color) !important;
     }
   }
@@ -732,8 +740,8 @@ body::before {
 
 // 上传模态框
 .upload-modal {
-  border-radius: var(--radius-lg) !important;
   background: var(--bg-card) !important;
+  border-radius: var(--radius-lg) !important;
 
   .modal-header {
     border-bottom-color: var(--border-color) !important;
@@ -748,8 +756,8 @@ body::before {
     border-radius: var(--radius-sm) !important;
 
     &:hover {
-      background: var(--danger-color) !important;
       color: var(--text-inverse) !important;
+      background: var(--danger-color) !important;
     }
   }
 
@@ -759,8 +767,8 @@ body::before {
 
     &:hover,
     &.drag-active {
-      border-color: var(--primary-color) !important;
       background: var(--primary-light) !important;
+      border-color: var(--primary-color) !important;
     }
   }
 
@@ -782,8 +790,8 @@ body::before {
 
   .browse-btn,
   .start-upload-btn {
-    background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
+    background: var(--primary-color) !important;
     border-radius: var(--radius-md) !important;
 
     &:hover {
@@ -859,13 +867,13 @@ body::before {
   }
 
   .add-more-btn {
-    border-color: var(--border-color) !important;
     color: var(--text-secondary) !important;
+    border-color: var(--border-color) !important;
     border-radius: var(--radius-md) !important;
 
     &:hover {
-      border-color: var(--primary-color) !important;
       color: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
     }
   }
 }

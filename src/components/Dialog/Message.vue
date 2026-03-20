@@ -102,23 +102,23 @@ defineExpose({
 .custom-message {
   position: fixed;
   left: 50%;
-  transform: translateX(-50%);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
   min-width: 0;
   max-width: min(420px, calc(100vw - 32px));
-  border-radius: 14px;
+  padding: 10px 16px;
+  pointer-events: all;
   background: #f4fbef;
   border: 1px solid #d8efc9;
-  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgb(31 41 55 / 8%);
   transition:
     opacity 0.3s,
     transform 0.4s,
     top 0.4s;
-  pointer-events: all;
-  box-sizing: border-box;
+  transform: translateX(-50%);
 
   // Type variants
   &.success {
@@ -176,32 +176,32 @@ defineExpose({
 
 .message-content-wrapper {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .message-icon {
-  font-size: 16px;
   flex-shrink: 0;
+  font-size: 16px;
 }
 
 .message-text {
   font-size: 14px;
   font-weight: 600;
-  color: #67c23a;
   line-height: 1.3;
+  color: #67c23a;
 }
 
 .message-close {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 12px;
   padding: 0;
-  border: none;
-  background: transparent;
+  margin-left: 12px;
   color: var(--text-secondary, #64748b);
   cursor: pointer;
+  background: transparent;
+  border: none;
 
   .svg-inline--fa {
     font-size: 18px;

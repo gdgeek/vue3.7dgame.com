@@ -310,31 +310,31 @@ onUnmounted(() => {
 .detail-panel-overlay {
   position: fixed;
   inset: 0;
-  background: var(--bg-overlay, rgba(0, 0, 0, 0.3));
   z-index: 2000;
   display: flex;
   justify-content: flex-end;
+  background: var(--bg-overlay, rgb(0 0 0 / 30%));
   backdrop-filter: blur(2px);
 }
 
 // Panel
 .detail-panel {
-  height: 100%;
-  background: var(--bg-card, #fff);
-  box-shadow: -4px 0 24px var(--shadow-lg, rgba(0, 0, 0, 0.15));
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
+  background: var(--bg-card, #fff);
+  box-shadow: -4px 0 24px var(--shadow-lg, rgb(0 0 0 / 15%));
 }
 
 // Header
 .panel-header {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
   border-bottom: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  flex-shrink: 0;
 }
 
 .panel-title {
@@ -350,16 +350,16 @@ onUnmounted(() => {
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-sm, 8px);
   color: var(--text-secondary, #64748b);
   cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm, 8px);
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    background: var(--bg-hover, #f1f5f9);
     color: var(--text-primary, #1e293b);
+    background: var(--bg-hover, #f1f5f9);
   }
 
   .svg-inline--fa {
@@ -369,35 +369,35 @@ onUnmounted(() => {
 
 // Body (Scrollable)
 .panel-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
 }
 
 // Footer (Fixed)
 .panel-footer {
-  flex-shrink: 0;
-  padding: 24px;
-  border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  background: var(--bg-card, #fff);
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 12px;
+  padding: 24px;
+  background: var(--bg-card, #fff);
+  border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
 }
 
 // Preview
 .panel-preview {
-  width: 100%;
-  flex-shrink: 0;
-  background: var(--bg-secondary, #f1f5f9);
-  border-radius: var(--radius-lg, 16px);
-  overflow: hidden;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-secondary, #f1f5f9);
+  border-radius: var(--radius-lg, 16px);
 
   :deep(img),
   :deep(video) {
@@ -410,8 +410,8 @@ onUnmounted(() => {
 .preview-placeholder {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   color: var(--text-muted, #94a3b8);
 
   .svg-inline--fa {
@@ -436,17 +436,17 @@ onUnmounted(() => {
 
 .info-name-row {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .info-name {
+  flex: 1;
   margin: 0;
+  overflow: hidden;
   font-size: 16px;
   font-weight: 600;
   color: var(--text-primary, #1e293b);
-  flex: 1;
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -469,13 +469,14 @@ onUnmounted(() => {
     --bg-input,
     var(--bg-card, #fff)
   ); // Use bg-input if available
+
   border: 2px solid var(--primary-color, #03a9f4);
   border-radius: var(--radius-md, 12px);
   outline: none;
   transition: all var(--transition-fast, 0.15s ease);
 
   &:focus {
-    box-shadow: 0 0 0 3px var(--primary-light, rgba(3, 169, 244, 0.15));
+    box-shadow: 0 0 0 3px var(--primary-light, rgb(3 169 244 / 15%));
   }
 
   &::placeholder {
@@ -485,8 +486,8 @@ onUnmounted(() => {
 
 .edit-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 8px;
+  justify-content: flex-end;
 }
 
 .btn-edit-cancel {
@@ -495,15 +496,15 @@ onUnmounted(() => {
   font-size: 14px;
   font-weight: 500;
   color: var(--text-secondary, #64748b);
+  cursor: pointer;
   background: transparent;
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-md, 10px);
-  cursor: pointer;
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    background: var(--bg-hover, #f1f5f9);
     color: var(--text-primary, #1e293b);
+    background: var(--bg-hover, #f1f5f9);
   }
 }
 
@@ -513,10 +514,10 @@ onUnmounted(() => {
   font-size: 14px;
   font-weight: 500;
   color: #fff;
+  cursor: pointer;
   background: var(--primary-color, #03a9f4);
   border: none;
   border-radius: var(--radius-md, 10px);
-  cursor: pointer;
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover:not(:disabled) {
@@ -524,28 +525,28 @@ onUnmounted(() => {
   }
 
   &:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
+    opacity: 0.5;
   }
 }
 
 .btn-icon-only {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-sm, 6px);
   color: var(--text-secondary, #64748b);
   cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm, 6px);
   transition: all var(--transition-fast, 0.15s ease);
-  flex-shrink: 0;
 
   &:hover {
-    background: var(--bg-hover, #f1f5f9);
     color: var(--primary-color, #03a9f4);
+    background: var(--bg-hover, #f1f5f9);
   }
 
   .svg-inline--fa {
@@ -563,12 +564,12 @@ onUnmounted(() => {
 .info-row {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 8px;
   align-items: flex-start;
+  justify-content: center;
   padding: 16px 20px;
   background-color: var(--bg-secondary, #f8fafc);
   border-radius: var(--radius-md, 12px);
-  gap: 8px;
   transition: all var(--transition-normal, 0.2s ease);
 
   &:hover {
@@ -578,15 +579,15 @@ onUnmounted(() => {
 
 .info-label {
   font-size: 13px;
-  color: var(--text-secondary, #94a3b8);
   line-height: 1;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .info-value {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #1e293b);
   line-height: 1.4;
+  color: var(--text-primary, #1e293b);
   word-break: break-all;
 }
 
@@ -600,18 +601,18 @@ onUnmounted(() => {
 /* Slot actions: dual primary buttons + bottom row actions */
 .panel-actions :deep(.dual-primary-btn) {
   display: inline-flex;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   width: 100%;
   height: 48px;
-  border: none;
-  border-radius: var(--radius-md, 12px);
-  background: var(--primary-color, #03a9f4);
-  color: #fff;
   font-size: 15px;
   font-weight: 500;
+  color: #fff;
   cursor: pointer;
+  background: var(--primary-color, #03a9f4);
+  border: none;
+  border-radius: var(--radius-md, 12px);
   transition: all var(--transition-normal, 0.2s ease);
 }
 
@@ -623,15 +624,15 @@ onUnmounted(() => {
 /* Slot primary action (entity/scene edit) should match legacy large size */
 .panel-actions :deep(.enter-edit-btn) {
   display: inline-flex !important;
+  gap: 8px !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
-  cursor: pointer !important;
   width: 100% !important;
   height: 52px !important;
   min-height: 52px !important;
   font-size: 16px !important;
   font-weight: 600 !important;
+  cursor: pointer !important;
   border-radius: 26px !important;
 }
 
@@ -644,33 +645,33 @@ onUnmounted(() => {
 .panel-actions :deep(.actions-row .btn-pill-secondary),
 .panel-actions :deep(.actions-row .btn-pill-danger) {
   display: inline-flex;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   width: 100%;
   height: 44px;
-  border-radius: var(--radius-md, 12px);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+  border-radius: var(--radius-md, 12px);
   transition: all var(--transition-fast, 0.15s ease);
 }
 
 .panel-actions :deep(.actions-row .btn-pill-secondary) {
-  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  background: var(--bg-card, #fff);
   color: var(--text-secondary, #64748b);
+  background: var(--bg-card, #fff);
+  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
 }
 
 .panel-actions :deep(.actions-row .btn-pill-secondary:hover) {
-  border-color: var(--primary-color, #03a9f4);
   color: var(--primary-color, #03a9f4);
+  border-color: var(--primary-color, #03a9f4);
 }
 
 .panel-actions :deep(.actions-row .btn-pill-danger) {
-  border: var(--border-width, 1px) solid #fecaca;
-  background: #fff;
   color: #ef4444;
+  background: #fff;
+  border: var(--border-width, 1px) solid #fecaca;
 }
 
 .panel-actions :deep(.actions-row .btn-pill-danger:hover) {
@@ -680,18 +681,18 @@ onUnmounted(() => {
 
 .btn-primary-full {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   width: 100%;
   height: 48px;
-  border: none;
-  background: var(--primary-color, #03a9f4);
-  color: #fff;
   font-size: 15px;
   font-weight: 500;
-  border-radius: var(--radius-md, 12px);
+  color: #fff;
   cursor: pointer;
+  background: var(--primary-color, #03a9f4);
+  border: none;
+  border-radius: var(--radius-md, 12px);
   transition: all var(--transition-normal, 0.2s ease);
 
   &:hover {
@@ -706,17 +707,17 @@ onUnmounted(() => {
 
 .btn-text-link {
   display: flex;
+  gap: 4px;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   width: 100%;
   height: 40px;
-  border: none;
-  background: transparent;
-  color: var(--primary-color, #03a9f4);
   font-size: 14px;
   font-weight: 500;
+  color: var(--primary-color, #03a9f4);
   cursor: pointer;
+  background: transparent;
+  border: none;
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
@@ -732,20 +733,20 @@ onUnmounted(() => {
 
 .btn-danger-text {
   display: flex;
+  gap: 6px;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   width: 100%;
   height: 40px;
-  border: none;
-  background: transparent;
-  color: var(--danger-color, #ef4444);
   font-size: 14px;
+  color: var(--danger-color, #ef4444);
   cursor: pointer;
+  background: transparent;
+  border: none;
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    background: var(--danger-light, rgba(239, 68, 68, 0.1));
+    background: var(--danger-light, rgb(239 68 68 / 10%));
     border-radius: var(--radius-sm, 8px);
   }
 
@@ -767,25 +768,25 @@ onUnmounted(() => {
 
 .btn-pill-primary {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   width: 100%;
   height: 52px;
-  border: none;
-  background: var(--primary-color, #03a9f4);
-  color: #fff;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 26px;
+  color: #fff;
   cursor: pointer;
+  background: var(--primary-color, #03a9f4);
+  border: none;
+  border-radius: 26px;
+  box-shadow: 0 4px 12px var(--primary-light, rgb(3 169 244 / 25%));
   transition: all var(--transition-normal, 0.2s ease);
-  box-shadow: 0 4px 12px var(--primary-light, rgba(3, 169, 244, 0.25));
 
   &:hover {
     background: var(--primary-hover, var(--primary-dark, #0288d1));
+    box-shadow: 0 6px 16px var(--primary-light, rgb(3 169 244 / 35%));
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px var(--primary-light, rgba(3, 169, 244, 0.35));
   }
 
   &:active {
@@ -794,25 +795,25 @@ onUnmounted(() => {
 }
 
 .btn-pill-secondary {
-  flex: 1;
   display: flex;
+  flex: 1;
+  gap: 6px;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   height: 38px;
-  border: 1.5px solid var(--border-color, #e2e8f0);
-  background: var(--bg-card, #fff);
-  color: var(--text-secondary, #64748b);
   font-size: 13px;
   font-weight: 500;
-  border-radius: 19px;
+  color: var(--text-secondary, #64748b);
   cursor: pointer;
+  background: var(--bg-card, #fff);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: 19px;
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    border-color: var(--primary-color, #03a9f4);
     color: var(--primary-color, #03a9f4);
-    background: var(--primary-light, rgba(3, 169, 244, 0.05));
+    background: var(--primary-light, rgb(3 169 244 / 5%));
+    border-color: var(--primary-color, #03a9f4);
   }
 
   .svg-inline--fa {
@@ -821,23 +822,23 @@ onUnmounted(() => {
 }
 
 .btn-pill-danger {
-  flex: 1;
   display: flex;
+  flex: 1;
+  gap: 6px;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   height: 38px;
-  border: none;
-  background: transparent;
-  color: var(--danger-color, #ef4444);
   font-size: 13px;
   font-weight: 500;
-  border-radius: 19px;
+  color: var(--danger-color, #ef4444);
   cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 19px;
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    background: var(--danger-light, rgba(239, 68, 68, 0.1));
+    background: var(--danger-light, rgb(239 68 68 / 10%));
   }
 
   .svg-inline--fa {

@@ -86,9 +86,9 @@ defineOptions({
 }
 
 .logo-container {
+  position: relative;
   width: 100%;
   overflow: hidden;
-  position: relative;
 }
 
 .logo-scroll {
@@ -102,9 +102,10 @@ defineOptions({
 
 .logo-group {
   display: flex;
+  flex-shrink: 0;
   gap: 60px;
   padding: 20px;
-  flex-shrink: 0;
+
   /* 防止logo被压缩 */
 
   img {

@@ -129,9 +129,9 @@ const handleCancel = () => {
 // 使用全局变量简化样式
 .custom-input-dialog {
   .el-dialog {
-    border-radius: 20px;
     overflow: hidden;
-    background: var(--bg-card, #ffffff);
+    background: var(--bg-card, #fff);
+    border-radius: 20px;
   }
 
   .el-dialog__header {
@@ -162,9 +162,9 @@ const handleCancel = () => {
 }
 
 .dialog-desc {
+  margin: 0;
   font-size: 14px;
   color: var(--text-secondary, #64748b);
-  margin: 0;
   text-align: center;
 }
 
@@ -184,11 +184,11 @@ const handleCancel = () => {
   width: 100%;
   height: 48px;
   padding: 0 16px;
+  font-size: 15px;
+  color: var(--text-primary, #1e293b);
+  background: var(--bg-hover, #f1f5f9);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 12px;
-  background: var(--bg-hover, #f1f5f9);
-  color: var(--text-primary, #1e293b);
-  font-size: 15px;
   transition: all 0.2s ease;
 
   &::placeholder {
@@ -196,14 +196,14 @@ const handleCancel = () => {
   }
 
   &:focus {
-    outline: none;
+    background: var(--bg-card, #fff);
     border-color: var(--primary-color, #00baff);
-    background: var(--bg-card, #ffffff);
+    outline: none;
   }
 
   &.has-error {
-    border-color: #ef4444;
     background: #fef2f2;
+    border-color: #ef4444;
 
     &:focus {
       border-color: #ef4444;
@@ -212,50 +212,50 @@ const handleCancel = () => {
 }
 
 .error-message {
+  margin-left: 4px;
   font-size: 13px;
   color: #ef4444;
-  margin-left: 4px;
 }
 
 .dialog-actions {
   display: flex;
-  justify-content: center;
   gap: 12px;
+  justify-content: center;
   padding-top: 8px;
 }
 
 .btn-primary {
   height: 44px;
   padding: 0 32px;
-  border: none;
-  border-radius: 22px;
-  background: var(--primary-color, #00baff);
-  color: var(--text-inverse, white);
   font-size: 15px;
   font-weight: 500;
+  color: var(--text-inverse, white);
   cursor: pointer;
+  background: var(--primary-color, #00baff);
+  border: none;
+  border-radius: 22px;
   transition: all 0.2s ease;
 
   &:hover {
-    background: var(--primary-hover, #0099dd);
+    background: var(--primary-hover, #09d);
   }
 }
 
 .btn-secondary {
   height: 44px;
   padding: 0 32px;
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 22px;
-  background: var(--bg-card, #ffffff);
-  color: var(--text-secondary, #64748b);
   font-size: 15px;
   font-weight: 500;
+  color: var(--text-secondary, #64748b);
   cursor: pointer;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 22px;
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: var(--text-muted, #64748b);
     color: var(--text-primary, #1e293b);
+    border-color: var(--text-muted, #64748b);
   }
 }
 

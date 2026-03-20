@@ -74,10 +74,10 @@ defineExpose({
 }
 
 .qrcode-box {
-  background: var(--bg-card, #fff);
   padding: 10px;
-  border-radius: var(--radius-md, 8px);
+  background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
 }
 
 .qrcode-tip {
@@ -85,8 +85,8 @@ defineExpose({
   font-size: 18px;
   font-weight: 600;
   color: var(--text-primary, #303133);
-  letter-spacing: 0.5px;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .qrcode-subtip {
@@ -98,8 +98,8 @@ defineExpose({
 
 .dialog-header-custom {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .header-icon {
@@ -116,14 +116,14 @@ defineExpose({
 
 <style lang="scss">
 .qrcode-dialog {
-  border-radius: var(--radius-xl, 24px) !important;
   overflow: hidden;
-  box-shadow: 0 12px 32px var(--shadow-lg, rgba(0, 0, 0, 0.2)) !important;
   background: var(--bg-card, #fff) !important;
+  border-radius: var(--radius-xl, 24px) !important;
+  box-shadow: 0 12px 32px var(--shadow-lg, rgb(0 0 0 / 20%)) !important;
 
   .el-dialog__header {
-    margin: 0;
     padding: 20px 24px 0;
+    margin: 0;
     border-bottom: none;
   }
 

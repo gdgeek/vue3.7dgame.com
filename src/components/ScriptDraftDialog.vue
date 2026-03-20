@@ -207,7 +207,7 @@ const intervalMinutes = computed(() =>
 
 <style scoped>
 .script-draft-dialog {
-  --draft-dialog-surface: var(--bg-card, #ffffff);
+  --draft-dialog-surface: var(--bg-card, #fff);
   --draft-dialog-surface-alt: var(--bg-hover, #f8fafc);
   --draft-dialog-surface-soft: var(--bg-secondary, #f1f5f9);
   --draft-dialog-border: var(--border-color, #e2e8f0);
@@ -215,7 +215,7 @@ const intervalMinutes = computed(() =>
   --draft-dialog-text: var(--text-primary, #1e293b);
   --draft-dialog-text-secondary: var(--text-secondary, #64748b);
   --draft-dialog-text-muted: var(--text-muted, #94a3b8);
-  --draft-dialog-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
+  --draft-dialog-shadow: var(--shadow-lg, 0 8px 24px rgb(0 0 0 / 12%));
   --draft-dialog-radius: var(--radius-lg, 24px);
   --draft-dialog-radius-md: var(--radius-md, 20px);
   --draft-dialog-radius-sm: var(--radius-sm, 12px);
@@ -240,7 +240,7 @@ const intervalMinutes = computed(() =>
   background: var(--draft-dialog-surface-alt);
   border: var(--border-width, 1px) solid var(--draft-dialog-border);
   border-radius: var(--draft-dialog-radius-md);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+  box-shadow: var(--shadow-sm, 0 1px 3px rgb(0 0 0 / 5%));
 }
 
 .setting-label {
@@ -251,8 +251,8 @@ const intervalMinutes = computed(() =>
 
 .setting-input {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .setting-unit {
@@ -268,17 +268,17 @@ const intervalMinutes = computed(() =>
 
 .script-draft-list-header {
   display: flex;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
   font-size: 15px;
   font-weight: 600;
   color: var(--draft-dialog-text);
-  gap: 12px;
 }
 
 .clear-history-btn {
-  border-width: 1px;
   font-weight: 600;
+  border-width: 1px;
   border-radius: var(--draft-dialog-radius-full, var(--radius-full, 9999px));
 }
 
@@ -300,9 +300,9 @@ const intervalMinutes = computed(() =>
 
 .draft-item-head {
   display: flex;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
   margin-bottom: 10px;
 }
 
@@ -326,23 +326,23 @@ const intervalMinutes = computed(() =>
 }
 
 :deep(.script-draft-dialog-modal .el-dialog) {
-  background: var(--bg-card, #ffffff) !important;
+  overflow: hidden;
+  background: var(--bg-card, #fff) !important;
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
   border-radius: var(--radius-lg, 24px) !important;
-  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12)) !important;
-  overflow: hidden;
+  box-shadow: var(--shadow-lg, 0 8px 24px rgb(0 0 0 / 12%)) !important;
 }
 
 :deep(.script-draft-dialog-modal .el-dialog__header) {
   padding: 18px 22px 14px !important;
+  background: var(--bg-card, #fff) !important;
   border-bottom: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
-  background: var(--bg-card, #ffffff) !important;
 }
 
 :deep(.script-draft-dialog-modal .el-dialog__title) {
-  color: var(--text-primary, #1e293b) !important;
   font-size: 18px !important;
   font-weight: 600 !important;
+  color: var(--text-primary, #1e293b) !important;
 }
 
 :deep(.script-draft-dialog-modal .el-dialog__headerbtn) {
@@ -363,7 +363,7 @@ const intervalMinutes = computed(() =>
 
 :deep(.script-draft-dialog-modal .el-dialog__body) {
   padding: 18px 22px 22px !important;
-  background: var(--bg-card, #ffffff) !important;
+  background: var(--bg-card, #fff) !important;
 }
 
 :deep(.script-draft-dialog-modal .el-switch) {
@@ -375,7 +375,7 @@ const intervalMinutes = computed(() =>
 }
 
 :deep(.script-draft-dialog-modal .el-input-number .el-input__wrapper) {
-  background: var(--bg-card, #ffffff) !important;
+  background: var(--bg-card, #fff) !important;
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
   border-radius: var(--radius-md, 20px) !important;
   box-shadow: none !important;
@@ -387,9 +387,9 @@ const intervalMinutes = computed(() =>
 
 :deep(.script-draft-dialog-modal .el-input-number__increase),
 :deep(.script-draft-dialog-modal .el-input-number__decrease) {
+  color: var(--text-secondary, #64748b) !important;
   background: var(--bg-hover, #f8fafc) !important;
   border-left: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
-  color: var(--text-secondary, #64748b) !important;
 }
 
 :deep(.script-draft-dialog-modal .el-input-number__increase:hover),
@@ -398,9 +398,9 @@ const intervalMinutes = computed(() =>
 }
 
 :deep(.script-draft-dialog-modal .draft-trigger-tag.el-tag) {
-  background: var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
-  border-color: transparent !important;
   color: var(--primary-color, #00baff) !important;
+  background: var(--primary-light, rgb(0 186 255 / 10%)) !important;
+  border-color: transparent !important;
   border-radius: var(--radius-full, 9999px) !important;
 }
 
@@ -409,16 +409,16 @@ const intervalMinutes = computed(() =>
 }
 
 :deep(.script-draft-dialog-modal .clear-history-btn) {
-  border-color: var(--danger-color, #ef4444) !important;
   color: var(--danger-color, #ef4444) !important;
   background: transparent !important;
+  border-color: var(--danger-color, #ef4444) !important;
 }
 
 :deep(.script-draft-dialog-modal .clear-history-btn:hover) {
-  background: var(--danger-light, rgba(239, 68, 68, 0.1)) !important;
+  background: var(--danger-light, rgb(239 68 68 / 10%)) !important;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .script-draft-settings {
     grid-template-columns: 1fr;
   }

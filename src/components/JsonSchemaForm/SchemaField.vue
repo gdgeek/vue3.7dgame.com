@@ -255,9 +255,9 @@ const validationRules = computed<FormItemRule[]>(() => {
 
 <style scoped>
 .field-description {
-  font-size: 12px;
-  color: #999;
   margin-top: 5px;
+  font-size: 12px;
   line-height: 1.2;
+  color: #999;
 }
 </style>

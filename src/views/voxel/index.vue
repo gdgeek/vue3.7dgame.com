@@ -12,7 +12,7 @@
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon
               :icon="['fas', 'upload']"
-              style="font-size: 18px; margin-right: 4px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ $t("voxel.uploadVoxel") }}
           </el-button>
@@ -262,20 +262,20 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .col-name {
-  flex: 1;
   display: flex;
-  align-items: center;
+  flex: 1;
   gap: 12px;
+  align-items: center;
   min-width: 0;
 }
 
 .col-size,
 .col-date {
+  flex-shrink: 0;
   width: 120px;
-  text-align: center;
   font-size: 13px;
   color: var(--el-text-color-secondary);
-  flex-shrink: 0;
+  text-align: center;
 }
 
 .col-date {
@@ -283,21 +283,21 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .col-actions {
+  flex-shrink: 0;
   width: 60px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 .item-thumb {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--el-fill-color-light);
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--el-fill-color-light);
+  border-radius: 8px;
 
   img {
     width: 100%;
@@ -315,23 +315,23 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .item-name {
+  overflow: hidden;
   font-size: 14px;
   color: var(--el-text-color-primary);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .actions-icon {
+  padding: 4px;
   font-size: 20px;
   color: var(--el-text-color-secondary);
   cursor: pointer;
-  padding: 4px;
   border-radius: 4px;
 
   &:hover {
-    background: var(--el-fill-color);
     color: var(--el-text-color-primary);
+    background: var(--el-fill-color);
   }
 }
 </style>

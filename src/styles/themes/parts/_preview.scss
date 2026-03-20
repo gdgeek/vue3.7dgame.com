@@ -21,12 +21,12 @@
   border-top: var(--border-width) solid var(--border-color) !important;
 
   .play-pause-btn {
-    background: var(--bg-hover) !important;
     color: var(--text-primary) !important;
+    background: var(--bg-hover) !important;
 
     &:hover {
-      background: var(--primary-light) !important;
       color: var(--primary-color) !important;
+      background: var(--primary-light) !important;
     }
   }
 
@@ -35,9 +35,9 @@
   }
 
   .animation-select {
+    color: var(--text-primary) !important;
     background: var(--bg-card) !important;
     border: var(--border-width) solid var(--border-color) !important;
-    color: var(--text-primary) !important;
     border-radius: var(--radius-sm) !important;
 
     &:focus {
@@ -87,22 +87,22 @@
 }
 
 .audio-player-controls {
-  background: rgba(255, 255, 255, 0.8) !important;
+  background: rgb(255 255 255 / 80%) !important;
   backdrop-filter: blur(10px) !important;
   border-radius: var(--radius-md) !important;
 
   .control-btn {
-    background: transparent !important;
     color: var(--text-secondary) !important;
+    background: transparent !important;
 
     &:hover {
-      background: var(--primary-light) !important;
       color: var(--primary-color) !important;
+      background: var(--primary-light) !important;
     }
 
     &.play-pause {
-      background: var(--primary-color) !important;
       color: var(--text-inverse) !important;
+      background: var(--primary-color) !important;
 
       &:hover {
         background: var(--primary-hover) !important;
@@ -115,7 +115,7 @@
   }
 
   .progress-track {
-    background: rgba(0, 0, 0, 0.1) !important;
+    background: rgb(0 0 0 / 10%) !important;
   }
 
   .progress-fill {
@@ -134,7 +134,7 @@
 
 // 视频预览窗口
 .video-preview-window {
-  background: #000000 !important;
+  background: #000 !important;
   border-radius: var(--radius-md) !important;
 }
 
@@ -154,7 +154,7 @@
 
 // 加载遮罩
 .loading-overlay {
-  background: rgba(255, 255, 255, 0.8) !important;
+  background: rgb(255 255 255 / 80%) !important;
 }
 
 // ============================================
@@ -165,26 +165,26 @@
   .preview-window,
   .image-preview-window {
     background: linear-gradient(135deg, #0b0e14 0%, #151921 100%) !important;
-    border: 1px solid rgba(0, 242, 255, 0.15) !important;
+    border: 1px solid rgb(0 242 255 / 15%) !important;
   }
 
   .loading-overlay {
-    background: rgba(11, 14, 20, 0.9) !important;
+    background: rgb(11 14 20 / 90%) !important;
   }
 
   .control-bar {
-    background: rgba(11, 14, 20, 0.95) !important;
-    border-top: 1px solid rgba(0, 242, 255, 0.15) !important;
+    background: rgb(11 14 20 / 95%) !important;
     backdrop-filter: blur(10px) !important;
+    border-top: 1px solid rgb(0 242 255 / 15%) !important;
 
     .play-pause-btn {
-      background: rgba(0, 242, 255, 0.15) !important;
       color: #00f2ff !important;
-      border: 1px solid rgba(0, 242, 255, 0.3) !important;
+      background: rgb(0 242 255 / 15%) !important;
+      border: 1px solid rgb(0 242 255 / 30%) !important;
 
       &:hover {
-        background: rgba(0, 242, 255, 0.25) !important;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+        background: rgb(0 242 255 / 25%) !important;
+        box-shadow: 0 0 15px rgb(0 242 255 / 40%) !important;
       }
     }
 
@@ -193,45 +193,45 @@
     }
 
     .animation-select {
-      background: rgba(18, 24, 32, 0.8) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
       color: #e8f4ff !important;
+      background: rgb(18 24 32 / 80%) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
 
       &:focus {
         border-color: #00f2ff !important;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
+        box-shadow: 0 0 15px rgb(0 242 255 / 30%) !important;
       }
     }
 
     .time-display {
-      background: rgba(0, 242, 255, 0.08) !important;
-      border: 1px solid rgba(0, 242, 255, 0.15) !important;
+      background: rgb(0 242 255 / 8%) !important;
+      border: 1px solid rgb(0 242 255 / 15%) !important;
     }
 
     .time-text {
       color: #00f2ff !important;
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+      text-shadow: 0 0 10px rgb(0 242 255 / 50%) !important;
     }
   }
 
   .audio-preview-window {
     background: linear-gradient(135deg, #0b0e14 0%, #151921 100%) !important;
-    border: 1px solid rgba(0, 242, 255, 0.15) !important;
+    border: 1px solid rgb(0 242 255 / 15%) !important;
 
     .audio-icon-wrapper {
       background: linear-gradient(
         135deg,
-        rgba(0, 242, 255, 0.2) 0%,
-        rgba(0, 242, 255, 0.1) 100%
+        rgb(0 242 255 / 20%) 0%,
+        rgb(0 242 255 / 10%) 100%
       ) !important;
-      border: 1px solid rgba(0, 242, 255, 0.4) !important;
+      border: 1px solid rgb(0 242 255 / 40%) !important;
       box-shadow:
-        0 0 30px rgba(0, 242, 255, 0.3),
-        inset 0 0 20px rgba(0, 242, 255, 0.1) !important;
+        0 0 30px rgb(0 242 255 / 30%),
+        inset 0 0 20px rgb(0 242 255 / 10%) !important;
 
       .audio-icon {
         color: #00f2ff !important;
-        text-shadow: 0 0 20px rgba(0, 242, 255, 0.8) !important;
+        text-shadow: 0 0 20px rgb(0 242 255 / 80%) !important;
       }
 
       &.playing {
@@ -241,34 +241,34 @@
 
     .audio-name {
       color: #e8f4ff !important;
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.3) !important;
+      text-shadow: 0 0 10px rgb(0 242 255 / 30%) !important;
     }
   }
 
   .audio-player-controls {
-    background: rgba(11, 14, 20, 0.9) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    background: rgb(11 14 20 / 90%) !important;
+    border: 1px solid rgb(0 242 255 / 20%) !important;
 
     .control-btn {
       color: #8ba3ad !important;
 
       &:hover {
-        background: rgba(0, 242, 255, 0.15) !important;
         color: #00f2ff !important;
+        background: rgb(0 242 255 / 15%) !important;
       }
 
       &.play-pause {
+        color: #00f2ff !important;
         background: linear-gradient(
           135deg,
-          rgba(0, 242, 255, 0.2) 0%,
-          rgba(0, 242, 255, 0.1) 100%
+          rgb(0 242 255 / 20%) 0%,
+          rgb(0 242 255 / 10%) 100%
         ) !important;
-        border: 1px solid rgba(0, 242, 255, 0.4) !important;
-        color: #00f2ff !important;
-        box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
+        border: 1px solid rgb(0 242 255 / 40%) !important;
+        box-shadow: 0 0 20px rgb(0 242 255 / 30%) !important;
 
         &:hover {
-          box-shadow: 0 0 30px rgba(0, 242, 255, 0.5) !important;
+          box-shadow: 0 0 30px rgb(0 242 255 / 50%) !important;
         }
       }
     }
@@ -278,17 +278,17 @@
     }
 
     .progress-track {
-      background: rgba(0, 242, 255, 0.1) !important;
+      background: rgb(0 242 255 / 10%) !important;
     }
 
     .progress-fill {
       background: linear-gradient(90deg, #00f2ff 0%, #00d4e6 100%) !important;
-      box-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+      box-shadow: 0 0 10px rgb(0 242 255 / 50%) !important;
     }
 
     .progress-thumb {
       background: #00f2ff !important;
-      box-shadow: 0 0 15px rgba(0, 242, 255, 0.6) !important;
+      box-shadow: 0 0 15px rgb(0 242 255 / 60%) !important;
     }
   }
 }
@@ -297,13 +297,14 @@
   0%,
   100% {
     box-shadow:
-      0 0 30px rgba(0, 242, 255, 0.3),
-      inset 0 0 20px rgba(0, 242, 255, 0.1);
+      0 0 30px rgb(0 242 255 / 30%),
+      inset 0 0 20px rgb(0 242 255 / 10%);
   }
+
   50% {
     box-shadow:
-      0 0 50px rgba(0, 242, 255, 0.5),
-      inset 0 0 30px rgba(0, 242, 255, 0.2);
+      0 0 50px rgb(0 242 255 / 50%),
+      inset 0 0 30px rgb(0 242 255 / 20%);
   }
 }
 
@@ -320,23 +321,23 @@
   }
 
   .loading-overlay {
-    background: rgba(255, 248, 245, 0.9) !important;
+    background: rgb(255 248 245 / 90%) !important;
   }
 
   .control-bar {
-    background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+    background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
     border-top: 2px solid #ffe0cc !important;
     border-radius: 0 0 20px 20px !important;
 
     .play-pause-btn {
-      background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
       color: white !important;
+      background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
       border: none !important;
-      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
+      box-shadow: 0 4px 12px rgb(255 107 53 / 30%) !important;
 
       &:hover {
+        box-shadow: 0 6px 16px rgb(255 107 53 / 40%) !important;
         transform: scale(1.1) !important;
-        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
       }
     }
 
@@ -345,22 +346,22 @@
     }
 
     .animation-select {
-      background: #ffffff !important;
-      border: 2px solid #ffe0cc !important;
       color: #2d1810 !important;
+      background: #fff !important;
+      border: 2px solid #ffe0cc !important;
       border-radius: 12px !important;
 
       &:focus {
         border-color: #ff6b35 !important;
-        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15) !important;
+        box-shadow: 0 0 0 3px rgb(255 107 53 / 15%) !important;
       }
     }
 
     .time-display {
       background: linear-gradient(
         135deg,
-        rgba(255, 107, 53, 0.1) 0%,
-        rgba(255, 183, 71, 0.1) 100%
+        rgb(255 107 53 / 10%) 0%,
+        rgb(255 183 71 / 10%) 100%
       ) !important;
       border-radius: 12px !important;
     }
@@ -377,7 +378,7 @@
 
     .audio-icon-wrapper {
       background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
-      box-shadow: 0 8px 24px rgba(255, 107, 53, 0.35) !important;
+      box-shadow: 0 8px 24px rgb(255 107 53 / 35%) !important;
 
       .audio-icon {
         color: white !important;
@@ -394,7 +395,7 @@
   }
 
   .audio-player-controls {
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: rgb(255 255 255 / 95%) !important;
     border: 2px solid #ffe0cc !important;
     border-radius: 20px !important;
 
@@ -402,22 +403,22 @@
       color: #8b6f5c !important;
 
       &:hover {
-        background: rgba(255, 107, 53, 0.1) !important;
         color: #ff6b35 !important;
+        background: rgb(255 107 53 / 10%) !important;
       }
 
       &.play-pause {
+        color: white !important;
         background: linear-gradient(
           135deg,
           #ff6b35 0%,
           #ffb347 100%
         ) !important;
-        color: white !important;
-        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.35) !important;
+        box-shadow: 0 6px 16px rgb(255 107 53 / 35%) !important;
 
         &:hover {
+          box-shadow: 0 8px 20px rgb(255 107 53 / 45%) !important;
           transform: scale(1.08) !important;
-          box-shadow: 0 8px 20px rgba(255, 107, 53, 0.45) !important;
         }
       }
     }
@@ -427,7 +428,7 @@
     }
 
     .progress-track {
-      background: rgba(255, 107, 53, 0.15) !important;
+      background: rgb(255 107 53 / 15%) !important;
       border-radius: 6px !important;
     }
 
@@ -438,7 +439,7 @@
 
     .progress-thumb {
       background: #ff6b35 !important;
-      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4) !important;
+      box-shadow: 0 2px 8px rgb(255 107 53 / 40%) !important;
     }
   }
 }
@@ -446,11 +447,12 @@
 @keyframes edu-bounce-ring {
   0%,
   100% {
-    box-shadow: 0 8px 24px rgba(255, 107, 53, 0.35);
+    box-shadow: 0 8px 24px rgb(255 107 53 / 35%);
     transform: scale(1);
   }
+
   50% {
-    box-shadow: 0 12px 32px rgba(255, 107, 53, 0.5);
+    box-shadow: 0 12px 32px rgb(255 107 53 / 50%);
     transform: scale(1.05);
   }
 }
@@ -463,78 +465,78 @@
   .preview-window,
   .image-preview-window {
     background: #e0f7ff !important;
-    border: 3px solid #000000 !important;
+    border: 3px solid #000 !important;
     border-radius: 8px !important;
-    box-shadow: 4px 4px 0px #000000 !important;
+    box-shadow: 4px 4px 0 #000 !important;
   }
 
   .loading-overlay {
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: rgb(255 255 255 / 95%) !important;
   }
 
   .control-bar {
     background: #fff000 !important;
-    border-top: 3px solid #000000 !important;
+    border-top: 3px solid #000 !important;
     border-radius: 0 0 8px 8px !important;
 
     .play-pause-btn {
-      background: #ffffff !important;
-      color: #000000 !important;
-      border: 3px solid #000000 !important;
+      color: #000 !important;
+      background: #fff !important;
+      border: 3px solid #000 !important;
       border-radius: 50% !important;
-      box-shadow: 3px 3px 0px #000000 !important;
+      box-shadow: 3px 3px 0 #000 !important;
 
       &:hover {
+        box-shadow: 5px 5px 0 #000 !important;
         transform: translate(-2px, -2px) !important;
-        box-shadow: 5px 5px 0px #000000 !important;
       }
     }
 
     .animation-label {
-      color: #000000 !important;
       font-weight: 700 !important;
+      color: #000 !important;
       text-transform: uppercase !important;
     }
 
     .animation-select {
-      background: #ffffff !important;
-      border: 3px solid #000000 !important;
-      color: #000000 !important;
-      border-radius: 4px !important;
-      box-shadow: 3px 3px 0px #000000 !important;
       font-weight: 600 !important;
+      color: #000 !important;
+      background: #fff !important;
+      border: 3px solid #000 !important;
+      border-radius: 4px !important;
+      box-shadow: 3px 3px 0 #000 !important;
 
       &:focus {
-        box-shadow: 5px 5px 0px #000000 !important;
+        box-shadow: 5px 5px 0 #000 !important;
         transform: translate(-2px, -2px) !important;
       }
     }
 
     .time-display {
-      background: #ffffff !important;
-      border: 2px solid #000000 !important;
+      background: #fff !important;
+      border: 2px solid #000 !important;
       border-radius: 4px !important;
     }
 
     .time-text {
-      color: #000000 !important;
       font-weight: 700 !important;
+      color: #000 !important;
     }
   }
 
   .audio-preview-window {
     background: #e0f7ff !important;
-    border: 3px solid #000000 !important;
+    border: 3px solid #000 !important;
     border-radius: 8px !important;
-    box-shadow: 4px 4px 0px #000000 !important;
+    box-shadow: 4px 4px 0 #000 !important;
 
     .audio-icon-wrapper {
       background: #ff007a !important;
-      border: 3px solid #000000 !important;
-      box-shadow: 4px 4px 0px #000000 !important;
+      border: 3px solid #000 !important;
+      box-shadow: 4px 4px 0 #000 !important;
 
       .audio-icon {
-        color: #ffffff !important;
+        color: #fff !important;
       }
 
       &.playing {
@@ -543,61 +545,61 @@
     }
 
     .audio-name {
-      color: #000000 !important;
       font-weight: 900 !important;
+      color: #000 !important;
       text-transform: uppercase !important;
     }
   }
 
   .audio-player-controls {
     background: #fff000 !important;
-    border: 3px solid #000000 !important;
+    border: 3px solid #000 !important;
     border-radius: 8px !important;
-    box-shadow: 4px 4px 0px #000000 !important;
+    box-shadow: 4px 4px 0 #000 !important;
 
     .control-btn {
-      color: #000000 !important;
+      color: #000 !important;
       border: 2px solid transparent !important;
 
       &:hover {
-        background: #ffffff !important;
-        border-color: #000000 !important;
+        background: #fff !important;
+        border-color: #000 !important;
       }
 
       &.play-pause {
-        background: #00ff88 !important;
-        color: #000000 !important;
-        border: 3px solid #000000 !important;
-        box-shadow: 3px 3px 0px #000000 !important;
+        color: #000 !important;
+        background: #0f8 !important;
+        border: 3px solid #000 !important;
+        box-shadow: 3px 3px 0 #000 !important;
 
         &:hover {
+          box-shadow: 5px 5px 0 #000 !important;
           transform: translate(-2px, -2px) !important;
-          box-shadow: 5px 5px 0px #000000 !important;
         }
       }
     }
 
     .time-display {
-      color: #000000 !important;
       font-weight: 700 !important;
+      color: #000 !important;
     }
 
     .progress-track {
-      background: #ffffff !important;
-      border: 2px solid #000000 !important;
+      background: #fff !important;
+      border: 2px solid #000 !important;
       border-radius: 0 !important;
     }
 
     .progress-fill {
-      background: #00ff88 !important;
+      background: #0f8 !important;
       border-radius: 0 !important;
     }
 
     .progress-thumb {
-      background: #000000 !important;
-      border-radius: 0 !important;
       width: 16px !important;
       height: 16px !important;
+      background: #000 !important;
+      border-radius: 0 !important;
       box-shadow: none !important;
     }
   }
@@ -608,9 +610,11 @@
   100% {
     transform: rotate(0deg);
   }
+
   25% {
     transform: rotate(-3deg);
   }
+
   75% {
     transform: rotate(3deg);
   }
@@ -629,41 +633,41 @@
   }
 
   .loading-overlay {
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: rgb(255 255 255 / 95%) !important;
   }
 
   .control-bar {
-    background: #ffffff !important;
+    background: #fff !important;
     border-top: 1px solid #e0e0e0 !important;
     border-radius: 0 !important;
 
     .play-pause-btn {
+      color: #000 !important;
       background: #fafafa !important;
-      color: #000000 !important;
       border: 1px solid #e0e0e0 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background: #000000 !important;
-        color: #ffffff !important;
-        border-color: #000000 !important;
+        color: #fff !important;
+        background: #000 !important;
+        border-color: #000 !important;
       }
     }
 
     .animation-label {
-      color: #666666 !important;
+      color: #666 !important;
     }
 
     .animation-select {
-      background: #ffffff !important;
+      color: #000 !important;
+      background: #fff !important;
       border: 1px solid #e0e0e0 !important;
-      color: #000000 !important;
       border-radius: 0 !important;
 
       &:focus {
-        border-color: #000000 !important;
-        box-shadow: none !important;
+        border-color: #000 !important;
         border-width: 2px !important;
+        box-shadow: none !important;
       }
     }
 
@@ -673,7 +677,7 @@
     }
 
     .time-text {
-      color: #000000 !important;
+      color: #000 !important;
     }
   }
 
@@ -683,51 +687,51 @@
     border-radius: 0 !important;
 
     .audio-icon-wrapper {
-      background: #000000 !important;
+      background: #000 !important;
       border-radius: 0 !important;
       box-shadow: none !important;
 
       .audio-icon {
-        color: #ffffff !important;
+        color: #fff !important;
       }
     }
 
     .audio-name {
-      color: #000000 !important;
       font-weight: 500 !important;
+      color: #000 !important;
     }
   }
 
   .audio-player-controls {
-    background: #ffffff !important;
+    background: #fff !important;
     border: 1px solid #e0e0e0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
 
     .control-btn {
-      color: #666666 !important;
+      color: #666 !important;
       border-radius: 0 !important;
 
       &:hover {
+        color: #000 !important;
         background: #fafafa !important;
-        color: #000000 !important;
       }
 
       &.play-pause {
-        background: #000000 !important;
-        color: #ffffff !important;
+        color: #fff !important;
+        background: #000 !important;
         border-radius: 0 !important;
         box-shadow: none !important;
 
         &:hover {
-          background: #333333 !important;
+          background: #333 !important;
           transform: none !important;
         }
       }
     }
 
     .time-display {
-      color: #666666 !important;
+      color: #666 !important;
     }
 
     .progress-track {
@@ -736,12 +740,12 @@
     }
 
     .progress-fill {
-      background: #000000 !important;
+      background: #000 !important;
       border-radius: 0 !important;
     }
 
     .progress-thumb {
-      background: #000000 !important;
+      background: #000 !important;
       border-radius: 0 !important;
       box-shadow: none !important;
     }
@@ -760,7 +764,7 @@
   }
 
   .loading-overlay {
-    background: rgba(21, 25, 33, 0.95) !important;
+    background: rgb(21 25 33 / 95%) !important;
   }
 
   .control-bar {
@@ -768,13 +772,13 @@
     border-top: 1px solid #21262d !important;
 
     .play-pause-btn {
-      background: #21262d !important;
       color: #b0b3b8 !important;
+      background: #21262d !important;
       border: 1px solid #30363d !important;
 
       &:hover {
-        background: rgba(45, 104, 255, 0.15) !important;
         color: #2d68ff !important;
+        background: rgb(45 104 255 / 15%) !important;
         border-color: #2d68ff !important;
       }
     }
@@ -784,13 +788,13 @@
     }
 
     .animation-select {
+      color: #e6edf3 !important;
       background: #21262d !important;
       border: 1px solid #30363d !important;
-      color: #e6edf3 !important;
 
       &:focus {
         border-color: #2d68ff !important;
-        box-shadow: 0 0 0 3px rgba(45, 104, 255, 0.2) !important;
+        box-shadow: 0 0 0 3px rgb(45 104 255 / 20%) !important;
       }
     }
 
@@ -814,10 +818,10 @@
 
     .audio-icon-wrapper {
       background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
-      box-shadow: 0 8px 32px rgba(45, 104, 255, 0.3) !important;
+      box-shadow: 0 8px 32px rgb(45 104 255 / 30%) !important;
 
       .audio-icon {
-        color: #ffffff !important;
+        color: #fff !important;
       }
 
       &.playing {
@@ -831,28 +835,28 @@
   }
 
   .audio-player-controls {
-    background: rgba(21, 25, 33, 0.95) !important;
+    background: rgb(21 25 33 / 95%) !important;
     border: 1px solid #21262d !important;
 
     .control-btn {
       color: #8b949e !important;
 
       &:hover {
-        background: rgba(45, 104, 255, 0.1) !important;
         color: #2d68ff !important;
+        background: rgb(45 104 255 / 10%) !important;
       }
 
       &.play-pause {
+        color: #fff !important;
         background: linear-gradient(
           135deg,
           #1a3d8f 0%,
           #2d68ff 100%
         ) !important;
-        color: #ffffff !important;
-        box-shadow: 0 0 20px rgba(45, 104, 255, 0.3) !important;
+        box-shadow: 0 0 20px rgb(45 104 255 / 30%) !important;
 
         &:hover {
-          box-shadow: 0 0 30px rgba(45, 104, 255, 0.5) !important;
+          box-shadow: 0 0 30px rgb(45 104 255 / 50%) !important;
         }
       }
     }
@@ -871,7 +875,7 @@
 
     .progress-thumb {
       background: #2d68ff !important;
-      box-shadow: 0 0 10px rgba(45, 104, 255, 0.5) !important;
+      box-shadow: 0 0 10px rgb(45 104 255 / 50%) !important;
     }
   }
 }
@@ -879,10 +883,11 @@
 @keyframes deep-space-pulse {
   0%,
   100% {
-    box-shadow: 0 8px 32px rgba(45, 104, 255, 0.3);
+    box-shadow: 0 8px 32px rgb(45 104 255 / 30%);
   }
+
   50% {
-    box-shadow: 0 8px 48px rgba(45, 104, 255, 0.5);
+    box-shadow: 0 8px 48px rgb(45 104 255 / 50%);
   }
 }
 
@@ -901,7 +906,7 @@
   }
 
   .loading-overlay {
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: rgb(255 255 255 / 90%) !important;
   }
 
   .control-bar {
@@ -909,12 +914,12 @@
     border-top: 1px solid var(--border-color, #e2e8f0) !important;
 
     .play-pause-btn {
-      background: var(--bg-active, #f1f5f9) !important;
       color: var(--text-primary, #1e293b) !important;
+      background: var(--bg-active, #f1f5f9) !important;
 
       &:hover {
-        background: var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
         color: var(--primary-color, #00baff) !important;
+        background: var(--primary-light, rgb(0 186 255 / 10%)) !important;
       }
     }
 
@@ -923,13 +928,13 @@
     }
 
     .animation-select {
-      background: var(--bg-card, #ffffff) !important;
-      border: 1px solid var(--border-color, #e2e8f0) !important;
       color: var(--text-primary, #1e293b) !important;
+      background: var(--bg-card, #fff) !important;
+      border: 1px solid var(--border-color, #e2e8f0) !important;
 
       &:focus {
         border-color: var(--primary-color, #00baff) !important;
-        box-shadow: 0 0 0 3px var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
+        box-shadow: 0 0 0 3px var(--primary-light, rgb(0 186 255 / 10%)) !important;
       }
 
       &:hover {
@@ -959,11 +964,11 @@
     .audio-icon-wrapper {
       background: var(
         --primary-gradient,
-        linear-gradient(135deg, #00baff 0%, #0099dd 100%)
+        linear-gradient(135deg, #00baff 0%, #09d 100%)
       ) !important;
       box-shadow: var(
         --shadow-primary,
-        0 8px 32px rgba(0, 186, 255, 0.3)
+        0 8px 32px rgb(0 186 255 / 30%)
       ) !important;
 
       .audio-icon {
@@ -977,28 +982,28 @@
   }
 
   .audio-player-controls {
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: rgb(255 255 255 / 90%) !important;
     backdrop-filter: blur(10px) !important;
     border-radius: var(--radius-md, 16px) !important;
-    box-shadow: var(--shadow-md, 0 4px 20px rgba(0, 0, 0, 0.08)) !important;
+    box-shadow: var(--shadow-md, 0 4px 20px rgb(0 0 0 / 8%)) !important;
 
     .control-btn {
       color: var(--text-secondary, #64748b) !important;
 
       &:hover {
-        background: var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
         color: var(--primary-color, #00baff) !important;
+        background: var(--primary-light, rgb(0 186 255 / 10%)) !important;
       }
 
       &.play-pause {
+        color: var(--text-inverse, white) !important;
         background: var(
           --primary-gradient,
-          linear-gradient(135deg, #00baff 0%, #0099dd 100%)
+          linear-gradient(135deg, #00baff 0%, #09d 100%)
         ) !important;
-        color: var(--text-inverse, white) !important;
         box-shadow: var(
           --shadow-primary,
-          0 4px 16px rgba(0, 186, 255, 0.35)
+          0 4px 16px rgb(0 186 255 / 35%)
         ) !important;
 
         &:hover {
@@ -1013,13 +1018,13 @@
     }
 
     .progress-track {
-      background: rgba(0, 0, 0, 0.1) !important;
+      background: rgb(0 0 0 / 10%) !important;
     }
 
     .progress-fill {
       background: var(
         --primary-gradient,
-        linear-gradient(90deg, #00baff 0%, #0099dd 100%)
+        linear-gradient(90deg, #00baff 0%, #09d 100%)
       ) !important;
     }
 
@@ -1027,7 +1032,7 @@
       background: var(--primary-color, #00baff) !important;
       box-shadow: var(
         --shadow-primary,
-        0 2px 8px rgba(0, 186, 255, 0.4)
+        0 2px 8px rgb(0 186 255 / 40%)
       ) !important;
     }
   }

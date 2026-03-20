@@ -36,7 +36,7 @@
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon
               :icon="['fas', 'upload']"
-              style="font-size: 18px; margin-right: 4px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ $t("audio.uploadAudio") }}
           </el-button>
@@ -553,29 +553,29 @@ const formatItemDate = (dateStr?: string) => {
 
 // List view styles - using CSS variables for theme compatibility
 .col-checkbox {
-  width: 40px;
-  flex-shrink: 0;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: 40px;
 }
 
 .col-name {
-  flex: 1;
   display: flex;
-  align-items: center;
+  flex: 1;
   gap: 16px;
+  align-items: center;
   min-width: 0;
 }
 
 .col-size,
 .col-date {
+  flex-shrink: 0;
   width: 100px;
-  text-align: right;
+  padding-right: 24px;
   font-size: var(--font-size-sm, 13px);
   color: var(--text-secondary, #64748b);
-  flex-shrink: 0;
-  padding-right: 24px;
+  text-align: right;
 }
 
 .col-date {
@@ -583,22 +583,22 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .col-actions {
+  flex-shrink: 0;
   width: 48px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 .item-thumb {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: 52px;
   height: 52px;
-  border-radius: var(--radius-sm, 12px);
   overflow: hidden;
   background: var(--bg-hover, #f8fafc);
   border: 1px solid var(--border-color, #e2e8f0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  border-radius: var(--radius-sm, 12px);
   transition: transform var(--transition-fast, 0.15s ease);
 
   img {
@@ -617,55 +617,55 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .item-name {
+  overflow: hidden;
   font-size: var(--font-size-md, 14px);
   font-weight: var(--font-weight-medium, 500);
   color: var(--text-primary, #1e293b);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .actions-icon {
+  padding: 6px;
   font-size: 22px;
   color: var(--text-secondary, #64748b);
   cursor: pointer;
-  padding: 6px;
   border-radius: var(--radius-sm, 12px);
-  transition: all var(--transition-fast, 0.15s ease);
   opacity: 0.6;
+  transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    background: var(--bg-active, #e2e8f0);
     color: var(--text-primary, #1e293b);
+    background: var(--bg-active, #e2e8f0);
     opacity: 1;
   }
 }
 
 // Audio preview in detail panel
 .audio-preview {
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 24px;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  width: 100%;
+  height: 100%;
   padding: 24px;
 }
 
 .audio-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 120px;
   height: 120px;
-  border-radius: 50%;
   background: linear-gradient(
     135deg,
     var(--primary-color, #03a9f4),
     var(--primary-dark, #0288d1)
   );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 32px rgba(3, 169, 244, 0.3);
+  border-radius: 50%;
+  box-shadow: 0 8px 32px rgb(3 169 244 / 30%);
 
   .svg-inline--fa {
     font-size: 56px;

@@ -136,55 +136,55 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .app-container {
   position: relative;
-  min-height: 100vh;
-  background-color: #ffffff;
-  width: 100%;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  background-color: #fff;
 
   &.dark-theme {
-    background-color: #121212;
     color: #fff;
+    background-color: #121212;
   }
 }
 
 .dark-theme {
-  background-color: #121212;
   color: #f0f0f0;
+  background-color: #121212;
 }
 
 .nav-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 60px;
-  height: 70px;
-  width: 100%;
-  box-sizing: border-box;
   position: fixed;
   top: 0;
-  left: 0;
   right: 0;
+  left: 0;
   z-index: 999;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 70px;
+  padding: 0 60px;
   margin: 0;
-  transition: all 0.3s ease;
   background-color: transparent;
   backdrop-filter: blur(0);
+  transition: all 0.3s ease;
 
   &.nav-scrolled {
     height: 64px;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgb(255 255 255 / 95%);
     backdrop-filter: blur(10px);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 20px rgb(0 0 0 / 10%);
   }
 
   &.dark-theme {
     &.nav-scrolled {
-      background-color: rgba(18, 18, 18, 0.9);
+      background-color: rgb(18 18 18 / 90%);
       backdrop-filter: blur(10px);
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 20px rgb(0 0 0 / 30%);
     }
   }
 
@@ -208,8 +208,8 @@ onUnmounted(() => {
 
   .nav-middle {
     display: flex;
-    align-items: center;
     gap: 30px;
+    align-items: center;
 
     .nav-menu-item {
       position: relative;
@@ -228,8 +228,8 @@ onUnmounted(() => {
       .menu-line {
         position: absolute;
         bottom: -6px;
-        height: 2px;
         width: 0;
+        height: 2px;
         background: linear-gradient(90deg, #00dbde, #afafaf);
         transition: all 0.3s ease;
       }
@@ -258,16 +258,16 @@ onUnmounted(() => {
       padding: 8px 20px;
       font-size: 15px;
       font-weight: 500;
-      border-radius: 10px;
       // background: linear-gradient(90deg, #00dbde, #fc00ff);
       background: linear-gradient(90deg, #00a8ab 0%, #bfbfbf 100%);
       border: none;
+      border-radius: 10px;
       transition: all 0.3s ease;
 
       &:hover {
-        transform: translateY(-1px);
         background: linear-gradient(90deg, #bfbfbf 0%, #00a8ab 100%);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 15px rgb(0 0 0 / 20%);
+        transform: translateY(-1px);
       }
 
       &.mobile-button {
@@ -308,14 +308,14 @@ onUnmounted(() => {
 
 .content-container {
   position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  background-color: #fff;
-  box-sizing: border-box;
   overflow: hidden;
+  background-color: #fff;
 
   &.dark-theme {
     background-color: #121212;
@@ -325,12 +325,9 @@ onUnmounted(() => {
 // 侧边栏遮罩层
 .sidebar-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  inset: 0;
   z-index: 998;
+  background-color: rgb(0 0 0 / 60%);
   backdrop-filter: blur(4px);
 }
 
@@ -339,17 +336,17 @@ onUnmounted(() => {
   position: fixed;
   top: 0;
   left: -300px;
+  z-index: 999;
   width: 300px;
   height: 100vh;
-  background-color: #fff;
-  z-index: 999;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 2px 0 30px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
+  background-color: #fff;
+  box-shadow: 2px 0 30px rgb(0 0 0 / 15%);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &.dark-theme {
     background-color: #1e1e1e;
-    box-shadow: 2px 0 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 2px 0 30px rgb(0 0 0 / 50%);
 
     .sidebar-header {
       border-bottom: 1px solid #333;
@@ -365,7 +362,7 @@ onUnmounted(() => {
         border-bottom: 1px solid #333;
 
         &:hover {
-          background-color: rgba(0, 219, 222, 0.1);
+          background-color: rgb(0 219 222 / 10%);
         }
       }
     }
@@ -377,41 +374,41 @@ onUnmounted(() => {
     // 侧边栏显示时的logo和名称动画
     .sidebar-header {
       .sidebar-logo {
-        transform: scale(1);
         opacity: 1;
+        transform: scale(1);
       }
 
       .sidebar-company-name {
-        transform: translateX(0);
         opacity: 1;
+        transform: translateX(0);
       }
     }
   }
 
   .sidebar-header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
     padding: 24px;
     border-bottom: 1px solid #f0f0f0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
 
     .sidebar-logo {
       width: 32px;
       height: 32px;
-      transform: scale(0.8);
       opacity: 0;
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       transition-delay: 0.1s;
+      transform: scale(0.8);
     }
 
     .sidebar-company-name {
       font-size: 16px;
       font-weight: bold;
       color: #333;
-      transform: translateX(-20px);
       opacity: 0;
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       transition-delay: 0.2s;
+      transform: translateX(-20px);
     }
   }
 
@@ -419,9 +416,9 @@ onUnmounted(() => {
     margin-top: 0;
 
     .theme-switch-mobile {
-      padding: 16px 24px;
       display: flex;
       justify-content: flex-start;
+      padding: 16px 24px;
       border-bottom: 1px solid #f0f0f0;
     }
 
@@ -430,28 +427,28 @@ onUnmounted(() => {
       font-size: 16px;
       color: #333;
       cursor: pointer;
-      transition: all 0.3s ease;
       border-bottom: 1px solid #f0f0f0;
+      transition: all 0.3s ease;
 
       &:hover {
-        background-color: rgba(0, 219, 222, 0.05);
         color: #00dbde;
+        background-color: rgb(0 219 222 / 5%);
       }
     }
   }
 }
 
 // 媒体查询适配
-@media screen and (max-width: 992px) {
+@media screen and (width <= 992px) {
   .nav-container {
     padding: 0 30px;
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
   .nav-container {
-    padding: 0 16px;
     height: 60px;
+    padding: 0 16px;
   }
 
   .content-container {

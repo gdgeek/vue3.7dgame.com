@@ -53,12 +53,12 @@ const logo = computed(
   }
 
   .logo-title {
+    max-width: 140px;
     margin-left: 10px;
+    overflow: hidden;
     font-size: 14px;
     font-weight: 400;
     color: white;
-    max-width: 140px;
-    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }

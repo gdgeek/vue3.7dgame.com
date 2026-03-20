@@ -279,17 +279,17 @@ const viewCards = computed(() => {
 }
 
 .image {
-  width: 100%;
   display: block;
+  width: 100%;
 }
 
-.clearfix:before,
-.clearfix:after {
+.clearfix::before,
+.clearfix::after {
   display: table;
   content: "";
 }
 
-.clearfix:after {
+.clearfix::after {
   clear: both;
 }
 </style>

@@ -8,18 +8,18 @@
 
 // 下拉菜单容器
 .el-dropdown-menu {
+  padding: 6px !important;
+  overflow: hidden !important;
   background: var(--bg-card) !important;
   border: var(--border-width) solid var(--border-color) !important;
   border-radius: var(--radius-md) !important;
   box-shadow: var(--shadow-lg) !important;
-  padding: 6px !important;
-  overflow: hidden !important;
 
   .el-dropdown-menu__item {
+    padding: 10px 14px !important;
+    margin: 2px 0 !important;
     color: var(--text-primary) !important;
     border-radius: calc(var(--radius-md) - 6px) !important;
-    margin: 2px 0 !important;
-    padding: 10px 14px !important;
     transition: all var(--transition-fast) !important;
 
     &:first-child {
@@ -31,14 +31,14 @@
     }
 
     &:hover {
-      background: var(--bg-hover) !important;
       color: var(--primary-color) !important;
+      background: var(--bg-hover) !important;
     }
 
     &.is-active,
     &.selected {
-      background: var(--primary-light) !important;
       color: var(--primary-color) !important;
+      background: var(--primary-light) !important;
     }
 
     &.is-disabled {
@@ -49,8 +49,8 @@
 
 // 下拉菜单 popper 容器
 .el-popper.el-dropdown__popper {
-  border-radius: var(--radius-md) !important;
   overflow: hidden !important;
+  border-radius: var(--radius-md) !important;
 
   // 箭头样式
   .el-popper__arrow::before {
@@ -61,17 +61,17 @@
 
 // Select 下拉菜单
 .el-select-dropdown {
+  padding: 6px !important;
+  overflow: hidden !important;
   background: var(--bg-card) !important;
   border: var(--border-width) solid var(--border-color) !important;
   border-radius: var(--radius-md) !important;
-  padding: 6px !important;
-  overflow: hidden !important;
 
   .el-select-dropdown__item {
+    padding: 10px 14px !important;
+    margin: 2px 0 !important;
     color: var(--text-primary) !important;
     border-radius: calc(var(--radius-md) - 6px) !important;
-    margin: 2px 0 !important;
-    padding: 10px 14px !important;
     transition: all var(--transition-fast) !important;
 
     &:first-child {
@@ -96,8 +96,8 @@
 
 // Select popper 容器
 .el-popper.el-select__popper {
-  border-radius: var(--radius-md) !important;
   overflow: hidden !important;
+  border-radius: var(--radius-md) !important;
 }
 
 // Popover 弹出框
@@ -150,8 +150,8 @@
   }
 
   .el-message-box__btns {
-    justify-content: center;
     gap: 25px;
+    justify-content: center;
   }
 
   .el-message-box__btns .el-button + .el-button {
@@ -161,14 +161,14 @@
 
 // 全局消息提示：统一为浅色提示条风格，并按类型区分颜色
 .el-message {
+  left: 50% !important;
   min-width: auto !important;
   max-width: min(420px, calc(100vw - 32px)) !important;
   padding: 10px 16px !important;
-  border-radius: 14px !important;
-  border-width: 1px !important;
   border-style: solid !important;
-  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08) !important;
-  left: 50% !important;
+  border-width: 1px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 24px rgb(31 41 55 / 8%) !important;
   transform: translateX(-50%) !important;
   animation: el-message-slide-down 0.3s ease-out !important;
 
@@ -179,13 +179,13 @@
   }
 
   .el-message__icon {
-    font-size: 16px !important;
     margin-right: 8px !important;
+    font-size: 16px !important;
   }
 
   .el-message__closeBtn {
-    font-size: 14px !important;
     margin-left: 12px !important;
+    font-size: 14px !important;
   }
 }
 
@@ -246,13 +246,13 @@
   .el-dropdown-menu,
   .el-select-dropdown,
   .el-popover {
-    background: rgba(11, 14, 20, 0.95) !important;
+    background: rgb(11 14 20 / 95%) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgb(0 242 255 / 20%) !important;
     box-shadow:
-      0 0 30px rgba(0, 0, 0, 0.5),
-      0 0 20px rgba(0, 242, 255, 0.1) !important;
+      0 0 30px rgb(0 0 0 / 50%),
+      0 0 20px rgb(0 242 255 / 10%) !important;
   }
 
   .el-dropdown-menu__item,
@@ -260,15 +260,15 @@
     color: #e8f4f8 !important;
 
     &:hover {
-      background: rgba(0, 242, 255, 0.1) !important;
       color: #00f2ff !important;
+      background: rgb(0 242 255 / 10%) !important;
     }
 
     &.is-active,
     &.selected,
     &.is-selected {
-      background: rgba(0, 242, 255, 0.15) !important;
       color: #00f2ff !important;
+      background: rgb(0 242 255 / 15%) !important;
     }
   }
 }
@@ -277,11 +277,11 @@
   .el-dropdown-menu,
   .el-select-dropdown,
   .el-popover {
-    background: #ffffff !important;
-    border: 3px solid #000000 !important;
-    border-radius: 8px !important;
-    box-shadow: 5px 5px 0px #000000 !important;
     padding: 4px !important;
+    background: #fff !important;
+    border: 3px solid #000 !important;
+    border-radius: 8px !important;
+    box-shadow: 5px 5px 0 #000 !important;
   }
 
   .el-dropdown-menu__item,
@@ -290,15 +290,15 @@
     border-radius: 4px !important;
 
     &:hover {
+      color: #000 !important;
       background: #fff000 !important;
-      color: #000000 !important;
     }
 
     &.is-active,
     &.selected,
     &.is-selected {
+      color: #fff !important;
       background: #ff007a !important;
-      color: #ffffff !important;
     }
   }
 }
@@ -307,10 +307,10 @@
   .el-dropdown-menu,
   .el-select-dropdown,
   .el-popover {
+    padding: 4px !important;
+    border: 1px solid #e0e0e0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    border: 1px solid #e0e0e0 !important;
-    padding: 4px !important;
   }
 
   .el-dropdown-menu__item,
@@ -324,8 +324,8 @@
     &.is-active,
     &.selected,
     &.is-selected {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
     }
   }
 }
@@ -343,15 +343,15 @@
     color: #b0b3b8 !important;
 
     &:hover {
+      color: #fff !important;
       background: #1c2128 !important;
-      color: #ffffff !important;
     }
 
     &.is-active,
     &.selected,
     &.is-selected {
       color: #2d68ff !important;
-      background: rgba(45, 104, 255, 0.1) !important;
+      background: rgb(45 104 255 / 10%) !important;
     }
   }
 }
@@ -360,8 +360,8 @@
   .el-dropdown-menu,
   .el-select-dropdown,
   .el-popover {
-    border-radius: 16px !important;
     padding: 8px !important;
+    border-radius: 16px !important;
   }
 
   .el-dropdown-menu__item,
@@ -369,15 +369,15 @@
     border-radius: 10px !important;
 
     &:hover {
-      background: rgba(255, 107, 53, 0.1) !important;
       color: #ff6b35 !important;
+      background: rgb(255 107 53 / 10%) !important;
     }
 
     &.is-active,
     &.selected,
     &.is-selected {
-      background: rgba(255, 107, 53, 0.15) !important;
       color: #ff6b35 !important;
+      background: rgb(255 107 53 / 15%) !important;
     }
   }
 }

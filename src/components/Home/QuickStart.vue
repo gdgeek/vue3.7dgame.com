@@ -93,8 +93,8 @@ const handleQuickAction = (path: string) => {
 
 .section-header {
   display: flex;
-  align-items: center;
   gap: var(--spacing-xs);
+  align-items: center;
   margin-bottom: var(--spacing-lg);
   color: var(--text-primary);
 }
@@ -105,9 +105,9 @@ const handleQuickAction = (path: string) => {
 }
 
 .section-title {
+  margin: 0;
   font-size: 20px;
   font-weight: 600;
-  margin: 0;
 }
 
 .quick-card {
@@ -115,21 +115,21 @@ const handleQuickAction = (path: string) => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  height: 100%;
+  min-height: 160px; // Further reduced height
   padding: 24px; // Reduced padding
+  overflow: hidden;
+  cursor: pointer;
   background: var(--bg-card);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  height: 100%;
-  min-height: 160px; // Further reduced height
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  transition: all var(--transition-normal);
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
     border-color: var(--primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-5px);
 
     .card-icon {
       transform: scale(1.1);
@@ -148,8 +148,8 @@ const handleQuickAction = (path: string) => {
   justify-content: center;
   width: 48px;
   height: 48px;
-  border-radius: var(--radius-md); // Changed to rounded square
   margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-md); // Changed to rounded square
 }
 
 .card-icon {
@@ -165,39 +165,39 @@ const handleQuickAction = (path: string) => {
 }
 
 .card-title {
+  margin: 0;
   font-size: 18px; // Increased title size
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0;
 }
 
 .card-desc {
-  font-size: 13px; // Reduced font size
-  color: var(--text-secondary);
   margin: 0;
+  font-size: 13px; // Reduced font size
   line-height: 1.5;
+  color: var(--text-secondary);
 }
 
 .card-action {
-  margin-top: auto;
   display: flex;
-  align-items: center;
   gap: 4px;
+  align-items: center;
+  margin-top: auto;
   font-size: var(--font-size-md);
   font-weight: 600;
   opacity: 0;
-  transform: translateX(-10px);
   transition: all var(--transition-normal);
+  transform: translateX(-10px);
 }
 
 .action-arrow {
   font-size: 20px;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .quick-card {
-    margin-bottom: var(--spacing-md);
     min-height: auto;
+    margin-bottom: var(--spacing-md);
 
     .card-action {
       opacity: 1;

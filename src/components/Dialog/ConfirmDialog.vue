@@ -119,9 +119,9 @@ const handleCancel = () => {
 // 使用全局变量简化样式
 .custom-confirm-dialog {
   .el-dialog {
-    border-radius: 20px;
     overflow: hidden;
-    background: var(--bg-card, #ffffff); // Ensure dialog bg uses variable
+    background: var(--bg-card, #fff); // Ensure dialog bg uses variable
+    border-radius: 20px;
   }
 
   .el-dialog__header {
@@ -178,13 +178,13 @@ const handleCancel = () => {
 
 .confirm-box {
   display: flex;
-  align-items: flex-start;
   gap: 16px;
+  align-items: flex-start;
   padding: 20px;
   border-radius: 12px;
 
   &.warning {
-    background: var(--warning-light, rgba(245, 158, 11, 0.08));
+    background: var(--warning-light, rgb(245 158 11 / 8%));
 
     .confirm-icon {
       color: var(--warning-color, #f59e0b);
@@ -192,7 +192,7 @@ const handleCancel = () => {
   }
 
   &.danger {
-    background: var(--danger-light, rgba(239, 68, 68, 0.08));
+    background: var(--danger-light, rgb(239 68 68 / 8%));
 
     .confirm-icon {
       color: var(--danger-color, #ef4444);
@@ -200,7 +200,7 @@ const handleCancel = () => {
   }
 
   &.info {
-    background: var(--primary-light, rgba(0, 186, 255, 0.08));
+    background: var(--primary-light, rgb(0 186 255 / 8%));
 
     .confirm-icon {
       color: var(--primary-color, #00baff);
@@ -208,7 +208,7 @@ const handleCancel = () => {
   }
 
   &.success {
-    background: var(--success-light, rgba(34, 197, 94, 0.08));
+    background: var(--success-light, rgb(34 197 94 / 8%));
 
     .confirm-icon {
       color: var(--success-color, #22c55e);
@@ -217,8 +217,8 @@ const handleCancel = () => {
 }
 
 .confirm-icon {
-  font-size: 28px;
   flex-shrink: 0;
+  font-size: 28px;
 }
 
 .confirm-text {
@@ -231,10 +231,10 @@ const handleCancel = () => {
 }
 
 .confirm-title {
+  margin: 0 0 6px;
   font-size: 15px;
   font-weight: 500;
   color: var(--text-primary, #1e293b);
-  margin: 0 0 6px;
 }
 
 .compact-content .confirm-title {
@@ -244,21 +244,21 @@ const handleCancel = () => {
 }
 
 .confirm-desc {
-  font-size: 13px;
-  color: var(--text-secondary, #64748b);
   margin: 0;
+  font-size: 13px;
   line-height: 1.5;
+  color: var(--text-secondary, #64748b);
 }
 
 .dialog-actions {
   display: flex;
-  justify-content: center;
   gap: 12px;
+  justify-content: center;
 }
 
 .confirm-box.is-centered {
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   padding: 14px 16px;
 }
 
@@ -273,48 +273,48 @@ const handleCancel = () => {
 .btn-primary {
   height: 44px;
   padding: 0 32px;
-  border: none;
-  border-radius: 22px;
-  background: var(--primary-color, #00baff);
-  color: var(--text-inverse, white);
   font-size: 15px;
   font-weight: 500;
+  color: var(--text-inverse, white);
   cursor: pointer;
+  background: var(--primary-color, #00baff);
+  border: none;
+  border-radius: 22px;
   transition: all 0.2s ease;
 
   &:hover {
-    background: var(--primary-hover, #0099dd);
+    background: var(--primary-hover, #09d);
   }
 }
 
 .btn-secondary {
   height: 44px;
   padding: 0 32px;
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 22px;
-  background: var(--bg-card, #ffffff);
-  color: var(--text-secondary, #64748b);
   font-size: 15px;
   font-weight: 500;
+  color: var(--text-secondary, #64748b);
   cursor: pointer;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 22px;
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: var(--text-muted, #94a3b8);
     color: var(--text-primary, #1e293b);
+    border-color: var(--text-muted, #94a3b8);
   }
 }
 
 .btn-danger {
   height: 44px;
   padding: 0 32px;
-  border: none;
-  border-radius: 22px;
-  background: var(--danger-color, #ef4444);
-  color: var(--text-inverse, white);
   font-size: 15px;
   font-weight: 500;
+  color: var(--text-inverse, white);
   cursor: pointer;
+  background: var(--danger-color, #ef4444);
+  border: none;
+  border-radius: 22px;
   transition: all 0.2s ease;
 
   &:hover {

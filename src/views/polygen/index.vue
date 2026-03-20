@@ -36,7 +36,7 @@
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon
               :icon="['fas', 'upload']"
-              style="font-size: 18px; margin-right: 4px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ $t("polygen.uploadPolygen") }}
           </el-button>
@@ -631,29 +631,29 @@ const formatItemDate = (dateStr?: string) => {
 
 // List view styles - using CSS variables for theme compatibility
 .col-checkbox {
-  width: 40px;
-  flex-shrink: 0;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: 40px;
 }
 
 .col-name {
-  flex: 1;
   display: flex;
-  align-items: center;
+  flex: 1;
   gap: 16px;
+  align-items: center;
   min-width: 0;
 }
 
 .col-size,
 .col-date {
+  flex-shrink: 0;
   width: 100px;
-  text-align: right;
+  padding-right: 24px;
   font-size: var(--font-size-sm, 13px);
   color: var(--text-secondary, #64748b);
-  flex-shrink: 0;
-  padding-right: 24px;
+  text-align: right;
 }
 
 .col-date {
@@ -661,22 +661,22 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .col-actions {
+  flex-shrink: 0;
   width: 48px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 .item-thumb {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: 52px;
   height: 52px;
-  border-radius: var(--radius-sm, 12px);
   overflow: hidden;
   background: var(--bg-hover, #f8fafc);
   border: 1px solid var(--border-color, #e2e8f0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  border-radius: var(--radius-sm, 12px);
   transition: transform var(--transition-fast, 0.15s ease);
 
   img {
@@ -695,26 +695,26 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .item-name {
+  overflow: hidden;
   font-size: var(--font-size-md, 14px);
   font-weight: var(--font-weight-medium, 500);
   color: var(--text-primary, #1e293b);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .actions-icon {
+  padding: 6px;
   font-size: 22px;
   color: var(--text-secondary, #64748b);
   cursor: pointer;
-  padding: 6px;
   border-radius: var(--radius-sm, 12px);
-  transition: all var(--transition-fast, 0.15s ease);
   opacity: 0.6;
+  transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    background: var(--bg-active, #e2e8f0);
     color: var(--text-primary, #1e293b);
+    background: var(--bg-active, #e2e8f0);
     opacity: 1;
   }
 }
@@ -730,15 +730,15 @@ const formatItemDate = (dateStr?: string) => {
 // These styles target teleported DOM (via DetailPanel's Teleport to="body")
 // and MUST be unscoped to take effect.
 .polygen-preview {
-  width: 100%;
-  height: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
   background: var(--bg-secondary, #f1f5f9);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-lg, 16px);
-  overflow: visible;
 
   &.has-animations {
     .box-card #three {
@@ -747,18 +747,18 @@ const formatItemDate = (dateStr?: string) => {
   }
 
   .box-card {
-    flex: 1;
-    min-height: 0;
     display: flex;
+    flex: 1;
     flex-direction: column;
-    border: none !important;
-    box-shadow: none !important;
+    min-height: 0;
     background: transparent !important;
     background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 
     .el-card__body {
-      flex: 1;
       display: flex;
+      flex: 1;
       flex-direction: column;
       padding: 0;
       background: transparent !important;
@@ -766,10 +766,10 @@ const formatItemDate = (dateStr?: string) => {
 
     #three {
       flex: 1;
-      min-height: 0;
       height: 100%;
-      border-radius: var(--radius-lg, 16px);
+      min-height: 0;
       background: transparent !important;
+      border-radius: var(--radius-lg, 16px);
     }
 
     .animation-bar {
@@ -780,11 +780,11 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .panel-preview > .preview-placeholder {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
   color: var(--text-muted, #94a3b8);
   background: var(--bg-secondary, #f1f5f9);
   border: 1px solid var(--border-color, #e2e8f0);
@@ -799,20 +799,20 @@ const formatItemDate = (dateStr?: string) => {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 3;
-  width: 28px;
-  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
   font-size: 11px;
   color: #fff;
-  background: rgba(30, 41, 59, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(6px);
   pointer-events: none;
+  background: rgb(30 41 59 / 45%);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
   animation:
     preview-hint-float 1.8s ease-in-out infinite,
     preview-hint-pulse 1.8s ease-in-out infinite;
@@ -823,6 +823,7 @@ const formatItemDate = (dateStr?: string) => {
   100% {
     transform: translate(-50%, -50%);
   }
+
   50% {
     transform: translate(-50%, calc(-50% - 5px));
   }
@@ -831,10 +832,11 @@ const formatItemDate = (dateStr?: string) => {
 @keyframes preview-hint-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 35%);
   }
+
   70% {
-    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 12px rgb(255 255 255 / 0%);
   }
 }
 </style>

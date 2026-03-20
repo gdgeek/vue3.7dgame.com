@@ -19,7 +19,7 @@
           </template>
 
           <template #footer>
-            <div style="display: flex; align-items: center; gap: 12px">
+            <div style="display: flex; gap: 12px; align-items: center">
               <tags
                 v-if="verse && verse.verseTags"
                 :editable="verse.editable"

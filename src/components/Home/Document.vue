@@ -141,16 +141,16 @@ const sanitizedContent = computed(() => {
 }
 
 .document-card {
+  overflow: hidden;
   background: var(--bg-card);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
 
   :deep(.el-card__header) {
     padding: var(--spacing-lg);
-    border-bottom: var(--border-width) solid var(--border-color);
     background: var(--bg-hover);
+    border-bottom: var(--border-width) solid var(--border-color);
   }
 
   :deep(.el-card__body) {
@@ -162,8 +162,8 @@ const sanitizedContent = computed(() => {
   margin: 0 0 var(--spacing-sm) 0;
   font-size: var(--font-size-xl);
   font-weight: 700;
-  color: var(--text-primary);
   line-height: 1.4;
+  color: var(--text-primary);
 }
 
 .document-tags {
@@ -179,16 +179,16 @@ const sanitizedContent = computed(() => {
 .document-tag {
   display: inline-block;
   padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-full);
-  background: var(--primary-light);
-  color: var(--primary-color);
   font-size: var(--font-size-xs);
   font-weight: 500;
+  color: var(--primary-color);
+  background: var(--primary-light);
+  border-radius: var(--radius-full);
   transition: all var(--transition-fast);
 
   &:hover {
-    background: var(--primary-color);
     color: var(--text-inverse);
+    background: var(--primary-color);
   }
 }
 
@@ -197,17 +197,17 @@ const sanitizedContent = computed(() => {
 }
 
 .document-body {
-  color: var(--text-primary);
   font-size: var(--font-size-md);
   line-height: 1.8;
+  color: var(--text-primary);
 
   :deep(h1),
   :deep(h2),
   :deep(h3),
   :deep(h4) {
-    color: var(--text-primary);
-    font-weight: 600;
     margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+    font-weight: 600;
+    color: var(--text-primary);
   }
 
   :deep(p) {
@@ -227,15 +227,15 @@ const sanitizedContent = computed(() => {
   :deep(img) {
     max-width: 100%;
     height: auto;
-    border-radius: var(--radius-sm);
     margin: var(--spacing-md) 0;
+    border-radius: var(--radius-sm);
   }
 
   :deep(blockquote) {
-    border-left: 3px solid var(--primary-color);
     padding-left: var(--spacing-md);
     margin: var(--spacing-md) 0;
     color: var(--text-secondary);
+    border-left: 3px solid var(--primary-color);
   }
 }
 
@@ -245,7 +245,7 @@ const sanitizedContent = computed(() => {
 }
 
 .document-date {
-  color: var(--text-muted);
   font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
 </style>

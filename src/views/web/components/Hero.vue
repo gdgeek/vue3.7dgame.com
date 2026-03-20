@@ -253,11 +253,11 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .hero-section {
   position: relative;
-  height: 100vh;
   width: 100%;
+  height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
   color: #fff;
+  background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
 
   &.dark-theme {
     background: linear-gradient(135deg, #16222a 0%, #3a6073 100%);
@@ -276,10 +276,10 @@ onUnmounted(() => {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 1;
+    background: rgb(0 0 0 / 30%);
   }
 }
 
@@ -292,17 +292,17 @@ onUnmounted(() => {
 
 .particle {
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-  pointer-events: none;
-  animation: float linear infinite;
   z-index: 0;
+  pointer-events: none;
+  background-color: rgb(255 255 255 / 60%);
+  border-radius: 50%;
+  animation: float linear infinite;
 }
 
 @keyframes float {
   0% {
-    transform: translateY(0) translateX(0) rotate(0deg);
     opacity: 0;
+    transform: translateY(0) translateX(0) rotate(0deg);
   }
 
   10% {
@@ -314,8 +314,8 @@ onUnmounted(() => {
   }
 
   100% {
-    transform: translateY(-100vh) translateX(100px) rotate(360deg);
     opacity: 0;
+    transform: translateY(-100vh) translateX(100px) rotate(360deg);
   }
 }
 
@@ -325,10 +325,10 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100%;
   max-width: 1400px;
-  margin: 0 auto;
+  height: 100%;
   padding: 0 60px;
+  margin: 0 auto;
 }
 
 .hero-text {
@@ -336,23 +336,23 @@ onUnmounted(() => {
   max-width: 600px;
 
   .hero-title {
+    margin-bottom: 1.5rem;
     font-size: 3.5rem;
     font-weight: 800;
-    margin-bottom: 1.5rem;
     line-height: 1.2;
   }
 
   .gradient-text {
-    background: linear-gradient(90deg, #ffffff 0%, #8e8e8e 100%);
-    -webkit-background-clip: text;
+    background: linear-gradient(90deg, #fff 0%, #8e8e8e 100%);
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .hero-subtitle {
+    margin-bottom: 3rem;
     font-size: 1.5rem;
     font-weight: 400;
-    margin-bottom: 3rem;
     opacity: 0.9;
   }
 
@@ -362,45 +362,45 @@ onUnmounted(() => {
 }
 
 .hero-image {
-  flex: 1;
   position: relative;
+  z-index: 2;
   display: flex;
-  justify-content: center;
+  flex: 1;
   align-items: center;
+  justify-content: center;
   width: 100%;
   max-width: 660px;
   perspective: 1000px;
-  z-index: 2;
 
   .showcase-container {
     position: relative;
     width: 100%;
-    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
     transform: rotateY(calc(var(--mouse-x, 0) * 5deg))
       rotateX(calc(var(--mouse-y, 0) * -5deg));
-    transition: transform 0.1s ease-out;
+    transform-style: preserve-3d;
 
     &:hover {
       .play-button-container {
-        opacity: 1;
         visibility: visible;
+        opacity: 1;
       }
     }
   }
 
   .primary-image {
+    z-index: 1;
     width: 100%;
     height: auto;
-    border-radius: 24px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     object-fit: contain;
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
-    z-index: 1;
+    filter: drop-shadow(0 10px 20px rgb(0 0 0 / 10%));
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgb(0 0 0 / 25%);
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 
     &:hover {
+      box-shadow: 0 30px 60px rgb(0 0 0 / 30%);
       transform: scale(1.02);
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
     }
   }
 
@@ -408,45 +408,45 @@ onUnmounted(() => {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 2;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 2;
   }
 
   .floating-element {
     position: absolute;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(15px);
-    box-shadow:
-      0 15px 35px rgba(0, 0, 0, 0.15),
-      0 3px 10px rgba(0, 0, 0, 0.1);
     padding: 12px;
-    transform-style: preserve-3d;
+    overflow: hidden;
+    background: rgb(255 255 255 / 95%);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    box-shadow:
+      0 15px 35px rgb(0 0 0 / 15%),
+      0 3px 10px rgb(0 0 0 / 10%);
     transition:
       transform 0.3s ease,
       box-shadow 0.3s ease;
-    overflow: hidden;
+    transform-style: preserve-3d;
 
     &:hover {
+      box-shadow: 0 20px 40px rgb(0 0 0 / 20%);
       transform: translateY(-5px) translateZ(20px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
     &::before {
-      content: "";
       position: absolute;
       top: 0;
       left: 0;
+      z-index: -1;
       width: 100%;
       height: 100%;
+      content: "";
       background: linear-gradient(
         135deg,
-        rgba(255, 255, 255, 0.4) 0%,
-        rgba(255, 255, 255, 0) 50%
+        rgb(255 255 255 / 40%) 0%,
+        rgb(255 255 255 / 0%) 50%
       );
-      z-index: -1;
     }
   }
 
@@ -454,21 +454,21 @@ onUnmounted(() => {
   .partner-card {
     top: -35px;
     right: -50px;
+    z-index: 5;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
     pointer-events: auto;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    animation: float-card 8s ease-in-out infinite;
     transform: rotate(-5deg);
-    z-index: 5;
+    animation: float-card 8s ease-in-out infinite;
 
     .partner-logo {
       width: 80px;
       height: auto;
-      border-radius: 8px;
       object-fit: contain;
+      border-radius: 8px;
     }
 
     .partner-info {
@@ -478,39 +478,39 @@ onUnmounted(() => {
     }
 
     .partner-name {
-      font-weight: 700;
       font-size: 16px;
+      font-weight: 700;
       color: #333;
     }
 
     .partner-badge {
-      background: linear-gradient(90deg, #00dbde 0%, #1a2980 100%);
-      color: white;
+      display: inline-block;
+      padding: 3px 8px;
       font-size: 11px;
       font-weight: 600;
-      padding: 3px 8px;
+      color: white;
+      background: linear-gradient(90deg, #00dbde 0%, #1a2980 100%);
       border-radius: 8px;
-      display: inline-block;
     }
   }
 
   /* 设备展示卡片 */
   .device-card {
-    bottom: -35px;
     right: -50px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    animation: float-card 8s ease-in-out infinite;
-    transform: rotate(-5deg);
+    bottom: -35px;
     z-index: 4;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
+    transform: rotate(-5deg);
+    animation: float-card 8s ease-in-out infinite;
 
     .device-image {
       width: 80px;
       height: auto;
-      border-radius: 8px;
       object-fit: contain;
+      border-radius: 8px;
     }
 
     .device-info {
@@ -520,19 +520,19 @@ onUnmounted(() => {
     }
 
     .device-name {
-      font-weight: 700;
       font-size: 16px;
+      font-weight: 700;
       color: #333;
     }
 
     .device-badge {
-      background: linear-gradient(90deg, #00dbde 0%, #1a2980 100%);
-      color: white;
+      display: inline-block;
+      padding: 3px 8px;
       font-size: 11px;
       font-weight: 600;
-      padding: 3px 8px;
+      color: white;
+      background: linear-gradient(90deg, #00dbde 0%, #1a2980 100%);
       border-radius: 8px;
-      display: inline-block;
     }
   }
 
@@ -540,13 +540,13 @@ onUnmounted(() => {
   .feature-card {
     top: 40%;
     left: -70px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px;
-    animation: float-card 7s ease-in-out infinite 0.5s;
-    transform: rotate(-3deg);
     z-index: 3;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 14px;
+    transform: rotate(-3deg);
+    animation: float-card 7s ease-in-out infinite 0.5s;
 
     .feature-icon {
       display: flex;
@@ -554,8 +554,8 @@ onUnmounted(() => {
       justify-content: center;
       width: 40px;
       height: 40px;
-      border-radius: 12px;
       overflow: hidden;
+      border-radius: 12px;
 
       .feature-img {
         width: 100%;
@@ -570,8 +570,8 @@ onUnmounted(() => {
     }
 
     .feature-title {
-      font-weight: 700;
       font-size: 16px;
+      font-weight: 700;
       color: #333;
     }
 
@@ -586,22 +586,22 @@ onUnmounted(() => {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    z-index: 10;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 12px;
-    z-index: 10;
+    align-items: center;
     cursor: pointer;
-    transition: all 0.3s ease;
-    opacity: 0;
     visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+    transform: translate(-50%, -50%);
 
     &:hover {
       transform: translate(-50%, -50%) scale(1.1);
 
       .play-icon {
-        color: rgba(255, 255, 255, 1);
+        color: rgb(255 255 255 / 100%);
       }
     }
   }
@@ -613,13 +613,13 @@ onUnmounted(() => {
     justify-content: center;
 
     &::after {
-      content: "";
       position: absolute;
+      z-index: -1;
       width: 100%;
       height: 100%;
+      content: "";
+      background: rgb(255 255 255 / 30%);
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      z-index: -1;
       transition:
         transform 0.5s ease,
         opacity 0.5s ease;
@@ -628,21 +628,21 @@ onUnmounted(() => {
 
     .play-icon {
       font-size: 48px;
-      color: rgba(255, 255, 255, 0.9);
+      color: rgb(255 255 255 / 90%);
+      filter: drop-shadow(0 2px 5px rgb(0 0 0 / 30%));
       transition: color 0.3s ease;
-      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
     }
   }
 
   .play-label {
+    padding: 6px 16px;
     font-size: 14px;
     font-weight: 600;
     color: white;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 6px 16px;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+    background: rgb(0 0 0 / 60%);
     border-radius: 20px;
     transition: all 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 
   /* 装饰元素 */
@@ -650,10 +650,10 @@ onUnmounted(() => {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 0;
   }
 
   .deco-circle {
@@ -663,41 +663,41 @@ onUnmounted(() => {
   }
 
   .circle-1 {
-    width: 300px;
-    height: 300px;
     top: -100px;
     right: -100px;
+    width: 300px;
+    height: 300px;
     background: radial-gradient(
       circle,
-      rgba(255, 255, 255, 0.8) 0%,
-      rgba(255, 255, 255, 0) 70%
+      rgb(255 255 255 / 80%) 0%,
+      rgb(255 255 255 / 0%) 70%
     );
     animation: pulse-slow 10s infinite;
   }
 
   .circle-2 {
-    width: 200px;
-    height: 200px;
     bottom: -50px;
     left: -70px;
+    width: 200px;
+    height: 200px;
     background: radial-gradient(
       circle,
-      rgba(255, 255, 255, 0.8) 0%,
-      rgba(255, 255, 255, 0) 70%
+      rgb(255 255 255 / 80%) 0%,
+      rgb(255 255 255 / 0%) 70%
     );
     animation: pulse-slow 8s infinite 1s;
   }
 
   .deco-line {
     position: absolute;
+    width: 100%;
+    height: 1px;
     background: linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.3) 50%,
-      rgba(255, 255, 255, 0) 100%
+      rgb(255 255 255 / 0%) 0%,
+      rgb(255 255 255 / 30%) 50%,
+      rgb(255 255 255 / 0%) 100%
     );
-    height: 1px;
-    width: 100%;
     opacity: 0.5;
   }
 
@@ -727,31 +727,31 @@ onUnmounted(() => {
 
 @keyframes pulse-ring {
   0% {
-    transform: scale(0.8);
     opacity: 0.8;
+    transform: scale(0.8);
   }
 
   70% {
-    transform: scale(1.5);
     opacity: 0;
+    transform: scale(1.5);
   }
 
   100% {
-    transform: scale(0.8);
     opacity: 0;
+    transform: scale(0.8);
   }
 }
 
 @keyframes pulse-slow {
   0%,
   100% {
-    transform: scale(1);
     opacity: 0.1;
+    transform: scale(1);
   }
 
   50% {
-    transform: scale(1.2);
     opacity: 0.2;
+    transform: scale(1.2);
   }
 }
 
@@ -769,68 +769,68 @@ onUnmounted(() => {
   position: absolute;
   bottom: 40px;
   left: 50%;
-  transform: translateX(-50%);
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  z-index: 10;
+  transform: translateX(-50%);
 
   .scroll-text {
-    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 10px;
     font-size: 14px;
     font-weight: 500;
-    margin-bottom: 10px;
+    color: rgb(255 255 255 / 90%);
+    text-shadow: 0 2px 4px rgb(0 0 0 / 30%);
     letter-spacing: 1px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   .scroll-icon {
-    width: 36px;
-    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
+    width: 36px;
+    height: 36px;
+    background: rgb(255 255 255 / 20%);
     backdrop-filter: blur(5px);
+    border: 1px solid rgb(255 255 255 / 30%);
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    animation: pulse 2s infinite;
+    box-shadow: 0 4px 8px rgb(0 0 0 / 15%);
     transition: all 0.3s ease;
+    animation: pulse 2s infinite;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: rgb(255 255 255 / 30%);
       transform: translateY(-3px);
     }
 
     .scroll-arrow {
       font-size: 18px;
-      color: rgba(255, 255, 255, 0.9);
+      color: rgb(255 255 255 / 90%);
     }
   }
 }
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 40%);
   }
 
   70% {
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 10px rgb(255 255 255 / 0%);
   }
 
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 0%);
   }
 }
 
 // 移动端适配
-@media screen and (max-width: 1024px) {
+@media screen and (width <= 1024px) {
   .hero-content {
     flex-direction: column;
-    padding: 120px 30px 60px;
     justify-content: center;
+    padding: 120px 30px 60px;
     text-align: center;
   }
 
@@ -865,8 +865,8 @@ onUnmounted(() => {
     }
 
     .device-card {
-      bottom: -25px;
       right: -20px;
+      bottom: -25px;
 
       .device-image {
         width: 60px;
@@ -883,7 +883,7 @@ onUnmounted(() => {
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
   .hero-content {
     padding: 100px 15px 40px;
   }
@@ -894,8 +894,8 @@ onUnmounted(() => {
     }
 
     .hero-subtitle {
-      font-size: 1rem;
       margin-bottom: 2rem;
+      font-size: 1rem;
     }
 
     .hero-cta {
@@ -916,8 +916,8 @@ onUnmounted(() => {
     .partner-card {
       top: -15px;
       right: -10px;
-      transform: scale(0.8) rotate(-5deg);
       padding: 8px 12px;
+      transform: scale(0.8) rotate(-5deg);
 
       .partner-logo {
         width: 50px;
@@ -933,10 +933,10 @@ onUnmounted(() => {
     }
 
     .device-card {
-      bottom: -15px;
       right: -10px;
-      transform: scale(0.8) rotate(5deg);
+      bottom: -15px;
       padding: 8px 12px;
+      transform: scale(0.8) rotate(5deg);
 
       .device-image {
         width: 50px;
@@ -953,8 +953,8 @@ onUnmounted(() => {
 
     .feature-card {
       left: -15px;
-      transform: scale(0.8) rotate(-3deg);
       padding: 10px;
+      transform: scale(0.8) rotate(-3deg);
 
       .feature-icon {
         width: 30px;
@@ -982,8 +982,8 @@ onUnmounted(() => {
       }
 
       .play-label {
-        font-size: 12px;
         padding: 4px 12px;
+        font-size: 12px;
       }
     }
   }
@@ -992,8 +992,8 @@ onUnmounted(() => {
     bottom: 15px;
 
     .scroll-text {
-      font-size: 12px;
       margin-bottom: 5px;
+      font-size: 12px;
     }
 
     .scroll-icon {
@@ -1007,7 +1007,7 @@ onUnmounted(() => {
   }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (width <= 480px) {
   .hero-image {
     max-width: 280px;
 
@@ -1027,8 +1027,8 @@ onUnmounted(() => {
     }
 
     .device-card {
-      bottom: -10px;
       right: -5px;
+      bottom: -10px;
     }
 
     .play-button-container {

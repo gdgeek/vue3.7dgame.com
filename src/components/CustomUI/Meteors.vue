@@ -80,8 +80,8 @@ onUnmounted(() => {
 
 @keyframes meteor {
   0% {
-    transform: rotate(215deg) translateX(0);
     opacity: 1;
+    transform: rotate(215deg) translateX(0);
   }
 
   70% {
@@ -89,8 +89,8 @@ onUnmounted(() => {
   }
 
   100% {
-    transform: rotate(215deg) translateX(-500px);
     opacity: 0;
+    transform: rotate(215deg) translateX(-500px);
   }
 }
 

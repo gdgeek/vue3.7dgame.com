@@ -9,21 +9,18 @@
 .theme-cyber-tech {
   // 细微扫描线效果
   &::after {
-    content: "";
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    content: "";
     background: repeating-linear-gradient(
       0deg,
       transparent,
       transparent 3px,
-      rgba(0, 242, 255, 0.015) 3px,
-      rgba(0, 242, 255, 0.015) 6px
+      rgb(0 242 255 / 1.5%) 3px,
+      rgb(0 242 255 / 1.5%) 6px
     );
-    pointer-events: none;
-    z-index: 9998;
   }
 
   // 玻璃质感卡片
@@ -35,19 +32,19 @@
   .video-card,
   .doc-item,
   .faq-item {
-    background: rgba(18, 24, 32, 0.75) !important;
+    background: rgb(18 24 32 / 75%) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(0, 242, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgb(0 242 255 / 15%) !important;
     box-shadow:
-      0 0 15px rgba(0, 242, 255, 0.08),
-      inset 0 0 0 1px rgba(0, 242, 255, 0.05) !important;
+      0 0 15px rgb(0 242 255 / 8%),
+      inset 0 0 0 1px rgb(0 242 255 / 5%) !important;
 
     &:hover {
-      border-color: rgba(0, 242, 255, 0.4) !important;
+      border-color: rgb(0 242 255 / 40%) !important;
       box-shadow:
-        0 0 30px rgba(0, 242, 255, 0.2),
-        inset 0 0 0 1px rgba(0, 242, 255, 0.15) !important;
+        0 0 30px rgb(0 242 255 / 20%),
+        inset 0 0 0 1px rgb(0 242 255 / 15%) !important;
     }
   }
 
@@ -60,15 +57,12 @@
     background: #0b0e14 !important;
 
     &::before {
-      content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='%2300F2FF' stroke-width='0.3' stroke-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0z'/%3E%3Cpath d='M20 0v40M0 20h40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      pointer-events: none;
+      inset: 0;
       z-index: 0;
+      pointer-events: none;
+      content: "";
+      background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='%2300F2FF' stroke-width='0.3' stroke-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0z'/%3E%3Cpath d='M20 0v40M0 20h40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
 
     > * {
@@ -79,56 +73,56 @@
 
   // 详情面板玻璃质感
   .detail-panel {
-    background: rgba(11, 14, 20, 0.95) !important;
+    background: rgb(11 14 20 / 95%) !important;
     backdrop-filter: blur(30px) !important;
-    -webkit-backdrop-filter: blur(30px) !important;
-    border-left: 1px solid rgba(0, 242, 255, 0.2) !important;
+    backdrop-filter: blur(30px) !important;
+    border-left: 1px solid rgb(0 242 255 / 20%) !important;
     box-shadow:
-      -10px 0 40px rgba(0, 0, 0, 0.5),
-      0 0 30px rgba(0, 242, 255, 0.1) !important;
+      -10px 0 40px rgb(0 0 0 / 50%),
+      0 0 30px rgb(0 242 255 / 10%) !important;
 
     .panel-header {
-      border-bottom: 1px solid rgba(0, 242, 255, 0.15) !important;
       background: linear-gradient(
         90deg,
-        rgba(0, 242, 255, 0.05) 0%,
+        rgb(0 242 255 / 5%) 0%,
         transparent 100%
       ) !important;
+      border-bottom: 1px solid rgb(0 242 255 / 15%) !important;
     }
 
     .panel-title {
-      color: #00f2ff !important;
-      text-shadow: 0 0 20px rgba(0, 242, 255, 0.5) !important;
       font-weight: 500 !important;
+      color: #00f2ff !important;
+      text-shadow: 0 0 20px rgb(0 242 255 / 50%) !important;
     }
 
     .preview-module,
     .cover-preview {
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
-      background: rgba(0, 242, 255, 0.03) !important;
-      box-shadow:
-        0 0 20px rgba(0, 242, 255, 0.1),
-        inset 0 0 30px rgba(0, 242, 255, 0.02) !important;
+      background: rgb(0 242 255 / 3%) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
       border-radius: 8px !important;
+      box-shadow:
+        0 0 20px rgb(0 242 255 / 10%),
+        inset 0 0 30px rgb(0 242 255 / 2%) !important;
     }
 
     .cover-placeholder {
-      background: rgba(0, 242, 255, 0.03) !important;
+      background: rgb(0 242 255 / 3%) !important;
 
       .svg-inline--fa {
-        color: rgba(0, 242, 255, 0.5) !important;
+        color: rgb(0 242 255 / 50%) !important;
       }
     }
 
     .change-cover-btn {
-      background: rgba(0, 242, 255, 0.2) !important;
-      border: 1px solid rgba(0, 242, 255, 0.3) !important;
       color: #00f2ff !important;
+      background: rgb(0 242 255 / 20%) !important;
+      border: 1px solid rgb(0 242 255 / 30%) !important;
       border-radius: 4px !important;
 
       &:hover {
-        background: rgba(0, 242, 255, 0.3) !important;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
+        background: rgb(0 242 255 / 30%) !important;
+        box-shadow: 0 0 15px rgb(0 242 255 / 30%) !important;
       }
     }
 
@@ -138,21 +132,21 @@
 
     // 修改名称按钮 - 霓虹发光风格
     .name-display .edit-btn {
-      background: rgba(0, 242, 255, 0.15) !important;
       color: #00f2ff !important;
-      border: 1px solid rgba(0, 242, 255, 0.4) !important;
-      box-shadow: 0 0 10px rgba(0, 242, 255, 0.2) !important;
+      background: rgb(0 242 255 / 15%) !important;
+      border: 1px solid rgb(0 242 255 / 40%) !important;
+      box-shadow: 0 0 10px rgb(0 242 255 / 20%) !important;
 
       &:hover {
-        background: rgba(0, 242, 255, 0.25) !important;
-        box-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
         color: #00f2ff !important;
+        background: rgb(0 242 255 / 25%) !important;
+        box-shadow: 0 0 20px rgb(0 242 255 / 40%) !important;
       }
     }
 
     .info-block {
-      background: rgba(0, 242, 255, 0.04) !important;
-      border: 1px solid rgba(0, 242, 255, 0.1) !important;
+      background: rgb(0 242 255 / 4%) !important;
+      border: 1px solid rgb(0 242 255 / 10%) !important;
       border-radius: 4px !important;
     }
 
@@ -172,9 +166,9 @@
     .form-input,
     .form-textarea,
     .name-input {
-      background: rgba(18, 24, 32, 0.8) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
       color: #e8f4ff !important;
+      background: rgb(18 24 32 / 80%) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
       border-radius: 4px !important;
 
       &::placeholder {
@@ -183,76 +177,76 @@
 
       &:focus {
         border-color: #00f2ff !important;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
+        box-shadow: 0 0 15px rgb(0 242 255 / 20%) !important;
       }
     }
 
     // 标签编辑器
     .tag-item {
-      background: rgba(0, 242, 255, 0.15) !important;
       color: #00f2ff !important;
-      border: 1px solid rgba(0, 242, 255, 0.3) !important;
+      background: rgb(0 242 255 / 15%) !important;
+      border: 1px solid rgb(0 242 255 / 30%) !important;
       border-radius: 4px !important;
     }
 
     .tag-select {
-      background: rgba(18, 24, 32, 0.8) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
       color: #e8f4ff !important;
+      background: rgb(18 24 32 / 80%) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
       border-radius: 4px !important;
     }
 
     .add-tag-btn {
-      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
       color: #0b0e14 !important;
+      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
       border-radius: 4px !important;
-      box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
+      box-shadow: 0 0 15px rgb(0 242 255 / 30%) !important;
     }
 
     // 可见性切换
     .visibility-btn {
-      background: rgba(18, 24, 32, 0.8) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
       color: #8b9dc3 !important;
+      background: rgb(18 24 32 / 80%) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
       border-radius: 4px !important;
 
       &:hover {
-        border-color: rgba(0, 242, 255, 0.4) !important;
         color: #00f2ff !important;
+        border-color: rgb(0 242 255 / 40%) !important;
       }
 
       &.active {
-        background: rgba(0, 242, 255, 0.15) !important;
-        border-color: #00f2ff !important;
         color: #00f2ff !important;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
+        background: rgb(0 242 255 / 15%) !important;
+        border-color: #00f2ff !important;
+        box-shadow: 0 0 15px rgb(0 242 255 / 20%) !important;
       }
     }
 
     .panel-footer {
-      background: rgba(11, 14, 20, 0.95) !important;
-      border-top: 1px solid rgba(0, 242, 255, 0.15) !important;
+      background: rgb(11 14 20 / 95%) !important;
+      border-top: 1px solid rgb(0 242 255 / 15%) !important;
     }
 
     .download-btn,
     .enter-edit-btn {
+      color: #00f2ff !important;
       background: linear-gradient(
         135deg,
-        rgba(0, 242, 255, 0.2) 0%,
-        rgba(0, 242, 255, 0.1) 100%
+        rgb(0 242 255 / 20%) 0%,
+        rgb(0 242 255 / 10%) 100%
       ) !important;
-      border: 1px solid rgba(0, 242, 255, 0.4) !important;
-      color: #00f2ff !important;
-      box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
+      border: 1px solid rgb(0 242 255 / 40%) !important;
       border-radius: 4px !important;
+      box-shadow: 0 0 20px rgb(0 242 255 / 30%) !important;
 
       &:hover {
         background: linear-gradient(
           135deg,
-          rgba(0, 242, 255, 0.3) 0%,
-          rgba(0, 242, 255, 0.15) 100%
+          rgb(0 242 255 / 30%) 0%,
+          rgb(0 242 255 / 15%) 100%
         ) !important;
-        box-shadow: 0 0 35px rgba(0, 242, 255, 0.5) !important;
+        box-shadow: 0 0 35px rgb(0 242 255 / 50%) !important;
       }
     }
 
@@ -264,35 +258,35 @@
 
     .confirm-btn,
     .save-btn {
-      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
       color: #0b0e14 !important;
-      box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
+      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
+      box-shadow: 0 0 15px rgb(0 242 255 / 30%) !important;
     }
 
     .cancel-btn {
-      background: rgba(18, 24, 32, 0.8) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
       color: #8b9dc3 !important;
+      background: rgb(18 24 32 / 80%) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
     }
 
     .delete-btn {
-      color: #ff3366 !important;
+      color: #f36 !important;
       border-radius: 4px !important;
 
       &:hover {
-        background: rgba(255, 51, 102, 0.1) !important;
-        box-shadow: 0 0 15px rgba(255, 51, 102, 0.2) !important;
+        background: rgb(255 51 102 / 10%) !important;
+        box-shadow: 0 0 15px rgb(255 51 102 / 20%) !important;
       }
     }
 
     .secondary-actions .download-btn {
-      background: transparent !important;
-      border: 1px solid rgba(0, 242, 255, 0.3) !important;
       color: #00f2ff !important;
+      background: transparent !important;
+      border: 1px solid rgb(0 242 255 / 30%) !important;
       box-shadow: none !important;
 
       &:hover {
-        background: rgba(0, 242, 255, 0.1) !important;
+        background: rgb(0 242 255 / 10%) !important;
       }
     }
   }
@@ -300,68 +294,68 @@
   // 对话框玻璃质感
   .custom-confirm-dialog .el-dialog,
   .custom-input-dialog .el-dialog {
-    background: rgba(11, 14, 20, 0.95) !important;
+    background: rgb(11 14 20 / 95%) !important;
     backdrop-filter: blur(30px) !important;
-    -webkit-backdrop-filter: blur(30px) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    backdrop-filter: blur(30px) !important;
+    border: 1px solid rgb(0 242 255 / 20%) !important;
     box-shadow:
-      0 0 60px rgba(0, 0, 0, 0.6),
-      0 0 40px rgba(0, 242, 255, 0.15) !important;
+      0 0 60px rgb(0 0 0 / 60%),
+      0 0 40px rgb(0 242 255 / 15%) !important;
 
     .el-dialog__title {
       color: #00f2ff !important;
-      text-shadow: 0 0 15px rgba(0, 242, 255, 0.5) !important;
+      text-shadow: 0 0 15px rgb(0 242 255 / 50%) !important;
     }
   }
 
   // 上传模态框玻璃质感
   .upload-modal {
-    background: rgba(11, 14, 20, 0.95) !important;
+    background: rgb(11 14 20 / 95%) !important;
     backdrop-filter: blur(30px) !important;
-    -webkit-backdrop-filter: blur(30px) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    backdrop-filter: blur(30px) !important;
+    border: 1px solid rgb(0 242 255 / 20%) !important;
     box-shadow:
-      0 0 60px rgba(0, 0, 0, 0.6),
-      0 0 40px rgba(0, 242, 255, 0.15) !important;
+      0 0 60px rgb(0 0 0 / 60%),
+      0 0 40px rgb(0 242 255 / 15%) !important;
 
     .modal-title {
       color: #00f2ff !important;
-      text-shadow: 0 0 15px rgba(0, 242, 255, 0.5) !important;
+      text-shadow: 0 0 15px rgb(0 242 255 / 50%) !important;
     }
 
     .upload-zone {
-      border: 1px dashed rgba(0, 242, 255, 0.3) !important;
-      background: rgba(0, 242, 255, 0.02) !important;
+      background: rgb(0 242 255 / 2%) !important;
+      border: 1px dashed rgb(0 242 255 / 30%) !important;
 
       &:hover,
       &.drag-active {
-        border-color: rgba(0, 242, 255, 0.6) !important;
-        background: rgba(0, 242, 255, 0.06) !important;
+        background: rgb(0 242 255 / 6%) !important;
+        border-color: rgb(0 242 255 / 60%) !important;
         box-shadow:
-          0 0 30px rgba(0, 242, 255, 0.15),
-          inset 0 0 20px rgba(0, 242, 255, 0.03) !important;
+          0 0 30px rgb(0 242 255 / 15%),
+          inset 0 0 20px rgb(0 242 255 / 3%) !important;
       }
     }
 
     .browse-btn,
     .start-upload-btn {
+      color: #00f2ff !important;
       background: linear-gradient(
         135deg,
-        rgba(0, 242, 255, 0.2) 0%,
-        rgba(0, 242, 255, 0.1) 100%
+        rgb(0 242 255 / 20%) 0%,
+        rgb(0 242 255 / 10%) 100%
       ) !important;
-      border: 1px solid rgba(0, 242, 255, 0.4) !important;
-      color: #00f2ff !important;
-      box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
+      border: 1px solid rgb(0 242 255 / 40%) !important;
+      box-shadow: 0 0 15px rgb(0 242 255 / 30%) !important;
 
       &:hover {
-        box-shadow: 0 0 25px rgba(0, 242, 255, 0.5) !important;
+        box-shadow: 0 0 25px rgb(0 242 255 / 50%) !important;
       }
     }
 
     .file-item {
-      background: rgba(0, 242, 255, 0.04) !important;
-      border: 1px solid rgba(0, 242, 255, 0.1) !important;
+      background: rgb(0 242 255 / 4%) !important;
+      border: 1px solid rgb(0 242 255 / 10%) !important;
     }
   }
 
@@ -373,48 +367,45 @@
   .save-btn,
   .edit-btn,
   .enter-editor-btn {
+    color: #00f2ff !important;
+    text-shadow: 0 0 10px rgb(0 242 255 / 50%) !important;
     background: linear-gradient(
       135deg,
-      rgba(0, 242, 255, 0.15) 0%,
-      rgba(0, 242, 255, 0.08) 100%
+      rgb(0 242 255 / 15%) 0%,
+      rgb(0 242 255 / 8%) 100%
     ) !important;
-    border: 1px solid rgba(0, 242, 255, 0.4) !important;
-    color: #00f2ff !important;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.25) !important;
-    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+    border: 1px solid rgb(0 242 255 / 40%) !important;
+    box-shadow: 0 0 15px rgb(0 242 255 / 25%) !important;
 
     &:hover {
       background: linear-gradient(
         135deg,
-        rgba(0, 242, 255, 0.25) 0%,
-        rgba(0, 242, 255, 0.12) 100%
+        rgb(0 242 255 / 25%) 0%,
+        rgb(0 242 255 / 12%) 100%
       ) !important;
-      border-color: rgba(0, 242, 255, 0.6) !important;
-      box-shadow: 0 0 30px rgba(0, 242, 255, 0.4) !important;
+      border-color: rgb(0 242 255 / 60%) !important;
+      box-shadow: 0 0 30px rgb(0 242 255 / 40%) !important;
     }
   }
 
   // 侧边栏玻璃质感
   .ar-sidebar {
-    background: rgba(8, 10, 15, 0.95) !important;
+    background: rgb(8 10 15 / 95%) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-right: 1px solid rgba(0, 242, 255, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgb(0 242 255 / 12%) !important;
 
     &::before {
-      content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      content: "";
       background: linear-gradient(
         180deg,
-        rgba(0, 242, 255, 0.03) 0%,
+        rgb(0 242 255 / 3%) 0%,
         transparent 40%
       );
-      pointer-events: none;
-      z-index: 0;
     }
 
     > * {
@@ -427,18 +418,18 @@
   .sidebar-item-active {
     background: linear-gradient(
       90deg,
-      rgba(0, 242, 255, 0.15) 0%,
-      rgba(0, 242, 255, 0.05) 100%
+      rgb(0 242 255 / 15%) 0%,
+      rgb(0 242 255 / 5%) 100%
     ) !important;
-    border: 1px solid rgba(0, 242, 255, 0.3) !important;
+    border: 1px solid rgb(0 242 255 / 30%) !important;
     box-shadow:
-      0 0 20px rgba(0, 242, 255, 0.2),
-      inset 0 0 10px rgba(0, 242, 255, 0.05) !important;
+      0 0 20px rgb(0 242 255 / 20%),
+      inset 0 0 10px rgb(0 242 255 / 5%) !important;
 
     .item-text,
     .svg-inline--fa {
       color: #00f2ff !important;
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+      text-shadow: 0 0 10px rgb(0 242 255 / 50%) !important;
     }
   }
 
@@ -449,17 +440,17 @@
   .search-input:focus,
   .name-input:focus,
   .custom-input:focus {
-    border-color: rgba(0, 242, 255, 0.5) !important;
+    border-color: rgb(0 242 255 / 50%) !important;
     box-shadow:
-      0 0 20px rgba(0, 242, 255, 0.2),
-      inset 0 0 10px rgba(0, 242, 255, 0.03) !important;
+      0 0 20px rgb(0 242 255 / 20%),
+      inset 0 0 10px rgb(0 242 255 / 3%) !important;
   }
 
   // 搜索框玻璃质感
   .search-input {
-    background: rgba(0, 242, 255, 0.04) !important;
-    border: 1px solid rgba(0, 242, 255, 0.15) !important;
     color: #e8f4f8 !important;
+    background: rgb(0 242 255 / 4%) !important;
+    border: 1px solid rgb(0 242 255 / 15%) !important;
 
     &::placeholder {
       color: #5a7078 !important;
@@ -478,7 +469,7 @@
   .hero-title,
   .section-title {
     color: #00f2ff !important;
-    text-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
+    text-shadow: 0 0 20px rgb(0 242 255 / 40%) !important;
   }
 
   // 次要标题
@@ -488,34 +479,34 @@
   }
 
   // 链接发光
-  a:not(.btn):not(.el-button),
+  a:not(.btn, .el-button),
   .btn-link,
   .view-more-link {
     color: #00f2ff !important;
 
     &:hover {
-      text-shadow: 0 0 12px rgba(0, 242, 255, 0.6) !important;
+      text-shadow: 0 0 12px rgb(0 242 255 / 60%) !important;
     }
   }
 
   // 底部信息栏
   .app-footer {
-    background: rgba(8, 10, 15, 0.95) !important;
+    background: rgb(8 10 15 / 95%) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-top: 1px solid rgba(0, 242, 255, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgb(0 242 255 / 12%) !important;
 
     .footer-link {
       color: #5a7078 !important;
 
       &:hover {
         color: #00f2ff !important;
-        text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+        text-shadow: 0 0 10px rgb(0 242 255 / 50%) !important;
       }
     }
 
     .divider {
-      color: rgba(0, 242, 255, 0.2) !important;
+      color: rgb(0 242 255 / 20%) !important;
     }
   }
 
@@ -523,39 +514,39 @@
   .progress-fill,
   .el-progress-bar__inner {
     background: linear-gradient(90deg, #00f2ff 0%, #00d4e6 100%) !important;
-    box-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+    box-shadow: 0 0 10px rgb(0 242 255 / 50%) !important;
   }
 
   // 列表视图 - 赛博科技风格
   .resource-list {
-    background: rgba(11, 14, 20, 0.95) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    background: rgb(11 14 20 / 95%) !important;
+    border: 1px solid rgb(0 242 255 / 20%) !important;
     box-shadow:
-      0 0 30px rgba(0, 0, 0, 0.3),
-      0 0 15px rgba(0, 242, 255, 0.08) !important;
+      0 0 30px rgb(0 0 0 / 30%),
+      0 0 15px rgb(0 242 255 / 8%) !important;
 
     .list-table {
       th {
-        background: rgba(0, 242, 255, 0.06) !important;
         color: #8ba3ad !important;
-        border-bottom: 1px solid rgba(0, 242, 255, 0.15) !important;
+        background: rgb(0 242 255 / 6%) !important;
+        border-bottom: 1px solid rgb(0 242 255 / 15%) !important;
       }
 
       td {
-        border-bottom: 1px solid rgba(0, 242, 255, 0.08) !important;
         color: #e8f4f8 !important;
+        border-bottom: 1px solid rgb(0 242 255 / 8%) !important;
       }
     }
 
     .list-row {
       &:hover {
-        background: rgba(0, 242, 255, 0.06) !important;
+        background: rgb(0 242 255 / 6%) !important;
       }
     }
 
     .row-thumbnail {
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
-      background: rgba(0, 242, 255, 0.03) !important;
+      background: rgb(0 242 255 / 3%) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
     }
 
     .file-name {
@@ -563,30 +554,31 @@
     }
 
     .enter-editor-btn {
+      color: #00f2ff !important;
       background: linear-gradient(
         135deg,
-        rgba(0, 242, 255, 0.2) 0%,
-        rgba(0, 242, 255, 0.1) 100%
+        rgb(0 242 255 / 20%) 0%,
+        rgb(0 242 255 / 10%) 100%
       ) !important;
-      border: 1px solid rgba(0, 242, 255, 0.4) !important;
-      color: #00f2ff !important;
-      box-shadow: 0 0 12px rgba(0, 242, 255, 0.25) !important;
+      border: 1px solid rgb(0 242 255 / 40%) !important;
+      box-shadow: 0 0 12px rgb(0 242 255 / 25%) !important;
 
       &:hover {
-        box-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
+        box-shadow: 0 0 20px rgb(0 242 255 / 40%) !important;
       }
     }
 
     .list-tag {
-      background: rgba(0, 242, 255, 0.15) !important;
       color: #00f2ff !important;
-      border: 1px solid rgba(0, 242, 255, 0.3) !important;
+      background: rgb(0 242 255 / 15%) !important;
+      border: 1px solid rgb(0 242 255 / 30%) !important;
     }
 
     .visibility-cell {
       &.public {
-        color: #00ff88 !important;
+        color: #0f8 !important;
       }
+
       &.private {
         color: #8ba3ad !important;
       }
@@ -596,18 +588,18 @@
       color: #8ba3ad !important;
 
       &:hover {
-        background: rgba(0, 242, 255, 0.1) !important;
         color: #00f2ff !important;
+        background: rgb(0 242 255 / 10%) !important;
       }
     }
 
     .row-menu {
-      background: rgba(11, 14, 20, 0.95) !important;
+      background: rgb(11 14 20 / 95%) !important;
       backdrop-filter: blur(20px) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
       box-shadow:
-        0 0 30px rgba(0, 0, 0, 0.5),
-        0 0 20px rgba(0, 242, 255, 0.1) !important;
+        0 0 30px rgb(0 0 0 / 50%),
+        0 0 20px rgb(0 242 255 / 10%) !important;
 
       .menu-item {
         color: #e8f4f8 !important;
@@ -617,18 +609,18 @@
         }
 
         &:hover {
-          background: rgba(0, 242, 255, 0.1) !important;
+          background: rgb(0 242 255 / 10%) !important;
         }
 
         &.danger {
-          color: #ff3366 !important;
+          color: #f36 !important;
 
           .svg-inline--fa {
-            color: #ff3366 !important;
+            color: #f36 !important;
           }
 
           &:hover {
-            background: rgba(255, 51, 102, 0.1) !important;
+            background: rgb(255 51 102 / 10%) !important;
           }
         }
       }
@@ -638,17 +630,17 @@
   // 表格样式（兼容旧样式）
   .list-table {
     th {
-      background: rgba(0, 242, 255, 0.05) !important;
       color: #8ba3ad !important;
-      border-bottom: 1px solid rgba(0, 242, 255, 0.15) !important;
+      background: rgb(0 242 255 / 5%) !important;
+      border-bottom: 1px solid rgb(0 242 255 / 15%) !important;
     }
 
     td {
-      border-bottom: 1px solid rgba(0, 242, 255, 0.08) !important;
+      border-bottom: 1px solid rgb(0 242 255 / 8%) !important;
     }
 
     .list-row:hover {
-      background: rgba(0, 242, 255, 0.06) !important;
+      background: rgb(0 242 255 / 6%) !important;
     }
   }
 
@@ -657,26 +649,26 @@
   .row-menu,
   .tag-dropdown,
   .visibility-dropdown {
-    background: rgba(11, 14, 20, 0.95) !important;
+    background: rgb(11 14 20 / 95%) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgb(0 242 255 / 20%) !important;
     box-shadow:
-      0 0 30px rgba(0, 0, 0, 0.5),
-      0 0 20px rgba(0, 242, 255, 0.1) !important;
+      0 0 30px rgb(0 0 0 / 50%),
+      0 0 20px rgb(0 242 255 / 10%) !important;
 
     .menu-item {
       color: #e8f4f8 !important;
 
       &:hover {
-        background: rgba(0, 242, 255, 0.1) !important;
+        background: rgb(0 242 255 / 10%) !important;
       }
 
       &.danger {
-        color: #ff3366 !important;
+        color: #f36 !important;
 
         &:hover {
-          background: rgba(255, 51, 102, 0.1) !important;
+          background: rgb(255 51 102 / 10%) !important;
         }
       }
     }
@@ -685,7 +677,7 @@
   // 空状态
   .empty-state {
     .empty-icon {
-      color: rgba(0, 242, 255, 0.3) !important;
+      color: rgb(0 242 255 / 30%) !important;
     }
 
     p {
@@ -695,29 +687,29 @@
 
   // 分页按钮
   .page-btn {
-    background: rgba(0, 242, 255, 0.05) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
     color: #8ba3ad !important;
+    background: rgb(0 242 255 / 5%) !important;
+    border: 1px solid rgb(0 242 255 / 20%) !important;
 
     &:hover:not(:disabled) {
-      border-color: rgba(0, 242, 255, 0.4) !important;
       color: #00f2ff !important;
-      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
+      border-color: rgb(0 242 255 / 40%) !important;
+      box-shadow: 0 0 15px rgb(0 242 255 / 20%) !important;
     }
   }
 
   // 视图切换按钮
   .view-toggle {
-    background: rgba(0, 242, 255, 0.05) !important;
-    border: 1px solid rgba(0, 242, 255, 0.15) !important;
+    background: rgb(0 242 255 / 5%) !important;
+    border: 1px solid rgb(0 242 255 / 15%) !important;
   }
 
   .view-btn {
     color: #5a7078 !important;
 
     &.active {
-      background: rgba(0, 242, 255, 0.15) !important;
       color: #00f2ff !important;
+      background: rgb(0 242 255 / 15%) !important;
     }
   }
 
@@ -731,7 +723,7 @@
 
     &.active {
       color: #00f2ff !important;
-      background: rgba(0, 242, 255, 0.08) !important;
+      background: rgb(0 242 255 / 8%) !important;
     }
   }
 }

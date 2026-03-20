@@ -195,22 +195,22 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .language-analysis {
-  background: var(--el-fill-color-lighter);
-  border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 8px;
 }
 
 .analysis-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
 }
 
 .analysis-title {
-  font-weight: 600;
   font-size: 14px;
+  font-weight: 600;
   color: var(--el-text-color-primary);
 }
 
@@ -220,8 +220,8 @@ onMounted(() => {
 }
 
 .language-bars {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 8px;
 }

@@ -6,15 +6,15 @@
   }
 
   .card-panel {
-    height: 108px;
-    cursor: pointer;
-    font-size: 12px;
     position: relative;
+    height: 108px;
     overflow: hidden;
+    font-size: 12px;
     color: var(--text-secondary, #666);
+    cursor: pointer;
     background: var(--bg-card, #fff);
-    box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
-    border-color: var(--border-color, rgba(0, 0, 0, 0.05));
+    border-color: var(--border-color, rgb(0 0 0 / 5%));
+    box-shadow: 4px 4px 40px rgb(0 0 0 / 5%);
 
     &:hover {
       .card-panel-icon-wrapper {
@@ -56,10 +56,10 @@
 
     .card-panel-icon-wrapper {
       float: left;
-      margin: 14px 0 0 14px;
       padding: 16px;
-      transition: all 0.38s ease-out;
+      margin: 14px 0 0 14px;
       border-radius: 6px;
+      transition: all 0.38s ease-out;
     }
 
     .card-panel-icon {
@@ -69,14 +69,14 @@
 
     .card-panel-description {
       float: left;
-      font-weight: bold;
       margin: 26px;
+      font-weight: bold;
 
       .card-panel-text {
-        line-height: 18px;
-        color: var(--text-muted, rgba(0, 0, 0, 0.45));
-        font-size: 16px;
         margin-bottom: 12px;
+        font-size: 16px;
+        line-height: 18px;
+        color: var(--text-muted, rgb(0 0 0 / 45%));
       }
 
       .card-panel-num {
@@ -86,7 +86,7 @@
   }
 }
 
-@media (max-width: 550px) {
+@media (width <= 550px) {
   .card-panel-description {
     display: none;
   }
@@ -99,8 +99,8 @@
 
     .svg-icon {
       display: block;
-      margin: 14px auto !important;
       float: none !important;
+      margin: 14px auto !important;
     }
   }
 }

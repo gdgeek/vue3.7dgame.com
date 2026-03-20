@@ -70,15 +70,15 @@ const strengthBarWidth = computed(() => {
   font-size: 13px;
 
   &__rules {
-    list-style: none;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    list-style: none;
   }
 
   &__rule {
     display: flex;
-    align-items: center;
     gap: 6px;
+    align-items: center;
     padding: 2px 0;
     color: var(--danger-color, #f56c6c);
     transition: color 0.3s ease;
@@ -89,8 +89,8 @@ const strengthBarWidth = computed(() => {
   }
 
   &__icon {
-    font-size: 12px;
     width: 14px;
+    font-size: 12px;
     text-align: center;
   }
 
@@ -99,11 +99,11 @@ const strengthBarWidth = computed(() => {
   }
 
   &__bar-wrapper {
-    margin-top: 8px;
     height: 6px;
+    margin-top: 8px;
+    overflow: hidden;
     background-color: var(--bg-active, #e4e7ed);
     border-radius: 3px;
-    overflow: hidden;
     transition: background-color 0.3s ease;
   }
 

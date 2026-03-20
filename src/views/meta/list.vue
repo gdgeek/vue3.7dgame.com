@@ -29,7 +29,7 @@
           <el-button type="primary" @click="addMeta">
             <font-awesome-icon
               :icon="['fas', 'plus']"
-              style="font-size: 18px; margin-right: 4px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ t("meta.list.createAction") }}
           </el-button>
@@ -1111,49 +1111,49 @@ const deletedWindow = async (
 }
 
 .col-name {
-  flex: 1;
   display: flex;
-  align-items: center;
+  flex: 1;
   gap: 16px;
+  align-items: center;
   min-width: 0;
 }
 
 .col-size,
 .col-author {
+  flex-shrink: 0;
   width: 100px;
-  text-align: right;
+  padding-right: 24px;
   font-size: var(--font-size-sm, 13px);
   color: var(--text-secondary, #64748b);
-  flex-shrink: 0;
-  padding-right: 24px;
+  text-align: right;
 }
 
 .col-resources {
+  flex-shrink: 0;
   width: 90px;
-  text-align: right;
+  padding-right: 24px;
   font-size: var(--font-size-sm, 13px);
   color: var(--text-secondary, #64748b);
-  flex-shrink: 0;
-  padding-right: 24px;
+  text-align: right;
 }
 
 .col-actions {
+  flex-shrink: 0;
   width: 48px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 .item-thumb {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: 52px;
   height: 52px;
-  border-radius: var(--radius-sm, 12px);
   overflow: hidden;
   background: var(--bg-hover, #f8fafc);
   border: 1px solid var(--border-color, #e2e8f0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  border-radius: var(--radius-sm, 12px);
 }
 
 .item-thumb img {
@@ -1171,36 +1171,37 @@ const deletedWindow = async (
 }
 
 .item-name {
+  overflow: hidden;
   font-size: var(--font-size-md, 14px);
   font-weight: var(--font-weight-medium, 500);
   color: var(--text-primary, #1e293b);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .actions-icon {
+  padding: 6px;
   font-size: 22px;
   color: var(--text-secondary, #64748b);
   cursor: pointer;
-  padding: 6px;
   border-radius: var(--radius-sm, 12px);
-  transition: all var(--transition-fast, 0.15s ease);
   opacity: 0.6;
+  transition: all var(--transition-fast, 0.15s ease);
 }
 
 .actions-icon:hover {
-  background: var(--bg-active, #e2e8f0);
   color: var(--text-primary, #1e293b);
+  background: var(--bg-active, #e2e8f0);
   opacity: 1;
 }
 
 .meta-preview {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
 
   img {
     width: 100%;
@@ -1214,21 +1215,21 @@ const deletedWindow = async (
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: white;
+    background: rgb(0 0 0 / 40%);
+    border-radius: var(--radius-lg, 16px);
     opacity: 0;
     transition: opacity 0.3s;
-    border-radius: var(--radius-lg, 16px);
-    color: white;
 
     .svg-inline--fa {
-      font-size: 48px;
       margin-bottom: 8px;
+      font-size: 48px;
     }
 
     .overlay-text {
@@ -1246,8 +1247,6 @@ const deletedWindow = async (
       filter: blur(2px);
     }
   }
-
-  cursor: pointer;
 }
 
 .hidden-input {
@@ -1273,34 +1272,34 @@ const deletedWindow = async (
 }
 
 .events-card {
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-md, 12px);
+  min-height: 88px;
   padding: 10px;
   background: var(--bg-hover, #f8fafc);
-  min-height: 88px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-md, 12px);
 }
 
 .events-card-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 8px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary, #64748b);
-  margin-bottom: 8px;
 }
 
 .events-count {
-  min-width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  padding: 0 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
   font-size: 11px;
   color: var(--primary-color, #03a9f4);
-  background: var(--primary-light, rgba(3, 169, 244, 0.12));
+  background: var(--primary-light, rgb(3 169 244 / 12%));
+  border-radius: 9px;
 }
 
 .events-list {
@@ -1311,61 +1310,61 @@ const deletedWindow = async (
 
 .events-item {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
-  font-size: 12px;
   padding: 6px 8px;
-  border-radius: 8px;
-  background: var(--bg-card, #ffffff);
+  font-size: 12px;
+  background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
 }
 
 .events-index {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  border-radius: 999px;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: 18px;
+  height: 18px;
   font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary, #64748b);
   background: var(--bg-hover, #f1f5f9);
+  border-radius: 999px;
 }
 
 .events-main {
-  min-width: 0;
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .events-title-text {
+  overflow: hidden;
   font-weight: 600;
   color: var(--text-primary, #1e293b);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .events-name-sub {
+  overflow: hidden;
   font-size: 11px;
   color: var(--text-muted, #94a3b8);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .events-type {
+  flex-shrink: 0;
+  padding: 2px 8px;
   color: var(--text-secondary, #64748b);
   background: var(--bg-hover, #f1f5f9);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 999px;
-  padding: 2px 8px;
-  flex-shrink: 0;
 }
 
 .events-empty {
@@ -1382,8 +1381,8 @@ const deletedWindow = async (
 
 .used-scenes-controls {
   display: flex;
-  align-items: center;
   gap: 6px;
+  align-items: center;
   min-width: 0;
 }
 
@@ -1392,44 +1391,44 @@ const deletedWindow = async (
   min-width: 120px;
 
   :deep(.el-select__wrapper) {
-    min-height: 24px;
     align-items: center;
+    min-height: 24px;
   }
 
   :deep(.el-select__selection) {
-    min-width: 0;
     align-items: center;
+    min-width: 0;
   }
 
   :deep(.el-select__selected-item),
   :deep(.el-select__placeholder) {
     width: 100%;
-    text-align: center;
-    line-height: 20px;
     overflow: hidden;
+    line-height: 20px;
+    text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 }
 
 .used-scenes-enter-btn {
+  display: inline-flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   height: 24px;
   padding: 0 10px;
   font-size: 12px;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   line-height: 1;
+  border-radius: 12px;
 }
 
 :global(.detail-link-select-popper .el-select-dropdown__item) {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  box-sizing: border-box;
   text-align: left;
 }
 
@@ -1452,23 +1451,19 @@ const deletedWindow = async (
   .detail-link-select-popper.el-select__popper
     .el-select-dropdown__item.is-hovering
 ) {
-  background: var(--primary-light, rgba(3, 169, 244, 0.12)) !important;
   color: var(--primary-color, #03a9f4) !important;
+  background: var(--primary-light, rgb(3 169 244 / 12%)) !important;
 }
 
 :global(
   .detail-link-select-popper.el-select__popper
-    .el-select-dropdown__item.selected:not(.hover):not(.is-hovering):not(
-      :hover
-    ),
+    .el-select-dropdown__item.selected:not(.hover, .is-hovering, :hover),
   .detail-link-select-popper.el-select__popper
-    .el-select-dropdown__item.is-selected:not(.hover):not(.is-hovering):not(
-      :hover
-    )
+    .el-select-dropdown__item.is-selected:not(.hover, .is-hovering, :hover)
 ) {
-  background: transparent !important;
-  color: var(--primary-color, #03a9f4) !important;
   font-weight: 500 !important;
+  color: var(--primary-color, #03a9f4) !important;
+  background: transparent !important;
 }
 
 .selection-container {
@@ -1480,43 +1475,43 @@ const deletedWindow = async (
 .selection-card {
   flex: 1;
   padding: 20px 15px;
-  border: 2px solid var(--border-color, #e4e7ed);
-  border-radius: 12px;
   text-align: center;
   cursor: pointer;
+  background: var(--bg-card, #fff);
+  border: 2px solid var(--border-color, #e4e7ed);
+  border-radius: 12px;
   transition: all 0.3s ease;
-  background: var(--bg-card, #ffffff);
 
   &:hover {
-    border-color: var(--primary-color, #0ea5e9);
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2); // Keep specific shadow color or use var if available
     background: var(--bg-hover, #f8fafc);
+    border-color: var(--primary-color, #0ea5e9);
+    box-shadow: 0 8px 16px rgb(14 165 233 / 20%); // Keep specific shadow color or use var if available
+    transform: translateY(-5px);
 
     .card-icon {
-      transform: scale(1.1);
       color: var(--primary-color, #0ea5e9);
+      transform: scale(1.1);
     }
   }
 }
 
 .card-icon {
-  color: var(--primary-color, #409eff);
   margin-bottom: 15px;
+  color: var(--primary-color, #409eff);
   transition: transform 0.3s ease;
 }
 
 .card-title {
+  margin-bottom: 8px;
   font-size: 16px;
   font-weight: 600;
   color: var(--text-primary, #303133);
-  margin-bottom: 8px;
 }
 
 .card-description {
   font-size: 13px;
-  color: var(--text-secondary, #909399);
   line-height: 1.5;
+  color: var(--text-secondary, #909399);
 }
 
 .preview-placeholder {
@@ -1537,18 +1532,18 @@ const deletedWindow = async (
   }
 
   :deep(.single-card-action-btn) {
-    width: 100%;
-    height: 44px;
     display: inline-flex;
+    gap: 6px;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    border: none;
-    background: var(--bg-hover, #f8fafc);
-    color: var(--text-secondary, #64748b);
+    width: 100%;
+    height: 44px;
     font-size: 14px;
     font-weight: 600;
+    color: var(--text-secondary, #64748b);
     cursor: pointer;
+    background: var(--bg-hover, #f8fafc);
+    border: none;
     transition: all 0.2s ease;
   }
 
@@ -1558,8 +1553,8 @@ const deletedWindow = async (
   }
 
   :deep(.standard-card .card-content) {
-    padding: 10px 14px;
     gap: 4px;
+    padding: 10px 14px;
   }
 
   :deep(.col-checkbox) {
@@ -1571,63 +1566,63 @@ const deletedWindow = async (
   }
 
   .col-author {
-    width: 120px;
-    text-align: right;
-    font-size: var(--font-size-sm, 13px);
-    color: var(--text-secondary, #64748b);
     flex-shrink: 0;
+    width: 120px;
     padding-right: 24px;
     overflow: hidden;
+    font-size: var(--font-size-sm, 13px);
+    color: var(--text-secondary, #64748b);
+    text-align: right;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .btn-hover-action {
-    opacity: 0;
-    visibility: hidden;
-    height: 28px;
-    width: 84px;
-    padding: 0;
-    margin-left: 8px;
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
+    width: 84px;
+    height: 28px;
+    padding: 0;
+    margin-left: 8px;
     font-size: 12px;
     font-weight: 500;
-    flex-shrink: 0;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    color: white;
+    visibility: hidden;
     background: var(--primary-color, #03a9f4);
     border: none;
-    color: white;
-    box-shadow: 0 4px 12px rgba(3, 169, 244, 0.3);
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgb(3 169 244 / 30%);
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
       background: var(--primary-hover, #039be5);
+      box-shadow: 0 6px 16px rgb(3 169 244 / 40%);
       transform: scale(1.05);
-      box-shadow: 0 6px 16px rgba(3, 169, 244, 0.4);
     }
   }
 
   :deep(.list-row:hover) {
     .btn-hover-action {
-      opacity: 1;
       visibility: visible;
+      opacity: 1;
     }
   }
 }
 
 .enter-edit-btn {
+  display: inline-flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: 100%;
   height: 52px !important;
   min-height: 52px !important;
-  border-radius: 26px !important;
   font-size: 16px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
+  border-radius: 26px !important;
 }
 </style>

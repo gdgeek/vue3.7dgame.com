@@ -623,7 +623,7 @@ watch(
 
 <style lang="scss" scoped>
 /* 响应式布局样式 */
-@media screen and (min-width: 900px) {
+@media screen and (width >= 900px) {
   .section-margin-left {
     margin-left: 12%;
   }
@@ -636,9 +636,9 @@ watch(
 
 /* 标题区块样式 */
 .box-title {
-  line-height: 10px;
   padding: 2px 0;
   margin-left: 1%;
+  line-height: 10px;
 
   small {
     color: #6f6f6f;
@@ -655,13 +655,13 @@ watch(
 
 .security-action-card {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #fafcff;
   border: 1px solid #ebeef5;
   border-radius: 10px;
-  background: #fafcff;
-  padding: 16px;
 }
 
 .security-main {
@@ -687,27 +687,27 @@ watch(
 
 .security-actions {
   display: flex;
-  gap: 10px;
   flex-wrap: wrap;
+  gap: 10px;
   justify-content: flex-end;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
   .security-action-card {
     flex-direction: column;
     align-items: flex-start;
   }
 
   .security-actions {
-    width: 100%;
     justify-content: flex-start;
+    width: 100%;
   }
 }
 
 .recover-tip {
   margin: 0 0 12px;
-  color: #6f6f6f;
   font-size: 13px;
+  color: #6f6f6f;
 }
 
 .recover-reset-btn {
@@ -721,35 +721,35 @@ watch(
 }
 
 .recover-reset-btn:not(.is-disabled) {
+  color: #fff !important;
   background-color: #409eff !important;
   border-color: #409eff !important;
-  color: #fff !important;
-  box-shadow: 0 6px 14px rgba(64, 158, 255, 0.24);
+  box-shadow: 0 6px 14px rgb(64 158 255 / 24%);
 }
 
 .recover-reset-btn:not(.is-disabled):hover,
 .recover-reset-btn:not(.is-disabled):focus-visible {
+  color: #fff !important;
   background-color: #5aafff !important;
   border-color: #5aafff !important;
-  color: #fff !important;
 }
 
 .recover-reset-btn:not(.is-disabled):active {
+  color: #fff !important;
   background-color: #2f8ee5 !important;
   border-color: #2f8ee5 !important;
-  color: #fff !important;
 }
 
 .recover-reset-btn.is-disabled,
 .recover-reset-btn.is-disabled:hover,
 .recover-reset-btn.is-disabled:focus,
 .recover-reset-btn.is-disabled:active {
+  color: #b6bfcc !important;
+  cursor: not-allowed !important;
   background-color: #f2f4f7 !important;
   border-color: #e5e9f0 !important;
-  color: #b6bfcc !important;
   box-shadow: none !important;
   opacity: 1 !important;
-  cursor: not-allowed !important;
 }
 
 /* 用户说明文字样式 */

@@ -13,13 +13,13 @@
                 <video
                   id="particle"
                   controls
-                  style="height: 300px; width: auto"
+                  style="width: auto; height: 300px"
                 >
                   <source v-if="file !== null" id="src" :src="file" />
                 </video>
                 <video
                   id="new_particle"
-                  style="height: 100%; width: auto"
+                  style="width: auto; height: 100%"
                   hidden
                   @canplaythrough="dealWith"
                 ></video>
@@ -57,7 +57,7 @@
                   id="image"
                   ref="image"
                   v-loading="expire"
-                  style="height: 300px; width: auto"
+                  style="width: auto; height: 300px"
                   :src="file || ''"
                   fit="contain"
                   @load="dealWith"
@@ -540,48 +540,42 @@ const named = async (id: number, name: string) => {
   position: relative;
   width: 100%;
   height: 350px;
-  background: rgb(238, 174, 202);
+  background: rgb(238 174 202);
   background: radial-gradient(
     circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgb(169, 196, 228) 100%
+    rgb(238 174 202 / 100%) 0%,
+    rgb(169 196 228) 100%
   );
 }
 
 .audio-box {
   position: relative;
-  margin: auto;
-  margin-top: 26px;
   width: 200px;
   height: 200px;
+  margin: auto;
+  margin-top: 26px;
 }
 
 .audio-record {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
+  inset: 0;
   width: 200px;
   height: 200px;
-  border-radius: 50%;
+  margin: auto;
   background: url("/media/bg/audio-record.jpg") center no-repeat;
   background-size: cover;
+  border-radius: 50%;
 }
 
 .audio-record-image {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
+  inset: 0;
   width: 106px;
   height: 106px;
-  border-radius: 50%;
+  margin: auto;
   background: url("/media/bg/audio-img.jpg") center no-repeat;
   background-size: 113%;
+  border-radius: 50%;
 }
 
 .audio-record-play {

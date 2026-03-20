@@ -23,9 +23,9 @@
         style="
           width: 140px;
           height: 140px;
-          border-radius: 6px;
           overflow: hidden;
           border: 1px solid var(--el-border-color);
+          border-radius: 6px;
         "
         thumbnailSize="256x"
         fit="cover"
@@ -474,8 +474,8 @@ const finishCropAndUpload = async () => {
 
 <style scoped>
 .image-display {
-  cursor: pointer;
   text-align: center;
+  cursor: pointer;
   transition: opacity 0.3s;
 }
 
@@ -491,8 +491,8 @@ const finishCropAndUpload = async () => {
 
 .crop-tip {
   margin: 0 0 10px;
-  color: #606266;
   font-size: 13px;
+  color: #606266;
 }
 
 .cropper-wrap {
@@ -503,32 +503,32 @@ const finishCropAndUpload = async () => {
 
 .crop-footer {
   display: flex;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
 }
 
 .selection-card {
   flex: 1;
   padding: 20px 15px;
-  border: 2px solid #e4e7ed;
-  border-radius: 12px;
   text-align: center;
   cursor: pointer;
+  background: linear-gradient(135deg, #f5f7fa 0%, #fff 100%);
+  border: 2px solid #e4e7ed;
+  border-radius: 12px;
   transition: all 0.3s ease;
-  background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
 }
 
 .selection-card:hover {
+  background: linear-gradient(135deg, #ecf5ff 0%, #fff 100%);
   border-color: #409eff;
+  box-shadow: 0 8px 16px rgb(64 158 255 / 20%);
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(64, 158, 255, 0.2);
-  background: linear-gradient(135deg, #ecf5ff 0%, #ffffff 100%);
 }
 
 .card-icon {
-  color: #409eff;
   margin-bottom: 15px;
+  color: #409eff;
   transition: transform 0.3s ease;
 }
 
@@ -537,16 +537,16 @@ const finishCropAndUpload = async () => {
 }
 
 .card-title {
+  margin-bottom: 8px;
   font-size: 16px;
   font-weight: 600;
   color: #303133;
-  margin-bottom: 8px;
 }
 
 .card-description {
   font-size: 13px;
-  color: #909399;
   line-height: 1.5;
+  color: #909399;
 }
 
 .image-display {
@@ -555,23 +555,23 @@ const finishCropAndUpload = async () => {
 }
 
 .upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 140px;
   height: 140px;
+  color: #909399;
+  cursor: pointer;
   background-color: #f5f7fa;
   border: 2px dashed #dcdfe6;
   border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: #909399;
   transition: all 0.3s;
-  cursor: pointer;
 }
 
 .upload-placeholder:hover {
-  border-color: #409eff;
   color: #409eff;
+  border-color: #409eff;
 }
 
 .placeholder-text {

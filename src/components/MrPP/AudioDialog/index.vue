@@ -336,19 +336,19 @@ watch(
 <style lang="scss" scoped>
 .audio-bgc {
   position: relative;
-  width: 100%;
-  height: 300px;
-  background: rgb(238, 174, 202);
-  background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgb(169, 196, 228) 100%
-  );
-  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 300px;
+  background: rgb(238 174 202);
+  background: radial-gradient(
+    circle,
+    rgb(238 174 202 / 100%) 0%,
+    rgb(169 196 228) 100%
+  );
+  border-radius: 8px;
 }
 
 .audio-box {
@@ -359,30 +359,24 @@ watch(
 
 .audio-record {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
+  inset: 0;
   width: 150px;
   height: 150px;
-  border-radius: 50%;
+  margin: auto;
   background: url("/media/bg/audio-record.jpg") center no-repeat;
   background-size: cover;
+  border-radius: 50%;
 }
 
 .audio-record-image {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
+  inset: 0;
   width: 80px;
   height: 80px;
-  border-radius: 50%;
+  margin: auto;
   background: url("/media/bg/audio-img.jpg") center no-repeat;
   background-size: 113%;
+  border-radius: 50%;
 }
 
 .audio-record-play {

@@ -563,7 +563,7 @@ onUnmounted(() => {
 }
 
 .desc-text {
-  color: #606266;
   margin-bottom: 14px;
+  color: #606266;
 }
 </style>

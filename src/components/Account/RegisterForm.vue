@@ -245,8 +245,8 @@ const backToLogin = () => {
     padding-bottom: 6px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary, #333);
     line-height: 1;
+    color: var(--text-primary, #333);
   }
 }
 
@@ -256,20 +256,20 @@ const backToLogin = () => {
 
   :deep(.el-input__wrapper) {
     padding: 0 12px;
-    border-radius: 8px;
     background-color: var(--bg-hover, #f8f8f8);
+    border-radius: 8px;
     box-shadow: 0 0 0 1px var(--border-color, #e0e0e0) inset;
     transition: all 0.3s;
 
     &.is-focus {
-      box-shadow: 0 0 0 1px var(--primary-color, #00a8ab) inset;
       background-color: var(--bg-card, #fff);
+      box-shadow: 0 0 0 1px var(--primary-color, #00a8ab) inset;
     }
   }
 
   :deep(.el-input__inner) {
-    color: var(--text-primary, #333);
     font-size: 14px;
+    color: var(--text-primary, #333);
 
     &::placeholder {
       color: var(--text-muted, #999);
@@ -291,16 +291,16 @@ const backToLogin = () => {
   width: 100%;
   height: 42px;
   font-size: 15px;
-  border-radius: 8px;
+  color: #fff;
   background: var(--primary-color, #00a8ab);
   border: none;
+  border-radius: 8px;
   transition: all 0.3s;
-  color: #fff;
 
   &:hover {
-    transform: translateY(-2px);
     background: var(--primary-hover, #00dbde);
-    box-shadow: var(--shadow-lg, 0 6px 16px rgba(0, 171, 173, 0.15));
+    box-shadow: var(--shadow-lg, 0 6px 16px rgb(0 171 173 / 15%));
+    transform: translateY(-2px);
   }
 
   &:active {
@@ -310,14 +310,14 @@ const backToLogin = () => {
 
 .login-link {
   margin-top: 16px;
-  text-align: center;
   font-size: 14px;
   color: var(--text-secondary, #666);
+  text-align: center;
 
   a {
     margin-left: 4px;
-    color: var(--primary-color, #00a8ab);
     font-weight: 500;
+    color: var(--primary-color, #00a8ab);
     text-decoration: none;
     transition: color 0.3s;
 

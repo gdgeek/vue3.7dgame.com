@@ -18,7 +18,7 @@
   .hero-title,
   .section-title {
     color: #00f2ff !important;
-    text-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
+    text-shadow: 0 0 20px rgb(0 242 255 / 40%) !important;
   }
 
   .scene-card,
@@ -26,64 +26,61 @@
   .video-card,
   .doc-item,
   .faq-item {
-    border: 1px solid rgba(0, 242, 255, 0.15) !important;
-    background: rgba(18, 24, 32, 0.75) !important;
+    background: rgb(18 24 32 / 75%) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgb(0 242 255 / 15%) !important;
 
     &:hover {
-      border-color: rgba(0, 242, 255, 0.4) !important;
+      border-color: rgb(0 242 255 / 40%) !important;
       box-shadow:
-        0 0 30px rgba(0, 242, 255, 0.2),
-        inset 0 0 0 1px rgba(0, 242, 255, 0.15) !important;
+        0 0 30px rgb(0 242 255 / 20%),
+        inset 0 0 0 1px rgb(0 242 255 / 15%) !important;
     }
   }
 
   // 微信交流群卡片 - 赛博科技风格
   .wechat-card {
-    background: rgba(18, 24, 32, 0.85) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(0, 242, 255, 0.25) !important;
     position: relative;
     overflow: hidden;
+    background: rgb(18 24 32 / 85%) !important;
+    backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgb(0 242 255 / 25%) !important;
 
     &::before {
-      content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
+      pointer-events: none;
+      content: "";
       background: linear-gradient(
         135deg,
-        rgba(0, 242, 255, 0.1) 0%,
+        rgb(0 242 255 / 10%) 0%,
         transparent 50%,
-        rgba(255, 51, 102, 0.05) 100%
+        rgb(255 51 102 / 5%) 100%
       ) !important;
-      pointer-events: none;
     }
 
     &::after {
-      content: "";
       position: absolute;
       top: -50%;
       left: -50%;
       width: 200%;
       height: 200%;
+      pointer-events: none;
+      content: "";
       background: conic-gradient(
         from 0deg,
         transparent,
-        rgba(0, 242, 255, 0.1),
+        rgb(0 242 255 / 10%),
         transparent 30%
       );
       animation: cyber-rotate 8s linear infinite;
-      pointer-events: none;
     }
 
     .card-title {
       color: #00f2ff !important;
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+      text-shadow: 0 0 10px rgb(0 242 255 / 50%) !important;
     }
 
     .card-desc {
@@ -91,16 +88,16 @@
     }
 
     .qrcode-wrapper {
-      border: 1px solid rgba(0, 242, 255, 0.3) !important;
-      box-shadow: 0 0 20px rgba(0, 242, 255, 0.2) !important;
+      border: 1px solid rgb(0 242 255 / 30%) !important;
+      box-shadow: 0 0 20px rgb(0 242 255 / 20%) !important;
     }
   }
 
   .app-footer {
-    background: rgba(8, 10, 15, 0.95) !important;
+    background: rgb(8 10 15 / 95%) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-top-color: rgba(0, 242, 255, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    border-top-color: rgb(0 242 255 / 12%) !important;
   }
 }
 
@@ -108,6 +105,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -136,39 +134,39 @@
 
   // 微信交流群卡片 - 教育友好风格
   .wechat-card {
-    background: linear-gradient(135deg, #ffffff 0%, #fff8f5 100%) !important;
-    border: 2px solid #ffe0cc !important;
-    border-radius: 28px !important;
     position: relative;
     overflow: hidden;
+    background: linear-gradient(135deg, #fff 0%, #fff8f5 100%) !important;
+    border: 2px solid #ffe0cc !important;
+    border-radius: 28px !important;
 
     &::before {
-      content: "";
       position: absolute;
       top: -20px;
       right: -20px;
       width: 120px;
       height: 120px;
+      pointer-events: none;
+      content: "";
       background: radial-gradient(
         circle,
-        rgba(255, 107, 53, 0.15) 0%,
+        rgb(255 107 53 / 15%) 0%,
         transparent 70%
       );
-      pointer-events: none;
     }
 
     &::after {
-      content: "🎉";
       position: absolute;
       top: 16px;
       right: 16px;
       font-size: 24px;
+      content: "🎉";
       animation: edu-bounce 2s ease-in-out infinite;
     }
 
     .card-title {
-      color: #ff6b35 !important;
       font-weight: 700 !important;
+      color: #ff6b35 !important;
     }
 
     .card-desc {
@@ -176,14 +174,14 @@
     }
 
     .qrcode-wrapper {
+      background: #fff !important;
       border: 2px solid #ffe0cc !important;
       border-radius: 16px !important;
-      background: #ffffff !important;
     }
 
     &:hover {
+      box-shadow: 0 12px 32px rgb(255 107 53 / 20%) !important;
       transform: translateY(-4px) scale(1.01) !important;
-      box-shadow: 0 12px 32px rgba(255, 107, 53, 0.2) !important;
     }
   }
 
@@ -191,11 +189,11 @@
   .edit-btn,
   .enter-editor-btn {
     background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
-    box-shadow: 0 6px 16px -4px rgba(255, 107, 53, 0.35) !important;
+    box-shadow: 0 6px 16px -4px rgb(255 107 53 / 35%) !important;
   }
 
   .app-footer {
-    background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+    background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
     border-top-color: #ffe4db !important;
   }
 }
@@ -205,6 +203,7 @@
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-8px);
   }
@@ -215,7 +214,7 @@
   .meta-library,
   .verse-library,
   .help-center {
-    background: #ffffff !important;
+    background: #fff !important;
   }
 
   .scene-card,
@@ -227,15 +226,15 @@
     box-shadow: none !important;
 
     &:hover {
-      border-color: #000000 !important;
+      border-color: #000 !important;
       transform: none !important;
     }
   }
 
   // 微信交流群卡片 - 极简纯净风格
   .wechat-card {
-    background: #ffffff !important;
-    border: 1px solid #000000 !important;
+    background: #fff !important;
+    border: 1px solid #000 !important;
     border-radius: 0 !important;
 
     &::before {
@@ -243,19 +242,19 @@
     }
 
     .card-title {
-      color: #000000 !important;
       font-weight: 500 !important;
+      color: #000 !important;
       letter-spacing: 0.5px !important;
     }
 
     .card-desc {
-      color: #666666 !important;
+      color: #666 !important;
     }
 
     .qrcode-wrapper {
-      border: 1px solid #000000 !important;
+      background: #fff !important;
+      border: 1px solid #000 !important;
       border-radius: 0 !important;
-      background: #ffffff !important;
     }
 
     &:hover {
@@ -266,11 +265,11 @@
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: #000000 !important;
+    background: #000 !important;
     border-radius: 0 !important;
 
     &:hover {
-      background: #333333 !important;
+      background: #333 !important;
     }
   }
 
@@ -292,9 +291,9 @@
   .hero-title,
   .section-title {
     font-weight: 900 !important;
+    color: #000 !important;
     text-transform: uppercase !important;
     letter-spacing: 2px !important;
-    color: #000000 !important;
   }
 
   .scene-card,
@@ -302,74 +301,74 @@
   .video-card,
   .doc-item,
   .faq-item {
-    background: #ffffff !important;
-    border: 3px solid #000000 !important;
+    background: #fff !important;
+    border: 3px solid #000 !important;
     border-radius: 8px !important;
-    box-shadow: 5px 5px 0px #000000 !important;
+    box-shadow: 5px 5px 0 #000 !important;
 
     &:hover {
+      box-shadow: 8px 8px 0 #000 !important;
       transform: translate(-3px, -3px) !important;
-      box-shadow: 8px 8px 0px #000000 !important;
     }
   }
 
   // 微信交流群卡片 - 新粗犷主义风格
   .wechat-card {
-    background: #00ff88 !important;
-    border: 3px solid #000000 !important;
-    border-radius: 8px !important;
-    box-shadow: 6px 6px 0px #000000 !important;
     position: relative;
+    background: #0f8 !important;
+    border: 3px solid #000 !important;
+    border-radius: 8px !important;
+    box-shadow: 6px 6px 0 #000 !important;
 
     &::before {
       display: none !important;
     }
 
     .card-title {
-      color: #000000 !important;
       font-weight: 900 !important;
+      color: #000 !important;
       text-transform: uppercase !important;
       letter-spacing: 1px !important;
     }
 
     .card-desc {
-      color: #000000 !important;
       font-weight: 500 !important;
+      color: #000 !important;
     }
 
     .qrcode-wrapper {
-      background: #ffffff !important;
-      border: 3px solid #000000 !important;
+      background: #fff !important;
+      border: 3px solid #000 !important;
       border-radius: 4px !important;
-      box-shadow: 4px 4px 0px #000000 !important;
+      box-shadow: 4px 4px 0 #000 !important;
     }
 
     &:hover {
+      box-shadow: 10px 10px 0 #000 !important;
       transform: translate(-4px, -4px) !important;
-      box-shadow: 10px 10px 0px #000000 !important;
     }
   }
 
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: #fff000 !important;
-    color: #000000 !important;
-    border: 3px solid #000000 !important;
-    border-radius: 8px !important;
-    box-shadow: 4px 4px 0px #000000 !important;
     font-weight: 700 !important;
+    color: #000 !important;
     text-transform: uppercase !important;
+    background: #fff000 !important;
+    border: 3px solid #000 !important;
+    border-radius: 8px !important;
+    box-shadow: 4px 4px 0 #000 !important;
 
     &:hover {
+      box-shadow: 6px 6px 0 #000 !important;
       transform: translate(-2px, -2px) !important;
-      box-shadow: 6px 6px 0px #000000 !important;
     }
   }
 
   .app-footer {
-    background: #ffffff !important;
-    border-top: 3px solid #000000 !important;
+    background: #fff !important;
+    border-top: 3px solid #000 !important;
   }
 }
 
@@ -384,7 +383,7 @@
   .library-title,
   .hero-title,
   .section-title {
-    color: #ffffff !important;
+    color: #fff !important;
   }
 
   .scene-card,
@@ -397,30 +396,27 @@
 
     &:hover {
       border-color: #30363d !important;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+      box-shadow: 0 8px 24px rgb(0 0 0 / 40%) !important;
     }
   }
 
   // 微信交流群卡片 - 深空专业风格
   .wechat-card {
-    background: linear-gradient(135deg, #151921 0%, #1a1f2a 100%) !important;
-    border: 1px solid #21262d !important;
     position: relative;
     overflow: hidden;
+    background: linear-gradient(135deg, #151921 0%, #1a1f2a 100%) !important;
+    border: 1px solid #21262d !important;
 
     &::before {
-      content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
+      pointer-events: none;
+      content: "";
       background: linear-gradient(
         135deg,
-        rgba(45, 104, 255, 0.08) 0%,
+        rgb(45 104 255 / 8%) 0%,
         transparent 60%
       ) !important;
-      pointer-events: none;
     }
 
     .card-title {
@@ -438,16 +434,16 @@
 
     &:hover {
       border-color: #2d68ff !important;
-      box-shadow: 0 8px 32px rgba(45, 104, 255, 0.15) !important;
+      box-shadow: 0 8px 32px rgb(45 104 255 / 15%) !important;
     }
   }
 
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
+    color: #fff !important;
     background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
     border: none !important;
-    color: #ffffff !important;
   }
 
   .app-footer {
@@ -475,28 +471,25 @@
 
   // 微信交流群卡片 - 现代蓝风格（默认）
   .wechat-card {
-    background: linear-gradient(
-      135deg,
-      var(--bg-card, #ffffff) 0%,
-      var(--bg-hover, #f8fafc) 100%
-    ) !important;
-    border: 1px solid var(--primary-light, rgba(0, 186, 255, 0.2)) !important;
     position: relative;
     overflow: hidden;
+    background: linear-gradient(
+      135deg,
+      var(--bg-card, #fff) 0%,
+      var(--bg-hover, #f8fafc) 100%
+    ) !important;
+    border: 1px solid var(--primary-light, rgb(0 186 255 / 20%)) !important;
 
     &::before {
-      content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
+      pointer-events: none;
+      content: "";
       background: linear-gradient(
         135deg,
-        var(--primary-light, rgba(0, 186, 255, 0.08)) 0%,
-        var(--success-light, rgba(34, 197, 94, 0.05)) 100%
+        var(--primary-light, rgb(0 186 255 / 8%)) 0%,
+        var(--success-light, rgb(34 197 94 / 5%)) 100%
       ) !important;
-      pointer-events: none;
     }
 
     .card-title {
@@ -508,16 +501,16 @@
     }
 
     .qrcode-wrapper {
-      background: var(--bg-card, #ffffff) !important;
+      background: var(--bg-card, #fff) !important;
       border: 1px solid var(--border-color, #e2e8f0) !important;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 5%) !important;
     }
 
     &:hover {
-      border-color: var(--primary-color, rgba(0, 186, 255, 0.4)) !important;
+      border-color: var(--primary-color, rgb(0 186 255 / 40%)) !important;
       box-shadow: var(
         --shadow-primary,
-        0 8px 24px rgba(0, 186, 255, 0.12)
+        0 8px 24px rgb(0 186 255 / 12%)
       ) !important;
     }
   }
@@ -527,12 +520,12 @@
   .enter-editor-btn {
     background: var(
       --primary-gradient,
-      linear-gradient(135deg, #00baff 0%, #0099dd 100%)
+      linear-gradient(135deg, #00baff 0%, #09d 100%)
     ) !important;
   }
 
   .app-footer {
-    background: var(--bg-card, #ffffff) !important;
+    background: var(--bg-card, #fff) !important;
   }
 }
 
@@ -541,8 +534,8 @@
 // ============================================
 
 .video-tutorials {
-  background: var(--bg-page) !important;
   font-family: var(--font-family) !important;
+  background: var(--bg-page) !important;
 
   .page-title {
     color: var(--text-primary) !important;
@@ -553,8 +546,8 @@
     border-radius: var(--radius-sm) !important;
 
     &:hover {
-      background: var(--bg-hover) !important;
       color: var(--primary-color) !important;
+      background: var(--bg-hover) !important;
     }
   }
 
@@ -570,8 +563,8 @@
       }
 
       &.active {
-        border-color: var(--primary-color) !important;
         background: var(--primary-light) !important;
+        border-color: var(--primary-color) !important;
       }
     }
 
@@ -603,15 +596,15 @@
   }
 
   .video-item {
-    border: 1px solid rgba(0, 242, 255, 0.15) !important;
-    background: rgba(18, 24, 32, 0.75) !important;
+    background: rgb(18 24 32 / 75%) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgb(0 242 255 / 15%) !important;
 
     &:hover,
     &.active {
-      border-color: rgba(0, 242, 255, 0.4) !important;
-      box-shadow: 0 0 30px rgba(0, 242, 255, 0.2) !important;
+      border-color: rgb(0 242 255 / 40%) !important;
+      box-shadow: 0 0 30px rgb(0 242 255 / 20%) !important;
     }
   }
 }
@@ -632,7 +625,7 @@
 
 .theme-minimal-pure {
   .video-tutorials {
-    background: #ffffff !important;
+    background: #fff !important;
   }
 
   .video-item {
@@ -640,7 +633,7 @@
     box-shadow: none !important;
 
     &:hover {
-      border-color: #000000 !important;
+      border-color: #000 !important;
       transform: none !important;
     }
   }
@@ -661,14 +654,14 @@
   }
 
   .video-item {
-    background: #ffffff !important;
-    border: 3px solid #000000 !important;
+    background: #fff !important;
+    border: 3px solid #000 !important;
     border-radius: 8px !important;
-    box-shadow: 5px 5px 0px #000000 !important;
+    box-shadow: 5px 5px 0 #000 !important;
 
     &:hover {
+      box-shadow: 8px 8px 0 #000 !important;
       transform: translate(-3px, -3px) !important;
-      box-shadow: 8px 8px 0px #000000 !important;
     }
 
     &.active {
@@ -688,17 +681,17 @@
 
     &:hover {
       border-color: #30363d !important;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+      box-shadow: 0 8px 24px rgb(0 0 0 / 40%) !important;
     }
 
     &.active {
+      background: rgb(45 104 255 / 10%) !important;
       border-color: #2d68ff !important;
-      background: rgba(45, 104, 255, 0.1) !important;
     }
   }
 
   .video-title {
-    color: #ffffff !important;
+    color: #fff !important;
   }
 
   .video-desc {
@@ -729,9 +722,9 @@
 // ============================================
 
 .profile-settings {
-  background: var(--bg-page) !important;
-  font-family: var(--font-family) !important;
   min-height: 100vh;
+  font-family: var(--font-family) !important;
+  background: var(--bg-page) !important;
 
   .page-title {
     color: var(--text-primary) !important;
@@ -752,8 +745,8 @@
   }
 
   .avatar-placeholder {
-    background: var(--bg-hover) !important;
     color: var(--text-muted) !important;
+    background: var(--bg-hover) !important;
   }
 
   .avatar-hint {
@@ -761,8 +754,8 @@
   }
 
   .btn-primary {
-    background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
+    background: var(--primary-color) !important;
     border-radius: var(--radius-full) !important;
 
     &:hover {
@@ -771,14 +764,14 @@
   }
 
   .btn-secondary {
+    color: var(--text-secondary) !important;
     background: var(--bg-card) !important;
     border: var(--border-width) solid var(--border-color) !important;
-    color: var(--text-secondary) !important;
     border-radius: var(--radius-full) !important;
 
     &:hover {
-      border-color: var(--border-color-hover) !important;
       color: var(--text-primary) !important;
+      border-color: var(--border-color-hover) !important;
     }
   }
 
@@ -794,8 +787,8 @@
     border-bottom: var(--border-width) solid var(--border-color) !important;
 
     .security-icon {
-      background: var(--primary-light) !important;
       color: var(--primary-color) !important;
+      background: var(--primary-light) !important;
       border-radius: var(--radius-md) !important;
     }
 
@@ -818,8 +811,8 @@
     border-radius: var(--radius-lg) !important;
 
     .subscription-badge {
-      background: var(--primary-color) !important;
       color: var(--text-inverse) !important;
+      background: var(--primary-color) !important;
     }
 
     .subscription-title {
@@ -840,9 +833,9 @@
   }
 
   .btn-outline {
+    color: var(--primary-color) !important;
     background: var(--bg-card) !important;
     border: var(--border-width) solid var(--primary-color) !important;
-    color: var(--primary-color) !important;
     border-radius: var(--radius-full) !important;
 
     &:hover {
@@ -887,24 +880,24 @@
       border-radius: var(--radius-md) !important;
 
       &.info {
-        background: var(--info-light) !important;
         color: var(--info-color) !important;
+        background: var(--info-light) !important;
       }
 
       &.warning {
-        background: var(--warning-light) !important;
         color: var(--warning-color) !important;
+        background: var(--warning-light) !important;
       }
 
       &.danger {
-        background: var(--danger-light) !important;
         color: var(--danger-color) !important;
+        background: var(--danger-light) !important;
       }
     }
 
     .dialog-btn-primary {
-      background: var(--primary-color) !important;
       color: var(--text-inverse) !important;
+      background: var(--primary-color) !important;
       border-radius: var(--radius-full) !important;
 
       &:hover {
@@ -913,9 +906,9 @@
     }
 
     .dialog-btn-secondary {
+      color: var(--text-secondary) !important;
       background: var(--bg-card) !important;
       border: var(--border-width) solid var(--border-color) !important;
-      color: var(--text-secondary) !important;
       border-radius: var(--radius-full) !important;
 
       &:hover {
@@ -932,13 +925,13 @@
     }
 
     .tool-btn {
-      background: var(--bg-hover) !important;
       color: var(--text-secondary) !important;
+      background: var(--bg-hover) !important;
       border-radius: var(--radius-sm) !important;
 
       &:hover {
-        background: var(--bg-active) !important;
         color: var(--primary-color) !important;
+        background: var(--bg-active) !important;
       }
     }
   }
@@ -950,28 +943,28 @@
     background: #0b0e14 !important;
 
     .settings-card {
-      background: rgba(18, 24, 32, 0.75) !important;
+      background: rgb(18 24 32 / 75%) !important;
       backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
-      border: 1px solid rgba(0, 242, 255, 0.15) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid rgb(0 242 255 / 15%) !important;
 
       &:hover {
-        border-color: rgba(0, 242, 255, 0.3) !important;
+        border-color: rgb(0 242 255 / 30%) !important;
       }
     }
 
     .subscription-card {
       background: linear-gradient(
         135deg,
-        rgba(0, 242, 255, 0.1) 0%,
-        rgba(18, 24, 32, 0.75) 100%
+        rgb(0 242 255 / 10%) 0%,
+        rgb(18 24 32 / 75%) 100%
       ) !important;
-      border-color: rgba(0, 242, 255, 0.3) !important;
+      border-color: rgb(0 242 255 / 30%) !important;
     }
 
     .danger-card {
-      background: rgba(255, 51, 102, 0.1) !important;
-      border-color: rgba(255, 51, 102, 0.3) !important;
+      background: rgb(255 51 102 / 10%) !important;
+      border-color: rgb(255 51 102 / 30%) !important;
     }
   }
 }
@@ -991,8 +984,8 @@
     .subscription-card {
       background: linear-gradient(
         135deg,
-        rgba(255, 107, 53, 0.1) 0%,
-        #ffffff 100%
+        rgb(255 107 53 / 10%) 0%,
+        #fff 100%
       ) !important;
       border-color: #ff6b35 !important;
     }
@@ -1005,7 +998,7 @@
 
 .theme-minimal-pure {
   .profile-settings {
-    background: #ffffff !important;
+    background: #fff !important;
 
     .settings-card,
     .subscription-card,
@@ -1021,10 +1014,10 @@
     }
 
     .btn-primary {
-      background: #000000 !important;
+      background: #000 !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
       }
     }
   }
@@ -1035,43 +1028,43 @@
     background: #fafaf8 !important;
 
     .settings-card {
-      background: #ffffff !important;
-      border: 3px solid #000000 !important;
+      background: #fff !important;
+      border: 3px solid #000 !important;
       border-radius: 8px !important;
-      box-shadow: 5px 5px 0px #000000 !important;
+      box-shadow: 5px 5px 0 #000 !important;
 
       &:hover {
+        box-shadow: 7px 7px 0 #000 !important;
         transform: translate(-2px, -2px) !important;
-        box-shadow: 7px 7px 0px #000000 !important;
       }
     }
 
     .subscription-card {
       background: #fff000 !important;
-      border: 3px solid #000000 !important;
-      box-shadow: 5px 5px 0px #000000 !important;
+      border: 3px solid #000 !important;
+      box-shadow: 5px 5px 0 #000 !important;
     }
 
     .danger-card {
       background: #ff1744 !important;
-      border: 3px solid #000000 !important;
-      box-shadow: 5px 5px 0px #000000 !important;
+      border: 3px solid #000 !important;
+      box-shadow: 5px 5px 0 #000 !important;
 
       .danger-title,
       .danger-desc {
-        color: #ffffff !important;
+        color: #fff !important;
       }
     }
 
     .btn-primary {
+      color: #000 !important;
       background: #fff000 !important;
-      color: #000000 !important;
-      border: 3px solid #000000 !important;
-      box-shadow: 4px 4px 0px #000000 !important;
+      border: 3px solid #000 !important;
+      box-shadow: 4px 4px 0 #000 !important;
 
       &:hover {
+        box-shadow: 6px 6px 0 #000 !important;
         transform: translate(-2px, -2px) !important;
-        box-shadow: 6px 6px 0px #000000 !important;
       }
     }
   }
@@ -1089,14 +1082,14 @@
     .subscription-card {
       background: linear-gradient(
         135deg,
-        rgba(45, 104, 255, 0.1) 0%,
+        rgb(45 104 255 / 10%) 0%,
         #151921 100%
       ) !important;
       border-color: #2d68ff !important;
     }
 
     .danger-card {
-      background: rgba(248, 81, 73, 0.1) !important;
+      background: rgb(248 81 73 / 10%) !important;
       border-color: #f85149 !important;
     }
 
@@ -1116,7 +1109,7 @@
     .btn-primary {
       background: var(
         --primary-gradient,
-        linear-gradient(135deg, #00baff 0%, #0099dd 100%)
+        linear-gradient(135deg, #00baff 0%, #09d 100%)
       ) !important;
     }
   }
@@ -1129,37 +1122,37 @@
 .theme-cyber-tech {
   .profile-settings .custom-dialog {
     :deep(.el-dialog) {
-      background: rgba(11, 14, 20, 0.95) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
+      background: rgb(11 14 20 / 95%) !important;
       backdrop-filter: blur(20px) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
     }
 
     .dialog-header {
-      background: rgba(11, 14, 20, 0.95) !important;
-      border-bottom-color: rgba(0, 242, 255, 0.15) !important;
+      background: rgb(11 14 20 / 95%) !important;
+      border-bottom-color: rgb(0 242 255 / 15%) !important;
     }
 
     .dialog-title {
       color: #00f2ff !important;
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+      text-shadow: 0 0 10px rgb(0 242 255 / 50%) !important;
     }
 
     .dialog-body {
-      background: rgba(11, 14, 20, 0.95) !important;
+      background: rgb(11 14 20 / 95%) !important;
     }
 
     .dialog-hint-box {
-      background: rgba(0, 242, 255, 0.08) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
+      background: rgb(0 242 255 / 8%) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
 
       &.warning {
-        background: rgba(255, 170, 0, 0.08) !important;
-        border-color: rgba(255, 170, 0, 0.2) !important;
+        background: rgb(255 170 0 / 8%) !important;
+        border-color: rgb(255 170 0 / 20%) !important;
       }
 
       &.danger {
-        background: rgba(255, 51, 102, 0.08) !important;
-        border-color: rgba(255, 51, 102, 0.2) !important;
+        background: rgb(255 51 102 / 8%) !important;
+        border-color: rgb(255 51 102 / 20%) !important;
       }
 
       p {
@@ -1168,52 +1161,52 @@
     }
 
     .dialog-btns {
-      background: rgba(11, 14, 20, 0.95) !important;
-      border-top-color: rgba(0, 242, 255, 0.15) !important;
+      background: rgb(11 14 20 / 95%) !important;
+      border-top-color: rgb(0 242 255 / 15%) !important;
     }
 
     .dialog-btn-primary {
-      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
       color: #0b0e14 !important;
-      box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
+      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
       border-radius: 4px !important;
+      box-shadow: 0 0 20px rgb(0 242 255 / 30%) !important;
     }
 
     .dialog-btn-secondary {
-      background: transparent !important;
-      border: 1px solid rgba(0, 242, 255, 0.3) !important;
       color: #00f2ff !important;
+      background: transparent !important;
+      border: 1px solid rgb(0 242 255 / 30%) !important;
       border-radius: 4px !important;
     }
 
     .dialog-btn-danger {
-      background: linear-gradient(135deg, #ff3366 0%, #ff1744 100%) !important;
-      box-shadow: 0 0 20px rgba(255, 51, 102, 0.3) !important;
+      background: linear-gradient(135deg, #f36 0%, #ff1744 100%) !important;
       border-radius: 4px !important;
+      box-shadow: 0 0 20px rgb(255 51 102 / 30%) !important;
     }
 
     .tool-btn {
-      background: rgba(18, 24, 32, 0.8) !important;
-      border-color: rgba(0, 242, 255, 0.2) !important;
       color: #8b9dc3 !important;
+      background: rgb(18 24 32 / 80%) !important;
+      border-color: rgb(0 242 255 / 20%) !important;
       border-radius: 4px !important;
 
       &:hover {
-        border-color: #00f2ff !important;
         color: #00f2ff !important;
-        box-shadow: 0 0 10px rgba(0, 242, 255, 0.3) !important;
+        border-color: #00f2ff !important;
+        box-shadow: 0 0 10px rgb(0 242 255 / 30%) !important;
       }
     }
 
     .custom-form {
       :deep(.el-input__wrapper) {
-        background: rgba(18, 24, 32, 0.8) !important;
-        border-color: rgba(0, 242, 255, 0.2) !important;
+        background: rgb(18 24 32 / 80%) !important;
+        border-color: rgb(0 242 255 / 20%) !important;
         border-radius: 4px !important;
 
         &:focus-within {
           border-color: #00f2ff !important;
-          box-shadow: 0 0 10px rgba(0, 242, 255, 0.2) !important;
+          box-shadow: 0 0 10px rgb(0 242 255 / 20%) !important;
         }
       }
 
@@ -1231,7 +1224,7 @@
 .theme-edu-friendly {
   .profile-settings .custom-dialog {
     :deep(.el-dialog) {
-      background: #ffffff !important;
+      background: #fff !important;
       border: 2px solid #ffe0cc !important;
       border-radius: 28px !important;
     }
@@ -1249,7 +1242,8 @@
       border-radius: 16px !important;
 
       &.info {
-        background: rgba(255, 107, 53, 0.08) !important;
+        background: rgb(255 107 53 / 8%) !important;
+
         .svg-inline--fa {
           color: #ff6b35 !important;
         }
@@ -1257,7 +1251,7 @@
     }
 
     .dialog-btns {
-      background: #ffffff !important;
+      background: #fff !important;
       border-top-color: #ffe0cc !important;
     }
 
@@ -1271,8 +1265,8 @@
     }
 
     .dialog-btn-secondary {
-      border-color: #ffe0cc !important;
       color: #ff6b35 !important;
+      border-color: #ffe0cc !important;
       border-radius: 24px !important;
     }
 
@@ -1286,9 +1280,9 @@
       border-radius: 12px !important;
 
       &:hover {
-        border-color: #ff6b35 !important;
         color: #ff6b35 !important;
-        background: rgba(255, 107, 53, 0.05) !important;
+        background: rgb(255 107 53 / 5%) !important;
+        border-color: #ff6b35 !important;
       }
     }
 
@@ -1299,7 +1293,7 @@
 
         &:focus-within {
           border-color: #ff6b35 !important;
-          box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
+          box-shadow: 0 0 0 3px rgb(255 107 53 / 10%) !important;
         }
       }
     }
@@ -1309,24 +1303,24 @@
 .theme-neo-brutalism {
   .profile-settings .custom-dialog {
     :deep(.el-dialog) {
-      background: #ffffff !important;
-      border: 3px solid #000000 !important;
+      background: #fff !important;
+      border: 3px solid #000 !important;
       border-radius: 8px !important;
-      box-shadow: 8px 8px 0px #000000 !important;
+      box-shadow: 8px 8px 0 #000 !important;
     }
 
     .dialog-header {
       background: #fff000 !important;
-      border-bottom: 3px solid #000000 !important;
+      border-bottom: 3px solid #000 !important;
     }
 
     .dialog-title {
-      color: #000000 !important;
       font-weight: 900 !important;
+      color: #000 !important;
     }
 
     .dialog-hint-box {
-      border: 2px solid #000000 !important;
+      border: 2px solid #000 !important;
       border-radius: 4px !important;
 
       &.info {
@@ -1339,74 +1333,76 @@
 
       &.danger {
         background: #ff1744 !important;
+
         p,
         .hint-title {
-          color: #ffffff !important;
+          color: #fff !important;
         }
+
         .svg-inline--fa {
-          color: #ffffff !important;
+          color: #fff !important;
         }
       }
     }
 
     .dialog-btns {
-      background: #ffffff !important;
-      border-top: 3px solid #000000 !important;
+      background: #fff !important;
+      border-top: 3px solid #000 !important;
     }
 
     .dialog-btn-primary {
+      color: #000 !important;
       background: #fff000 !important;
-      color: #000000 !important;
-      border: 3px solid #000000 !important;
+      border: 3px solid #000 !important;
       border-radius: 4px !important;
-      box-shadow: 4px 4px 0px #000000 !important;
+      box-shadow: 4px 4px 0 #000 !important;
 
       &:hover {
+        box-shadow: 6px 6px 0 #000 !important;
         transform: translate(-2px, -2px) !important;
-        box-shadow: 6px 6px 0px #000000 !important;
       }
     }
 
     .dialog-btn-secondary {
-      background: #ffffff !important;
-      color: #000000 !important;
-      border: 3px solid #000000 !important;
+      color: #000 !important;
+      background: #fff !important;
+      border: 3px solid #000 !important;
       border-radius: 4px !important;
-      box-shadow: 4px 4px 0px #000000 !important;
+      box-shadow: 4px 4px 0 #000 !important;
 
       &:hover {
+        box-shadow: 6px 6px 0 #000 !important;
         transform: translate(-2px, -2px) !important;
-        box-shadow: 6px 6px 0px #000000 !important;
       }
     }
 
     .dialog-btn-danger {
+      color: #fff !important;
       background: #ff1744 !important;
-      color: #ffffff !important;
-      border: 3px solid #000000 !important;
+      border: 3px solid #000 !important;
       border-radius: 4px !important;
-      box-shadow: 4px 4px 0px #000000 !important;
+      box-shadow: 4px 4px 0 #000 !important;
     }
 
     .tool-btn {
-      border: 2px solid #000000 !important;
+      border: 2px solid #000 !important;
       border-radius: 4px !important;
-      box-shadow: 3px 3px 0px #000000 !important;
+      box-shadow: 3px 3px 0 #000 !important;
 
       &:hover {
-        transform: translate(-1px, -1px) !important;
-        box-shadow: 4px 4px 0px #000000 !important;
         background: #fff000 !important;
+        box-shadow: 4px 4px 0 #000 !important;
+        transform: translate(-1px, -1px) !important;
       }
     }
 
     .custom-form {
       :deep(.el-input__wrapper) {
-        border: 2px solid #000000 !important;
+        border: 2px solid #000 !important;
         border-radius: 4px !important;
 
         &:focus-within {
-          box-shadow: 4px 4px 0px #000000 !important;
+          box-shadow: 4px 4px 0 #000 !important;
         }
       }
     }
@@ -1416,95 +1412,98 @@
 .theme-minimal-pure {
   .profile-settings .custom-dialog {
     :deep(.el-dialog) {
-      background: #ffffff !important;
-      border: 1px solid #000000 !important;
+      background: #fff !important;
+      border: 1px solid #000 !important;
       border-radius: 0 !important;
       box-shadow: none !important;
     }
 
     .dialog-header {
-      background: #ffffff !important;
-      border-bottom: 1px solid #000000 !important;
+      background: #fff !important;
+      border-bottom: 1px solid #000 !important;
     }
 
     .dialog-title {
-      color: #000000 !important;
       font-weight: 500 !important;
+      color: #000 !important;
     }
 
     .dialog-hint-box {
-      border-radius: 0 !important;
-      border: 1px solid currentColor !important;
       background: transparent !important;
+      border: 1px solid currentcolor !important;
+      border-radius: 0 !important;
 
       &.info {
-        border-color: #000000 !important;
+        border-color: #000 !important;
+
         .svg-inline--fa {
-          color: #000000 !important;
+          color: #000 !important;
         }
       }
 
       &.warning {
-        border-color: #666666 !important;
+        border-color: #666 !important;
+
         .svg-inline--fa {
-          color: #666666 !important;
+          color: #666 !important;
         }
       }
 
       &.danger {
-        border-color: #000000 !important;
+        border-color: #000 !important;
+
         .svg-inline--fa {
-          color: #000000 !important;
+          color: #000 !important;
         }
       }
     }
 
     .dialog-btns {
-      background: #ffffff !important;
-      border-top: 1px solid #000000 !important;
+      background: #fff !important;
+      border-top: 1px solid #000 !important;
     }
 
     .dialog-btn-primary {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
       }
     }
 
     .dialog-btn-secondary {
-      background: #ffffff !important;
-      color: #000000 !important;
-      border: 1px solid #000000 !important;
+      color: #000 !important;
+      background: #fff !important;
+      border: 1px solid #000 !important;
       border-radius: 0 !important;
     }
 
     .dialog-btn-danger {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
       border-radius: 0 !important;
     }
 
     .tool-btn {
-      border: 1px solid #000000 !important;
+      border: 1px solid #000 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background: #000000 !important;
-        color: #ffffff !important;
+        color: #fff !important;
+        background: #000 !important;
       }
     }
 
     .custom-form {
       :deep(.el-input__wrapper) {
-        border: 1px solid #000000 !important;
+        border: 1px solid #000 !important;
         border-radius: 0 !important;
 
         &:focus-within {
-          box-shadow: none !important;
           border-width: 2px !important;
+          box-shadow: none !important;
         }
       }
     }
@@ -1532,14 +1531,14 @@
     }
 
     .dialog-hint-box {
-      background: rgba(45, 104, 255, 0.1) !important;
+      background: rgb(45 104 255 / 10%) !important;
 
       &.warning {
-        background: rgba(210, 153, 34, 0.1) !important;
+        background: rgb(210 153 34 / 10%) !important;
       }
 
       &.danger {
-        background: rgba(248, 81, 73, 0.1) !important;
+        background: rgb(248 81 73 / 10%) !important;
       }
 
       p {
@@ -1557,13 +1556,13 @@
     }
 
     .dialog-btn-secondary {
+      color: #8b949e !important;
       background: #21262d !important;
       border-color: #30363d !important;
-      color: #8b949e !important;
 
       &:hover {
-        border-color: #2d68ff !important;
         color: #e6edf3 !important;
+        border-color: #2d68ff !important;
       }
     }
 
@@ -1572,13 +1571,13 @@
     }
 
     .tool-btn {
+      color: #8b949e !important;
       background: #21262d !important;
       border-color: #30363d !important;
-      color: #8b949e !important;
 
       &:hover {
-        border-color: #2d68ff !important;
         color: #2d68ff !important;
+        border-color: #2d68ff !important;
       }
     }
 
@@ -1589,7 +1588,7 @@
 
         &:focus-within {
           border-color: #2d68ff !important;
-          box-shadow: 0 0 0 3px rgba(45, 104, 255, 0.2) !important;
+          box-shadow: 0 0 0 3px rgb(45 104 255 / 20%) !important;
         }
       }
 

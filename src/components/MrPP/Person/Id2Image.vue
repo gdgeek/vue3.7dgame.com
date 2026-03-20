@@ -73,10 +73,10 @@ const url = computed(() => {
 
 <style scoped>
 .image-wrapper {
-  min-height: 100px;
   /* Give it some height so the spinner is visible */
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  min-height: 100px;
 }
 </style>

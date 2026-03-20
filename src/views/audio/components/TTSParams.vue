@@ -94,16 +94,16 @@ const localSampleRate = computed({
 
 .param-row {
   display: flex;
-  gap: 32px;
   flex-wrap: wrap;
+  gap: 32px;
 }
 
 .param-item {
-  flex: 1;
-  min-width: 200px;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 8px;
+  min-width: 200px;
 }
 
 .param-label {

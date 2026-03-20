@@ -81,8 +81,8 @@ const emit = defineEmits<{
 <style scoped lang="scss">
 .resource-scope-filter {
   display: flex;
-  align-items: center;
   gap: 10px;
+  align-items: center;
 }
 
 .scene-select,
@@ -116,13 +116,13 @@ const emit = defineEmits<{
 .resource-scope-select-popper .el-select-dropdown__item {
   display: flex;
   align-items: center;
-  text-align: left;
-  margin: 2px 8px;
-  border-radius: var(--radius-sm, 12px);
-  border: 1px solid transparent;
-  padding-left: 16px;
   padding-right: 16px;
+  padding-left: 16px;
+  margin: 2px 8px;
   color: var(--ar-text-secondary);
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 12px);
   transition:
     background-color 0.15s ease,
     color 0.15s ease,
@@ -132,16 +132,16 @@ const emit = defineEmits<{
 
 .resource-scope-select-popper .el-select-dropdown__item.hover,
 .resource-scope-select-popper .el-select-dropdown__item:hover {
-  background-color: var(--ar-primary-alpha-10);
-  color: var(--ar-primary);
-  border-color: var(--ar-primary);
   font-weight: var(--font-weight-medium, 500);
+  color: var(--ar-primary);
+  background-color: var(--ar-primary-alpha-10);
+  border-color: var(--ar-primary);
 }
 
 .resource-scope-select-popper .el-select-dropdown__item.selected {
-  background-color: var(--ar-primary-alpha-10);
-  color: var(--ar-primary);
-  border-color: var(--ar-primary);
   font-weight: var(--font-weight-medium, 500);
+  color: var(--ar-primary);
+  background-color: var(--ar-primary-alpha-10);
+  border-color: var(--ar-primary);
 }
 </style>

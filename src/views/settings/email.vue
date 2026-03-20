@@ -46,7 +46,7 @@ import EmailVerificationPanel from "@/components/Account/EmailVerificationPanel.
 </script>
 
 <style lang="scss" scoped>
-@media screen and (min-width: 900px) {
+@media screen and (width >= 900px) {
   .section-margin-left {
     margin-left: 12%;
   }
@@ -57,9 +57,9 @@ import EmailVerificationPanel from "@/components/Account/EmailVerificationPanel.
 }
 
 .box-title {
-  line-height: 10px;
   padding: 2px 0;
   margin-left: 1%;
+  line-height: 10px;
 
   small {
     color: #6f6f6f;

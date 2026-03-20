@@ -70,13 +70,13 @@
 
   // 资源库极简风格
   .resource-library {
-    background: #ffffff !important;
+    background: #fff !important;
 
     .resource-card {
       border-width: 1px !important;
 
       &:hover {
-        border-color: #000000 !important;
+        border-color: #000 !important;
         transform: none !important;
       }
     }
@@ -84,7 +84,7 @@
 
   // 详情面板极简风格
   .detail-panel {
-    background: #ffffff !important;
+    background: #fff !important;
     border-left: 1px solid #e0e0e0 !important;
     box-shadow: none !important;
 
@@ -94,7 +94,7 @@
 
     .panel-title {
       font-weight: 500 !important;
-      color: #000000 !important;
+      color: #000 !important;
     }
 
     .preview-module,
@@ -107,35 +107,35 @@
       background: #fafafa !important;
 
       .svg-inline--fa {
-        color: #666666 !important;
+        color: #666 !important;
       }
     }
 
     .change-cover-btn {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
       }
     }
 
     .item-name {
       font-weight: 500 !important;
-      color: #000000 !important;
+      color: #000 !important;
     }
 
     // 修改名称按钮 - 极简纯净风格
     .name-display .edit-btn {
+      color: #000 !important;
       background: #fafafa !important;
-      color: #000000 !important;
-      border: 1px solid #000000 !important;
+      border: 1px solid #000 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background: #000000 !important;
-        color: #ffffff !important;
+        color: #fff !important;
+        background: #000 !important;
       }
     }
 
@@ -146,16 +146,16 @@
     }
 
     .info-label {
-      color: #666666 !important;
+      color: #666 !important;
     }
 
     .info-value {
-      color: #000000 !important;
+      color: #000 !important;
     }
 
     // 表单样式
     .form-label {
-      color: #666666 !important;
+      color: #666 !important;
     }
 
     .form-input,
@@ -165,23 +165,23 @@
       border-radius: 0 !important;
 
       &:focus {
-        border-color: #000000 !important;
-        box-shadow: none !important;
+        border-color: #000 !important;
         border-width: 2px !important;
+        box-shadow: none !important;
       }
     }
 
     // 标签编辑器
     .tag-item {
+      color: #000 !important;
       background: #fafafa !important;
-      color: #000000 !important;
-      border: 1px solid #000000 !important;
+      border: 1px solid #000 !important;
       border-radius: 0 !important;
     }
 
     .tag-remove:hover {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
     }
 
     .tag-select {
@@ -190,12 +190,12 @@
     }
 
     .add-tag-btn {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
       }
     }
 
@@ -205,30 +205,30 @@
       border-radius: 0 !important;
 
       &:hover {
-        border-color: #000000 !important;
+        border-color: #000 !important;
       }
 
       &.active {
-        background: #000000 !important;
-        color: #ffffff !important;
-        border-color: #000000 !important;
+        color: #fff !important;
+        background: #000 !important;
+        border-color: #000 !important;
       }
     }
 
     .panel-footer {
-      background: #ffffff !important;
+      background: #fff !important;
       border-top: 1px solid #e0e0e0 !important;
     }
 
     .download-btn,
     .enter-edit-btn {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
       border-radius: 0 !important;
       box-shadow: none !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
         transform: none !important;
       }
     }
@@ -238,37 +238,37 @@
       border-radius: 0 !important;
 
       &:hover {
-        border-color: #000000 !important;
+        border-color: #000 !important;
       }
     }
 
     .confirm-btn,
     .save-btn {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
       }
     }
 
     .delete-btn {
-      color: #000000 !important;
+      color: #000 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background: rgba(244, 67, 54, 0.05) !important;
+        background: rgb(244 67 54 / 5%) !important;
       }
     }
 
     .secondary-actions .download-btn {
-      background: #ffffff !important;
-      color: #000000 !important;
+      color: #000 !important;
+      background: #fff !important;
       border: 1px solid #e0e0e0 !important;
 
       &:hover {
-        border-color: #000000 !important;
+        border-color: #000 !important;
       }
     }
   }
@@ -276,14 +276,14 @@
   // 对话框极简风格
   .custom-confirm-dialog .el-dialog,
   .custom-input-dialog .el-dialog {
-    background: #ffffff !important;
+    background: #fff !important;
     border: 1px solid #e0e0e0 !important;
 
     .btn-primary {
-      background: #000000 !important;
+      background: #000 !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
       }
     }
 
@@ -291,14 +291,14 @@
       border: 1px solid #e0e0e0 !important;
 
       &:hover {
-        border-color: #000000 !important;
+        border-color: #000 !important;
       }
     }
   }
 
   // 上传模态框极简风格
   .upload-modal {
-    background: #ffffff !important;
+    background: #fff !important;
     border: 1px solid #e0e0e0 !important;
 
     .upload-zone {
@@ -306,17 +306,17 @@
 
       &:hover,
       &.drag-active {
-        border-color: #000000 !important;
         background: #fafafa !important;
+        border-color: #000 !important;
       }
     }
 
     .browse-btn,
     .start-upload-btn {
-      background: #000000 !important;
+      background: #000 !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
         transform: none !important;
       }
     }
@@ -335,7 +335,7 @@
     border-width: 1px !important;
 
     &:hover {
-      border-color: #000000 !important;
+      border-color: #000 !important;
       transform: none !important;
     }
   }
@@ -347,12 +347,12 @@
   }
 
   // 下划线链接
-  a:not(.btn):not(.el-button) {
+  a:not(.btn, .el-button) {
     text-decoration: none;
     border-bottom: 1px solid transparent;
 
     &:hover {
-      border-bottom-color: currentColor;
+      border-bottom-color: currentcolor;
     }
   }
 
@@ -372,17 +372,17 @@
   .sidebar-item {
     &:hover {
       background: transparent !important;
-      border-left: 2px solid #000000;
+      border-left: 2px solid #000;
     }
   }
 
   .sidebar-item-active {
+    color: #000 !important;
     background: transparent !important;
-    border-left: 2px solid #000000 !important;
-    color: #000000 !important;
+    border-left: 2px solid #000 !important;
 
     .svg-inline--fa {
-      color: #000000 !important;
+      color: #000 !important;
     }
   }
 
@@ -391,29 +391,29 @@
     border: 1px solid #e0e0e0 !important;
 
     &:focus {
-      border-color: #000000 !important;
+      border-color: #000 !important;
       box-shadow: none !important;
     }
   }
 
   // 列表视图 - 极简纯净风格
   .resource-list {
-    background: #ffffff !important;
+    background: #fff !important;
     border: 1px solid #e0e0e0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
 
     .list-table {
       th {
-        background: #fafafa !important;
-        color: #666666 !important;
-        border-bottom: 1px solid #e0e0e0 !important;
         font-weight: 500 !important;
+        color: #666 !important;
+        background: #fafafa !important;
+        border-bottom: 1px solid #e0e0e0 !important;
       }
 
       td {
+        color: #000 !important;
         border-bottom: 1px solid #e0e0e0 !important;
-        color: #000000 !important;
       }
     }
 
@@ -428,67 +428,68 @@
     }
 
     .row-thumbnail {
+      background: #fafafa !important;
       border: 1px solid #e0e0e0 !important;
       border-radius: 0 !important;
-      background: #fafafa !important;
     }
 
     .file-name {
-      color: #000000 !important;
       font-weight: 500 !important;
+      color: #000 !important;
     }
 
     .enter-editor-btn {
-      background: #000000 !important;
-      color: #ffffff !important;
+      color: #fff !important;
+      background: #000 !important;
       border-radius: 0 !important;
       box-shadow: none !important;
 
       &:hover {
-        background: #333333 !important;
+        background: #333 !important;
         transform: none !important;
       }
     }
 
     .list-tag {
+      color: #000 !important;
       background: #fafafa !important;
-      color: #000000 !important;
-      border: 1px solid #000000 !important;
+      border: 1px solid #000 !important;
       border-radius: 0 !important;
     }
 
     .visibility-cell {
       &.public {
-        color: #000000 !important;
+        color: #000 !important;
       }
+
       &.private {
-        color: #666666 !important;
+        color: #666 !important;
       }
     }
 
     .more-btn {
-      color: #666666 !important;
+      color: #666 !important;
       border-radius: 0 !important;
 
       &:hover {
+        color: #000 !important;
         background: #fafafa !important;
-        color: #000000 !important;
       }
     }
 
     .row-menu {
-      background: #ffffff !important;
+      padding: 0 !important;
+      background: #fff !important;
       border: 1px solid #e0e0e0 !important;
       border-radius: 0 !important;
       box-shadow: none !important;
-      padding: 0 !important;
 
       .menu-item {
-        color: #000000 !important;
+        color: #000 !important;
         border-radius: 0 !important;
 
         .svg-inline--fa {
-          color: #666666 !important;
+          color: #666 !important;
         }
 
         &:hover {
@@ -496,14 +497,14 @@
         }
 
         &.danger {
-          color: #000000 !important;
+          color: #000 !important;
 
           .svg-inline--fa {
-            color: #000000 !important;
+            color: #000 !important;
           }
 
           &:hover {
-            background: rgba(244, 67, 54, 0.05) !important;
+            background: rgb(244 67 54 / 5%) !important;
           }
         }
       }

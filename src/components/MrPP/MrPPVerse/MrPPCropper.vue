@@ -281,9 +281,9 @@ const finish = async () => {
 }
 
 .file-uploader {
-  cursor: pointer;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .file-uploader:hover {
@@ -291,22 +291,22 @@ const finish = async () => {
 }
 
 .file-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
   width: 132px;
   height: 132px;
+  margin-right: 12px;
+  font-size: 28px;
   line-height: 132px;
+  color: #8c939d;
   text-align: center;
   border: 1px dashed #d9d9d9;
-  margin-right: 12px;
   border-radius: 6px;
 }
 
 .file {
+  display: block;
   width: 132px;
   height: 132px;
-  display: block;
-  border-radius: 6px;
   margin-right: 12px;
+  border-radius: 6px;
 }
 </style>

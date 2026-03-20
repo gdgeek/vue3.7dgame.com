@@ -126,8 +126,8 @@ const handleLanguageChange = async (lang: string) => {
 
 .actions-group {
   display: flex;
-  align-items: center;
   gap: 4px;
+  align-items: center;
   padding-right: 16px;
   border-right: 1px solid var(--ar-divider);
 }
@@ -137,16 +137,16 @@ const handleLanguageChange = async (lang: string) => {
   :deep(.el-dropdown-menu) {
     min-width: 280px;
     padding: 8px;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--border-color);
     background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 15%);
   }
 
   :deep(.el-dropdown-menu__item) {
     padding: 0;
-    border-radius: 12px;
     margin-bottom: 6px;
+    border-radius: 12px;
     transition: all 0.2s ease;
 
     &:last-child {
@@ -169,36 +169,36 @@ const handleLanguageChange = async (lang: string) => {
 
 .theme-item {
   display: flex;
-  align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  align-items: center;
   width: 100%;
+  padding: 10px 12px;
 }
 
 .theme-preview-mini {
-  width: 40px;
-  height: 28px;
-  border-radius: 6px;
-  overflow: hidden;
+  position: relative;
   display: flex;
   flex-shrink: 0;
+  width: 40px;
+  height: 28px;
+  overflow: hidden;
   border: 1px solid var(--border-color);
-  position: relative;
+  border-radius: 6px;
 
   // 日间模式
   &.modern-blue {
-    background: linear-gradient(90deg, #ffffff 30%, #f0f4f8 30%);
+    background: linear-gradient(90deg, #fff 30%, #f0f4f8 30%);
 
     &::after {
-      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
       width: 12px;
       height: 8px;
-      background: #ffffff;
-      border-radius: 2px;
+      content: "";
+      background: #fff;
       border: 1px solid #e2e8f0;
+      border-radius: 2px;
     }
   }
 
@@ -207,24 +207,24 @@ const handleLanguageChange = async (lang: string) => {
     background: linear-gradient(90deg, #080a0f 30%, #0b0e14 30%);
 
     &::after {
-      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
       width: 12px;
       height: 8px;
+      content: "";
       background: #151921;
-      border-radius: 2px;
       border: 1px solid #21262d;
+      border-radius: 2px;
     }
 
     &::before {
-      content: "";
       position: absolute;
       top: 6px;
       left: 4px;
       width: 3px;
       height: 3px;
+      content: "";
       background: #2d68ff;
       border-radius: 50%;
     }
@@ -233,119 +233,114 @@ const handleLanguageChange = async (lang: string) => {
   // 赛博科技
   &.cyber-tech {
     background: linear-gradient(90deg, #080a0f 30%, #0b0e14 30%);
-    border-color: rgba(0, 242, 255, 0.3);
+    border-color: rgb(0 242 255 / 30%);
 
     &::after {
-      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
       width: 12px;
       height: 8px;
-      background: rgba(18, 24, 32, 0.85);
+      content: "";
+      background: rgb(18 24 32 / 85%);
+      border: 1px solid rgb(0 242 255 / 20%);
       border-radius: 2px;
-      border: 1px solid rgba(0, 242, 255, 0.2);
-      box-shadow: 0 0 4px rgba(0, 242, 255, 0.3);
+      box-shadow: 0 0 4px rgb(0 242 255 / 30%);
     }
   }
 
   // 教育友好
   &.edu-friendly {
-    background: linear-gradient(
-      90deg,
-      linear-gradient(180deg, #ff6b35, #ffb347) 30%,
-      #fff8f5 30%
-    );
     background: #fff8f5;
 
     &::before {
-      content: "";
       position: absolute;
-      left: 0;
       top: 0;
       bottom: 0;
+      left: 0;
       width: 30%;
+      content: "";
       background: linear-gradient(180deg, #ff6b35, #ffb347);
     }
 
     &::after {
-      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
       width: 12px;
       height: 8px;
-      background: #ffffff;
-      border-radius: 4px;
+      content: "";
+      background: #fff;
       border: 2px solid #ffe4db;
+      border-radius: 4px;
     }
   }
 
   // 新粗犷主义
   &.neo-brutalism {
     background: #fafaf8;
-    border: 2px solid #000000;
+    border: 2px solid #000;
     border-radius: 2px;
 
     &::before {
-      content: "";
       position: absolute;
-      left: 0;
       top: 0;
       bottom: 0;
+      left: 0;
       width: 30%;
-      background: #ffffff;
-      border-right: 2px solid #000000;
+      content: "";
+      background: #fff;
+      border-right: 2px solid #000;
     }
 
     &::after {
-      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
       width: 10px;
       height: 6px;
+      content: "";
       background: #fff000;
-      border: 1px solid #000000;
-      box-shadow: 2px 2px 0 #000000;
+      border: 1px solid #000;
+      box-shadow: 2px 2px 0 #000;
     }
   }
 
   // 极简纯净
   &.minimal-pure {
-    background: #ffffff;
+    background: #fff;
     border-radius: 0;
 
     &::before {
-      content: "";
       position: absolute;
-      left: 0;
       top: 0;
       bottom: 0;
+      left: 0;
       width: 30%;
+      content: "";
       background: #fafafa;
       border-right: 1px solid #e0e0e0;
     }
 
     &::after {
-      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
       width: 12px;
       height: 8px;
-      background: #ffffff;
+      content: "";
+      background: #fff;
       border: 1px solid #e0e0e0;
     }
   }
 }
 
 .theme-info {
-  flex: 1;
-  min-width: 0;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .theme-name {
@@ -355,18 +350,18 @@ const handleLanguageChange = async (lang: string) => {
 }
 
 .theme-desc {
+  overflow: hidden;
   font-size: 12px;
   color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .theme-check {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   color: var(--primary-color);
-  flex-shrink: 0;
 
   .svg-inline--fa {
     font-size: 14px;
@@ -378,16 +373,16 @@ const handleLanguageChange = async (lang: string) => {
   :deep(.el-dropdown-menu) {
     min-width: 200px;
     padding: 8px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border: 1px solid var(--border-color);
     background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
   }
 
   :deep(.el-dropdown-menu__item) {
     padding: 0;
-    border-radius: 8px;
     margin-bottom: 4px;
+    border-radius: 8px;
     transition: all 0.2s ease;
 
     &:last-child {
@@ -410,11 +405,11 @@ const handleLanguageChange = async (lang: string) => {
 
 .language-item {
   display: flex;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
   width: 100%;
+  padding: 10px 14px;
   color: var(--text-primary);
   transition: color 0.2s ease;
 }

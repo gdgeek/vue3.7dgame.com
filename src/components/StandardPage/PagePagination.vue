@@ -108,9 +108,9 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .page-pagination {
   display: flex;
+  gap: 16px;
   align-items: center;
   justify-content: center;
-  gap: 16px;
   padding: 20px 0;
 
   &.sticky {
@@ -118,12 +118,12 @@ onBeforeUnmount(() => {
     bottom: 10px;
     z-index: 20;
     width: fit-content;
-    margin: 12px auto 0;
     padding: 10px 14px;
-    border: 1px solid var(--border-color, #e2e8f0);
-    border-radius: var(--radius-full, 9999px);
+    margin: 12px auto 0;
     background: var(--bg-page, #f8fafc);
     backdrop-filter: blur(6px);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-full, 9999px);
   }
 }
 
@@ -134,16 +134,16 @@ onBeforeUnmount(() => {
 }
 
 .page-info {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
   font-size: 14px;
   color: var(--el-text-color-secondary, #909399);
   user-select: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 
   strong {
-    color: var(--el-text-color-primary, #303133);
     font-weight: 600;
+    color: var(--el-text-color-primary, #303133);
   }
 }
 
@@ -151,9 +151,9 @@ onBeforeUnmount(() => {
   width: 46px;
 
   :deep(.el-input__inner) {
-    text-align: center;
-    padding-left: 4px;
     padding-right: 4px;
+    padding-left: 4px;
+    text-align: center;
   }
 }
 </style>

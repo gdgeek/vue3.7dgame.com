@@ -116,6 +116,7 @@ canvas {
   top: 0;
   left: 0;
   z-index: 9999;
+
   /* 确保 canvas 在最上层 */
 }
 </style>

@@ -67,22 +67,22 @@ body {
 
 .box {
   position: relative;
-  height: auto;
   width: 400px;
   max-width: 100%;
-  padding: 10px 10px 10px 10px;
+  height: auto;
+  padding: 10px;
   margin: 0 auto;
   margin-bottom: 20px;
-  border-radius: 5px;
-  background-color: var(--bg-card, #fff);
   overflow: hidden;
-  transition: all 0.3s ease;
+  background-color: var(--bg-card, #fff);
   border: 1px solid transparent; // Consistent border handling
+  border-radius: 5px;
+  transition: all 0.3s ease;
 }
 
 .logout-head {
-  padding: 10px;
   max-width: 100%;
+  padding: 10px;
 }
 
 .logout-welcome {

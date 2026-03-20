@@ -142,16 +142,16 @@ const handleFlowAction = (path: string) => {
 
 <style lang="scss" scoped>
 .home-page {
+  min-height: 100%;
   padding: 40px 120px;
   background: var(--bg-page);
-  min-height: 100%;
   transition: padding var(--transition-normal);
 
-  @media (max-width: 1200px) {
+  @media (width <= 1200px) {
     padding: 40px 60px;
   }
 
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     padding: 24px 20px;
   }
 }
@@ -162,11 +162,11 @@ const handleFlowAction = (path: string) => {
 
 .section-header {
   display: flex;
-  align-items: center;
   gap: var(--spacing-xs);
+  align-items: center;
+  padding: 0;
   margin-top: var(--spacing-xl);
   margin-bottom: var(--spacing-lg);
-  padding: 0;
   color: var(--text-primary);
 }
 
@@ -187,22 +187,22 @@ const handleFlowAction = (path: string) => {
 }
 
 .concept-guide {
-  margin-bottom: 28px;
   padding: 24px;
-  border: var(--border-width) solid var(--border-color);
-  border-radius: var(--radius-lg);
+  margin-bottom: 28px;
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--primary-color) 8%, white) 0%,
     var(--bg-card) 30%,
     var(--bg-card) 100%
   );
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
 }
 
 .concept-subtitle {
   margin: 0 0 18px;
-  color: var(--text-secondary);
   line-height: 1.65;
+  color: var(--text-secondary);
 }
 
 .concept-flow {
@@ -213,17 +213,17 @@ const handleFlowAction = (path: string) => {
 }
 
 .flow-node {
-  border: var(--border-width) solid
-    color-mix(in srgb, var(--primary-color) 26%, var(--border-color));
-  background: color-mix(in srgb, var(--primary-color) 6%, var(--bg-card));
-  border-radius: 14px;
-  padding: 14px 16px;
-  min-height: 78px;
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 4px;
-  position: relative;
+  justify-content: center;
+  min-height: 78px;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--primary-color) 6%, var(--bg-card));
+  border: var(--border-width) solid
+    color-mix(in srgb, var(--primary-color) 26%, var(--border-color));
+  border-radius: 14px;
 
   strong {
     font-size: 16px;
@@ -243,29 +243,29 @@ const handleFlowAction = (path: string) => {
     border-color 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
     border-color: color-mix(
       in srgb,
       var(--primary-color) 42%,
       var(--border-color)
     );
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
   }
 }
 
 .node-icon-wrapper {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 30px;
+  height: 30px;
   background: color-mix(in srgb, var(--primary-color) 14%, var(--bg-card));
+  border-radius: 50%;
 }
 
 .node-icon {
-  color: var(--primary-color);
   font-size: 14px;
+  color: var(--primary-color);
 }
 
 .node-kicker {
@@ -274,28 +274,28 @@ const handleFlowAction = (path: string) => {
 }
 
 .flow-arrow {
-  color: var(--text-secondary);
   font-size: 20px;
+  color: var(--text-secondary);
   text-align: center;
 }
 
 .scope-grid {
-  margin-top: 18px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  margin-top: 18px;
 }
 
 .scope-card {
+  padding: 14px 16px;
+  background: var(--bg-card);
   border: var(--border-width) solid var(--border-color);
   border-radius: 14px;
-  background: var(--bg-card);
-  padding: 14px 16px;
 
   p {
     margin: 0;
-    color: var(--text-secondary);
     line-height: 1.65;
+    color: var(--text-secondary);
   }
 }
 
@@ -310,25 +310,25 @@ const handleFlowAction = (path: string) => {
 }
 
 .scope-note {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
   margin-top: 10px !important;
   color: var(--warning-color, #f59e0b) !important;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 }
 
-@media (max-width: 1200px) {
+@media (width <= 1200px) {
   .concept-flow {
     grid-template-columns: 1fr;
   }
 
   .flow-arrow {
-    transform: rotate(90deg);
     margin: -2px 0;
+    transform: rotate(90deg);
   }
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .scope-grid {
     grid-template-columns: 1fr;
   }
@@ -337,8 +337,8 @@ const handleFlowAction = (path: string) => {
 .home-local-tabs {
   margin-top: var(--spacing-lg);
   overflow: hidden;
+  background: var(--bg-card);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-lg);
-  background: var(--bg-card);
 }
 </style>

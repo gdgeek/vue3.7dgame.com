@@ -259,26 +259,26 @@ const localEmotionIntensity = computed({
 
 .voice-filters {
   display: flex;
-  gap: 16px;
   flex-wrap: wrap;
+  gap: 16px;
 }
 
 .filter-item {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .language-control {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .voice-type {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .voice-select {
@@ -288,8 +288,8 @@ const localEmotionIntensity = computed({
 
 .voice-option {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
 }
 
@@ -310,22 +310,22 @@ const localEmotionIntensity = computed({
 
 .emotion-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 24px;
   align-items: center;
-  flex-wrap: wrap;
 }
 
 .emotion-type {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .emotion-intensity {
   display: flex;
-  align-items: center;
-  gap: 8px;
   flex: 1;
+  gap: 8px;
+  align-items: center;
   min-width: 200px;
 }
 

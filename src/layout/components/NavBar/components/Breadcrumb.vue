@@ -303,9 +303,9 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 <style lang="scss" scoped>
 .breadcrumb-nav {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+  align-items: center;
 }
 
 .crumb-link {
@@ -314,8 +314,8 @@ const handleNavigate = (item: BreadcrumbSegment) => {
   padding: 0;
   margin: 0;
   font-size: 14px;
-  line-height: 20px;
   font-weight: 600;
+  line-height: 20px;
   color: var(--ar-text-muted) !important;
   text-transform: none;
   letter-spacing: 0;
@@ -343,12 +343,12 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 }
 
 .crumb-unsaved-dot {
+  flex-shrink: 0;
   width: 7px;
   height: 7px;
   margin-left: 6px;
-  border-radius: 50%;
   background: #f59a23;
-  flex-shrink: 0;
+  border-radius: 50%;
 }
 
 .crumb-separator {

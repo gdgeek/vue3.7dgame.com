@@ -140,17 +140,17 @@ const deleted = () => {
 }
 
 .mrpp-card-wrapper:hover .box-card {
-  box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.15));
+  box-shadow: var(--shadow-lg, 0 12px 24px rgb(0 0 0 / 15%));
 }
 
 .box-card {
-  border-radius: var(--radius-md, 12px);
   overflow: hidden;
+  background-color: var(--bg-card, white);
+  border: 1px solid var(--border-color, #e4e7ed);
+  border-radius: var(--radius-md, 12px);
   transition:
     box-shadow 0.3s ease,
     border-color 0.3s ease;
-  background-color: var(--bg-card, white);
-  border: 1px solid var(--border-color, #e4e7ed);
 }
 
 .card-header {
@@ -160,23 +160,23 @@ const deleted = () => {
 }
 
 .mrpp-title {
-  font-size: 15px;
-  padding: 0;
   flex: 1;
   min-width: 0;
+  padding: 0;
+  font-size: 15px;
   color: var(--text-primary, #303133);
 }
 
 .card-title {
-  white-space: nowrap;
   display: block;
-  text-overflow: ellipsis;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .type-prefix {
-  font-weight: 700;
   margin-right: 4px;
+  font-weight: 700;
 }
 
 .title-text {
@@ -185,12 +185,12 @@ const deleted = () => {
 }
 
 .color-indicator {
+  flex-shrink: 0;
   width: 12px;
   height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
   margin-left: 8px;
-  box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.2));
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm, 0 2px 4px rgb(0 0 0 / 20%));
 }
 
 /* 图片容器样式 */
@@ -214,10 +214,10 @@ const deleted = () => {
   position: absolute;
   bottom: -100%;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
   color: white;
   text-align: center;
-  padding: 10px;
+  background-color: rgb(0 0 0 / 50%);
   transition:
     bottom 0.5s ease-in-out,
     z-index 0.3s ease;
@@ -231,19 +231,19 @@ const deleted = () => {
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.2) 0%,
-    rgba(0, 0, 0, 0.5) 100%
+    rgb(0 0 0 / 20%) 0%,
+    rgb(0 0 0 / 50%) 100%
   );
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  backdrop-filter: blur(2px);
   opacity: 0;
   transition: opacity 0.3s ease;
-  backdrop-filter: blur(2px);
 }
 
 .image-container:hover .overlay-container {

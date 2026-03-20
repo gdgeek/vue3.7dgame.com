@@ -472,49 +472,50 @@ const handleDialogClose = () => {
 
 .upload-area {
   position: relative;
-  width: 100%;
-  height: 320px;
-  border: 2px dashed var(--border-color, #e2e8f0);
-  border-radius: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--bg-card, #fff);
-  transition: all 0.3s ease;
-  cursor: pointer;
+  width: 100%;
+  height: 320px;
   overflow: hidden;
+  cursor: pointer;
+  background-color: var(--bg-card, #fff);
+  border: 2px dashed var(--border-color, #e2e8f0);
+  border-radius: 24px;
+  transition: all 0.3s ease;
 
   &:hover,
   &.is-dragover {
-    border-color: var(--primary-color, #0ea5e9);
     background-color: var(--primary-light, #f0f9ff);
+    border-color: var(--primary-color, #0ea5e9);
   }
 
   &.is-disabled {
     cursor: not-allowed;
-    border-color: var(--border-color, #e2e8f0);
     background-color: var(--bg-secondary, #f8fafc);
+    border-color: var(--border-color, #e2e8f0);
   }
 }
 
 .upload-content {
-  text-align: center;
   z-index: 1;
+  text-align: center;
 }
 
 .cloud-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 80px;
   height: 80px;
+  margin: 0 auto 24px;
   background-color: var(
     --info-light,
     #e0f2fe
   ); // Ensure info-light is defined or fallback
+
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 24px;
 
   .svg-inline--fa {
     font-size: 40px;
@@ -526,38 +527,38 @@ const handleDialogClose = () => {
   margin-bottom: 24px;
 
   h3 {
+    margin: 0 0 8px;
     font-size: 18px;
     font-weight: 500;
     color: var(--text-primary, #1e293b);
-    margin: 0 0 8px;
   }
 
   p {
+    margin: 0;
     font-size: 14px;
     color: var(--text-muted, #94a3b8);
-    margin: 0;
   }
 }
 
 .browse-btn {
+  height: auto;
   padding: 12px 32px;
   font-size: 14px;
   border-radius: 20px;
-  height: auto;
 }
 
 .upload-progress-overlay {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
   background: var(--bg-card, #fff);
   opacity: 0.95;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
 
   .progress-content {
     text-align: center;
@@ -579,9 +580,9 @@ const handleDialogClose = () => {
 
 .upload-footer {
   margin-top: 24px;
+  overflow: hidden;
   border: var(--border-width, 1px) solid var(--border-color, #ebeef5);
   border-radius: 12px;
-  overflow: hidden;
 }
 
 .footer-row {
@@ -589,18 +590,18 @@ const handleDialogClose = () => {
   align-items: center;
 
   &.header {
-    background-color: var(--bg-secondary, #f5f7fa);
-    color: var(--text-muted, #909399);
-    font-size: 13px;
     padding: 12px 0;
+    font-size: 13px;
+    color: var(--text-muted, #909399);
+    background-color: var(--bg-secondary, #f5f7fa);
   }
 
   &.body {
-    background-color: var(--bg-card, #fff);
-    color: var(--text-primary, #303133);
+    padding: 16px 0;
     font-size: 14px;
     font-weight: 600;
-    padding: 16px 0;
+    color: var(--text-primary, #303133);
+    background-color: var(--bg-card, #fff);
   }
 }
 
@@ -611,14 +612,14 @@ const handleDialogClose = () => {
 
 // Override Dialog styles
 :deep(.el-dialog__header) {
-  margin-right: 0;
   padding: 20px 24px;
+  margin-right: 0;
   border-bottom: var(--border-width, 1px) solid var(--border-color, #f1f5f9);
 }
 
 :deep(.el-dialog__title) {
-  font-weight: 500;
   font-size: 18px;
+  font-weight: 500;
   color: var(--text-primary);
 }
 

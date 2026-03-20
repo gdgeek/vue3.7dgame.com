@@ -266,8 +266,8 @@ const handleChange = ({
 
 <style scoped>
 .vue-form-demo {
-  padding: 20px;
   max-width: 800px;
+  padding: 20px;
   margin: 0 auto;
 }
 
@@ -277,19 +277,19 @@ const handleChange = ({
 
 .schema-display,
 .data-display {
-  background: #f5f5f5;
   padding: 10px;
+  background: #f5f5f5;
   border-radius: 4px;
 }
 
 .schema-display pre,
 .data-display pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-size: 12px;
   max-height: 200px;
+  margin: 0;
   overflow: auto;
+  font-size: 12px;
+  word-break: break-all;
+  white-space: pre-wrap;
 }
 
 .form-container {
@@ -297,7 +297,7 @@ const handleChange = ({
 }
 
 h4 {
-  margin: 0 0 10px 0;
+  margin: 0 0 10px;
   color: #666;
 }
 </style>

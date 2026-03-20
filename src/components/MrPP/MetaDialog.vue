@@ -535,9 +535,9 @@ defineExpose({
 
 .dialog-action-bar {
   :deep(.page-action-bar) {
+    padding-bottom: 0;
     margin-bottom: 0;
     border-bottom: none;
-    padding-bottom: 0;
   }
 
   :deep(.title-row) {
@@ -545,7 +545,7 @@ defineExpose({
   }
 
   :deep(.controls-row) {
-    padding: 8px 0 8px;
+    padding: 8px 0;
   }
 
   :deep(.controls-right) {
@@ -555,20 +555,20 @@ defineExpose({
 
 .resource-view-container {
   max-height: 67vh;
-  overflow: auto;
   padding: 0 var(--resource-dialog-grid-padding-x, 20px)
     var(--resource-dialog-grid-padding-bottom, 6px)
     var(--resource-dialog-grid-padding-x, 20px);
+  overflow: auto;
 }
 
 .resource-list-shell {
-  border: none !important;
-  background: transparent !important;
   margin-top: var(--resource-dialog-shell-offset-top, -6px);
+  background: transparent !important;
+  border: none !important;
 
   :deep(.el-card__body) {
-    border: none !important;
     background: transparent !important;
+    border: none !important;
   }
 
   :deep(.standard-card) {
@@ -584,7 +584,7 @@ defineExpose({
     );
     box-shadow: var(
       --resource-dialog-card-hover-shadow,
-      0 6px 16px rgba(15, 23, 42, 0.08)
+      0 6px 16px rgb(15 23 42 / 8%)
     );
     transform: translateY(-2px);
   }
@@ -606,47 +606,47 @@ defineExpose({
 }
 
 .col-checkbox {
-  width: 40px;
-  flex-shrink: 0;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: 40px;
 }
 
 .col-name {
-  flex: 1;
   display: flex;
-  align-items: center;
+  flex: 1;
   gap: 14px;
+  align-items: center;
   min-width: 0;
 }
 
 .col-date {
+  flex-shrink: 0;
   width: 180px;
-  text-align: right;
+  padding-right: 16px;
   font-size: var(--font-size-sm, 13px);
   color: var(--text-secondary, #64748b);
-  flex-shrink: 0;
-  padding-right: 16px;
+  text-align: right;
 }
 
 .col-actions {
-  width: 220px;
   flex-shrink: 0;
+  width: 220px;
 }
 
 .item-thumb {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-sm, 12px);
-  overflow: hidden;
-  border: 1px solid var(--border-color, #e2e8f0);
-  background: var(--bg-secondary, #f1f5f9);
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
   cursor: pointer;
+  background: var(--bg-secondary, #f1f5f9);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 12px);
 
   img {
     width: 100%;
@@ -664,35 +664,35 @@ defineExpose({
 }
 
 .item-name {
+  overflow: hidden;
   font-size: var(--font-size-md, 14px);
   font-weight: var(--font-weight-medium, 500);
   color: var(--text-primary, #1e293b);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .list-actions {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
 
   :deep(.el-button) {
     min-width: 72px;
     height: 30px;
     padding: 0 12px;
     margin: 0;
-    border-radius: 999px;
     font-size: 13px;
+    border-radius: 999px;
   }
 }
 
 .card-actions {
   display: flex;
   gap: 10px;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   padding-top: 10px;
 
   :deep(.el-button) {
@@ -700,8 +700,8 @@ defineExpose({
     height: 30px;
     padding: 0 14px;
     margin: 0;
-    border-radius: 999px;
     font-size: 13px;
+    border-radius: 999px;
   }
 }
 
@@ -720,13 +720,13 @@ defineExpose({
 }
 
 .detail-preview-placeholder {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-secondary, #f1f5f9);
+  width: 100%;
+  height: 100%;
   color: var(--text-secondary, #94a3b8);
+  background: var(--bg-secondary, #f1f5f9);
 
   .svg-inline--fa {
     font-size: 64px;

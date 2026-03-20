@@ -153,10 +153,10 @@ const toggleSelect = () => {
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background: var(--bg-card, #fff);
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-lg, 24px);
-  overflow: hidden;
   transition: all var(--transition-normal, 0.2s ease);
 
   &:hover {
@@ -166,7 +166,7 @@ const toggleSelect = () => {
 
   &.is-selected {
     border-color: var(--primary-color, #00baff);
-    box-shadow: 0 0 0 2px var(--primary-light, rgba(0, 186, 255, 0.1)); // Keep specifics for now or use --shadow-focus
+    box-shadow: 0 0 0 2px var(--primary-light, rgb(0 186 255 / 10%)); // Keep specifics for now or use --shadow-focus
   }
 }
 
@@ -185,20 +185,20 @@ const toggleSelect = () => {
 }
 
 .checkbox-inner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  border-radius: 6px;
-  background: var(--bg-overlay, rgba(0, 0, 0, 0.3));
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  transition: all var(--transition-fast, 0.15s ease);
+  background: var(--bg-overlay, rgb(0 0 0 / 30%));
   backdrop-filter: blur(4px);
+  border: 2px solid rgb(255 255 255 / 80%);
+  border-radius: 6px;
+  transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    background: var(--bg-overlay-hover, rgba(0, 0, 0, 0.5));
+    background: var(--bg-overlay-hover, rgb(0 0 0 / 50%));
     border-color: #fff;
   }
 
@@ -207,9 +207,9 @@ const toggleSelect = () => {
     border-color: var(--primary-color, #00baff);
 
     .svg-inline--fa {
-      color: #fff; // Always white on primary
       font-size: 16px;
       font-weight: 600;
+      color: #fff; // Always white on primary
     }
   }
 }
@@ -220,17 +220,17 @@ const toggleSelect = () => {
   top: 12px;
   right: 12px;
   z-index: 10;
-  width: 28px;
-  height: 28px;
-  background: var(--bg-overlay, rgba(0, 0, 0, 0.3));
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 28px;
+  height: 28px;
   color: #fff;
   pointer-events: none;
+  background: var(--bg-overlay, rgb(0 0 0 / 30%));
+  backdrop-filter: blur(8px);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 50%;
   transition: all var(--transition-fast, 0.15s ease);
 
   .svg-inline--fa {
@@ -239,8 +239,8 @@ const toggleSelect = () => {
 }
 
 .standard-card:hover .card-type-icon {
-  background: var(--bg-overlay-hover, rgba(0, 0, 0, 0.5));
-  border-color: rgba(255, 255, 255, 0.4);
+  background: var(--bg-overlay-hover, rgb(0 0 0 / 50%));
+  border-color: rgb(255 255 255 / 40%);
 }
 
 // ===== Thumbnail =====
@@ -269,11 +269,11 @@ const toggleSelect = () => {
 }
 
 .thumbnail-placeholder {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(
     135deg,
     var(--bg-secondary, #f1f5f9) 0%,
@@ -290,13 +290,13 @@ const toggleSelect = () => {
 .thumbnail-overlay {
   position: absolute;
   inset: 0;
-  background: var(--bg-overlay, rgba(0, 0, 0, 0.5));
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--bg-overlay, rgb(0 0 0 / 50%));
+  backdrop-filter: blur(2px);
   opacity: 0;
   transition: opacity var(--transition-normal, 0.2s ease);
-  backdrop-filter: blur(2px);
 }
 
 .standard-card:hover .thumbnail-overlay {
@@ -305,19 +305,19 @@ const toggleSelect = () => {
 
 .overlay-btn {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #1e293b);
+  cursor: pointer;
   background: var(--bg-card, #fff);
   border: none;
   border-radius: var(--radius-full, 9999px);
-  color: var(--text-primary, #1e293b);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
+  box-shadow: var(--shadow-md, 0 4px 12px rgb(0 0 0 / 15%));
   transition: all var(--transition-fast, 0.15s ease);
   transform: translateY(10px);
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.15));
 
   .svg-inline--fa {
     font-size: 20px;
@@ -339,59 +339,59 @@ const toggleSelect = () => {
   bottom: 12px;
   left: 12px;
   display: flex;
-  gap: 6px;
   flex-wrap: wrap;
+  gap: 6px;
 }
 
 .tag-badge {
   padding: 4px 10px;
-  background: var(--bg-card, #fff);
-  border-radius: var(--radius-full, 9999px);
   font-size: 12px;
   font-weight: 500;
   color: var(--text-primary, #1e293b);
+  background: var(--bg-card, #fff);
   backdrop-filter: blur(4px);
+  border-radius: var(--radius-full, 9999px);
   opacity: 0.9;
 }
 
 .tag-more {
   padding: 4px 8px;
-  background: var(--bg-overlay, rgba(0, 0, 0, 0.5));
-  border-radius: var(--radius-full, 9999px);
   font-size: 12px;
   color: #fff;
+  background: var(--bg-overlay, rgb(0 0 0 / 50%));
+  border-radius: var(--radius-full, 9999px);
 }
 
 // ===== Content Area =====
 .card-content {
-  padding: 16px;
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 8px;
+  padding: 16px;
 }
 
 .card-title {
   margin: 0;
+  overflow: hidden;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #1e293b);
   line-height: 1.4;
-  overflow: hidden;
+  color: var(--text-primary, #1e293b);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .card-description {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary, #64748b);
-  line-height: 1.5;
   display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  margin: 0;
   overflow: hidden;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary, #64748b);
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .card-meta {
@@ -402,8 +402,8 @@ const toggleSelect = () => {
 
 .meta-item {
   display: flex;
-  align-items: center;
   gap: 4px;
+  align-items: center;
   font-size: 12px;
   color: var(--text-muted, #94a3b8);
 }
@@ -415,13 +415,13 @@ const toggleSelect = () => {
 // ===== Action Footer =====
 .card-action {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   padding: 14px 16px;
+  cursor: pointer;
   background: var(--bg-hover, #f8fafc);
   border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  cursor: pointer;
   transition: background var(--transition-fast, 0.15s ease);
 
   &:hover {

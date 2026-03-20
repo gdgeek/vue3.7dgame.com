@@ -237,13 +237,12 @@ body {
     width: 450px;
     height: 600px;
     background-color: #fff;
-
     transition: all 0.3s ease;
 
     &.dark-theme {
-      background-color: rgb(63, 63, 63);
-      border-color: #494949;
       color: white;
+      background-color: rgb(63 63 63);
+      border-color: #494949;
     }
 
     .box2 {
@@ -254,13 +253,12 @@ body {
       padding: 25px;
       border: 1px solid #ebeefe;
       border-radius: 4px;
-
       transition: all 0.3s ease;
 
       &.dark-theme {
-        background-color: rgb(52, 52, 52);
-        border-color: #494949;
         color: white;
+        background-color: rgb(52 52 52);
+        border-color: #494949;
       }
 
       &:hover {
@@ -270,14 +268,14 @@ body {
 
       h1 {
         margin-top: 0;
-        font-family: "KaiTi", sans-serif;
+        font-family: KaiTi, sans-serif;
         font-size: 36px;
         font-weight: 400;
       }
 
       h4 {
         margin-top: 0;
-        font-family: "KaiTi", sans-serif;
+        font-family: KaiTi, sans-serif;
         font-size: 18px;
         font-weight: 400;
       }
@@ -291,7 +289,7 @@ body {
 
   .login-title {
     margin: 20px 0;
-    font-family: "KaiTi", sans-serif;
+    font-family: KaiTi, sans-serif;
     font-weight: bold;
     text-align: center;
   }
@@ -299,7 +297,7 @@ body {
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 0px 0px 0px 0px;
+    padding: 0;
     margin-top: 10px;
   }
 
@@ -309,7 +307,7 @@ body {
 
   .error-message {
     margin-top: 10px;
-    font-family: "KaiTi", sans-serif;
+    font-family: KaiTi, sans-serif;
     color: red;
     text-align: center;
   }

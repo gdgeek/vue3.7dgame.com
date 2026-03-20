@@ -14,8 +14,8 @@ const id = computed(() => parseInt(route.query.id as string));
 
 <style lang="scss" scoped>
 .document-page {
+  min-height: 100%;
   padding: var(--spacing-lg);
   background: var(--bg-page);
-  min-height: 100%;
 }
 </style>

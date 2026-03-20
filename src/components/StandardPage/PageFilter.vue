@@ -142,27 +142,27 @@ const clearSelection = () => {
 <style scoped lang="scss">
 .filter-trigger {
   display: flex;
+  gap: 8px;
   align-items: center;
+  width: fit-content;
   height: 44px;
   padding: 0 16px;
-  border-radius: var(--radius-full, 9999px);
-  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  background: var(--bg-card, #fff);
-  cursor: pointer;
-  transition: all var(--transition-fast, 0.15s ease);
-  user-select: none;
-  gap: 8px;
   color: var(--text-secondary, #64748b);
-  width: fit-content;
+  cursor: pointer;
+  user-select: none;
+  background: var(--bg-card, #fff);
+  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-full, 9999px);
+  transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
-    border-color: var(--border-color-hover, #94a3b8);
     color: var(--text-primary, #1e293b);
+    border-color: var(--border-color-hover, #94a3b8);
   }
 
   &.is-active {
-    border-color: var(--primary-color, #00baff);
     color: var(--primary-color, #00baff);
+    border-color: var(--primary-color, #00baff);
   }
 }
 
@@ -191,11 +191,11 @@ const clearSelection = () => {
 <style lang="scss">
 .page-filter-popper {
   padding: 0 !important;
-  border-radius: var(--radius-md, 20px) !important;
-  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12)) !important;
-  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
   overflow: hidden;
   background: var(--bg-card, #fff) !important;
+  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
+  border-radius: var(--radius-md, 20px) !important;
+  box-shadow: var(--shadow-lg, 0 8px 24px rgb(0 0 0 / 12%)) !important;
 
   .filter-content {
     display: flex;
@@ -208,12 +208,12 @@ const clearSelection = () => {
 
   .filter-item {
     display: flex;
-    align-items: center;
     gap: 16px;
-    padding: 16px 16px;
+    align-items: center;
+    padding: 16px;
     cursor: pointer;
-    transition: background var(--transition-fast, 0.15s ease);
     border-radius: calc(var(--radius-md, 20px) - 8px);
+    transition: background var(--transition-fast, 0.15s ease);
 
     &:hover {
       background: var(--bg-hover, #f8fafc);
@@ -221,32 +221,32 @@ const clearSelection = () => {
   }
 
   .filter-checkbox {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
     width: 22px;
     height: 22px;
     border: 2px solid var(--border-color, #e2e8f0);
     border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition: all var(--transition-fast, 0.15s ease);
-    flex-shrink: 0;
 
     &.is-checked {
       background: var(--primary-color, #00baff);
       border-color: var(--primary-color, #00baff);
 
       .check-icon {
-        color: var(--text-inverse, #fff);
         font-size: 16px;
         font-weight: 600;
+        color: var(--text-inverse, #fff);
       }
     }
   }
 
   .filter-item-label {
     font-size: 16px;
-    color: var(--text-primary, #1e293b);
     font-weight: 500;
+    color: var(--text-primary, #1e293b);
   }
 
   .filter-footer {
@@ -255,22 +255,22 @@ const clearSelection = () => {
   }
 
   .clear-btn {
-    width: 100%;
-    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-secondary, #f1f5f9);
-    border: none;
-    border-radius: var(--radius-full, 9999px);
+    width: 100%;
+    height: 44px;
     font-size: 15px;
     color: var(--text-secondary, #64748b);
     cursor: pointer;
+    background: var(--bg-secondary, #f1f5f9);
+    border: none;
+    border-radius: var(--radius-full, 9999px);
     transition: all var(--transition-fast, 0.15s ease);
 
     &:hover {
-      background: var(--bg-tertiary, #e2e8f0);
       color: var(--text-primary, #1e293b);
+      background: var(--bg-tertiary, #e2e8f0);
     }
   }
 }

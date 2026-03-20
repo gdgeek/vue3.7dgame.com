@@ -2,7 +2,7 @@
   <TransitionWrapper>
     <div v-loading="loading" class="document-index">
       <br />
-      <el-row :gutter="20" style="margin: 0px 18px 0">
+      <el-row :gutter="20" style="margin: 0 18px">
         <el-col :sm="16">
           <el-card class="box-card">
             <template #header>

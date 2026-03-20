@@ -199,21 +199,21 @@ const login = async function () {
   height: 42px;
   font-size: 16px;
   font-weight: 500;
-  border-radius: 8px;
+  color: white;
   background-color: #07c160;
   border: none;
-  color: white;
+  border-radius: 8px;
   transition: all 0.3s ease;
 
   .wechat-icon {
-    font-size: 20px;
     margin-right: 8px;
+    font-size: 20px;
   }
 
   &:hover {
     background-color: #06ad56;
+    box-shadow: 0 8px 15px rgb(0 0 0 / 10%);
     transform: translateY(-1px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
   }
 
   &:active {
@@ -223,9 +223,9 @@ const login = async function () {
 
 .qrcode-dialog {
   :deep(.el-dialog) {
-    border-radius: 16px;
     overflow: hidden;
     background-color: var(--bg-card, #fff);
+    border-radius: 16px;
 
     .el-dialog__header {
       padding: 16px;
@@ -253,21 +253,21 @@ const login = async function () {
 .qrcode-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 16px;
+  align-items: center;
 }
 
 .qrcode-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 200px;
   height: 200px;
+  padding: 8px;
   background-color: var(--bg-card, white);
   border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px;
-  box-shadow: var(--shadow-lg, 0 4px 12px rgba(0, 0, 0, 0.1));
+  box-shadow: var(--shadow-lg, 0 4px 12px rgb(0 0 0 / 10%));
 
   .qrcode-box {
     width: 100%;
@@ -276,14 +276,14 @@ const login = async function () {
 
   .qrcode-logo {
     position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 40px;
     height: 40px;
+    padding: 4px;
     background: var(--bg-card, white);
     border-radius: 8px;
-    padding: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 
     img {
       width: 100%;
@@ -297,10 +297,10 @@ const login = async function () {
   text-align: center;
 
   .main-tip {
+    margin-bottom: 4px;
     font-size: 15px;
     font-weight: 500;
     color: var(--text-primary, #333);
-    margin-bottom: 4px;
   }
 
   .sub-tip {
@@ -311,8 +311,8 @@ const login = async function () {
 
 .loading-status {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   margin-top: 8px;
 
   .scanning-text {

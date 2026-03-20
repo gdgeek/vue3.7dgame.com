@@ -63,10 +63,10 @@ async function handleLanguageChange(lang: string) {
 <style scoped>
 .lang-trigger {
   display: flex;
-  align-items: center;
   gap: 6px;
-  cursor: pointer;
+  align-items: center;
   color: inherit;
+  cursor: pointer;
 }
 
 .lang-text {

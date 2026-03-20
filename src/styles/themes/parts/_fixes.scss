@@ -10,58 +10,54 @@
   // 修复一级菜单激活项文字可见性
   .sidebar-item-active {
     .sidebar-text {
-      color: #00f2ff !important;
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.8) !important;
       font-weight: 600 !important;
+      color: #00f2ff !important;
+      text-shadow: 0 0 10px rgb(0 242 255 / 80%) !important;
     }
 
     .svg-inline--fa {
       color: #00f2ff !important;
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.8) !important;
+      text-shadow: 0 0 10px rgb(0 242 255 / 80%) !important;
     }
   }
 
   // 修复二级菜单激活项文字可见性
   .sidebar-subitem-active {
     color: #00f2ff !important;
-    text-shadow: 0 0 8px rgba(0, 242, 255, 0.6) !important;
+    text-shadow: 0 0 8px rgb(0 242 255 / 60%) !important;
 
     .submenu-dot {
       background: #00f2ff !important;
-      box-shadow: 0 0 8px rgba(0, 242, 255, 0.8) !important;
+      box-shadow: 0 0 8px rgb(0 242 255 / 80%) !important;
     }
   }
 
   // 修复实体/场景详情面板"进入编辑"按钮文字可见性
   .detail-panel {
     .enter-edit-btn {
-      color: #0b0e14 !important;
-      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
-      text-shadow: none !important;
       font-weight: 600 !important;
+      color: #0b0e14 !important;
+      text-shadow: none !important;
+      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
 
       &:hover {
-        background: linear-gradient(
-          135deg,
-          #33f5ff 0%,
-          #33ccff 100%
-        ) !important;
+        background: linear-gradient(135deg, #33f5ff 0%, #3cf 100%) !important;
       }
     }
   }
 
   // 列表视图"进入编辑"按钮
   .list-row .enter-editor-btn {
-    color: #0b0e14 !important;
-    background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
-    text-shadow: none !important;
     font-weight: 600 !important;
+    color: #0b0e14 !important;
+    text-shadow: none !important;
+    background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
     border: none !important;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+    box-shadow: 0 0 15px rgb(0 242 255 / 40%) !important;
 
     &:hover {
-      background: linear-gradient(135deg, #33f5ff 0%, #33ccff 100%) !important;
-      box-shadow: 0 0 25px rgba(0, 242, 255, 0.6) !important;
+      background: linear-gradient(135deg, #33f5ff 0%, #3cf 100%) !important;
+      box-shadow: 0 0 25px rgb(0 242 255 / 60%) !important;
     }
   }
 }
@@ -75,25 +71,25 @@
 
   // 上传按钮使用粉色
   .upload-btn {
+    color: #fff !important;
     background: #ff007a !important;
-    color: #ffffff !important;
 
     &:hover {
-      background: #ff3399 !important;
+      background: #f39 !important;
     }
   }
 
   // 编辑按钮使用青色
   .edit-btn,
   .scene-actions .edit-btn {
+    color: #000 !important;
     background: #00ffc2 !important;
-    color: #000000 !important;
   }
 
   // 进入编辑器按钮使用紫色
   .enter-editor-btn {
+    color: #fff !important;
     background: #9d4edd !important;
-    color: #ffffff !important;
 
     &:hover {
       background: #b76ee8 !important;
@@ -102,84 +98,84 @@
 
   // 详情面板进入编辑按钮使用青色
   .detail-panel .enter-edit-btn {
+    color: #000 !important;
     background: #00ffc2 !important;
-    color: #000000 !important;
   }
 
   // 下载按钮使用橙色
   .download-btn {
+    color: #fff !important;
     background: #ff6b35 !important;
-    color: #ffffff !important;
   }
 
   // 保存/确认按钮使用青色
   .save-btn,
   .confirm-btn {
+    color: #000 !important;
     background: #00ffc2 !important;
-    color: #000000 !important;
   }
 
   // 标签使用多种颜色
   .scene-tag:nth-child(1),
   .list-tag:nth-child(1) {
+    color: #fff !important;
     background: #ff007a !important;
-    color: #ffffff !important;
   }
 
   .scene-tag:nth-child(2),
   .list-tag:nth-child(2) {
+    color: #000 !important;
     background: #00ffc2 !important;
-    color: #000000 !important;
   }
 
   .scene-tag:nth-child(3),
   .list-tag:nth-child(3) {
+    color: #fff !important;
     background: #9d4edd !important;
-    color: #ffffff !important;
   }
 
   // 视图切换激活状态使用青色
   .view-btn.active {
+    color: #000 !important;
     background: #00ffc2 !important;
-    color: #000000 !important;
   }
 
   // 排序按钮激活状态使用粉色
   .sort-btn.active {
+    color: #fff !important;
     background: #ff007a !important;
-    color: #ffffff !important;
   }
 
   // 分页按钮悬停使用青色
   .page-btn:hover:not(:disabled) {
+    color: #000 !important;
     background: #00ffc2 !important;
-    color: #000000 !important;
   }
 
   // 2. 侧边栏二级菜单激活项文字可见性修复
   .sidebar-subitem-active {
+    color: #fff !important;
     background: #ff007a !important;
-    color: #ffffff !important;
-    border: 2px solid #000000 !important;
-    box-shadow: 2px 2px 0px #000000 !important;
+    border: 2px solid #000 !important;
+    box-shadow: 2px 2px 0 #000 !important;
 
     .submenu-dot {
-      background: #ffffff !important;
+      background: #fff !important;
     }
 
     span {
-      color: #ffffff !important;
       font-weight: 700 !important;
+      color: #fff !important;
     }
   }
 
   // 二级菜单悬停
   .sidebar-subitem:hover:not(.sidebar-subitem-active) {
+    color: #000 !important;
     background: #fff000 !important;
-    color: #000000 !important;
 
     .submenu-dot {
-      background: #000000 !important;
+      background: #000 !important;
     }
   }
 
@@ -188,23 +184,23 @@
   .verse-library {
     .header-controls {
       .search-box .search-input {
-        background: #ffffff !important;
-        border: 3px solid #000000 !important;
-        box-shadow: 4px 4px 0px #000000 !important;
+        background: #fff !important;
+        border: 3px solid #000 !important;
+        box-shadow: 4px 4px 0 #000 !important;
       }
 
       .sort-buttons {
-        border-right: 3px solid #000000 !important;
+        border-right: 3px solid #000 !important;
       }
 
       .sort-btn {
-        background: #ffffff !important;
-        border: 2px solid #000000 !important;
-        box-shadow: 3px 3px 0px #000000 !important;
+        background: #fff !important;
+        border: 2px solid #000 !important;
+        box-shadow: 3px 3px 0 #000 !important;
 
         &.active {
+          color: #fff !important;
           background: #ff007a !important;
-          color: #ffffff !important;
         }
 
         &:hover:not(.active) {
@@ -213,23 +209,23 @@
       }
 
       .view-toggle {
-        background: #ffffff !important;
-        border: 2px solid #000000 !important;
-        box-shadow: 3px 3px 0px #000000 !important;
+        background: #fff !important;
+        border: 2px solid #000 !important;
+        box-shadow: 3px 3px 0 #000 !important;
       }
 
       .view-btn {
         &.active {
+          color: #000 !important;
           background: #00ffc2 !important;
-          color: #000000 !important;
         }
       }
 
       .upload-btn {
+        color: #fff !important;
         background: #ff007a !important;
-        color: #ffffff !important;
-        border: 3px solid #000000 !important;
-        box-shadow: 4px 4px 0px #000000 !important;
+        border: 3px solid #000 !important;
+        box-shadow: 4px 4px 0 #000 !important;
       }
     }
   }
@@ -237,25 +233,25 @@
   // 4. 标签筛选和可见性筛选按钮 - 新粗犷主义风格
   .tag-filter-btn,
   .visibility-filter-btn {
-    background: #ffffff !important;
-    border: 3px solid #000000 !important;
-    border-radius: 8px !important;
-    box-shadow: 4px 4px 0px #000000 !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
+    background: #fff !important;
+    border: 3px solid #000 !important;
+    border-radius: 8px !important;
+    box-shadow: 4px 4px 0 #000 !important;
     transition:
       transform 0.1s ease-out,
       box-shadow 0.1s ease-out !important;
 
     .svg-inline--fa {
-      color: #000000 !important;
+      color: #000 !important;
     }
 
     &:hover {
-      transform: translate(-2px, -2px) !important;
-      box-shadow: 6px 6px 0px #000000 !important;
       background: #fff000 !important;
+      box-shadow: 6px 6px 0 #000 !important;
+      transform: translate(-2px, -2px) !important;
     }
   }
 
@@ -273,12 +269,12 @@
     background: #ffe4f0 !important;
 
     &:hover {
+      color: #fff !important;
       background: #ff007a !important;
-      color: #ffffff !important;
 
       .svg-inline--fa,
       span {
-        color: #ffffff !important;
+        color: #fff !important;
       }
     }
   }
@@ -287,15 +283,15 @@
   .tag-dropdown,
   .visibility-dropdown {
     z-index: 1000 !important;
-    background: #ffffff !important;
-    border: 3px solid #000000 !important;
+    background: #fff !important;
+    border: 3px solid #000 !important;
     border-radius: 8px !important;
-    box-shadow: 6px 6px 0px #000000 !important;
+    box-shadow: 6px 6px 0 #000 !important;
 
     .tag-option,
     .visibility-option {
       font-weight: 600 !important;
-      border-bottom: 2px solid #000000 !important;
+      border-bottom: 2px solid #000 !important;
 
       &:last-child {
         border-bottom: none !important;
@@ -306,45 +302,45 @@
       }
 
       &.selected {
+        color: #000 !important;
         background: #00ffc2 !important;
-        color: #000000 !important;
       }
     }
   }
 
   .tag-dropdown {
     .tag-checkbox {
-      border: 2px solid #000000 !important;
+      border: 2px solid #000 !important;
       border-radius: 4px !important;
 
       .svg-inline--fa {
-        color: #000000 !important;
+        color: #000 !important;
       }
     }
 
     .tag-option.selected .tag-checkbox {
       background: #ff007a !important;
-      border-color: #000000 !important;
+      border-color: #000 !important;
 
       .svg-inline--fa {
-        color: #ffffff !important;
+        color: #fff !important;
       }
     }
 
     .tag-actions {
-      border-top: 3px solid #000000 !important;
+      border-top: 3px solid #000 !important;
 
       .clear-btn {
-        background: #ff6b35 !important;
-        color: #ffffff !important;
-        border: 2px solid #000000 !important;
-        border-radius: 6px !important;
-        box-shadow: 3px 3px 0px #000000 !important;
         font-weight: 700 !important;
+        color: #fff !important;
+        background: #ff6b35 !important;
+        border: 2px solid #000 !important;
+        border-radius: 6px !important;
+        box-shadow: 3px 3px 0 #000 !important;
 
         &:hover {
+          box-shadow: 4px 4px 0 #000 !important;
           transform: translate(-1px, -1px) !important;
-          box-shadow: 4px 4px 0px #000000 !important;
         }
       }
     }
@@ -363,8 +359,8 @@
 
   // 空状态按钮
   .empty-state .upload-btn-secondary {
+    color: #fff !important;
     background: #9d4edd !important;
-    color: #ffffff !important;
 
     &:hover {
       background: #ff007a !important;

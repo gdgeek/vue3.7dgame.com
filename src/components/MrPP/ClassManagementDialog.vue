@@ -41,10 +41,10 @@
           >
             <div
               style="
+                flex-shrink: 0;
                 width: 100px;
                 height: 100px;
                 margin-right: 20px;
-                flex-shrink: 0;
               "
             >
               <Id2Image
@@ -54,7 +54,7 @@
               ></Id2Image>
             </div>
             <div style="flex-grow: 1">
-              <h2 style="margin: 0 0 10px 0">{{ school.name }}</h2>
+              <h2 style="margin: 0 0 10px">{{ school.name }}</h2>
               <p style="margin: 0; color: #666">
                 <span style="margin-right: 20px">
                   <strong>{{ $t("manager.school.principal") }}:</strong>
@@ -69,7 +69,7 @@
                   {{ school.info?.address || "-" }}
                 </span>
               </p>
-              <p style="margin: 10px 0 0 0; color: #999; font-size: 14px">
+              <p style="margin: 10px 0 0; font-size: 14px; color: #999">
                 {{ school.info?.description || "-" }}
               </p>
             </div>
@@ -663,15 +663,15 @@ watch(
     transition: all 0.3s ease;
 
     &:hover {
+      box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
       transform: translateY(-4px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
   }
 
   /* 确保卡片样式与外部一致 */
   :deep(.box-card) {
-    border-radius: 4px;
     overflow: hidden;
+    border-radius: 4px;
   }
 }
 

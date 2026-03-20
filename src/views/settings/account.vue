@@ -333,7 +333,7 @@ const postEmail = async () => {
 }
 
 .hover-blue:hover {
-  background-color: #409eff;
   color: white;
+  background-color: #409eff;
 }
 </style>

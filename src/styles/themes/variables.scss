@@ -11,19 +11,19 @@
 
   // 主色调
   --primary-color: #00baff;
-  --primary-hover: #0099dd;
-  --primary-light: rgba(0, 186, 255, 0.1);
-  --primary-dark: #0077aa;
+  --primary-hover: #09d;
+  --primary-light: rgb(0 186 255 / 10%);
+  --primary-dark: #07a;
 
   // 文字颜色
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
-  --text-inverse: #ffffff;
+  --text-inverse: #fff;
 
   // 背景颜色
   --bg-page: #f0f4f8;
-  --bg-card: #ffffff;
+  --bg-card: #fff;
   --bg-hover: #f8fafc;
   --bg-active: #e2e8f0;
   --bg-secondary: #f1f5f9;
@@ -40,15 +40,15 @@
 
   // 语义色
   --success-color: #22c55e;
-  --success-light: rgba(34, 197, 94, 0.1);
+  --success-light: rgb(34 197 94 / 10%);
   --warning-color: #f59e0b;
-  --warning-light: rgba(245, 158, 11, 0.1);
+  --warning-light: rgb(245 158 11 / 10%);
   --danger-color: #ef4444;
-  --danger-light: rgba(239, 68, 68, 0.1);
-  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-light: rgb(239 68 68 / 10%);
+  --danger-bg: rgb(239 68 68 / 10%);
   --danger-border: #ef4444;
   --info-color: #00baff;
-  --info-light: rgba(0, 186, 255, 0.1);
+  --info-light: rgb(0 186 255 / 10%);
 
   // ============================================
   // 风格变量
@@ -61,9 +61,9 @@
   --radius-full: 9999px;
 
   // 阴影
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 5%);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 8%);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 12%);
 
   // 间距
   --spacing-xs: 4px;
@@ -74,8 +74,8 @@
 
   // 字体
   --font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
+    -apple-system, blinkmacsystemfont, "Segoe UI", roboto, "Helvetica Neue",
+    arial, sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 13px;
   --font-size-md: 14px;
@@ -101,7 +101,7 @@
   --resource-dialog-card-border-color: #d7e0ec;
   --resource-dialog-card-shadow: none;
   --resource-dialog-card-hover-border-color: #c7d3e3;
-  --resource-dialog-card-hover-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  --resource-dialog-card-hover-shadow: 0 6px 16px rgb(15 23 42 / 8%);
   --resource-dialog-card-selected-border-color: var(--primary-color);
   --resource-dialog-card-selected-shadow: 0 0 0 2px var(--primary-light);
   --resource-dialog-audio-visual-bg: linear-gradient(
@@ -150,28 +150,24 @@
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --text-inverse: #0f172a;
-
   --bg-page: #0f172a;
   --bg-card: #1e293b;
   --bg-hover: #334155;
   --bg-active: #475569;
   --bg-secondary: #0f172a; // Darker background for secondary elements
   --bg-tertiary: #334155;
-
   --bg-color: var(--bg-page);
   --card-bg: var(--bg-card);
-
   --border-color: #334155;
   --border-color-hover: #64748b;
   --border-color-light: #1e293b;
-
   --success-color: #4ade80;
-  --success-light: rgba(74, 222, 128, 0.15);
+  --success-light: rgb(74 222 128 / 15%);
   --warning-color: #fbbf24;
-  --warning-light: rgba(251, 191, 36, 0.15);
+  --warning-light: rgb(251 191 36 / 15%);
   --danger-color: #f87171;
-  --danger-light: rgba(248, 113, 113, 0.15);
-  --danger-bg: rgba(248, 113, 113, 0.15);
+  --danger-light: rgb(248 113 113 / 15%);
+  --danger-bg: rgb(248 113 113 / 15%);
   --info-color: #38bdf8;
-  --info-light: rgba(56, 189, 248, 0.15);
+  --info-light: rgb(56 189 248 / 15%);
 }

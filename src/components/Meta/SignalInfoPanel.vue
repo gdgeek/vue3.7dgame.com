@@ -111,34 +111,34 @@ const { t } = useI18n();
 }
 
 .events-card {
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-md, 12px);
+  min-height: 88px;
   padding: 10px;
   background: var(--bg-hover, #f8fafc);
-  min-height: 88px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-md, 12px);
 }
 
 .events-card-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 8px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary, #64748b);
-  margin-bottom: 8px;
 }
 
 .events-count {
-  min-width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  padding: 0 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
   font-size: 11px;
   color: var(--primary-color, #03a9f4);
-  background: var(--primary-light, rgba(3, 169, 244, 0.12));
+  background: var(--primary-light, rgb(3 169 244 / 12%));
+  border-radius: 9px;
 }
 
 .events-list {
@@ -149,61 +149,61 @@ const { t } = useI18n();
 
 .events-item {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
-  font-size: 12px;
   padding: 6px 8px;
-  border-radius: 8px;
-  background: var(--bg-card, #ffffff);
+  font-size: 12px;
+  background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
 }
 
 .events-index {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  border-radius: 999px;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: 18px;
+  height: 18px;
   font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary, #64748b);
   background: var(--bg-hover, #f1f5f9);
+  border-radius: 999px;
 }
 
 .events-main {
-  min-width: 0;
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .events-title-text {
+  overflow: hidden;
   font-weight: 600;
   color: var(--text-primary, #1e293b);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .events-name-sub {
+  overflow: hidden;
   font-size: 11px;
   color: var(--text-muted, #94a3b8);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .events-type {
+  flex-shrink: 0;
+  padding: 2px 8px;
   color: var(--text-secondary, #64748b);
   background: var(--bg-hover, #f1f5f9);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 999px;
-  padding: 2px 8px;
-  flex-shrink: 0;
 }
 
 .events-empty {

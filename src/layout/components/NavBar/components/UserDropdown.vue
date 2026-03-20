@@ -132,29 +132,29 @@ onUnmounted(() => {
 
 .profile-trigger {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   padding-left: 16px;
+  cursor: pointer;
   background: transparent;
   border: none;
-  cursor: pointer;
 }
 
 .profile-info {
-  text-align: right;
   display: none;
+  text-align: right;
 
-  @media (min-width: 640px) {
+  @media (width >= 640px) {
     display: block;
   }
 }
 
 .profile-name {
+  margin-bottom: 4px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--ar-text-primary);
   line-height: 1;
-  margin-bottom: 4px;
+  color: var(--ar-text-primary);
 }
 
 /* Dropdown transition */

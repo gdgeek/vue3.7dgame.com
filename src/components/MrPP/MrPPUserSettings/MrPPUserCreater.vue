@@ -141,26 +141,31 @@ onMounted(fetchCreation);
 .icon {
   width: 10px;
 }
+
 .el-col {
   margin-bottom: 20px;
   font-size: 14px;
   font-weight: 400;
   color: #282a2b;
 }
+
 .info-title {
   height: 39px;
   font-weight: 700;
-  color: #666666;
   line-height: 39px;
+  color: #666;
   border-bottom: 1px solid #e2e5ec;
 }
+
 .info-content-label {
   width: 70px;
 }
+
 .info-content-label-link:hover {
   color: #40a0ffd0;
   text-decoration: underline;
 }
+
 .info-content-label-link {
   color: #409eff;
 }

@@ -3,31 +3,29 @@
 :root {
   /* 主色调 - 映射到全局主题变量 */
   --ar-primary: var(--primary-color, #00baff);
-  --ar-primary-dark: var(--primary-dark, #0099dd);
+  --ar-primary-dark: var(--primary-dark, #09d);
   --ar-primary-light: var(--primary-light, #33c8ff);
-  --ar-primary-alpha-10: rgba(
-    0,
-    186,
-    255,
-    0.1
+  --ar-primary-alpha-10: rgb(
+    0 186 255 / 10%
   ); // Keep as is for now or use primary-light
-  --ar-primary-alpha-20: rgba(0, 186, 255, 0.2);
+
+  --ar-primary-alpha-20: rgb(0 186 255 / 20%);
 
   /* 背景色 */
   --ar-bg-light: var(--bg-page, #f8fafc);
   --ar-bg-dark: var(--bg-page, #0f172a); // Just alias to bg-page
 
   /* 侧边栏样式 - 自动适配主题 */
-  --menu-background: var(--bg-card, #ffffff);
+  --menu-background: var(--bg-card, #fff);
   --menu-text: var(--text-secondary, #64748b);
-  --menu-active-text: #ffffff;
+  --menu-active-text: #fff;
   --menu-active-bg: var(--primary-color, #00baff);
   --menu-hover: var(--bg-hover, #f1f5f9);
-  --sidebar-logo-background: var(--bg-card, #ffffff);
+  --sidebar-logo-background: var(--bg-card, #fff);
   --sidebar-border: var(--border-color, #e2e8f0);
 
   /* 卡片和边框 */
-  --ar-card-bg: var(--bg-card, #ffffff);
+  --ar-card-bg: var(--bg-card, #fff);
   --ar-card-border: var(--border-color, #e2e8f0);
   --ar-divider: var(--border-color, #e2e8f0);
 
@@ -71,17 +69,17 @@ $border-radius-2xl: 1.5rem;
 $border-radius-3xl: 1.5rem;
 
 /* 阴影 */
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 5%);
 $shadow-md:
-  0 4px 6px -1px rgba(0, 0, 0, 0.1),
-  0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  0 4px 6px -1px rgb(0 0 0 / 10%),
+  0 2px 4px -2px rgb(0 0 0 / 10%);
 $shadow-lg:
-  0 10px 15px -3px rgba(0, 0, 0, 0.1),
-  0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  0 10px 15px -3px rgb(0 0 0 / 10%),
+  0 4px 6px -4px rgb(0 0 0 / 10%);
 $shadow-xl:
-  0 20px 25px -5px rgba(0, 0, 0, 0.1),
-  0 8px 10px -6px rgba(0, 0, 0, 0.1);
-$shadow-primary: 0 10px 15px -3px rgba(0, 186, 255, 0.2);
+  0 20px 25px -5px rgb(0 0 0 / 10%),
+  0 8px 10px -6px rgb(0 0 0 / 10%);
+$shadow-primary: 0 10px 15px -3px rgb(0 186 255 / 20%);
 
 /* 过渡动画 */
 $transition-fast: 150ms ease;
@@ -93,7 +91,7 @@ $font-family-base:
   "Inter",
   "Noto Sans SC",
   -apple-system,
-  BlinkMacSystemFont,
+  blinkmacsystemfont,
   "Segoe UI",
-  Roboto,
+  roboto,
   sans-serif;

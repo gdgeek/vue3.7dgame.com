@@ -96,35 +96,35 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .app-container {
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  width: 100%;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  background-color: #f5f5f5;
 }
 
 .nav-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 60px;
-  height: 64px;
-  width: 100%;
-  box-sizing: border-box;
   position: fixed;
   top: 0;
-  left: 0;
   right: 0;
+  left: 0;
   z-index: 999;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 64px;
+  padding: 0 60px;
   margin: 0;
   transition: all 0.3s ease;
 
   // 默认样式（非关于我们页面）
   &.nav-default {
     background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
   }
 
   // 透明样式（关于我们页面顶部）
@@ -136,7 +136,7 @@ onUnmounted(() => {
   // 滚动样式（关于我们页面滚动后）
   &.nav-scrolled {
     background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
   }
 
   .nav-left {
@@ -166,10 +166,10 @@ onUnmounted(() => {
     gap: 48px;
 
     .nav-item {
+      padding: 8px 16px;
       font-size: 16px;
       color: #666;
       cursor: pointer;
-      padding: 8px 16px;
       border-radius: 4px;
       transition: all 0.3s ease;
 
@@ -178,23 +178,23 @@ onUnmounted(() => {
 
         &:hover {
           color: #1890ff;
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgb(255 255 255 / 10%);
         }
 
         &.active {
           color: #1890ff;
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgb(255 255 255 / 10%);
         }
       }
 
       &:hover {
         color: #1890ff;
-        background-color: rgba(24, 144, 255, 0.1);
+        background-color: rgb(24 144 255 / 10%);
       }
 
       &.active {
         color: #1890ff;
-        background-color: rgba(24, 144, 255, 0.1);
+        background-color: rgb(24 144 255 / 10%);
       }
     }
   }
@@ -202,25 +202,25 @@ onUnmounted(() => {
 
 .content-container {
   position: absolute;
-  width: 100%;
-  flex: 1;
-  background-color: #fff;
   box-sizing: border-box;
+  flex: 1;
+  width: 100%;
   overflow: hidden;
+  background-color: #fff;
 
   .content-section {
     height: 100%;
 
     h1 {
+      margin-bottom: 24px;
       font-size: 28px;
       color: #333;
-      margin-bottom: 24px;
     }
 
     p {
       font-size: 16px;
-      color: #666;
       line-height: 1.6;
+      color: #666;
     }
   }
 }

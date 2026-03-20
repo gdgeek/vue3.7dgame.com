@@ -254,14 +254,14 @@ const sanitizedExcerpt = (item: Item) => {
 
 .document-list-category-tag {
   display: inline-block;
-  margin-left: var(--spacing-xl);
-  margin-bottom: var(--spacing-md);
   padding: 4px var(--spacing-sm);
-  border-radius: var(--radius-full);
-  background: var(--primary-light);
-  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  margin-left: var(--spacing-xl);
   font-size: var(--font-size-xs);
   font-weight: 500;
+  color: var(--primary-color);
+  background: var(--primary-light);
+  border-radius: var(--radius-full);
 }
 
 .document-timeline {
@@ -274,56 +274,56 @@ const sanitizedExcerpt = (item: Item) => {
   }
 
   :deep(.el-timeline-item__timestamp) {
-    color: var(--text-muted);
     font-size: var(--font-size-xs);
+    color: var(--text-muted);
   }
 }
 
 .document-box-card {
-  cursor: pointer;
   display: flex;
+  overflow: hidden;
+  cursor: pointer;
   background: var(--bg-card);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: all var(--transition-normal);
   box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
 
   &:hover {
+    border-color: var(--primary-color);
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
-    border-color: var(--primary-color);
   }
 }
 
 .document-list-img {
+  flex-shrink: 0;
   width: 120px;
   min-height: 100px;
   object-fit: cover;
-  flex-shrink: 0;
   border-radius: 0;
 }
 
 .document-list-text {
-  padding: var(--spacing-md);
   flex: 1;
   min-width: 0;
+  padding: var(--spacing-md);
 }
 
 .document-list-title {
   margin: 0 0 var(--spacing-xs) 0;
   font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--text-primary);
   line-height: 1.4;
+  color: var(--text-primary);
 }
 
 .document-list-excerpt {
-  color: var(--text-secondary);
+  display: -webkit-box;
+  overflow: hidden;
   font-size: var(--font-size-sm);
   line-height: 1.6;
-  overflow: hidden;
-  display: -webkit-box;
+  color: var(--text-secondary);
   -webkit-line-clamp: 3;
   line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -342,15 +342,15 @@ const sanitizedExcerpt = (item: Item) => {
     .btn-prev,
     .btn-next,
     .el-pager li {
-      border-radius: var(--radius-sm);
-      background: var(--bg-card);
       color: var(--text-secondary);
+      background: var(--bg-card);
       border: var(--border-width) solid var(--border-color);
+      border-radius: var(--radius-sm);
     }
 
     .el-pager li.is-active {
-      background: var(--primary-color);
       color: var(--text-inverse);
+      background: var(--primary-color);
       border-color: var(--primary-color);
     }
   }

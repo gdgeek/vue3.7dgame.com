@@ -89,11 +89,11 @@ const showQRCode = () => {
 }
 
 .home-greeting-title {
-  margin: 0 0 16px 0; // Increased spacing to 16px as requested
+  margin: 0 0 16px; // Increased spacing to 16px as requested
   font-size: 32px;
   font-weight: 700;
-  color: var(--text-primary);
   line-height: 1.2;
+  color: var(--text-primary);
 }
 
 .home-username {
@@ -103,8 +103,8 @@ const showQRCode = () => {
 .home-greeting-subtitle {
   margin: 0;
   font-size: 16px;
-  color: var(--text-secondary);
   line-height: 1.5;
+  color: var(--text-secondary);
 }
 
 .home-header-row {
@@ -117,31 +117,31 @@ const showQRCode = () => {
   display: flex;
   justify-content: flex-end;
   padding: 0;
-  margin-top: 0;
   padding-bottom: 4px; // Fine-tune alignment with text baseline
+  margin-top: 0;
 
   &.mobile {
     justify-content: flex-start;
-    margin-top: var(--spacing-md);
     padding-bottom: 0;
+    margin-top: var(--spacing-md);
   }
 }
 
 .home-btn {
   display: inline-flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   height: 44px;
   padding: 0 20px;
   font-size: var(--font-size-md);
   font-weight: 500;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: all var(--transition-normal);
   background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-full);
-  color: var(--text-primary);
-  box-shadow: 0 4px 12px var(--shadow-sm, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 4px 12px var(--shadow-sm, rgb(0 0 0 / 8%));
+  transition: all var(--transition-normal);
 
   .btn-icon {
     font-size: 20px;
@@ -149,9 +149,9 @@ const showQRCode = () => {
   }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px var(--shadow-md, rgba(0, 0, 0, 0.12));
     background: var(--bg-hover, #f8fafc);
+    box-shadow: 0 6px 16px var(--shadow-md, rgb(0 0 0 / 12%));
+    transform: translateY(-2px);
   }
 }
 </style>

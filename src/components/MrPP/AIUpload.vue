@@ -265,8 +265,8 @@ const isResourceInfo = (value: unknown): value is ResourceInfo => {
 }
 
 .grid-content {
-  border-radius: 4px;
   min-height: 36px;
+  border-radius: 4px;
 }
 
 :root {

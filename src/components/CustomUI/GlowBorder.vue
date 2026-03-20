@@ -57,8 +57,8 @@ const childStyles = computed(() => ({
 
 <style scoped>
 .glow-border::before {
-  animation: glow-pulse var(--glow-pulse-duration) infinite linear;
   background-image: var(--background-radial-gradient);
+  animation: glow-pulse var(--glow-pulse-duration) infinite linear;
 }
 
 @keyframes glow-pulse {

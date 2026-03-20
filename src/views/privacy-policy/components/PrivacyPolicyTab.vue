@@ -876,8 +876,8 @@ const policyUpdates = ref([
 .policy-card .policy-content section {
   &.updates {
     .policy-timeline {
-      margin-top: 30px;
       padding-left: 20px;
+      margin-top: 30px;
 
       :deep(.el-timeline-item__wrapper) {
         padding-left: 20px;
@@ -885,18 +885,18 @@ const policyUpdates = ref([
 
       :deep(.el-timeline-item__timestamp) {
         font-size: 14px;
-        color: #409eff;
         font-weight: 500;
+        color: #409eff;
       }
 
       :deep(.el-timeline-item__content) {
-        font-size: 15px;
-        color: #333;
-        line-height: 1.6;
         padding: 10px 15px;
+        font-size: 15px;
+        line-height: 1.6;
+        color: #333;
         background-color: #f9f9f9;
-        border-radius: 6px;
         border-left: 3px solid #409eff;
+        border-radius: 6px;
       }
 
       :deep(.el-timeline-item__node--normal) {
@@ -915,16 +915,16 @@ const policyUpdates = ref([
 
   &.cookies {
     .custom-table {
-      border-radius: 8px;
       overflow: hidden;
       border: 1px solid #ebeef5;
-      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.03);
+      border-radius: 8px;
+      box-shadow: 0 2px 12px 0 rgb(0 0 0 / 3%);
 
       :deep(th) {
-        background-color: #f5f7fa;
-        color: #333;
-        font-weight: 600;
         padding: 15px;
+        font-weight: 600;
+        color: #333;
+        background-color: #f5f7fa;
       }
 
       :deep(td) {
@@ -939,7 +939,7 @@ const policyUpdates = ref([
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
   .policy-card .policy-content section {
     &.cookies {
       .custom-table {
@@ -951,9 +951,9 @@ const policyUpdates = ref([
           }
 
           .cell {
-            white-space: normal;
-            word-break: break-all;
             font-size: 13px;
+            word-break: break-all;
+            white-space: normal;
           }
         }
       }

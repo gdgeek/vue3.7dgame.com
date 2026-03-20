@@ -46,28 +46,28 @@
           >
             <font-awesome-icon
               :icon="['fas', 'square-minus']"
-              style="font-size: 18px; margin-right: 4px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ t("ui.cancelSelectAll") }}
           </el-button>
           <el-button v-else @click="$emit('select-all-page')">
             <font-awesome-icon
               :icon="['fas', 'check-double']"
-              style="font-size: 18px; margin-right: 4px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ t("ui.selectAllPage") }}
           </el-button>
           <el-button @click="$emit('batch-download')">
             <font-awesome-icon
               :icon="['fas', 'download']"
-              style="font-size: 18px; margin-right: 4px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ t("ui.batchDownload") }}
           </el-button>
           <el-button type="danger" @click="$emit('batch-delete')">
             <font-awesome-icon
               :icon="['fas', 'trash-can']"
-              style="font-size: 18px; margin-right: 4px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ t("ui.batchDelete") }}
           </el-button>
@@ -291,32 +291,32 @@ defineExpose({
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: var(--text-primary, #1e293b);
   line-height: 1.3;
+  color: var(--text-primary, #1e293b);
 }
 
 .page-subtitle {
   margin: 6px 0 0;
   font-size: var(--font-size-md, 14px);
-  color: var(--text-secondary, #64748b);
   line-height: 1.5;
+  color: var(--text-secondary, #64748b);
 }
 
 // Selection info container
 .selection-info {
-  margin-top: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
   gap: 2px;
+  align-items: flex-end;
+  margin-top: 0;
 }
 
 .selection-count {
   margin: 0;
   font-size: var(--font-size-md, 14px);
-  color: var(--primary-color, #00baff);
   font-weight: var(--font-weight-medium, 500);
   line-height: 1.5;
+  color: var(--primary-color, #00baff);
 }
 
 .selection-count-inline {
@@ -326,8 +326,8 @@ defineExpose({
 }
 
 .select-all-btn {
-  padding: 0;
   height: auto;
+  padding: 0;
   font-size: 12px;
   font-weight: normal;
 
@@ -339,29 +339,29 @@ defineExpose({
 // ===== Controls Row =====
 .controls-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
   padding: 0 0 16px;
-  gap: 12px;
-  flex-wrap: wrap;
 }
 
 .controls-left {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
 }
 
 .controls-right {
   display: flex;
-  align-items: center;
-  gap: 12px;
   flex-shrink: 0;
+  gap: 12px;
+  align-items: center;
 
   // Customize action buttons to be pill-shaped
   :deep(.el-button) {
-    border-radius: var(--radius-full, 9999px);
     padding: 8px 20px; // Ensure enough padding for pill shape
+    border-radius: var(--radius-full, 9999px);
   }
 }
 
@@ -385,11 +385,11 @@ defineExpose({
   width: 100%;
   height: 44px;
   padding: 0 16px 0 48px;
-  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-full, 9999px);
-  background: var(--bg-card, #fff);
   font-size: var(--font-size-md, 14px);
   color: var(--text-primary, #1e293b);
+  background: var(--bg-card, #fff);
+  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-full, 9999px);
   outline: none;
   transition: all var(--transition-fast, 0.15s ease);
 
@@ -399,7 +399,7 @@ defineExpose({
 
   &:focus {
     border-color: var(--primary-color, #00baff);
-    box-shadow: 0 0 0 3px var(--primary-light, rgba(0, 186, 255, 0.1));
+    box-shadow: 0 0 0 3px var(--primary-light, rgb(0 186 255 / 10%));
   }
 }
 
@@ -408,47 +408,47 @@ defineExpose({
 .vertical-divider {
   width: 1px;
   height: 24px;
-  background-color: var(--border-color, #e2e8f0);
   margin: 0 4px 0 0;
+  background-color: var(--border-color, #e2e8f0);
 }
 
 // ===== Sort Buttons =====
 .sort-control {
   display: flex;
-  align-items: center;
   gap: 8px; // Increased gap for pill buttons
-  margin-right: 12px;
+  align-items: center;
   padding: 2px; // Add padding to avoid shadow clipping
+  margin-right: 12px;
 }
 
 .sort-btn {
   display: inline-flex;
+  gap: 6px;
   align-items: center;
   justify-content: center;
   height: 40px; // Match view toggle height
   padding: 0 16px; // More horizontal padding
-  border-radius: 8px; // Standard rounded rectangle
-  background: transparent;
-  border: none;
-  color: var(--text-secondary, #64748b);
   font-size: var(--font-size-sm, 13px);
   font-weight: 500;
+  color: var(--text-secondary, #64748b);
   cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 8px; // Standard rounded rectangle
   transition: all var(--transition-fast, 0.15s ease);
-  gap: 6px;
 
   &:hover {
-    background: var(--bg-tertiary, #e2e8f0);
     color: var(--text-primary, #1e293b);
+    background: var(--bg-tertiary, #e2e8f0);
   }
 
   &.active {
-    background: var(--bg-card, #fff);
-    color: var(--primary-color, #00baff);
-    box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.1),
-      0 1px 2px rgba(0, 0, 0, 0.06); // Soft shadow
     font-weight: 600;
+    color: var(--primary-color, #00baff);
+    background: var(--bg-card, #fff);
+    box-shadow:
+      0 1px 3px rgb(0 0 0 / 10%),
+      0 1px 2px rgb(0 0 0 / 6%); // Soft shadow
 
     &:hover {
       background: var(--bg-card, #fff); // Keep white on hover
@@ -460,11 +460,11 @@ defineExpose({
   }
 
   .sort-az {
+    display: flex;
+    align-items: center;
     font-size: 12px;
     font-weight: 600;
     line-height: 1;
-    display: flex;
-    align-items: center;
 
     small {
       font-size: 10px;
@@ -472,30 +472,29 @@ defineExpose({
   }
 
   .sort-arrow {
-    font-size: 18px; // Matching icon size
     margin-left: 0;
+    font-size: 18px; // Matching icon size
   }
 }
 
 // ===== View Toggle (Segment Control) =====
 .view-toggle {
   .segment-control {
+    box-sizing: border-box;
     display: flex;
+    gap: 2px;
+    align-items: center;
+    height: 40px;
     padding: 3px;
     background-color: var(--bg-secondary, #f1f5f9);
+    border: var(--border-width, 1px) solid var(--border-color, #e2e8f0); // Added border
+    border-radius: 8px;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 5%); // Optional: slight inset for track depth
 
     :global(.dark) & {
       background-color: var(--bg-page);
       border-color: var(--border-color);
     }
-
-    border: var(--border-width, 1px) solid var(--border-color, #e2e8f0); // Added border
-    border-radius: 8px;
-    gap: 2px;
-    height: 40px;
-    box-sizing: border-box;
-    align-items: center;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05); // Optional: slight inset for track depth
   }
 
   .segment-btn {
@@ -504,12 +503,12 @@ defineExpose({
     justify-content: center;
     width: 36px;
     height: 32px; // Slightly smaller to fit with padding
-    border: none;
-    border-radius: 6px;
-    background: transparent;
     padding: 0;
     color: var(--text-secondary, #64748b);
     cursor: pointer;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
     transition: all var(--transition-fast, 0.15s ease);
 
     .svg-inline--fa {
@@ -521,11 +520,11 @@ defineExpose({
     }
 
     &.active {
-      background-color: var(--bg-card, #fff);
       color: var(--primary-color, #00baff);
+      background-color: var(--bg-card, #fff);
       box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.1),
-        0 1px 1px rgba(0, 0, 0, 0.05); // Enhanced shadow
+        0 1px 2px rgb(0 0 0 / 10%),
+        0 1px 1px rgb(0 0 0 / 5%); // Enhanced shadow
 
       .svg-inline--fa {
         font-variation-settings: "FILL" 1;

@@ -12,11 +12,11 @@
   .settings-card,
   .resource-card,
   .theme-card {
+    border-width: 2px !important;
     transition:
       transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
       box-shadow 0.3s ease,
       border-color 0.3s ease !important;
-    border-width: 2px !important;
 
     &:hover {
       transform: translateY(-6px) scale(1.02) !important;
@@ -28,27 +28,27 @@
     background: linear-gradient(180deg, #fff8f5 0%, #ffe8dd 100%) !important;
 
     &::before {
-      content: "";
       position: absolute;
+      right: 0;
       bottom: 0;
       left: 0;
-      right: 0;
+      z-index: 0;
       height: 150px;
+      pointer-events: none;
+      content: "";
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%23FF6B35' fill-opacity='0.08' d='M0,50 C360,100 720,0 1080,50 C1260,75 1350,25 1440,50 L1440,100 L0,100 Z'/%3E%3C/svg%3E");
       background-size: cover;
-      pointer-events: none;
-      z-index: 0;
     }
   }
 
   // 详情面板温暖风格
   .detail-panel {
-    background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+    background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
 
     .panel-header {
       background: linear-gradient(
         90deg,
-        rgba(255, 107, 53, 0.05) 0%,
+        rgb(255 107 53 / 5%) 0%,
         transparent 100%
       ) !important;
       border-bottom: 2px solid #ffe4db !important;
@@ -60,8 +60,8 @@
 
     .preview-module,
     .cover-preview {
-      border-width: 2px !important;
       border-color: #ffe4db !important;
+      border-width: 2px !important;
       border-radius: 20px !important;
     }
 
@@ -74,8 +74,8 @@
     }
 
     .change-cover-btn {
-      background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
       color: white !important;
+      background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
       border-radius: 20px !important;
 
       &:hover {
@@ -89,22 +89,22 @@
 
     // 修改名称按钮 - 温暖活泼风格
     .name-display .edit-btn {
+      color: #ff6b35 !important;
       background: linear-gradient(
         135deg,
-        rgba(255, 107, 53, 0.15) 0%,
-        rgba(255, 183, 71, 0.15) 100%
+        rgb(255 107 53 / 15%) 0%,
+        rgb(255 183 71 / 15%) 100%
       ) !important;
-      color: #ff6b35 !important;
       border: 2px solid #ffe4db !important;
       border-radius: 50% !important;
 
       &:hover {
+        color: white !important;
         background: linear-gradient(
           135deg,
           #ff6b35 0%,
           #ffb347 100%
         ) !important;
-        color: white !important;
         border-color: #ff6b35 !important;
         transform: scale(1.1) !important;
       }
@@ -113,8 +113,8 @@
     .info-block {
       background: linear-gradient(
         135deg,
-        rgba(255, 107, 53, 0.05) 0%,
-        rgba(255, 183, 71, 0.05) 100%
+        rgb(255 107 53 / 5%) 0%,
+        rgb(255 183 71 / 5%) 100%
       ) !important;
       border: 2px solid #ffe4db !important;
       border-radius: 16px !important;
@@ -136,24 +136,24 @@
     .form-input,
     .form-textarea,
     .name-input {
+      background: #fff !important;
       border: 2px solid #ffe4db !important;
       border-radius: 12px !important;
-      background: #ffffff !important;
 
       &:focus {
         border-color: #ff6b35 !important;
-        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
+        box-shadow: 0 0 0 3px rgb(255 107 53 / 10%) !important;
       }
     }
 
     // 标签编辑器
     .tag-item {
+      color: #ff6b35 !important;
       background: linear-gradient(
         135deg,
-        rgba(255, 107, 53, 0.1) 0%,
-        rgba(255, 183, 71, 0.1) 100%
+        rgb(255 107 53 / 10%) 0%,
+        rgb(255 183 71 / 10%) 100%
       ) !important;
-      color: #ff6b35 !important;
       border-radius: 20px !important;
     }
 
@@ -173,35 +173,35 @@
       border-radius: 16px !important;
 
       &:hover {
-        border-color: #ff6b35 !important;
         color: #ff6b35 !important;
+        border-color: #ff6b35 !important;
       }
 
       &.active {
-        border-color: #ff6b35 !important;
+        color: #ff6b35 !important;
         background: linear-gradient(
           135deg,
-          rgba(255, 107, 53, 0.1) 0%,
-          rgba(255, 183, 71, 0.1) 100%
+          rgb(255 107 53 / 10%) 0%,
+          rgb(255 183 71 / 10%) 100%
         ) !important;
-        color: #ff6b35 !important;
+        border-color: #ff6b35 !important;
       }
     }
 
     .panel-footer {
-      background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+      background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
       border-top: 2px solid #ffe4db !important;
     }
 
     .download-btn,
     .enter-edit-btn {
       background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
-      box-shadow: 0 8px 20px -4px rgba(255, 107, 53, 0.35) !important;
       border-radius: 16px !important;
+      box-shadow: 0 8px 20px -4px rgb(255 107 53 / 35%) !important;
 
       &:hover {
+        box-shadow: 0 12px 28px -4px rgb(255 107 53 / 45%) !important;
         transform: scale(1.02);
-        box-shadow: 0 12px 28px -4px rgba(255, 107, 53, 0.45) !important;
       }
     }
 
@@ -225,19 +225,19 @@
       border-radius: 12px !important;
 
       &:hover {
-        background: rgba(255, 107, 107, 0.1) !important;
+        background: rgb(255 107 107 / 10%) !important;
       }
     }
 
     .secondary-actions .download-btn {
+      color: #ff6b35 !important;
       background: transparent !important;
       border: 2px solid #ffe4db !important;
-      color: #ff6b35 !important;
       box-shadow: none !important;
 
       &:hover {
+        background: rgb(255 107 53 / 5%) !important;
         border-color: #ff6b35 !important;
-        background: rgba(255, 107, 53, 0.05) !important;
       }
     }
   }
@@ -245,18 +245,18 @@
   // 对话框温暖风格
   .custom-confirm-dialog .el-dialog,
   .custom-input-dialog .el-dialog {
-    background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+    background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
     border: 2px solid #ffe4db !important;
 
     .btn-primary {
       background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
-      box-shadow: 0 6px 16px -4px rgba(255, 107, 53, 0.35) !important;
+      box-shadow: 0 6px 16px -4px rgb(255 107 53 / 35%) !important;
     }
   }
 
   // 上传模态框温暖风格
   .upload-modal {
-    background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+    background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
     border: 2px solid #ffe4db !important;
 
     .upload-zone {
@@ -265,27 +265,27 @@
 
       &:hover,
       &.drag-active {
+        background: rgb(255 107 53 / 8%) !important;
         border-color: #ff6b35 !important;
-        background: rgba(255, 107, 53, 0.08) !important;
       }
     }
 
     .browse-btn,
     .start-upload-btn {
       background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
-      box-shadow: 0 6px 16px -4px rgba(255, 107, 53, 0.35) !important;
+      box-shadow: 0 6px 16px -4px rgb(255 107 53 / 35%) !important;
 
       &:hover {
+        box-shadow: 0 8px 20px -4px rgb(255 107 53 / 45%) !important;
         transform: scale(1.02);
-        box-shadow: 0 8px 20px -4px rgba(255, 107, 53, 0.45) !important;
       }
     }
 
     .file-item {
       background: linear-gradient(
         135deg,
-        rgba(255, 107, 53, 0.05) 0%,
-        rgba(255, 183, 71, 0.05) 100%
+        rgb(255 107 53 / 5%) 0%,
+        rgb(255 183 71 / 5%) 100%
       ) !important;
       border: 2px solid #ffe4db !important;
     }
@@ -313,19 +313,19 @@
 
   // 侧边栏温暖风格
   .ar-sidebar {
-    background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+    background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
 
     &::before {
-      content: "";
       position: absolute;
+      right: 0;
       bottom: 0;
       left: 0;
-      right: 0;
+      z-index: 0;
       height: 100px;
+      pointer-events: none;
+      content: "";
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cpath fill='%23FF6B35' fill-opacity='0.08' d='M0,50 Q50,100 100,50 T200,50 L200,100 L0,100 Z'/%3E%3C/svg%3E");
       background-size: cover;
-      pointer-events: none;
-      z-index: 0;
     }
 
     > * {
@@ -347,7 +347,7 @@
 
   .sidebar-item-active {
     background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
-    box-shadow: 0 6px 16px -4px rgba(255, 107, 53, 0.35) !important;
+    box-shadow: 0 6px 16px -4px rgb(255 107 53 / 35%) !important;
   }
 
   // 图标动画
@@ -362,35 +362,35 @@
 
   // 搜索框温暖风格
   .search-input {
-    border-width: 2px !important;
     border-color: #ffe4db !important;
+    border-width: 2px !important;
 
     &:focus {
       border-color: #ff6b35 !important;
-      box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.15) !important;
+      box-shadow: 0 0 0 4px rgb(255 107 53 / 15%) !important;
     }
   }
 
   // 列表视图 - 温暖活泼风格
   .resource-list {
-    background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+    background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
     border: 2px solid #ffe4db !important;
     border-radius: 20px !important;
 
     .list-table {
       th {
+        color: #8b6f5c !important;
         background: linear-gradient(
           90deg,
-          rgba(255, 107, 53, 0.05) 0%,
-          rgba(255, 183, 71, 0.05) 100%
+          rgb(255 107 53 / 5%) 0%,
+          rgb(255 183 71 / 5%) 100%
         ) !important;
-        color: #8b6f5c !important;
         border-bottom: 2px solid #ffe4db !important;
       }
 
       td {
-        border-bottom: 2px solid #ffe4db !important;
         color: #2d1810 !important;
+        border-bottom: 2px solid #ffe4db !important;
       }
     }
 
@@ -398,7 +398,7 @@
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
       &:hover {
-        background: rgba(255, 107, 53, 0.06) !important;
+        background: rgb(255 107 53 / 6%) !important;
         transform: translateX(4px) !important;
       }
 
@@ -408,43 +408,44 @@
     }
 
     .row-thumbnail {
+      background: linear-gradient(135deg, #fff8f5 0%, #ffe8dd 100%) !important;
       border: 2px solid #ffe4db !important;
       border-radius: 12px !important;
-      background: linear-gradient(135deg, #fff8f5 0%, #ffe8dd 100%) !important;
     }
 
     .file-name {
-      color: #2d1810 !important;
       font-weight: 600 !important;
+      color: #2d1810 !important;
     }
 
     .enter-editor-btn {
-      background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
       color: white !important;
+      background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
       border-radius: 12px !important;
-      box-shadow: 0 4px 12px -2px rgba(255, 107, 53, 0.3) !important;
+      box-shadow: 0 4px 12px -2px rgb(255 107 53 / 30%) !important;
 
       &:hover {
+        box-shadow: 0 6px 16px -2px rgb(255 107 53 / 40%) !important;
         transform: scale(1.05) !important;
-        box-shadow: 0 6px 16px -2px rgba(255, 107, 53, 0.4) !important;
       }
     }
 
     .list-tag {
+      font-weight: 600 !important;
+      color: #ff6b35 !important;
       background: linear-gradient(
         135deg,
-        rgba(255, 107, 53, 0.1) 0%,
-        rgba(255, 183, 71, 0.1) 100%
+        rgb(255 107 53 / 10%) 0%,
+        rgb(255 183 71 / 10%) 100%
       ) !important;
-      color: #ff6b35 !important;
       border-radius: 20px !important;
-      font-weight: 600 !important;
     }
 
     .visibility-cell {
       &.public {
         color: #22c55e !important;
       }
+
       &.private {
         color: #8b6f5c !important;
       }
@@ -455,16 +456,16 @@
       border-radius: 10px !important;
 
       &:hover {
-        background: rgba(255, 107, 53, 0.1) !important;
         color: #ff6b35 !important;
+        background: rgb(255 107 53 / 10%) !important;
       }
     }
 
     .row-menu {
-      background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+      background: linear-gradient(180deg, #fff 0%, #fff8f5 100%) !important;
       border: 2px solid #ffe4db !important;
       border-radius: 16px !important;
-      box-shadow: 0 8px 24px -4px rgba(255, 107, 53, 0.2) !important;
+      box-shadow: 0 8px 24px -4px rgb(255 107 53 / 20%) !important;
 
       .menu-item {
         color: #2d1810 !important;
@@ -475,7 +476,7 @@
         }
 
         &:hover {
-          background: rgba(255, 107, 53, 0.08) !important;
+          background: rgb(255 107 53 / 8%) !important;
           transform: translateX(4px) !important;
         }
 
@@ -487,7 +488,7 @@
           }
 
           &:hover {
-            background: rgba(255, 107, 107, 0.1) !important;
+            background: rgb(255 107 107 / 10%) !important;
           }
         }
       }
@@ -496,15 +497,15 @@
 
   // 波浪装饰（页面底部）
   &::after {
-    content: "";
     position: fixed;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
+    z-index: 0;
     height: 100px;
+    pointer-events: none;
+    content: "";
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%23FF6B35' fill-opacity='0.05' d='M0,50 C360,100 720,0 1080,50 C1260,75 1350,25 1440,50 L1440,100 L0,100 Z'/%3E%3C/svg%3E");
     background-size: cover;
-    pointer-events: none;
-    z-index: 0;
   }
 }

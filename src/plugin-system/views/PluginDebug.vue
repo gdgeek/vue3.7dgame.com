@@ -379,7 +379,7 @@ onMounted(() => {
                 <template #reference>
                   <el-button link type="primary" size="small">查看</el-button>
                 </template>
-                <pre style="font-size: 12px; margin: 0">{{
+                <pre style="margin: 0; font-size: 12px">{{
                   JSON.stringify(row.extraConfig, null, 2)
                 }}</pre>
               </el-popover>
@@ -568,8 +568,8 @@ onMounted(() => {
 
 <style scoped>
 .plugin-debug {
-  padding: 20px;
   height: 100%;
+  padding: 20px;
   overflow-y: auto;
   background: var(--el-bg-color-page, #f5f7fa);
 }
@@ -583,8 +583,8 @@ onMounted(() => {
 
 .plugin-debug__title {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .plugin-debug__title h2 {
@@ -595,8 +595,8 @@ onMounted(() => {
 
 .plugin-debug__actions {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
 }
 
 .plugin-debug__alert {
@@ -608,8 +608,8 @@ onMounted(() => {
 }
 
 .plugin-debug__tabs {
-  background: var(--el-bg-color, #fff);
   padding: 16px;
+  background: var(--el-bg-color, #fff);
   border-radius: 4px;
 }
 
@@ -618,15 +618,15 @@ onMounted(() => {
 }
 
 .plugin-debug__json {
-  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  padding: 12px;
+  margin: 0;
+  overflow-x: auto;
+  font-family: "SF Mono", "Fira Code", Consolas, monospace;
   font-size: 12px;
   line-height: 1.6;
-  background: var(--el-fill-color-lighter, #f5f7fa);
-  padding: 12px;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin: 0;
-  white-space: pre-wrap;
   word-break: break-all;
+  white-space: pre-wrap;
+  background: var(--el-fill-color-lighter, #f5f7fa);
+  border-radius: 4px;
 }
 </style>

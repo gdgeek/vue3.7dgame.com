@@ -205,19 +205,19 @@ watch(
   transition: all 0.3s;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     border-color: var(--el-color-primary);
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+    transform: translateY(-5px);
   }
 }
 
 .image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 150px;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background-color: #f5f7fa;
 }
 
@@ -228,31 +228,31 @@ watch(
 }
 
 .user-name {
-  font-size: 16px;
-  font-weight: bold;
   display: block;
   margin-bottom: 5px;
-  white-space: nowrap;
   overflow: hidden;
+  font-size: 16px;
+  font-weight: bold;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-username {
-  font-size: 12px;
-  color: #909399;
   display: block;
   margin-bottom: 10px;
+  font-size: 12px;
+  color: #909399;
 }
 
 .bottom {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .pagination-container {
-  margin-top: 20px;
   display: flex;
   justify-content: center;
+  margin-top: 20px;
 }
 </style>

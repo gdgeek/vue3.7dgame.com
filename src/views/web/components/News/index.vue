@@ -580,19 +580,19 @@ defineOptions({
 
 <style lang="scss" scoped>
 .news-section {
-  padding: 100px 0;
-  background-color: #f9fafb;
   position: relative;
+  padding: 100px 0;
   overflow: hidden;
+  background-color: #f9fafb;
 
   &.dark-theme {
-    background-color: #121212;
     color: #f9fafb;
+    background-color: #121212;
 
     .section-title {
       color: #f3f4f6;
 
-      &:after {
+      &::after {
         background: linear-gradient(90deg, #00dbde, #9e9e9e);
       }
     }
@@ -603,7 +603,7 @@ defineOptions({
 
     .news-tabs {
       :deep(.el-tabs__nav-wrap::after) {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgb(255 255 255 / 10%);
       }
 
       :deep(.el-tabs__item) {
@@ -621,7 +621,7 @@ defineOptions({
 
     .timeline-card {
       background-color: #1e1e1e;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
 
       &:hover {
         background-color: #2d2d2d;
@@ -630,7 +630,7 @@ defineOptions({
       &.newest-article {
         background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
 
-        &:before {
+        &::before {
           background: linear-gradient(90deg, #00dbde, #b2b2b2);
         }
       }
@@ -652,41 +652,41 @@ defineOptions({
 
 .container {
   max-width: 1200px;
-  margin: 0 auto;
   padding: 0 20px;
+  margin: 0 auto;
 }
 
 .section-header {
-  text-align: center;
   margin-bottom: 60px;
+  text-align: center;
 
   .section-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-    color: #1f2937;
     position: relative;
     display: inline-block;
+    margin-bottom: 16px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
 
-    &:after {
-      content: "";
+    &::after {
       position: absolute;
       bottom: -10px;
       left: 50%;
-      transform: translateX(-50%);
       width: 80px;
       height: 4px;
+      content: "";
       //background: linear-gradient(90deg, #00dbde, #adadad);
       background: linear-gradient(90deg, #7367f0, #00cfe8);
       border-radius: 2px;
+      transform: translateX(-50%);
     }
   }
 
   .section-subtitle {
-    font-size: 1.1rem;
-    color: #6b7280;
     max-width: 700px;
     margin: 0 auto;
+    font-size: 1.1rem;
+    color: #6b7280;
   }
 }
 
@@ -707,18 +707,18 @@ defineOptions({
   }
 
   :deep(.el-tabs__item) {
+    height: 40px;
+    padding: 0 20px 20px;
     font-size: 1.1rem;
     font-weight: 500;
-    padding: 0 20px 20px;
-    height: 40px;
     line-height: 40px;
   }
 
   :deep(.el-tabs__active-bar) {
     height: 3px;
-    border-radius: 3px;
     //background: linear-gradient(90deg, #00dbde, #bebebe);
     background: linear-gradient(90deg, #7367f0, #00cfe8);
+    border-radius: 3px;
   }
 }
 
@@ -734,10 +734,10 @@ defineOptions({
   }
 
   :deep(.el-timeline-item__timestamp) {
+    margin-bottom: 8px;
     font-size: 0.9rem;
     font-weight: 500;
     color: #6b7280;
-    margin-bottom: 8px;
   }
 
   :deep(.el-timeline-item__node--normal) {
@@ -750,21 +750,21 @@ defineOptions({
 }
 
 .timeline-card {
-  background-color: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  padding: 24px;
-  margin-bottom: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
   position: relative;
   display: flex;
-  overflow: hidden;
   min-height: 160px;
+  padding: 24px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 8%);
+  transition: all 0.3s ease;
 
   &:hover {
+    box-shadow: 0 15px 35px rgb(0 0 0 / 10%);
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 
     .read-more {
       text-decoration: underline;
@@ -785,11 +785,11 @@ defineOptions({
 }
 
 .card-image {
+  position: relative;
   width: 38%;
   margin-left: 2%;
   overflow: hidden;
   border-radius: 8px;
-  position: relative;
 
   img {
     width: 100%;
@@ -820,23 +820,23 @@ defineOptions({
 }
 
 .article-title {
+  margin-bottom: 12px;
   font-size: 1.4rem;
   font-weight: 600;
-  margin-bottom: 12px;
-  color: #1f2937;
   line-height: 1.4;
+  color: #1f2937;
 }
 
 .article-excerpt {
-  font-size: 1rem;
-  color: #4b5563;
-  margin-bottom: 16px;
   display: -webkit-box;
+  margin-bottom: 16px;
+  overflow: hidden;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b5563;
   -webkit-line-clamp: 3;
   line-clamp: 3;
   -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.6;
 
   :deep(p) {
     margin: 0;
@@ -850,9 +850,9 @@ defineOptions({
   .read-more {
     display: flex;
     align-items: center;
-    color: #3894ff;
     font-size: 0.95rem;
     font-weight: 500;
+    color: #3894ff;
 
     .el-icon {
       margin-left: 4px;
@@ -862,9 +862,9 @@ defineOptions({
 }
 
 .news-pagination {
-  margin-top: 40px;
   display: flex;
   justify-content: center;
+  margin-top: 40px;
 }
 
 .news-more {
@@ -877,9 +877,9 @@ defineOptions({
     transition: all 0.3s ease;
 
     &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 20px rgb(0 0 0 / 10%);
       opacity: 0.9;
+      transform: translateY(-1px);
     }
 
     .el-icon {
@@ -895,14 +895,14 @@ defineOptions({
 
   .article-meta-detail {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 30px;
 
     .article-tags {
       display: flex;
-      gap: 8px;
       flex-wrap: wrap;
+      gap: 8px;
     }
 
     .article-date-detail {
@@ -919,21 +919,21 @@ defineOptions({
     :deep(img) {
       max-width: 100%;
       height: auto;
-      border-radius: 8px;
       margin: 20px 0;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgb(0 0 0 / 8%);
     }
 
     :deep(h2) {
-      font-size: 1.8rem;
       margin: 30px 0 20px;
+      font-size: 1.8rem;
       font-weight: 600;
       color: #1f2937;
     }
 
     :deep(h3) {
-      font-size: 1.5rem;
       margin: 25px 0 15px;
+      font-size: 1.5rem;
       font-weight: 600;
       color: #1f2937;
     }
@@ -962,34 +962,34 @@ defineOptions({
     }
 
     :deep(blockquote) {
-      border-left: 4px solid #00dbde;
       padding: 15px 20px;
-      background-color: #f9fafb;
       margin: 20px 0;
       font-style: italic;
       color: #4b5563;
+      background-color: #f9fafb;
+      border-left: 4px solid #00dbde;
     }
 
     :deep(code) {
-      background-color: #f3f4f6;
       padding: 3px 6px;
-      border-radius: 4px;
       font-family: monospace;
       font-size: 0.9em;
+      background-color: #f3f4f6;
+      border-radius: 4px;
     }
 
     :deep(pre) {
-      background-color: #1f2937;
-      color: #f9fafb;
       padding: 20px;
-      border-radius: 8px;
-      overflow-x: auto;
       margin: 20px 0;
+      overflow-x: auto;
+      color: #f9fafb;
+      background-color: #1f2937;
+      border-radius: 8px;
 
       code {
-        background-color: transparent;
-        color: inherit;
         padding: 0;
+        color: inherit;
+        background-color: transparent;
       }
     }
   }
@@ -1006,16 +1006,16 @@ defineOptions({
 .news-error,
 .article-loading,
 .article-error {
-  padding: 40px 0;
-  min-height: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 300px;
+  padding: 40px 0;
 }
 
 // 移动端适配
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
   .news-section {
     padding: 60px 0;
   }
@@ -1037,9 +1037,9 @@ defineOptions({
 
     .card-image {
       width: 100%;
-      margin-left: 0;
-      margin-top: 20px;
       height: 180px;
+      margin-top: 20px;
+      margin-left: 0;
     }
   }
 
@@ -1049,8 +1049,8 @@ defineOptions({
 
   .article-meta-detail {
     flex-direction: column;
-    align-items: flex-start;
     gap: 10px;
+    align-items: flex-start;
   }
 }
 
@@ -1065,13 +1065,13 @@ defineOptions({
     }
 
     :deep(blockquote) {
-      background-color: #2d2d2d;
       color: #d1d5db;
+      background-color: #2d2d2d;
     }
 
     :deep(code) {
-      background-color: #374151;
       color: #e5e7eb;
+      background-color: #374151;
     }
 
     :deep(pre) {

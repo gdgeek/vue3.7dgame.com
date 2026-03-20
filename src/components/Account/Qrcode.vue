@@ -76,15 +76,15 @@ export default {
 <!-- 添加默认导出以解决导入问题 -->
 <style scoped>
 .qrcode-container {
-  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .qrcode-canvas {
   width: 100%;
-  aspect-ratio: 1 / 1;
   height: auto;
+  aspect-ratio: 1 / 1;
 }
 </style>

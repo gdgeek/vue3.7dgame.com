@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div ref="three" style="height: 300px; width: 100%"></div>
+    <div ref="three" style="width: 100%; height: 300px"></div>
   </div>
 </template>
 

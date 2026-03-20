@@ -104,11 +104,11 @@ watch([() => props.bvid, () => props.aid, () => props.page], () => {
 
 <style lang="scss" scoped>
 .bilibili-player-container {
+  position: relative;
   width: 100%;
   overflow: hidden;
-  position: relative;
   border-radius: 8px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 20px rgb(0 0 0 / 10%);
 }
 
 .bilibili-player {
@@ -118,27 +118,27 @@ watch([() => props.bvid, () => props.aid, () => props.page], () => {
 }
 
 .loading-container {
-  width: 100%;
-  background: #000;
-  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
 
   .player-placeholder {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     background-color: #f8f9fa;
-    position: relative;
 
     .logo {
       position: absolute;
+      z-index: 1;
       width: 60px;
       height: 60px;
-      z-index: 1;
 
       img {
         width: 100%;
@@ -157,7 +157,7 @@ watch([() => props.bvid, () => props.aid, () => props.page], () => {
 }
 
 // 响应式调整
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
   .bilibili-player-container {
     border-radius: 4px;
   }

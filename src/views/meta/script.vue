@@ -50,7 +50,7 @@
                   <el-main class="blockly-editor-main">
                     <iframe
                       :key="editorFrameKey"
-                      style="margin: 0; padding: 0; height: 100%; width: 100%"
+                      style="width: 100%; height: 100%; padding: 0; margin: 0"
                       class="blockly-editor-frame"
                       scrolling="no"
                       id="editor"
@@ -754,7 +754,7 @@ defineExpose({ run });
 }
 
 .dark-theme .hljs {
-  background-color: rgb(24, 24, 24) !important;
+  background-color: rgb(24 24 24) !important;
 }
 
 .light-theme .hljs {
@@ -763,8 +763,8 @@ defineExpose({ run });
 
 .script-tabs-wrapper {
   position: relative;
-  width: 100%;
   flex: 1;
+  width: 100%;
   min-width: 0;
 }
 
@@ -783,14 +783,14 @@ defineExpose({ run });
 }
 
 .script-used-scenes-select :deep(.el-select__wrapper) {
-  min-height: 32px;
   align-items: center;
+  min-height: 32px;
 }
 
 .script-used-scenes-select :deep(.el-select__placeholder),
 .script-used-scenes-select :deep(.el-select__selected-item) {
-  text-align: center;
   line-height: 20px;
+  text-align: center;
 }
 
 :global(.script-used-scenes-popper .el-select-dropdown__item) {
@@ -804,31 +804,31 @@ defineExpose({ run });
   .script-used-scenes-popper .el-select-dropdown__item:hover,
   .script-used-scenes-popper .el-select-dropdown__item.is-hovering
 ) {
-  background-color: var(--ar-primary-alpha-10) !important;
-  color: var(--ar-primary) !important;
   font-weight: var(--font-weight-medium, 500) !important;
+  color: var(--ar-primary) !important;
+  background-color: var(--ar-primary-alpha-10) !important;
 }
 
 .script-tabs-wrapper :deep(.el-tabs__header) {
-  margin: 0 !important;
-  padding-right: 280px;
-  border-bottom: none !important;
   position: relative;
   top: -4px;
+  padding-right: 280px;
+  margin: 0 !important;
+  border-bottom: none !important;
 }
 
 .script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__nav) {
-  border: none !important;
   background: transparent !important;
+  border: none !important;
   box-shadow: none !important;
 }
 
 .script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
-  border: 0.5px solid #d6deea !important;
   background: #fff;
+  border: 0.5px solid #d6deea !important;
   border-radius: 8px;
-  box-shadow: none !important;
   outline: none !important;
+  box-shadow: none !important;
 }
 
 .script-tabs-wrapper
@@ -841,14 +841,14 @@ defineExpose({ run });
   color: #06a7ee;
   background: #fff;
   border: 0.5px solid #06a7ee !important;
-  box-shadow: none !important;
   outline: none !important;
+  box-shadow: none !important;
 }
 
 .script-tabs-wrapper :deep(.el-tabs__nav-wrap::after) {
   display: none !important;
-  content: none !important;
   height: 0 !important;
+  content: none !important;
 }
 
 .script-tabs-wrapper :deep(.el-tabs__content) {
@@ -857,28 +857,28 @@ defineExpose({ run });
 }
 
 .blockly-editor-main {
+  position: relative;
+  height: calc(100vh - 185px);
+  min-height: 520px;
+  padding: 0;
   margin: 0;
   margin-top: 0;
-  padding: 0;
-  position: relative;
   overflow: hidden;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
-  height: calc(100vh - 185px);
-  min-height: 520px;
 }
 
 .blockly-editor-frame {
-  border: 0;
   display: block;
+  border: 0;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .script-tabs-actions {
     position: static;
-    margin-bottom: 8px;
     flex-wrap: wrap;
     justify-content: flex-end;
+    margin-bottom: 8px;
   }
 
   .script-tabs-wrapper :deep(.el-tabs__header) {
@@ -891,7 +891,7 @@ defineExpose({ run });
 }
 
 .dark-theme :deep(.hljs) {
-  background-color: rgb(24, 24, 24) !important;
+  background-color: rgb(24 24 24) !important;
 }
 
 .light-theme :deep(.hljs) {
@@ -912,10 +912,10 @@ defineExpose({ run });
 }
 
 .scene-fullscreen-btn {
-  opacity: 0.8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.8;
 }
 
 .scene-fullscreen-btn :deep(.svg-inline--fa) {

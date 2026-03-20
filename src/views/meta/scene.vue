@@ -1592,37 +1592,37 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .verse-scene {
-  height: calc(100vh - 60px);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow: hidden;
   border-radius: 0 !important;
 }
 
 .editor-wrapper {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
   position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: 100%;
   border-radius: 0 !important;
 }
 
 .editor-container {
-  padding: 0 !important;
   flex: 1;
+  padding: 0 !important;
   overflow: hidden;
   border-radius: 0 !important;
 }
 
 .content {
-  height: 100%;
+  display: block;
   width: 100%;
+  height: 100%;
   background: var(--bg-card, #fff);
   border: 0;
-  outline: none;
-  display: block;
   border-radius: 0 !important;
+  outline: none;
 }
 </style>
 

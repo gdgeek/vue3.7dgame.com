@@ -1,7 +1,7 @@
 <template>
   <div class="verse-view">
     <br />
-    <el-row :gutter="20" style="margin: 0px 18px 0">
+    <el-row :gutter="20" style="margin: 0 18px">
       <el-col :sm="16">
         <el-card v-if="item" class="box-card">
           <template #header>

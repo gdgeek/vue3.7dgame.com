@@ -264,15 +264,15 @@ onUnmounted(() => {
   height: 100%;
 
   h1 {
+    margin-bottom: 24px;
     font-size: 28px;
     color: #333;
-    margin-bottom: 24px;
   }
 
   p {
     font-size: 16px;
-    color: #666;
     line-height: 1.6;
+    color: #666;
   }
 }
 
@@ -281,9 +281,9 @@ onUnmounted(() => {
   height: 100%;
 
   .carousel-content {
-    height: 100%;
-    width: 100%;
     position: relative;
+    width: 100%;
+    height: 100%;
 
     .carousel-video {
       width: 100%;
@@ -297,13 +297,13 @@ onUnmounted(() => {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
     z-index: 2;
     width: 100%;
+    color: white;
+    text-align: center;
     opacity: 0;
     transition: all 0.8s ease;
+    transform: translate(-50%, -50%);
 
     // 优化淡入滑动动画
     &.fade-slide {
@@ -475,16 +475,16 @@ onUnmounted(() => {
     }
 
     h2 {
+      margin-bottom: 25px;
       font-size: 56px;
       font-weight: bold;
-      margin-bottom: 25px;
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+      text-shadow: 2px 2px 6px rgb(0 0 0 / 50%);
     }
 
     p {
       font-size: 28px;
       line-height: 1.5;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      text-shadow: 2px 2px 4px rgb(0 0 0 / 50%);
     }
 
     h2,
@@ -617,43 +617,43 @@ onUnmounted(() => {
 
 @keyframes splitEnter {
   0% {
+    filter: blur(10px);
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.9);
-    filter: blur(10px);
   }
 
   100% {
+    filter: blur(0);
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
-    filter: blur(0);
   }
 }
 
 @keyframes splitLeave {
   0% {
+    filter: blur(0);
     opacity: 1;
     transform: translate(-50%, -50%);
-    filter: blur(0);
   }
 
   100% {
+    filter: blur(10px);
     opacity: 0;
     transform: translate(-50%, -50%);
-    filter: blur(10px);
   }
 }
 
 @keyframes splitTextEnter {
   0% {
+    filter: blur(5px);
     opacity: 0;
     transform: translateX(-20px);
-    filter: blur(5px);
   }
 
   100% {
+    filter: blur(0);
     opacity: 1;
     transform: translateX(0);
-    filter: blur(0);
   }
 }
 
@@ -699,14 +699,14 @@ onUnmounted(() => {
 
 @keyframes glitchEnter {
   0% {
+    filter: blur(10px);
     opacity: 0;
     transform: translate(-50%, -50%) skew(10deg, 10deg);
-    filter: blur(10px);
   }
 
   30% {
+    filter: blur(0);
     transform: translate(-52%, -48%) skew(-5deg, -5deg);
-    filter: blur(0px);
   }
 
   60% {
@@ -721,9 +721,9 @@ onUnmounted(() => {
 
 @keyframes glitchTextEnter {
   0% {
+    filter: blur(5px);
     opacity: 0;
     transform: skew(10deg, 10deg);
-    filter: blur(5px);
   }
 
   30% {
@@ -735,9 +735,9 @@ onUnmounted(() => {
   }
 
   100% {
+    filter: blur(0);
     opacity: 1;
     transform: skew(0, 0);
-    filter: blur(0);
   }
 }
 
@@ -752,23 +752,23 @@ onUnmounted(() => {
   }
 
   100% {
+    filter: blur(10px);
     opacity: 0;
     transform: translate(-50%, -50%) skew(-10deg, -10deg);
-    filter: blur(10px);
   }
 }
 
 @keyframes revealEnter {
   0% {
+    clip-path: inset(0 100% 0 0);
     opacity: 0;
     transform: translate(-50%, -50%);
-    clip-path: inset(0 100% 0 0);
   }
 
   100% {
+    clip-path: inset(0 0 0 0);
     opacity: 1;
     transform: translate(-50%, -50%);
-    clip-path: inset(0 0 0 0);
   }
 }
 
@@ -786,15 +786,15 @@ onUnmounted(() => {
 
 @keyframes revealLeave {
   0% {
+    clip-path: inset(0 0 0 0);
     opacity: 1;
     transform: translate(-50%, -50%);
-    clip-path: inset(0 0 0 0);
   }
 
   100% {
+    clip-path: inset(0 0 0 100%);
     opacity: 0;
     transform: translate(-50%, -50%);
-    clip-path: inset(0 0 0 100%);
   }
 }
 
@@ -843,10 +843,10 @@ onUnmounted(() => {
 }
 
 :deep(.el-carousel__item) {
-  overflow: hidden;
   position: absolute;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 
   &.is-active {
     .carousel-content .carousel-video {
@@ -856,16 +856,16 @@ onUnmounted(() => {
 }
 
 :deep(.el-carousel__indicators--vertical) {
-  right: 30px;
   top: 50%;
+  right: 30px;
   transform: translateY(-50%);
 
   .el-carousel__button {
     width: 12px;
     height: 12px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: rgb(255 255 255 / 50%);
     border: 2px solid white;
+    border-radius: 50%;
     transition: all 0.3s ease;
 
     &:hover {
@@ -883,74 +883,73 @@ onUnmounted(() => {
 .business-container {
   position: relative;
   padding: 60px 0;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   overflow: hidden;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
 
   // 左上角渐变圆形
   &::before {
-    content: "";
     position: absolute;
-    z-index: 0;
-    border-radius: 50%;
-    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
-    width: 500px;
-    height: 500px;
-    background: linear-gradient(
-      45deg,
-      rgba(24, 144, 255, 0.6) 0%,
-      rgba(24, 144, 255, 0.4) 33%,
-      rgba(24, 144, 255, 0.2) 67%,
-      rgba(24, 144, 255, 0.1) 100%
-    );
     top: -200px;
     left: -200px;
+    z-index: 0;
+    width: 500px;
+    height: 500px;
+    content: "";
+    background: linear-gradient(
+      45deg,
+      rgb(24 144 255 / 60%) 0%,
+      rgb(24 144 255 / 40%) 33%,
+      rgb(24 144 255 / 20%) 67%,
+      rgb(24 144 255 / 10%) 100%
+    );
     backdrop-filter: blur(5px);
+    border-radius: 50%;
+    box-shadow: inset 0 0 50px rgb(255 255 255 / 50%);
     animation: floatGradientLeft 20s ease-in-out infinite;
   }
 
   // 右下角渐变圆形
   &::after {
-    content: "";
     position: absolute;
+    right: -200px;
+    bottom: -200px;
     z-index: 0;
-    border-radius: 50%;
-    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
     width: 500px;
     height: 500px;
+    content: "";
     background: linear-gradient(
       225deg,
-      rgba(255, 105, 20, 0.6) 0%,
-      rgba(255, 105, 20, 0.4) 33%,
-      rgba(255, 105, 20, 0.2) 67%,
-      rgba(255, 105, 20, 0.1) 100%
+      rgb(255 105 20 / 60%) 0%,
+      rgb(255 105 20 / 40%) 33%,
+      rgb(255 105 20 / 20%) 67%,
+      rgb(255 105 20 / 10%) 100%
     );
-    bottom: -200px;
-    right: -200px;
     backdrop-filter: blur(5px);
+    border-radius: 50%;
+    box-shadow: inset 0 0 50px rgb(255 255 255 / 50%);
     animation: floatGradientRight 20s ease-in-out infinite;
   }
 
   // 添加随机位置的绿色渐变圆形
   .random-gradient {
-    content: "";
     position: absolute;
+    top: var(--random-y, 50%);
+    left: var(--random-x, 50%);
     z-index: 0;
-    border-radius: 50%;
-    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
     width: 400px;
     height: 400px;
+    content: "";
     background: linear-gradient(
       135deg,
-      rgba(82, 196, 26, 0.6) 0%,
-      rgba(82, 196, 26, 0.4) 33%,
-      rgba(82, 196, 26, 0.2) 67%,
-      rgba(82, 196, 26, 0.1) 100%
+      rgb(82 196 26 / 60%) 0%,
+      rgb(82 196 26 / 40%) 33%,
+      rgb(82 196 26 / 20%) 67%,
+      rgb(82 196 26 / 10%) 100%
     );
-    position: absolute;
-    left: var(--random-x, 50%);
-    top: var(--random-y, 50%);
-    transform: translate(-50%, -50%);
     backdrop-filter: blur(5px);
+    border-radius: 50%;
+    box-shadow: inset 0 0 50px rgb(255 255 255 / 50%);
+    transform: translate(-50%, -50%);
     animation: floatGradientCenter 20s ease-in-out infinite;
   }
 
@@ -958,11 +957,11 @@ onUnmounted(() => {
     position: relative; // 确保内容在装饰背景之上
     z-index: 1;
     display: flex;
+    gap: 60px;
     align-items: center;
     max-width: 1400px;
-    margin: 0 auto;
     padding: 40px 20px;
-    gap: 60px;
+    margin: 0 auto;
 
     &.right {
       flex-direction: row;
@@ -980,27 +979,27 @@ onUnmounted(() => {
       animation: fadeInUp 0.8s forwards;
 
       h2 {
+        position: relative;
+        margin-bottom: 20px;
         font-size: 36px;
         color: #333;
-        margin-bottom: 20px;
-        position: relative;
 
         &::after {
-          content: "";
           position: absolute;
           bottom: -10px;
           left: 0;
           width: 40px;
           height: 3px;
+          content: "";
           background: #1890ff;
         }
       }
 
       p {
-        font-size: 18px;
-        color: #666;
-        line-height: 1.8;
         margin-top: 20px;
+        font-size: 18px;
+        line-height: 1.8;
+        color: #666;
       }
     }
 
@@ -1009,7 +1008,7 @@ onUnmounted(() => {
       height: 400px;
       overflow: hidden;
       border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
       opacity: 0;
       transform: translateX(20px);
       animation: fadeInSide 0.8s forwards;
@@ -1054,32 +1053,32 @@ onUnmounted(() => {
     z-index: 1;
     align-items: center;
     max-width: 1400px;
+    padding: 40px;
     margin: 0 auto;
-    padding: 40px 40px;
 
     .contact-header {
-      text-align: left;
       margin-bottom: 30px;
+      text-align: left;
 
       .section-title {
+        margin-bottom: 6px;
         font-size: 18px;
         font-weight: 400;
         color: #333;
-        margin-bottom: 6px;
       }
 
       .section-subtitle {
+        margin: 0;
         font-size: 36px;
         font-weight: 500;
-        color: rgb(0, 204, 204);
-        margin: 0;
+        color: rgb(0 204 204);
       }
     }
 
     .contact-content {
       display: flex;
-      justify-content: space-between;
       gap: 100px;
+      justify-content: space-between;
 
       .left-content,
       .right-content {
@@ -1087,17 +1086,17 @@ onUnmounted(() => {
       }
 
       .content-title {
-        font-size: 24px;
-        color: #333;
         margin-bottom: 20px;
+        font-size: 24px;
         font-weight: 500;
+        color: #333;
       }
 
       .company-intro {
+        margin: 0;
         font-size: 16px;
         line-height: 1.8;
         color: #666;
-        margin: 0;
         letter-spacing: 2px;
       }
 
@@ -1108,14 +1107,14 @@ onUnmounted(() => {
 
         .contact-item {
           display: flex;
-          align-items: center;
           gap: 12px;
+          align-items: center;
 
           i {
             width: 24px;
             height: 24px;
-            background-size: contain;
             background-repeat: no-repeat;
+            background-size: contain;
           }
 
           .location-icon {
@@ -1139,12 +1138,12 @@ onUnmounted(() => {
     }
 
     // 响应式设计
-    @media (max-width: 768px) {
+    @media (width <= 768px) {
       padding: 40px 20px;
 
       .contact-header {
-        text-align: center;
         margin-bottom: 40px;
+        text-align: center;
       }
 
       .contact-content {
@@ -1199,7 +1198,7 @@ onUnmounted(() => {
 }
 
 // 响应式设计
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .BusinessList {
     .business-item {
       flex-direction: column !important;
@@ -1218,11 +1217,11 @@ onUnmounted(() => {
 }
 
 .carousel-container {
+  position: relative;
   width: 100%;
   height: 100%;
-  position: relative;
-  cursor: s-resize;
   overflow: hidden;
+  cursor: s-resize;
 
   :deep(.el-carousel__container) {
     .el-carousel__item {
@@ -1236,8 +1235,8 @@ onUnmounted(() => {
       transform: none !important;
 
       &.is-active {
-        opacity: 1;
         z-index: 2;
+        opacity: 1;
       }
     }
   }
@@ -1245,21 +1244,18 @@ onUnmounted(() => {
 
 .custom-carousel {
   .carousel-content {
-    height: 100%;
+    position: relative;
     width: 100%;
-    position: relative;
-    position: relative;
-    cursor: default;
-    position: relative;
-    cursor: default;
+    height: 100%;
     overflow: hidden;
+    cursor: default;
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scale(1.05);
       transition: transform 6s ease-out;
+      transform: scale(1.05);
     }
   }
 }

@@ -38,25 +38,25 @@ function toggleSideBar() {
 
 <style lang="scss" scoped>
 .navbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: $navbar-height;
   padding: 0 32px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 
 .navbar-left {
   display: flex;
-  align-items: center;
   gap: 16px;
+  align-items: center;
 }
 
 .navbar-right {
   display: flex;
-  align-items: center;
   gap: 16px;
+  align-items: center;
 }
 </style>

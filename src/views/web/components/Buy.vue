@@ -217,8 +217,8 @@ onUnmounted(() => {
 .stats-section {
   position: relative;
   padding: 120px 0;
-  color: #fff;
   overflow: hidden;
+  color: #fff;
 
   &:not(.dark-theme) {
     .section-title {
@@ -231,7 +231,7 @@ onUnmounted(() => {
 
     .stat-number {
       color: #3b82f6;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      text-shadow: 0 1px 2px rgb(0 0 0 / 10%);
     }
 
     .stat-label {
@@ -240,14 +240,14 @@ onUnmounted(() => {
 
     .stat-icon {
       color: #3b82f6;
-      background-color: rgba(59, 130, 246, 0.1);
+      background-color: rgb(59 130 246 / 10%);
     }
 
     .stats-background .overlay {
       background: linear-gradient(
         to right,
-        rgba(255, 255, 255, 0.9),
-        rgba(240, 240, 240, 0.9)
+        rgb(255 255 255 / 90%),
+        rgb(240 240 240 / 90%)
       );
     }
 
@@ -271,16 +271,16 @@ onUnmounted(() => {
 
     .stat-number {
       color: #3b82f6;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
     }
 
     .stat-label {
-      color: rgba(255, 255, 255, 0.8);
+      color: rgb(255 255 255 / 80%);
     }
 
     .stat-icon {
       color: #fff;
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgb(255 255 255 / 10%);
     }
 
     .case-card {
@@ -301,9 +301,9 @@ onUnmounted(() => {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: -1;
   width: 100%;
   height: 100%;
-  z-index: -1;
 
   .parallax-bg {
     position: absolute;
@@ -312,8 +312,8 @@ onUnmounted(() => {
     width: 100%;
     height: 100%;
     background-image: url("/media/bg/cloudbgc5.jpg");
-    background-size: cover;
     background-position: center;
+    background-size: cover;
     transition: transform 0.2s ease-out;
   }
 
@@ -325,50 +325,50 @@ onUnmounted(() => {
     height: 100%;
     background: linear-gradient(
       to right,
-      rgba(52, 48, 149, 0.8),
-      rgba(59, 178, 184, 0.8)
+      rgb(52 48 149 / 80%),
+      rgb(59 178 184 / 80%)
     );
   }
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
   position: relative;
   z-index: 1;
+  max-width: 1200px;
+  padding: 0 20px;
+  margin: 0 auto;
 }
 
 .section-header {
-  text-align: center;
   margin-bottom: 60px;
+  text-align: center;
 
   .section-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-    color: #fff;
     position: relative;
     display: inline-block;
+    margin-bottom: 16px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
 
-    &:after {
-      content: "";
+    &::after {
       position: absolute;
       bottom: -10px;
       left: 50%;
-      transform: translateX(-50%);
       width: 80px;
       height: 4px;
+      content: "";
       background: linear-gradient(90deg, #7367f0, #00cfe8);
       border-radius: 2px;
+      transform: translateX(-50%);
     }
   }
 
   .section-subtitle {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.9);
     max-width: 700px;
     margin: 0 auto;
+    font-size: 1.1rem;
+    color: rgb(255 255 255 / 90%);
   }
 }
 
@@ -381,25 +381,25 @@ onUnmounted(() => {
 }
 
 .stat-item {
-  cursor: pointer;
+  width: 100%;
+  padding: 30px 20px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  background: rgb(255 255 255 / 5%);
   backdrop-filter: blur(10px);
   border-radius: 16px;
-  padding: 30px 20px;
-  width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
   transition: all 0.3s ease;
 
   &:hover {
+    box-shadow: 0 15px 35px rgb(0 0 0 / 20%);
     transform: translateY(-10px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   }
 
   .stat-icon {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     width: 70px;
     height: 70px;
     margin: 0 auto 20px;
@@ -418,16 +418,16 @@ onUnmounted(() => {
   }
 
   .stat-number {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    margin-bottom: 12px;
     font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: baseline;
 
     .unit {
-      font-size: 1.5rem;
       margin-left: 4px;
+      font-size: 1.5rem;
     }
   }
 
@@ -446,16 +446,16 @@ onUnmounted(() => {
 }
 
 .case-card {
+  overflow: hidden;
+  cursor: pointer;
   background-color: #fff;
   border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 30px rgb(0 0 0 / 10%);
   transition: all 0.3s ease;
-  cursor: pointer;
 
   &:hover {
+    box-shadow: 0 20px 40px rgb(0 0 0 / 20%);
     transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 
     .case-image img {
       transform: scale(1.05);
@@ -475,11 +475,11 @@ onUnmounted(() => {
 
     .case-overlay {
       position: absolute;
+      right: 0;
       bottom: 0;
       left: 0;
-      right: 0;
       padding: 15px;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+      background: linear-gradient(to top, rgb(0 0 0 / 70%), transparent);
 
       .case-tags {
         display: flex;
@@ -488,11 +488,11 @@ onUnmounted(() => {
 
         .case-tag {
           padding: 4px 10px;
-          background-color: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(5px);
-          border-radius: 50px;
           font-size: 0.75rem;
           color: #fff;
+          background-color: rgb(255 255 255 / 20%);
+          backdrop-filter: blur(5px);
+          border-radius: 50px;
         }
       }
     }
@@ -502,29 +502,29 @@ onUnmounted(() => {
     padding: 24px;
 
     .case-title {
+      margin-bottom: 12px;
       font-size: 1.25rem;
       font-weight: 600;
-      margin-bottom: 12px;
     }
 
     .case-description {
-      font-size: 0.95rem;
-      color: #677288;
-      line-height: 1.6;
       margin-bottom: 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #677288;
     }
   }
 }
 
 .price {
-  color: #3b82f6;
-  font-size: 1rem;
   margin: 10px 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  color: #3b82f6;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
 // 响应式调整
-@media screen and (max-width: 992px) {
+@media screen and (width <= 992px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
@@ -562,7 +562,7 @@ onUnmounted(() => {
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
   .stats-section {
     padding: 80px 0;
   }
@@ -616,7 +616,7 @@ onUnmounted(() => {
   }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (width <= 480px) {
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 15px;

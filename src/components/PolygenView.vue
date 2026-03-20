@@ -4,7 +4,7 @@
     shadow="never"
     style="background: transparent; border: none"
   >
-    <div id="three" ref="three" style="height: 400px; width: 100%"></div>
+    <div id="three" ref="three" style="width: 100%; height: 400px"></div>
 
     <!-- Animation Controls - Visible only when animations exist -->
     <div class="animation-bar" v-if="showAnimationBar">
@@ -496,8 +496,8 @@ watch(
 /* Animation Bar - New Style */
 .animation-bar {
   display: flex;
-  align-items: center;
   gap: var(--polygen-animbar-gap, 16px);
+  align-items: center;
   padding: var(--polygen-animbar-padding-top, 12px)
     var(--polygen-animbar-padding-x, 16px)
     var(--polygen-animbar-padding-bottom, 8px);
@@ -509,28 +509,28 @@ watch(
 }
 
 .animation-main-controls {
-  flex: 1;
-  min-width: 0;
   display: flex;
-  align-items: center;
+  flex: 1;
   gap: var(--polygen-anim-main-gap, 12px);
+  align-items: center;
+  min-width: 0;
 }
 
 .animation-play-btn {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: var(--polygen-anim-play-btn-size, 44px);
   height: var(--polygen-anim-play-btn-size, 44px);
-  border-radius: 50%;
+  cursor: pointer;
   background: var(--polygen-anim-play-btn-bg, var(--bg-hover, #f1f5f9));
   border: var(
     --polygen-anim-play-btn-border,
     1px solid var(--border-color, #e2e8f0)
   );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  border-radius: 50%;
   transition: all var(--transition-normal, 0.2s ease);
-  flex-shrink: 0;
 }
 
 .animation-play-btn:hover:not(.disabled) {
@@ -538,8 +538,8 @@ watch(
 }
 
 .animation-play-btn.disabled {
-  opacity: var(--polygen-anim-play-btn-disabled-opacity, 0.5);
   cursor: not-allowed;
+  opacity: var(--polygen-anim-play-btn-disabled-opacity, 0.5);
 }
 
 .animation-play-btn .svg-inline--fa {
@@ -548,13 +548,13 @@ watch(
 }
 
 .animation-select-wrapper {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
   width: var(--polygen-anim-select-width, 220px);
+  min-width: 160px;
   max-width: 100%;
   margin-left: auto;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  min-width: 160px;
 }
 
 .animation-select {
@@ -563,12 +563,12 @@ watch(
 
 .animation-select :deep(.el-input__wrapper) {
   background: var(--polygen-anim-select-bg, var(--bg-hover, #f8fafc));
-  border-radius: var(--polygen-anim-select-radius, var(--radius-md, 12px));
-  box-shadow: none;
   border: var(
     --polygen-anim-select-border,
     1px solid var(--border-color, #e2e8f0)
   );
+  border-radius: var(--polygen-anim-select-radius, var(--radius-md, 12px));
+  box-shadow: none;
 }
 
 .animation-select :deep(.el-input__inner) {
@@ -606,14 +606,14 @@ watch(
 }
 
 .animation-time {
+  flex-shrink: 0;
   font-size: var(--polygen-anim-time-size, 14px);
   font-weight: var(--polygen-anim-time-weight, 500);
   color: var(--polygen-anim-time-color, var(--text-secondary, #64748b));
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
-@media (max-width: 860px) {
+@media (width <= 860px) {
   .animation-bar {
     flex-wrap: wrap;
     gap: 10px;
@@ -625,8 +625,8 @@ watch(
 
   .animation-select-wrapper {
     width: 100%;
-    margin-left: 0;
     min-width: 0;
+    margin-left: 0;
   }
 }
 </style>

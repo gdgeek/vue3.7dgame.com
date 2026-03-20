@@ -12,8 +12,8 @@
     border-radius: var(--radius-sm) !important;
 
     &:hover {
-      background: var(--bg-hover) !important;
       color: var(--primary-color) !important;
+      background: var(--bg-hover) !important;
     }
   }
 
@@ -52,16 +52,16 @@
       color: #8ba3ad !important;
 
       &:hover {
-        background: rgba(0, 242, 255, 0.1) !important;
         color: #00f2ff !important;
+        background: rgb(0 242 255 / 10%) !important;
       }
     }
 
     .theme-dropdown .el-dropdown-menu,
     .language-dropdown .el-dropdown-menu {
-      background: rgba(11, 14, 20, 0.95) !important;
+      background: rgb(11 14 20 / 95%) !important;
       backdrop-filter: blur(20px) !important;
-      border: 1px solid rgba(0, 242, 255, 0.2) !important;
+      border: 1px solid rgb(0 242 255 / 20%) !important;
     }
   }
 }
@@ -72,8 +72,8 @@
       color: #b0b3b8 !important;
 
       &:hover {
-        background: #1c2128 !important;
         color: #2d68ff !important;
+        background: #1c2128 !important;
       }
     }
   }
@@ -102,8 +102,8 @@
   }
 
   .login-btn {
-    background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
+    background: var(--primary-color) !important;
     border-radius: var(--radius-full) !important;
 
     &:hover {
@@ -180,17 +180,17 @@
 
 .theme-cyber-tech {
   .user-dropdown .dropdown-menu {
-    background: rgba(11, 14, 20, 0.95) !important;
+    background: rgb(11 14 20 / 95%) !important;
     backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    border: 1px solid rgb(0 242 255 / 20%) !important;
   }
 }
 
 .theme-neo-brutalism {
   .user-dropdown .dropdown-menu {
-    background: #ffffff !important;
-    border: 3px solid #000000 !important;
-    box-shadow: 5px 5px 0px #000000 !important;
+    background: #fff !important;
+    border: 3px solid #000 !important;
+    box-shadow: 5px 5px 0 #000 !important;
   }
 }
 
