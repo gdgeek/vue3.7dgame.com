@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Runtime Config Debug</title>
-  <script src="/env-config.js"></script>
   <style>
     * {
       margin: 0;
@@ -58,16 +57,8 @@
       width: 280px;
     }
 
-    .val {
-      word-break: break-all;
-    }
-
     .ok {
       color: #4ade80;
-    }
-
-    .warn {
-      color: #fbbf24;
     }
 
     .err {
@@ -79,14 +70,6 @@
       font-size: 15px;
       font-weight: bold;
       margin: 20px 0 8px;
-    }
-
-    #nginx-test {
-      margin-top: 16px;
-    }
-
-    .test-row td {
-      font-size: 12px;
     }
 
     button {
@@ -109,16 +92,6 @@
   <h1>⚙️ Runtime Config Debug</h1>
   <p class="subtitle" id="info"></p>
 
-  <div class="section">Window 全局变量 (env-config.js)</div>
-  <table>
-    <tr>
-      <th>变量</th>
-      <th>值</th>
-      <th>状态</th>
-    </tr>
-    <tbody id="window-vars"></tbody>
-  </table>
-
   <div class="section">Nginx 反向代理测试</div>
   <table>
     <tr>
@@ -131,33 +104,10 @@
   </table>
   <button onclick="runProxyTests()">重新测试</button>
 
-  <div class="section">env-config.js 原始内容</div>
-  <pre id="raw-config"
-    style="background:#16213e;padding:12px;border-radius:4px;font-size:12px;overflow-x:auto;margin-top:8px;"></pre>
-
   <script>
     document.getElementById('info').textContent =
       '页面: ' + location.hostname + ' | 时间: ' + new Date().toLocaleString();
 
-    // 检查 window 全局变量
-    const windowVars = [
-      ['window.__DOMAIN_INFO_API_URL__', window.__DOMAIN_INFO_API_URL__],
-      ['window.__BACKUP_DOMAIN_INFO_API_URL__', window.__BACKUP_DOMAIN_INFO_API_URL__],
-      ['window.__API_URL__', window.__API_URL__],
-      ['window.__BACKUP_API_URL__', window.__BACKUP_API_URL__],
-    ];
-
-    const tbody = document.getElementById('window-vars');
-    windowVars.forEach(([name, val]) => {
-      const status = val && val !== '' && !val.startsWith('$')
-        ? '<span class="ok">✓ 已注入</span>'
-        : val && val.startsWith('$')
-          ? '<span class="err">✗ 未替换 (envsubst 未生效)</span>'
-          : '<span class="warn">— 未定义</span>';
-      tbody.innerHTML += `<tr><td>${name}</td><td class="val">${val || '(undefined)'}</td><td>${status}</td></tr>`;
-    });
-
-    // 测试反向代理
     async function testPath(path) {
       try {
         const resp = await fetch(path, { redirect: 'manual' });
@@ -175,22 +125,17 @@
         '/api/v1/auth/login',
         '/api-backup/health',
         '/api-backup/',
-        '/env-config.js',
+        '/api-domain/api/health',
+        '/api-domain-backup/api/health',
       ];
       const ptbody = document.getElementById('proxy-tests');
       ptbody.innerHTML = '';
       for (const path of tests) {
         const r = await testPath(path);
         const cls = r.ok ? 'ok' : 'err';
-        ptbody.innerHTML += `<tr class="test-row"><td>${path}</td><td class="${cls}">${r.status}</td><td class="${cls}">${r.ok ? '可达' : '不可达'}</td><td style="font-size:11px;color:#888;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.body || ''}</td></tr>`;
+        ptbody.innerHTML += `<tr><td>${path}</td><td class="${cls}">${r.status}</td><td class="${cls}">${r.ok ? '可达' : '不可达'}</td><td style="font-size:11px;color:#888;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.body || ''}</td></tr>`;
       }
     }
-
-    // 加载 env-config.js 原始内容
-    fetch('/env-config.js')
-      .then(r => r.text())
-      .then(t => document.getElementById('raw-config').textContent = t)
-      .catch(e => document.getElementById('raw-config').textContent = '加载失败: ' + e.message);
 
     runProxyTests();
   </script>

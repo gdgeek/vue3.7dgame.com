@@ -2,8 +2,8 @@
  * Unit tests for Dockerfiles
  * Validates that all three Dockerfiles use:
  * - Official nginx envsubst for nginx.conf.template
- * - Custom entrypoint script (docker-envsubst.sh) for env-config.js.template
- *   (separated to avoid NGINX_ENVSUBST_OUTPUT_DIR conflict)
+ * - NGINX_ENVSUBST_FILTER=APP_ to protect nginx built-in variables
+ * - No legacy env-config.js or docker-envsubst.sh references
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -40,28 +40,23 @@ describe.each(dockerfiles)("$name", ({ get }) => {
     expect(get()).toContain("/etc/nginx/templates/");
   });
 
-  it("copies env-config.js.template to /etc/nginx/ (not templates/)", () => {
-    expect(get()).toContain("env-config.js.template");
-    expect(get()).toContain("/etc/nginx/env-config.js.template");
-  });
-
-  it("uses custom entrypoint script numbered before nginx's 20-envsubst", () => {
-    expect(get()).toContain("docker-envsubst.sh");
-    expect(get()).toContain("/docker-entrypoint.d/15-envsubst-env-config.sh");
-    expect(get()).toContain("chmod +x");
-  });
-
-  it("does not reference old docker-entrypoint.sh", () => {
-    // The old custom entrypoint.sh is removed; only docker-envsubst.sh is used
-    expect(get()).not.toContain("docker-entrypoint.sh ");
-  });
-
   it("sets NGINX_ENVSUBST_FILTER=APP_", () => {
     expect(get()).toContain("NGINX_ENVSUBST_FILTER=APP_");
   });
 
   it("does not set NGINX_ENVSUBST_OUTPUT_DIR", () => {
-    // Removed to let nginx envsubst output to default /etc/nginx/conf.d/
     expect(get()).not.toContain("NGINX_ENVSUBST_OUTPUT_DIR");
+  });
+
+  it("does not reference old docker-entrypoint.sh", () => {
+    expect(get()).not.toContain("docker-entrypoint.sh ");
+  });
+
+  it("does not reference env-config.js.template", () => {
+    expect(get()).not.toContain("env-config.js.template");
+  });
+
+  it("does not reference docker-envsubst.sh", () => {
+    expect(get()).not.toContain("docker-envsubst.sh");
   });
 });

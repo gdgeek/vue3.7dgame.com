@@ -5,14 +5,15 @@
 本项目是一个 Vue 3 + Vite 前端应用，生产环境使用 Nginx 托管静态文件并提供反向代理。
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  浏览器                                              │
-│                                                     │
-│  /api/*          → nginx 反向代理 → 后端 API 服务     │
-│  /api-backup/*   → nginx 反向代理 → 备用 API 服务     │
-│  /env-config.js  → nginx envsubst 运行时生成          │
-│  其他静态资源      → nginx 直接返回 dist/ 文件          │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  浏览器                                                       │
+│                                                              │
+│  /api/*               → nginx 反向代理 → 后端 API 服务        │
+│  /api-backup/*        → nginx 反向代理 → 备用 API 服务        │
+│  /api-domain/*        → nginx 反向代理 → 域名信息 API 服务     │
+│  /api-domain-backup/* → nginx 反向代理 → 备用域名信息 API 服务  │
+│  其他静态资源           → nginx 直接返回 dist/ 文件             │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -77,7 +78,6 @@ environment:
   # nginx 反向代理上游地址（用于 nginx.conf.template）
   - APP_API_URL=https://api.xrteeth.com
   - APP_BACKUP_API_URL=https://api.tmrpp.com
-  # 运行时注入到 env-config.js（用于 env-config.js.template）
   - APP_DOMAIN_INFO_API_URL=https://domain.xrteeth.com
   - APP_BACKUP_DOMAIN_INFO_API_URL=https://domain.tmrpp.com
   # 必须设置，确保只替换 APP_ 前缀变量，不影响 nginx 内置变量
@@ -89,10 +89,7 @@ environment:
 容器启动时，nginx 官方镜像自动执行 envsubst：
 
 1. `/etc/nginx/templates/default.conf.template` → `/etc/nginx/conf.d/default.conf`
-   - 替换 `${APP_API_URL}` 和 `${APP_BACKUP_API_URL}` 为反向代理上游地址
-2. `/etc/nginx/templates/env-config.js.template` → `/usr/share/nginx/html/env-config.js`
-   - 替换 `${APP_DOMAIN_INFO_API_URL}` 和 `${APP_BACKUP_DOMAIN_INFO_API_URL}`
-   - 前端通过 `<script src="/env-config.js">` 在 `index.html` 中加载
+   - 替换 `${APP_API_URL}`、`${APP_BACKUP_API_URL}`、`${APP_DOMAIN_INFO_API_URL}`、`${APP_BACKUP_DOMAIN_INFO_API_URL}` 为反向代理上游地址
 
 `NGINX_ENVSUBST_FILTER=APP_` 确保只替换 `APP_` 前缀的变量，避免破坏 nginx 配置中的 `$host`、`$remote_addr` 等内置变量。
 
@@ -117,24 +114,21 @@ healthcheck:
 |------|---------|---------|
 | `/api/*` | `${APP_API_URL}` | `nginx.conf.template` |
 | `/api-backup/*` | `${APP_BACKUP_API_URL}` | `nginx.conf.template` |
+| `/api-domain/*` | `${APP_DOMAIN_INFO_API_URL}` | `nginx.conf.template` |
+| `/api-domain-backup/*` | `${APP_BACKUP_DOMAIN_INFO_API_URL}` | `nginx.conf.template` |
 
-前端代码在生产环境中直接请求 `/api` 和 `/api-backup`，由 nginx 转发到实际后端。
+前端代码在生产环境中直接请求 `/api`、`/api-backup`、`/api-domain`、`/api-domain-backup`，由 nginx 转发到实际后端。
 
 `src/environment.ts` 中的逻辑：
 
 ```typescript
 api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL : "/api",
 backup_api: import.meta.env.DEV ? import.meta.env.VITE_APP_BACKUP_API_URL : "/api-backup",
+domain_info: import.meta.env.DEV ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL : "/api-domain",
+domain_info_backup: import.meta.env.DEV ? import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL : "/api-domain-backup",
 ```
 
-### 走运行时注入的路径（env-config.js）
-
-| 变量 | 用途 | 注入方式 |
-|------|------|---------|
-| `window.__DOMAIN_INFO_API_URL__` | 域名信息查询 | `env-config.js.template` → envsubst |
-| `window.__BACKUP_DOMAIN_INFO_API_URL__` | 备用域名信息查询 | `env-config.js.template` → envsubst |
-
-这些是外部服务地址，不走 nginx 反向代理，前端直接请求。
+> 注意：`/api/` 和 `/api-backup/` 包含 GEEK 自定义请求头和 WebSocket 支持；`/api-domain/` 和 `/api-domain-backup/` 仅包含标准代理头。
 
 ### 构建时写死的地址（不可运行时修改）
 
@@ -164,9 +158,7 @@ backup_api: import.meta.env.DEV ? import.meta.env.VITE_APP_BACKUP_API_URL : "/ap
 ```dockerfile
 FROM nginx:alpine
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
-COPY env-config.js.template /etc/nginx/templates/env-config.js.template
 ENV NGINX_ENVSUBST_FILTER=APP_
-ENV NGINX_ENVSUBST_OUTPUT_DIR=/usr/share/nginx/html
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 ```
