@@ -1525,9 +1525,7 @@ const pushMetaToEditor = (meta: metaInfo) => {
       id: userStore.userInfo?.id || null,
       role: userStore.getRole(),
     },
-    system: {
-      a1: import.meta.env.VITE_APP_A1_API,
-    },
+    system: {},
   });
 };
 
