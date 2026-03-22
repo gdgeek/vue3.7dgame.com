@@ -16,24 +16,37 @@ beforeAll(() => {
 });
 
 describe("docker-compose.prod.yml — environment variables", () => {
-  it("contains APP_API_URL", () => {
-    expect(composeConfig).toContain("APP_API_URL=");
+  it("contains APP_API_1_URL (primary backend)", () => {
+    expect(composeConfig).toContain("APP_API_1_URL=");
   });
 
-  it("contains APP_BACKUP_API_URL", () => {
-    expect(composeConfig).toContain("APP_BACKUP_API_URL=");
+  it("contains APP_API_2_URL (backup backend)", () => {
+    expect(composeConfig).toContain("APP_API_2_URL=");
   });
 
-  it("contains APP_DOMAIN_INFO_API_URL", () => {
-    expect(composeConfig).toContain("APP_DOMAIN_INFO_API_URL=");
+  it("contains APP_DOMAIN_1_URL (primary domain backend)", () => {
+    expect(composeConfig).toContain("APP_DOMAIN_1_URL=");
   });
 
-  it("contains APP_BACKUP_DOMAIN_INFO_API_URL", () => {
-    expect(composeConfig).toContain("APP_BACKUP_DOMAIN_INFO_API_URL=");
+  it("contains APP_DOMAIN_2_URL (backup domain backend)", () => {
+    expect(composeConfig).toContain("APP_DOMAIN_2_URL=");
   });
 
-  it("contains NGINX_ENVSUBST_FILTER=APP_", () => {
-    expect(composeConfig).toContain("NGINX_ENVSUBST_FILTER=APP_");
+  it("does NOT contain old APP_DOMAIN_INFO_API_URL format", () => {
+    expect(composeConfig).not.toContain("APP_DOMAIN_INFO_API_URL=");
+  });
+
+  it("does NOT contain old APP_BACKUP_DOMAIN_INFO_API_URL format", () => {
+    expect(composeConfig).not.toContain("APP_BACKUP_DOMAIN_INFO_API_URL=");
+  });
+
+  it("does NOT contain old APP_API_URL format", () => {
+    // Should use numbered format APP_API_1_URL, not APP_API_URL
+    expect(composeConfig).not.toMatch(/APP_API_URL=/);
+  });
+
+  it("does NOT contain NGINX_ENVSUBST_FILTER (handled by entrypoint)", () => {
+    expect(composeConfig).not.toContain("NGINX_ENVSUBST_FILTER");
   });
 });
 

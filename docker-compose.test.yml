@@ -2,12 +2,11 @@ services:
   vue3:
     build: .
     environment:
-      - APP_API_URL=https://api.your-domain.com
-      - APP_BACKUP_API_URL=https://backup-api.your-domain.com
-      - APP_DOMAIN_INFO_API_URL=https://domain-info.your-domain.com
-      - APP_BACKUP_DOMAIN_INFO_API_URL=https://backup-domain-info.your-domain.com
-      - APP_AUTH_API=https://auth.your-domain.com
-      - APP_AI_API=https://ai.your-domain.com
+      - APP_API_1_URL=https://api.your-domain.com
+      - APP_API_2_URL=https://backup-api.your-domain.com
+      - APP_DOMAIN_1_URL=https://domain-info.your-domain.com
+      - APP_DOMAIN_2_URL=https://backup-domain-info.your-domain.com
+      - APP_DOC_API_URL=https://docs.your-domain.com/wp-json/wp/v2
     volumes:
       - ./dist:/usr/share/nginx/html
     ports:

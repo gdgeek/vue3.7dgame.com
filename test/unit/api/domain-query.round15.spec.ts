@@ -14,10 +14,10 @@ const stringifySpy = vi.hoisted(() =>
   })
 );
 
-const createFailoverAxiosSpy = vi.hoisted(() => vi.fn(() => mockService));
-
-vi.mock("@/utils/failover", () => ({
-  createFailoverAxios: createFailoverAxiosSpy,
+vi.mock("axios", () => ({
+  default: {
+    create: vi.fn(() => mockService),
+  },
 }));
 vi.mock("querystringify", () => ({
   default: {
@@ -27,7 +27,6 @@ vi.mock("querystringify", () => ({
 vi.mock("@/environment", () => ({
   default: {
     domain_info: "https://domain.primary.example",
-    domain_info_backup: "https://domain.backup.example",
   },
 }));
 
@@ -42,16 +41,6 @@ describe("src/api/domain-query.ts round15", () => {
     ({ getDomainDefault, getDomainLanguage } = await import(
       "@/api/domain-query"
     ));
-  });
-
-  it("creates failover axios with expected config", () => {
-    expect(createFailoverAxiosSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        primaryUrl: "https://domain.primary.example",
-        backupUrl: "https://domain.backup.example",
-        healthPath: "/api/health",
-      })
-    );
   });
 
   it("registers response interceptor extracting response.data", () => {

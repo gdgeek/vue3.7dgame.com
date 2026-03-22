@@ -7,12 +7,14 @@ services:
     ports:
       - "80:80"
     environment:
-      - APP_API_URL=https://api.xrteeth.com
-      - APP_BACKUP_API_URL=https://api.tmrpp.com
-      - APP_DOMAIN_INFO_API_URL=https://domain.xrteeth.com
-      - APP_BACKUP_DOMAIN_INFO_API_URL=https://domain.tmrpp.com
+      # API 后端（编号格式，第一个为主，后续为备用）
+      - APP_API_1_URL=https://api.xrteeth.com
+      - APP_API_2_URL=https://api.tmrpp.com
+      # 域名信息 API（编号格式，同上）
+      - APP_DOMAIN_1_URL=https://domain.xrteeth.com
+      - APP_DOMAIN_2_URL=https://domain.tmrpp.com
+      # 文档 API
       - APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
-      - NGINX_ENVSUBST_FILTER=APP_
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]

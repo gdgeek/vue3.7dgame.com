@@ -1,10 +1,10 @@
 /**
  * Unit tests for src/api/domain-query.ts
  * Covers: getDomainDefault and getDomainLanguage URL/param construction.
+ * Note: Failover is now handled by Nginx, so no createFailoverAxios tests.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Capture the mock axios instance so we can inspect calls
 const mockAxiosInstance = vi.hoisted(() => ({
   get: vi.fn(),
   interceptors: {
@@ -17,16 +17,11 @@ const mockAxiosInstance = vi.hoisted(() => ({
 vi.mock("axios", () => ({
   default: {
     create: vi.fn(() => mockAxiosInstance),
-    get: vi.fn(),
   },
-}));
-vi.mock("@/utils/logger", () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 vi.mock("@/environment", () => ({
   default: {
     domain_info: "https://domain.xrteeth.com",
-    domain_info_backup: "",
   },
 }));
 
@@ -40,7 +35,6 @@ describe("getDomainDefault()", () => {
   });
 
   it("calls GET /api/query/default with current hostname when domain not provided", async () => {
-    // jsdom sets window.location.hostname to 'localhost' by default
     await getDomainDefault();
     const url: string = mockAxiosInstance.get.mock.calls[0][0];
     expect(url).toContain("/api/query/default");
@@ -99,13 +93,6 @@ describe("getDomainLanguage()", () => {
     expect(url).toContain("domain=testhost.com");
     expect(url).toContain("lang=ja-JP");
   });
-
-  it("includes both domain and lang when both provided", async () => {
-    await getDomainLanguage("7dgame.com", "zh-TW");
-    const url: string = mockAxiosInstance.get.mock.calls[0][0];
-    expect(url).toContain("7dgame.com");
-    expect(url).toContain("zh-TW");
-  });
 });
 
 describe("domain-query response interceptor", () => {
@@ -116,66 +103,10 @@ describe("domain-query response interceptor", () => {
     await import("@/api/domain-query");
   });
 
-  it("passes through successful response", () => {
-    // domain-query.ts adds its own response interceptor (response.data extraction)
-    // after the failover factory's interceptor, so it's at index 1
+  it("extracts response.data on success", () => {
     const resInterceptor =
-      mockAxiosInstance.interceptors.response.use.mock.calls[1]?.[0] ??
       mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[0];
     const response = { data: { domain: "example.com" } };
     expect(resInterceptor(response)).toBe(response.data);
-  });
-
-  it("rejects on network error when retry already attempted", async () => {
-    const errInterceptor =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = {
-      config: { _retry: true },
-      response: undefined,
-    };
-    await expect(errInterceptor(error)).rejects.toBe(error);
-  });
-
-  it("rejects on response error (non-network)", async () => {
-    const errInterceptor =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = {
-      config: { _retry: false },
-      response: { status: 404, data: {} },
-    };
-    await expect(errInterceptor(error)).rejects.toBe(error);
-  });
-});
-
-describe("domain-query request interceptor", () => {
-  beforeEach(async () => {
-    vi.clearAllMocks();
-    vi.resetModules();
-    mockAxiosInstance.get.mockResolvedValue({});
-    await import("@/api/domain-query");
-  });
-
-  it("sets baseURL from currentApi when config has relative URL", () => {
-    const reqInterceptor =
-      mockAxiosInstance.interceptors.request.use.mock.calls[0]?.[0];
-    const config = { baseURL: "/relative" };
-    const result = reqInterceptor(config);
-    // currentApi = PRIMARY_API = "https://domain.xrteeth.com"
-    expect(result.baseURL).toBe("https://domain.xrteeth.com");
-  });
-
-  it("leaves baseURL unchanged when it already starts with http", () => {
-    const reqInterceptor =
-      mockAxiosInstance.interceptors.request.use.mock.calls[0]?.[0];
-    const config = { baseURL: "https://other.api.com" };
-    const result = reqInterceptor(config);
-    expect(result.baseURL).toBe("https://other.api.com");
-  });
-
-  it("returns config object", () => {
-    const reqInterceptor =
-      mockAxiosInstance.interceptors.request.use.mock.calls[0]?.[0];
-    const config = { baseURL: "https://example.com" };
-    expect(reqInterceptor(config)).toBe(config);
   });
 });

@@ -1,6 +1,6 @@
 import env from "@/environment";
 import qs from "querystringify";
-import { createFailoverAxios } from "@/utils/failover";
+import axios from "axios";
 
 export interface DomainDefaultInfo {
   homepage: string;
@@ -22,12 +22,10 @@ export interface DomainLanguageInfo {
   }[];
 }
 
-const service = createFailoverAxios({
-  primaryUrl: env.domain_info,
-  backupUrl: env.domain_info_backup,
-  healthPath: "/api/health",
-  axiosConfig: { timeout: 10000 },
-  logTag: "[Domain API]",
+// Nginx 层已处理 /api-domain/ 的 failover，前端不再需要主备切换
+const service = axios.create({
+  baseURL: env.domain_info,
+  timeout: 10000,
 });
 
 // 提取 response.data，与原有行为保持一致

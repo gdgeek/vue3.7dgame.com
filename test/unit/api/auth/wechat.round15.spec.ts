@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 vi.mock("@/environment", () => ({
-  default: { auth_api: "https://auth.round15.example" },
+  default: { api: "https://auth.round15.example" },
 }));
 
 describe("src/api/auth/wechat.ts round15", () => {
