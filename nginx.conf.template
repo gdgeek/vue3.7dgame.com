@@ -26,20 +26,13 @@ server {
         image/svg+xml
         image/x-icon;
 
-    # DNS 解析器（Docker 内置 DNS + Google DNS 备用）
-    resolver 127.0.0.11 8.8.8.8 valid=30s ipv6=off;
-    resolver_timeout 5s;
-
     # ============ 反向代理 - 主 API ============
     location /api/ {
-        set $backend_api "${APP_API_URL}";
-        set $backend_api_host "${APP_API_HOST}";
+        proxy_pass ${APP_API_URL}/;
 
-        proxy_pass $backend_api/;
-
-        # HTTPS 上游：启用 SNI 并传递上游域名作为 Host
+        # HTTPS 上游：启用 SNI
         proxy_ssl_server_name on;
-        proxy_set_header Host $backend_api_host;
+        proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -65,14 +58,11 @@ server {
 
     # ============ 反向代理 - 备用 API ============
     location /api-backup/ {
-        set $backup_api "${APP_BACKUP_API_URL}";
-        set $backup_api_host "${APP_BACKUP_API_HOST}";
+        proxy_pass ${APP_BACKUP_API_URL}/;
 
-        proxy_pass $backup_api/;
-
-        # HTTPS 上游：启用 SNI 并传递上游域名作为 Host
+        # HTTPS 上游：启用 SNI
         proxy_ssl_server_name on;
-        proxy_set_header Host $backup_api_host;
+        proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
