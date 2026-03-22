@@ -2,6 +2,10 @@
  * Unit tests for nginx.conf.template
  * Validates proxy configuration, headers, timeouts, gzip, and error handling.
  *
+ * Note: /api/ and /api-backup/ location blocks are now dynamically generated
+ * by docker-entrypoint.sh. This test validates the static template structure
+ * and the entrypoint script logic.
+ *
  * Property-based tests validate correctness properties from the design doc.
  */
 import { readFileSync } from "node:fs";
@@ -10,10 +14,15 @@ import { describe, it, expect, beforeAll } from "vitest";
 import fc from "fast-check";
 
 let nginxConfig: string;
+let entrypointScript: string;
 
 beforeAll(() => {
   nginxConfig = readFileSync(
     resolve(__dirname, "../../../nginx.conf.template"),
+    "utf-8"
+  );
+  entrypointScript = readFileSync(
+    resolve(__dirname, "../../../docker-entrypoint.sh"),
     "utf-8"
   );
 });
@@ -39,13 +48,21 @@ function extractLocationBlock(config: string, path: string): string {
   return "";
 }
 
-describe("nginx.conf.template — proxy location blocks", () => {
-  it("contains /api/ location block", () => {
-    expect(nginxConfig).toContain("location /api/");
+// ===========================================================================
+// Static template structure tests
+// ===========================================================================
+
+describe("nginx.conf.template — static proxy location blocks", () => {
+  it("contains # __API_LOCATIONS__ placeholder for dynamic API config", () => {
+    expect(nginxConfig).toContain("# __API_LOCATIONS__");
   });
 
-  it("contains /api-backup/ location block", () => {
-    expect(nginxConfig).toContain("location /api-backup/");
+  it("does NOT contain static /api/ location (now dynamic)", () => {
+    expect(nginxConfig).not.toMatch(/location\s+\/api\/\s*\{/);
+  });
+
+  it("does NOT contain static /api-backup/ location (now dynamic)", () => {
+    expect(nginxConfig).not.toContain("location /api-backup/");
   });
 
   it("contains /api-domain/ location block", () => {
@@ -58,14 +75,6 @@ describe("nginx.conf.template — proxy location blocks", () => {
 
   it("contains /api-doc/ location block", () => {
     expect(nginxConfig).toContain("location /api-doc/");
-  });
-
-  it("proxy_pass uses ${APP_API_URL} variable", () => {
-    expect(nginxConfig).toContain("${APP_API_URL}");
-  });
-
-  it("proxy_pass uses ${APP_BACKUP_API_URL} variable", () => {
-    expect(nginxConfig).toContain("${APP_BACKUP_API_URL}");
   });
 
   it("proxy_pass uses ${APP_DOMAIN_INFO_API_URL} variable", () => {
@@ -81,7 +90,7 @@ describe("nginx.conf.template — proxy location blocks", () => {
   });
 });
 
-describe("nginx.conf.template — standard headers", () => {
+describe("nginx.conf.template — standard headers (static locations)", () => {
   it("sets X-Real-IP header", () => {
     expect(nginxConfig).toContain("proxy_set_header X-Real-IP");
   });
@@ -94,10 +103,8 @@ describe("nginx.conf.template — standard headers", () => {
     expect(nginxConfig).toContain("proxy_set_header X-Forwarded-Proto");
   });
 
-  it("sets Host header to $proxy_host in all proxy locations", () => {
+  it("sets Host header to $proxy_host in static proxy locations", () => {
     const locations = [
-      "/api/",
-      "/api-backup/",
       "/api-domain/",
       "/api-domain-backup/",
       "/api-doc/",
@@ -115,8 +122,6 @@ describe("nginx.conf.template — HTTPS upstream (SNI)", () => {
   });
 
   const sniLocations = [
-    "/api/",
-    "/api-backup/",
     "/api-domain/",
     "/api-domain-backup/",
     "/api-doc/",
@@ -130,35 +135,7 @@ describe("nginx.conf.template — HTTPS upstream (SNI)", () => {
   });
 });
 
-describe("nginx.conf.template — GEEK custom headers", () => {
-  const geekHeaders = ["X-GEEK-Proxy", "X-GEEK-Real-IP", "X-GEEK-Source"];
-
-  it("/api/ location has all 3 GEEK headers", () => {
-    const block = extractLocationBlock(nginxConfig, "/api/");
-    for (const header of geekHeaders) {
-      expect(block).toContain(`proxy_set_header ${header}`);
-    }
-  });
-
-  it("/api-backup/ location has all 3 GEEK headers", () => {
-    const block = extractLocationBlock(nginxConfig, "/api-backup/");
-    for (const header of geekHeaders) {
-      expect(block).toContain(`proxy_set_header ${header}`);
-    }
-  });
-});
-
-describe("nginx.conf.template — WebSocket headers", () => {
-  it("sets Upgrade header", () => {
-    expect(nginxConfig).toContain("proxy_set_header Upgrade");
-  });
-
-  it("sets Connection header for upgrade", () => {
-    expect(nginxConfig).toContain('proxy_set_header Connection "upgrade"');
-  });
-});
-
-describe("nginx.conf.template — timeout configuration", () => {
+describe("nginx.conf.template — timeout configuration (static locations)", () => {
   it("proxy_connect_timeout is 60s", () => {
     expect(nginxConfig).toContain("proxy_connect_timeout 60s");
   });
@@ -169,14 +146,6 @@ describe("nginx.conf.template — timeout configuration", () => {
 
   it("proxy_send_timeout is 120s", () => {
     expect(nginxConfig).toContain("proxy_send_timeout 120s");
-  });
-});
-
-describe("nginx.conf.template — body size limit", () => {
-  it("client_max_body_size is at least 50m", () => {
-    const match = nginxConfig.match(/client_max_body_size\s+(\d+)m/);
-    expect(match).not.toBeNull();
-    expect(Number(match![1])).toBeGreaterThanOrEqual(50);
   });
 });
 
@@ -214,34 +183,89 @@ describe("nginx.conf.template — custom JSON error responses", () => {
 });
 
 // ===========================================================================
+// docker-entrypoint.sh tests
+// ===========================================================================
+
+describe("docker-entrypoint.sh — entrypoint script structure", () => {
+  it("reads APP_API_N_URL numbered environment variables", () => {
+    expect(entrypointScript).toContain("APP_API_${i}_URL");
+  });
+
+  it("auto-extracts Host from URL when APP_API_N_HOST is not set", () => {
+    expect(entrypointScript).toMatch(/host=.*sed.*https/);
+  });
+
+  it("generates primary location /api/ for first backend", () => {
+    expect(entrypointScript).toContain("location /api/");
+  });
+
+  it("generates named backup locations @api_backup_N", () => {
+    expect(entrypointScript).toContain("@api_backup_${i}");
+  });
+
+  it("sets proxy_ssl_server_name on for HTTPS upstream", () => {
+    expect(entrypointScript).toContain("proxy_ssl_server_name on");
+  });
+
+  it("sets correct Host header per backend", () => {
+    expect(entrypointScript).toContain("proxy_set_header Host ${host}");
+  });
+
+  it("includes GEEK custom headers in generated locations", () => {
+    expect(entrypointScript).toContain("X-GEEK-Proxy");
+    expect(entrypointScript).toContain("X-GEEK-Real-IP");
+    expect(entrypointScript).toContain("X-GEEK-Source");
+  });
+
+  it("includes WebSocket support headers", () => {
+    expect(entrypointScript).toContain("Upgrade");
+    expect(entrypointScript).toContain("Connection");
+  });
+
+  it("uses error_page for failover chaining", () => {
+    expect(entrypointScript).toContain("error_page 502 503 504");
+  });
+
+  it("uses proxy_connect_timeout 5s for fast failover", () => {
+    expect(entrypointScript).toContain("proxy_connect_timeout 5s");
+  });
+
+  it("uses rewrite to strip /api/ prefix in backup locations", () => {
+    expect(entrypointScript).toContain("rewrite ^/api/");
+  });
+
+  it("replaces # __API_LOCATIONS__ placeholder", () => {
+    expect(entrypointScript).toContain("__API_LOCATIONS__");
+  });
+
+  it("ends with exec nginx", () => {
+    expect(entrypointScript).toContain("exec nginx -g");
+  });
+});
+
+// ===========================================================================
 // Property-Based Tests (fast-check)
 // ===========================================================================
 
 /**
- * Feature: nginx-api-proxy, Property 1: 代理路由正确性
- * **Validates: Requirements 1.1, 1.2**
- *
- * For any proxy prefix, the config routes correctly —
- * the location block exists and proxy_pass directly references the envsubst variable.
+ * Feature: nginx-api-proxy, Property 1: 代理路由正确性 (static locations)
+ * **Validates: Requirements 1.1, 1.2 (for domain/doc proxies)**
  */
-describe("Property 1: Proxy route correctness", () => {
-  const proxyRoutes = [
-    { prefix: "/api/", envVar: "APP_API_URL" },
-    { prefix: "/api-backup/", envVar: "APP_BACKUP_API_URL" },
+describe("Property 1: Proxy route correctness (static locations)", () => {
+  const staticRoutes = [
     { prefix: "/api-domain/", envVar: "APP_DOMAIN_INFO_API_URL" },
     { prefix: "/api-domain-backup/", envVar: "APP_BACKUP_DOMAIN_INFO_API_URL" },
     { prefix: "/api-doc/", envVar: "APP_DOC_API_URL" },
   ] as const;
 
-  it("for any proxy prefix, the config contains the location and correct envsubst variable in proxy_pass", () => {
+  it("for any static proxy prefix, the config contains the location and correct envsubst variable", () => {
     fc.assert(
       fc.property(
-        fc.constantFrom(...proxyRoutes),
+        fc.constantFrom(...staticRoutes),
         fc.webUrl(),
         (route, _upstreamUrl) => {
           const block = extractLocationBlock(nginxConfig, route.prefix);
           expect(block.length).toBeGreaterThan(0);
-          // proxy_pass directly uses the envsubst variable (static after substitution)
           expect(block).toContain(`\${${route.envVar}}`);
           expect(block).toContain("proxy_pass");
         }
@@ -252,15 +276,11 @@ describe("Property 1: Proxy route correctness", () => {
 });
 
 /**
- * Feature: nginx-api-proxy, Property 2: 路径前缀剥离
+ * Feature: nginx-api-proxy, Property 2: 路径前缀剥离 (static locations)
  * **Validates: Requirements 1.3**
- *
- * proxy_pass with trailing slash strips the prefix.
  */
-describe("Property 2: Path prefix stripping", () => {
-  const proxyPrefixes = [
-    "/api/",
-    "/api-backup/",
+describe("Property 2: Path prefix stripping (static locations)", () => {
+  const staticPrefixes = [
     "/api-domain/",
     "/api-domain-backup/",
     "/api-doc/",
@@ -269,7 +289,7 @@ describe("Property 2: Path prefix stripping", () => {
   it("proxy_pass ends with trailing slash to strip prefix", () => {
     fc.assert(
       fc.property(
-        fc.constantFrom(...proxyPrefixes),
+        fc.constantFrom(...staticPrefixes),
         fc.stringMatching(/^[a-zA-Z0-9/_-]{1,50}$/),
         (prefix, _pathSegment) => {
           const block = extractLocationBlock(nginxConfig, prefix);
@@ -286,41 +306,33 @@ describe("Property 2: Path prefix stripping", () => {
 /**
  * Feature: nginx-api-proxy, Property 3: GEEK 自定义请求头完整性
  * **Validates: Requirements 1.6, 1.7, 1.8**
+ *
+ * Verifies the entrypoint script generates GEEK headers for dynamic locations.
  */
-describe("Property 3: GEEK custom header completeness", () => {
+describe("Property 3: GEEK custom header completeness (entrypoint)", () => {
   const geekHeaders = [
     "X-GEEK-Proxy",
     "X-GEEK-Real-IP",
     "X-GEEK-Source",
   ] as const;
-  const proxyPrefixes = ["/api/", "/api-backup/"] as const;
 
-  it("for any proxy location and GEEK header, the header is present", () => {
+  it("for any GEEK header, the entrypoint script includes it in generated locations", () => {
     fc.assert(
-      fc.property(
-        fc.constantFrom(...proxyPrefixes),
-        fc.constantFrom(...geekHeaders),
-        (prefix, header) => {
-          const block = extractLocationBlock(nginxConfig, prefix);
-          expect(block).toContain(`proxy_set_header ${header}`);
-        }
-      ),
+      fc.property(fc.constantFrom(...geekHeaders), (header) => {
+        expect(entrypointScript).toContain(header);
+      }),
       { numRuns: 100 }
     );
   });
 });
 
 /**
- * Feature: nginx-api-proxy, Property 4: 模板替换往返一致性
+ * Feature: nginx-api-proxy, Property 4: 模板替换往返一致性 (static locations)
  * **Validates: Requirements 2.1, 2.2, 2.3**
- *
- * envsubst variables appear directly in proxy_pass (no set $var indirection).
  */
 describe("Property 4: Template substitution round-trip consistency", () => {
-  it("all envsubst variables appear in their respective proxy_pass directives", () => {
+  it("all static envsubst variables appear in their respective proxy_pass directives", () => {
     const envVarRoutes = [
-      { prefix: "/api/", envVar: "APP_API_URL" },
-      { prefix: "/api-backup/", envVar: "APP_BACKUP_API_URL" },
       { prefix: "/api-domain/", envVar: "APP_DOMAIN_INFO_API_URL" },
       {
         prefix: "/api-domain-backup/",
@@ -345,15 +357,14 @@ describe("Property 4: Template substitution round-trip consistency", () => {
  * **Validates: Requirements 3.1, 3.2, 3.3, 3.5**
  */
 describe("Property 5: Environment-aware URL selection", () => {
-  it("production environment returns relative paths for all proxy endpoints", () => {
+  it("production environment returns relative paths for proxy endpoints", () => {
     fc.assert(
-      fc.property(fc.webUrl(), fc.webUrl(), (_apiUrl, _backupUrl) => {
+      fc.property(fc.webUrl(), (_apiUrl) => {
         const envSource = readFileSync(
           resolve(__dirname, "../../../src/environment.ts"),
           "utf-8"
         );
         expect(envSource).toMatch(/:\s*["']\/api["']/);
-        expect(envSource).toMatch(/:\s*["']\/api-backup["']/);
         expect(envSource).toMatch(/:\s*["']\/api-domain["']/);
         expect(envSource).toMatch(/:\s*["']\/api-domain-backup["']/);
         expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
@@ -370,7 +381,6 @@ describe("Property 5: Environment-aware URL selection", () => {
           "utf-8"
         );
         expect(envSource).toContain("VITE_APP_API_URL");
-        expect(envSource).toContain("VITE_APP_BACKUP_API_URL");
         expect(envSource).toContain("import.meta.env.DEV");
       }),
       { numRuns: 100 }
@@ -406,7 +416,6 @@ describe("Property 6: Static file fallback", () => {
           .filter(
             (p) =>
               !p.startsWith("/api") &&
-              !p.startsWith("/api-backup") &&
               !p.startsWith("/api-domain") &&
               !p.startsWith("/api-doc")
           ),

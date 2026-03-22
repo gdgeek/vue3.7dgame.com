@@ -1,4 +1,4 @@
-import { InternalAxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
 import { ElMessage } from "element-plus";
@@ -7,7 +7,6 @@ import env from "@/environment";
 import { ref, watch } from "vue";
 import Token from "@/store/modules/token";
 import { logger } from "@/utils/logger";
-import { createFailoverAxios } from "@/utils/failover";
 
 const lang = ref(i18n.global.locale.value);
 watch(
@@ -50,16 +49,11 @@ const isTokenExpiringSoon = (token: { expires?: string }): boolean => {
   return expiryTime - currentTime < fiveMinutesMs;
 };
 
-// 创建带主备切换能力的 axios 实例
-const service = createFailoverAxios({
-  primaryUrl: env.api,
-  backupUrl: env.backup_api,
-  healthPath: "/health",
-  axiosConfig: {
-    timeout: 50000,
-    headers: { "Content-Type": "application/json;charset=utf-8" },
-  },
-  logTag: "[API Failover]",
+// 创建 axios 实例（failover 由 Nginx 层处理）
+const service = axios.create({
+  baseURL: env.api,
+  timeout: 50000,
+  headers: { "Content-Type": "application/json;charset=utf-8" },
 });
 
 const refreshToken = async () => {
@@ -162,7 +156,6 @@ function handleUnauthorized(
 }
 
 // 响应拦截器（Auth / HTTP 错误处理）
-// 注意：主备切换已由 createFailoverAxios 的拦截器处理
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;

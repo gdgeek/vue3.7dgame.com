@@ -40,3 +40,18 @@
   - `/api-domain-backup/api/health` → 200 ✅
 - 无 env-config.js 引用错误 ✅
 - 所有任务完成 🎉
+
+## 2026-03-22: Nginx 多后端 Failover 负载均衡 — 测试修复
+
+### 修复的测试文件
+- `test/unit/api/auth/wechat.round15.spec.ts` — mock 从 `auth_api` 改为 `api`
+- `test/unit/api/user-server-auth-wechat.spec.ts` — 同上
+- `test/unit/nginx/dockerfile.spec.ts` — 已在上一轮修复
+
+### 测试结果
+- 292 test files all passing ✅
+- 4289 tests green, 3 skipped ✅
+- 无错误，无失败
+
+### 待完成
+- Phase 5: 文档更新（deployment-guide.md）

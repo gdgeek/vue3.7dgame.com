@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 vi.mock("@/environment", () => ({
   default: {
-    auth_api: "https://auth.example.com",
+    api: "https://auth.example.com",
   },
 }));
 

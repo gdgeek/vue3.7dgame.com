@@ -40,16 +40,17 @@ describe.each(dockerfiles)("$name", ({ get }) => {
     expect(get()).toContain("/etc/nginx/templates/");
   });
 
-  it("sets NGINX_ENVSUBST_FILTER=APP_", () => {
-    expect(get()).toContain("NGINX_ENVSUBST_FILTER=APP_");
+  it("includes docker-entrypoint.sh for dynamic API failover config", () => {
+    expect(get()).toContain("docker-entrypoint.sh");
+    expect(get()).toContain("ENTRYPOINT");
+  });
+
+  it("does not set NGINX_ENVSUBST_FILTER (handled by entrypoint)", () => {
+    expect(get()).not.toContain("NGINX_ENVSUBST_FILTER");
   });
 
   it("does not set NGINX_ENVSUBST_OUTPUT_DIR", () => {
     expect(get()).not.toContain("NGINX_ENVSUBST_OUTPUT_DIR");
-  });
-
-  it("does not reference old docker-entrypoint.sh", () => {
-    expect(get()).not.toContain("docker-entrypoint.sh ");
   });
 
   it("does not reference env-config.js.template", () => {

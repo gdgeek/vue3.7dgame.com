@@ -54,7 +54,6 @@ vi.mock("@/api/v1/auth", () => ({
 vi.mock("@/environment", () => ({
   default: {
     api: "https://primary.api.com",
-    backup_api: "https://backup.api.com",
     useCloud: vi.fn(() => false),
   },
 }));
@@ -80,11 +79,7 @@ vi.mock("@/utils/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() },
 }));
 
-// Mock failover to return mockService directly without adding its own interceptors,
-// so tests can reliably index into calls[0] for request.ts interceptors.
-vi.mock("@/utils/failover", () => ({
-  createFailoverAxios: vi.fn(() => mockService),
-}));
+// request.ts now uses axios.create directly (failover handled by Nginx)
 
 describe("request.ts module", () => {
   beforeEach(() => {
