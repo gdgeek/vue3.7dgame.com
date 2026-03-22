@@ -1,7 +1,9 @@
 /**
  * Unit tests for Dockerfiles
- * Validates that all three Dockerfiles use the official nginx envsubst
- * template mechanism with env-config.js.template for runtime config.
+ * Validates that all three Dockerfiles use:
+ * - Official nginx envsubst for nginx.conf.template
+ * - Custom entrypoint script (docker-envsubst.sh) for env-config.js.template
+ *   (separated to avoid NGINX_ENVSUBST_OUTPUT_DIR conflict)
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -38,21 +40,28 @@ describe.each(dockerfiles)("$name", ({ get }) => {
     expect(get()).toContain("/etc/nginx/templates/");
   });
 
-  it("copies env-config.js.template to official templates directory", () => {
+  it("copies env-config.js.template to /etc/nginx/ (not templates/)", () => {
     expect(get()).toContain("env-config.js.template");
-    expect(get()).toContain("/etc/nginx/templates/env-config.js.template");
+    expect(get()).toContain("/etc/nginx/env-config.js.template");
   });
 
-  it("does not reference docker-entrypoint.sh", () => {
-    expect(get()).not.toContain("docker-entrypoint.sh");
-    expect(get()).not.toContain("/docker-entrypoint.d/");
+  it("uses custom entrypoint script for env-config.js generation", () => {
+    expect(get()).toContain("docker-envsubst.sh");
+    expect(get()).toContain("/docker-entrypoint.d/25-envsubst-env-config.sh");
+    expect(get()).toContain("chmod +x");
+  });
+
+  it("does not reference old docker-entrypoint.sh", () => {
+    // The old custom entrypoint.sh is removed; only docker-envsubst.sh is used
+    expect(get()).not.toContain("docker-entrypoint.sh ");
   });
 
   it("sets NGINX_ENVSUBST_FILTER=APP_", () => {
     expect(get()).toContain("NGINX_ENVSUBST_FILTER=APP_");
   });
 
-  it("sets NGINX_ENVSUBST_OUTPUT_DIR for env-config.js output", () => {
-    expect(get()).toContain("NGINX_ENVSUBST_OUTPUT_DIR=/usr/share/nginx/html");
+  it("does not set NGINX_ENVSUBST_OUTPUT_DIR", () => {
+    // Removed to let nginx envsubst output to default /etc/nginx/conf.d/
+    expect(get()).not.toContain("NGINX_ENVSUBST_OUTPUT_DIR");
   });
 });

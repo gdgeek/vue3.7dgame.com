@@ -26,6 +26,10 @@ server {
         image/svg+xml
         image/x-icon;
 
+    # DNS 解析器（Docker 内置 DNS + Google DNS 备用）
+    resolver 127.0.0.11 8.8.8.8 valid=30s ipv6=off;
+    resolver_timeout 5s;
+
     # ============ 反向代理 - 主 API ============
     location /api/ {
         set $backend_api "${APP_API_URL}";

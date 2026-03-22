@@ -125,6 +125,7 @@
       <th>路径</th>
       <th>状态码</th>
       <th>结果</th>
+      <th>响应预览</th>
     </tr>
     <tbody id="proxy-tests"></tbody>
   </table>
@@ -159,17 +160,20 @@
     // 测试反向代理
     async function testPath(path) {
       try {
-        const resp = await fetch(path, { method: 'HEAD', redirect: 'manual' });
-        return { status: resp.status, ok: resp.status < 500 };
+        const resp = await fetch(path, { redirect: 'manual' });
+        const body = await resp.text().catch(() => '');
+        const preview = body.length > 80 ? body.substring(0, 80) + '...' : body;
+        return { status: resp.status, ok: resp.status < 500, body: preview };
       } catch (e) {
-        return { status: 'ERR: ' + e.message, ok: false };
+        return { status: 'ERR: ' + e.message, ok: false, body: '' };
       }
     }
 
     async function runProxyTests() {
       const tests = [
-        '/api/',
+        '/api/health',
         '/api/v1/auth/login',
+        '/api-backup/health',
         '/api-backup/',
         '/env-config.js',
       ];
@@ -178,7 +182,7 @@
       for (const path of tests) {
         const r = await testPath(path);
         const cls = r.ok ? 'ok' : 'err';
-        ptbody.innerHTML += `<tr class="test-row"><td>${path}</td><td class="${cls}">${r.status}</td><td class="${cls}">${r.ok ? '可达' : '不可达'}</td></tr>`;
+        ptbody.innerHTML += `<tr class="test-row"><td>${path}</td><td class="${cls}">${r.status}</td><td class="${cls}">${r.ok ? '可达' : '不可达'}</td><td style="font-size:11px;color:#888;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.body || ''}</td></tr>`;
       }
     }
 
