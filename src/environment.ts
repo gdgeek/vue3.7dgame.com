@@ -40,6 +40,9 @@ const environment = {
   backup_api: import.meta.env.DEV
     ? import.meta.env.VITE_APP_BACKUP_API_URL || ""
     : "/api-backup",
+  auth_api: import.meta.env.DEV
+    ? import.meta.env.VITE_APP_API_URL || ""
+    : "/api",
   doc: import.meta.env.VITE_APP_DOC_API || "",
   blockly: import.meta.env.VITE_APP_BLOCKLY_URL || "",
   editor: import.meta.env.VITE_APP_EDITOR_URL || "",
@@ -57,6 +60,8 @@ const environment = {
   subtitle: () => "支持Rokid设备",
   useCloud: () => import.meta.env.VITE_APP_BASE_MODE !== "local",
   local: () => import.meta.env.VITE_APP_BASE_MODE === "local",
+  /** 替换 API URL 中的 IP（兼容旧代码，目前直接返回原 URL） */
+  replaceIP: (url: string) => url,
 };
 
 export default environment;
