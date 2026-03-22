@@ -35,11 +35,11 @@ COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 ENV NGINX_ENVSUBST_FILTER=APP_
 
 # 所有 APP_ 环境变量的默认值（未配置时 proxy_pass 指向无效地址，返回 502）
-ENV APP_API_URL=http://127.0.0.1:0 \
-    APP_BACKUP_API_URL=http://127.0.0.1:0 \
-    APP_DOMAIN_INFO_API_URL=http://127.0.0.1:0 \
-    APP_BACKUP_DOMAIN_INFO_API_URL=http://127.0.0.1:0 \
-    APP_DOC_API_URL=http://127.0.0.1:0
+ENV APP_API_URL=http://127.0.0.1:65535 \
+    APP_BACKUP_API_URL=http://127.0.0.1:65535 \
+    APP_DOMAIN_INFO_API_URL=http://127.0.0.1:65535 \
+    APP_BACKUP_DOMAIN_INFO_API_URL=http://127.0.0.1:65535 \
+    APP_DOC_API_URL=http://127.0.0.1:65535
 
 # 将构建的文件复制到 Nginx 默认的静态文件目录
 COPY --from=build /app/dist /usr/share/nginx/html

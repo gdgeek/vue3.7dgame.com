@@ -6,3 +6,4 @@
 |---|------|------|----------|----------|----------|
 | 1 | 2026-03-11 | `src/views/phototype/edit.vue` | Codemirror JSON 编辑器与 schema 表单不同步，底部显示 `{}` | AI 在 lint 清理时删除了 `jsonStr` computed 属性（原本绑定 `tree` 到 JSON 编辑器），后续修复时用 `dataJson`（绑定 `phototype.data`）替代，但语义完全不同：原来显示的是 schema JSON，现在显示的是 data JSON | 需要恢复 schema 与 JSON 编辑器的双向绑定 |
 | 2 | 2026-03-19 | `src/layout/components/NavBar/components/NavbarRight.vue` | avatarUrl 赋值逻辑错误：使用了 `userStore.userInfo?.avatar?.url` 而非 `newUserInfo.userInfo?.avatar?.url`，且条件判断冗余混乱 | AI 在替换 DiceBear fallback 时错误地将 watcher 参数 `newUserInfo` 改为直接引用 `userStore.userInfo`，并写出了不合理的三元表达式 | 恢复使用 watcher 参数 `newUserInfo`，改用 `getUserAvatarUrl()` 工具函数 |
+| 3 | 2026-03-22 | `Dockerfile` | 使用 `http://127.0.0.1:0` 作为 ENV 默认值导致 nginx 启动失败：`invalid port in upstream "127.0.0.1:0/"` | AI 选择端口 0 作为占位符，但 nginx 不接受端口 0 作为合法的 upstream 地址，导致配置校验失败容器反复重启 | 改用 `http://127.0.0.1:65535`（合法端口，无服务监听，访问时返回 502） |
