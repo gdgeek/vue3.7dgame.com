@@ -11,6 +11,7 @@ services:
       - APP_BACKUP_API_URL=https://api.tmrpp.com
       - APP_DOMAIN_INFO_API_URL=https://domain.xrteeth.com
       - APP_BACKUP_DOMAIN_INFO_API_URL=https://domain.tmrpp.com
+      - APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
       - NGINX_ENVSUBST_FILTER=APP_
     restart: unless-stopped
     healthcheck:

@@ -23,7 +23,9 @@ const getMessageArray = () => {
 
 // 创建一个 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_DOC_API,
+  baseURL: import.meta.env.DEV
+    ? import.meta.env.VITE_APP_DOC_API || ""
+    : "/api-doc",
   timeout: 50000,
 });
 
