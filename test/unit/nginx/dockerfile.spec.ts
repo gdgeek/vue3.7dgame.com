@@ -45,9 +45,9 @@ describe.each(dockerfiles)("$name", ({ get }) => {
     expect(get()).toContain("/etc/nginx/env-config.js.template");
   });
 
-  it("uses custom entrypoint script for env-config.js generation", () => {
+  it("uses custom entrypoint script numbered before nginx's 20-envsubst", () => {
     expect(get()).toContain("docker-envsubst.sh");
-    expect(get()).toContain("/docker-entrypoint.d/25-envsubst-env-config.sh");
+    expect(get()).toContain("/docker-entrypoint.d/15-envsubst-env-config.sh");
     expect(get()).toContain("chmod +x");
   });
 

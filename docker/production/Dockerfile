@@ -24,8 +24,8 @@ COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY env-config.js.template /etc/nginx/env-config.js.template
 
 # 自定义启动脚本：在 nginx 启动前生成 env-config.js
-COPY docker-envsubst.sh /docker-entrypoint.d/25-envsubst-env-config.sh
-RUN chmod +x /docker-entrypoint.d/25-envsubst-env-config.sh
+COPY docker-envsubst.sh /docker-entrypoint.d/15-envsubst-env-config.sh
+RUN chmod +x /docker-entrypoint.d/15-envsubst-env-config.sh
 
 # 只替换 APP_ 前缀的环境变量，不影响 nginx 内置变量
 ENV NGINX_ENVSUBST_FILTER=APP_

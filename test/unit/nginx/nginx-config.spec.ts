@@ -49,8 +49,13 @@ describe("nginx.conf.template — standard headers", () => {
     expect(nginxConfig).toContain("proxy_set_header X-Forwarded-Proto");
   });
 
-  it("sets Host header to $proxy_host for upstream domain", () => {
-    expect(nginxConfig).toContain("proxy_set_header Host $proxy_host");
+  it("sets Host header to upstream domain variable (not $host)", () => {
+    // Host must be the upstream API domain, not the client's Host header
+    // /api/ uses $backend_api_host, /api-backup/ uses $backup_api_host
+    const apiBlock = extractLocationBlock(nginxConfig, "/api/");
+    const backupBlock = extractLocationBlock(nginxConfig, "/api-backup/");
+    expect(apiBlock).toContain("proxy_set_header Host $backend_api_host");
+    expect(backupBlock).toContain("proxy_set_header Host $backup_api_host");
   });
 });
 
