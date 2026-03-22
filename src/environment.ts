@@ -45,9 +45,6 @@ const environment = {
   domain_info: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
     : "/api-domain",
-  domain_info_backup: import.meta.env.DEV
-    ? import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL || ""
-    : "/api-domain-backup",
   version: 1,
   subtitle: () => "支持Rokid设备",
   useCloud: () => import.meta.env.VITE_APP_BASE_MODE !== "local",

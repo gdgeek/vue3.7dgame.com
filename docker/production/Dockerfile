@@ -24,10 +24,8 @@ COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-# 非 API 的 APP_ 环境变量默认值
-ENV APP_DOMAIN_INFO_API_URL=http://127.0.0.1:65535 \
-    APP_BACKUP_DOMAIN_INFO_API_URL=http://127.0.0.1:65535 \
-    APP_DOC_API_URL=http://127.0.0.1:65535
+# 非动态 failover 的 APP_ 环境变量默认值（API 和 Domain 由 entrypoint 动态处理）
+ENV APP_DOC_API_URL=http://127.0.0.1:65535
 
 # 将构建的文件复制到 Nginx 默认的静态文件目录
 COPY --from=build /app/dist /usr/share/nginx/html

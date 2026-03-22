@@ -43,39 +43,8 @@ server {
         proxy_send_timeout 120s;
     }
 
-    # ============ 反向代理 - 域名信息 API ============
-    location /api-domain/ {
-        proxy_pass ${APP_DOMAIN_INFO_API_URL}/;
-
-        # HTTPS 上游：启用 SNI
-        proxy_ssl_server_name on;
-        proxy_set_header Host $proxy_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # 超时配置
-        proxy_connect_timeout 60s;
-        proxy_read_timeout 120s;
-        proxy_send_timeout 120s;
-    }
-
-    # ============ 反向代理 - 备用域名信息 API ============
-    location /api-domain-backup/ {
-        proxy_pass ${APP_BACKUP_DOMAIN_INFO_API_URL}/;
-
-        # HTTPS 上游：启用 SNI
-        proxy_ssl_server_name on;
-        proxy_set_header Host $proxy_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # 超时配置
-        proxy_connect_timeout 60s;
-        proxy_read_timeout 120s;
-        proxy_send_timeout 120s;
-    }
+    # ============ 反向代理 - 域名信息 API (由 docker-entrypoint.sh 动态生成) ============
+    # __DOMAIN_LOCATIONS__
 
     # ============ 反向代理 - API (由 docker-entrypoint.sh 动态生成) ============
     # __API_LOCATIONS__

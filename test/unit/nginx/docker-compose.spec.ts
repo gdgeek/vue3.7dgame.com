@@ -24,12 +24,20 @@ describe("docker-compose.prod.yml — environment variables", () => {
     expect(composeConfig).toContain("APP_API_2_URL=");
   });
 
-  it("contains APP_DOMAIN_INFO_API_URL", () => {
-    expect(composeConfig).toContain("APP_DOMAIN_INFO_API_URL=");
+  it("contains APP_DOMAIN_1_URL (primary domain backend)", () => {
+    expect(composeConfig).toContain("APP_DOMAIN_1_URL=");
   });
 
-  it("contains APP_BACKUP_DOMAIN_INFO_API_URL", () => {
-    expect(composeConfig).toContain("APP_BACKUP_DOMAIN_INFO_API_URL=");
+  it("contains APP_DOMAIN_2_URL (backup domain backend)", () => {
+    expect(composeConfig).toContain("APP_DOMAIN_2_URL=");
+  });
+
+  it("does NOT contain old APP_DOMAIN_INFO_API_URL format", () => {
+    expect(composeConfig).not.toContain("APP_DOMAIN_INFO_API_URL=");
+  });
+
+  it("does NOT contain old APP_BACKUP_DOMAIN_INFO_API_URL format", () => {
+    expect(composeConfig).not.toContain("APP_BACKUP_DOMAIN_INFO_API_URL=");
   });
 
   it("does NOT contain old APP_API_URL format", () => {

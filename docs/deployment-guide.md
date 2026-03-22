@@ -4,15 +4,14 @@
 
 本项目是一个 Vue 3 + Vite 前端应用，生产环境使用 Nginx 托管静态文件并提供反向代理。
 
-主 API（`/api/`）采用 Nginx 层面的多后端 failover 机制：通过 `error_page` + 命名 location 链式切换，当主后端不可用时自动尝试备用后端。后端数量通过编号环境变量动态配置。
+主 API（`/api/`）和域名信息 API（`/api-domain/`）均采用 Nginx 层面的多后端 failover 机制：通过 `error_page` + 命名 location 链式切换，当主后端不可用时自动尝试备用后端。后端数量通过编号环境变量动态配置。
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  浏览器                                                       │
 │                                                              │
 │  /api/*               → nginx failover 链 → 后端 1 → 后端 2  │
-│  /api-domain/*        → nginx 反向代理 → 域名信息 API 服务     │
-│  /api-domain-backup/* → nginx 反向代理 → 备用域名信息 API 服务  │
+│  /api-domain/*        → nginx failover 链 → 域名 1 → 域名 2  │
 │  /api-doc/*           → nginx 反向代理 → WordPress 文档 API     │
 │  其他静态资源           → nginx 直接返回 dist/ 文件             │
 └──────────────────────────────────────────────────────────────┘
@@ -71,12 +70,10 @@ environment:
   # 主 API 后端（编号格式，支持多个）
   - APP_API_1_URL=https://api.xrteeth.com
   - APP_API_2_URL=https://api.tmrpp.com
-  # 如需更多备用后端：
-  # - APP_API_3_URL=https://api.backup3.com
 
-  # 域名信息 API
-  - APP_DOMAIN_INFO_API_URL=https://domain.xrteeth.com
-  - APP_BACKUP_DOMAIN_INFO_API_URL=https://domain.tmrpp.com
+  # 域名信息 API（编号格式，同上）
+  - APP_DOMAIN_1_URL=https://domain.xrteeth.com
+  - APP_DOMAIN_2_URL=https://domain.tmrpp.com
 
   # 文档 API（可选，不配置则文档功能不显示）
   - APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
@@ -141,22 +138,20 @@ healthcheck:
 | 路径 | 代理目标 | 说明 |
 |------|---------|------|
 | `/api/*` | `APP_API_1_URL` → `APP_API_2_URL` → ... | 链式 failover，由 entrypoint 动态生成 |
-| `/api-domain/*` | `${APP_DOMAIN_INFO_API_URL}` | 域名信息 API |
-| `/api-domain-backup/*` | `${APP_BACKUP_DOMAIN_INFO_API_URL}` | 备用域名信息 API |
+| `/api-domain/*` | `APP_DOMAIN_1_URL` → `APP_DOMAIN_2_URL` → ... | 链式 failover，由 entrypoint 动态生成 |
 | `/api-doc/*` | `${APP_DOC_API_URL}`（可选） | WordPress 文档 API |
 
-前端代码在生产环境中直接请求 `/api`、`/api-domain`、`/api-domain-backup`、`/api-doc`，由 nginx 转发到实际后端。
+前端代码在生产环境中直接请求 `/api`、`/api-domain`、`/api-doc`，由 nginx 转发到实际后端。
 
 `src/environment.ts` 中的逻辑：
 
 ```typescript
 api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL : "/api",
 domain_info: import.meta.env.DEV ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL : "/api-domain",
-domain_info_backup: import.meta.env.DEV ? import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL : "/api-domain-backup",
 doc: import.meta.env.DEV ? import.meta.env.VITE_APP_DOC_API : "/api-doc",
 ```
 
-> 注意：`/api/` 的所有 failover location 都包含 GEEK 自定义请求头和 WebSocket 支持。`/api-domain/`、`/api-domain-backup/` 和 `/api-doc/` 仅包含标准代理头。`/api-doc/` 是可选的，不配置 `APP_DOC_API_URL` 时前端 `environment.doc` 为空，文档相关功能不显示。
+> 注意：`/api/` 的所有 failover location 都包含 GEEK 自定义请求头和 WebSocket 支持。`/api-domain/` 的 failover location 仅包含标准代理头。`/api-doc/` 仅包含标准代理头，是可选的，不配置 `APP_DOC_API_URL` 时前端 `environment.doc` 为空，文档相关功能不显示。
 
 ### 构建时写死的地址（不可运行时修改）
 

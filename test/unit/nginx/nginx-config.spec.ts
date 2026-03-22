@@ -57,6 +57,10 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("# __API_LOCATIONS__");
   });
 
+  it("contains # __DOMAIN_LOCATIONS__ placeholder for dynamic domain API config", () => {
+    expect(nginxConfig).toContain("# __DOMAIN_LOCATIONS__");
+  });
+
   it("does NOT contain static /api/ location (now dynamic)", () => {
     expect(nginxConfig).not.toMatch(/location\s+\/api\/\s*\{/);
   });
@@ -65,28 +69,28 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).not.toContain("location /api-backup/");
   });
 
-  it("contains /api-domain/ location block", () => {
-    expect(nginxConfig).toContain("location /api-domain/");
+  it("does NOT contain static /api-domain/ location (now dynamic)", () => {
+    expect(nginxConfig).not.toMatch(/location\s+\/api-domain\/\s*\{/);
   });
 
-  it("contains /api-domain-backup/ location block", () => {
-    expect(nginxConfig).toContain("location /api-domain-backup/");
+  it("does NOT contain static /api-domain-backup/ location (now dynamic)", () => {
+    expect(nginxConfig).not.toContain("location /api-domain-backup/");
   });
 
   it("contains /api-doc/ location block", () => {
     expect(nginxConfig).toContain("location /api-doc/");
   });
 
-  it("proxy_pass uses ${APP_DOMAIN_INFO_API_URL} variable", () => {
-    expect(nginxConfig).toContain("${APP_DOMAIN_INFO_API_URL}");
-  });
-
-  it("proxy_pass uses ${APP_BACKUP_DOMAIN_INFO_API_URL} variable", () => {
-    expect(nginxConfig).toContain("${APP_BACKUP_DOMAIN_INFO_API_URL}");
-  });
-
   it("proxy_pass uses ${APP_DOC_API_URL} variable", () => {
     expect(nginxConfig).toContain("${APP_DOC_API_URL}");
+  });
+
+  it("does NOT contain ${APP_DOMAIN_INFO_API_URL} (now dynamic)", () => {
+    expect(nginxConfig).not.toContain("${APP_DOMAIN_INFO_API_URL}");
+  });
+
+  it("does NOT contain ${APP_BACKUP_DOMAIN_INFO_API_URL} (now dynamic)", () => {
+    expect(nginxConfig).not.toContain("${APP_BACKUP_DOMAIN_INFO_API_URL}");
   });
 });
 
@@ -104,15 +108,8 @@ describe("nginx.conf.template — standard headers (static locations)", () => {
   });
 
   it("sets Host header to $proxy_host in static proxy locations", () => {
-    const locations = [
-      "/api-domain/",
-      "/api-domain-backup/",
-      "/api-doc/",
-    ] as const;
-    for (const loc of locations) {
-      const block = extractLocationBlock(nginxConfig, loc);
-      expect(block).toContain("proxy_set_header Host $proxy_host");
-    }
+    const block = extractLocationBlock(nginxConfig, "/api-doc/");
+    expect(block).toContain("proxy_set_header Host $proxy_host");
   });
 });
 
@@ -121,11 +118,7 @@ describe("nginx.conf.template — HTTPS upstream (SNI)", () => {
     expect(nginxConfig).toContain("proxy_ssl_server_name on");
   });
 
-  const sniLocations = [
-    "/api-domain/",
-    "/api-domain-backup/",
-    "/api-doc/",
-  ] as const;
+  const sniLocations = ["/api-doc/"] as const;
 
   sniLocations.forEach((loc) => {
     it(`${loc} location has proxy_ssl_server_name`, () => {
@@ -188,19 +181,31 @@ describe("nginx.conf.template — custom JSON error responses", () => {
 
 describe("docker-entrypoint.sh — entrypoint script structure", () => {
   it("reads APP_API_N_URL numbered environment variables", () => {
-    expect(entrypointScript).toContain("APP_API_${i}_URL");
+    expect(entrypointScript).toContain("APP_API");
   });
 
-  it("auto-extracts Host from URL when APP_API_N_HOST is not set", () => {
-    expect(entrypointScript).toMatch(/host=.*sed.*https/);
+  it("reads APP_DOMAIN_N_URL numbered environment variables", () => {
+    expect(entrypointScript).toContain("APP_DOMAIN");
   });
 
-  it("generates primary location /api/ for first backend", () => {
-    expect(entrypointScript).toContain("location /api/");
+  it("uses generate_failover_chain function for reusable failover generation", () => {
+    expect(entrypointScript).toContain("generate_failover_chain");
   });
 
-  it("generates named backup locations @api_backup_N", () => {
-    expect(entrypointScript).toContain("@api_backup_${i}");
+  it("generates /api/ failover chain", () => {
+    expect(entrypointScript).toContain('"/api/"');
+  });
+
+  it("generates /api-domain/ failover chain", () => {
+    expect(entrypointScript).toContain('"/api-domain/"');
+  });
+
+  it("replaces # __API_LOCATIONS__ placeholder", () => {
+    expect(entrypointScript).toContain("__API_LOCATIONS__");
+  });
+
+  it("replaces # __DOMAIN_LOCATIONS__ placeholder", () => {
+    expect(entrypointScript).toContain("__DOMAIN_LOCATIONS__");
   });
 
   it("sets proxy_ssl_server_name on for HTTPS upstream", () => {
@@ -230,8 +235,8 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("proxy_connect_timeout 5s");
   });
 
-  it("uses rewrite to strip /api/ prefix in backup locations", () => {
-    expect(entrypointScript).toContain("rewrite ^/api/");
+  it("uses rewrite to strip prefix in backup locations", () => {
+    expect(entrypointScript).toContain("rewrite ^${LOC_PATH}");
   });
 
   it("replaces # __API_LOCATIONS__ placeholder", () => {
@@ -253,8 +258,6 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
  */
 describe("Property 1: Proxy route correctness (static locations)", () => {
   const staticRoutes = [
-    { prefix: "/api-domain/", envVar: "APP_DOMAIN_INFO_API_URL" },
-    { prefix: "/api-domain-backup/", envVar: "APP_BACKUP_DOMAIN_INFO_API_URL" },
     { prefix: "/api-doc/", envVar: "APP_DOC_API_URL" },
   ] as const;
 
@@ -280,11 +283,7 @@ describe("Property 1: Proxy route correctness (static locations)", () => {
  * **Validates: Requirements 1.3**
  */
 describe("Property 2: Path prefix stripping (static locations)", () => {
-  const staticPrefixes = [
-    "/api-domain/",
-    "/api-domain-backup/",
-    "/api-doc/",
-  ] as const;
+  const staticPrefixes = ["/api-doc/"] as const;
 
   it("proxy_pass ends with trailing slash to strip prefix", () => {
     fc.assert(
@@ -333,11 +332,6 @@ describe("Property 3: GEEK custom header completeness (entrypoint)", () => {
 describe("Property 4: Template substitution round-trip consistency", () => {
   it("all static envsubst variables appear in their respective proxy_pass directives", () => {
     const envVarRoutes = [
-      { prefix: "/api-domain/", envVar: "APP_DOMAIN_INFO_API_URL" },
-      {
-        prefix: "/api-domain-backup/",
-        envVar: "APP_BACKUP_DOMAIN_INFO_API_URL",
-      },
       { prefix: "/api-doc/", envVar: "APP_DOC_API_URL" },
     ] as const;
 
@@ -366,7 +360,6 @@ describe("Property 5: Environment-aware URL selection", () => {
         );
         expect(envSource).toMatch(/:\s*["']\/api["']/);
         expect(envSource).toMatch(/:\s*["']\/api-domain["']/);
-        expect(envSource).toMatch(/:\s*["']\/api-domain-backup["']/);
         expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
       }),
       { numRuns: 100 }
