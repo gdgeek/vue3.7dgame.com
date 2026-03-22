@@ -17,17 +17,18 @@ RUN pnpm run build
 # 使用 Nginx 作为生产阶段
 FROM nginx:alpine
 
-# 将 Nginx 配置模板复制到容器中
-COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
+# Nginx 配置模板（官方镜像自动 envsubst）
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# 运行时环境变量注入模板（生成 /usr/share/nginx/html/env-config.js）
+COPY env-config.js.template /etc/nginx/templates/env-config.js.template
+
+# 只替换 APP_ 前缀的环境变量，不影响 nginx 内置变量
+ENV NGINX_ENVSUBST_FILTER=APP_
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/usr/share/nginx/html
 
 # 将构建的文件复制到 Nginx 默认的静态文件目录
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# 复制启动脚本
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
 # 暴露端口
 EXPOSE 80
-
-ENTRYPOINT ["/docker-entrypoint.sh"]

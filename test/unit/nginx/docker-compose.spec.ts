@@ -31,6 +31,10 @@ describe("docker-compose.prod.yml — environment variables", () => {
   it("contains APP_BACKUP_DOMAIN_INFO_API_URL", () => {
     expect(composeConfig).toContain("APP_BACKUP_DOMAIN_INFO_API_URL=");
   });
+
+  it("contains NGINX_ENVSUBST_FILTER=APP_", () => {
+    expect(composeConfig).toContain("NGINX_ENVSUBST_FILTER=APP_");
+  });
 });
 
 describe("docker-compose.prod.yml — port mapping", () => {

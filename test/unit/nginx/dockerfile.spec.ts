@@ -1,7 +1,7 @@
 /**
  * Unit tests for Dockerfiles
- * Validates that all three Dockerfiles contain nginx.conf.template
- * and entrypoint related directives.
+ * Validates that all three Dockerfiles use the official nginx envsubst
+ * template mechanism with env-config.js.template for runtime config.
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -33,19 +33,26 @@ const dockerfiles = [
 ];
 
 describe.each(dockerfiles)("$name", ({ get }) => {
-  it("contains nginx.conf.template COPY directive", () => {
+  it("copies nginx.conf.template to official templates directory", () => {
     expect(get()).toContain("nginx.conf.template");
+    expect(get()).toContain("/etc/nginx/templates/");
   });
 
-  it("contains docker-entrypoint.sh COPY directive", () => {
-    expect(get()).toContain("docker-entrypoint.sh");
+  it("copies env-config.js.template to official templates directory", () => {
+    expect(get()).toContain("env-config.js.template");
+    expect(get()).toContain("/etc/nginx/templates/env-config.js.template");
   });
 
-  it("contains chmod +x for the entrypoint", () => {
-    expect(get()).toMatch(/chmod\s+\+x.*entrypoint/);
+  it("does not reference docker-entrypoint.sh", () => {
+    expect(get()).not.toContain("docker-entrypoint.sh");
+    expect(get()).not.toContain("/docker-entrypoint.d/");
   });
 
-  it("contains ENTRYPOINT directive", () => {
-    expect(get()).toMatch(/ENTRYPOINT\s+\[/);
+  it("sets NGINX_ENVSUBST_FILTER=APP_", () => {
+    expect(get()).toContain("NGINX_ENVSUBST_FILTER=APP_");
+  });
+
+  it("sets NGINX_ENVSUBST_OUTPUT_DIR for env-config.js output", () => {
+    expect(get()).toContain("NGINX_ENVSUBST_OUTPUT_DIR=/usr/share/nginx/html");
   });
 });
