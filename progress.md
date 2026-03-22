@@ -21,3 +21,22 @@
 - `POST /api/v1/auth/login` → 400 `{"message":"username is required"}` ✅（API 正常业务响应，不再是 404）
 - `env-config.js` → 200，域名信息 URL 正确注入 ✅
 - 反向代理问题完全解决 🎉
+
+## 2026-03-22: Task 2+3 域名 API 反向代理 + 移除 env-config.js
+
+### 变更
+- 新增 `/api-domain/` 和 `/api-domain-backup/` nginx 反向代理
+- `src/environment.ts` 改为使用反向代理路径
+- 删除 `env-config.js.template`、`docker-envsubst.sh`
+- 清理 `index.html`、3 个 Dockerfile、`debug.html`、测试、文档
+
+### 部署验证（2026-03-22 18:47）
+- CI run 23401219831 通过 ✅
+- Portainer 容器已自动更新
+- debug.html 全部 6 个端点验证通过：
+  - `/api/health` → 200 ✅
+  - `/api-backup/health` → 200 ✅
+  - `/api-domain/api/health` → 200 ✅
+  - `/api-domain-backup/api/health` → 200 ✅
+- 无 env-config.js 引用错误 ✅
+- 所有任务完成 🎉
