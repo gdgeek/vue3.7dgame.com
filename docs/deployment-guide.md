@@ -12,6 +12,7 @@
 │  /api-backup/*        → nginx 反向代理 → 备用 API 服务        │
 │  /api-domain/*        → nginx 反向代理 → 域名信息 API 服务     │
 │  /api-domain-backup/* → nginx 反向代理 → 备用域名信息 API 服务  │
+│  /api-doc/*           → nginx 反向代理 → WordPress 文档 API     │
 │  其他静态资源           → nginx 直接返回 dist/ 文件             │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -80,6 +81,8 @@ environment:
   - APP_BACKUP_API_URL=https://api.tmrpp.com
   - APP_DOMAIN_INFO_API_URL=https://domain.xrteeth.com
   - APP_BACKUP_DOMAIN_INFO_API_URL=https://domain.tmrpp.com
+  # 文档 API（可选，不配置则文档功能不显示）
+  - APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
   # 必须设置，确保只替换 APP_ 前缀变量，不影响 nginx 内置变量
   - NGINX_ENVSUBST_FILTER=APP_
 ```
@@ -89,7 +92,7 @@ environment:
 容器启动时，nginx 官方镜像自动执行 envsubst：
 
 1. `/etc/nginx/templates/default.conf.template` → `/etc/nginx/conf.d/default.conf`
-   - 替换 `${APP_API_URL}`、`${APP_BACKUP_API_URL}`、`${APP_DOMAIN_INFO_API_URL}`、`${APP_BACKUP_DOMAIN_INFO_API_URL}` 为反向代理上游地址
+   - 替换 `${APP_API_URL}`、`${APP_BACKUP_API_URL}`、`${APP_DOMAIN_INFO_API_URL}`、`${APP_BACKUP_DOMAIN_INFO_API_URL}`、`${APP_DOC_API_URL}` 为反向代理上游地址
 
 `NGINX_ENVSUBST_FILTER=APP_` 确保只替换 `APP_` 前缀的变量，避免破坏 nginx 配置中的 `$host`、`$remote_addr` 等内置变量。
 
@@ -116,8 +119,9 @@ healthcheck:
 | `/api-backup/*` | `${APP_BACKUP_API_URL}` | `nginx.conf.template` |
 | `/api-domain/*` | `${APP_DOMAIN_INFO_API_URL}` | `nginx.conf.template` |
 | `/api-domain-backup/*` | `${APP_BACKUP_DOMAIN_INFO_API_URL}` | `nginx.conf.template` |
+| `/api-doc/*` | `${APP_DOC_API_URL}`（可选） | `nginx.conf.template` |
 
-前端代码在生产环境中直接请求 `/api`、`/api-backup`、`/api-domain`、`/api-domain-backup`，由 nginx 转发到实际后端。
+前端代码在生产环境中直接请求 `/api`、`/api-backup`、`/api-domain`、`/api-domain-backup`、`/api-doc`，由 nginx 转发到实际后端。
 
 `src/environment.ts` 中的逻辑：
 
@@ -126,15 +130,15 @@ api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL : "/api",
 backup_api: import.meta.env.DEV ? import.meta.env.VITE_APP_BACKUP_API_URL : "/api-backup",
 domain_info: import.meta.env.DEV ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL : "/api-domain",
 domain_info_backup: import.meta.env.DEV ? import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL : "/api-domain-backup",
+doc: import.meta.env.DEV ? import.meta.env.VITE_APP_DOC_API : "/api-doc",
 ```
 
-> 注意：`/api/` 和 `/api-backup/` 包含 GEEK 自定义请求头和 WebSocket 支持；`/api-domain/` 和 `/api-domain-backup/` 仅包含标准代理头。
+> 注意：`/api/` 和 `/api-backup/` 包含 GEEK 自定义请求头和 WebSocket 支持；`/api-domain/`、`/api-domain-backup/` 和 `/api-doc/` 仅包含标准代理头。`/api-doc/` 是可选的，不配置 `APP_DOC_API_URL` 时前端 `environment.doc` 为空，文档相关功能不显示。
 
 ### 构建时写死的地址（不可运行时修改）
 
 | 变量 | 用途 | 来源 |
 |------|------|------|
-| `VITE_APP_DOC_API` | WordPress 文档 API | `.env.production` |
 | `VITE_APP_BLOCKLY_URL` | Blockly 编辑器 | `.env.production` |
 | `VITE_APP_EDITOR_URL` | 代码编辑器 | `.env.production` |
 | `VITE_APP_BASE_MODE` | 域名模式标识 | `.env.production` |

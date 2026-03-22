@@ -56,6 +56,10 @@ describe("nginx.conf.template — proxy location blocks", () => {
     expect(nginxConfig).toContain("location /api-domain-backup/");
   });
 
+  it("contains /api-doc/ location block", () => {
+    expect(nginxConfig).toContain("location /api-doc/");
+  });
+
   it("proxy_pass uses ${APP_API_URL} variable", () => {
     expect(nginxConfig).toContain("${APP_API_URL}");
   });
@@ -70,6 +74,10 @@ describe("nginx.conf.template — proxy location blocks", () => {
 
   it("proxy_pass uses ${APP_BACKUP_DOMAIN_INFO_API_URL} variable", () => {
     expect(nginxConfig).toContain("${APP_BACKUP_DOMAIN_INFO_API_URL}");
+  });
+
+  it("proxy_pass uses ${APP_DOC_API_URL} variable", () => {
+    expect(nginxConfig).toContain("${APP_DOC_API_URL}");
   });
 });
 
@@ -92,6 +100,7 @@ describe("nginx.conf.template — standard headers", () => {
       "/api-backup/",
       "/api-domain/",
       "/api-domain-backup/",
+      "/api-doc/",
     ] as const;
     for (const loc of locations) {
       const block = extractLocationBlock(nginxConfig, loc);
@@ -110,6 +119,7 @@ describe("nginx.conf.template — HTTPS upstream (SNI)", () => {
     "/api-backup/",
     "/api-domain/",
     "/api-domain-backup/",
+    "/api-doc/",
   ] as const;
 
   sniLocations.forEach((loc) => {
@@ -220,6 +230,7 @@ describe("Property 1: Proxy route correctness", () => {
     { prefix: "/api-backup/", envVar: "APP_BACKUP_API_URL" },
     { prefix: "/api-domain/", envVar: "APP_DOMAIN_INFO_API_URL" },
     { prefix: "/api-domain-backup/", envVar: "APP_BACKUP_DOMAIN_INFO_API_URL" },
+    { prefix: "/api-doc/", envVar: "APP_DOC_API_URL" },
   ] as const;
 
   it("for any proxy prefix, the config contains the location and correct envsubst variable in proxy_pass", () => {
@@ -252,6 +263,7 @@ describe("Property 2: Path prefix stripping", () => {
     "/api-backup/",
     "/api-domain/",
     "/api-domain-backup/",
+    "/api-doc/",
   ] as const;
 
   it("proxy_pass ends with trailing slash to strip prefix", () => {
@@ -314,6 +326,7 @@ describe("Property 4: Template substitution round-trip consistency", () => {
         prefix: "/api-domain-backup/",
         envVar: "APP_BACKUP_DOMAIN_INFO_API_URL",
       },
+      { prefix: "/api-doc/", envVar: "APP_DOC_API_URL" },
     ] as const;
 
     fc.assert(
@@ -343,6 +356,7 @@ describe("Property 5: Environment-aware URL selection", () => {
         expect(envSource).toMatch(/:\s*["']\/api-backup["']/);
         expect(envSource).toMatch(/:\s*["']\/api-domain["']/);
         expect(envSource).toMatch(/:\s*["']\/api-domain-backup["']/);
+        expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
       }),
       { numRuns: 100 }
     );
@@ -393,7 +407,8 @@ describe("Property 6: Static file fallback", () => {
             (p) =>
               !p.startsWith("/api") &&
               !p.startsWith("/api-backup") &&
-              !p.startsWith("/api-domain")
+              !p.startsWith("/api-domain") &&
+              !p.startsWith("/api-doc")
           ),
         (_path) => {
           expect(nginxConfig).toContain("try_files $uri $uri/ /index.html");

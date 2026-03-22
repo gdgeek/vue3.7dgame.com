@@ -43,7 +43,9 @@ const environment = {
   auth_api: import.meta.env.DEV
     ? import.meta.env.VITE_APP_API_URL || ""
     : "/api",
-  doc: import.meta.env.VITE_APP_DOC_API || "",
+  doc: import.meta.env.DEV
+    ? import.meta.env.VITE_APP_DOC_API || ""
+    : "/api-doc",
   blockly: import.meta.env.VITE_APP_BLOCKLY_URL || "",
   editor: import.meta.env.VITE_APP_EDITOR_URL || "",
   domain_info: import.meta.env.DEV
