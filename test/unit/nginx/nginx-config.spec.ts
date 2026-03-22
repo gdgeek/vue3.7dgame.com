@@ -49,8 +49,24 @@ describe("nginx.conf.template — standard headers", () => {
     expect(nginxConfig).toContain("proxy_set_header X-Forwarded-Proto");
   });
 
-  it("sets Host header", () => {
-    expect(nginxConfig).toContain("proxy_set_header Host");
+  it("sets Host header to $proxy_host for upstream domain", () => {
+    expect(nginxConfig).toContain("proxy_set_header Host $proxy_host");
+  });
+});
+
+describe("nginx.conf.template — HTTPS upstream (SNI)", () => {
+  it("enables proxy_ssl_server_name for SNI support", () => {
+    expect(nginxConfig).toContain("proxy_ssl_server_name on");
+  });
+
+  it("/api/ location has proxy_ssl_server_name", () => {
+    const block = extractLocationBlock(nginxConfig, "/api/");
+    expect(block).toContain("proxy_ssl_server_name on");
+  });
+
+  it("/api-backup/ location has proxy_ssl_server_name", () => {
+    const block = extractLocationBlock(nginxConfig, "/api-backup/");
+    expect(block).toContain("proxy_ssl_server_name on");
   });
 });
 

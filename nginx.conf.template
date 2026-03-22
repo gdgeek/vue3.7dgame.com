@@ -36,7 +36,9 @@ server {
 
         proxy_pass $backend_api/;
 
-        proxy_set_header Host $host;
+        # HTTPS 上游：启用 SNI 并传递上游域名作为 Host
+        proxy_ssl_server_name on;
+        proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -66,7 +68,9 @@ server {
 
         proxy_pass $backup_api/;
 
-        proxy_set_header Host $host;
+        # HTTPS 上游：启用 SNI 并传递上游域名作为 Host
+        proxy_ssl_server_name on;
+        proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
