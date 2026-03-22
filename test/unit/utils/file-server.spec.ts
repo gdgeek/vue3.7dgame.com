@@ -15,7 +15,6 @@ vi.mock("@/utils/logger", () => ({
 vi.mock("@/environment", () => ({
   default: {
     api: "https://api.example.com",
-    replaceIP: (url: string) => url,
   },
 }));
 vi.mock("axios", () => ({

@@ -10,13 +10,14 @@ RUN pnpm run build:staging
 # 使用 Nginx 作为生产阶段
 FROM nginx:alpine
 
-# 将自定义的 Nginx 配置文件复制到容器中
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Nginx 配置模板（官方镜像自动 envsubst）
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# 只替换 APP_ 前缀的环境变量，不影响 nginx 内置变量
+ENV NGINX_ENVSUBST_FILTER=APP_
 
 # 将构建的文件复制到 Nginx 默认的静态文件目录
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # 暴露端口
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
