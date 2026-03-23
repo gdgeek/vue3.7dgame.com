@@ -131,7 +131,9 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const lastSavedAt = ref<string | null>(null);
   const editorFrameKey = ref(0);
   const editor = ref<HTMLIFrameElement | null>(null);
-  const src = ref(env.blockly + "?language=" + appStore.language);
+  const src = ref(
+    env.blockly + "?language=" + appStore.language + "&v=" + env.buildVersion
+  );
   const isDark = computed<boolean>(
     () => settingsStore.theme === ThemeEnum.DARK
   );
@@ -850,7 +852,8 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   watch(
     () => appStore.language,
     (newValue) => {
-      src.value = env.blockly + "?language=" + newValue;
+      src.value =
+        env.blockly + "?language=" + newValue + "&v=" + env.buildVersion;
       options.onReady(); // 语言切换时重新初始化编辑器
     }
   );
