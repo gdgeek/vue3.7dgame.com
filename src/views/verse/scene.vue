@@ -153,7 +153,7 @@ const id = computed(() => parseInt(route.query.id as string));
 const src = computed(() => {
   const query: Record<string, string | number> = {
     language: appStore.language,
-    timestamp: Date.now(),
+    v: env.buildVersion,
     api: env.api,
   };
 
