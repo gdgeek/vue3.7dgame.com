@@ -42,7 +42,7 @@ vi.mock("@/utils/logger", () => ({
 }));
 
 vi.mock("@/environment", () => ({
-  default: { blockly: "https://blockly.test" },
+  default: { blockly: "https://blockly.test", buildVersion: "test-v1" },
 }));
 
 vi.mock("pako", () => ({
@@ -138,7 +138,9 @@ describe("useScriptEditorBase", () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
-      expect(result.src.value).toBe("https://blockly.test?language=zh-CN");
+      expect(result.src.value).toBe(
+        "https://blockly.test?language=zh-CN&v=test-v1"
+      );
       unmount();
     });
 
