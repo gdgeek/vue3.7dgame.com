@@ -10,7 +10,6 @@ import type {
   PluginState,
   PluginInfo,
   PluginManifest,
-  PluginMessage,
 } from "@/plugin-system/types";
 
 const logger = createLogger("PluginSystem");
@@ -150,7 +149,12 @@ export class PluginSystem {
     this.transitionState(pluginId, "loading");
 
     try {
-      const loaded = await this.loader.load(pluginId, manifest, container, options);
+      const loaded = await this.loader.load(
+        pluginId,
+        manifest,
+        container,
+        options
+      );
 
       // Register in MessageBus for communication
       this.messageBus.registerPlugin(pluginId, loaded.iframe, loaded.origin);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, computed, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
@@ -17,7 +17,7 @@ const containerRef = ref<HTMLDivElement>();
 
 const pluginId = computed(() => route.params.pluginId as string | undefined);
 
-const pluginInfo = computed(() => {
+const _pluginInfo = computed(() => {
   if (!pluginId.value) return undefined;
   return store.plugins.get(pluginId.value);
 });
@@ -129,7 +129,7 @@ onBeforeUnmount(() => {
     <!-- 加载状态 -->
     <div v-if="loading" class="plugin-page__loading">
       <el-icon class="is-loading" :size="32">
-        <Loading />
+        <Loading></Loading>
       </el-icon>
       <p>插件加载中...</p>
     </div>
@@ -145,11 +145,11 @@ onBeforeUnmount(() => {
 
     <!-- 空状态 -->
     <div v-else-if="!pluginId" class="plugin-page__empty">
-      <el-empty description="请从左侧菜单选择一个工具" />
+      <el-empty description="请从左侧菜单选择一个工具"></el-empty>
     </div>
 
     <!-- iframe 容器：由 PluginLoader 动态创建 iframe 并 append 到此 div -->
-    <div ref="containerRef" class="plugin-page__iframe" />
+    <div ref="containerRef" class="plugin-page__iframe"></div>
   </div>
 </template>
 

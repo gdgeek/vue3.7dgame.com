@@ -638,7 +638,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     pendingSavePromise = new Promise<void>((resolve, reject) => {
       saveResolve = resolve;
       saveReject = reject;
-      postMessage('REQUEST', { action: 'save' });
+      postMessage("REQUEST", { action: "save" });
     });
     return pendingSavePromise;
   };
@@ -870,7 +870,10 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   // ---- Watchers ----
   watch(isDark, (newValue) => {
     loadHighlightStyle(newValue);
-    postMessage('THEME_CHANGE', { theme: newValue ? 'dark' : 'light', dark: newValue });
+    postMessage("THEME_CHANGE", {
+      theme: newValue ? "dark" : "light",
+      dark: newValue,
+    });
   });
 
   watch(
@@ -928,7 +931,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
 
   // ---- onBeforeUnmount：注销事件监听 ----
   onBeforeUnmount(() => {
-    postMessage('DESTROY');
+    postMessage("DESTROY");
     clearAutoSaveTimer();
     window.removeEventListener("message", handleMessage);
     window.removeEventListener("beforeunload", handleBeforeUnload);

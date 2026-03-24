@@ -41,11 +41,13 @@ const environment = {
     ? import.meta.env.VITE_APP_DOC_API || ""
     : "/api-doc",
   blockly:
-    (window as any).__ENV__?.BLOCKLY_URL ||
+    (window as unknown as Record<string, Record<string, string>>).__ENV__
+      ?.BLOCKLY_URL ||
     import.meta.env.VITE_APP_BLOCKLY_URL ||
     "",
   editor:
-    (window as any).__ENV__?.EDITOR_URL ||
+    (window as unknown as Record<string, Record<string, string>>).__ENV__
+      ?.EDITOR_URL ||
     import.meta.env.VITE_APP_EDITOR_URL ||
     "",
   domain_info: import.meta.env.DEV

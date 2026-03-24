@@ -189,10 +189,7 @@ export class PluginLoader {
   /**
    * Build the full iframe URL by appending lang/theme query parameters.
    */
-  private buildPluginUrl(
-    baseUrl: string,
-    options?: PluginLoadOptions
-  ): string {
+  private buildPluginUrl(baseUrl: string, options?: PluginLoadOptions): string {
     if (!options) return baseUrl;
     const separator = baseUrl.includes("?") ? "&" : "?";
     const params: string[] = [];
