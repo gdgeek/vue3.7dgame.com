@@ -144,31 +144,36 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
   // ── update path: repeated updates should still refresh editor state ─────
 
   describe("repeated update handling", () => {
-    it("second action=update call still refreshes latest code", async () => {
+    it("second EVENT update call still refreshes latest code", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
 
-      const firstUpdateData = {
-        lua: "print(1)",
-        js: "console.log(1)",
-        blocklyData: "xml",
-      };
-      const secondUpdateData = {
-        lua: "print(2)",
-        js: "console.log(2)",
-        blocklyData: "xml-2",
-      };
-
       await result.handleMessage(
         new MessageEvent("message", {
-          data: { action: "update", data: firstUpdateData },
+          data: {
+            type: "EVENT",
+            payload: {
+              event: "update",
+              lua: "print(1)",
+              js: "console.log(1)",
+              blocklyData: "xml",
+            },
+          },
         })
       );
 
       await result.handleMessage(
         new MessageEvent("message", {
-          data: { action: "update", data: secondUpdateData },
+          data: {
+            type: "EVENT",
+            payload: {
+              event: "update",
+              lua: "print(2)",
+              js: "console.log(2)",
+              blocklyData: "xml-2",
+            },
+          },
         })
       );
 
@@ -183,21 +188,32 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
   // ── Lines ~291-293: saveResolve path ────────────────────────────────────
 
   describe("saveResolve path (lines 291-293)", () => {
-    it("action=post after save() resolves the save promise", async () => {
+    it("RESPONSE save after save() resolves the save promise", async () => {
       const onPost = vi.fn().mockResolvedValue(undefined);
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions({ onPost }))
       );
 
+      // Set up a mock editor so postMessage inside save() doesn't error
+      const mockPostMessage = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPostMessage },
+      } as unknown as HTMLIFrameElement;
+
       // Call save() to set saveResolve
       const savePromise = result.save();
 
-      // Now fire action=post → handleMessage calls saveResolve()
+      // Now fire RESPONSE save → handleMessage calls saveResolve()
       await result.handleMessage(
         new MessageEvent("message", {
           data: {
-            action: "post",
-            data: { lua: "return {}", js: "return {}", data: {} },
+            type: "RESPONSE",
+            payload: {
+              action: "save",
+              lua: "return {}",
+              js: "return {}",
+              data: {},
+            },
           },
         })
       );
@@ -215,20 +231,32 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         useScriptEditorBase(makeOptions({ onPost }))
       );
 
+      // Set up a mock editor so postMessage inside save() doesn't error
+      const mockPostMessage = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPostMessage },
+      } as unknown as HTMLIFrameElement;
+
       result.save();
 
-      // First action=post → calls saveResolve(), sets it to null
+      // First RESPONSE save → calls saveResolve(), sets it to null
       await result.handleMessage(
         new MessageEvent("message", {
-          data: { action: "post", data: { lua: "x", js: "y", data: {} } },
+          data: {
+            type: "RESPONSE",
+            payload: { action: "save", lua: "x", js: "y", data: {} },
+          },
         })
       );
 
-      // Second action=post → saveResolve is null, so lines 291-293 NOT triggered again
+      // Second RESPONSE save → saveResolve is null, so lines NOT triggered again
       vi.clearAllMocks();
       await result.handleMessage(
         new MessageEvent("message", {
-          data: { action: "post", data: { lua: "x", js: "y", data: {} } },
+          data: {
+            type: "RESPONSE",
+            payload: { action: "save", lua: "x", js: "y", data: {} },
+          },
         })
       );
 
@@ -248,11 +276,17 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         useScriptEditorBase(makeOptions({ onPost }))
       );
 
+      // Set up a mock editor so postMessage inside save() doesn't error
+      const mockPostMessage = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPostMessage },
+      } as unknown as HTMLIFrameElement;
+
       await result.handleMessage(
         new MessageEvent("message", {
           data: {
-            action: "post",
-            data: { lua: "x", js: "y", data: {} },
+            type: "RESPONSE",
+            payload: { action: "save", lua: "x", js: "y", data: {} },
           },
         })
       );
@@ -273,7 +307,10 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
       await expect(
         result.handleMessage(
           new MessageEvent("message", {
-            data: { action: "post", data: { lua: "x", js: "y", data: {} } },
+            data: {
+              type: "RESPONSE",
+              payload: { action: "save", lua: "x", js: "y", data: {} },
+            },
           })
         )
       ).resolves.toBeUndefined();
@@ -383,11 +420,10 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
     });
   });
 
-  // ── Lines ~350-354: watch(userStore.userInfo) callback ───────────────────
+  // ── postMessage helper ─────────────────────────────────────────────────
 
-  describe("watch(userStore.userInfo) callback (lines 350-354)", () => {
-    it("changing userStore.userInfo triggers postMessage with user-info", async () => {
-      // Need an editor with contentWindow to capture postMessage call
+  describe("postMessage helper", () => {
+    it("postMessage sends structured message to editor contentWindow", async () => {
       const mockPostMessage = vi.fn();
       const mockEditor = {
         contentWindow: { postMessage: mockPostMessage },
@@ -397,44 +433,14 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         useScriptEditorBase(makeOptions())
       );
 
-      // Set up editor
       result.editor.value = mockEditor;
 
-      // Change userInfo deeply
-      mockUserState.userInfo = { id: 99, userData: {} };
-      await nextTick();
-      await nextTick();
-
-      // postMessage("user-info", ...) should have been called
-      expect(mockPostMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ action: "user-info" }),
-        "*"
-      );
-
-      unmount();
-    });
-
-    it("userInfo change sends correct user id and role", async () => {
-      const mockPostMessage = vi.fn();
-      const mockEditor = {
-        contentWindow: { postMessage: mockPostMessage },
-      } as unknown as HTMLIFrameElement;
-
-      mockUserState.getRole.mockReturnValue("admin");
-
-      const { result, unmount } = withSetup(() =>
-        useScriptEditorBase(makeOptions())
-      );
-
-      result.editor.value = mockEditor;
-
-      mockUserState.userInfo = { id: 123, userData: {} };
-      await nextTick();
-      await nextTick();
+      result.postMessage("THEME_CHANGE", { theme: "dark", dark: true });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ id: 123, role: "admin" }),
+          type: "THEME_CHANGE",
+          payload: expect.objectContaining({ theme: "dark", dark: true }),
         }),
         "*"
       );
@@ -442,28 +448,27 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
       unmount();
     });
 
-    it("userInfo set to null → postMessage sends id=null", async () => {
-      const mockPostMessage = vi.fn();
-      const mockEditor = {
-        contentWindow: { postMessage: mockPostMessage },
-      } as unknown as HTMLIFrameElement;
-
+    it("postMessage without editor shows error message", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
 
-      result.editor.value = mockEditor;
+      // editor.value is null by default
+      result.postMessage("THEME_CHANGE", { theme: "dark" });
 
-      mockUserState.userInfo = null;
-      await nextTick();
-      await nextTick();
+      expect(mockMessage3.error).toHaveBeenCalled();
 
-      expect(mockPostMessage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ id: null }),
-        }),
-        "*"
+      unmount();
+    });
+
+    it("postMessage returns undefined when editor is not set", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
       );
+
+      const id = result.postMessage("THEME_CHANGE", { theme: "dark" });
+
+      expect(id).toBeUndefined();
 
       unmount();
     });
@@ -494,23 +499,32 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         useScriptEditorBase(makeOptions({ onPost }))
       );
 
+      // Set up a mock editor so postMessage inside save() doesn't error
+      const mockPostMessage = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPostMessage },
+      } as unknown as HTMLIFrameElement;
+
       // Set unsaved changes
       result.hasUnsavedChanges.value = true;
 
       const guardCallback = mockOnBeforeRouteLeave3.mock.calls[0]?.[0];
       const next = vi.fn();
 
-      // We need to resolve save() by triggering action=post
       // Run the guard and simultaneously resolve the save
       const guardPromise = guardCallback({}, {}, next);
 
       // Allow the guard to reach the save() call
       await nextTick();
+      await nextTick();
 
-      // Resolve save() by triggering action=post (saveResolve is set by save())
+      // Resolve save() by triggering RESPONSE save
       await result.handleMessage(
         new MessageEvent("message", {
-          data: { action: "post", data: { lua: "x", js: "y", data: {} } },
+          data: {
+            type: "RESPONSE",
+            payload: { action: "save", lua: "x", js: "y", data: {} },
+          },
         })
       );
 
@@ -529,6 +543,12 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         useScriptEditorBase(makeOptions({ onPost }))
       );
 
+      // Set up a mock editor so postMessage inside save() doesn't error
+      const mockPostMessage = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPostMessage },
+      } as unknown as HTMLIFrameElement;
+
       result.hasUnsavedChanges.value = true;
 
       const guardCallback = mockOnBeforeRouteLeave3.mock.calls[0]?.[0];
@@ -537,10 +557,14 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
       // Start guard, then resolve save()
       const guardPromise = guardCallback({}, {}, next);
       await nextTick();
+      await nextTick();
 
       await result.handleMessage(
         new MessageEvent("message", {
-          data: { action: "post", data: { lua: "x", js: "y", data: {} } },
+          data: {
+            type: "RESPONSE",
+            payload: { action: "save", lua: "x", js: "y", data: {} },
+          },
         })
       );
 

@@ -345,7 +345,10 @@ describe("useScriptEditorBase", () => {
       result.postMessage("test-action", { key: "value" });
 
       expect(mockContentWindow.postMessage).toHaveBeenCalledWith(
-        { from: "meta", action: "test-action", data: { key: "value" } },
+        expect.objectContaining({
+          type: "test-action",
+          payload: { key: "value" },
+        }),
         "*"
       );
       unmount();
@@ -390,7 +393,7 @@ describe("useScriptEditorBase", () => {
       } as MockIframe as HTMLIFrameElement;
 
       await result.handleMessage({
-        data: { action: "ready" },
+        data: { type: "PLUGIN_READY" },
       } as MockMessageEvent as MessageEvent);
 
       expect(onReady).toHaveBeenCalledOnce();
@@ -398,7 +401,7 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
 
-    it("action=ready：发送 user-info 消息给 iframe", async () => {
+    it("PLUGIN_READY：不再自动发送 user-info（由调用方处理）", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
@@ -408,26 +411,37 @@ describe("useScriptEditorBase", () => {
       } as MockIframe as HTMLIFrameElement;
 
       await result.handleMessage({
-        data: { action: "ready" },
+        data: { type: "PLUGIN_READY" },
       } as MockMessageEvent as MessageEvent);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        expect.objectContaining({ action: "user-info" }),
-        "*"
-      );
+      // postMessage is NOT called automatically on PLUGIN_READY
+      expect(mockPost).not.toHaveBeenCalled();
       unmount();
     });
 
-    it("action=post（合法数据）：调用 onPost", async () => {
+    it("RESPONSE save（合法数据）：调用 onPost", async () => {
       const onPost = vi.fn().mockResolvedValue(undefined);
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions({ onPost }))
       );
 
+      // Set up editor so save() can send postMessage
+      result.editor.value = {
+        contentWindow: { postMessage: vi.fn() },
+      } as MockIframe as HTMLIFrameElement;
+
+      // Trigger save() first to set up saveResolve
+      result.save();
+
       await result.handleMessage({
         data: {
-          action: "post",
-          data: { lua: "local x=1", js: "var x=1;", data: {} },
+          type: "RESPONSE",
+          payload: {
+            action: "save",
+            lua: "local x=1",
+            js: "var x=1;",
+            data: {},
+          },
         },
       } as MockMessageEvent as MessageEvent);
 
@@ -438,43 +452,74 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
 
-    it("action=post（lua 不是字符串）：显示 error1 并不调用 onPost", async () => {
+    it("RESPONSE save（lua 不是字符串）：显示 error1 并不调用 onPost", async () => {
       const onPost = vi.fn();
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions({ onPost }))
       );
 
+      // Set up editor so save() can send postMessage
+      result.editor.value = {
+        contentWindow: { postMessage: vi.fn() },
+      } as MockIframe as HTMLIFrameElement;
+
+      // Trigger save() first — catch the rejection to avoid unhandled promise
+      const savePromise = result.save().catch(() => {
+        /* expected rejection */
+      });
+
       await result.handleMessage({
-        data: { action: "post", data: { lua: 123, js: "ok" } },
+        data: {
+          type: "RESPONSE",
+          payload: { action: "save", lua: 123, js: "ok" },
+        },
       } as MockMessageEvent as MessageEvent);
+
+      await savePromise;
 
       expect(mockMessage.error).toHaveBeenCalledWith("i18n.error1");
       expect(onPost).not.toHaveBeenCalled();
       unmount();
     });
 
-    it("action=post:no-change：显示 info 消息", async () => {
+    it("RESPONSE save noChange：显示 info 消息", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
 
+      // Set up editor so save() can send postMessage
+      result.editor.value = {
+        contentWindow: { postMessage: vi.fn() },
+      } as MockIframe as HTMLIFrameElement;
+
+      // Trigger save() first
+      result.save();
+
       await result.handleMessage({
-        data: { action: "post:no-change" },
+        data: {
+          type: "RESPONSE",
+          payload: { action: "save", noChange: true },
+        },
       } as MockMessageEvent as MessageEvent);
 
       expect(mockMessage.info).toHaveBeenCalledWith("i18n.info");
       unmount();
     });
 
-    it("action=update：更新 LuaCode 和 JavaScriptCode", async () => {
+    it("EVENT update：更新 LuaCode 和 JavaScriptCode", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
 
       await result.handleMessage({
         data: {
-          action: "update",
-          data: { lua: "x = 1", js: "var x=1;", blocklyData: {} },
+          type: "EVENT",
+          payload: {
+            event: "update",
+            lua: "x = 1",
+            js: "var x=1;",
+            blocklyData: {},
+          },
         },
       } as MockMessageEvent as MessageEvent);
 
@@ -485,20 +530,23 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
 
-    it("action=update（js 不是字符串）：忽略更新", async () => {
+    it("EVENT update（js 不是字符串）：忽略更新", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
 
       await result.handleMessage({
-        data: { action: "update", data: { lua: "ok", js: 999 } },
+        data: {
+          type: "EVENT",
+          payload: { event: "update", lua: "ok", js: 999 },
+        },
       } as MockMessageEvent as MessageEvent);
 
       expect(result.LuaCode.value).toBe("");
       unmount();
     });
 
-    it("无 action 的消息：直接忽略", async () => {
+    it("无 type 的消息：直接忽略", async () => {
       const onPost = vi.fn();
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions({ onPost }))
@@ -682,7 +730,10 @@ describe("useScriptEditorBase", () => {
 
       expect(result.hasUnsavedChanges.value).toBe(true);
       expect(mockPostMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ action: "save" }),
+        expect.objectContaining({
+          type: "REQUEST",
+          payload: { action: "save" },
+        }),
         "*"
       );
       unmount();
