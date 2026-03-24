@@ -34,6 +34,26 @@
       "order": 2,
       "allowedOrigin": "https://user-manager.plugins.xrugc.com",
       "version": "1.0.0"
+    },
+    {
+      "id": "apk-rebuilder",
+      "name": "APK Rebuilder",
+      "nameI18n": {
+        "zh-CN": "APK 打包工具",
+        "zh-TW": "APK 打包工具",
+        "en-US": "APK Rebuilder",
+        "ja-JP": "APK リビルダー",
+        "th-TH": "เครื่องมือ APK Rebuilder"
+      },
+      "description": "APK 打包与重建工具",
+      "url": "https://apk-rebuilder.plugins.xrugc.com/",
+      "icon": "Download",
+      "group": "tools",
+      "enabled": true,
+      "order": 3,
+      "allowedOrigin": "https://apk-rebuilder.plugins.xrugc.com",
+      "version": "1.0.0",
+      "sandbox": "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
     }
   ]
 }

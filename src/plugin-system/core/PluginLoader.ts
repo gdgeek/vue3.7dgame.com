@@ -1,4 +1,5 @@
 import { createLogger } from "@/utils/logger";
+import env from "@/environment";
 
 import type { PluginManifest, PluginState } from "@/plugin-system/types";
 
@@ -50,7 +51,8 @@ export class PluginLoader {
     pluginId: string,
     manifest: PluginManifest,
     container: HTMLElement,
-    options?: PluginLoadOptions
+    options?: PluginLoadOptions,
+    onIframeCreated?: (iframe: HTMLIFrameElement, origin: string) => void
   ): Promise<LoadedPlugin> {
     if (this.loaded.has(pluginId)) {
       logger.warn(`Plugin "${pluginId}" is already loaded, skipping`);
@@ -75,21 +77,27 @@ export class PluginLoader {
 
     container.appendChild(iframe);
 
-    // Wait for iframe to finish loading with timeout
-    await this.waitForLoad(iframe, pluginId);
-
     const record: LoadedPlugin = {
       pluginId,
       iframe,
       origin: manifest.allowedOrigin,
-      state: "active",
+      state: "loading",
       loadedAt: Date.now(),
     };
 
     this.loaded.set(pluginId, record);
-    logger.info(`Plugin "${pluginId}" loaded successfully`);
+    onIframeCreated?.(iframe, manifest.allowedOrigin);
 
-    return record;
+    try {
+      // Wait for iframe to finish loading with timeout
+      await this.waitForLoad(iframe, pluginId);
+      record.state = "active";
+      logger.info(`Plugin "${pluginId}" loaded successfully`);
+      return record;
+    } catch (err) {
+      this.unload(pluginId);
+      throw err;
+    }
   }
 
   /** 卸载插件：销毁 iframe，释放资源 */
@@ -152,11 +160,13 @@ export class PluginLoader {
     token?: string
   ): void {
     const jwt = token ?? this.getToken();
+    const hostApiBase = this.resolveHostApiBase();
     const message = {
       type: "INIT" as const,
       id: `init-${manifest.id}-${Date.now()}`,
       payload: {
         token: jwt,
+        hostApiBase,
         config: JSON.parse(JSON.stringify(manifest.extraConfig ?? {})),
       },
     };
@@ -184,6 +194,15 @@ export class PluginLoader {
   /** Get the loaded iframe element for a plugin */
   public getIframe(pluginId: string): HTMLIFrameElement | undefined {
     return this.loaded.get(pluginId)?.iframe;
+  }
+
+  /** Resolve main host API base as absolute URL for plugin iframe usage */
+  private resolveHostApiBase(): string {
+    const base = env.api || "";
+    if (!base) return window.location.origin;
+    if (base.startsWith("http://") || base.startsWith("https://")) return base;
+    if (base.startsWith("/")) return `${window.location.origin}${base}`;
+    return `${window.location.origin}/${base}`;
   }
 
   /**
