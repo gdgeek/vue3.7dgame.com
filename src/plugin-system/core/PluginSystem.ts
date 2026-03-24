@@ -357,6 +357,28 @@ export class PluginSystem {
     });
   }
 
+  /**
+   * 广播宿主设置变更（主题/语言等）。
+   * 供外部（如 PluginLayout）在主题或语言切换时调用。
+   */
+  broadcastSettingsUpdate(payload: {
+    theme?: string;
+    dark?: boolean;
+    language?: string;
+  }): void {
+    this.messageBus.broadcast({
+      type: "EVENT",
+      id: `settings-update-${Date.now()}`,
+      payload: {
+        type: "SETTINGS_UPDATE",
+        theme: payload.theme,
+        isDark: payload.dark,
+        language: payload.language,
+        lang: payload.language,
+      },
+    });
+  }
+
   /** 获取 PluginLoader 实例（供视图层获取 iframe 引用） */
   getLoader(): PluginLoader {
     return this.loader;

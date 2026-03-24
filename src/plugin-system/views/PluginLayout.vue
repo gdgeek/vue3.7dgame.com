@@ -76,8 +76,28 @@ watch(
 /** 主题变更时广播 THEME_CHANGE 到所有活跃插件 */
 watch(currentThemeName, (newTheme) => {
   const DARK_THEMES = ["deep-space", "cyber-tech"];
-  pluginSystem.broadcastThemeChange(newTheme, DARK_THEMES.includes(newTheme));
+  const isDark = DARK_THEMES.includes(newTheme);
+  pluginSystem.broadcastThemeChange(newTheme, isDark);
+  pluginSystem.broadcastSettingsUpdate({
+    theme: newTheme,
+    dark: isDark,
+    language: appStore.language,
+  });
 });
+
+/** 语言变更时广播到所有活跃插件 */
+watch(
+  () => appStore.language,
+  (newLang) => {
+    const DARK_THEMES = ["deep-space", "cyber-tech"];
+    const theme = currentThemeName.value;
+    pluginSystem.broadcastSettingsUpdate({
+      theme,
+      dark: DARK_THEMES.includes(theme),
+      language: newLang,
+    });
+  }
+);
 
 /** 等待下一 tick 确保 containerRef 已挂载 */
 function nextTickContainer(): Promise<void> {
