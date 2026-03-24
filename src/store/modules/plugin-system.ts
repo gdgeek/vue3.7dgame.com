@@ -156,6 +156,14 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       this.loading = true;
       this.error = null;
       try {
+        const existing = this.plugins.get(pluginId);
+        if (existing?.state === "loading") {
+          return;
+        }
+        if (existing?.state === "active") {
+          // Prevent invalid state transition active -> loading
+          await this.deactivatePlugin(pluginId);
+        }
         await pluginSystem.loadPlugin(pluginId, container, options);
         const info = this.plugins.get(pluginId);
         if (info) {

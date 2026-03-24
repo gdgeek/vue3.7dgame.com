@@ -150,19 +150,29 @@ export class PluginSystem {
     this.transitionState(pluginId, "loading");
 
     try {
-      const loaded = await this.loader.load(pluginId, manifest, container, options);
+      await this.loader.load(
+        pluginId,
+        manifest,
+        container,
+        options,
+        (iframe, origin) => {
+          // Register early to catch PLUGIN_READY that may fire before load resolves
+          this.messageBus.registerPlugin(pluginId, iframe, origin);
+        }
+      );
 
-      // Register in MessageBus for communication
-      this.messageBus.registerPlugin(pluginId, loaded.iframe, loaded.origin);
-
-      // Transition: loading → active
-      this.transitionState(pluginId, "active");
+      // Transition: loading → active (if PLUGIN_READY didn't already do it)
+      const info = this.plugins.get(pluginId);
+      if (info?.state === "loading") {
+        this.transitionState(pluginId, "active");
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
 
       // Transition: loading → error
       this.transitionState(pluginId, "error", errorMessage);
 
+      this.messageBus.unregisterPlugin(pluginId);
       logger.error(`Failed to load plugin "${pluginId}":`, err);
     }
   }
