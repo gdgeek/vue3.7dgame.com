@@ -75,7 +75,7 @@ describe("PluginLoader", () => {
 
       const iframe = container.querySelector("iframe");
       expect(iframe?.getAttribute("sandbox")).toBe(
-        "allow-scripts allow-same-origin"
+        "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
       );
     });
 
@@ -117,7 +117,7 @@ describe("PluginLoader", () => {
       expect(result.loadedAt).toBeGreaterThanOrEqual(before);
     });
 
-    it("should send INIT postMessage after load", async () => {
+    it("should not auto-send INIT postMessage after load (INIT is sent by PluginSystem on PLUGIN_READY)", async () => {
       const manifest = createManifest();
 
       const loadPromise = loader.load(manifest.id, manifest, container);
@@ -133,12 +133,8 @@ describe("PluginLoader", () => {
       iframe.dispatchEvent(new Event("load"));
       await loadPromise;
 
-      expect(postMessageSpy).toHaveBeenCalledTimes(1);
-      const [message, origin] = postMessageSpy.mock.calls[0];
-      expect(message.type).toBe("INIT");
-      expect(message.payload).toHaveProperty("token");
-      expect(message.payload).toHaveProperty("config");
-      expect(origin).toBe(manifest.allowedOrigin);
+      // load() no longer sends INIT — that's handled by PluginSystem after PLUGIN_READY
+      expect(postMessageSpy).not.toHaveBeenCalled();
     });
 
     it("should return existing record if plugin is already loaded", async () => {

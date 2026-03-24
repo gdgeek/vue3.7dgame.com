@@ -307,7 +307,8 @@ describe("PluginSystem", () => {
       expect(loader.load).toHaveBeenCalledWith(
         "plugin-a",
         expect.objectContaining({ id: "plugin-a" }),
-        container
+        container,
+        undefined
       );
     });
 
