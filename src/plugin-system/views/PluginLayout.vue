@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, onBeforeUnmount } from "vue";
+import { ref, watch, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
@@ -53,9 +53,13 @@ watch(
   { immediate: true }
 );
 
-/** iframe 加载完成后发送 INIT 消息 */
+/** iframe 加载完成 — 仅更新 loading 状态，不发送 INIT */
 function handleIframeLoad() {
   loading.value = false;
+}
+
+/** 向插件 iframe 发送 INIT 消息（携带 JWT token 和 extraConfig） */
+function sendInitToPlugin() {
   const manifest = pluginManifest.value;
   if (!manifest || !iframeRef.value?.contentWindow) return;
 
@@ -78,6 +82,15 @@ function handleIframeLoad() {
   );
 }
 
+/** 监听插件 postMessage，收到 PLUGIN_READY 后发送 INIT */
+function handlePluginMessage(event: MessageEvent) {
+  if (event.source !== iframeRef.value?.contentWindow) return;
+  const { type } = event.data || {};
+  if (type === "PLUGIN_READY") {
+    sendInitToPlugin();
+  }
+}
+
 function handleIframeError() {
   loading.value = false;
   error.value = "插件页面加载失败";
@@ -91,7 +104,12 @@ function handleRetry() {
   }
 }
 
+onMounted(() => {
+  window.addEventListener("message", handlePluginMessage);
+});
+
 onBeforeUnmount(() => {
+  window.removeEventListener("message", handlePluginMessage);
   if (pluginId.value) {
     store.deactivatePlugin(pluginId.value);
   }

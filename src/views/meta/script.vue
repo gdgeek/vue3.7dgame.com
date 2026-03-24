@@ -202,6 +202,7 @@ import {
   useEditorVersionToolbar,
   type EditorToolbarStatus,
 } from "@/composables/useEditorVersionToolbar";
+import { useUserStore } from "@/store/modules/user";
 
 // ---------- Meta 专有状态 ----------
 const loading = ref(false);
@@ -262,13 +263,19 @@ const initEditor = (overrideData?: unknown) => {
     const data =
       overrideData ?? unsavedBlocklyData.value ?? JSON.parse(blocklyData);
     test.value = getResource(meta.value);
-    postMessage("init", {
-      language: ["lua", "js"],
-      style: ["base", "meta"],
-      data,
-      parameters: {
-        index: meta.value.id,
-        resource: getResource(meta.value),
+    postMessage("INIT", {
+      token: null,
+      config: {
+        style: ["base", "meta"],
+        parameters: {
+          index: meta.value.id,
+          resource: getResource(meta.value),
+        },
+        data,
+        userInfo: {
+          id: userStore.userInfo?.id || null,
+          role: userStore.getRole(),
+        },
       },
     });
   } catch (error) {
@@ -344,7 +351,6 @@ const {
   decompressBlockly,
   isReady,
 } = useScriptEditorBase({
-  from: "script.meta.web",
   luaLocalVar: "meta",
   i18nKeys: {
     error1: "meta.script.error1",
@@ -392,6 +398,7 @@ onBeforeUnmount(() => {
 });
 
 const { t } = useI18n();
+const userStore = useUserStore();
 
 type SceneOption = {
   id: number;

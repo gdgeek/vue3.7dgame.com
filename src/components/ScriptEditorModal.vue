@@ -240,6 +240,7 @@ import {
   useScriptEditorBase,
   type EditorPostPayload,
 } from "@/composables/useScriptEditorBase";
+import { useUserStore } from "@/store/modules/user";
 import {
   buildScriptRuntime,
   type ScenePlayerLike,
@@ -283,6 +284,7 @@ const metasJavaScriptCode = ref("");
 let map = new Map<string, Array<{ uuid: string; title: string }>>();
 
 const { t } = useI18n();
+const userStore = useUserStore();
 
 const sceneEditorLink = computed(() => {
   const editorLabel = t("route.project.sceneEditor");
@@ -324,13 +326,19 @@ const initEditor = () => {
     let blocklyData = verse.value.verseCode?.blockly || "{}";
     blocklyData = decompressBlockly(blocklyData);
     const data = unsavedBlocklyData.value ?? JSON.parse(blocklyData);
-    postMessage("init", {
-      language: ["lua", "js"],
-      style: ["base", "verse"],
-      data,
-      parameters: {
-        index: verse.value!.id,
-        resource: resource.value,
+    postMessage("INIT", {
+      token: null,
+      config: {
+        style: ["base", "verse"],
+        parameters: {
+          index: verse.value!.id,
+          resource: resource.value,
+        },
+        data,
+        userInfo: {
+          id: userStore.userInfo?.id || null,
+          role: userStore.getRole(),
+        },
       },
     });
   } catch (error) {
@@ -413,7 +421,6 @@ const {
   decompressBlockly,
   isReady,
 } = useScriptEditorBase({
-  from: "script.verse.web",
   luaLocalVar: "verse",
   i18nKeys: {
     error1: "verse.view.script.error1",

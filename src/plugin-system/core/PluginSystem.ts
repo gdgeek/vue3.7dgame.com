@@ -304,7 +304,7 @@ export class PluginSystem {
     );
   }
 
-  /** Handle PLUGIN_READY message — transition loading → active if applicable */
+  /** Handle PLUGIN_READY message — transition loading → active, then send INIT */
   private handlePluginReady(pluginId: string): void {
     const info = this.plugins.get(pluginId);
     if (!info) {
@@ -317,6 +317,20 @@ export class PluginSystem {
     if (info.state === "loading") {
       this.transitionState(pluginId, "active");
     }
+
+    // Send INIT message with token and config
+    const manifest = this.registry.get(pluginId);
+    if (!manifest) return;
+
+    const token = this.authService.getAccessToken() || "";
+    this.messageBus.sendToPlugin(pluginId, {
+      type: "INIT",
+      id: `init-${pluginId}-${Date.now()}`,
+      payload: {
+        token,
+        config: manifest.extraConfig ?? {},
+      },
+    });
   }
 }
 

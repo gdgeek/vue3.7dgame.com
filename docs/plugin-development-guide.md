@@ -22,7 +22,7 @@
 - 插件是完全独立的 Web 应用（可以用任何框架：Vue、React、原生 JS 等）
 - 主框架通过 `<iframe sandbox="allow-scripts allow-same-origin">` 加载插件
 - 所有通信通过 `window.postMessage` / `window.addEventListener('message')` 完成
-- 主框架在插件加载后发送 INIT 消息，携带用户 Token 和配置
+- 插件加载后先发送 PLUGIN_READY，主框架收到后发送 INIT 消息，携带用户 Token 和配置
 
 ## 2. 消息协议
 
@@ -60,9 +60,9 @@ interface PluginMessage {
 ```
 1. 主框架创建 iframe，src = 插件 URL
 2. iframe 加载完成（onload）
-3. 主框架发送 INIT 消息 → 插件
-4. 插件收到 INIT，保存 token，完成初始化
-5. 插件发送 PLUGIN_READY → 主框架
+3. 插件发送 PLUGIN_READY → 主框架
+4. 主框架收到 PLUGIN_READY，发送 INIT 消息 → 插件
+5. 插件收到 INIT，保存 token，完成初始化
 6. 运行时：双向 REQUEST/RESPONSE/EVENT 通信
 7. Token 刷新时：主框架发送 TOKEN_UPDATE → 插件
 8. 卸载前：主框架发送 DESTROY → 插件
@@ -132,6 +132,12 @@ interface PluginMessage {
       }
     })
 
+    // 插件加载后立即通知主框架已准备好，主框架收到后会发送 INIT
+    sendToParent({
+      type: 'PLUGIN_READY',
+      id: `ready-${Date.now()}`
+    })
+
     /**
      * 处理初始化
      */
@@ -143,12 +149,6 @@ interface PluginMessage {
 
       // 在这里执行插件的初始化逻辑
       document.getElementById('app').textContent = '插件已就绪'
-
-      // 通知主框架插件已准备好
-      sendToParent({
-        type: 'PLUGIN_READY',
-        id: `ready-${Date.now()}`
-      })
     }
 
     /**
@@ -320,12 +320,12 @@ const ready = ref(false)
 const pluginConfig = ref<Record<string, unknown>>({})
 
 onMounted(() => {
+  // 插件挂载后立即通知主框架已准备好，主框架收到后会发送 INIT
+  bridge.sendReady()
+
   bridge.onInit(({ token, config }) => {
     pluginConfig.value = config
     ready.value = true
-
-    // 通知主框架已就绪
-    bridge.sendReady()
   })
 
   bridge.onTokenUpdate((newToken) => {
@@ -377,11 +377,6 @@ export function usePluginBridge() {
           tokenRef.current = payload?.token ?? null
           setConfig(payload?.config ?? {})
           setReady(true)
-          // 通知主框架已就绪
-          window.parent.postMessage(
-            { type: 'PLUGIN_READY', id: `ready-${Date.now()}` },
-            '*'
-          )
           break
         case 'TOKEN_UPDATE':
           tokenRef.current = payload?.token ?? null
@@ -393,6 +388,13 @@ export function usePluginBridge() {
     }
 
     window.addEventListener('message', handleMessage)
+
+    // 插件挂载后立即通知主框架已准备好，主框架收到后会发送 INIT
+    window.parent.postMessage(
+      { type: 'PLUGIN_READY', id: `ready-${Date.now()}` },
+      '*'
+    )
+
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
@@ -594,12 +596,6 @@ window.addEventListener('message', (event) => {
             count = Number(payload.config.initialCount)
             updateDisplay()
           }
-
-          // 通知主框架已就绪
-          window.parent.postMessage({
-            type: 'PLUGIN_READY',
-            id: 'ready-' + Date.now()
-          }, '*')
           break
 
         case 'TOKEN_UPDATE':
@@ -613,6 +609,12 @@ window.addEventListener('message', (event) => {
           break
       }
     })
+
+    // 插件加载后立即通知主框架已准备好，主框架收到后会发送 INIT
+    window.parent.postMessage({
+      type: 'PLUGIN_READY',
+      id: 'ready-' + Date.now()
+    }, '*')
 
     function increment() {
       count++
@@ -726,7 +728,7 @@ window.addEventListener('message', (event) => {
 
 - [ ] 插件部署在 HTTPS 地址
 - [ ] `allowedOrigin` 与部署地址一致
-- [ ] 插件正确处理 INIT 消息并发送 PLUGIN_READY
+- [ ] 插件在挂载时发送 PLUGIN_READY，并正确处理 INIT 消息
 - [ ] 插件正确处理 TOKEN_UPDATE 消息
 - [ ] 插件正确处理 DESTROY 消息（清理资源）
 - [ ] Token 不写入 localStorage/cookie，不输出到日志

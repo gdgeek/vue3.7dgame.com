@@ -227,6 +227,7 @@ import {
   useScriptEditorBase,
   type EditorPostPayload,
 } from "@/composables/useScriptEditorBase";
+import { useUserStore } from "@/store/modules/user";
 import pako from "pako";
 import { useI18n } from "vue-i18n";
 
@@ -254,6 +255,7 @@ const visible = computed({
 });
 
 const { t } = useI18n();
+const userStore = useUserStore();
 
 const dialogTitle = computed(() => {
   if (props.title) return props.title;
@@ -308,13 +310,19 @@ const initEditor = () => {
   try {
     blocklyData = decompressBlockly(blocklyData);
     const data = unsavedBlocklyData.value ?? JSON.parse(blocklyData);
-    postMessage("init", {
-      language: ["lua", "js"],
-      style: ["base", "meta"],
-      data,
-      parameters: {
-        index: meta.value.id,
-        resource: getResource(meta.value),
+    postMessage("INIT", {
+      token: null,
+      config: {
+        style: ["base", "meta"],
+        parameters: {
+          index: meta.value.id,
+          resource: getResource(meta.value),
+        },
+        data,
+        userInfo: {
+          id: userStore.userInfo?.id || null,
+          role: userStore.getRole(),
+        },
       },
     });
   } catch (error) {
@@ -374,7 +382,6 @@ const {
   decompressBlockly,
   isReady,
 } = useScriptEditorBase({
-  from: "script.meta.web",
   luaLocalVar: "meta",
   i18nKeys: {
     error1: "meta.script.error1",

@@ -10,7 +10,7 @@ import pako from "pako";
 import jsBeautify from "js-beautify";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useAppStore } from "@/store/modules/app";
-import { useUserStore } from "@/store/modules/user";
+// useUserStore removed — callers now pass userInfo via initEditor
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { ElMessageBox } from "element-plus";
 import { Message } from "@/components/Dialog";
@@ -65,8 +65,6 @@ export type ScriptEditorI18nKeys = {
 };
 
 export type UseScriptEditorBaseOptions = {
-  /** postMessage 中的 from 字段，区分 meta / verse */
-  from: string;
   /** Lua 前缀变量名，"meta" 或 "verse" */
   luaLocalVar: string;
   /** i18n 键映射 */
@@ -106,7 +104,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const { t } = useI18n();
   const settingsStore = useSettingsStore();
   const appStore = useAppStore();
-  const userStore = useUserStore();
 
   // ---- 状态 ----
   const activeName = ref<string>("blockly");
@@ -148,6 +145,8 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   let lastSavedSignature = "";
   let pendingSavePromise: Promise<void> | null = null;
   let pendingRestorePayload: EditorPostPayload | null = null;
+
+  const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
   const canSaveCurrentScript = () =>
     typeof options.canSave === "function" ? options.canSave() : true;
@@ -588,18 +587,21 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   };
 
   // ---- 向 Blockly iframe 发送消息 ----
-  const postMessage = (action: string, data: unknown = {}) => {
+  const postMessage = (type: string, payload?: unknown) => {
     if (editor.value && editor.value.contentWindow) {
+      const id = genId();
       editor.value.contentWindow.postMessage(
         {
-          from: options.from,
-          action,
-          data: safeClone(data),
+          type,
+          id,
+          payload: payload !== undefined ? safeClone(payload) : undefined,
         },
         "*"
       );
+      return id;
     } else {
       Message.error(t(options.i18nKeys.error3));
+      return undefined;
     }
   };
 
@@ -636,7 +638,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     pendingSavePromise = new Promise<void>((resolve, reject) => {
       saveResolve = resolve;
       saveReject = reject;
-      postMessage("save", { language: ["lua", "js"], data: {} });
+      postMessage('REQUEST', { action: 'save' });
     });
     return pendingSavePromise;
   };
@@ -699,112 +701,133 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     }
   };
 
-  // ---- iframe 消息处理 ----
+  // ---- iframe 消息处理（标准协议） ----
   const handleMessage = async (e: MessageEvent) => {
     try {
-      const payload = e.data as EditorEventPayload;
-      if (!payload || !payload.action) return;
-      const params = payload;
+      const msg = e.data;
+      if (!msg || typeof msg.type !== "string") return;
 
-      if (params.action === "ready") {
+      const payload = (msg.payload ?? {}) as Record<string, unknown>;
+
+      if (msg.type === "PLUGIN_READY") {
         ready = true;
         options.onReady();
-        postMessage("user-info", {
-          id: userStore.userInfo?.id || null,
-          role: userStore.getRole(),
-        });
-      } else if (params.action === "post") {
-        if (!isEditorPostPayload(params.data)) {
-          Message.error(t(options.i18nKeys.error1));
-          isSaving.value = false;
-          if (saveReject) {
-            saveReject(new Error("invalid save payload"));
-            saveReject = null;
+      } else if (msg.type === "RESPONSE") {
+        if (payload.action === "save" && !payload.noChange) {
+          // --- 有变更的保存响应 ---
+          if (!isEditorPostPayload(payload)) {
+            Message.error(t(options.i18nKeys.error1));
+            isSaving.value = false;
+            if (saveReject) {
+              saveReject(new Error("invalid save payload"));
+              saveReject = null;
+            }
+            pendingSavePromise = null;
+            return;
           }
-          pendingSavePromise = null;
-          return;
-        }
-        await options.onPost(params.data, { trigger: currentSaveTrigger });
-        pendingRestorePayload = null;
-        const savedAt = addDraftVersion(params.data, currentSaveTrigger);
-        markCurrentPayloadAsSaved({
-          lua: params.data.lua,
-          js: params.data.js,
-          blocklyData: params.data.data,
-        });
-        lastSaveTrigger.value = currentSaveTrigger;
-        lastSavedAt.value = savedAt || new Date().toISOString();
-        isSaving.value = false;
-        if (currentSaveTrigger === "auto") {
-          Message.success(t("common.scriptDraft.autoSavedNotice"));
-        }
-        if (saveResolve) {
-          saveResolve();
-          saveResolve = null;
-        }
-        saveReject = null;
-        pendingSavePromise = null;
-      } else if (params.action === "post:no-change") {
-        if (pendingRestorePayload && hasUnsavedChanges.value) {
-          await options.onPost(pendingRestorePayload, {
-            trigger: currentSaveTrigger,
-          });
-          const savedAt = addDraftVersion(
-            pendingRestorePayload,
-            currentSaveTrigger
-          );
+          const postData: EditorPostPayload = {
+            data: payload.data,
+            lua: payload.lua as string,
+            js: payload.js as string,
+          };
+          await options.onPost(postData, { trigger: currentSaveTrigger });
+          pendingRestorePayload = null;
+          const savedAt = addDraftVersion(postData, currentSaveTrigger);
           markCurrentPayloadAsSaved({
-            lua: pendingRestorePayload.lua,
-            js: pendingRestorePayload.js,
-            blocklyData: pendingRestorePayload.data,
+            lua: postData.lua,
+            js: postData.js,
+            blocklyData: postData.data,
           });
           lastSaveTrigger.value = currentSaveTrigger;
           lastSavedAt.value = savedAt || new Date().toISOString();
+          isSaving.value = false;
           if (currentSaveTrigger === "auto") {
             Message.success(t("common.scriptDraft.autoSavedNotice"));
           }
-          pendingRestorePayload = null;
-          isSaving.value = false;
           if (saveResolve) {
             saveResolve();
             saveResolve = null;
           }
           saveReject = null;
           pendingSavePromise = null;
-          return;
-        }
-        isSaving.value = false;
-        lastSaveTrigger.value = currentSaveTrigger;
-        lastSavedAt.value = new Date().toISOString();
-        if (!currentSaveOptions.suppressNoChangeInfo) {
-          Message.info(t(options.i18nKeys.info));
-        }
-        if (saveResolve) {
-          saveResolve();
-          saveResolve = null;
-        }
-        saveReject = null;
-        pendingSavePromise = null;
-      } else if (params.action === "update") {
-        if (!isEditorUpdatePayload(params.data)) return;
-        if (pendingRestorePayload) {
-          const nextSignature = buildSnapshotSignature({
-            lua: params.data.lua,
-            js: params.data.js,
-            blocklyData: params.data.blocklyData,
-          });
-          const restoreSignature = buildSnapshotSignature({
-            lua: pendingRestorePayload.lua,
-            js: pendingRestorePayload.js,
-            blocklyData: pendingRestorePayload.data,
-          });
-          if (nextSignature !== restoreSignature) {
+        } else if (payload.noChange === true) {
+          // --- 无变更的保存响应 ---
+          if (pendingRestorePayload && hasUnsavedChanges.value) {
+            await options.onPost(pendingRestorePayload, {
+              trigger: currentSaveTrigger,
+            });
+            const savedAt = addDraftVersion(
+              pendingRestorePayload,
+              currentSaveTrigger
+            );
+            markCurrentPayloadAsSaved({
+              lua: pendingRestorePayload.lua,
+              js: pendingRestorePayload.js,
+              blocklyData: pendingRestorePayload.data,
+            });
+            lastSaveTrigger.value = currentSaveTrigger;
+            lastSavedAt.value = savedAt || new Date().toISOString();
+            if (currentSaveTrigger === "auto") {
+              Message.success(t("common.scriptDraft.autoSavedNotice"));
+            }
             pendingRestorePayload = null;
+            isSaving.value = false;
+            if (saveResolve) {
+              saveResolve();
+              saveResolve = null;
+            }
+            saveReject = null;
+            pendingSavePromise = null;
+            return;
           }
+          isSaving.value = false;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = new Date().toISOString();
+          if (!currentSaveOptions.suppressNoChangeInfo) {
+            Message.info(t(options.i18nKeys.info));
+          }
+          if (saveResolve) {
+            saveResolve();
+            saveResolve = null;
+          }
+          saveReject = null;
+          pendingSavePromise = null;
         }
-        applyEditorCodes(params.data);
-        if (!hasInitializedSavedSnapshot) {
-          markCurrentPayloadAsSaved(params.data);
+      } else if (msg.type === "EVENT") {
+        if (payload.event === "update") {
+          // --- 工作区实时更新 ---
+          if (!isEditorUpdatePayload(payload)) return;
+          const updateData: EditorUpdatePayload = {
+            lua: payload.lua as string,
+            js: payload.js as string,
+            blocklyData: payload.blocklyData,
+          };
+          if (pendingRestorePayload) {
+            const nextSignature = buildSnapshotSignature({
+              lua: updateData.lua,
+              js: updateData.js,
+              blocklyData: updateData.blocklyData,
+            });
+            const restoreSignature = buildSnapshotSignature({
+              lua: pendingRestorePayload.lua,
+              js: pendingRestorePayload.js,
+              blocklyData: pendingRestorePayload.data,
+            });
+            if (nextSignature !== restoreSignature) {
+              pendingRestorePayload = null;
+            }
+          }
+          applyEditorCodes(updateData);
+          if (!hasInitializedSavedSnapshot) {
+            markCurrentPayloadAsSaved(updateData);
+          }
+        } else if (payload.event === "error") {
+          // --- 错误通知 ---
+          const errorMessage =
+            typeof payload.message === "string"
+              ? payload.message
+              : "Unknown editor error";
+          Message.error(errorMessage);
         }
       }
     } catch (_e) {
@@ -847,6 +870,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   // ---- Watchers ----
   watch(isDark, (newValue) => {
     loadHighlightStyle(newValue);
+    postMessage('THEME_CHANGE', { theme: newValue ? 'dark' : 'light', dark: newValue });
   });
 
   watch(
@@ -871,17 +895,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     persistDraftSettings();
     restartAutoSaveTimer();
   });
-
-  watch(
-    () => userStore.userInfo,
-    () => {
-      postMessage("user-info", {
-        id: userStore.userInfo?.id || null,
-        role: userStore.getRole(),
-      });
-    },
-    { deep: true }
-  );
 
   // ---- 离开路由守卫（未保存变更提示） ----
   onBeforeRouteLeave(async (to, from, next) => {
@@ -915,6 +928,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
 
   // ---- onBeforeUnmount：注销事件监听 ----
   onBeforeUnmount(() => {
+    postMessage('DESTROY');
     clearAutoSaveTimer();
     window.removeEventListener("message", handleMessage);
     window.removeEventListener("beforeunload", handleBeforeUnload);

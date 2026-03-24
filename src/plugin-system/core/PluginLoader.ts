@@ -62,9 +62,6 @@ export class PluginLoader {
     // Wait for iframe to finish loading with timeout
     await this.waitForLoad(iframe, pluginId);
 
-    // Send INIT message with token and config
-    this.sendInitMessage(iframe, manifest);
-
     const record: LoadedPlugin = {
       pluginId,
       iframe,
@@ -130,8 +127,10 @@ export class PluginLoader {
 
   /**
    * Send the INIT postMessage to the plugin iframe with token and config.
+   * Public so that external callers (e.g. PluginLayout, PluginSystem) can
+   * trigger INIT after receiving PLUGIN_READY from the plugin.
    */
-  private sendInitMessage(
+  public sendInitMessage(
     iframe: HTMLIFrameElement,
     manifest: PluginManifest
   ): void {
@@ -153,7 +152,7 @@ export class PluginLoader {
    * Extracted as a method so it can be overridden or extended
    * when AuthService integration is wired up.
    */
-  private getToken(): string {
+  public getToken(): string {
     // Placeholder — PluginSystem will coordinate with AuthService
     // to provide the real token. For now return empty string.
     return "";
