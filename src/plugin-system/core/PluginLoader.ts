@@ -5,7 +5,8 @@ import type { PluginManifest, PluginState } from "@/plugin-system/types";
 const logger = createLogger("PluginLoader");
 
 /** Default sandbox attributes for plugin iframes */
-const DEFAULT_SANDBOX = "allow-scripts allow-same-origin";
+const DEFAULT_SANDBOX =
+  "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox";
 
 /** Timeout in milliseconds for iframe load */
 const LOAD_TIMEOUT_MS = 30_000;
@@ -17,6 +18,14 @@ export interface LoadedPlugin {
   origin: string;
   state: PluginState;
   loadedAt: number;
+}
+
+/** Options passed when loading a plugin to customise the iframe URL */
+export interface PluginLoadOptions {
+  /** Current UI language code, e.g. "zh-CN" */
+  lang?: string;
+  /** Current theme name, e.g. "edu-friendly" */
+  theme?: string;
 }
 
 /**
@@ -34,23 +43,30 @@ export class PluginLoader {
    * @param pluginId  插件唯一标识
    * @param manifest  插件清单
    * @param container 挂载 iframe 的 DOM 容器
+   * @param options   可选的 lang/theme 参数，会附加到 iframe URL
    * @returns 已加载的插件记录
    */
   async load(
     pluginId: string,
     manifest: PluginManifest,
-    container: HTMLElement
+    container: HTMLElement,
+    options?: PluginLoadOptions
   ): Promise<LoadedPlugin> {
     if (this.loaded.has(pluginId)) {
       logger.warn(`Plugin "${pluginId}" is already loaded, skipping`);
       return this.loaded.get(pluginId)!;
     }
 
-    logger.info(`Loading plugin "${pluginId}" from ${manifest.url}`);
+    // Build iframe URL with optional lang/theme query params
+    const iframeUrl = this.buildPluginUrl(manifest.url, options);
+
+    logger.info(`Loading plugin "${pluginId}" from ${iframeUrl}`);
 
     const iframe = document.createElement("iframe");
     iframe.setAttribute("sandbox", manifest.sandbox ?? DEFAULT_SANDBOX);
-    iframe.src = manifest.url;
+    iframe.setAttribute("allow", "clipboard-write; clipboard-read");
+    iframe.title = manifest.name;
+    iframe.src = iframeUrl;
 
     // Style: fill container
     iframe.style.width = "100%";
@@ -127,19 +143,21 @@ export class PluginLoader {
 
   /**
    * Send the INIT postMessage to the plugin iframe with token and config.
-   * Public so that external callers (e.g. PluginLayout, PluginSystem) can
+   * Public so that external callers (e.g. PluginSystem) can
    * trigger INIT after receiving PLUGIN_READY from the plugin.
    */
   public sendInitMessage(
     iframe: HTMLIFrameElement,
-    manifest: PluginManifest
+    manifest: PluginManifest,
+    token?: string
   ): void {
+    const jwt = token ?? this.getToken();
     const message = {
       type: "INIT" as const,
       id: `init-${manifest.id}-${Date.now()}`,
       payload: {
-        token: this.getToken(),
-        config: manifest.extraConfig ?? {},
+        token: jwt,
+        config: JSON.parse(JSON.stringify(manifest.extraConfig ?? {})),
       },
     };
 
@@ -148,14 +166,42 @@ export class PluginLoader {
   }
 
   /**
-   * Retrieve the current access token.
-   * Extracted as a method so it can be overridden or extended
-   * when AuthService integration is wired up.
+   * Retrieve the current access token from the Token store.
    */
   public getToken(): string {
-    // Placeholder — PluginSystem will coordinate with AuthService
-    // to provide the real token. For now return empty string.
-    return "";
+    try {
+      // Dynamic import to avoid circular dependency at module level
+      const tokenStore =
+        require("@/store/modules/token").default ??
+        require("@/store/modules/token");
+      const tokenInfo = tokenStore.getToken?.();
+      return tokenInfo?.accessToken || tokenInfo?.token || "";
+    } catch {
+      return "";
+    }
+  }
+
+  /** Get the loaded iframe element for a plugin */
+  public getIframe(pluginId: string): HTMLIFrameElement | undefined {
+    return this.loaded.get(pluginId)?.iframe;
+  }
+
+  /**
+   * Build the full iframe URL by appending lang/theme query parameters.
+   */
+  private buildPluginUrl(
+    baseUrl: string,
+    options?: PluginLoadOptions
+  ): string {
+    if (!options) return baseUrl;
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    const params: string[] = [];
+    if (options.lang) params.push(`lang=${encodeURIComponent(options.lang)}`);
+    if (options.theme)
+      params.push(`theme=${encodeURIComponent(options.theme)}`);
+    return params.length > 0
+      ? `${baseUrl}${separator}${params.join("&")}`
+      : baseUrl;
   }
 }
 

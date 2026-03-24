@@ -1,6 +1,7 @@
 import { createLogger } from "@/utils/logger";
 import { PluginRegistry } from "@/plugin-system/core/PluginRegistry";
 import { PluginLoader } from "@/plugin-system/core/PluginLoader";
+import type { PluginLoadOptions } from "@/plugin-system/core/PluginLoader";
 import { MessageBus } from "@/plugin-system/core/MessageBus";
 import { AuthService } from "@/plugin-system/services/AuthService";
 import { ConfigService } from "@/plugin-system/services/ConfigService";
@@ -9,6 +10,7 @@ import type {
   PluginState,
   PluginInfo,
   PluginManifest,
+  PluginMessage,
 } from "@/plugin-system/types";
 
 const logger = createLogger("PluginSystem");
@@ -127,8 +129,13 @@ export class PluginSystem {
    *
    * @param pluginId  插件唯一标识
    * @param container 挂载 iframe 的 DOM 容器
+   * @param options   可选的 lang/theme 参数
    */
-  async loadPlugin(pluginId: string, container: HTMLElement): Promise<void> {
+  async loadPlugin(
+    pluginId: string,
+    container: HTMLElement,
+    options?: PluginLoadOptions
+  ): Promise<void> {
     const pluginInfo = this.plugins.get(pluginId);
     if (!pluginInfo) {
       throw new Error(`Plugin "${pluginId}" is not registered`);
@@ -143,7 +150,7 @@ export class PluginSystem {
     this.transitionState(pluginId, "loading");
 
     try {
-      const loaded = await this.loader.load(pluginId, manifest, container);
+      const loaded = await this.loader.load(pluginId, manifest, container, options);
 
       // Register in MessageBus for communication
       this.messageBus.registerPlugin(pluginId, loaded.iframe, loaded.origin);
@@ -322,15 +329,28 @@ export class PluginSystem {
     const manifest = this.registry.get(pluginId);
     if (!manifest) return;
 
+    const iframe = this.loader.getIframe(pluginId);
+    if (!iframe) return;
+
     const token = this.authService.getAccessToken() || "";
-    this.messageBus.sendToPlugin(pluginId, {
-      type: "INIT",
-      id: `init-${pluginId}-${Date.now()}`,
-      payload: {
-        token,
-        config: manifest.extraConfig ?? {},
-      },
+    this.loader.sendInitMessage(iframe, manifest, token);
+  }
+
+  /**
+   * 广播主题变更到所有活跃插件。
+   * 供外部（如 PluginLayout）在主题切换时调用。
+   */
+  broadcastThemeChange(theme: string, dark: boolean): void {
+    this.messageBus.broadcast({
+      type: "THEME_CHANGE",
+      id: `theme-change-${Date.now()}`,
+      payload: { theme, dark },
     });
+  }
+
+  /** 获取 PluginLoader 实例（供视图层获取 iframe 引用） */
+  getLoader(): PluginLoader {
+    return this.loader;
   }
 }
 

@@ -35,6 +35,7 @@ export type PluginMessageType =
   | "INIT"
   | "PLUGIN_READY"
   | "TOKEN_UPDATE"
+  | "THEME_CHANGE"
   | "REQUEST"
   | "RESPONSE"
   | "EVENT"

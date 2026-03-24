@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { pluginSystem } from "@/plugin-system";
+import type { PluginLoadOptions } from "@/plugin-system/core/PluginLoader";
 import { store } from "@/store";
 import type { PluginInfo, PluginsConfig, MenuGroup } from "@/plugin-system";
 import Token from "@/store/modules/token";
@@ -147,11 +148,15 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       }
     },
 
-    async activatePlugin(pluginId: string, container: HTMLElement) {
+    async activatePlugin(
+      pluginId: string,
+      container: HTMLElement,
+      options?: PluginLoadOptions
+    ) {
       this.loading = true;
       this.error = null;
       try {
-        await pluginSystem.loadPlugin(pluginId, container);
+        await pluginSystem.loadPlugin(pluginId, container, options);
         const info = this.plugins.get(pluginId);
         if (info) {
           info.state = pluginSystem.getPluginState(pluginId);

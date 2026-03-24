@@ -4,14 +4,16 @@ import { useRoute } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useTheme } from "@/composables/useTheme";
+import { pluginSystem } from "@/plugin-system";
 import { Loading } from "@element-plus/icons-vue";
-import Token from "@/store/modules/token";
 
 const route = useRoute();
 const store = usePluginSystemStore();
 const appStore = useAppStoreHook();
 const { currentThemeName } = useTheme();
-const iframeRef = ref<HTMLIFrameElement>();
+
+/** iframe 挂载容器 */
+const containerRef = ref<HTMLDivElement>();
 
 const pluginId = computed(() => route.params.pluginId as string | undefined);
 
@@ -20,30 +22,48 @@ const pluginInfo = computed(() => {
   return store.plugins.get(pluginId.value);
 });
 
-// Find the plugin manifest to get the URL and origin
-const pluginManifest = computed(() => {
-  if (!pluginId.value || !store.config) return undefined;
-  return store.config.plugins.find((p) => p.id === pluginId.value);
-});
-
-const pluginUrl = computed(() => {
-  const baseUrl = pluginManifest.value?.url ?? "";
-  if (!baseUrl) return "";
-  const separator = baseUrl.includes("?") ? "&" : "?";
-  return `${baseUrl}${separator}lang=${appStore.language}&theme=${currentThemeName.value}`;
-});
-
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+/**
+ * 当 pluginId 变化时：卸载旧插件 → 初始化系统 → 激活新插件。
+ * iframe 创建、PLUGIN_READY/INIT 握手、Token 注入全部由 PluginSystem core 层处理。
+ */
 watch(
   pluginId,
-  async (newId) => {
+  async (newId, oldId) => {
     error.value = null;
+
+    // 卸载旧插件
+    if (oldId) {
+      await store.deactivatePlugin(oldId);
+    }
+
     if (!newId) return;
+
     loading.value = true;
     try {
+      // 确保插件系统已初始化（幂等）
       await store.init();
+
+      // 等待 DOM 容器就绪
+      await nextTickContainer();
+
+      if (!containerRef.value) {
+        throw new Error("Plugin container element not available");
+      }
+
+      // 委托给 core 层：创建 iframe + 注册 MessageBus + 状态机
+      await store.activatePlugin(newId, containerRef.value, {
+        lang: appStore.language,
+        theme: currentThemeName.value,
+      });
+
+      // 检查激活后的状态
+      const info = store.plugins.get(newId);
+      if (info?.state === "error") {
+        error.value = info.lastError || "插件加载失败";
+      }
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : "加载插件失败";
     } finally {
@@ -53,63 +73,51 @@ watch(
   { immediate: true }
 );
 
-/** iframe 加载完成 — 仅更新 loading 状态，不发送 INIT */
-function handleIframeLoad() {
-  loading.value = false;
-}
+/** 主题变更时广播 THEME_CHANGE 到所有活跃插件 */
+watch(currentThemeName, (newTheme) => {
+  const DARK_THEMES = ["deep-space", "cyber-tech"];
+  pluginSystem.broadcastThemeChange(newTheme, DARK_THEMES.includes(newTheme));
+});
 
-/** 向插件 iframe 发送 INIT 消息（携带 JWT token 和 extraConfig） */
-function sendInitToPlugin() {
-  const manifest = pluginManifest.value;
-  if (!manifest || !iframeRef.value?.contentWindow) return;
-
-  // 优先使用 accessToken（JWT），fallback 到 token 字段
-  const tokenInfo = Token.getToken();
-  const jwt = tokenInfo?.accessToken || tokenInfo?.token || "";
-
-  const initMessage = {
-    type: "INIT" as const,
-    id: `init-${manifest.id}-${Date.now()}`,
-    payload: {
-      token: jwt,
-      config: JSON.parse(JSON.stringify(manifest.extraConfig ?? {})),
-    },
-  };
-
-  iframeRef.value.contentWindow.postMessage(
-    initMessage,
-    manifest.allowedOrigin
-  );
-}
-
-/** 监听插件 postMessage，收到 PLUGIN_READY 后发送 INIT */
-function handlePluginMessage(event: MessageEvent) {
-  if (event.source !== iframeRef.value?.contentWindow) return;
-  const { type } = event.data || {};
-  if (type === "PLUGIN_READY") {
-    sendInitToPlugin();
-  }
-}
-
-function handleIframeError() {
-  loading.value = false;
-  error.value = "插件页面加载失败";
+/** 等待下一 tick 确保 containerRef 已挂载 */
+function nextTickContainer(): Promise<void> {
+  return new Promise((resolve) => {
+    if (containerRef.value) {
+      resolve();
+    } else {
+      requestAnimationFrame(() => resolve());
+    }
+  });
 }
 
 function handleRetry() {
-  if (iframeRef.value && pluginUrl.value) {
+  if (!pluginId.value) return;
+  // 强制重新激活：先卸载再加载
+  const id = pluginId.value;
+  store.deactivatePlugin(id).then(async () => {
     loading.value = true;
     error.value = null;
-    iframeRef.value.src = pluginUrl.value;
-  }
+    try {
+      await nextTickContainer();
+      if (containerRef.value) {
+        await store.activatePlugin(id, containerRef.value, {
+          lang: appStore.language,
+          theme: currentThemeName.value,
+        });
+        const info = store.plugins.get(id);
+        if (info?.state === "error") {
+          error.value = info.lastError || "插件加载失败";
+        }
+      }
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : "重试失败";
+    } finally {
+      loading.value = false;
+    }
+  });
 }
 
-onMounted(() => {
-  window.addEventListener("message", handlePluginMessage);
-});
-
 onBeforeUnmount(() => {
-  window.removeEventListener("message", handlePluginMessage);
   if (pluginId.value) {
     store.deactivatePlugin(pluginId.value);
   }
@@ -121,7 +129,7 @@ onBeforeUnmount(() => {
     <!-- 加载状态 -->
     <div v-if="loading" class="plugin-page__loading">
       <el-icon class="is-loading" :size="32">
-        <Loading></Loading>
+        <Loading />
       </el-icon>
       <p>插件加载中...</p>
     </div>
@@ -137,21 +145,11 @@ onBeforeUnmount(() => {
 
     <!-- 空状态 -->
     <div v-else-if="!pluginId" class="plugin-page__empty">
-      <el-empty description="请从左侧菜单选择一个工具"></el-empty>
+      <el-empty description="请从左侧菜单选择一个工具" />
     </div>
 
-    <!-- iframe 载入插件 -->
-    <iframe
-      v-if="pluginUrl"
-      ref="iframeRef"
-      :src="pluginUrl"
-      class="plugin-page__iframe"
-      :title="pluginInfo?.name ?? '插件'"
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-      allow="clipboard-write; clipboard-read"
-      @load="handleIframeLoad"
-      @error="handleIframeError"
-    ></iframe>
+    <!-- iframe 容器：由 PluginLoader 动态创建 iframe 并 append 到此 div -->
+    <div ref="containerRef" class="plugin-page__iframe" />
   </div>
 </template>
 
@@ -168,9 +166,6 @@ onBeforeUnmount(() => {
   display: block;
   width: 100%;
   height: 100%;
-  background: var(--bg-card, #fff);
-  border: none;
-  outline: none;
 }
 
 .plugin-page__loading,
