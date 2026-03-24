@@ -11,6 +11,8 @@
     <meta name="description" content="Loading..." />
     <meta name="keywords" content="vue-element-admin,vue3-element-admin" />
     <title>Loading...</title>
+    <!-- 运行时环境变量注入（Docker 部署时由 entrypoint 生成，开发时不存在则忽略） -->
+    <script src="/__env.js"></script>
   </head>
   <script
     type="text/javascript"

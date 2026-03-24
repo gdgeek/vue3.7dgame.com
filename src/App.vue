@@ -17,6 +17,7 @@
       </transition>
     </router-view>
   </el-config-provider>
+  <span class="global-version">v{{ appVersion }}</span>
 </template>
 <script setup>
 import { UpdateAbility } from "@/utils/ability";
@@ -33,6 +34,9 @@ import { useDomainStore } from "@/store/modules/domain";
 import { UpdateRoutes } from "@/router";
 import Token from "@/store/modules/token";
 import { disposeKTX2Loader } from "@/lib/three/loaders";
+
+/** @type {string} */
+const appVersion = __APP_VERSION__;
 
 const userStore = useUserStore();
 const domainStore = useDomainStore();
@@ -118,5 +122,16 @@ canvas {
   z-index: 9999;
 
   /* 确保 canvas 在最上层 */
+}
+
+.global-version {
+  position: fixed;
+  right: 12px;
+  bottom: 8px;
+  font-size: 11px;
+  color: #ccc;
+  pointer-events: none;
+  z-index: 9999;
+  user-select: none;
 }
 </style>

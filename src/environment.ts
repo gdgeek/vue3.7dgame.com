@@ -40,8 +40,14 @@ const environment = {
   doc: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOC_API || ""
     : "/api-doc",
-  blockly: import.meta.env.VITE_APP_BLOCKLY_URL || "",
-  editor: import.meta.env.VITE_APP_EDITOR_URL || "",
+  blockly:
+    (window as any).__ENV__?.BLOCKLY_URL ||
+    import.meta.env.VITE_APP_BLOCKLY_URL ||
+    "",
+  editor:
+    (window as any).__ENV__?.EDITOR_URL ||
+    import.meta.env.VITE_APP_EDITOR_URL ||
+    "",
   domain_info: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
     : "/api-domain",

@@ -33,6 +33,18 @@ const __APP_INFO__ = {
   buildTimestamp: Date.now(),
 };
 
+// 生成北京时间版本号，格式：2026.03.25-0200
+function buildVersion(): string {
+  const now = new Date();
+  const beijing = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  const y = beijing.getUTCFullYear();
+  const M = String(beijing.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(beijing.getUTCDate()).padStart(2, "0");
+  const h = String(beijing.getUTCHours()).padStart(2, "0");
+  const m = String(beijing.getUTCMinutes()).padStart(2, "0");
+  return `${y}.${M}.${d}-${h}${m}`;
+}
+
 const pathSrc = resolve(__dirname, "src");
 //  https://cn.vitejs.dev/config
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
@@ -233,6 +245,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     },
     define: {
       __APP_INFO__: JSON.stringify(__APP_INFO__),
+      __APP_VERSION__: JSON.stringify(buildVersion()),
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
     },
   };

@@ -198,5 +198,16 @@ inject_locations "# __DOMAIN_LOCATIONS__" "$DOMAIN_LOCATIONS"
 
 echo "[entrypoint] Nginx config generated at $OUTPUT"
 
-# --- 5. 启动 nginx ---
+# --- 5. 生成运行时环境变量注入文件 ---
+ENV_JS="/usr/share/nginx/html/__env.js"
+echo "[entrypoint] Generating runtime env injection at $ENV_JS"
+cat > "$ENV_JS" <<EOF
+window.__ENV__ = {
+  BLOCKLY_URL: "${APP_BLOCKLY_URL:-}",
+  EDITOR_URL: "${APP_EDITOR_URL:-}"
+};
+EOF
+echo "[entrypoint] Runtime env: BLOCKLY_URL=${APP_BLOCKLY_URL:-<not set>}, EDITOR_URL=${APP_EDITOR_URL:-<not set>}"
+
+# --- 6. 启动 nginx ---
 exec nginx -g 'daemon off;'

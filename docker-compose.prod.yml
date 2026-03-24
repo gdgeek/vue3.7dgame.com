@@ -15,6 +15,9 @@ services:
       - APP_DOMAIN_2_URL=https://domain.tmrpp.com
       # 文档 API
       - APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
+      # Blockly / Editor iframe URL（运行时注入）
+      - APP_BLOCKLY_URL=https://blockly.bujiaban.com
+      - APP_EDITOR_URL=https://editor.bujiaban.com
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
