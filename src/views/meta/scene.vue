@@ -96,11 +96,6 @@ type MetaResourceRef = {
   type: RestorableResourceType;
 };
 
-type UnsavedChangesResultPayload = {
-  requestId: string;
-  changed: boolean;
-};
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -120,13 +115,6 @@ const isAudioBarItem = (
   value: unknown
 ): value is { type: "audio"; context: unknown } =>
   isRecord(value) && value.type === "audio";
-
-const isUnsavedChangesResultPayload = (
-  value: unknown
-): value is UnsavedChangesResultPayload =>
-  isRecord(value) &&
-  typeof value.requestId === "string" &&
-  typeof value.changed === "boolean";
 
 const DEFAULT_AUTO_SAVE_INTERVAL_SECONDS = 300;
 const DRAFT_SETTINGS_VERSION = 2;
@@ -238,6 +226,8 @@ import { postFile } from "@/api/v1/files";
 import { AbilityEdit } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
+import { useSettingsStore } from "@/store/modules/settings";
+import { ThemeEnum } from "@/enums/ThemeEnum";
 import { until } from "@vueuse/core";
 import {
   useEditorVersionToolbar,
@@ -247,6 +237,8 @@ import type {
   ScriptDraftVersion,
   ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
+import { useIframeMessaging } from "@/composables/useIframeMessaging";
+import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
 
 import qs from "querystringify";
 
@@ -262,12 +254,9 @@ const editor = ref<HTMLIFrameElement | null>();
 let init = false;
 const ability = useAbility();
 const userStore = useUserStore();
-let unsavedCheckSeed = 0;
-const pendingUnsavedChecks = new Map<string, (changed: boolean) => void>();
-let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
-const hasUnsavedChangesBeforeUnload = ref(false);
+const settingsStore = useSettingsStore();
+
 let unsavedCheckPollingTimer: number | null = null;
-let isPollingUnsavedChanges = false;
 const editorFrameKey = ref(0);
 const isRestoringDraft = ref(false);
 const metaDetail = ref<unknown>(null);
@@ -285,7 +274,6 @@ const pendingRestorePayload = ref<{
 } | null>(null);
 let currentSaveTrigger: ScriptSaveTrigger = "manual";
 let autoSaveTimer: number | null = null;
-let pendingSceneSavePromise: Promise<boolean> | null = null;
 
 const toolbarOwner = "meta-scene-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
@@ -739,7 +727,7 @@ const restartAutoSaveTimer = () => {
     if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
       return;
     }
-    if (isSavingVersion.value || pendingSceneSavePromise) return;
+    if (isSavingVersion.value) return;
     if (!metaDetail.value || !saveable(metaDetail.value as metaInfo)) return;
     try {
       await requestSceneSave("auto");
@@ -887,19 +875,7 @@ watch(
   }
 );
 
-// 监听用户信息变化
-watch(
-  () => userStore.userInfo,
-  () => {
-    // 用户信息变化时，向编辑器发送最新用户信息
-    postMessage("user-info", {
-      id: userStore.userInfo?.id || null,
-      //roles: userStore.userInfo?.roles || [],
-      role: userStore.getRole(),
-    });
-  },
-  { deep: true }
-);
+
 
 const selectedPhototype = async (
   phototype: PhototypeType,
@@ -914,7 +890,7 @@ const selectedPhototype = async (
   }
   phototypeDialogRef.value?.open(schemaRoot, (data: unknown) => {
     // const d = { ...data, id: phototype.id };
-    postMessage("load-phototype", {
+    sendRequest("load-phototype", {
       data: {
         type: phototype.type,
         context: JSON.stringify(data),
@@ -936,9 +912,9 @@ const selected = async (info: CardInfo, replace: boolean = false) => {
     return;
   }
   if (replace) {
-    postMessage("replace-resource", info.context);
+    sendRequest("replace-resource", info.context as Record<string, unknown>);
   } else {
-    postMessage("load-resource", info.context);
+    sendRequest("load-resource", info.context as Record<string, unknown>);
   }
 };
 
@@ -960,28 +936,11 @@ const saveable = (data: unknown) => {
   return Boolean(data.editable);
 };
 
-// 向编辑器发送消息
-const postMessage = (action: string, data: unknown = {}) => {
-  if (editor.value && editor.value.contentWindow) {
-    const rawData = toRaw(data);
-    let clonedData: unknown;
-    try {
-      clonedData = structuredClone(rawData);
-    } catch {
-      clonedData = JSON.parse(JSON.stringify(rawData));
-    }
-    editor.value.contentWindow.postMessage(
-      {
-        from: "scene.meta.web",
-        action,
-        data: clonedData,
-      },
-      "*"
-    );
-  } else {
-    ElMessage.error(t("meta.scene.error"));
-  }
-};
+// 消息发送基础设施
+const { postStandardMessage, sendRequest, pendingRequests } = useIframeMessaging(
+  editor,
+  { onError: () => ElMessage.error(t("meta.scene.error")) }
+);
 
 const confirmSaveCurrentEntity = () =>
   ElMessageBox.confirm(t("common.entitySaveConfirm.message"), "", {
@@ -996,110 +955,22 @@ const confirmSaveCurrentEntity = () =>
     cancelButtonText: t("common.entitySaveConfirm.cancel"),
   });
 
-const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
-  return new Promise((resolve) => {
-    if (!editor.value || !editor.value.contentWindow) {
-      resolve(false);
-      return;
-    }
-
-    const requestId = `meta_${Date.now()}_${++unsavedCheckSeed}`;
-    const timeout = window.setTimeout(() => {
-      pendingUnsavedChecks.delete(requestId);
-      resolve(false);
-    }, 1200);
-
-    pendingUnsavedChecks.set(requestId, (changed) => {
-      window.clearTimeout(timeout);
-      pendingUnsavedChecks.delete(requestId);
-      resolve(changed);
-    });
-
-    postMessage("check-unsaved-changes", { requestId });
-  });
-};
-
-const syncUnsavedChangesForBeforeUnload = async () => {
-  if (isPollingUnsavedChanges) return;
-  if (!editor.value || !editor.value.contentWindow) return;
-
-  isPollingUnsavedChanges = true;
-  try {
-    const changed = await queryUnsavedChangesBeforeLeave();
-    hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-      ? true
-      : changed;
-  } finally {
-    isPollingUnsavedChanges = false;
-  }
-};
-
-const waitForLeaveSaveResult = (): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const timeout = window.setTimeout(() => {
-      if (pendingLeaveSaveResolver) {
-        pendingLeaveSaveResolver = null;
-      }
-      resolve(false);
-    }, 3000);
-
-    pendingLeaveSaveResolver = (result: boolean) => {
-      window.clearTimeout(timeout);
-      pendingLeaveSaveResolver = null;
-      resolve(result);
-    };
-  });
-};
-
-const resolveLeaveSave = (result: boolean) => {
-  if (!pendingLeaveSaveResolver) return;
-  const resolver = pendingLeaveSaveResolver;
-  pendingLeaveSaveResolver = null;
-  resolver(result);
-};
-
-const requestSceneSave = (trigger: ScriptSaveTrigger) => {
-  if (pendingSceneSavePromise) return pendingSceneSavePromise;
-  currentSaveTrigger = trigger;
-  isSavingVersion.value = true;
-  postMessage("save-before-leave", {});
-  pendingSceneSavePromise = waitForLeaveSaveResult().finally(() => {
-    pendingSceneSavePromise = null;
-    isSavingVersion.value = false;
-  });
-  return pendingSceneSavePromise;
-};
-
-const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
-  if (pendingRestorePayload.value) {
-    hasUnsavedChangesBeforeUnload.value = true;
-  }
-  const changed = await queryUnsavedChangesBeforeLeave();
-  hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-    ? true
-    : changed;
-
-  if (!changed) {
-    return true;
-  }
-
-  try {
-    await confirmSaveCurrentEntity();
-  } catch (action) {
-    if (action === "cancel") {
-      return true;
-    }
-    return false;
-  }
-
-  return requestSceneSave("manual");
-};
-
-const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-  if (!hasUnsavedChangesBeforeUnload.value) return;
-  event.preventDefault();
-  event.returnValue = "";
-};
+const {
+  hasUnsavedChangesBeforeUnload,
+  syncUnsavedChangesForBeforeUnload,
+  resolveLeaveSave,
+  requestSceneSave,
+  resolveUnsavedBeforeLeave,
+  handleBeforeUnload,
+  cleanupPendingResolver,
+} = useSceneSaveGuard({
+  sendRequest,
+  pendingRequests,
+  pendingRestorePayload,
+  isSavingVersion,
+  confirmDialog: confirmSaveCurrentEntity,
+  onBeforeSave: (trigger) => { currentSaveTrigger = trigger; },
+});
 
 // 获取可用的资源类型
 const getAvailableResourceTypes = () => {
@@ -1276,218 +1147,15 @@ const handleUploadCover = async (data: unknown) => {
   }
 };
 
-// 处理编辑器发来的消息
+// 处理编辑器发来的消息（标准协议：msg.type 路由）
 const handleMessage = async (e: MessageEvent) => {
-  if (!e.data || !e.data.action) {
-    return;
-  }
+  const msg = e.data;
+  if (!msg || typeof msg.type !== "string") return;
 
-  const action = e.data.action;
-  const data = e.data.data;
+  const payload = (msg.payload ?? {}) as Record<string, unknown>;
 
-  switch (action) {
-    case "save-meta":
-      {
-        currentSaveTrigger = "manual";
-        isSavingVersion.value = true;
-        const result = await saveMeta(
-          data as {
-            meta: MetaPayload;
-            events: unknown;
-          },
-          currentSaveTrigger
-        );
-        if (result) {
-          const payload = data as { meta: MetaPayload; events: unknown };
-          const savedAt = addSceneDraftVersion(payload, currentSaveTrigger);
-          hasUnsavedChangesBeforeUnload.value = false;
-          pendingRestorePayload.value = null;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-        }
-        isSavingVersion.value = false;
-        resolveLeaveSave(result);
-      }
-      break;
-
-    case "save-meta-none":
-      if (pendingRestorePayload.value) {
-        const restoredPayload = pendingRestorePayload.value;
-        const result = await saveMeta(
-          {
-            meta: restoredPayload.meta as MetaPayload,
-            events: restoredPayload.events,
-          },
-          currentSaveTrigger
-        );
-        if (result) {
-          const savedAt = addSceneDraftVersion(
-            {
-              meta: restoredPayload.meta,
-              events: restoredPayload.events,
-            },
-            currentSaveTrigger
-          );
-          pendingRestorePayload.value = null;
-          hasUnsavedChangesBeforeUnload.value = false;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-        }
-        isSavingVersion.value = false;
-        resolveLeaveSave(result);
-        break;
-      }
-      lastSaveTrigger.value = currentSaveTrigger;
-      lastSavedAt.value = new Date().toISOString();
-      ElMessage.warning(t("meta.scene.noChanges"));
-      hasUnsavedChangesBeforeUnload.value = false;
-      isSavingVersion.value = false;
-      resolveLeaveSave(true);
-      break;
-
-    case "save-meta-before-leave":
-      {
-        isSavingVersion.value = true;
-        const result = await saveMeta(
-          data as {
-            meta: MetaPayload;
-            events: unknown;
-          },
-          currentSaveTrigger
-        );
-        if (result) {
-          const payload = data as { meta: MetaPayload; events: unknown };
-          const savedAt = addSceneDraftVersion(payload, currentSaveTrigger);
-          hasUnsavedChangesBeforeUnload.value = false;
-          pendingRestorePayload.value = null;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-          if (currentSaveTrigger === "auto") {
-            Message.success(t("common.scriptDraft.autoSavedNotice"));
-          }
-        }
-        isSavingVersion.value = false;
-        resolveLeaveSave(result);
-      }
-      break;
-
-    case "save-meta-before-leave-none":
-      if (pendingRestorePayload.value) {
-        const restoredPayload = pendingRestorePayload.value;
-        const result = await saveMeta(
-          {
-            meta: restoredPayload.meta as MetaPayload,
-            events: restoredPayload.events,
-          },
-          currentSaveTrigger
-        );
-        if (result) {
-          const savedAt = addSceneDraftVersion(
-            {
-              meta: restoredPayload.meta,
-              events: restoredPayload.events,
-            },
-            currentSaveTrigger
-          );
-          pendingRestorePayload.value = null;
-          hasUnsavedChangesBeforeUnload.value = false;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-          if (currentSaveTrigger === "auto") {
-            Message.success(t("common.scriptDraft.autoSavedNotice"));
-          }
-        }
-        isSavingVersion.value = false;
-        resolveLeaveSave(result);
-        break;
-      }
-      lastSaveTrigger.value = currentSaveTrigger;
-      lastSavedAt.value = new Date().toISOString();
-      hasUnsavedChangesBeforeUnload.value = false;
-      isSavingVersion.value = false;
-      resolveLeaveSave(true);
-      break;
-
-    case "unsaved-changes-result":
-      if (isUnsavedChangesResultPayload(data)) {
-        hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-          ? true
-          : Boolean(data.changed);
-        const resolver = pendingUnsavedChecks.get(data.requestId);
-        if (resolver) {
-          resolver(pendingRestorePayload.value ? true : Boolean(data.changed));
-        }
-      }
-      break;
-
-    case "load-resource":
-      loadResource(data);
-      break;
-
-    case "replace-resource":
-      replaceResource(data);
-      break;
-
-    case "goto":
-      if (isRecord(data) && data.target === "blockly.js") {
-        const scriptRoute = router
-          .getRoutes()
-          .find((route) => route.path === "/meta/script");
-
-        if (scriptRoute && scriptRoute.meta.title) {
-          const metaTitle = translateRouteTitle(scriptRoute.meta.title);
-
-          router.push({
-            path: "/meta/script",
-            query: {
-              id: id.value,
-              title: metaTitle + title.value,
-            },
-          });
-        }
-      } else if (isRecord(data) && data.target === "verse.scene") {
-        const rawSceneId = data.sceneId;
-        let sceneId =
-          typeof rawSceneId === "number" ? rawSceneId : Number(rawSceneId);
-        const sceneName =
-          typeof data.sceneName === "string" && data.sceneName.trim()
-            ? data.sceneName.trim()
-            : t("verse.listPage.unnamed");
-
-        if (!Number.isFinite(sceneId)) {
-          const resolvedSceneId = await findSceneIdByName(sceneName);
-          if (resolvedSceneId === null) {
-            break;
-          }
-          sceneId = resolvedSceneId;
-        }
-
-        const sceneTitle = encodeURIComponent(
-          t("verse.listPage.editorTitle", { name: sceneName })
-        );
-
-        router.push({
-          path: "/verse/scene",
-          query: { id: sceneId, title: sceneTitle },
-        });
-      } else if (isRecord(data) && data.data === "rete.js") {
-        router.push({
-          path: "/meta/rete-meta",
-          query: { id: id.value, title: title.value },
-        });
-      }
-      break;
-
-    case "get-available-resource-types":
-      // 如果编辑器明确请求可用资源类型，就发送它们
-
-      await until(() => userStore.userInfo != null).toBeTruthy();
-      const availableTypes = getAvailableResourceTypes();
-
-      postMessage("available-resource-types", availableTypes);
-      break;
-
-    case "ready":
+  switch (msg.type) {
+    case "PLUGIN_READY":
       hasUnsavedChangesBeforeUnload.value = false;
       if (isRestoringDraft.value && metaDetail.value) {
         isRestoringDraft.value = false;
@@ -1497,35 +1165,222 @@ const handleMessage = async (e: MessageEvent) => {
       } else if (!init) {
         init = true;
         await refresh();
-      } else {
-        logger.log("post user info to editor");
-        postMessage("user-info", {
-          id: userStore.userInfo?.id || null,
-          //roles: userStore.userInfo?.roles || [],
-          role: userStore.getRole(),
-        });
       }
       break;
 
-    case "upload-cover":
-      handleUploadCover(data);
+    case "RESPONSE": {
+      const action = payload.action as string | undefined;
+
+      if (action === "save" && !payload.noChange) {
+        // Original save-meta logic
+        currentSaveTrigger = "manual";
+        isSavingVersion.value = true;
+        const saveData = payload as unknown as {
+          meta: MetaPayload;
+          events: unknown;
+        };
+        const result = await saveMeta(saveData, currentSaveTrigger);
+        if (result) {
+          const savedAt = addSceneDraftVersion(saveData, currentSaveTrigger);
+          hasUnsavedChangesBeforeUnload.value = false;
+          pendingRestorePayload.value = null;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+        }
+        isSavingVersion.value = false;
+        resolveLeaveSave(result);
+      } else if (action === "save" && payload.noChange) {
+        // Original save-meta-none logic
+        if (pendingRestorePayload.value) {
+          const restoredPayload = pendingRestorePayload.value;
+          const result = await saveMeta(
+            {
+              meta: restoredPayload.meta as MetaPayload,
+              events: restoredPayload.events,
+            },
+            currentSaveTrigger
+          );
+          if (result) {
+            const savedAt = addSceneDraftVersion(
+              {
+                meta: restoredPayload.meta,
+                events: restoredPayload.events,
+              },
+              currentSaveTrigger
+            );
+            pendingRestorePayload.value = null;
+            hasUnsavedChangesBeforeUnload.value = false;
+            lastSaveTrigger.value = currentSaveTrigger;
+            lastSavedAt.value = savedAt || new Date().toISOString();
+          }
+          isSavingVersion.value = false;
+          resolveLeaveSave(result);
+        } else {
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = new Date().toISOString();
+          ElMessage.warning(t("meta.scene.noChanges"));
+          hasUnsavedChangesBeforeUnload.value = false;
+          isSavingVersion.value = false;
+          resolveLeaveSave(true);
+        }
+      } else if (action === "save-before-leave" && !payload.noChange) {
+        // Original save-meta-before-leave logic
+        isSavingVersion.value = true;
+        const saveData = payload as unknown as {
+          meta: MetaPayload;
+          events: unknown;
+        };
+        const result = await saveMeta(saveData, currentSaveTrigger);
+        if (result) {
+          const savedAt = addSceneDraftVersion(saveData, currentSaveTrigger);
+          hasUnsavedChangesBeforeUnload.value = false;
+          pendingRestorePayload.value = null;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+          if (currentSaveTrigger === "auto") {
+            Message.success(t("common.scriptDraft.autoSavedNotice"));
+          }
+        }
+        isSavingVersion.value = false;
+        resolveLeaveSave(result);
+      } else if (action === "save-before-leave" && payload.noChange) {
+        // Original save-meta-before-leave-none logic
+        if (pendingRestorePayload.value) {
+          const restoredPayload = pendingRestorePayload.value;
+          const result = await saveMeta(
+            {
+              meta: restoredPayload.meta as MetaPayload,
+              events: restoredPayload.events,
+            },
+            currentSaveTrigger
+          );
+          if (result) {
+            const savedAt = addSceneDraftVersion(
+              {
+                meta: restoredPayload.meta,
+                events: restoredPayload.events,
+              },
+              currentSaveTrigger
+            );
+            pendingRestorePayload.value = null;
+            hasUnsavedChangesBeforeUnload.value = false;
+            lastSaveTrigger.value = currentSaveTrigger;
+            lastSavedAt.value = savedAt || new Date().toISOString();
+            if (currentSaveTrigger === "auto") {
+              Message.success(t("common.scriptDraft.autoSavedNotice"));
+            }
+          }
+          isSavingVersion.value = false;
+          resolveLeaveSave(result);
+        } else {
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = new Date().toISOString();
+          hasUnsavedChangesBeforeUnload.value = false;
+          isSavingVersion.value = false;
+          resolveLeaveSave(true);
+        }
+      } else if (action === "check-unsaved-changes") {
+        // Match via msg.requestId against pendingRequests Map callback
+        const resolver = pendingRequests.get(msg.requestId);
+        if (resolver) {
+          resolver(payload);
+        } else {
+          // Fallback: direct update of hasUnsavedChangesBeforeUnload
+          hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
+            ? true
+            : Boolean(payload.changed);
+        }
+      }
       break;
+    }
+
+    case "EVENT": {
+      const event = payload.event as string | undefined;
+
+      if (event === "load-resource") {
+        loadResource(payload);
+      } else if (event === "replace-resource") {
+        replaceResource(payload);
+      } else if (event === "goto") {
+        if (payload.target === "blockly.js") {
+          const scriptRoute = router
+            .getRoutes()
+            .find((route) => route.path === "/meta/script");
+
+          if (scriptRoute && scriptRoute.meta.title) {
+            const metaTitle = translateRouteTitle(scriptRoute.meta.title);
+
+            router.push({
+              path: "/meta/script",
+              query: {
+                id: id.value,
+                title: metaTitle + title.value,
+              },
+            });
+          }
+        } else if (payload.target === "verse.scene") {
+          const rawSceneId = payload.sceneId;
+          let sceneId =
+            typeof rawSceneId === "number" ? rawSceneId : Number(rawSceneId);
+          const sceneName =
+            typeof payload.sceneName === "string" &&
+            (payload.sceneName as string).trim()
+              ? (payload.sceneName as string).trim()
+              : t("verse.listPage.unnamed");
+
+          if (!Number.isFinite(sceneId)) {
+            const resolvedSceneId = await findSceneIdByName(sceneName);
+            if (resolvedSceneId === null) {
+              break;
+            }
+            sceneId = resolvedSceneId;
+          }
+
+          const sceneTitle = encodeURIComponent(
+            t("verse.listPage.editorTitle", { name: sceneName })
+          );
+
+          router.push({
+            path: "/verse/scene",
+            query: { id: sceneId, title: sceneTitle },
+          });
+        } else if (payload.data === "rete.js") {
+          router.push({
+            path: "/meta/rete-meta",
+            query: { id: id.value, title: title.value },
+          });
+        }
+      } else if (event === "upload-cover") {
+        handleUploadCover(payload);
+      } else if (event === "get-available-resource-types") {
+        await until(() => userStore.userInfo != null).toBeTruthy();
+        const availableTypes = getAvailableResourceTypes();
+        postStandardMessage("EVENT", {
+          event: "available-resource-types",
+          types: availableTypes,
+        });
+      }
+      break;
+    }
   }
 };
 
 const pushMetaToEditor = (meta: metaInfo) => {
   const availableTypes = getAvailableResourceTypes();
-  postMessage("load", {
-    data: meta,
-    saveable: saveable(meta),
-    availableResourceTypes: availableTypes,
-    entityScenes: entityScenes.value,
-    entitySceneNames: entityScenes.value.map((scene) => scene.name),
-    user: {
-      id: userStore.userInfo?.id || null,
-      role: userStore.getRole(),
+  postStandardMessage("INIT", {
+    token: null,
+    config: {
+      data: meta,
+      saveable: saveable(meta),
+      availableResourceTypes: availableTypes,
+      entityScenes: entityScenes.value,
+      entitySceneNames: entityScenes.value.map((scene) => scene.name),
+      user: {
+        id: userStore.userInfo?.id || null,
+        role: userStore.getRole(),
+      },
+      system: {},
     },
-    system: {},
   });
 };
 
@@ -1571,7 +1426,18 @@ watch([autoSaveEnabled, autoSaveIntervalSeconds], () => {
   restartAutoSaveTimer();
 });
 
+watch(
+  () => settingsStore.theme,
+  (newTheme) => {
+    postStandardMessage("THEME_CHANGE", {
+      theme: newTheme === ThemeEnum.DARK ? "dark" : "light",
+      dark: newTheme === ThemeEnum.DARK,
+    });
+  }
+);
+
 onBeforeUnmount(() => {
+  postStandardMessage("DESTROY");
   unregisterToolbar(toolbarOwner);
   clearAutoSaveTimer();
   window.removeEventListener("message", handleMessage);
@@ -1580,11 +1446,8 @@ onBeforeUnmount(() => {
     window.clearInterval(unsavedCheckPollingTimer);
     unsavedCheckPollingTimer = null;
   }
-  pendingUnsavedChecks.clear();
-  if (pendingLeaveSaveResolver) {
-    pendingLeaveSaveResolver(false);
-    pendingLeaveSaveResolver = null;
-  }
+  pendingRequests.clear();
+  cleanupPendingResolver();
 });
 </script>
 

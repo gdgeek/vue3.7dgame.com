@@ -46,6 +46,8 @@ import type { JsonValue } from "@/api/v1/types/common";
 import { getPrefab } from "@/api/v1/prefab";
 import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
+import { useSettingsStore } from "@/store/modules/settings";
+import { ThemeEnum } from "@/enums/ThemeEnum";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
 import { useFileStore } from "@/store/modules/config";
@@ -57,10 +59,13 @@ import type {
   ScriptDraftVersion,
   ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
+import { useIframeMessaging } from "@/composables/useIframeMessaging";
+import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
 
 // 组件状态
 const userStore = useUserStore();
 const appStore = useAppStore();
+const settingsStore = useSettingsStore();
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
@@ -68,12 +73,7 @@ const editor = ref<HTMLIFrameElement>();
 import qs from "querystringify";
 let init = false;
 const saveable = ref(false);
-let unsavedCheckSeed = 0;
-const pendingUnsavedChecks = new Map<string, (changed: boolean) => void>();
-let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
-const hasUnsavedChangesBeforeUnload = ref(false);
 let unsavedCheckPollingTimer: number | null = null;
-let isPollingUnsavedChanges = false;
 const editorFrameKey = ref(0);
 const isRestoringDraft = ref(false);
 const versionDialogVisible = ref(false);
@@ -88,7 +88,6 @@ const lastSavedAt = ref<string | null>(null);
 const pendingRestorePayload = ref<VerseEditorPayload | null>(null);
 let currentSaveTrigger: ScriptSaveTrigger = "manual";
 let autoSaveTimer: number | null = null;
-let pendingSceneSavePromise: Promise<boolean> | null = null;
 
 const toolbarOwner = "verse-scene-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
@@ -171,28 +170,18 @@ watch(
     await refresh();
   }
 );
-// 监听用户信息变化
-watch(
-  () => userStore.userInfo,
-  () => {
-    // 用户信息变化时，向编辑器发送最新用户信息
-    postMessage("user-info", {
-      id: userStore.userInfo?.id || null,
-      //roles: userStore.userInfo?.roles || [],
-      role: userStore.getRole(),
-    });
-  },
-  { deep: true }
-);
 const verse = ref<VerseData | null>(null);
 const pushVerseToEditor = (nextVerse: VerseData) => {
-  postMessage("load", {
-    id: id.value,
-    data: nextVerse,
-    saveable: saveable.value,
-    user: {
-      id: userStore.userInfo?.id || null,
-      role: userStore.getRole(),
+  postStandardMessage("INIT", {
+    token: null,
+    config: {
+      id: id.value,
+      data: nextVerse,
+      saveable: saveable.value,
+      user: {
+        id: userStore.userInfo?.id || null,
+        role: userStore.getRole(),
+      },
     },
   });
 };
@@ -281,11 +270,6 @@ type VerseEditorData = {
 
 type VerseEditorPayload = {
   verse?: VerseEditorData;
-};
-
-type EditorMessage = {
-  action: string;
-  data?: unknown;
 };
 
 type CoverUploadPayload = {
@@ -554,7 +538,7 @@ const restartAutoSaveTimer = () => {
     if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
       return;
     }
-    if (isSavingVersion.value || pendingSceneSavePromise) return;
+    if (isSavingVersion.value) return;
     if (!verse.value?.editable) return;
     try {
       await requestSceneSave("auto");
@@ -563,9 +547,6 @@ const restartAutoSaveTimer = () => {
     }
   }, autoSaveIntervalSeconds.value * 1000);
 };
-
-const isEditorMessage = (value: unknown): value is EditorMessage =>
-  isRecord(value) && typeof value.action === "string";
 
 const isPrefabSetupPayload = (value: unknown): value is PrefabSetupPayload =>
   isRecord(value) && "meta_id" in value && "data" in value && "uuid" in value;
@@ -580,20 +561,11 @@ const isUnsavedChangesResultPayload = (
   typeof value.requestId === "string" &&
   typeof value.changed === "boolean";
 
-const postMessage = (action: string, data: unknown) => {
-  if (editor.value && editor.value.contentWindow) {
-    editor.value.contentWindow.postMessage(
-      {
-        from: "scene.verse.web",
-        action,
-        data: JSON.parse(JSON.stringify(data)),
-      },
-      "*"
-    );
-  } else {
-    ElMessage.error(t("verse.view.sceneEditor.error1"));
-  }
-};
+// 消息发送基础设施
+const { postStandardMessage, sendRequest, pendingRequests } = useIframeMessaging(
+  editor,
+  { onError: () => ElMessage.error(t("verse.view.sceneEditor.error1")) }
+);
 
 const confirmSaveCurrentScene = () =>
   ElMessageBox.confirm(t("common.sceneSaveConfirm.message"), "", {
@@ -608,110 +580,22 @@ const confirmSaveCurrentScene = () =>
     cancelButtonText: t("common.sceneSaveConfirm.cancel"),
   });
 
-const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
-  return new Promise((resolve) => {
-    if (!editor.value || !editor.value.contentWindow) {
-      resolve(false);
-      return;
-    }
-
-    const requestId = `verse_${Date.now()}_${++unsavedCheckSeed}`;
-    const timeout = window.setTimeout(() => {
-      pendingUnsavedChecks.delete(requestId);
-      resolve(false);
-    }, 1200);
-
-    pendingUnsavedChecks.set(requestId, (changed) => {
-      window.clearTimeout(timeout);
-      pendingUnsavedChecks.delete(requestId);
-      resolve(changed);
-    });
-
-    postMessage("check-unsaved-changes", { requestId });
-  });
-};
-
-const syncUnsavedChangesForBeforeUnload = async () => {
-  if (isPollingUnsavedChanges) return;
-  if (!editor.value || !editor.value.contentWindow) return;
-
-  isPollingUnsavedChanges = true;
-  try {
-    const changed = await queryUnsavedChangesBeforeLeave();
-    hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-      ? true
-      : changed;
-  } finally {
-    isPollingUnsavedChanges = false;
-  }
-};
-
-const waitForLeaveSaveResult = (): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const timeout = window.setTimeout(() => {
-      if (pendingLeaveSaveResolver) {
-        pendingLeaveSaveResolver = null;
-      }
-      resolve(false);
-    }, 3000);
-
-    pendingLeaveSaveResolver = (result: boolean) => {
-      window.clearTimeout(timeout);
-      pendingLeaveSaveResolver = null;
-      resolve(result);
-    };
-  });
-};
-
-const resolveLeaveSave = (result: boolean) => {
-  if (!pendingLeaveSaveResolver) return;
-  const resolver = pendingLeaveSaveResolver;
-  pendingLeaveSaveResolver = null;
-  resolver(result);
-};
-
-const requestSceneSave = (trigger: ScriptSaveTrigger) => {
-  if (pendingSceneSavePromise) return pendingSceneSavePromise;
-  currentSaveTrigger = trigger;
-  isSavingVersion.value = true;
-  postMessage("save-before-leave", {});
-  pendingSceneSavePromise = waitForLeaveSaveResult().finally(() => {
-    pendingSceneSavePromise = null;
-    isSavingVersion.value = false;
-  });
-  return pendingSceneSavePromise;
-};
-
-const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
-  if (pendingRestorePayload.value) {
-    hasUnsavedChangesBeforeUnload.value = true;
-  }
-  const changed = await queryUnsavedChangesBeforeLeave();
-  hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-    ? true
-    : changed;
-
-  if (!changed) {
-    return true;
-  }
-
-  try {
-    await confirmSaveCurrentScene();
-  } catch (action) {
-    if (action === "cancel") {
-      return true;
-    }
-    return false;
-  }
-
-  return requestSceneSave("manual");
-};
-
-const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-  if (!hasUnsavedChangesBeforeUnload.value) return;
-  event.preventDefault();
-  event.returnValue = "";
-};
+const {
+  hasUnsavedChangesBeforeUnload,
+  syncUnsavedChangesForBeforeUnload,
+  resolveLeaveSave,
+  requestSceneSave,
+  resolveUnsavedBeforeLeave,
+  handleBeforeUnload,
+  cleanupPendingResolver,
+} = useSceneSaveGuard({
+  sendRequest,
+  pendingRequests,
+  pendingRestorePayload,
+  isSavingVersion,
+  confirmDialog: confirmSaveCurrentScene,
+  onBeforeSave: (trigger) => { currentSaveTrigger = trigger; },
+});
 
 // 设置预制件属性
 const setupPrefab = async ({ meta_id, data, uuid }: PrefabSetupPayload) => {
@@ -720,7 +604,7 @@ const setupPrefab = async ({ meta_id, data, uuid }: PrefabSetupPayload) => {
     schema: JSON.parse(response.data.data!),
     data: JSON.parse(data),
     callback: (setup: unknown) => {
-      postMessage("setup-module", { uuid, setup });
+      sendRequest("setup-module", { uuid, setup } as Record<string, unknown>);
     },
   });
 };
@@ -737,7 +621,7 @@ const addMeta = () => {
 
 // 选择元素后的回调
 const selected = async ({ data, setup, title }: SelectedMetaPayload) => {
-  postMessage("add-module", { data, setup, title });
+  sendRequest("add-module", { data, setup, title } as Record<string, unknown>);
 };
 
 // 保存场景数据
@@ -910,117 +794,51 @@ const releaseVerse = async (data: unknown) => {
   }
 };
 
-// 处理来自编辑器的消息
+// 处理来自编辑器的消息（标准协议：msg.type 路由）
 const handleMessage = async (e: MessageEvent) => {
-  if (!isEditorMessage(e.data)) return;
+  const msg = e.data;
+  if (!msg || typeof msg.type !== "string") return;
 
-  const action = e.data.action;
-  const data = e.data.data;
+  const payload = (msg.payload ?? {}) as Record<string, unknown>;
 
-  switch (action) {
-    case "edit-meta":
-      if (isRecord(data)) {
-        const metaId = toMetaId(data.meta_id);
-        if (metaId === null) break;
-        const title = buildMetaSceneTitle(metaId, data);
-        router.push({
-          path: "/meta/scene",
-          query: { id: String(metaId), title },
-        });
-      }
-      break;
-
-    case "setup-prefab":
-      if (isPrefabSetupPayload(data)) {
-        setupPrefab(data);
-      }
-      break;
-
-    case "add-meta":
-      addMeta();
-      break;
-
-    //  case "add-prefab":
-    //    addPrefab();
-    //    break;
-
-    case "save-verse":
-      currentSaveTrigger = "manual";
-      isSavingVersion.value = true;
-      await saveVerse(data, currentSaveTrigger);
-      if (isRecord(data) && data.verse) {
-        const savedAt = addSceneDraftVersion(
-          data as VerseEditorPayload,
-          currentSaveTrigger
-        );
-        pendingRestorePayload.value = null;
-        lastSaveTrigger.value = currentSaveTrigger;
-        lastSavedAt.value = savedAt || new Date().toISOString();
-      }
+  switch (msg.type) {
+    case "PLUGIN_READY":
       hasUnsavedChangesBeforeUnload.value = false;
-      isSavingVersion.value = false;
-      ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
-
-      break;
-
-    case "release-verse":
-      releaseVerse(data);
-      break;
-
-    case "save-verse-none":
-      if (pendingRestorePayload.value) {
-        const restoredPayload = pendingRestorePayload.value;
-        await saveVerse(restoredPayload, currentSaveTrigger);
-        const savedAt = addSceneDraftVersion(
-          restoredPayload,
-          currentSaveTrigger
-        );
-        pendingRestorePayload.value = null;
-        hasUnsavedChangesBeforeUnload.value = false;
-        lastSaveTrigger.value = currentSaveTrigger;
-        lastSavedAt.value = savedAt || new Date().toISOString();
-        isSavingVersion.value = false;
-        resolveLeaveSave(true);
-        break;
+      if (isRestoringDraft.value && verse.value) {
+        isRestoringDraft.value = false;
+        pushVerseToEditor(verse.value);
+        hasUnsavedChangesBeforeUnload.value = true;
+      } else if (!init) {
+        init = true;
+        refresh();
       }
-      lastSaveTrigger.value = currentSaveTrigger;
-      lastSavedAt.value = new Date().toISOString();
-      ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
-      hasUnsavedChangesBeforeUnload.value = false;
-      isSavingVersion.value = false;
-      resolveLeaveSave(true);
       break;
 
-    case "save-verse-before-leave":
-      {
+    case "RESPONSE": {
+      const action = payload.action as string | undefined;
+
+      if (action === "save" && !payload.noChange) {
+        // Original save-verse logic
+        currentSaveTrigger = "manual";
         isSavingVersion.value = true;
-        const result = await saveVerseBeforeLeave(data, currentSaveTrigger);
-        if (result && isRecord(data) && data.verse) {
+        await saveVerse(payload, currentSaveTrigger);
+        if (payload.verse) {
           const savedAt = addSceneDraftVersion(
-            data as VerseEditorPayload,
+            payload as VerseEditorPayload,
             currentSaveTrigger
           );
           pendingRestorePayload.value = null;
           lastSaveTrigger.value = currentSaveTrigger;
           lastSavedAt.value = savedAt || new Date().toISOString();
-          hasUnsavedChangesBeforeUnload.value = false;
-          if (currentSaveTrigger === "auto") {
-            Message.success(t("common.scriptDraft.autoSavedNotice"));
-          }
         }
+        hasUnsavedChangesBeforeUnload.value = false;
         isSavingVersion.value = false;
-        resolveLeaveSave(result);
-      }
-      break;
-
-    case "save-verse-before-leave-none":
-      if (pendingRestorePayload.value) {
-        const restoredPayload = pendingRestorePayload.value;
-        const result = await saveVerseBeforeLeave(
-          restoredPayload,
-          currentSaveTrigger
-        );
-        if (result) {
+        ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
+      } else if (action === "save" && payload.noChange) {
+        // Original save-verse-none logic
+        if (pendingRestorePayload.value) {
+          const restoredPayload = pendingRestorePayload.value;
+          await saveVerse(restoredPayload, currentSaveTrigger);
           const savedAt = addSceneDraftVersion(
             restoredPayload,
             currentSaveTrigger
@@ -1029,73 +847,123 @@ const handleMessage = async (e: MessageEvent) => {
           hasUnsavedChangesBeforeUnload.value = false;
           lastSaveTrigger.value = currentSaveTrigger;
           lastSavedAt.value = savedAt || new Date().toISOString();
+          isSavingVersion.value = false;
+          resolveLeaveSave(true);
+        } else {
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = new Date().toISOString();
+          ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
+          hasUnsavedChangesBeforeUnload.value = false;
+          isSavingVersion.value = false;
+          resolveLeaveSave(true);
+        }
+      } else if (action === "save-before-leave" && !payload.noChange) {
+        // Original save-verse-before-leave logic
+        isSavingVersion.value = true;
+        const result = await saveVerseBeforeLeave(payload, currentSaveTrigger);
+        if (result && payload.verse) {
+          const savedAt = addSceneDraftVersion(
+            payload as VerseEditorPayload,
+            currentSaveTrigger
+          );
+          pendingRestorePayload.value = null;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+          hasUnsavedChangesBeforeUnload.value = false;
           if (currentSaveTrigger === "auto") {
             Message.success(t("common.scriptDraft.autoSavedNotice"));
           }
         }
         isSavingVersion.value = false;
         resolveLeaveSave(result);
-        break;
-      }
-      lastSaveTrigger.value = currentSaveTrigger;
-      lastSavedAt.value = new Date().toISOString();
-      hasUnsavedChangesBeforeUnload.value = false;
-      isSavingVersion.value = false;
-      resolveLeaveSave(true);
-      break;
-
-    case "unsaved-changes-result":
-      if (isUnsavedChangesResultPayload(data)) {
-        hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-          ? true
-          : Boolean(data.changed);
-        const resolver = pendingUnsavedChecks.get(data.requestId);
+      } else if (action === "save-before-leave" && payload.noChange) {
+        // Original save-verse-before-leave-none logic
+        if (pendingRestorePayload.value) {
+          const restoredPayload = pendingRestorePayload.value;
+          const result = await saveVerseBeforeLeave(
+            restoredPayload,
+            currentSaveTrigger
+          );
+          if (result) {
+            const savedAt = addSceneDraftVersion(
+              restoredPayload,
+              currentSaveTrigger
+            );
+            pendingRestorePayload.value = null;
+            hasUnsavedChangesBeforeUnload.value = false;
+            lastSaveTrigger.value = currentSaveTrigger;
+            lastSavedAt.value = savedAt || new Date().toISOString();
+            if (currentSaveTrigger === "auto") {
+              Message.success(t("common.scriptDraft.autoSavedNotice"));
+            }
+          }
+          isSavingVersion.value = false;
+          resolveLeaveSave(result);
+        } else {
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = new Date().toISOString();
+          hasUnsavedChangesBeforeUnload.value = false;
+          isSavingVersion.value = false;
+          resolveLeaveSave(true);
+        }
+      } else if (action === "check-unsaved-changes") {
+        // Match via msg.requestId against pendingRequests Map callback
+        const resolver = pendingRequests.get(msg.requestId);
         if (resolver) {
-          resolver(pendingRestorePayload.value ? true : Boolean(data.changed));
+          resolver(payload);
+        } else {
+          // Fallback: direct update of hasUnsavedChangesBeforeUnload
+          hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
+            ? true
+            : Boolean(payload.changed);
         }
       }
       break;
+    }
 
-    case "goto":
-      if (isRecord(data) && data.target === "blockly.js") {
-        const scriptRoute = router
-          .getRoutes()
-          .find((route) => route.path === "/verse/script");
+    case "EVENT": {
+      const event = payload.event as string | undefined;
 
-        if (scriptRoute && scriptRoute.meta.title) {
-          const metaTitle = translateRouteTitle(scriptRoute.meta.title);
-
+      if (event === "edit-meta") {
+        const metaId = toMetaId(payload.meta_id);
+        if (metaId !== null) {
+          const title = buildMetaSceneTitle(metaId, payload);
           router.push({
-            path: "/verse/script",
-            query: {
-              id: id.value,
-              title: metaTitle + title.value,
-            },
+            path: "/meta/scene",
+            query: { id: String(metaId), title },
           });
         }
+      } else if (event === "setup-prefab") {
+        if (isPrefabSetupPayload(payload)) {
+          setupPrefab(payload);
+        }
+      } else if (event === "add-meta") {
+        addMeta();
+      } else if (event === "release-verse") {
+        releaseVerse(payload);
+      } else if (event === "goto") {
+        if (payload.target === "blockly.js") {
+          const scriptRoute = router
+            .getRoutes()
+            .find((route) => route.path === "/verse/script");
+
+          if (scriptRoute && scriptRoute.meta.title) {
+            const metaTitle = translateRouteTitle(scriptRoute.meta.title);
+
+            router.push({
+              path: "/verse/script",
+              query: {
+                id: id.value,
+                title: metaTitle + title.value,
+              },
+            });
+          }
+        }
+      } else if (event === "upload-cover") {
+        handleUploadCover(payload);
       }
       break;
-
-    case "ready":
-      if (isRestoringDraft.value && verse.value) {
-        isRestoringDraft.value = false;
-        pushVerseToEditor(verse.value);
-        hasUnsavedChangesBeforeUnload.value = true;
-      } else if (!init) {
-        init = true;
-        refresh();
-      } else {
-        postMessage("user-info", {
-          id: userStore.userInfo?.id || null,
-          //roles: userStore.userInfo?.roles || [],
-          role: userStore.getRole(),
-        });
-      }
-      break;
-
-    case "upload-cover":
-      handleUploadCover(data);
-      break;
+    }
   }
 };
 
@@ -1217,7 +1085,18 @@ watch([autoSaveEnabled, autoSaveIntervalSeconds], () => {
   restartAutoSaveTimer();
 });
 
+watch(
+  () => settingsStore.theme,
+  (newTheme) => {
+    postStandardMessage("THEME_CHANGE", {
+      theme: newTheme === ThemeEnum.DARK ? "dark" : "light",
+      dark: newTheme === ThemeEnum.DARK,
+    });
+  }
+);
+
 onBeforeUnmount(() => {
+  postStandardMessage("DESTROY");
   unregisterToolbar(toolbarOwner);
   clearAutoSaveTimer();
   window.removeEventListener("message", handleMessage);
@@ -1226,11 +1105,8 @@ onBeforeUnmount(() => {
     window.clearInterval(unsavedCheckPollingTimer);
     unsavedCheckPollingTimer = null;
   }
-  pendingUnsavedChecks.clear();
-  if (pendingLeaveSaveResolver) {
-    pendingLeaveSaveResolver(false);
-    pendingLeaveSaveResolver = null;
-  }
+  pendingRequests.clear();
+  cleanupPendingResolver();
 });
 </script>
 
