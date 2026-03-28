@@ -27,12 +27,12 @@
         "th-TH": "การจัดการผู้ใช้"
       },
       "description": "用户增删改查管理工具",
-      "url": "https://user-manager.plugins.xrugc.com/",
+      "url": "http://localhost:3003/",
       "icon": "User",
       "group": "tools",
       "enabled": true,
       "order": 2,
-      "allowedOrigin": "https://user-manager.plugins.xrugc.com",
+      "allowedOrigin": "http://localhost:3003",
       "version": "1.0.0"
     }
   ]

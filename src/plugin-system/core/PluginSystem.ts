@@ -54,6 +54,9 @@ export class PluginSystem {
   /** Whether initialize() has been called */
   private initialized = false;
 
+  /** Deduplicates concurrent initialize() calls — stores the in-flight promise */
+  private initPromise: Promise<void> | null = null;
+
   constructor(
     registry?: PluginRegistry,
     loader?: PluginLoader,
@@ -70,6 +73,9 @@ export class PluginSystem {
 
   /**
    * 初始化插件系统：加载配置，注册所有启用的插件，设置 Token 变化监听。
+   *
+   * 并发安全：多个调用方同时 await initialize() 时，只会执行一次初始化逻辑，
+   * 所有调用方都会等待同一个 promise 完成。
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
@@ -77,6 +83,20 @@ export class PluginSystem {
       return;
     }
 
+    // Deduplicate concurrent calls: return the in-flight promise if one exists
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    this.initPromise = this._doInitialize();
+    try {
+      await this.initPromise;
+    } finally {
+      this.initPromise = null;
+    }
+  }
+
+  private async _doInitialize(): Promise<void> {
     logger.info("Initializing PluginSystem...");
 
     const config = await this.configService.loadConfig();
@@ -161,6 +181,13 @@ export class PluginSystem {
 
       // Transition: loading → active
       this.transitionState(pluginId, "active");
+
+      // Send INIT immediately after iframe loads.
+      // The plugin sends PLUGIN_READY during onMounted (before the iframe
+      // 'load' event fires in some browsers), so MessageBus discards it
+      // because the plugin isn't registered yet.
+      // We proactively send INIT here after registration to ensure delivery.
+      this.sendInitToPlugin(pluginId);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
 
@@ -315,7 +342,7 @@ export class PluginSystem {
     );
   }
 
-  /** Handle PLUGIN_READY message — transition loading → active, then send INIT */
+  /** Handle PLUGIN_READY message — transition loading → active if needed, then send INIT */
   private handlePluginReady(pluginId: string): void {
     const info = this.plugins.get(pluginId);
     if (!info) {
@@ -323,13 +350,19 @@ export class PluginSystem {
       return;
     }
 
-    // Only relevant if plugin is still in loading state
-    // (the load() method may have already transitioned it)
+    // Only transition if still loading (proactive path already sets active)
     if (info.state === "loading") {
       this.transitionState(pluginId, "active");
     }
 
-    // Send INIT message with token and config
+    this.sendInitToPlugin(pluginId);
+  }
+
+  /**
+   * Send INIT message to an already-registered plugin.
+   * Safe to call regardless of plugin state — no state transition performed.
+   */
+  private sendInitToPlugin(pluginId: string): void {
     const manifest = this.registry.get(pluginId);
     if (!manifest) return;
 

@@ -52,9 +52,19 @@ export class PluginLoader {
     container: HTMLElement,
     options?: PluginLoadOptions
   ): Promise<LoadedPlugin> {
-    if (this.loaded.has(pluginId)) {
-      logger.warn(`Plugin "${pluginId}" is already loaded, skipping`);
-      return this.loaded.get(pluginId)!;
+    const existing = this.loaded.get(pluginId);
+    if (existing) {
+      // If the origin changed (e.g. local config overriding production URL),
+      // unload the stale iframe so the new URL is loaded fresh.
+      if (existing.origin !== manifest.allowedOrigin) {
+        logger.info(
+          `Plugin "${pluginId}" origin changed (${existing.origin} → ${manifest.allowedOrigin}), reloading`
+        );
+        this.unload(pluginId);
+      } else {
+        logger.warn(`Plugin "${pluginId}" is already loaded, skipping`);
+        return existing;
+      }
     }
 
     // Build iframe URL with optional lang/theme query params

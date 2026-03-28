@@ -32,6 +32,9 @@ export class MessageBus {
   /** Type-specific message handlers keyed by message type */
   private typeHandlers: Map<string, Set<MessageHandler>> = new Map();
 
+  /** Origins already warned about — prevents log flooding */
+  private warnedOrigins: Set<string> = new Set();
+
   /** Bound reference for cleanup */
   private readonly messageListener: (event: MessageEvent) => void;
 
@@ -118,6 +121,7 @@ export class MessageBus {
     this.connections.clear();
     this.handlers.clear();
     this.typeHandlers.clear();
+    this.warnedOrigins.clear();
     logger.info("MessageBus destroyed");
   }
 
@@ -129,9 +133,12 @@ export class MessageBus {
     // Find the plugin whose registered origin matches the event origin
     const pluginId = this.findPluginByOrigin(event.origin);
     if (!pluginId) {
-      logger.warn(
-        `Message from unregistered origin discarded: ${event.origin}`
-      );
+      if (!this.warnedOrigins.has(event.origin)) {
+        this.warnedOrigins.add(event.origin);
+        logger.warn(
+          `Message from unregistered origin discarded: ${event.origin}`
+        );
+      }
       return;
     }
 
