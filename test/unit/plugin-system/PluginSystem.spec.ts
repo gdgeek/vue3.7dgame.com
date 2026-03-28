@@ -113,6 +113,10 @@ function createMockLoader(): PluginLoader {
 
   loader.isLoaded = vi.fn((pluginId: string) => loadedMap.has(pluginId));
   loader.getLoaded = vi.fn((pluginId: string) => loadedMap.get(pluginId));
+  loader.getIframe = vi.fn(
+    (pluginId: string) => loadedMap.get(pluginId)?.iframe
+  );
+  loader.sendInitMessage = vi.fn();
 
   return loader;
 }

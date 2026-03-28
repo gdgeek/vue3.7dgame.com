@@ -21,7 +21,7 @@ const VALID_TRANSITIONS: ReadonlyMap<
 > = new Map<PluginState, ReadonlySet<PluginState>>([
   ["unloaded", new Set(["loading"])],
   ["loading", new Set(["active", "error"])],
-  ["active", new Set(["unloaded"])],
+  ["active", new Set(["unloaded", "error"])],
   ["error", new Set(["loading", "unloaded"])],
 ]);
 
