@@ -1,7 +1,11 @@
 import { createLogger } from "@/utils/logger";
 import request from "@/utils/request";
 
-import type { PluginsConfig, PluginManifest, PluginPublicManifest } from "@/plugin-system/types";
+import type {
+  PluginsConfig,
+  PluginManifest,
+  PluginPublicManifest,
+} from "@/plugin-system/types";
 
 const logger = createLogger("ConfigService");
 
@@ -105,7 +109,10 @@ export class ConfigService {
     const localConfig = await this.loadLocalConfig();
 
     const merged: PluginsConfig = {
-      version: localConfig.version !== EMPTY_CONFIG.version ? localConfig.version : apiConfig.version,
+      version:
+        localConfig.version !== EMPTY_CONFIG.version
+          ? localConfig.version
+          : apiConfig.version,
       menuGroups: mergeMenuGroups(apiConfig.menuGroups, localConfig.menuGroups),
       plugins: mergePlugins(apiConfig.plugins, localConfig.plugins),
     };
@@ -128,12 +135,15 @@ export class ConfigService {
    * 约定：每个插件在 `{plugin.url}plugin-manifest.json` 暴露自身元数据。
    * fetch 失败时静默跳过，不影响整体可用性。
    */
-  private async enrichWithPluginManifests(config: PluginsConfig): Promise<void> {
+  private async enrichWithPluginManifests(
+    config: PluginsConfig
+  ): Promise<void> {
     const groupMap = new Map(config.menuGroups.map((g) => [g.id, g]));
 
     // 判断当前页面是否在本地开发环境
     const currentHostname = window.location.hostname;
-    const isLocalEnv = currentHostname === "localhost" || currentHostname === "127.0.0.1";
+    const isLocalEnv =
+      currentHostname === "localhost" || currentHostname === "127.0.0.1";
 
     const jobs = config.plugins.map(async (plugin) => {
       // 解析插件 URL 的 hostname
@@ -144,7 +154,8 @@ export class ConfigService {
         return; // URL 格式非法，跳过
       }
 
-      const pluginIsLocal = pluginHostname === "localhost" || pluginHostname === "127.0.0.1";
+      const pluginIsLocal =
+        pluginHostname === "localhost" || pluginHostname === "127.0.0.1";
 
       // 跳过跨环境 fetch：本地开发时不拉生产插件的 manifest（避免证书错误），
       // 生产环境时不拉 localhost 插件的 manifest（无意义且会报错）
@@ -153,9 +164,12 @@ export class ConfigService {
         return;
       }
 
-      const manifestUrl = plugin.url.replace(/\/?$/, "/") + "plugin-manifest.json";
+      const manifestUrl =
+        plugin.url.replace(/\/?$/, "/") + "plugin-manifest.json";
       try {
-        const res = await fetch(manifestUrl, { signal: AbortSignal.timeout(3000) });
+        const res = await fetch(manifestUrl, {
+          signal: AbortSignal.timeout(3000),
+        });
         if (!res.ok) return;
         const data: unknown = await res.json();
         if (!isPluginPublicManifest(data) || data.id !== plugin.id) return;
@@ -166,7 +180,10 @@ export class ConfigService {
         }
         // 覆盖插件 descriptionI18n（存到 extraConfig 供 UI 使用）
         if (data.descriptionI18n) {
-          plugin.extraConfig = { ...plugin.extraConfig, _descriptionI18n: JSON.stringify(data.descriptionI18n) };
+          plugin.extraConfig = {
+            ...plugin.extraConfig,
+            _descriptionI18n: JSON.stringify(data.descriptionI18n),
+          };
         }
         // 覆盖所属分组的 nameI18n
         if (data.group?.nameI18n) {
@@ -179,7 +196,9 @@ export class ConfigService {
         logger.info(`Plugin manifest fetched: ${plugin.id}`);
       } catch {
         // 网络不通或插件未实现 manifest，静默跳过
-        logger.debug(`Plugin manifest not available: ${plugin.id} (${manifestUrl})`);
+        logger.debug(
+          `Plugin manifest not available: ${plugin.id} (${manifestUrl})`
+        );
       }
     });
 
@@ -196,7 +215,9 @@ export class ConfigService {
     try {
       const response = await fetch("/config/plugins.json");
       if (!response.ok) {
-        logger.warn(`Local plugins.json not found (${response.status}), skipping`);
+        logger.warn(
+          `Local plugins.json not found (${response.status}), skipping`
+        );
         return { ...EMPTY_CONFIG };
       }
       const data: unknown = await response.json();

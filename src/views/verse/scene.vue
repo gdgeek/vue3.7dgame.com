@@ -554,7 +554,7 @@ const isPrefabSetupPayload = (value: unknown): value is PrefabSetupPayload =>
 const isCoverUploadPayload = (value: unknown): value is CoverUploadPayload =>
   isRecord(value) && typeof value.imageData === "string";
 
-const isUnsavedChangesResultPayload = (
+const _isUnsavedChangesResultPayload = (
   value: unknown
 ): value is UnsavedChangesResultPayload =>
   isRecord(value) &&
@@ -562,10 +562,10 @@ const isUnsavedChangesResultPayload = (
   typeof value.changed === "boolean";
 
 // 消息发送基础设施
-const { postStandardMessage, sendRequest, pendingRequests } = useIframeMessaging(
-  editor,
-  { onError: () => ElMessage.error(t("verse.view.sceneEditor.error1")) }
-);
+const { postStandardMessage, sendRequest, pendingRequests } =
+  useIframeMessaging(editor, {
+    onError: () => ElMessage.error(t("verse.view.sceneEditor.error1")),
+  });
 
 const confirmSaveCurrentScene = () =>
   ElMessageBox.confirm(t("common.sceneSaveConfirm.message"), "", {
@@ -594,7 +594,9 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentScene,
-  onBeforeSave: (trigger) => { currentSaveTrigger = trigger; },
+  onBeforeSave: (trigger) => {
+    currentSaveTrigger = trigger;
+  },
 });
 
 // 设置预制件属性

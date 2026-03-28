@@ -1,5 +1,10 @@
 // Re-export manifest types
-export type { PluginManifest, PluginsConfig, MenuGroup, PluginPublicManifest } from "./manifest";
+export type {
+  PluginManifest,
+  PluginsConfig,
+  MenuGroup,
+  PluginPublicManifest,
+} from "./manifest";
 
 /** 插件运行状态 */
 export type PluginState = "unloaded" | "loading" | "active" | "error";

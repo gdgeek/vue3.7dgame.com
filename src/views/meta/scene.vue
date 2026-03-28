@@ -875,8 +875,6 @@ watch(
   }
 );
 
-
-
 const selectedPhototype = async (
   phototype: PhototypeType,
   _replace: boolean = false
@@ -937,10 +935,10 @@ const saveable = (data: unknown) => {
 };
 
 // 消息发送基础设施
-const { postStandardMessage, sendRequest, pendingRequests } = useIframeMessaging(
-  editor,
-  { onError: () => ElMessage.error(t("meta.scene.error")) }
-);
+const { postStandardMessage, sendRequest, pendingRequests } =
+  useIframeMessaging(editor, {
+    onError: () => ElMessage.error(t("meta.scene.error")),
+  });
 
 const confirmSaveCurrentEntity = () =>
   ElMessageBox.confirm(t("common.entitySaveConfirm.message"), "", {
@@ -969,7 +967,9 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentEntity,
-  onBeforeSave: (trigger) => { currentSaveTrigger = trigger; },
+  onBeforeSave: (trigger) => {
+    currentSaveTrigger = trigger;
+  },
 });
 
 // 获取可用的资源类型
