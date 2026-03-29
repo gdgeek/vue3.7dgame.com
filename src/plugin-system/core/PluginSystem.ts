@@ -385,6 +385,18 @@ export class PluginSystem {
     });
   }
 
+  /**
+   * 广播语言变更到所有活跃插件。
+   * 供外部（如 PluginLayout）在语言切换时调用。
+   */
+  broadcastLangChange(lang: string): void {
+    this.messageBus.broadcast({
+      type: "LANG_CHANGE",
+      id: `lang-change-${Date.now()}`,
+      payload: { lang },
+    });
+  }
+
   /** 获取 PluginLoader 实例（供视图层获取 iframe 引用） */
   getLoader(): PluginLoader {
     return this.loader;

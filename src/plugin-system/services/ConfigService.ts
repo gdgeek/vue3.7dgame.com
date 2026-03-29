@@ -3,8 +3,6 @@ import request from "@/utils/request";
 
 import type {
   PluginsConfig,
-  PluginManifest,
-  PluginPublicManifest,
 } from "@/plugin-system/types";
 
 const logger = createLogger("ConfigService");
@@ -30,62 +28,14 @@ function isPluginsConfig(value: unknown): value is PluginsConfig {
 }
 
 /**
- * Type guard: checks whether a value looks like a PluginPublicManifest.
- */
-function isPluginPublicManifest(value: unknown): value is PluginPublicManifest {
-  if (typeof value !== "object" || value === null) return false;
-  return typeof (value as Record<string, unknown>).id === "string";
-}
-
-/**
- * Merge two plugin lists by `id`.
- * `override` entries replace `base` entries with the same id;
- * new ids from `override` are appended.
- */
-function mergePlugins(
-  base: PluginManifest[],
-  override: PluginManifest[]
-): PluginManifest[] {
-  if (override.length === 0) return base;
-  const overrideMap = new Map(override.map((p) => [p.id, p]));
-  const merged: PluginManifest[] = base.map((p) => overrideMap.get(p.id) ?? p);
-  // Append plugins from override that don't exist in base
-  const baseIds = new Set(base.map((p) => p.id));
-  for (const p of override) {
-    if (!baseIds.has(p.id)) {
-      merged.push(p);
-    }
-  }
-  return merged;
-}
-
-/**
- * Merge two menu group lists by `id`.
- * `override` entries replace `base` entries with the same id;
- * new ids from `override` are appended.
- */
-function mergeMenuGroups(
-  base: PluginsConfig["menuGroups"],
-  override: PluginsConfig["menuGroups"]
-): PluginsConfig["menuGroups"] {
-  if (override.length === 0) return base;
-  const overrideMap = new Map(override.map((g) => [g.id, g]));
-  const merged = base.map((g) => overrideMap.get(g.id) ?? g);
-  const baseIds = new Set(base.map((g) => g.id));
-  for (const g of override) {
-    if (!baseIds.has(g.id)) {
-      merged.push(g);
-    }
-  }
-  return merged;
-}
-
-/**
  * ConfigService — 插件配置加载服务
  *
- * 两层合并策略（优先级从低到高）：
- * 1. 本地配置 `/config/plugins.json`：基础兜底插件，随前端部署，后端未配置也能用
- * 2. 后端 API `GET /v1/plugin/list?domain={hostname}`：按 id 覆盖/追加本地配置
+ * 合并策略（本地与 DB 完全平行，互不覆盖）：
+ * 1. 本地 `/config/plugins.json` — 本地内置插件，保留声明的分组
+ *    `builtins` 分组为保留 id，DB 无法覆盖
+ * 2. 后端 API `GET /v1/plugin/list?domain={hostname}` — DB 插件，保留各自分组
+ *    DB 中与本地同 group id 的分组定义被忽略（本地优先）
+ * 3. 两边插件全部显示，各自属于声明的分组，不去重
  *
  * 任意一层加载失败都不影响其他层，确保最大可用性。
  */
@@ -97,112 +47,41 @@ export class ConfigService {
     logger.info("ConfigService initialized");
   }
 
-  /** 加载配置：API → 本地两层合并（本地配置优先级更高，可覆盖 API 配置，方便本地开发用 localhost URL 覆盖生产地址） */
+  /**
+   * 加载配置：本地与 DB 完全平行，互不覆盖。
+   * 分组：本地优先（本地声明的 group id 不被 DB 覆盖）；DB 独有分组追加。
+   * 插件：本地 + DB 全部显示，各自保留声明的 group。
+   */
   async loadConfig(): Promise<PluginsConfig> {
     if (this.cachedConfig) {
       return this.cachedConfig;
     }
 
-    // Layer 1: API baseline
     const apiConfig = await this.loadApiConfig();
-    // Layer 2: local override（同 id 时本地配置覆盖 API 配置）
     const localConfig = await this.loadLocalConfig();
 
+    // 分组：本地优先，DB 中与本地同 id 的分组定义被忽略
+    const localGroupIds = new Set(localConfig.menuGroups.map((g) => g.id));
+    const dbOnlyGroups = apiConfig.menuGroups.filter((g) => !localGroupIds.has(g.id));
+    const menuGroups = [...localConfig.menuGroups, ...dbOnlyGroups];
+
+    // 插件：两边全部显示，各自保留声明的 group，不去重
+    const plugins = [...localConfig.plugins, ...apiConfig.plugins];
+
     const merged: PluginsConfig = {
-      version:
-        localConfig.version !== EMPTY_CONFIG.version
-          ? localConfig.version
-          : apiConfig.version,
-      menuGroups: mergeMenuGroups(apiConfig.menuGroups, localConfig.menuGroups),
-      plugins: mergePlugins(apiConfig.plugins, localConfig.plugins),
+      version: apiConfig.version !== EMPTY_CONFIG.version
+        ? apiConfig.version
+        : localConfig.version,
+      menuGroups,
+      plugins,
     };
 
-    // Layer 3: 从各插件自身的 plugin-manifest.json 拉取 i18n 数据并覆盖
-    await this.enrichWithPluginManifests(merged);
-
     logger.info(
-      `Config loaded: local(${localConfig.plugins.length}) + API(${apiConfig.plugins.length}) = ${merged.plugins.length} plugins`
+      `Config loaded: local(${localConfig.plugins.length}) + DB(${apiConfig.plugins.length}) = ${merged.plugins.length} total`
     );
 
     this.cachedConfig = merged;
     return this.cachedConfig;
-  }
-
-  /**
-   * Layer 3：并行 fetch 各插件的 `plugin-manifest.json`，
-   * 用插件自己声明的 nameI18n / descriptionI18n / group.nameI18n 覆盖 merged 配置。
-   *
-   * 约定：每个插件在 `{plugin.url}plugin-manifest.json` 暴露自身元数据。
-   * fetch 失败时静默跳过，不影响整体可用性。
-   */
-  private async enrichWithPluginManifests(
-    config: PluginsConfig
-  ): Promise<void> {
-    const groupMap = new Map(config.menuGroups.map((g) => [g.id, g]));
-
-    // 判断当前页面是否在本地开发环境
-    const currentHostname = window.location.hostname;
-    const isLocalEnv =
-      currentHostname === "localhost" || currentHostname === "127.0.0.1";
-
-    const jobs = config.plugins.map(async (plugin) => {
-      // 解析插件 URL 的 hostname
-      let pluginHostname: string;
-      try {
-        pluginHostname = new URL(plugin.url).hostname;
-      } catch {
-        return; // URL 格式非法，跳过
-      }
-
-      const pluginIsLocal =
-        pluginHostname === "localhost" || pluginHostname === "127.0.0.1";
-
-      // 跳过跨环境 fetch：本地开发时不拉生产插件的 manifest（避免证书错误），
-      // 生产环境时不拉 localhost 插件的 manifest（无意义且会报错）
-      if (isLocalEnv !== pluginIsLocal) {
-        logger.debug(`Plugin manifest skipped (cross-env): ${plugin.id}`);
-        return;
-      }
-
-      const manifestUrl =
-        plugin.url.replace(/\/?$/, "/") + "plugin-manifest.json";
-      try {
-        const res = await fetch(manifestUrl, {
-          signal: AbortSignal.timeout(3000),
-        });
-        if (!res.ok) return;
-        const data: unknown = await res.json();
-        if (!isPluginPublicManifest(data) || data.id !== plugin.id) return;
-
-        // 覆盖插件 nameI18n
-        if (data.nameI18n) {
-          plugin.nameI18n = data.nameI18n;
-        }
-        // 覆盖插件 descriptionI18n（存到 extraConfig 供 UI 使用）
-        if (data.descriptionI18n) {
-          plugin.extraConfig = {
-            ...plugin.extraConfig,
-            _descriptionI18n: JSON.stringify(data.descriptionI18n),
-          };
-        }
-        // 覆盖所属分组的 nameI18n
-        if (data.group?.nameI18n) {
-          const group = groupMap.get(data.group.id);
-          if (group) {
-            group.nameI18n = data.group.nameI18n;
-          }
-        }
-
-        logger.info(`Plugin manifest fetched: ${plugin.id}`);
-      } catch {
-        // 网络不通或插件未实现 manifest，静默跳过
-        logger.debug(
-          `Plugin manifest not available: ${plugin.id} (${manifestUrl})`
-        );
-      }
-    });
-
-    await Promise.allSettled(jobs);
   }
 
   /** 获取已加载的配置（合并后的结果） */

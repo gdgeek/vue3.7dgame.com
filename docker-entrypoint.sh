@@ -198,7 +198,17 @@ inject_locations "# __DOMAIN_LOCATIONS__" "$DOMAIN_LOCATIONS"
 
 echo "[entrypoint] Nginx config generated at $OUTPUT"
 
-# --- 5. 生成运行时环境变量注入文件 ---
+# --- 5. 替换 plugins.json 中的插件 URL 占位符 ---
+PLUGINS_FILE="/usr/share/nginx/html/config/plugins.json"
+if [ -f "$PLUGINS_FILE" ]; then
+  echo "[entrypoint] Substituting plugin URLs in $PLUGINS_FILE"
+  echo "[entrypoint]   PLUGIN_USER_MANAGEMENT_URL=${PLUGIN_USER_MANAGEMENT_URL:-<not set>}"
+  echo "[entrypoint]   PLUGIN_SYSTEM_ADMIN_URL=${PLUGIN_SYSTEM_ADMIN_URL:-<not set>}"
+  envsubst '$PLUGIN_USER_MANAGEMENT_URL $PLUGIN_SYSTEM_ADMIN_URL' \
+    < "$PLUGINS_FILE" > "${PLUGINS_FILE}.tmp" && mv "${PLUGINS_FILE}.tmp" "$PLUGINS_FILE"
+fi
+
+# --- 6. 生成运行时环境变量注入文件 ---
 ENV_JS="/usr/share/nginx/html/__env.js"
 echo "[entrypoint] Generating runtime env injection at $ENV_JS"
 cat > "$ENV_JS" <<EOF

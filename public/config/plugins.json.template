@@ -27,12 +27,12 @@
         "th-TH": "การจัดการผู้ใช้"
       },
       "description": "用户增删改查管理工具",
-      "url": "http://localhost:3003/",
+      "url": "${PLUGIN_USER_MANAGEMENT_URL}/",
       "icon": "User",
       "group": "builtins",
       "enabled": true,
       "order": 1,
-      "allowedOrigin": "http://localhost:3003",
+      "allowedOrigin": "${PLUGIN_USER_MANAGEMENT_URL}",
       "version": "1.0.0"
     },
     {
@@ -46,12 +46,12 @@
         "th-TH": "จัดการระบบ"
       },
       "description": "插件权限、插件注册、菜单分组管理",
-      "url": "http://localhost:3005/",
+      "url": "${PLUGIN_SYSTEM_ADMIN_URL}/",
       "icon": "Setting",
       "group": "builtins",
       "enabled": true,
       "order": 2,
-      "allowedOrigin": "http://localhost:3005",
+      "allowedOrigin": "${PLUGIN_SYSTEM_ADMIN_URL}",
       "version": "1.0.0"
     }
   ]

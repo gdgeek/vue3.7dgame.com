@@ -14,4 +14,7 @@ services:
       - VITE_APP_DOMAIN_INFO_API_URL=https://domain.xrteeth.com
       - NGINX_PORT=80
       - VITE_APP_PORT=3000
+      # 插件 URL（运行时注入到 plugins.json）
+      - PLUGIN_USER_MANAGEMENT_URL=http://localhost:3003
+      - PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005
     command: pnpm run dev --host

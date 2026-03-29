@@ -82,6 +82,7 @@ import {
   faFloppyDisk,
   faAppleWhole,
   faToolbox,
+  faClockRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { getVueAppleLoginConfig } from "@/utils/helper";
 import "element-plus/dist/index.css";
@@ -162,7 +163,8 @@ library.add(
   faChevronUp,
   faFloppyDisk,
   faAppleWhole,
-  faToolbox
+  faToolbox,
+  faClockRotateLeft
 );
 
 // 本地SVG图标
@@ -230,6 +232,14 @@ app.use(abilitiesPlugin, ability, {
   useGlobalProperties: true,
 });
 app.component("FontAwesomeIcon", FontAwesomeIcon);
+
+// 全局注册 Element Plus 图标，使 PluginMenu 中的 <component :is="iconName"> 动态渲染生效
+import * as ElementPlusIconsVue from "@element-plus/icons-vue";
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  app.component(key, component as any);
+}
+
 app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
 //app.use(ElementPlus);
