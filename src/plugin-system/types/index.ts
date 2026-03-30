@@ -41,6 +41,7 @@ export type PluginMessageType =
   | "PLUGIN_READY"
   | "TOKEN_UPDATE"
   | "THEME_CHANGE"
+  | "LANG_CHANGE"
   | "REQUEST"
   | "RESPONSE"
   | "EVENT"
