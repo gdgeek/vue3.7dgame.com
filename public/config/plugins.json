@@ -46,7 +46,7 @@
         "th-TH": "เครื่องมือ APK Rebuilder"
       },
       "description": "APK 打包与重建工具",
-      "url": "https://apk-rebuilder.plugins.xrugc.com/",
+      "url": "https://apk-rebuilder.plugins.xrugc.com/embed.html",
       "icon": "Download",
       "group": "tools",
       "enabled": true,

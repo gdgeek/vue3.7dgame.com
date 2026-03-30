@@ -39,9 +39,10 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const grouped = new Map<string, PluginInfo[]>();
       for (const plugin of state.plugins.values()) {
         if (!plugin.enabled) continue;
-        // 默认关闭：只有 API 成功返回了非空 actions 才显示
-        const actions = state.pluginPermissions[plugin.pluginId];
-        if (!actions || actions.length === 0) continue;
+        // 临时兜底：忽略权限结果，直接显示插件入口
+        // TODO: 恢复为按 allowed-actions 控制
+        // const actions = state.pluginPermissions[plugin.pluginId];
+        // if (!actions || actions.length === 0) continue;
 
         const list = grouped.get(plugin.group) ?? [];
         list.push(plugin);
@@ -60,11 +61,9 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const enabled = Array.from(state.plugins.values()).filter(
         (p) => p.enabled
       );
-      // 默认关闭：只有 API 成功返回了非空 actions 才显示
-      return enabled.filter((p) => {
-        const actions = state.pluginPermissions[p.pluginId];
-        return actions !== undefined && actions.length > 0;
-      });
+      // 临时兜底：忽略权限结果，直接显示插件入口
+      // TODO: 恢复为按 allowed-actions 控制
+      return enabled;
     },
 
     menuGroups(state): MenuGroup[] {
@@ -119,6 +118,33 @@ export const usePluginSystemStore = defineStore("plugin-system", {
 
       let permissionApiUnavailable = false;
 
+      const normalizeActions = (value: unknown): string[] | null => {
+        if (Array.isArray(value)) {
+          return value.filter((item): item is string => typeof item === "string");
+        }
+        if (typeof value === "string") {
+          const trimmed = value.trim();
+          return trimmed ? [trimmed] : [];
+        }
+        return null;
+      };
+
+      const extractActions = (payload: unknown): string[] | null => {
+        if (!payload || typeof payload !== "object") return null;
+        const data = (payload as { data?: unknown }).data;
+
+        return (
+          normalizeActions((payload as { actions?: unknown }).actions) ??
+          normalizeActions((payload as { allowedActions?: unknown }).allowedActions) ??
+          normalizeActions((payload as { permissions?: unknown }).permissions) ??
+          normalizeActions((data as { actions?: unknown })?.actions) ??
+          normalizeActions((data as { allowedActions?: unknown })?.allowedActions) ??
+          normalizeActions((data as { allowed_actions?: unknown })?.allowed_actions) ??
+          normalizeActions((data as { permissions?: unknown })?.permissions) ??
+          normalizeActions(data)
+        );
+      };
+
       for (const pluginId of enabledIds) {
         if (permissionApiUnavailable) break;
         try {
@@ -127,7 +153,10 @@ export const usePluginSystemStore = defineStore("plugin-system", {
             skipErrorMessage: true,
           });
           if (res.data?.code === 0) {
-            this.pluginPermissions[pluginId] = res.data.data?.actions ?? [];
+            const actions = extractActions(res.data);
+            if (actions) {
+              this.pluginPermissions[pluginId] = actions;
+            }
           }
           // code !== 0 时保持默认空数组（关闭）
         } catch (err) {
