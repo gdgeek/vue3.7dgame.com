@@ -58,21 +58,32 @@ export class ConfigService {
     const apiConfig = await this.loadApiConfig();
     const localConfig = await this.loadLocalConfig();
 
-    // 分组：本地优先，DB 中与本地同 id 的分组定义被忽略
-    const localGroupIds = new Set(localConfig.menuGroups.map((g) => g.id));
-    const dbOnlyGroups = apiConfig.menuGroups.filter(
-      (g) => !localGroupIds.has(g.id)
-    );
-    const menuGroups = [...localConfig.menuGroups, ...dbOnlyGroups];
+    // 插件：以 API 为基础，本地同 id 覆盖 API，本地新 id 追加到末尾
+    const apiPluginIds = new Set(apiConfig.plugins.map((p) => p.id));
+    const localPluginById = new Map(localConfig.plugins.map((p) => [p.id, p]));
+    const plugins = [
+      ...apiConfig.plugins.map((p) => localPluginById.get(p.id) ?? p),
+      ...localConfig.plugins.filter((p) => !apiPluginIds.has(p.id)),
+    ];
 
-    // 插件：两边全部显示，各自保留声明的 group，不去重
-    const plugins = [...localConfig.plugins, ...apiConfig.plugins];
+    // 分组：以 API 为基础，本地同 id 覆盖 API，本地新 id 追加到末尾
+    const apiGroupIds = new Set(apiConfig.menuGroups.map((g) => g.id));
+    const localGroupById = new Map(
+      localConfig.menuGroups.map((g) => [g.id, g])
+    );
+    const menuGroups = [
+      ...apiConfig.menuGroups.map((g) => localGroupById.get(g.id) ?? g),
+      ...localConfig.menuGroups.filter((g) => !apiGroupIds.has(g.id)),
+    ];
+
+    // 版本：本地优先（非空时），否则用 API
+    const version =
+      localConfig.version !== EMPTY_CONFIG.version
+        ? localConfig.version
+        : apiConfig.version;
 
     const merged: PluginsConfig = {
-      version:
-        apiConfig.version !== EMPTY_CONFIG.version
-          ? apiConfig.version
-          : localConfig.version,
+      version,
       menuGroups,
       plugins,
     };
