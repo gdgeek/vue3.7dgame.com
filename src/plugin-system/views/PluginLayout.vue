@@ -80,9 +80,12 @@ watch(currentThemeName, (newTheme) => {
 });
 
 /** 语言变更时广播 LANG_CHANGE 到所有活跃插件 */
-watch(() => appStore.language, (newLang) => {
-  pluginSystem.broadcastLangChange(newLang);
-});
+watch(
+  () => appStore.language,
+  (newLang) => {
+    pluginSystem.broadcastLangChange(newLang);
+  }
+);
 
 /** 等待下一 tick 确保 containerRef 已挂载 */
 function nextTickContainer(): Promise<void> {

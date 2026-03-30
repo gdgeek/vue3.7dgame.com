@@ -1,9 +1,7 @@
 import { createLogger } from "@/utils/logger";
 import request from "@/utils/request";
 
-import type {
-  PluginsConfig,
-} from "@/plugin-system/types";
+import type { PluginsConfig } from "@/plugin-system/types";
 
 const logger = createLogger("ConfigService");
 
@@ -62,16 +60,19 @@ export class ConfigService {
 
     // 分组：本地优先，DB 中与本地同 id 的分组定义被忽略
     const localGroupIds = new Set(localConfig.menuGroups.map((g) => g.id));
-    const dbOnlyGroups = apiConfig.menuGroups.filter((g) => !localGroupIds.has(g.id));
+    const dbOnlyGroups = apiConfig.menuGroups.filter(
+      (g) => !localGroupIds.has(g.id)
+    );
     const menuGroups = [...localConfig.menuGroups, ...dbOnlyGroups];
 
     // 插件：两边全部显示，各自保留声明的 group，不去重
     const plugins = [...localConfig.plugins, ...apiConfig.plugins];
 
     const merged: PluginsConfig = {
-      version: apiConfig.version !== EMPTY_CONFIG.version
-        ? apiConfig.version
-        : localConfig.version,
+      version:
+        apiConfig.version !== EMPTY_CONFIG.version
+          ? apiConfig.version
+          : localConfig.version,
       menuGroups,
       plugins,
     };
