@@ -6,6 +6,9 @@ import type { PluginInfo, PluginsConfig, MenuGroup } from "@/plugin-system";
 import Token from "@/store/modules/token";
 import request from "@/utils/request";
 
+const BYPASS_EMPTY_ACTIONS_IN_LOCAL =
+  import.meta.env.DEV || window.location.hostname === "localhost";
+
 interface PluginSystemState {
   initialized: boolean;
   config: PluginsConfig | null;
@@ -39,9 +42,11 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const grouped = new Map<string, PluginInfo[]>();
       for (const plugin of state.plugins.values()) {
         if (!plugin.enabled) continue;
-        // 默认关闭：只有 API 成功返回了非空 actions 才显示
-        const actions = state.pluginPermissions[plugin.pluginId];
-        if (!actions || actions.length === 0) continue;
+        // 本地联调可跳过 actions 过滤，线上仍保持默认关闭策略
+        if (!BYPASS_EMPTY_ACTIONS_IN_LOCAL) {
+          const actions = state.pluginPermissions[plugin.pluginId];
+          if (!actions || actions.length === 0) continue;
+        }
 
         const list = grouped.get(plugin.group) ?? [];
         list.push(plugin);
@@ -60,7 +65,10 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const enabled = Array.from(state.plugins.values()).filter(
         (p) => p.enabled
       );
-      // 默认关闭：只有 API 成功返回了非空 actions 才显示
+      // 本地联调可跳过 actions 过滤，线上仍保持默认关闭策略
+      if (BYPASS_EMPTY_ACTIONS_IN_LOCAL) {
+        return enabled;
+      }
       return enabled.filter((p) => {
         const actions = state.pluginPermissions[p.pluginId];
         return actions !== undefined && actions.length > 0;

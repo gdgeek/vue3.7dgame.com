@@ -125,6 +125,9 @@ export default {
     profile: "プロフィール",
     accountSecurity: "アカウントセキュリティ",
   },
+  plugin: {
+    title: "プラグイン",
+  },
   ui: {
     personalSettings: "個人設定",
     user: "ユーザー",
