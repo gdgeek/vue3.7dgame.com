@@ -13,6 +13,19 @@
       },
       "icon": "Setting",
       "order": 99
+    },
+    {
+      "id": "extensions",
+      "name": "扩展能力",
+      "nameI18n": {
+        "zh-CN": "扩展能力",
+        "zh-TW": "擴展能力",
+        "en-US": "Extensions",
+        "ja-JP": "拡張機能",
+        "th-TH": "ความสามารถส่วนขยาย"
+      },
+      "icon": "Setting",
+      "order": 100
     }
   ],
   "plugins": [
@@ -52,6 +65,25 @@
       "enabled": true,
       "order": 2,
       "allowedOrigin": "http://localhost:3005",
+      "version": "1.0.0"
+    },
+    {
+      "id": "apk-rebuilder",
+      "name": "APK 改包",
+      "nameI18n": {
+        "zh-CN": "APK 改包",
+        "zh-TW": "APK 改包",
+        "en-US": "APK Rebuilder",
+        "ja-JP": "APK リビルダー",
+        "th-TH": "APK Rebuilder"
+      },
+      "description": "标准包驱动的 APK 改包与重签名工具",
+      "url": "http://localhost:3007/",
+      "icon": "Setting",
+      "group": "extensions",
+      "enabled": true,
+      "order": 3,
+      "allowedOrigin": "http://localhost:3007",
       "version": "1.0.0"
     }
   ]

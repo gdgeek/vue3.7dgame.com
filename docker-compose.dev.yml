@@ -17,4 +17,5 @@ services:
       # 插件 URL（运行时注入到 plugins.json）
       - PLUGIN_USER_MANAGEMENT_URL=http://localhost:3003
       - PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005
+      - PLUGIN_APK_REBUILDER_URL=http://localhost:3007
     command: pnpm run dev --host

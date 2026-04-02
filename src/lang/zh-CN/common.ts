@@ -137,6 +137,9 @@ export default {
     profile: "个人资料",
     accountSecurity: "账号安全",
   },
+  plugin: {
+    title: "插件",
+  },
   ui: {
     personalSettings: "个人设置",
     user: "用户",

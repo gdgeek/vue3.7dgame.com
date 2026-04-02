@@ -123,6 +123,9 @@ export default {
     profile: "個人資料",
     accountSecurity: "帳號安全",
   },
+  plugin: {
+    title: "外掛",
+  },
   ui: {
     personalSettings: "個人設定",
     user: "用戶",
