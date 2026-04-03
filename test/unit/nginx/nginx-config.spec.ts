@@ -188,8 +188,8 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("APP_DOMAIN");
   });
 
-  it("uses generate_failover_chain function for reusable failover generation", () => {
-    expect(entrypointScript).toContain("generate_failover_chain");
+  it("uses generate_lb_config function for reusable load balancing generation", () => {
+    expect(entrypointScript).toContain("generate_lb_config");
   });
 
   it("generates /api/ failover chain", () => {

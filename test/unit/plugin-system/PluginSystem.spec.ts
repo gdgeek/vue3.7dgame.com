@@ -92,9 +92,15 @@ function createMockLoader(): PluginLoader {
     async (
       pluginId: string,
       manifest: PluginManifest,
-      _container: HTMLElement
+      _container: HTMLElement,
+      _options?: unknown,
+      onIframeCreated?: (iframe: HTMLIFrameElement) => void
     ): Promise<LoadedPlugin> => {
       const iframe = createMockIframe();
+      // Invoke the callback so MessageBus registration happens
+      if (onIframeCreated) {
+        onIframeCreated(iframe);
+      }
       const record: LoadedPlugin = {
         pluginId,
         iframe,
@@ -312,7 +318,8 @@ describe("PluginSystem", () => {
         "plugin-a",
         expect.objectContaining({ id: "plugin-a" }),
         container,
-        undefined
+        undefined,
+        expect.any(Function)
       );
     });
 
