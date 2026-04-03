@@ -724,7 +724,73 @@ window.addEventListener('message', (event) => {
 | 加载超时 | 插件加载时间 > 30秒 | 优化插件体积，检查网络 |
 | postMessage 无响应 | sandbox 限制 | 检查 sandbox 属性是否包含所需权限 |
 
-## 9. 部署清单
+## 9. 架构约束与常见陷阱
+
+### 9.1 Router Guard 不要检查 isInIframe()
+
+插件的 Vue Router 中**不要**添加 `isInIframe()` 检查的 `beforeEach` guard。iframe 检测和握手等待应完全由 `App.vue` 层统一处理。
+
+```typescript
+// ❌ 错误：router 中检查 isInIframe，会与 App.vue 握手逻辑产生竞态
+router.beforeEach((to) => {
+  if (!isInIframe()) return { name: 'NotAllowed' }
+  return true
+})
+
+// ✅ 正确：router 只做权限检查，iframe 检测由 App.vue 处理
+router.beforeEach(permissionGuard)
+```
+
+**原因：** router guard 在 App.vue setup 之前执行，两层检查互相干扰会导致每次刷新短暂闪现"请通过主系统访问"的警告。
+
+### 9.2 AppLayout 必须使用 ready 门控
+
+AppLayout（父组件）的 `onMounted` 中通常会调用 `fetchPermissions()` 和 `api.get('/me')` 等初始化请求。由于 Vue 的组件挂载顺序是**子组件先 mounted，父组件后 mounted**，子路由页面（如 UserList、PermissionList）的 `onMounted` 会在 AppLayout 之前执行。
+
+如果子页面在 `onMounted` 中直接发起 API 请求，而此时 token 验证还未完成，请求可能因 401 或 403 失败。
+
+**解决方案：** 在 AppLayout 中使用 `ready` 门控，确保初始化完成后才渲染 `<router-view>`：
+
+```vue
+<template>
+  <main class="content">
+    <!-- 等待初始化完成 -->
+    <div v-if="!ready" class="loading-state">
+      <el-icon class="is-loading" :size="24"><Loading /></el-icon>
+    </div>
+    <div v-else-if="loaded && !hasAny()" class="no-permission">
+      <el-empty description="权限不足" />
+    </div>
+    <router-view v-else />
+  </main>
+</template>
+
+<script setup lang="ts">
+const ready = ref(false)
+
+onMounted(async () => {
+  try {
+    await Promise.all([api.get('/me'), fetchPermissions()])
+  } catch {
+    // 静默失败
+  } finally {
+    ready.value = true  // 无论成功失败都放行
+  }
+})
+</script>
+```
+
+### 9.3 App.vue 握手层职责划分
+
+| 职责 | 负责组件 | 说明 |
+|------|---------|------|
+| iframe 检测 | App.vue | `isInIframe()` 同步检测，控制握手 UI |
+| 握手等待 | App.vue | `v-if="hasToken"` 控制 `<router-view>` 渲染 |
+| 权限检查 | Router guard | `permissionGuard` 检查用户是否有页面权限 |
+| 初始化门控 | AppLayout | `ready` 门控确保 API 初始化完成后才渲染子路由 |
+| 数据加载 | 子页面 | `onMounted` 中发起业务 API 请求 |
+
+## 10. 部署清单
 
 插件上线前请确认：
 
@@ -738,7 +804,7 @@ window.addEventListener('message', (event) => {
 - [ ] `plugins.json` 中已添加正确的配置
 - [ ] 在主框架中测试加载/卸载/重新加载流程
 
-## 10. API 参考速查
+## 11. API 参考速查
 
 ### 插件 → 主框架
 
