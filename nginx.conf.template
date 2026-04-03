@@ -1,3 +1,7 @@
+# __RESOLVER__
+
+# __LB_HTTP_BLOCK__
+
 server {
     listen 80;
     server_name localhost;
