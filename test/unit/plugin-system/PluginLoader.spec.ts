@@ -66,7 +66,7 @@ describe("PluginLoader", () => {
 
       const iframe = container.querySelector("iframe");
       expect(iframe).not.toBeNull();
-      expect(iframe?.src).toBe("https://editor.example.com/v2");
+      expect(iframe?.src).toBe("https://editor.example.com/v2?v=1.0.0");
     });
 
     it("should set default sandbox attribute when manifest.sandbox is undefined", async () => {
@@ -149,18 +149,13 @@ describe("PluginLoader", () => {
   });
 
   describe("load timeout", () => {
-    it("should reject when iframe does not fire load within timeout", async () => {
-      vi.useFakeTimers();
-
+    it("should resolve even when iframe does not fire load event (no timeout rejection)", async () => {
       const manifest = createManifest();
       const loadPromise = loader.load(manifest.id, manifest, container);
 
-      // Advance past the 30s timeout
-      vi.advanceTimersByTime(30_001);
-
-      await expect(loadPromise).rejects.toThrow("timed out");
-
-      vi.useRealTimers();
+      // load() now resolves immediately without waiting for iframe load event
+      const result = await loadPromise;
+      expect(result.pluginId).toBe(manifest.id);
     });
   });
 
