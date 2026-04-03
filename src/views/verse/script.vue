@@ -858,10 +858,10 @@ onMounted(async () => {
 
 .script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
   background: #fff;
-  height: 36px;
-  padding: 0 16px;
-  font-size: 14px;
-  line-height: 36px;
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 30px;
   border: 0.5px solid #d6deea !important;
   border-radius: 8px;
   outline: none !important;
