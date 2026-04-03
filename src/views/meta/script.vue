@@ -777,7 +777,7 @@ defineExpose({ run });
 
 .script-tabs-actions {
   position: absolute;
-  top: 4px;
+  top: 0;
   right: 0;
   z-index: 10;
   display: flex;
@@ -818,7 +818,7 @@ defineExpose({ run });
 
 .script-tabs-wrapper :deep(.el-tabs__header) {
   position: relative;
-  top: -4px;
+  top: -8px;
   padding-right: 280px;
   margin: 0 !important;
   border-bottom: none !important;
@@ -832,6 +832,10 @@ defineExpose({ run });
 
 .script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
   background: #fff;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+  line-height: 36px;
   border: 0.5px solid #d6deea !important;
   border-radius: 8px;
   outline: none !important;
@@ -871,8 +875,12 @@ defineExpose({ run });
   margin: 0;
   margin-top: 0;
   overflow: hidden;
+  background: #fff;
+  border: 0.5px solid #d6deea;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 .blockly-editor-frame {

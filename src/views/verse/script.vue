@@ -6,6 +6,22 @@
           <el-container v-if="!disabled">
             <div class="script-tabs-wrapper">
               <div v-if="verse" class="script-tabs-actions">
+                <el-select
+                  v-model="selectedLoadedMetaId"
+                  class="script-loaded-metas-select"
+                  size="small"
+                  :placeholder="$t('verse.listPage.loadedEntities')"
+                  :disabled="loadedMetaOptions.length === 0"
+                  popper-class="script-loaded-metas-popper"
+                  @change="handleLoadedMetaChange"
+                >
+                  <el-option
+                    v-for="metaOption in loadedMetaOptions"
+                    :key="metaOption.id"
+                    :label="metaOption.name"
+                    :value="metaOption.id"
+                  ></el-option>
+                </el-select>
                 <el-button
                   type="primary"
                   size="small"
@@ -191,6 +207,7 @@ import {
   type EditorToolbarStatus,
 } from "@/composables/useEditorVersionToolbar";
 import { useUserStore } from "@/store/modules/user";
+import { translateRouteTitle } from "@/utils/i18n";
 
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
@@ -214,12 +231,72 @@ const sceneEditorLink = computed(() => {
   return `/verse/scene?id=${id.value}&title=${encodeURIComponent(titleText)}`;
 });
 
+type LoadedMetaOption = {
+  id: number;
+  name: string;
+};
+
+const selectedLoadedMetaId = ref<number | null>(null);
+const loadedMetaOptions = computed<LoadedMetaOption[]>(() => {
+  const metas = Array.isArray(verse.value?.metas) ? verse.value!.metas : [];
+  if (metas.length === 0) return [];
+
+  const options: LoadedMetaOption[] = [];
+  const seen = new Set<number>();
+
+  metas.forEach((meta) => {
+    const metaId = Number(meta?.id);
+    if (!Number.isFinite(metaId) || seen.has(metaId)) return;
+    seen.add(metaId);
+    options.push({
+      id: metaId,
+      name:
+        (meta.title && String(meta.title).trim()) ||
+        (meta.name && String(meta.name).trim()) ||
+        `${t("verse.listPage.entityFallback")}${metaId}`,
+    });
+  });
+
+  return options;
+});
+
 const goBackToSceneEditor = async () => {
   const canLeave = await resolveUnsavedChangesBeforeLeave({
     showDiscardInfo: false,
   });
   if (!canLeave) return;
   router.push(sceneEditorLink.value);
+};
+
+const goToLoadedMetaEditor = async (metaId: number, metaName?: string) => {
+  const canLeave = await resolveUnsavedChangesBeforeLeave({
+    showDiscardInfo: false,
+  });
+  if (!canLeave) return;
+
+  const sceneRoute = router
+    .getRoutes()
+    .find((route) => route.path === "/meta/scene");
+  const sceneEditorTitle =
+    sceneRoute && typeof sceneRoute.meta?.title === "string"
+      ? translateRouteTitle(sceneRoute.meta.title)
+      : t("route.meta.sceneEditor");
+  const fallbackName = `${t("verse.listPage.entityFallback")}${metaId}`;
+  const title = encodeURIComponent(
+    `${sceneEditorTitle}【${metaName || fallbackName}】`
+  );
+
+  router.push({
+    path: "/meta/scene",
+    query: { id: metaId, title },
+  });
+};
+
+const handleLoadedMetaChange = async (metaId: number) => {
+  const selected = loadedMetaOptions.value.find(
+    (metaOption) => metaOption.id === metaId
+  );
+  await goToLoadedMetaEditor(metaId, selected?.name);
 };
 
 const saveable = computed(() => Boolean(verse.value?.editable));
@@ -707,7 +784,7 @@ onMounted(async () => {
 
 .script-tabs-actions {
   position: absolute;
-  top: 4px;
+  top: 0;
   right: 0;
   z-index: 10;
   display: flex;
@@ -715,10 +792,60 @@ onMounted(async () => {
   align-items: center;
 }
 
+.script-loaded-metas-select {
+  width: 180px;
+}
+
+.script-loaded-metas-select :deep(.el-select__wrapper) {
+  align-items: center;
+  min-height: 32px;
+}
+
+.script-loaded-metas-select :deep(.el-select__placeholder),
+.script-loaded-metas-select :deep(.el-select__selected-item) {
+  line-height: 20px;
+  text-align: center;
+}
+
+:global(.script-loaded-metas-popper.el-select__popper) {
+  padding: 0 !important;
+}
+
+:global(.script-loaded-metas-popper .el-select-dropdown__item) {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 34px;
+  text-align: left;
+}
+
+:global(
+  .script-loaded-metas-popper.el-select__popper .el-select-dropdown__item.hover,
+  .script-loaded-metas-popper.el-select__popper .el-select-dropdown__item:hover,
+  .script-loaded-metas-popper.el-select__popper
+    .el-select-dropdown__item.is-hovering
+) {
+  color: var(--primary-color, #03a9f4) !important;
+  background: var(--primary-light, rgb(3 169 244 / 12%)) !important;
+}
+
+:global(
+  .script-loaded-metas-popper.el-select__popper
+    .el-select-dropdown__item.selected:not(.hover, .is-hovering, :hover),
+  .script-loaded-metas-popper.el-select__popper
+    .el-select-dropdown__item.is-selected:not(.hover, .is-hovering, :hover)
+) {
+  font-weight: 500 !important;
+  color: var(--primary-color, #03a9f4) !important;
+  background: transparent !important;
+}
+
 .script-tabs-wrapper :deep(.el-tabs__header) {
   position: relative;
-  top: -4px;
-  padding-right: 280px;
+  top: -8px;
+  padding-right: 460px;
   margin: 0 !important;
   border-bottom: none !important;
 }
@@ -731,6 +858,10 @@ onMounted(async () => {
 
 .script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
   background: #fff;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+  line-height: 36px;
   border: 0.5px solid #d6deea !important;
   border-radius: 8px;
   outline: none !important;
@@ -770,8 +901,12 @@ onMounted(async () => {
   margin: 0;
   margin-top: 0;
   overflow: hidden;
+  background: #fff;
+  border: 0.5px solid #d6deea;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 .blockly-editor-frame {
@@ -788,6 +923,10 @@ onMounted(async () => {
 
   .script-tabs-wrapper :deep(.el-tabs__header) {
     padding-right: 0;
+  }
+
+  .script-loaded-metas-select {
+    width: 100%;
   }
 }
 
