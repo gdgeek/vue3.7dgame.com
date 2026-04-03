@@ -52,7 +52,9 @@ export class MessageBus {
       return;
     }
 
-    console.log(`[PluginSystem:handshake] MessageBus.sendToPlugin("${pluginId}") type=${message.type}, targetOrigin=${connection.origin}`);
+    console.log(
+      `[PluginSystem:handshake] MessageBus.sendToPlugin("${pluginId}") type=${message.type}, targetOrigin=${connection.origin}`
+    );
     connection.iframe.contentWindow?.postMessage(message, connection.origin);
   }
 
@@ -133,9 +135,20 @@ export class MessageBus {
   private handleMessage(event: MessageEvent): void {
     // Only log plugin-protocol messages to avoid infinite loop with DevTools postMessage
     const msgType = (event.data as PluginMessage)?.type;
-    const PLUGIN_TYPES = ['PLUGIN_READY', 'INIT', 'TOKEN_UPDATE', 'DESTROY', 'REQUEST', 'RESPONSE', 'EVENT', 'THEME_CHANGE'];
+    const PLUGIN_TYPES = [
+      "PLUGIN_READY",
+      "INIT",
+      "TOKEN_UPDATE",
+      "DESTROY",
+      "REQUEST",
+      "RESPONSE",
+      "EVENT",
+      "THEME_CHANGE",
+    ];
     if (msgType && PLUGIN_TYPES.includes(msgType)) {
-      console.log(`[PluginSystem:handshake] MessageBus.handleMessage: origin="${event.origin}", type="${msgType}"`);
+      console.log(
+        `[PluginSystem:handshake] MessageBus.handleMessage: origin="${event.origin}", type="${msgType}"`
+      );
     }
 
     // Find the plugin whose registered origin matches the event origin
@@ -146,19 +159,33 @@ export class MessageBus {
         logger.warn(
           `Message from unregistered origin discarded: ${event.origin}`
         );
-        console.warn(`[PluginSystem:handshake] MessageBus discarded message from origin="${event.origin}", type=${(event.data as PluginMessage)?.type}, registered origins=[${Array.from(this.connections.values()).map(c => c.origin).join(', ')}]`);
+        console.warn(
+          `[PluginSystem:handshake] MessageBus discarded message from origin="${event.origin}", type=${(event.data as PluginMessage)?.type}, registered origins=[${Array.from(
+            this.connections.values()
+          )
+            .map((c) => c.origin)
+            .join(", ")}]`
+        );
       } else {
         // Still log silently-discarded messages for debugging
         const msgType = (event.data as PluginMessage)?.type;
-        if (msgType === 'PLUGIN_READY') {
-          console.warn(`[PluginSystem:handshake] MessageBus SILENTLY discarded PLUGIN_READY from origin="${event.origin}", registered origins=[${Array.from(this.connections.values()).map(c => c.origin).join(', ')}]`);
+        if (msgType === "PLUGIN_READY") {
+          console.warn(
+            `[PluginSystem:handshake] MessageBus SILENTLY discarded PLUGIN_READY from origin="${event.origin}", registered origins=[${Array.from(
+              this.connections.values()
+            )
+              .map((c) => c.origin)
+              .join(", ")}]`
+          );
         }
       }
       return;
     }
 
     const message = event.data as PluginMessage;
-    console.log(`[PluginSystem:handshake] MessageBus received from plugin="${pluginId}" type=${message.type}`);
+    console.log(
+      `[PluginSystem:handshake] MessageBus received from plugin="${pluginId}" type=${message.type}`
+    );
 
     // Dispatch to general handlers
     for (const handler of this.handlers) {
