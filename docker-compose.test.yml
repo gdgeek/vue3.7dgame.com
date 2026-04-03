@@ -2,11 +2,16 @@ services:
   vue3:
     build: .
     environment:
+      # API 后端（支持负载均衡 + failover，WEIGHT 可选）
       - APP_API_1_URL=https://api.your-domain.com
       - APP_API_2_URL=https://backup-api.your-domain.com
+      # 域名信息 API
       - APP_DOMAIN_1_URL=https://domain-info.your-domain.com
       - APP_DOMAIN_2_URL=https://backup-domain-info.your-domain.com
+      # 文档 API
       - APP_DOC_API_URL=https://docs.your-domain.com/wp-json/wp/v2
+      # DNS 解析服务器（可选）
+      - APP_RESOLVER=8.8.8.8 223.5.5.5
     volumes:
       - ./dist:/usr/share/nginx/html
     ports:

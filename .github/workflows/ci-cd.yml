@@ -10,6 +10,7 @@ on:
         publish,
         "openclaw/improvements",
         "feature/nginx-api-proxy",
+        "test",
       ]
   pull_request:
     branches: [main, master, develop]
@@ -64,7 +65,7 @@ jobs:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/publish' || github.ref == 'refs/heads/openclaw/improvements' || github.ref == 'refs/heads/feature/nginx-api-proxy')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/publish' || github.ref == 'refs/heads/openclaw/improvements' || github.ref == 'refs/heads/feature/nginx-api-proxy' || github.ref == 'refs/heads/test')
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
 

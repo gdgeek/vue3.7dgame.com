@@ -7,12 +7,18 @@ services:
     ports:
       - "80:80"
     environment:
-      # API 后端（编号格式，第一个为主，后续为备用）
+      # API 后端（编号格式，支持负载均衡 + failover）
+      # WEIGHT 可选：不配则平均分配，配了按权重比例分流
       - APP_API_1_URL=https://api.xrteeth.com
+      - APP_API_1_WEIGHT=60
       - APP_API_2_URL=https://api.tmrpp.com
+      - APP_API_2_WEIGHT=40
       # 域名信息 API（编号格式，同上）
       - APP_DOMAIN_1_URL=https://domain.xrteeth.com
       - APP_DOMAIN_2_URL=https://domain.tmrpp.com
+      # DNS 解析服务器（可选，默认 8.8.8.8 223.5.5.5）
+      # 云内网建议用云厂商 DNS，如阿里云：100.100.2.136 100.100.2.138
+      - APP_RESOLVER=8.8.8.8 223.5.5.5
       # 文档 API
       - APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
       # Blockly / Editor iframe URL（运行时注入）
