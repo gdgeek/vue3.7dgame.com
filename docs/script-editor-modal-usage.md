@@ -57,8 +57,11 @@ const openMetaEditor = () => {
 
 - `openScriptEditor(options)` - 打开脚本编辑器模态窗口
 - `closeScriptEditor()` - 关闭模态窗口
+- `handleSaved()` - 触发保存回调（由模态窗口组件内部调用）
 - `isModalOpen` - 模态窗口是否打开（响应式）
 - `currentVerseId` - 当前编辑的 verse ID（响应式）
+- `currentMetaId` - 当前编辑的 meta ID（响应式）
+- `currentType` - 当前编辑器类型，`"verse"` 或 `"meta"`（响应式）
 - `currentTitle` - 当前标题（响应式）
 
 #### `openScriptEditor` 参数
@@ -82,7 +85,7 @@ interface ScriptEditorModalOptions {
   <div class="scene-editor">
     <el-button
       type="primary"
-      @click="openScriptEditor({ verseId: currentVerseId })"
+      @click="openScriptEditor({ type: 'verse', verseId: currentVerseId })"
     >
       编辑脚本
     </el-button>
@@ -122,6 +125,7 @@ const { openScriptEditor } = useScriptEditorModal();
 
 const editScript = (verseId: number) => {
   openScriptEditor({
+    type: "verse",
     verseId,
     onSaved: () => {
       ElMessage.success("脚本保存成功");
@@ -143,6 +147,7 @@ const { openScriptEditor } = useScriptEditorModal();
 
 const openWithCallback = () => {
   openScriptEditor({
+    type: "verse",
     verseId: 627,
     title: "高级脚本编辑",
     onSaved: async () => {
@@ -201,6 +206,8 @@ web/src/
 // 全局单例状态
 const isModalOpen = ref(false);
 const currentVerseId = ref<number>(0);
+const currentMetaId = ref<number>(0);
+const currentType = ref<"verse" | "meta">("verse");
 const currentTitle = ref<string>("");
 const savedCallback = ref<(() => void) | undefined>();
 ```

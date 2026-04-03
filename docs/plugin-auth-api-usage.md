@@ -21,6 +21,7 @@
 const axios = require('axios');
 
 const MAIN_API_BASE = process.env.MAIN_API_URL || 'http://xrugc-main-api/v1/plugin';
+// 开发环境直接调用：http://localhost:8081/v1/plugin
 
 // 中间件：验证用户身份
 async function authMiddleware(req, res, next) {
@@ -89,6 +90,7 @@ class PluginAuthService
     private string $baseUrl;
 
     public function __construct(string $baseUrl = 'http://xrugc-main-api/v1/plugin')
+    // 开发环境：http://localhost:8081/v1/plugin
     {
         $this->client = new Client(['timeout' => 5]);
         $this->baseUrl = $baseUrl;
@@ -163,3 +165,39 @@ http://xrugc-main-api/v1/plugin/check-permission
 - 每次 API 调用都会实时查询数据库，权限变更即时生效
 - 建议插件后端缓存 verify-token 结果（短时间内，如 30 秒），减少对主后端的请求
 - check-permission 不建议缓存，因为权限配置可能随时变更
+
+## 发送邮件示例
+
+插件可通过主后端发送验证码邮件，无需自行配置邮件服务。
+
+### Node.js 示例
+
+```javascript
+async function sendVerificationCode(authHeader, email, locale = 'zh-CN') {
+  const response = await axios.post(`${MAIN_API_BASE}/send-email`, {
+    email,
+    type: 'verification_code',
+    params: { locale }
+  }, {
+    headers: { Authorization: authHeader }
+  });
+
+  if (response.data.code === 0) {
+    return true; // 发送成功，验证码已存入 Redis，有效期 15 分钟
+  }
+
+  // 处理速率限制
+  if (response.data.code === 3004) {
+    const retryAfter = response.data.data?.retry_after;
+    throw new Error(`发送过于频繁，请 ${retryAfter} 秒后再试`);
+  }
+
+  throw new Error(response.data.message);
+}
+```
+
+### 速率限制说明
+
+- 同一邮箱：60 秒内最多发送 1 次
+- 同一用户：60 秒内最多发送 1 次
+- 超限时返回 HTTP 429，响应体包含 `retry_after`（剩余等待秒数）

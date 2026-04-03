@@ -163,6 +163,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .plugin-page {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -171,7 +172,8 @@ onBeforeUnmount(() => {
 }
 
 .plugin-page__iframe {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
 }
@@ -179,12 +181,19 @@ onBeforeUnmount(() => {
 .plugin-page__loading,
 .plugin-page__error,
 .plugin-page__empty {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
+  background: var(--el-bg-color);
+}
+
+.plugin-page__loading {
+  pointer-events: none;
 }
 </style>
 

@@ -26,6 +26,8 @@ export interface PluginLoadOptions {
   lang?: string;
   /** Current theme name, e.g. "edu-friendly" */
   theme?: string;
+  /** Plugin version string, appended as ?v=xxx to bust cache */
+  version?: string;
 }
 
 /**
@@ -50,7 +52,8 @@ export class PluginLoader {
     pluginId: string,
     manifest: PluginManifest,
     container: HTMLElement,
-    options?: PluginLoadOptions
+    options?: PluginLoadOptions,
+    onIframeCreated?: (iframe: HTMLIFrameElement) => void
   ): Promise<LoadedPlugin> {
     const existing = this.loaded.get(pluginId);
     if (existing) {
@@ -67,8 +70,11 @@ export class PluginLoader {
       }
     }
 
-    // Build iframe URL with optional lang/theme query params
-    const iframeUrl = this.buildPluginUrl(manifest.url, options);
+    // Build iframe URL with optional lang/theme/version query params
+    const iframeUrl = this.buildPluginUrl(manifest.url, {
+      ...options,
+      version: options?.version ?? manifest.version,
+    });
 
     logger.info(`Loading plugin "${pluginId}" from ${iframeUrl}`);
 
@@ -85,8 +91,13 @@ export class PluginLoader {
 
     container.appendChild(iframe);
 
-    // Wait for iframe to finish loading with timeout
-    await this.waitForLoad(iframe, pluginId);
+    // Register in MessageBus IMMEDIATELY after iframe is appended to DOM,
+    // BEFORE waiting for load. The plugin sends PLUGIN_READY during onMounted
+    // which fires before the iframe 'load' event. If we register after load,
+    // PLUGIN_READY is discarded because the origin isn't registered yet.
+    onIframeCreated?.(iframe);
+
+    // Wait for iframe to finish loading with timeout.
 
     const record: LoadedPlugin = {
       pluginId,
@@ -132,22 +143,26 @@ export class PluginLoader {
     iframe: HTMLIFrameElement,
     pluginId: string
   ): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        iframe.removeEventListener("load", onLoad);
-        reject(
-          new Error(
-            `Plugin "${pluginId}" iframe load timed out after ${LOAD_TIMEOUT_MS}ms`
-          )
-        );
-      }, LOAD_TIMEOUT_MS);
-
+    return new Promise<void>((resolve) => {
+      // Try to catch the load event (works when iframe hasn't loaded yet)
       const onLoad = () => {
         clearTimeout(timer);
+        console.log(`[PluginSystem:handshake] waitForLoad("${pluginId}") iframe load event fired`);
         resolve();
       };
 
+      // Attach listener BEFORE setting src to avoid race condition
       iframe.addEventListener("load", onLoad, { once: true });
+
+      // Fallback: if load event doesn't fire within 3s (e.g. already cached),
+      // resolve anyway — PLUGIN_READY handshake will confirm actual readiness
+      const timer = setTimeout(() => {
+        iframe.removeEventListener("load", onLoad);
+        console.warn(`[PluginSystem:handshake] waitForLoad("${pluginId}") load event not received after 3s, resolving anyway`);
+        resolve();
+      }, 3_000);
+
+      console.log(`[PluginSystem:handshake] waitForLoad("${pluginId}") waiting for iframe load event, src=${iframe.src}`);
     });
   }
 
@@ -171,6 +186,7 @@ export class PluginLoader {
       },
     };
 
+    console.log(`[PluginSystem:handshake] sendInitMessage to plugin="${manifest.id}", targetOrigin="${manifest.allowedOrigin}", hasToken=${!!jwt}, iframeConnected=${!!iframe.contentWindow}`);
     iframe.contentWindow?.postMessage(message, manifest.allowedOrigin);
     logger.debug(`INIT message sent to plugin "${manifest.id}"`);
   }
@@ -197,7 +213,7 @@ export class PluginLoader {
   }
 
   /**
-   * Build the full iframe URL by appending lang/theme query parameters.
+   * Build the full iframe URL by appending lang/theme/version query parameters.
    */
   private buildPluginUrl(baseUrl: string, options?: PluginLoadOptions): string {
     if (!options) return baseUrl;
@@ -206,6 +222,8 @@ export class PluginLoader {
     if (options.lang) params.push(`lang=${encodeURIComponent(options.lang)}`);
     if (options.theme)
       params.push(`theme=${encodeURIComponent(options.theme)}`);
+    if (options.version)
+      params.push(`v=${encodeURIComponent(options.version)}`);
     return params.length > 0
       ? `${baseUrl}${separator}${params.join("&")}`
       : baseUrl;

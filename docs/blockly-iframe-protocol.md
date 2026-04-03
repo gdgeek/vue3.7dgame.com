@@ -14,7 +14,7 @@ Blockly 脚本编辑器以 iframe 方式嵌入主系统弹窗/页面中，通过
 interface Message {
   type: string           // 消息类型（路由层）
   id: string             // 唯一消息 ID（时间戳 + 随机串）
-  payload?: unknown      // 消息负载
+  payload?: Record<string, unknown>  // 消息负载
   requestId?: string     // 关联的请求 ID（仅 RESPONSE 使用）
 }
 ```

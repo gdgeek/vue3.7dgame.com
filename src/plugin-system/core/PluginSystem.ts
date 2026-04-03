@@ -165,6 +165,8 @@ export class PluginSystem {
       throw new Error(`Plugin manifest not found for "${pluginId}"`);
     }
 
+    console.log(`[PluginSystem:handshake] loadPlugin("${pluginId}") start, url=${manifest.url}, allowedOrigin=${manifest.allowedOrigin}`);
+
     // Transition: current → loading
     this.transitionState(pluginId, "loading");
 
@@ -173,21 +175,24 @@ export class PluginSystem {
         pluginId,
         manifest,
         container,
-        options
+        options,
+        // Register in MessageBus as soon as iframe is in DOM (before load event),
+        // so PLUGIN_READY from the plugin is not discarded.
+        (iframe) => {
+          console.log(`[PluginSystem:handshake] loadPlugin("${pluginId}") iframe created, registering in MessageBus early`);
+          this.messageBus.registerPlugin(pluginId, iframe, manifest.allowedOrigin);
+        }
       );
 
-      // Register in MessageBus for communication
-      this.messageBus.registerPlugin(pluginId, loaded.iframe, loaded.origin);
+      console.log(`[PluginSystem:handshake] loadPlugin("${pluginId}") iframe loaded, origin=${loaded.origin}`);
 
       // Transition: loading → active
       this.transitionState(pluginId, "active");
 
-      // Send INIT immediately after iframe loads.
-      // The plugin sends PLUGIN_READY during onMounted (before the iframe
-      // 'load' event fires in some browsers), so MessageBus discards it
-      // because the plugin isn't registered yet.
-      // We proactively send INIT here after registration to ensure delivery.
-      this.sendInitToPlugin(pluginId);
+      // Do NOT proactively send INIT here — the iframe may not have finished
+      // loading its JS bundle yet. Instead, wait for PLUGIN_READY from the plugin,
+      // which is handled by handlePluginReady → sendInitToPlugin.
+      console.log(`[PluginSystem:handshake] loadPlugin("${pluginId}") waiting for PLUGIN_READY from plugin...`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
 
@@ -344,11 +349,14 @@ export class PluginSystem {
 
   /** Handle PLUGIN_READY message — transition loading → active if needed, then send INIT */
   private handlePluginReady(pluginId: string): void {
+    console.log(`[PluginSystem:handshake] handlePluginReady("${pluginId}")`);
     const info = this.plugins.get(pluginId);
     if (!info) {
       logger.warn(`Received PLUGIN_READY from unknown plugin: ${pluginId}`);
       return;
     }
+
+    console.log(`[PluginSystem:handshake] plugin state="${info.state}", sending INIT...`);
 
     // Only transition if still loading (proactive path already sets active)
     if (info.state === "loading") {
@@ -364,12 +372,19 @@ export class PluginSystem {
    */
   private sendInitToPlugin(pluginId: string): void {
     const manifest = this.registry.get(pluginId);
-    if (!manifest) return;
+    if (!manifest) {
+      console.warn(`[PluginSystem:handshake] sendInit("${pluginId}") — no manifest found`);
+      return;
+    }
 
     const iframe = this.loader.getIframe(pluginId);
-    if (!iframe) return;
+    if (!iframe) {
+      console.warn(`[PluginSystem:handshake] sendInit("${pluginId}") — no iframe found`);
+      return;
+    }
 
     const token = this.authService.getAccessToken() || "";
+    console.log(`[PluginSystem:handshake] sendInit("${pluginId}") token=${token ? token.slice(0, 20) + '...' : '(empty)'}, iframeSrc=${iframe.src}`);
     this.loader.sendInitMessage(iframe, manifest, token);
   }
 

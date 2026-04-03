@@ -5,7 +5,7 @@
 ## 基础信息
 
 - 基础路径：`/v1/plugin/`
-- 主后端 API 地址：`http://localhost:8091`（Docker 环境）
+- 主后端 API 地址：`http://localhost:8081`（开发环境）
 - 认证方式：`Authorization: Bearer {jwt_token}`
 - 响应格式：`application/json`
 
@@ -181,6 +181,82 @@ Authorization: Bearer {jwt_token}
 缺少参数 (400)：
 ```json
 { "code": 2001, "message": "缺少必要参数: plugin_name" }
+```
+
+Token 相关错误同 verify-token 端点。
+
+---
+
+## 4. 发送邮件
+
+### `POST /v1/plugin/send-email`
+
+插件通过主后端发送邮件（如邮箱验证码）。验证码生成后存储在 Redis 中，有效期 15 分钟。
+
+速率限制：同一邮箱 60 秒内最多 1 次，同一用户 60 秒内最多 1 次。
+
+### 请求
+
+```
+POST /v1/plugin/send-email
+Authorization: Bearer {jwt_token}
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "type": "verification_code",
+  "params": {
+    "locale": "zh-CN"
+  }
+}
+```
+
+### 请求体参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| email | string | 是 | 收件人邮箱 |
+| type | string | 是 | 邮件类型，目前仅支持 `verification_code` |
+| params | object | 否 | 模板参数，支持 `locale`（语言）和 `i18n`（自定义文案） |
+
+### 成功响应 (200)
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "email": "user@example.com",
+    "type": "verification_code"
+  }
+}
+```
+
+### 错误响应示例
+
+缺少参数 (400)：
+```json
+{ "code": 3001, "message": "缺少必要参数: email, type" }
+```
+
+不支持的邮件类型 (400)：
+```json
+{ "code": 3002, "message": "不支持的邮件类型: xxx，仅支持: verification_code" }
+```
+
+邮箱格式无效 (400)：
+```json
+{ "code": 3003, "message": "邮箱格式无效" }
+```
+
+发送频率超限 (429)：
+```json
+{ "code": 3004, "message": "发送过于频繁，请 58 秒后再试", "data": { "retry_after": 58 } }
+```
+
+发送失败 (500)：
+```json
+{ "code": 3005, "message": "邮件发送失败，请稍后重试" }
 ```
 
 Token 相关错误同 verify-token 端点。

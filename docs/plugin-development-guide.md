@@ -50,6 +50,8 @@ interface PluginMessage {
 | `INIT` | 主框架 → 插件 | 初始化消息，携带 token 和 config |
 | `PLUGIN_READY` | 插件 → 主框架 | 插件加载完成，准备就绪 |
 | `TOKEN_UPDATE` | 主框架 → 插件 | Token 刷新通知，携带新 token |
+| `THEME_CHANGE` | 主框架 → 插件 | 主题切换通知，携带 theme 和 dark 字段 |
+| `LANG_CHANGE` | 主框架 → 插件 | 语言切换通知，携带 lang 字段 |
 | `REQUEST` | 插件 → 主框架 | 插件向主框架发起请求 |
 | `RESPONSE` | 主框架 → 插件 | 主框架对请求的响应 |
 | `EVENT` | 双向 | 事件通知 |
@@ -767,6 +769,6 @@ window.parent.postMessage({
 ```javascript
 window.addEventListener('message', (event) => {
   const { type, id, payload, requestId } = event.data
-  // type: 'INIT' | 'TOKEN_UPDATE' | 'RESPONSE' | 'EVENT' | 'DESTROY'
+  // type: 'INIT' | 'TOKEN_UPDATE' | 'THEME_CHANGE' | 'LANG_CHANGE' | 'RESPONSE' | 'EVENT' | 'DESTROY'
 })
 ```

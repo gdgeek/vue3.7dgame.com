@@ -61,3 +61,4 @@ playwright-report/
 
 # pnpm store
 .pnpm-store/
+.copilot-specs-cache/

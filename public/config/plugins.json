@@ -13,6 +13,19 @@
       },
       "icon": "Setting",
       "order": 99
+    },
+    {
+      "id": "tools",
+      "name": "实用工具",
+      "nameI18n": {
+        "zh-CN": "实用工具",
+        "zh-TW": "實用工具",
+        "en-US": "Utilities",
+        "ja-JP": "ユーティリティ",
+        "th-TH": "เครื่องมือ"
+      },
+      "icon": "Tools",
+      "order": 100
     }
   ],
   "plugins": [
@@ -52,6 +65,25 @@
       "enabled": true,
       "order": 2,
       "allowedOrigin": "http://localhost:3005",
+      "version": "1.0.0"
+    },
+    {
+      "id": "plugin-template-frontend-only",
+      "name": "纯前端插件模板",
+      "nameI18n": {
+        "zh-CN": "纯前端插件模板",
+        "zh-TW": "純前端外掛模板",
+        "en-US": "Frontend-Only Plugin Template",
+        "ja-JP": "フロントエンド専用プラグインテンプレート",
+        "th-TH": "เทมเพลตปลั๊กอินฝั่งหน้าบ้าน"
+      },
+      "description": "无自有后端的插件开发模板",
+      "url": "http://localhost:3006/",
+      "icon": "Document",
+      "group": "tools",
+      "enabled": true,
+      "order": 1,
+      "allowedOrigin": "http://localhost:3006",
       "version": "1.0.0"
     }
   ]
