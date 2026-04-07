@@ -831,11 +831,16 @@ defineExpose({ run });
 }
 
 .script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: #fff;
-  height: 30px;
+  min-height: 30px;
   padding: 0 12px;
   font-size: 12px;
-  line-height: 30px;
+  line-height: 1.2;
+  white-space: nowrap;
   border: 0.5px solid #d6deea !important;
   border-radius: 8px;
   outline: none !important;
