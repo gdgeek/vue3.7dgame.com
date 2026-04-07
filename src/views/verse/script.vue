@@ -862,10 +862,11 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   background: #fff;
-  min-height: 30px;
-  padding: 0 12px;
+  height: 30px !important;
+  min-height: 0 !important;
+  padding: 0 12px !important;
   font-size: 12px;
-  line-height: 1.2;
+  line-height: 1.1;
   white-space: nowrap;
   border: 0.5px solid #d6deea !important;
   border-radius: 8px;
