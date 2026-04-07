@@ -375,6 +375,42 @@ onUnmounted(() => {
   gap: 24px;
   padding: 24px;
   overflow-y: auto;
+  background: var(--bg-card, #fff);
+
+  :deep(.el-loading-mask) {
+    background: var(
+      --detail-panel-loading-mask-bg,
+      rgb(255 255 255 / 84%)
+    ) !important;
+    backdrop-filter: blur(4px);
+  }
+
+  :deep(.el-loading-spinner) {
+    .circular {
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: var(--detail-panel-loading-spinner-bg, var(--bg-card, #fff));
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 999px;
+      box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+    }
+
+    .path {
+      stroke: var(
+        --detail-panel-loading-spinner-color,
+        var(--primary-color)
+      ) !important;
+    }
+
+    .el-loading-text {
+      margin-top: 12px;
+      color: var(
+        --detail-panel-loading-text-color,
+        var(--text-secondary)
+      ) !important;
+    }
+  }
 }
 
 // Footer (Fixed)

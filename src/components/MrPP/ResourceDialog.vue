@@ -77,7 +77,13 @@
             <div class="resource-item" :class="{ disabled: !item.enabled }">
               <div v-loading="!item.enabled">
                 <StandardCard
-                  :image="item.image?.url"
+                  :image="getCardPreviewUrl(item)"
+                  image-fit="contain"
+                  :contain-padding="item.type !== 'polygen'"
+                  :contain-scale="item.type === 'polygen' ? 0.88 : 1"
+                  :thumbnail-variant="
+                    item.type === 'audio' ? 'audio' : 'default'
+                  "
                   :title="getItemTitle(item)"
                   :meta="{
                     date: item.created_at
@@ -144,9 +150,17 @@
             </div>
             <div class="col-name">
               <div class="item-thumb" @click.stop="handleViewInfo(item)">
+                <div
+                  v-if="item.type === 'audio'"
+                  class="item-thumb-audio-badge"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'headphones']"
+                  ></font-awesome-icon>
+                </div>
                 <img
-                  v-if="item.image?.url"
-                  :src="toHttps(item.image.url)"
+                  v-else-if="getCardPreviewUrl(item)"
+                  :src="getCardPreviewUrl(item)"
                   :alt="getItemTitle(item)"
                 />
                 <div v-else class="thumb-placeholder">
@@ -372,7 +386,7 @@ const getTypeIcon = (type?: string): string[] => {
     case "video":
       return ["fas", "video"];
     case "audio":
-      return ["fas", "music"];
+      return ["fas", "headphones"];
     case "voxel":
       return ["fas", "cubes"];
     case "particle":
@@ -424,10 +438,24 @@ const detailPreviewUrl = computed(() => {
       detailResource.value.image?.url || detailResource.value.file?.url
     );
   }
+  if (detailType.value === "picture") {
+    return toHttps(
+      detailResource.value.file?.url || detailResource.value.image?.url || ""
+    );
+  }
   return (
     detailResource.value.image?.url || detailResource.value.file?.url || ""
   );
 });
+
+const getCardPreviewUrl = (item: CardInfo) => {
+  if (item.type === "audio") return undefined;
+  if (item.type === "picture") {
+    const picture = item.context as ResourceInfo;
+    return toHttps(picture.file?.url || item.image?.url || "");
+  }
+  return toHttps(item.image?.url || "");
+};
 
 const detailProperties = computed(() => {
   if (!detailResource.value) return [];
@@ -923,14 +951,30 @@ defineExpose({
   height: 48px;
   overflow: hidden;
   cursor: pointer;
-  background: var(--bg-secondary, #f1f5f9);
+  background: var(--resource-card-thumbnail-bg, #f4f7fa);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-sm, 12px);
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+  }
+}
+
+.item-thumb-audio-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(180deg, #1fb8f2 0%, #0999df 100%);
+  border-radius: 50%;
+  box-shadow: 0 6px 14px rgb(9 153 223 / 22%);
+
+  .svg-inline--fa {
+    font-size: 15px;
+    color: #fff;
   }
 }
 

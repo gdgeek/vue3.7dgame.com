@@ -55,6 +55,7 @@
         <template #grid-card="{ item }">
           <StandardCard
             :image="getVideoCover(item.image?.url)"
+            image-fit="contain"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :selected="isSelected(item.id)"

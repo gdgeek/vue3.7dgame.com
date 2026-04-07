@@ -2,7 +2,7 @@
   <div class="verse-code">
     <el-container>
       <el-main>
-        <el-card v-loading="loading" class="box-card">
+        <el-card class="box-card">
           <el-container v-if="!disabled">
             <div class="script-tabs-wrapper">
               <div v-if="meta" class="script-tabs-actions">
@@ -48,6 +48,14 @@
                   name="blockly"
                 >
                   <el-main class="blockly-editor-main">
+                    <div
+                      v-if="editorContentLoading"
+                      class="script-editor-loading-indicator"
+                    >
+                      <el-icon class="script-editor-loading-spinner is-loading">
+                        <Loading></Loading>
+                      </el-icon>
+                    </div>
                     <iframe
                       :key="editorFrameKey"
                       style="width: 100%; height: 100%; padding: 0; margin: 0"
@@ -176,7 +184,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { CopyDocument } from "@element-plus/icons-vue";
+import { CopyDocument, Loading } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -340,6 +348,7 @@ const {
   editorFrameKey,
   editor,
   src,
+  editorContentReady,
   isDark,
   toggleSceneFullscreen,
   postMessage,
@@ -381,6 +390,9 @@ const toolbarStatus = computed<EditorToolbarStatus>(() => {
   }
   return "saved";
 });
+const editorContentLoading = computed(
+  () => loading.value || !editorContentReady.value
+);
 
 onMounted(() => {
   registerToolbar(toolbarOwner, {
@@ -835,14 +847,15 @@ defineExpose({ run });
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  color: var(--text-secondary, #64748b);
+  background: var(--bg-card, #fff);
   height: 30px !important;
   min-height: 0 !important;
   padding: 0 12px !important;
   font-size: 12px;
   line-height: 1.1;
   white-space: nowrap;
-  border: 0.5px solid #d6deea !important;
+  border: 1px solid var(--border-color, #d6deea) !important;
   border-radius: 8px;
   outline: none !important;
   box-shadow: none !important;
@@ -855,9 +868,9 @@ defineExpose({ run });
 
 .script-tabs-wrapper
   :deep(.el-tabs--card > .el-tabs__header .el-tabs__item.is-active) {
-  color: #06a7ee;
-  background: #fff;
-  border: 0.5px solid #06a7ee !important;
+  color: var(--primary-color, #06a7ee);
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--primary-color, #06a7ee) !important;
   outline: none !important;
   box-shadow: none !important;
 }
@@ -881,8 +894,8 @@ defineExpose({ run });
   margin: 0;
   margin-top: 0;
   overflow: hidden;
-  background: #fff;
-  border: 0.5px solid #d6deea;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #d6deea);
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
   border-bottom-left-radius: 12px;
@@ -892,6 +905,28 @@ defineExpose({ run });
 .blockly-editor-frame {
   display: block;
   border: 0;
+  border-radius: inherit;
+  background: var(--bg-card, #fff);
+}
+
+.script-editor-loading-indicator {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.script-editor-loading-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-size: 22px;
+  color: var(--primary-color, #06a7ee);
 }
 
 @media (width <= 768px) {

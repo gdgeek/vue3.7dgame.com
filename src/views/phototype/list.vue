@@ -34,6 +34,7 @@
         <template #grid-card="{ item }">
           <StandardCard
             :image="item.image?.url"
+            image-fit="contain"
             :title="item.title || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :selected="isSelected(item.id!)"

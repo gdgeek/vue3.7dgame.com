@@ -28,6 +28,39 @@
   --bg-active: #e2e8f0;
   --bg-secondary: #f1f5f9;
   --bg-tertiary: #e2e8f0;
+  --resource-card-thumbnail-bg: color-mix(
+    in srgb,
+    var(--bg-card) 70%,
+    var(--bg-page) 30%
+  );
+  --resource-card-action-surface-bg: var(--bg-card);
+  --resource-card-action-btn-bg: color-mix(
+    in srgb,
+    var(--bg-card) 88%,
+    var(--bg-hover) 12%
+  );
+  --resource-card-action-btn-hover-bg: color-mix(
+    in srgb,
+    var(--bg-hover) 82%,
+    var(--primary-light) 18%
+  );
+  --resource-card-action-btn-border: color-mix(
+    in srgb,
+    var(--border-color) 88%,
+    var(--bg-card) 12%
+  );
+  --detail-panel-loading-mask-bg: color-mix(
+    in srgb,
+    var(--bg-card) 84%,
+    transparent 16%
+  );
+  --detail-panel-loading-spinner-bg: color-mix(
+    in srgb,
+    var(--bg-card) 88%,
+    var(--bg-page) 12%
+  );
+  --detail-panel-loading-spinner-color: var(--primary-color);
+  --detail-panel-loading-text-color: var(--text-secondary);
 
   // 兼容旧变量名
   --bg-color: var(--bg-page);
@@ -156,6 +189,43 @@
   --bg-active: #475569;
   --bg-secondary: #0f172a; // Darker background for secondary elements
   --bg-tertiary: #334155;
+  --resource-card-thumbnail-bg: color-mix(
+    in srgb,
+    var(--bg-card) 78%,
+    var(--bg-hover) 22%
+  );
+  --resource-card-action-surface-bg: color-mix(
+    in srgb,
+    var(--bg-card) 94%,
+    var(--bg-page) 6%
+  );
+  --resource-card-action-btn-bg: color-mix(
+    in srgb,
+    var(--bg-card) 82%,
+    var(--bg-hover) 18%
+  );
+  --resource-card-action-btn-hover-bg: color-mix(
+    in srgb,
+    var(--bg-hover) 78%,
+    var(--primary-light) 22%
+  );
+  --resource-card-action-btn-border: color-mix(
+    in srgb,
+    var(--border-color) 82%,
+    var(--bg-card) 18%
+  );
+  --detail-panel-loading-mask-bg: color-mix(
+    in srgb,
+    var(--bg-card) 88%,
+    transparent 12%
+  );
+  --detail-panel-loading-spinner-bg: color-mix(
+    in srgb,
+    var(--bg-card) 72%,
+    var(--bg-hover) 28%
+  );
+  --detail-panel-loading-spinner-color: var(--primary-color);
+  --detail-panel-loading-text-color: var(--text-secondary);
   --bg-color: var(--bg-page);
   --card-bg: var(--bg-card);
   --border-color: #334155;

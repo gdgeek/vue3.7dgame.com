@@ -502,7 +502,8 @@ const select = async () => {
             const imageFile = processed.image;
             const imageMd5 = await fileStore.store.fileMD5(imageFile);
             const imageHandler = await fileStore.store.publicHandler();
-            const imageExtension = ".jpg";
+            const imageExtension =
+              imageFile.type === "image/png" ? ".png" : ".jpg";
 
             const imageHas = await fileStore.store.fileHas(
               imageMd5,

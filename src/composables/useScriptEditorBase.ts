@@ -131,6 +131,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const src = ref(
     env.blockly + "?language=" + appStore.language + "&v=" + env.buildVersion
   );
+  const editorContentReady = ref(false);
   const isDark = computed<boolean>(
     () => settingsStore.theme === ThemeEnum.DARK
   );
@@ -461,6 +462,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
 
   const reloadEditorFrame = () => {
     ready = false;
+    editorContentReady.value = false;
     editorFrameKey.value += 1;
   };
 
@@ -797,6 +799,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         if (payload.event === "update") {
           // --- 工作区实时更新 ---
           if (!isEditorUpdatePayload(payload)) return;
+          editorContentReady.value = true;
           const updateData: EditorUpdatePayload = {
             lua: payload.lua as string,
             js: payload.js as string,
@@ -879,6 +882,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   watch(
     () => appStore.language,
     (newValue) => {
+      editorContentReady.value = false;
       src.value =
         env.blockly + "?language=" + newValue + "&v=" + env.buildVersion;
       options.onReady(); // 语言切换时重新初始化编辑器
@@ -973,6 +977,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     editorFrameKey,
     editor,
     src,
+    editorContentReady,
     isDark,
     // 函数
     handleBlocklyChange,

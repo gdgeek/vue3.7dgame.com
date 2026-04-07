@@ -303,7 +303,7 @@ const uploadSingleFile = async (file: File) => {
         // Upload screenshot
         const imageFile = processed.image;
         const imageMd5 = await fileStore.store.fileMD5(imageFile);
-        const imageExtension = ".jpg";
+        const imageExtension = imageFile.type === "image/png" ? ".png" : ".jpg";
         const imageHas = await fileStore.store.fileHas(
           imageMd5,
           imageExtension,

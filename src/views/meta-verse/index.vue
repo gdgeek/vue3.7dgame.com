@@ -46,6 +46,7 @@
         <template #grid-card="{ item }">
           <StandardCard
             :image="item.image?.url"
+            image-fit="contain"
             :title="item.name || t('verse.listPage.unnamed')"
             :description="item.description"
             :type-icon="['fas', 'layer-group']"
@@ -1416,6 +1417,7 @@ const formatItemDate = (dateStr?: string) => {
 .list-view {
   :deep(.single-card-actions) {
     display: flex;
+    background: var(--resource-card-action-surface-bg, var(--bg-card, #fff));
     border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
   }
 
@@ -1430,14 +1432,18 @@ const formatItemDate = (dateStr?: string) => {
     font-weight: 600;
     color: var(--text-secondary, #64748b);
     cursor: pointer;
-    background: var(--bg-hover, #f8fafc);
-    border: none;
+    background: var(--resource-card-action-btn-bg, var(--bg-hover, #f8fafc));
+    border: 1px solid
+      var(--resource-card-action-btn-border, var(--border-color, #e2e8f0));
     transition: all 0.2s ease;
   }
 
   :deep(.single-card-action-btn:hover) {
     color: var(--primary-color, #03a9f4);
-    background: var(--bg-active, #eef7ff);
+    background: var(
+      --resource-card-action-btn-hover-bg,
+      var(--bg-active, #e2e8f0)
+    );
   }
 
   :deep(.standard-card .card-content) {

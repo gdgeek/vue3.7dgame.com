@@ -54,7 +54,8 @@
       >
         <template #grid-card="{ item }">
           <StandardCard
-            :image="item.image?.url"
+            :image="getPictureThumbnailUrl(item)"
+            image-fit="contain"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :placeholder-icon="['fas', 'image']"
@@ -76,8 +77,8 @@
           <div class="col-name">
             <div class="item-thumb">
               <img
-                v-if="item.image?.url"
-                :src="toHttps(item.image.url)"
+                v-if="getPictureThumbnailUrl(item)"
+                :src="getPictureThumbnailUrl(item)"
                 :alt="item.name"
               />
               <div v-else class="thumb-placeholder">
@@ -340,6 +341,10 @@ const detailProperties = computed(() => {
       : []),
   ];
 });
+
+const getPictureThumbnailUrl = (item: ResourceInfo) => {
+  return toHttps(item.file?.url || item.image?.url || "");
+};
 
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
@@ -604,7 +609,7 @@ const formatItemDate = (dateStr?: string) => {
   width: 52px;
   height: 52px;
   overflow: hidden;
-  background: var(--bg-hover, #f8fafc);
+  background: var(--resource-card-thumbnail-bg, #f4f7fa);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-sm, 12px);
   transition: transform var(--transition-fast, 0.15s ease);
@@ -612,7 +617,7 @@ const formatItemDate = (dateStr?: string) => {
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 }
 

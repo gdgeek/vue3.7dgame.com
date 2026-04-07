@@ -54,7 +54,7 @@
       >
         <template #grid-card="{ item }">
           <StandardCard
-            :image="item.image?.url || getDefaultAvatarUrl(item.id, 'thumbs')"
+            thumbnail-variant="audio"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :selected="isSelected(item.id)"
@@ -74,11 +74,12 @@
             ></el-checkbox>
           </div>
           <div class="col-name">
-            <div class="item-thumb">
-              <img
-                :src="item.image?.url || getDefaultAvatarUrl(item.id, 'thumbs')"
-                :alt="item.name"
-              />
+            <div class="item-thumb item-thumb-audio">
+              <div class="item-thumb-audio-badge">
+                <font-awesome-icon
+                  :icon="['fas', 'headphones']"
+                ></font-awesome-icon>
+              </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
           </div>
@@ -210,7 +211,6 @@ import {
   getResourceFormat,
 } from "@/utils/utilityFunctions";
 import { toHttps } from "@/utils/helper";
-import { getDefaultAvatarUrl } from "@/utils/avatar";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
 import {
   denseResourceBreakpoints,
@@ -596,7 +596,7 @@ const formatItemDate = (dateStr?: string) => {
   width: 52px;
   height: 52px;
   overflow: hidden;
-  background: var(--bg-hover, #f8fafc);
+  background: var(--resource-card-thumbnail-bg, #f4f7fa);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-sm, 12px);
   transition: transform var(--transition-fast, 0.15s ease);
@@ -604,7 +604,23 @@ const formatItemDate = (dateStr?: string) => {
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+  }
+}
+
+.item-thumb-audio-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(180deg, #1fb8f2 0%, #0999df 100%);
+  border-radius: 50%;
+  box-shadow: 0 6px 14px rgb(9 153 223 / 22%);
+
+  .svg-inline--fa {
+    font-size: 15px;
+    color: #fff;
   }
 }
 

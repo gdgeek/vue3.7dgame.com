@@ -388,7 +388,7 @@ const screenshot = (): Promise<Blob> => {
         sleep = false;
         reject("Renderer or Camera is not initialized");
       }
-    }, "image/jpeg");
+    }, "image/png");
   });
 };
 defineExpose({ screenshot });

@@ -17,32 +17,48 @@ export interface ProcessedModel {
   image: File;
 }
 
-export const processModel = (file: File): Promise<ProcessedModel> => {
+const createRenderer = () => {
+  const renderer = new THREE.WebGLRenderer({
+    preserveDrawingBuffer: true,
+    antialias: true,
+    alpha: true,
+  });
+  renderer.setSize(512, 512);
+  renderer.setClearColor(0x000000, 0);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  return renderer;
+};
+
+const createGltfLoader = (renderer: THREE.WebGLRenderer) => {
+  const gltfLoader = new GLTFLoader();
+
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath("/js/three.js/libs/draco/");
+  gltfLoader.setDRACOLoader(dracoLoader);
+
+  const ktx2Loader = new KTX2Loader()
+    .setTranscoderPath("/js/three.js/libs/basis/")
+    .detectSupport(renderer);
+  gltfLoader.setKTX2Loader(ktx2Loader);
+
+  return { gltfLoader, dracoLoader, ktx2Loader };
+};
+
+const captureModelFromUrl = (
+  url: string,
+  filename: string
+): Promise<ProcessedModel> => {
   return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const gltfLoader = new GLTFLoader();
-
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath("/js/three.js/libs/draco/");
-    gltfLoader.setDRACOLoader(dracoLoader);
-
-    // We need a renderer to detect KTX2 support and for taking the screenshot
     const width = 512;
     const height = 512;
-    const renderer = new THREE.WebGLRenderer({
-      preserveDrawingBuffer: true,
-      antialias: true,
-      alpha: true, // Use alpha to handle background if needed, or set clear color
-    });
-    renderer.setSize(width, height);
-    renderer.setClearColor(0xeeffff, 1);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    const ktx2Loader = new KTX2Loader()
-      .setTranscoderPath("/js/three.js/libs/basis/")
-      .detectSupport(renderer);
-    gltfLoader.setKTX2Loader(ktx2Loader);
+    const renderer = createRenderer();
+    const { gltfLoader, dracoLoader, ktx2Loader } = createGltfLoader(renderer);
+    const cleanup = () => {
+      renderer.dispose();
+      dracoLoader.dispose();
+      ktx2Loader.dispose();
+    };
 
     gltfLoader.load(
       url,
@@ -108,8 +124,9 @@ export const processModel = (file: File): Promise<ProcessedModel> => {
         scene.add(new THREE.AmbientLight(0xffffff, 1.2));
 
         // Position model
-        const targetSize = 1.5;
-        const scale = targetSize / size.x;
+        const targetSize = 1.35;
+        const maxDimension = Math.max(size.x, size.y, size.z, 0.0001);
+        const scale = targetSize / maxDimension;
         model.position.set(
           -center.x * scale,
           -center.y * scale,
@@ -137,32 +154,47 @@ export const processModel = (file: File): Promise<ProcessedModel> => {
           if (blob) {
             const imageFile = new File(
               [blob],
-              file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+              filename.replace(/\.[^/.]+$/, "") + ".png",
               {
-                type: "image/jpeg",
+                type: "image/png",
                 lastModified: Date.now(),
               }
             );
 
-            // Cleanup
-            URL.revokeObjectURL(url);
-            renderer.dispose();
+            cleanup();
 
             resolve({
               info,
               image: imageFile,
             });
           } else {
+            cleanup();
             reject(new Error("Failed to generate screenshot blob"));
           }
-        }, "image/jpeg");
+        }, "image/png");
       },
       undefined,
       (error) => {
-        URL.revokeObjectURL(url);
-        renderer.dispose();
+        cleanup();
         reject(error);
       }
     );
   });
+};
+
+export const processModel = async (file: File): Promise<ProcessedModel> => {
+  const url = URL.createObjectURL(file);
+  try {
+    return await captureModelFromUrl(url, file.name);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+};
+
+export const generateModelThumbnailFromUrl = async (
+  url: string,
+  filename = "model.glb"
+): Promise<File> => {
+  const result = await captureModelFromUrl(url, filename);
+  return result.image;
 };

@@ -89,7 +89,32 @@ const emit = defineEmits<{
 .entity-select {
   :deep(.el-select__wrapper) {
     min-height: 40px;
+    padding: 0 14px;
+    color: var(--text-primary, #1e293b);
+    background: var(--bg-card, #fff) !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
     border-radius: var(--radius-full, 9999px);
+    box-shadow: none !important;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:hover {
+      border-color: var(--border-color-hover, #94a3b8) !important;
+    }
+
+    &.is-focused,
+    &.is-hovering,
+    &:focus-within {
+      background: var(--bg-card, #fff) !important;
+      border-color: var(--primary-color, #00baff) !important;
+      box-shadow: 0 0 0 3px var(--primary-light, rgb(0 186 255 / 10%)) !important;
+    }
+  }
+
+  :deep(.el-select__caret) {
+    color: var(--text-muted, #94a3b8) !important;
   }
 }
 
@@ -98,13 +123,26 @@ const emit = defineEmits<{
   :deep(.el-input__inner),
   :deep(.el-select__placeholder) {
     width: 100%;
+    color: var(--text-secondary, #64748b) !important;
     text-align: left;
+  }
+
+  :deep(.el-select__selected-item) {
+    color: var(--text-primary, #1e293b) !important;
   }
 }
 
 .scene-select,
 .entity-select {
   width: 180px;
+
+  :deep(.el-select__selected-item) {
+    color: var(--text-primary, #1e293b) !important;
+  }
+
+  :deep(.el-select__placeholder) {
+    color: var(--text-secondary, #64748b) !important;
+  }
 }
 </style>
 

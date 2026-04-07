@@ -32,7 +32,19 @@
     <!-- Thumbnail Area -->
     <div class="card-thumbnail" :style="{ aspectRatio }" @click="$emit('view')">
       <div class="thumbnail-inner">
-        <img v-if="image" :src="image" :alt="title" />
+        <div v-if="thumbnailVariant === 'audio'" class="audio-thumbnail">
+          <div class="audio-thumbnail-badge">
+            <font-awesome-icon
+              :icon="typeIcon || placeholderIcon || ['fas', 'headphones']"
+            ></font-awesome-icon>
+          </div>
+        </div>
+        <img
+          v-else-if="image"
+          :src="image"
+          :alt="title"
+          :style="thumbnailImageStyle"
+        />
         <div v-else class="thumbnail-placeholder">
           <font-awesome-icon :icon="placeholderIcon"></font-awesome-icon>
         </div>
@@ -120,6 +132,9 @@ const props = withDefaults(
     typeIcon?: string | string[];
     showCheckbox?: boolean;
     aspectRatio?: string;
+    imageFit?: "cover" | "contain";
+    thumbnailVariant?: "default" | "audio";
+    containPadding?: boolean;
   }>(),
   {
     actionIcon: () => ["fas", "pen-to-square"],
@@ -129,6 +144,9 @@ const props = withDefaults(
     typeIcon: "",
     showCheckbox: true,
     aspectRatio: "1 / 1",
+    imageFit: "cover",
+    thumbnailVariant: "default",
+    containPadding: true,
   }
 );
 
@@ -140,6 +158,15 @@ const emit = defineEmits<{
 
 const isHovered = ref(false);
 const isSelected = computed(() => props.selected);
+const thumbnailImageStyle = computed(() => ({
+  objectFit: props.imageFit,
+  padding:
+    props.imageFit === "contain" &&
+    props.thumbnailVariant !== "audio" &&
+    props.containPadding
+      ? "10px"
+      : "0",
+}));
 
 const displayTags = computed(() => props.tags?.slice(0, 2) || []);
 
@@ -254,17 +281,48 @@ const toggleSelect = () => {
 .thumbnail-inner {
   width: 100%;
   height: 100%;
-  background: var(--bg-secondary, #f1f5f9);
+  background: var(--resource-card-thumbnail-bg, #f4f7fa);
 
   img {
+    box-sizing: border-box;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    background: transparent;
+    object-position: center;
     transition: transform var(--transition-slow, 0.3s ease);
   }
 }
 
 .standard-card:hover .thumbnail-inner img {
+  transform: scale(1.05);
+}
+
+.audio-thumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.audio-thumbnail-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(72px, 34%, 112px);
+  height: clamp(72px, 34%, 112px);
+  background: linear-gradient(180deg, #1fb8f2 0%, #0999df 100%);
+  border-radius: 50%;
+  box-shadow: 0 10px 24px rgb(9 153 223 / 22%);
+  transition: transform var(--transition-slow, 0.3s ease);
+
+  .svg-inline--fa {
+    font-size: clamp(32px, 14%, 46px);
+    color: #fff;
+  }
+}
+
+.standard-card:hover .audio-thumbnail-badge {
   transform: scale(1.05);
 }
 
@@ -274,11 +332,7 @@ const toggleSelect = () => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    135deg,
-    var(--bg-secondary, #f1f5f9) 0%,
-    var(--bg-tertiary, #e2e8f0) 100%
-  );
+  background: var(--resource-card-thumbnail-bg, #f4f7fa);
 
   .svg-inline--fa {
     font-size: 48px;

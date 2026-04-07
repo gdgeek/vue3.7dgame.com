@@ -54,7 +54,10 @@
       >
         <template #grid-card="{ item }">
           <StandardCard
+            class="polygen-card"
             :image="item.image?.url"
+            image-fit="contain"
+            :contain-padding="false"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :selected="isSelected(item.id)"
@@ -196,7 +199,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, computed } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
 import {
@@ -211,6 +214,7 @@ import {
 import StandardUploadDialog from "@/components/StandardPage/StandardUploadDialog.vue";
 import PolygenView from "@/components/PolygenView.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { postFile } from "@/api/v1/files";
 import {
   getPolygens,
   getPolygen,
@@ -219,6 +223,7 @@ import {
   postPolygen,
 } from "@/api/v1/resources/index";
 import type { ResourceInfo } from "@/api/v1/resources/model";
+import type { UploadFileType } from "@/api/user/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
 import { downloadResource } from "@/utils/downloadHelper";
@@ -229,12 +234,15 @@ import {
 } from "@/utils/utilityFunctions";
 import { toHttps } from "@/utils/helper";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
+import { useFileStore } from "@/store/modules/config";
+import { generateModelThumbnailFromUrl } from "@/utils/modelProcessor";
 import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
 } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
+const fileStore = useFileStore().store;
 
 // Standard page data
 const {
@@ -346,9 +354,16 @@ const detailLoading = ref(false);
 const polygenViewRef = ref<InstanceType<typeof PolygenView> | null>(null);
 const isPreviewHovered = ref(false);
 const hasPreviewInteracted = ref(false);
+const refreshingThumbnail = ref(false);
+const refreshedThumbnailId = ref<number | null>(null);
 const loadedModelStats = ref<{ faces?: number; vertices?: number } | null>(
   null
 );
+const autoRefreshingPageThumbnails = ref(false);
+const refreshedPageThumbnailIds = new Set<number>();
+const failedPageThumbnailIds = new Set<number>();
+let autoRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+let autoRefreshCycle = 0;
 
 const formatModelStat = (value: unknown) => {
   const numericValue = Number(value);
@@ -410,6 +425,8 @@ const handlePanelClose = () => {
   hasAnimations.value = false;
   isPreviewHovered.value = false;
   hasPreviewInteracted.value = false;
+  refreshingThumbnail.value = false;
+  refreshedThumbnailId.value = null;
   loadedModelStats.value = null;
 };
 
@@ -431,6 +448,177 @@ const hasAnimationsFromResourceInfo = (resource: ResourceInfo | null) => {
   }
 };
 
+const hasLegacyThumbnail = (resource: ResourceInfo | null) => {
+  const imageUrl = resource?.image?.url || "";
+  return /\.(jpe?g)(\?|$)/i.test(imageUrl);
+};
+
+const needsThumbnailRefresh = (resource: ResourceInfo | null) => {
+  if (!resource) return false;
+  const imageUrl = resource.image?.url || "";
+  return !imageUrl || hasLegacyThumbnail(resource);
+};
+
+const updateDisplayedThumbnail = (
+  resourceId: number,
+  image: NonNullable<ResourceInfo["image"]>
+) => {
+  const updateTarget = (target: ResourceInfo | null) => {
+    if (target && target.id === resourceId) {
+      target.image = image;
+    }
+  };
+
+  updateTarget(currentPolygen.value);
+  displayItems.value.forEach(updateTarget);
+  items.value?.forEach(updateTarget);
+};
+
+const uploadThumbnailFile = async (resource: ResourceInfo, file: File) => {
+  const extension = ".png";
+  const md5 = await fileStore.fileMD5(file);
+  const handler = await fileStore.publicHandler();
+  const has = await fileStore.fileHas(
+    md5,
+    extension,
+    handler,
+    "screenshot/polygen"
+  );
+
+  if (!has) {
+    await fileStore.fileUpload(
+      md5,
+      extension,
+      file,
+      () => {},
+      handler,
+      "screenshot/polygen"
+    );
+  }
+
+  const fileData: UploadFileType = {
+    filename: file.name,
+    md5,
+    key: md5 + extension,
+    url: fileStore.fileUrl(md5, extension, handler, "screenshot/polygen"),
+  };
+  const fileResponse = await postFile(fileData);
+  await putPolygen(String(resource.id), { image_id: fileResponse.data.id });
+
+  const image = {
+    ...(resource.image || {}),
+    id: fileResponse.data.id,
+    url: fileData.url,
+  };
+  updateDisplayedThumbnail(resource.id, image);
+
+  return image;
+};
+
+const refreshThumbnailForResource = async (resource: ResourceInfo) => {
+  const detail = (await getPolygen(resource.id)) as { data: ResourceInfo };
+  const fileUrl = detail.data.file?.url;
+
+  if (!fileUrl) return false;
+
+  const thumbnailFile = await generateModelThumbnailFromUrl(
+    fileUrl,
+    `${resource.name || "model"}.glb`
+  );
+
+  await uploadThumbnailFile(resource, thumbnailFile);
+  return true;
+};
+
+const refreshCurrentThumbnail = async () => {
+  const resource = currentPolygen.value;
+  if (
+    !resource ||
+    refreshingThumbnail.value ||
+    refreshedThumbnailId.value === resource.id ||
+    !needsThumbnailRefresh(resource)
+  ) {
+    return;
+  }
+
+  try {
+    refreshingThumbnail.value = true;
+    const blob = await polygenViewRef.value?.screenshot();
+    if (!blob) return;
+
+    const file = new File([blob], `${resource.name || "model"}.png`, {
+      type: "image/png",
+      lastModified: Date.now(),
+    });
+    const image = await uploadThumbnailFile(resource, file);
+
+    refreshedThumbnailId.value = resource.id;
+    currentPolygen.value = { ...resource, image };
+  } catch (error) {
+    logger.error("Failed to refresh polygen thumbnail", error);
+  } finally {
+    refreshingThumbnail.value = false;
+  }
+};
+
+const runAutoRefreshForCurrentPage = async (cycle: number) => {
+  if (autoRefreshingPageThumbnails.value) return;
+
+  autoRefreshingPageThumbnails.value = true;
+  try {
+    while (cycle === autoRefreshCycle) {
+      const nextResource = displayItems.value.find(
+        (item) =>
+          needsThumbnailRefresh(item) &&
+          !refreshedPageThumbnailIds.has(item.id) &&
+          !failedPageThumbnailIds.has(item.id)
+      );
+
+      if (!nextResource) break;
+
+      try {
+        const refreshed = await refreshThumbnailForResource(nextResource);
+        if (refreshed) {
+          refreshedPageThumbnailIds.add(nextResource.id);
+        } else {
+          failedPageThumbnailIds.add(nextResource.id);
+        }
+      } catch (error) {
+        failedPageThumbnailIds.add(nextResource.id);
+        logger.error(
+          "Failed to auto refresh polygen thumbnail",
+          nextResource.id,
+          error
+        );
+      }
+    }
+  } finally {
+    autoRefreshingPageThumbnails.value = false;
+    if (cycle !== autoRefreshCycle) {
+      scheduleAutoRefreshForCurrentPage();
+    }
+  }
+};
+
+const scheduleAutoRefreshForCurrentPage = () => {
+  if (autoRefreshTimer) {
+    clearTimeout(autoRefreshTimer);
+  }
+
+  autoRefreshTimer = setTimeout(() => {
+    autoRefreshTimer = null;
+    if (
+      loading.value ||
+      scopeFilter.loadingSceneDetail.value ||
+      scopeFilter.loadingEntityDetail.value ||
+      viewDialogVisible.value
+    ) {
+      return;
+    }
+    void runAutoRefreshForCurrentPage(autoRefreshCycle);
+  }, 180);
+};
+
 const handleModelLoaded = (info: {
   size: { x: number; y: number; z: number };
   center: { x: number; y: number; z: number };
@@ -444,6 +632,8 @@ const handleModelLoaded = (info: {
     faces: info.faces,
     vertices: info.vertices,
   };
+
+  void refreshCurrentThumbnail();
 };
 
 const handlePreviewInteracted = () => {
@@ -622,6 +812,40 @@ const formatItemDate = (dateStr?: string) => {
   const d = new Date(dateStr);
   return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
+
+watch(
+  () =>
+    displayItems.value
+      .map((item) => `${item.id}:${item.image?.url || "none"}`)
+      .join("|"),
+  () => {
+    autoRefreshCycle += 1;
+    scheduleAutoRefreshForCurrentPage();
+  },
+  { immediate: true }
+);
+
+watch(
+  [
+    loading,
+    () => scopeFilter.loadingSceneDetail.value,
+    () => scopeFilter.loadingEntityDetail.value,
+    viewDialogVisible,
+  ],
+  ([isLoading, isSceneLoading, isEntityLoading, isDialogVisible]) => {
+    if (isLoading || isSceneLoading || isEntityLoading || isDialogVisible) {
+      return;
+    }
+    autoRefreshCycle += 1;
+    scheduleAutoRefreshForCurrentPage();
+  }
+);
+
+onBeforeUnmount(() => {
+  if (autoRefreshTimer) {
+    clearTimeout(autoRefreshTimer);
+  }
+});
 </script>
 
 <style scoped lang="scss">
@@ -674,7 +898,7 @@ const formatItemDate = (dateStr?: string) => {
   width: 52px;
   height: 52px;
   overflow: hidden;
-  background: var(--bg-hover, #f8fafc);
+  background: transparent;
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-sm, 12px);
   transition: transform var(--transition-fast, 0.15s ease);
@@ -682,7 +906,7 @@ const formatItemDate = (dateStr?: string) => {
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 }
 
@@ -692,6 +916,11 @@ const formatItemDate = (dateStr?: string) => {
   .svg-inline--fa {
     font-size: 24px;
   }
+}
+
+:deep(.polygen-card .thumbnail-inner),
+:deep(.polygen-card .thumbnail-placeholder) {
+  background: transparent;
 }
 
 .item-name {

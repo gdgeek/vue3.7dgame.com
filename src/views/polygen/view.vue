@@ -263,10 +263,10 @@ const loaded = async (info: Record<string, unknown>) => {
 
     if (blob) {
       const file: File = new File([blob], polygenData.value.name ?? "model", {
-        type: "image/jpeg",
+        type: "image/png",
         lastModified: new Date().getTime(),
       });
-      const extension = ".jpg";
+      const extension = ".png";
       const md5 = await store.fileMD5(file);
       const handler = await store.publicHandler();
       const has = await store.fileHas(
