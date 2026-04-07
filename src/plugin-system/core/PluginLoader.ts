@@ -147,9 +147,6 @@ export class PluginLoader {
       // Try to catch the load event (works when iframe hasn't loaded yet)
       const onLoad = () => {
         clearTimeout(timer);
-        console.log(
-          `[PluginSystem:handshake] waitForLoad("${pluginId}") iframe load event fired`
-        );
         resolve();
       };
 
@@ -160,15 +157,9 @@ export class PluginLoader {
       // resolve anyway — PLUGIN_READY handshake will confirm actual readiness
       const timer = setTimeout(() => {
         iframe.removeEventListener("load", onLoad);
-        console.warn(
-          `[PluginSystem:handshake] waitForLoad("${pluginId}") load event not received after 3s, resolving anyway`
-        );
+        logger.debug(`waitForLoad("${pluginId}") load event not received after 3s, resolving anyway`);
         resolve();
       }, 3_000);
-
-      console.log(
-        `[PluginSystem:handshake] waitForLoad("${pluginId}") waiting for iframe load event, src=${iframe.src}`
-      );
     });
   }
 
@@ -192,9 +183,6 @@ export class PluginLoader {
       },
     };
 
-    console.log(
-      `[PluginSystem:handshake] sendInitMessage to plugin="${manifest.id}", targetOrigin="${manifest.allowedOrigin}", hasToken=${!!jwt}, iframeConnected=${!!iframe.contentWindow}`
-    );
     iframe.contentWindow?.postMessage(message, manifest.allowedOrigin);
     logger.debug(`INIT message sent to plugin "${manifest.id}"`);
   }
