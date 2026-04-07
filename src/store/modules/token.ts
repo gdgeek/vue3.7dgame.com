@@ -1,10 +1,10 @@
-import SecureLS from "secure-ls";
 import { logger } from "@/utils/logger";
 import type { TokenInfo } from "@/api/v1/types/auth";
 
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+import { createSecureLS } from "@/utils/secureLs";
 
-const ls = new SecureLS({ encodingType: "aes" });
+const ls = createSecureLS({ encodingType: "aes" });
 
 function setToken(token: TokenInfo) {
   ls.set(TOKEN_KEY, token);
@@ -17,7 +17,7 @@ function removeToken() {
 }
 function getToken(): TokenInfo | null {
   try {
-    const token = ls.get(TOKEN_KEY);
+    const token = ls.get<TokenInfo | null>(TOKEN_KEY);
     return token || null;
   } catch (e) {
     logger.error("Failed to parse token:", e);

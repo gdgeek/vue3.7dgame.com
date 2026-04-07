@@ -135,6 +135,7 @@ const props = withDefaults(
     imageFit?: "cover" | "contain";
     thumbnailVariant?: "default" | "audio";
     containPadding?: boolean;
+    containScale?: number;
   }>(),
   {
     actionIcon: () => ["fas", "pen-to-square"],
@@ -147,6 +148,7 @@ const props = withDefaults(
     imageFit: "cover",
     thumbnailVariant: "default",
     containPadding: true,
+    containScale: 1,
   }
 );
 
@@ -166,6 +168,10 @@ const thumbnailImageStyle = computed(() => ({
     props.containPadding
       ? "10px"
       : "0",
+  transform:
+    props.imageFit === "contain" && props.containScale !== 1
+      ? `scale(${props.containScale})`
+      : undefined,
 }));
 
 const displayTags = computed(() => props.tags?.slice(0, 2) || []);

@@ -223,7 +223,7 @@ import {
   postPolygen,
 } from "@/api/v1/resources/index";
 import type { ResourceInfo } from "@/api/v1/resources/model";
-import type { UploadFileType } from "@/api/user/model";
+import type { FileType, UploadFileType } from "@/api/user/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
 import { downloadResource } from "@/utils/downloadHelper";
@@ -505,10 +505,14 @@ const uploadThumbnailFile = async (resource: ResourceInfo, file: File) => {
   const fileResponse = await postFile(fileData);
   await putPolygen(String(resource.id), { image_id: fileResponse.data.id });
 
-  const image = {
-    ...(resource.image || {}),
+  const image: FileType = {
     id: fileResponse.data.id,
+    md5: fileData.md5,
+    type: file.type || resource.image?.type || "image/png",
     url: fileData.url,
+    filename: file.name,
+    size: file.size,
+    key: fileData.key,
   };
   updateDisplayedThumbnail(resource.id, image);
 

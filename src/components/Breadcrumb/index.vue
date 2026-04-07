@@ -21,8 +21,8 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import SecureLS from "secure-ls";
-const ls = new SecureLS({ encodingType: "aes" });
+import { createSecureLS } from "@/utils/secureLs";
+const ls = createSecureLS({ encodingType: "aes" });
 import { RouteLocationMatched, type LocationQuery } from "vue-router";
 import { useRouter } from "@/router";
 const router = useRouter();

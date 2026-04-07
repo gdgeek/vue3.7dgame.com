@@ -172,7 +172,7 @@ describe("processModel()", () => {
     const result = await processModel(file);
 
     expect(result.image).toBeInstanceOf(File);
-    expect(result.image.name).toBe("mymodel.jpg");
+    expect(result.image.name).toBe("mymodel.png");
   });
 
   it("rejects when GLTFLoader.load fires an error", async () => {

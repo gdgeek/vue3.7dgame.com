@@ -56,8 +56,8 @@ const captureModelFromUrl = (
     const { gltfLoader, dracoLoader, ktx2Loader } = createGltfLoader(renderer);
     const cleanup = () => {
       renderer.dispose();
-      dracoLoader.dispose();
-      ktx2Loader.dispose();
+      dracoLoader.dispose?.();
+      ktx2Loader.dispose?.();
     };
 
     gltfLoader.load(

@@ -1,5 +1,5 @@
-import SecureLS from "secure-ls";
-const ls = new SecureLS({ encodingType: "aes" });
+import { createSecureLS } from "@/utils/secureLs";
+const ls = createSecureLS({ encodingType: "aes" });
 
 export const useTagsViewStore = defineStore("tagsView", () => {
   // 安全读取 SecureLS 数据，防止 JSON 解析失败或数据类型异常导致崩溃
