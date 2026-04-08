@@ -157,7 +157,9 @@ export class PluginLoader {
       // resolve anyway — PLUGIN_READY handshake will confirm actual readiness
       const timer = setTimeout(() => {
         iframe.removeEventListener("load", onLoad);
-        logger.debug(`waitForLoad("${pluginId}") load event not received after 3s, resolving anyway`);
+        logger.debug(
+          `waitForLoad("${pluginId}") load event not received after 3s, resolving anyway`
+        );
         resolve();
       }, 3_000);
     });

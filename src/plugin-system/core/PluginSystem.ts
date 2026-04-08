@@ -187,7 +187,9 @@ export class PluginSystem {
         }
       );
 
-      logger.debug(`loadPlugin("${pluginId}") iframe loaded, origin=${loaded.origin}`);
+      logger.debug(
+        `loadPlugin("${pluginId}") iframe loaded, origin=${loaded.origin}`
+      );
 
       // Transition: loading → active
       this.transitionState(pluginId, "active");
@@ -385,17 +387,13 @@ export class PluginSystem {
   private sendInitToPlugin(pluginId: string): void {
     const manifest = this.registry.get(pluginId);
     if (!manifest) {
-      logger.warn(
-        `sendInit("${pluginId}") — no manifest found`
-      );
+      logger.warn(`sendInit("${pluginId}") — no manifest found`);
       return;
     }
 
     const iframe = this.loader.getIframe(pluginId);
     if (!iframe) {
-      logger.warn(
-        `sendInit("${pluginId}") — no iframe found`
-      );
+      logger.warn(`sendInit("${pluginId}") — no iframe found`);
       return;
     }
 
