@@ -444,7 +444,9 @@ const usedSceneOptions = computed<SceneOption[]>(() => {
   return options;
 });
 
-const usedSceneSelectPlaceholder = "已使用场景";
+const usedSceneSelectPlaceholder = computed(() =>
+  t("meta.script.usedScenesPlaceholder")
+);
 
 const sceneEditorLink = computed(() => {
   const editorLabel = t("route.meta.sceneEditor");
@@ -504,7 +506,12 @@ const loadSceneNameMap = async () => {
 
     const map = new Map<number, string>();
     scenes.forEach((scene) => {
-      map.set(scene.id, String(scene.name || `Scene-${scene.id}`));
+      map.set(
+        scene.id,
+        String(
+          scene.name || `${t("meta.list.properties.sceneFallback")}${scene.id}`
+        )
+      );
     });
     sceneNameMap.value = map;
   } catch (error) {

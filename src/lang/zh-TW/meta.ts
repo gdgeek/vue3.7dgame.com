@@ -106,6 +106,7 @@ export default {
     },
     script: {
       title: "腳本",
+      usedScenesPlaceholder: "跳轉到已使用場景",
       entityEditor: "實體編輯",
       save: "保存",
       error1: "沒有實體信息",

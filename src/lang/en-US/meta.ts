@@ -133,6 +133,7 @@ export default {
     },
     script: {
       title: "Script",
+      usedScenesPlaceholder: "Jump to Used Scenes",
       entityEditor: "Entity Editor",
       save: "Save",
       error1: "No metadata available",

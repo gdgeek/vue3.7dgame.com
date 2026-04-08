@@ -107,6 +107,7 @@ export default {
     },
     script: {
       title: "สคริปต์",
+      usedScenesPlaceholder: "ไปยังฉากที่ใช้งานอยู่",
       entityEditor: "แก้ไขเอนทิตี",
       save: "บันทึก",
       error1: "ไม่มีข้อมูลเอนทิตี",

@@ -238,6 +238,7 @@ export default {
         info: "没有修改",
         edit: "逻辑编辑",
         code: "代码查看",
+        loadedEntitiesPlaceholder: "跳转到已加载实体",
         leave: {
           message1: "是否保存当前脚本",
           message2: "提示",

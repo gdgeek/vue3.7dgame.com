@@ -317,6 +317,7 @@ export default {
         info: "No changes made",
         edit: "Logical Edit",
         code: "Code View",
+        loadedEntitiesPlaceholder: "Jump to Loaded Entities",
         leave: {
           message1: "Unsaved changes detected. Do you want to save?",
           message2: "Prompt",

@@ -108,6 +108,7 @@ export default {
     },
     script: {
       title: "スクリプト",
+      usedScenesPlaceholder: "使用中のシーンへ移動",
       entityEditor: "エンティティ編集",
       save: "保存",
       error1: "メタ情報がありません",

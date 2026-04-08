@@ -312,6 +312,7 @@ export default {
         info: "沒有修改",
         edit: "邏輯編輯",
         code: "代碼查看",
+        loadedEntitiesPlaceholder: "跳轉到已加載實體",
         leave: {
           message1: "是否保存當前腳本",
           message2: "提示",

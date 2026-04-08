@@ -309,6 +309,7 @@ export default {
         info: "変更はありません",
         edit: "ロジック編集",
         code: "コードビュー",
+        loadedEntitiesPlaceholder: "読み込み済みエンティティへ移動",
         leave: {
           message1: "保存されていない変更があります。保存しますか？",
           message2: "ヒント",

@@ -309,6 +309,7 @@ export default {
         info: "ไม่มีการแก้ไข",
         edit: "แก้ไขตรรกะ",
         code: "ดูโค้ด",
+        loadedEntitiesPlaceholder: "ไปยังเอนทิตีที่โหลดแล้ว",
         leave: {
           message1: "พบการแก้ไขที่ยังไม่ได้บันทึก ต้องการบันทึกหรือไม่",
           message2: "แจ้งเตือน",

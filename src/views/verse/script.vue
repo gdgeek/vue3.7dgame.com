@@ -10,7 +10,9 @@
                   v-model="selectedLoadedMetaId"
                   class="script-loaded-metas-select"
                   size="small"
-                  :placeholder="$t('verse.listPage.loadedEntities')"
+                  :placeholder="
+                    $t('verse.view.script.loadedEntitiesPlaceholder')
+                  "
                   :disabled="loadedMetaOptions.length === 0"
                   popper-class="script-loaded-metas-popper"
                   @change="handleLoadedMetaChange"
