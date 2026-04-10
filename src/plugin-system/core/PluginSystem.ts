@@ -5,14 +5,68 @@ import type { PluginLoadOptions } from "@/plugin-system/core/PluginLoader";
 import { MessageBus } from "@/plugin-system/core/MessageBus";
 import { AuthService } from "@/plugin-system/services/AuthService";
 import { ConfigService } from "@/plugin-system/services/ConfigService";
+import { useFileStore } from "@/store/modules/config";
+import { postFile } from "@/api/v1/files";
+import { postPolygen } from "@/api/v1/resources/index";
+import { processModel } from "@/utils/modelProcessor";
+import { useRouter } from "@/router";
 
 import type {
   PluginState,
   PluginInfo,
   PluginManifest,
+  PluginMessage,
 } from "@/plugin-system/types";
 
 const logger = createLogger("PluginSystem");
+const HOST_UPLOAD_PLUGIN_ID = "3d-model-optimizer";
+const HOST_UPLOAD_ACTION = "UPLOAD_POLYGEN_TO_LIBRARY";
+const HOST_OPEN_LIBRARY_ACTION = "OPEN_POLYGEN_LIBRARY";
+const HOST_PICK_RESOURCE_ACTION = "PICK_POLYGEN_RESOURCE";
+
+type FileStoreLike = {
+  fileMD5: (
+    file: File,
+    progress?: (progress: number) => void
+  ) => Promise<string>;
+  publicHandler: () => Promise<unknown>;
+  fileHas: (
+    md5: string,
+    extension: string,
+    handler: unknown,
+    dir: string
+  ) => Promise<boolean>;
+  fileUpload: (
+    md5: string,
+    extension: string,
+    file: File,
+    progress: (progress: number) => void,
+    handler: unknown,
+    dir: string
+  ) => Promise<unknown>;
+  fileUrl: (
+    name: string,
+    extension: string,
+    handler: unknown,
+    dir: string
+  ) => string;
+};
+
+type UploadPolygenRequestPayload = {
+  action?: string;
+  resourceName?: string;
+  optimizedFile?: unknown;
+  info?: string;
+  path?: string;
+  lang?: string;
+  theme?: string;
+};
+
+type HostRequestHandler = (
+  pluginId: string,
+  action: string,
+  payload: Record<string, unknown>
+) => Promise<Record<string, unknown> | null | undefined>;
 
 /** Valid state transitions: Map<fromState, Set<toState>> */
 const VALID_TRANSITIONS: ReadonlyMap<
@@ -20,7 +74,7 @@ const VALID_TRANSITIONS: ReadonlyMap<
   ReadonlySet<PluginState>
 > = new Map<PluginState, ReadonlySet<PluginState>>([
   ["unloaded", new Set(["loading"])],
-  ["loading", new Set(["active", "error"])],
+  ["loading", new Set(["active", "error", "unloaded"])],
   ["active", new Set(["unloaded", "error"])],
   ["error", new Set(["loading", "unloaded"])],
 ]);
@@ -42,6 +96,8 @@ export class PluginSystem {
   private readonly authService: AuthService;
   private readonly configService: ConfigService;
 
+  private hostRequestHandler: HostRequestHandler | null = null;
+
   /** Runtime plugin info keyed by pluginId */
   private plugins: Map<string, PluginInfo> = new Map();
 
@@ -51,11 +107,20 @@ export class PluginSystem {
   /** PLUGIN_READY message unsubscribe handle */
   private readyUnsubscribe: (() => void) | null = null;
 
+  /** REQUEST message unsubscribe handle */
+  private requestUnsubscribe: (() => void) | null = null;
+
   /** Whether initialize() has been called */
   private initialized = false;
 
   /** Deduplicates concurrent initialize() calls — stores the in-flight promise */
   private initPromise: Promise<void> | null = null;
+
+  /** Deduplicates concurrent loadPlugin() calls per plugin */
+  private loadPromises: Map<string, Promise<void>> = new Map();
+
+  /** Monotonic version per plugin used to ignore stale async load completions */
+  private loadVersions: Map<string, number> = new Map();
 
   constructor(
     registry?: PluginRegistry,
@@ -69,6 +134,10 @@ export class PluginSystem {
     this.messageBus = messageBus ?? new MessageBus();
     this.authService = authService ?? new AuthService();
     this.configService = configService ?? new ConfigService();
+  }
+
+  setHostRequestHandler(handler: HostRequestHandler | null): void {
+    this.hostRequestHandler = handler;
   }
 
   /**
@@ -137,6 +206,13 @@ export class PluginSystem {
       }
     );
 
+    this.requestUnsubscribe = this.messageBus.onMessageType(
+      "REQUEST",
+      (pluginId, message) => {
+        void this.handlePluginRequest(pluginId, message);
+      }
+    );
+
     this.initialized = true;
     logger.info("PluginSystem initialized successfully");
   }
@@ -165,46 +241,36 @@ export class PluginSystem {
       throw new Error(`Plugin manifest not found for "${pluginId}"`);
     }
 
+    if (pluginInfo.state === "active" && this.loader.isLoaded(pluginId)) {
+      this.loader.reattach(pluginId, container);
+      this.sendInitToPlugin(pluginId);
+      logger.debug(`loadPlugin("${pluginId}") skipped: already active`);
+      return;
+    }
+
+    const existingPromise = this.loadPromises.get(pluginId);
+    if (existingPromise) {
+      logger.debug(`loadPlugin("${pluginId}") joining existing in-flight load`);
+      return existingPromise;
+    }
+
     logger.debug(`loadPlugin("${pluginId}") start`);
 
-    // Transition: current → loading
-    this.transitionState(pluginId, "loading");
+    const loadVersion = this.bumpLoadVersion(pluginId);
+    const loadPromise = this.doLoadPlugin(
+      pluginId,
+      manifest,
+      container,
+      options,
+      loadVersion
+    ).finally(() => {
+      if (this.loadPromises.get(pluginId) === loadPromise) {
+        this.loadPromises.delete(pluginId);
+      }
+    });
 
-    try {
-      const loaded = await this.loader.load(
-        pluginId,
-        manifest,
-        container,
-        options,
-        // Register in MessageBus as soon as iframe is in DOM (before load event),
-        // so PLUGIN_READY from the plugin is not discarded.
-        (iframe) => {
-          this.messageBus.registerPlugin(
-            pluginId,
-            iframe,
-            manifest.allowedOrigin
-          );
-        }
-      );
-
-      logger.debug(
-        `loadPlugin("${pluginId}") iframe loaded, origin=${loaded.origin}`
-      );
-
-      // Transition: loading → active
-      this.transitionState(pluginId, "active");
-
-      // Do NOT proactively send INIT here — the iframe may not have finished
-      // loading its JS bundle yet. Instead, wait for PLUGIN_READY from the plugin,
-      // which is handled by handlePluginReady → sendInitToPlugin.
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-
-      // Transition: loading → error
-      this.transitionState(pluginId, "error", errorMessage);
-
-      logger.error(`Failed to load plugin "${pluginId}":`, err);
-    }
+    this.loadPromises.set(pluginId, loadPromise);
+    return loadPromise;
   }
 
   /**
@@ -223,6 +289,9 @@ export class PluginSystem {
       logger.warn(`Plugin "${pluginId}" is already unloaded`);
       return;
     }
+
+    // Invalidate any in-flight load so its completion cannot reactivate the plugin.
+    this.bumpLoadVersion(pluginId);
 
     // Send DESTROY message before unloading
     if (pluginInfo.state === "active") {
@@ -286,6 +355,10 @@ export class PluginSystem {
       this.readyUnsubscribe();
       this.readyUnsubscribe = null;
     }
+    if (this.requestUnsubscribe) {
+      this.requestUnsubscribe();
+      this.requestUnsubscribe = null;
+    }
 
     // Destroy sub-modules
     this.messageBus.destroy();
@@ -314,6 +387,76 @@ export class PluginSystem {
       enabled: manifest.enabled,
       order: manifest.order,
     };
+  }
+
+  private async doLoadPlugin(
+    pluginId: string,
+    manifest: PluginManifest,
+    container: HTMLElement,
+    options: PluginLoadOptions | undefined,
+    loadVersion: number
+  ): Promise<void> {
+    // Transition: current → loading
+    this.transitionState(pluginId, "loading");
+
+    try {
+      const loaded = await this.loader.load(
+        pluginId,
+        manifest,
+        container,
+        options,
+        // Register in MessageBus as soon as iframe is in DOM (before load event),
+        // so PLUGIN_READY from the plugin is not discarded.
+        (iframe) => {
+          this.messageBus.registerPlugin(
+            pluginId,
+            iframe,
+            manifest.allowedOrigin
+          );
+        }
+      );
+
+      logger.debug(
+        `loadPlugin("${pluginId}") iframe loaded, origin=${loaded.origin}`
+      );
+
+      if (this.getLoadVersion(pluginId) !== loadVersion) {
+        logger.debug(`loadPlugin("${pluginId}") stale completion ignored`);
+        return;
+      }
+
+      const info = this.plugins.get(pluginId);
+      if (info?.state === "loading") {
+        this.transitionState(pluginId, "active");
+      }
+
+      // Send INIT after load as a fallback in case PLUGIN_READY arrived too early
+      // or the iframe was reattached during route stabilization.
+      this.sendInitToPlugin(pluginId);
+    } catch (err) {
+      if (this.getLoadVersion(pluginId) !== loadVersion) {
+        logger.debug(`loadPlugin("${pluginId}") stale failure ignored`);
+        return;
+      }
+
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const info = this.plugins.get(pluginId);
+      if (info?.state === "loading") {
+        this.transitionState(pluginId, "error", errorMessage);
+      }
+
+      logger.error(`Failed to load plugin "${pluginId}":`, err);
+    }
+  }
+
+  private getLoadVersion(pluginId: string): number {
+    return this.loadVersions.get(pluginId) ?? 0;
+  }
+
+  private bumpLoadVersion(pluginId: string): number {
+    const nextVersion = this.getLoadVersion(pluginId) + 1;
+    this.loadVersions.set(pluginId, nextVersion);
+    return nextVersion;
   }
 
   /**
@@ -365,9 +508,13 @@ export class PluginSystem {
       return;
     }
 
-    // Deduplicate: ignore repeated PLUGIN_READY if we already sent INIT
+    // Re-send INIT when the plugin asks again. This helps iframe plugins recover
+    // after reattachment or delayed bootstrapping without forcing a manual reopen.
     if (this.initSentPlugins.has(pluginId)) {
-      logger.debug(`Ignoring duplicate PLUGIN_READY from "${pluginId}"`);
+      logger.debug(
+        `Re-sending INIT for duplicate PLUGIN_READY from "${pluginId}"`
+      );
+      this.sendInitToPlugin(pluginId);
       return;
     }
 
@@ -402,6 +549,197 @@ export class PluginSystem {
       `sendInit("${pluginId}") token=${token ? "(present)" : "(empty)"}`
     );
     this.loader.sendInitMessage(iframe, manifest, token);
+  }
+
+  private async handlePluginRequest(
+    pluginId: string,
+    message: PluginMessage
+  ): Promise<void> {
+    const payload = (message.payload ?? {}) as UploadPolygenRequestPayload &
+      Record<string, unknown>;
+    const action = typeof payload.action === "string" ? payload.action : "";
+
+    try {
+      let result: Record<string, unknown> = {};
+
+      if (pluginId === HOST_UPLOAD_PLUGIN_ID && action === HOST_UPLOAD_ACTION) {
+        result = await this.uploadPolygenFromPlugin(payload);
+      } else if (
+        pluginId === HOST_UPLOAD_PLUGIN_ID &&
+        action === HOST_OPEN_LIBRARY_ACTION
+      ) {
+        result = await this.openPolygenLibraryFromPlugin(payload);
+      } else if (
+        pluginId === HOST_UPLOAD_PLUGIN_ID &&
+        action === HOST_PICK_RESOURCE_ACTION &&
+        this.hostRequestHandler
+      ) {
+        const handlerResult = await this.hostRequestHandler(
+          pluginId,
+          action,
+          payload
+        );
+        if (!handlerResult) {
+          return;
+        }
+        result = handlerResult;
+      } else {
+        return;
+      }
+
+      this.sendPluginResponse(pluginId, message.id, {
+        ok: true,
+        result,
+      });
+    } catch (error) {
+      const messageText =
+        error instanceof Error ? error.message : "上传素材库失败";
+      logger.error(`Host request failed for plugin "${pluginId}":`, error);
+      this.sendPluginResponse(pluginId, message.id, {
+        ok: false,
+        error: messageText,
+      });
+    }
+  }
+
+  private async openPolygenLibraryFromPlugin(
+    payload: UploadPolygenRequestPayload
+  ) {
+    const router = useRouter();
+    const path =
+      typeof payload.path === "string" && payload.path.trim()
+        ? payload.path.trim()
+        : "/resource/polygen/index";
+    const query: Record<string, string> = {};
+
+    if (typeof payload.lang === "string" && payload.lang.trim()) {
+      query.lang = payload.lang.trim();
+    }
+    if (typeof payload.theme === "string" && payload.theme.trim()) {
+      query.theme = payload.theme.trim();
+    }
+
+    await router.push({
+      path,
+      ...(Object.keys(query).length ? { query } : {}),
+    });
+
+    return {
+      path,
+    };
+  }
+
+  private sendPluginResponse(
+    pluginId: string,
+    requestId: string,
+    payload: Record<string, unknown>
+  ): void {
+    this.messageBus.sendToPlugin(pluginId, {
+      type: "RESPONSE",
+      id: `response-${pluginId}-${Date.now()}`,
+      requestId,
+      payload,
+    });
+  }
+
+  private async uploadPolygenFromPlugin(payload: UploadPolygenRequestPayload) {
+    const optimizedFile = this.asFile(payload.optimizedFile);
+    if (!optimizedFile) {
+      throw new Error("缺少待上传的优化模型文件");
+    }
+
+    const resourceName =
+      typeof payload.resourceName === "string" && payload.resourceName.trim()
+        ? payload.resourceName.trim()
+        : optimizedFile.name;
+    const info =
+      typeof payload.info === "string" && payload.info.trim()
+        ? payload.info
+        : undefined;
+
+    let finalInfo = info;
+    let imageId: number | undefined;
+
+    try {
+      const processed = await processModel(optimizedFile);
+      finalInfo = processed.info || finalInfo;
+      const imageUpload = await this.uploadFileRecord(
+        processed.image,
+        "screenshot/polygen"
+      );
+      imageId = imageUpload.fileId;
+    } catch (error) {
+      logger.warn(
+        `Auto-generating polygen thumbnail failed for plugin "${HOST_UPLOAD_PLUGIN_ID}"`,
+        error
+      );
+    }
+
+    const modelUpload = await this.uploadFileRecord(optimizedFile, "polygen");
+    const resourceResponse = await postPolygen({
+      name: resourceName,
+      file_id: modelUpload.fileId,
+      ...(finalInfo ? { info: finalInfo } : {}),
+      ...(imageId ? { image_id: imageId } : {}),
+    });
+
+    return {
+      fileId: modelUpload.fileId,
+      imageId: imageId ?? null,
+      resourceId: resourceResponse.data?.id ?? null,
+    };
+  }
+
+  private async uploadFileRecord(file: File, directory: string) {
+    const fileStore = useFileStore().store as unknown as FileStoreLike;
+    const handler = await fileStore.publicHandler();
+    const extension = this.getFileExtension(file);
+    const md5 = await fileStore.fileMD5(file);
+    const has = await fileStore.fileHas(md5, extension, handler, directory);
+
+    if (!has) {
+      await fileStore.fileUpload(
+        md5,
+        extension,
+        file,
+        () => {},
+        handler,
+        directory
+      );
+    }
+
+    const response = await postFile({
+      filename: file.name,
+      md5,
+      key: `${md5}${extension}`,
+      url: fileStore.fileUrl(md5, extension, handler, directory),
+    });
+
+    return {
+      fileId: response.data.id,
+      md5,
+      extension,
+    };
+  }
+
+  private getFileExtension(file: File): string {
+    const name = file.name || "";
+    const lastDotIndex = name.lastIndexOf(".");
+    return lastDotIndex >= 0 ? name.slice(lastDotIndex) : "";
+  }
+
+  private asFile(value: unknown): File | null {
+    if (
+      value &&
+      typeof value === "object" &&
+      typeof (value as File).name === "string" &&
+      typeof (value as File).size === "number" &&
+      typeof (value as File).slice === "function"
+    ) {
+      return value as File;
+    }
+
+    return null;
   }
 
   /**

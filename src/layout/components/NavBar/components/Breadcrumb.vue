@@ -284,6 +284,19 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
     ]);
   }
 
+  if (path.startsWith("/plugins")) {
+    const currentPluginId = String(route.params.pluginId || "");
+    const pluginLabel =
+      currentPluginId === "3d-model-optimizer"
+        ? String(t("polygen.optimizePolygen"))
+        : String(t("sidebar.tools"));
+    return buildSegments([
+      { label: workspace, to: HOME_PATH, clickable: true },
+      { label: String(t("sidebar.tools")) },
+      { label: pluginLabel },
+    ]);
+  }
+
   const segments = resolveMapSegments(path);
   return buildSegments(
     segments.map((segment) => ({

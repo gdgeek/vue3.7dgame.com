@@ -76,6 +76,7 @@ export default {
     },
   },
   polygen: {
+    optimizePolygen: "モデル最適化",
     uploadPolygen: "モデルをアップロード",
     listPageTitle: "すべてのモデル素材",
     searchPlaceholder: "モデルを検索...",

@@ -92,6 +92,7 @@
                   }"
                   :selected="isSelected(item)"
                   :selection-mode="mode !== 'replace' && multiple"
+                  :show-checkbox="mode !== 'replace' && multiple"
                   :type-icon="getTypeIcon(item.type)"
                   :placeholder-icon="getTypeIcon(item.type)"
                   @select="() => toggleSelection(item)"
@@ -357,6 +358,7 @@ const active = ref<DataOutput>({
 const emit = defineEmits<{
   (e: "selected", data: CardInfo, replace: boolean): void;
   (e: "cancel"): void;
+  (e: "close"): void;
 }>();
 
 // 事件和国际化
@@ -759,7 +761,7 @@ const doClose = () => {
   detailVisible.value = false;
   handleDetailClose();
   dialogVisible.value = false;
-  //emit("close");
+  emit("close");
 };
 
 async function doBatchSelect() {

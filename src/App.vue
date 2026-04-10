@@ -12,9 +12,7 @@
   </router-view> -->
   <el-config-provider :locale="elementLocale">
     <router-view v-slot="{ Component, route }">
-      <transition name="page" mode="out-in" :key="route.fullPath">
-        <component :is="Component"></component>
-      </transition>
+      <component :is="Component" :key="getRootViewKey(route)"></component>
     </router-view>
   </el-config-provider>
   <span class="global-version">v{{ appVersion }}</span>
@@ -54,6 +52,9 @@ const elementLocaleMap = {
 const elementLocale = computed(
   () => elementLocaleMap[appStore.language] || zhCn
 );
+
+const getRootViewKey = (route) =>
+  route?.matched?.[0]?.path || route?.path || "";
 
 watch(
   () => userStore.userInfo,
@@ -97,22 +98,6 @@ onUnmounted(() => {
 
 /* .fade-leave-active in <2.1.8 */ {
   opacity: 0;
-}
-
-/* 新增页面过渡效果 */
-.page-enter-active,
-.page-leave-active {
-  transition: all 0.4s cubic-bezier(0.55, 0, 0.1, 1);
-}
-
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-30px);
 }
 
 canvas {

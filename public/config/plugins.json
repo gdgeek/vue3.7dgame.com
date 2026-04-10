@@ -85,6 +85,28 @@
       "order": 1,
       "allowedOrigin": "http://localhost:3006",
       "version": "1.0.0"
+    },
+    {
+      "id": "3d-model-optimizer",
+      "name": "模型优化",
+      "nameI18n": {
+        "zh-CN": "模型优化",
+        "zh-TW": "模型優化",
+        "en-US": "Model Optimization",
+        "ja-JP": "モデル最適化",
+        "th-TH": "เพิ่มประสิทธิภาพโมเดล"
+      },
+      "description": "上传并优化 3D 模型，支持压缩、减面与格式处理",
+      "url": "http://localhost:3007/",
+      "icon": "Box",
+      "group": "tools",
+      "enabled": true,
+      "order": 2,
+      "allowedOrigin": "http://localhost:3007",
+      "version": "1.0.0",
+      "extraConfig": {
+        "apiBaseUrl": "https://api.voxel.cn"
+      }
     }
   ]
 }

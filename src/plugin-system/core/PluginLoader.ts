@@ -40,6 +40,25 @@ export class PluginLoader {
   private loaded: Map<string, LoadedPlugin> = new Map();
 
   /**
+   * Ensure an already-loaded iframe is attached to the current visible container.
+   */
+  reattach(pluginId: string, container: HTMLElement): boolean {
+    const record = this.loaded.get(pluginId);
+    if (!record) {
+      return false;
+    }
+
+    if (record.iframe.parentElement !== container) {
+      container.appendChild(record.iframe);
+      logger.info(
+        `Plugin "${pluginId}" iframe reattached to the current container`
+      );
+    }
+
+    return true;
+  }
+
+  /**
    * 加载插件：创建 iframe，等待加载，注入 Token。
    *
    * @param pluginId  插件唯一标识
@@ -65,6 +84,7 @@ export class PluginLoader {
         );
         this.unload(pluginId);
       } else {
+        this.reattach(pluginId, container);
         logger.warn(`Plugin "${pluginId}" is already loaded, skipping`);
         return existing;
       }
@@ -82,13 +102,29 @@ export class PluginLoader {
     iframe.setAttribute("sandbox", manifest.sandbox ?? DEFAULT_SANDBOX);
     iframe.setAttribute("allow", "clipboard-write; clipboard-read");
     iframe.title = manifest.name;
-    iframe.src = iframeUrl;
 
     // Style: fill container
     iframe.style.width = "100%";
     iframe.style.height = "100%";
     iframe.style.border = "0";
 
+    // Attach the load/error listeners before setting src to avoid missing
+    // a fast load event on cached resources.
+    const waitForLoadPromise = this.waitForLoad(iframe, pluginId);
+
+    // Set the final src before appending so the first load event is for the
+    // real plugin document instead of the implicit about:blank page.
+    iframe.src = iframeUrl;
+
+    const record: LoadedPlugin = {
+      pluginId,
+      iframe,
+      origin: manifest.allowedOrigin,
+      state: "loading",
+      loadedAt: Date.now(),
+    };
+
+    this.loaded.set(pluginId, record);
     container.appendChild(iframe);
 
     // Register in MessageBus IMMEDIATELY after iframe is appended to DOM,
@@ -97,20 +133,18 @@ export class PluginLoader {
     // PLUGIN_READY is discarded because the origin isn't registered yet.
     onIframeCreated?.(iframe);
 
-    // Wait for iframe to finish loading with timeout.
-
-    const record: LoadedPlugin = {
-      pluginId,
-      iframe,
-      origin: manifest.allowedOrigin,
-      state: "active",
-      loadedAt: Date.now(),
-    };
-
-    this.loaded.set(pluginId, record);
-    logger.info(`Plugin "${pluginId}" loaded successfully`);
-
-    return record;
+    // Wait for iframe to finish loading before exposing it as active.
+    try {
+      await waitForLoadPromise;
+      record.state = "active";
+      record.loadedAt = Date.now();
+      logger.info(`Plugin "${pluginId}" loaded successfully`);
+      return record;
+    } catch (error) {
+      this.loaded.delete(pluginId);
+      iframe.parentElement?.removeChild(iframe);
+      throw error;
+    }
   }
 
   /** 卸载插件：销毁 iframe，释放资源 */
@@ -143,25 +177,35 @@ export class PluginLoader {
     iframe: HTMLIFrameElement,
     pluginId: string
   ): Promise<void> {
-    return new Promise<void>((resolve) => {
-      // Try to catch the load event (works when iframe hasn't loaded yet)
+    return new Promise<void>((resolve, reject) => {
       const onLoad = () => {
-        clearTimeout(timer);
+        cleanup();
+        logger.debug(`waitForLoad("${pluginId}") load event received`);
         resolve();
       };
 
-      // Attach listener BEFORE setting src to avoid race condition
-      iframe.addEventListener("load", onLoad, { once: true });
+      const onError = () => {
+        cleanup();
+        reject(new Error(`Plugin "${pluginId}" iframe failed to load`));
+      };
 
-      // Fallback: if load event doesn't fire within 3s (e.g. already cached),
-      // resolve anyway — PLUGIN_READY handshake will confirm actual readiness
-      const timer = setTimeout(() => {
+      const cleanup = () => {
+        clearTimeout(timer);
         iframe.removeEventListener("load", onLoad);
-        logger.debug(
-          `waitForLoad("${pluginId}") load event not received after 3s, resolving anyway`
+        iframe.removeEventListener("error", onError);
+      };
+
+      iframe.addEventListener("load", onLoad, { once: true });
+      iframe.addEventListener("error", onError, { once: true });
+
+      const timer = setTimeout(() => {
+        cleanup();
+        reject(
+          new Error(
+            `Plugin "${pluginId}" iframe load timed out after ${_LOAD_TIMEOUT_MS}ms`
+          )
         );
-        resolve();
-      }, 3_000);
+      }, _LOAD_TIMEOUT_MS);
     });
   }
 

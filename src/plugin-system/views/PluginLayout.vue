@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import { ref, watch, computed, onBeforeUnmount } from "vue";
+import { ref, watch, computed, onBeforeUnmount, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useTheme } from "@/composables/useTheme";
 import { pluginSystem } from "@/plugin-system";
+import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { Loading } from "@element-plus/icons-vue";
+import { toHttps } from "@/utils/helper";
+import { DeviceEnum } from "@/enums/DeviceEnum";
+
+import type { ResourceInfo } from "@/api/v1/resources/model";
+import type { CardInfo } from "@/utils/types";
 
 const route = useRoute();
 const store = usePluginSystemStore();
 const appStore = useAppStoreHook();
 const { currentThemeName } = useTheme();
+const HOST_PICK_RESOURCE_ACTION = "PICK_POLYGEN_RESOURCE";
+const HOST_PICK_PLUGIN_ID = "3d-model-optimizer";
 
 /** iframe 挂载容器 */
 const containerRef = ref<HTMLDivElement>();
+const resourceDialogRef = ref<InstanceType<typeof ResourceDialog> | null>(null);
 
 const pluginId = computed(() => route.params.pluginId as string | undefined);
 
@@ -24,6 +33,135 @@ const _pluginInfo = computed(() => {
 
 const loading = ref(false);
 const error = ref<string | null>(null);
+
+let pendingResourcePick: {
+  resolve: (value: Record<string, unknown>) => void;
+  reject: (reason?: unknown) => void;
+  settled: boolean;
+} | null = null;
+let resolvingResourcePick = false;
+
+async function fetchResourceAsFile(resource: ResourceInfo): Promise<File> {
+  const fileUrl = toHttps(resource.file?.url ?? "");
+  if (!fileUrl) {
+    throw new Error("所选模型缺少文件地址");
+  }
+
+  const response = await fetch(fileUrl, { method: "GET", credentials: "omit" });
+  if (!response.ok) {
+    throw new Error(`下载模型失败：${response.status}`);
+  }
+
+  const blob = await response.blob();
+  const filename =
+    resource.file?.filename || `${resource.name || `model-${resource.id}`}.glb`;
+  const fileType =
+    resource.file?.type || blob.type || "application/octet-stream";
+
+  return new File([blob], filename, {
+    type: fileType,
+    lastModified: Date.now(),
+  });
+}
+
+function settlePendingResourcePick(result: Record<string, unknown>) {
+  if (!pendingResourcePick || pendingResourcePick.settled) {
+    return;
+  }
+  pendingResourcePick.settled = true;
+  pendingResourcePick.resolve(result);
+  pendingResourcePick = null;
+  resolvingResourcePick = false;
+}
+
+function rejectPendingResourcePick(reason: unknown) {
+  if (!pendingResourcePick || pendingResourcePick.settled) {
+    return;
+  }
+  pendingResourcePick.settled = true;
+  pendingResourcePick.reject(reason);
+  pendingResourcePick = null;
+  resolvingResourcePick = false;
+}
+
+function openPolygenResourceDialog(): Promise<Record<string, unknown>> {
+  return new Promise((resolve, reject) => {
+    if (!resourceDialogRef.value) {
+      reject(new Error("模型选择器尚未准备好"));
+      return;
+    }
+
+    if (pendingResourcePick && !pendingResourcePick.settled) {
+      rejectPendingResourcePick(new Error("已有模型选择操作正在进行"));
+    }
+
+    pendingResourcePick = {
+      resolve,
+      reject,
+      settled: false,
+    };
+    resolvingResourcePick = false;
+
+    void resourceDialogRef.value.openIt({ type: "polygen" }, "normal");
+  });
+}
+
+async function handleHostRequest(
+  requestPluginId: string,
+  action: string
+): Promise<Record<string, unknown> | null> {
+  if (
+    requestPluginId !== HOST_PICK_PLUGIN_ID ||
+    action !== HOST_PICK_RESOURCE_ACTION
+  ) {
+    return null;
+  }
+
+  return await openPolygenResourceDialog();
+}
+
+async function handleResourceDialogSelected(data: CardInfo) {
+  if (!pendingResourcePick) {
+    return;
+  }
+
+  resolvingResourcePick = true;
+
+  try {
+    const resource = data.context as ResourceInfo;
+    const file = await fetchResourceAsFile(resource);
+    const fileBuffer = await file.arrayBuffer();
+    settlePendingResourcePick({
+      cancelled: false,
+      resourceId: resource.id,
+      resourceName: resource.name ?? resource.file?.filename ?? file.name,
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      fileLastModified: file.lastModified,
+      fileBuffer,
+      fileUrl: toHttps(resource.file?.url ?? ""),
+    });
+  } catch (error) {
+    rejectPendingResourcePick(error);
+  } finally {
+    resolvingResourcePick = false;
+  }
+}
+
+function handleResourceDialogClose() {
+  if (resolvingResourcePick) {
+    return;
+  }
+
+  if (!pendingResourcePick || pendingResourcePick.settled) {
+    return;
+  }
+
+  settlePendingResourcePick({ cancelled: true });
+}
+
+pluginSystem.setHostRequestHandler(handleHostRequest);
 
 /**
  * 当 pluginId 变化时：卸载旧插件 → 初始化系统 → 激活新插件。
@@ -43,6 +181,13 @@ watch(
 
     loading.value = true;
     try {
+      if (
+        newId === HOST_PICK_PLUGIN_ID &&
+        appStore.device !== DeviceEnum.MOBILE
+      ) {
+        appStore.openSideBar();
+      }
+
       // 确保插件系统已初始化（幂等）
       await store.init();
 
@@ -90,11 +235,30 @@ watch(
 /** 等待下一 tick 确保 containerRef 已挂载 */
 function nextTickContainer(): Promise<void> {
   return new Promise((resolve) => {
-    if (containerRef.value) {
+    const waitForStableContainer = async () => {
+      await nextTick();
+
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        const container = containerRef.value;
+        if (
+          container &&
+          container.isConnected &&
+          container.clientWidth > 0 &&
+          container.clientHeight > 0
+        ) {
+          resolve();
+          return;
+        }
+
+        await new Promise<void>((frameResolve) => {
+          requestAnimationFrame(() => frameResolve());
+        });
+      }
+
       resolve();
-    } else {
-      requestAnimationFrame(() => resolve());
-    }
+    };
+
+    waitForStableContainer();
   });
 }
 
@@ -126,6 +290,8 @@ function handleRetry() {
 }
 
 onBeforeUnmount(() => {
+  pluginSystem.setHostRequestHandler(null);
+  settlePendingResourcePick({ cancelled: true });
   if (pluginId.value) {
     store.deactivatePlugin(pluginId.value);
   }
@@ -158,6 +324,12 @@ onBeforeUnmount(() => {
 
     <!-- iframe 容器：由 PluginLoader 动态创建 iframe 并 append 到此 div -->
     <div ref="containerRef" class="plugin-page__iframe"></div>
+    <ResourceDialog
+      ref="resourceDialogRef"
+      :multiple="false"
+      @selected="handleResourceDialogSelected"
+      @close="handleResourceDialogClose"
+    ></ResourceDialog>
   </div>
 </template>
 

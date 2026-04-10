@@ -13,6 +13,19 @@
       },
       "icon": "Setting",
       "order": 99
+    },
+    {
+      "id": "tools",
+      "name": "实用工具",
+      "nameI18n": {
+        "zh-CN": "实用工具",
+        "zh-TW": "實用工具",
+        "en-US": "Utilities",
+        "ja-JP": "ユーティリティ",
+        "th-TH": "เครื่องมือ"
+      },
+      "icon": "Tools",
+      "order": 100
     }
   ],
   "plugins": [
@@ -53,6 +66,28 @@
       "order": 2,
       "allowedOrigin": "${PLUGIN_SYSTEM_ADMIN_URL}",
       "version": "1.0.0"
+    },
+    {
+      "id": "3d-model-optimizer",
+      "name": "模型优化",
+      "nameI18n": {
+        "zh-CN": "模型优化",
+        "zh-TW": "模型優化",
+        "en-US": "Model Optimization",
+        "ja-JP": "モデル最適化",
+        "th-TH": "เพิ่มประสิทธิภาพโมเดล"
+      },
+      "description": "上传并优化 3D 模型，支持压缩、减面与格式处理",
+      "url": "${PLUGIN_3D_MODEL_OPTIMIZER_URL}/",
+      "icon": "Box",
+      "group": "tools",
+      "enabled": true,
+      "order": 1,
+      "allowedOrigin": "${PLUGIN_3D_MODEL_OPTIMIZER_URL}",
+      "version": "1.0.0",
+      "extraConfig": {
+        "apiBaseUrl": "${PLUGIN_3D_MODEL_OPTIMIZER_API_URL}"
+      }
     }
   ]
 }

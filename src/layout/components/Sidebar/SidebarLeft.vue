@@ -595,8 +595,7 @@ const currentPath = computed(() => router.currentRoute.value.path);
 const logoIcon = computed(() => domainStore.icon || "/icon.png");
 const showLogoutDialog = ref(false);
 
-// Submenu open/close state - auto-expand based on current route
-const menuOpen = ref<Record<string, boolean>>({
+const createRouteMenuState = (): Record<string, boolean> => ({
   resource: currentPath.value.startsWith("/resource"),
   scene: currentPath.value.startsWith("/verse"),
   admin:
@@ -604,6 +603,12 @@ const menuOpen = ref<Record<string, boolean>>({
     currentPath.value.startsWith("/phototype"),
   plugins: currentPath.value.startsWith("/plugins"),
 });
+
+// Submenu open/close state - auto-expand based on current route and persist across refresh
+const menuOpen = useStorage<Record<string, boolean>>(
+  "sidebarMenuOpen",
+  createRouteMenuState()
+);
 
 const toggleMenu = (key: string) => {
   menuOpen.value[key] = !menuOpen.value[key];
@@ -621,22 +626,36 @@ const visibleMenuGroups = computed(() => {
   );
 });
 
-// Auto-expand plugin sub-groups when store is initialized and on plugin route
-watch(
-  () => pluginStore.initialized,
-  (initialized) => {
-    if (!initialized || !currentPath.value.startsWith("/plugins")) return;
-    const activePluginId = currentPath.value
-      .split("/plugins/")[1]
-      ?.split("?")[0];
-    if (!activePluginId) return;
-    // Find which group this plugin belongs to
-    for (const [groupId, plugins] of pluginStore.pluginsByGroup) {
-      if (plugins.some((p) => p.pluginId === activePluginId)) {
-        menuOpen.value[`plugin-group-${groupId}`] = true;
-        break;
-      }
+const syncMenuStateFromRoute = () => {
+  const path = currentPath.value;
+
+  menuOpen.value.resource = path.startsWith("/resource");
+  menuOpen.value.scene = path.startsWith("/verse");
+  menuOpen.value.admin =
+    path.startsWith("/manager") || path.startsWith("/phototype");
+  menuOpen.value.plugins = path.startsWith("/plugins");
+
+  for (const group of visibleMenuGroups.value) {
+    menuOpen.value[`plugin-group-${group.id}`] = false;
+  }
+
+  if (!menuOpen.value.plugins || !pluginStore.initialized) return;
+
+  const activePluginId = path.split("/plugins/")[1]?.split("?")[0];
+  if (!activePluginId) return;
+
+  for (const [groupId, plugins] of pluginStore.pluginsByGroup) {
+    if (plugins.some((plugin) => plugin.pluginId === activePluginId)) {
+      menuOpen.value[`plugin-group-${groupId}`] = true;
+      break;
     }
+  }
+};
+
+watch(
+  [() => pluginStore.initialized, currentPath, visibleMenuGroups],
+  () => {
+    syncMenuStateFromRoute();
   },
   { immediate: true }
 );

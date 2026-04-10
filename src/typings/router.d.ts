@@ -45,6 +45,13 @@ declare module "vue-router" {
     keepAlive?: boolean;
 
     /**
+     * 是否禁用路由切换动效
+     * true 禁用, false 启用
+     * @default false
+     */
+    disableTransition?: boolean;
+
+    /**
      * 是否在面包屑导航中隐藏
      * true 隐藏, false 显示
      * @default false

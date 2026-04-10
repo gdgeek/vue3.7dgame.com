@@ -33,6 +33,13 @@
           ></ResourceScopeFilter>
         </template>
         <template #actions>
+          <el-button type="primary" @click="goToModelOptimizer">
+            <font-awesome-icon
+              :icon="['fas', 'bolt']"
+              style="margin-right: 4px; font-size: 18px"
+            ></font-awesome-icon>
+            {{ $t("polygen.optimizePolygen") }}
+          </el-button>
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon
               :icon="['fas', 'upload']"
@@ -201,6 +208,7 @@
 import { logger } from "@/utils/logger";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from "vue-router";
 import { Message, MessageBox } from "@/components/Dialog";
 import {
   PageActionBar,
@@ -242,6 +250,8 @@ import {
 } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
+const router = useRouter();
+const route = useRoute();
 const fileStore = useFileStore().store;
 
 // Standard page data
@@ -399,6 +409,15 @@ const detailProperties = computed(() => {
 
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
+};
+
+const goToModelOptimizer = () => {
+  void router.push({
+    path: "/plugins/3d-model-optimizer",
+    query: {
+      ...route.query,
+    },
+  });
 };
 
 const openViewDialog = async (id: number) => {

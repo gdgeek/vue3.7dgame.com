@@ -2,14 +2,9 @@
   <section class="app-main" :style="{ minHeight: minHeight }">
     <router-view>
       <template #default="{ Component, route }">
-        <transition
-          enter-active-class="animate__animated animate__fadeIn"
-          mode="out-in"
-        >
-          <keep-alive :include="cachedViews">
-            <component :is="Component" :key="route.path"></component>
-          </keep-alive>
-        </transition>
+        <keep-alive :include="cachedViews">
+          <component :is="Component" :key="route.path"></component>
+        </keep-alive>
       </template>
     </router-view>
   </section>
