@@ -71,6 +71,7 @@ export const resourceRoutes: RouteRecordRaw = {
         icon: "el-icon-pear",
         hidden: true,
         alwaysShow: false,
+        preserveComponentOnQueryChange: true,
         params: null,
       },
     },

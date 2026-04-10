@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, computed, onBeforeUnmount } from "vue";
-import { useRoute } from "vue-router";
+import { ref, watch, computed, onBeforeUnmount, onMounted } from "vue";
+import { useRoute, useRouter, type LocationQueryRaw } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useTheme } from "@/composables/useTheme";
@@ -8,6 +8,7 @@ import { pluginSystem } from "@/plugin-system";
 import { Loading } from "@element-plus/icons-vue";
 
 const route = useRoute();
+const router = useRouter();
 const store = usePluginSystemStore();
 const appStore = useAppStoreHook();
 const { currentThemeName } = useTheme();
@@ -24,6 +25,7 @@ const _pluginInfo = computed(() => {
 
 const loading = ref(false);
 const error = ref<string | null>(null);
+const mountedPluginId = ref<string | null>(null);
 
 /**
  * 当 pluginId 变化时：卸载旧插件 → 初始化系统 → 激活新插件。
@@ -37,6 +39,9 @@ watch(
     // 卸载旧插件
     if (oldId) {
       await store.deactivatePlugin(oldId);
+      if (mountedPluginId.value === oldId) {
+        mountedPluginId.value = null;
+      }
     }
 
     if (!newId) return;
@@ -58,6 +63,7 @@ watch(
         lang: appStore.language,
         theme: currentThemeName.value,
       });
+      mountedPluginId.value = newId;
 
       // 检查激活后的状态
       const info = store.plugins.get(newId);
@@ -98,11 +104,81 @@ function nextTickContainer(): Promise<void> {
   });
 }
 
+function getActivePluginIframe(): HTMLIFrameElement | null {
+  return containerRef.value?.querySelector("iframe") ?? null;
+}
+
+function toQueryRecord(value: unknown): LocationQueryRaw {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  const query: LocationQueryRaw = {};
+
+  Object.entries(value as Record<string, unknown>).forEach(([key, item]) => {
+    if (Array.isArray(item)) {
+      query[key] = item.map((entry) => String(entry));
+      return;
+    }
+    if (item == null) {
+      query[key] = item;
+      return;
+    }
+    query[key] = String(item);
+  });
+
+  return query;
+}
+
+function handlePluginMessage(event: MessageEvent) {
+  const iframe = getActivePluginIframe();
+  if (!iframe || event.source !== iframe.contentWindow) {
+    return;
+  }
+
+  const iframeOrigin = (() => {
+    try {
+      return new URL(iframe.src).origin;
+    } catch {
+      return "";
+    }
+  })();
+  if (iframeOrigin && event.origin !== iframeOrigin) {
+    return;
+  }
+
+  const message = event.data as {
+    type?: string;
+    payload?: Record<string, unknown>;
+  };
+  if (message?.type !== "EVENT") {
+    return;
+  }
+
+  const payload = message.payload ?? {};
+  if (payload.event !== "navigate-host") {
+    return;
+  }
+
+  const path = typeof payload.path === "string" ? payload.path : "";
+  if (!path) {
+    return;
+  }
+
+  router.push({
+    path,
+    query: toQueryRecord(payload.query),
+  });
+}
+
 function handleRetry() {
   if (!pluginId.value) return;
   // 强制重新激活：先卸载再加载
   const id = pluginId.value;
   store.deactivatePlugin(id).then(async () => {
+    if (mountedPluginId.value === id) {
+      mountedPluginId.value = null;
+    }
     loading.value = true;
     error.value = null;
     try {
@@ -112,6 +188,7 @@ function handleRetry() {
           lang: appStore.language,
           theme: currentThemeName.value,
         });
+        mountedPluginId.value = id;
         const info = store.plugins.get(id);
         if (info?.state === "error") {
           error.value = info.lastError || "插件加载失败";
@@ -125,9 +202,16 @@ function handleRetry() {
   });
 }
 
+onMounted(() => {
+  window.addEventListener("message", handlePluginMessage);
+});
+
 onBeforeUnmount(() => {
-  if (pluginId.value) {
-    store.deactivatePlugin(pluginId.value);
+  window.removeEventListener("message", handlePluginMessage);
+  const idToDeactivate = mountedPluginId.value ?? pluginId.value;
+  if (idToDeactivate) {
+    store.deactivatePlugin(idToDeactivate);
+    mountedPluginId.value = null;
   }
 });
 </script>

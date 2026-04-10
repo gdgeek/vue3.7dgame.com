@@ -1,0 +1,198 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createApp, nextTick, reactive, ref } from "vue";
+
+const mockRoute = reactive({
+  params: {
+    pluginId: "ai-3d-generator-v3" as string | undefined,
+  },
+});
+
+const mockActivatePlugin = vi.fn();
+const mockDeactivatePlugin = vi.fn();
+const mockInit = vi.fn();
+const mockBroadcastThemeChange = vi.fn();
+const mockBroadcastLangChange = vi.fn();
+const mockRouterPush = vi.fn();
+
+const mockPlugins = new Map([
+  [
+    "ai-3d-generator-v3",
+    {
+      pluginId: "ai-3d-generator-v3",
+      state: "unloaded",
+      lastError: undefined as string | undefined,
+    },
+  ],
+]);
+
+vi.mock("vue-router", () => ({
+  useRoute: vi.fn(() => mockRoute),
+  useRouter: vi.fn(() => ({
+    push: mockRouterPush,
+  })),
+}));
+
+vi.mock("@/store/modules/plugin-system", () => ({
+  usePluginSystemStore: vi.fn(() => ({
+    init: mockInit,
+    activatePlugin: mockActivatePlugin,
+    deactivatePlugin: mockDeactivatePlugin,
+    plugins: mockPlugins,
+  })),
+}));
+
+vi.mock("@/store/modules/app", () => ({
+  useAppStoreHook: vi.fn(() => ({
+    language: "zh-CN",
+  })),
+}));
+
+vi.mock("@/composables/useTheme", () => ({
+  useTheme: vi.fn(() => ({
+    currentThemeName: ref("edu-friendly"),
+  })),
+}));
+
+vi.mock("@/plugin-system", () => ({
+  pluginSystem: {
+    broadcastThemeChange: mockBroadcastThemeChange,
+    broadcastLangChange: mockBroadcastLangChange,
+  },
+}));
+
+const cleanups: Array<() => void> = [];
+
+async function mountView() {
+  const { default: PluginLayout } = await import(
+    "@/plugin-system/views/PluginLayout.vue"
+  );
+
+  const el = document.createElement("div");
+  document.body.appendChild(el);
+
+  const app = createApp(PluginLayout);
+  app.component("el-icon", {
+    template: "<div><slot /></div>",
+  });
+  app.component("el-button", {
+    template: "<button><slot /></button>",
+  });
+  app.component("el-result", {
+    template: "<div><slot name='extra' /></div>",
+  });
+  app.component("el-empty", {
+    template: "<div></div>",
+  });
+  app.mount(el);
+
+  cleanups.push(() => {
+    app.unmount();
+    el.remove();
+  });
+
+  await nextTick();
+  await Promise.resolve();
+
+  return { app, el };
+}
+
+describe("plugin-system/views/PluginLayout.vue", () => {
+  beforeEach(() => {
+    mockRoute.params.pluginId = "ai-3d-generator-v3";
+    mockInit.mockResolvedValue(undefined);
+    mockActivatePlugin.mockImplementation(async (pluginId: string) => {
+      const info = mockPlugins.get(pluginId);
+      if (info) {
+        info.state = "active";
+        info.lastError = undefined;
+      }
+    });
+    mockDeactivatePlugin.mockResolvedValue(undefined);
+    mockBroadcastThemeChange.mockReset();
+    mockBroadcastLangChange.mockReset();
+    mockRouterPush.mockReset();
+  });
+
+  afterEach(() => {
+    cleanups.splice(0).reverse().forEach((fn) => fn());
+    mockInit.mockClear();
+    mockActivatePlugin.mockClear();
+    mockDeactivatePlugin.mockClear();
+    mockPlugins.get("ai-3d-generator-v3")!.state = "unloaded";
+    mockPlugins.get("ai-3d-generator-v3")!.lastError = undefined;
+  });
+
+  it("activates the plugin for the current route", async () => {
+    const { el } = await mountView();
+
+    expect(mockInit).toHaveBeenCalledOnce();
+    expect(mockActivatePlugin).toHaveBeenCalledOnce();
+    expect(mockActivatePlugin).toHaveBeenCalledWith(
+      "ai-3d-generator-v3",
+      expect.any(HTMLDivElement),
+      expect.objectContaining({
+        lang: "zh-CN",
+        theme: "edu-friendly",
+      })
+    );
+    expect(el.querySelector(".plugin-page__iframe")).not.toBeNull();
+  });
+
+  it("deactivates the last mounted plugin even if the route param is already cleared", async () => {
+    const { app } = await mountView();
+
+    mockDeactivatePlugin.mockClear();
+
+    mockRoute.params.pluginId = undefined;
+    app.unmount();
+
+    expect(mockDeactivatePlugin).toHaveBeenCalledWith("ai-3d-generator-v3");
+  });
+
+  it("routes host navigation events from the active plugin iframe", async () => {
+    const { el } = await mountView();
+
+    const container = el.querySelector(".plugin-page__iframe") as HTMLDivElement;
+    const iframe = document.createElement("iframe");
+    const iframeWindow = { postMessage: vi.fn() };
+    Object.defineProperty(iframe, "contentWindow", {
+      value: iframeWindow,
+      configurable: true,
+    });
+    iframe.src = "http://localhost:3101/?lang=zh-CN&theme=edu-friendly";
+    container.appendChild(iframe);
+
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        source: iframeWindow as unknown as MessageEventSource,
+        origin: "http://localhost:3101",
+        data: {
+          type: "EVENT",
+          id: "event-1",
+          payload: {
+            event: "navigate-host",
+            path: "/resource/polygen/index",
+            query: {
+              lang: "zh-CN",
+              theme: "edu-friendly",
+              resourceId: "5391",
+              open: "1",
+            },
+          },
+        },
+      })
+    );
+
+    await nextTick();
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      path: "/resource/polygen/index",
+      query: {
+        lang: "zh-CN",
+        theme: "edu-friendly",
+        resourceId: "5391",
+        open: "1",
+      },
+    });
+  });
+});

@@ -34,6 +34,7 @@ import { useRoute, useRouter } from "vue-router";
 import type { RouteLocationRaw } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
+import { translateRouteTitle } from "@/utils/i18n";
 
 const route = useRoute();
 const router = useRouter();
@@ -93,7 +94,7 @@ const resolveEditorName = (): string => {
   const metaTitle =
     typeof route.meta.title === "string" ? route.meta.title : "";
   if (metaTitle) {
-    const translatedTitle = String(t(metaTitle));
+    const translatedTitle = String(translateRouteTitle(metaTitle));
     const normalizedTitle =
       translatedTitle && translatedTitle !== metaTitle
         ? translatedTitle

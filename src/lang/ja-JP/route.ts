@@ -218,5 +218,8 @@ export default {
       title: "プロトタイプ",
       list: "リスト",
     },
+    plugin: {
+      title: "プラグイン",
+    },
   },
 };

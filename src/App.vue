@@ -12,7 +12,11 @@
   </router-view> -->
   <el-config-provider :locale="elementLocale">
     <router-view v-slot="{ Component, route }">
-      <transition name="page" mode="out-in" :key="route.fullPath">
+      <transition
+        name="page"
+        mode="out-in"
+        :key="getPageTransitionKey(route)"
+      >
         <component :is="Component"></component>
       </transition>
     </router-view>
@@ -54,6 +58,14 @@ const elementLocaleMap = {
 const elementLocale = computed(
   () => elementLocaleMap[appStore.language] || zhCn
 );
+
+function getPageTransitionKey(route) {
+  if (route?.meta?.preserveComponentOnQueryChange) {
+    return `${route.path}:${JSON.stringify(route.params || {})}`;
+  }
+
+  return route.fullPath;
+}
 
 watch(
   () => userStore.userInfo,

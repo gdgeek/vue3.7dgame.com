@@ -201,6 +201,7 @@
 import { logger } from "@/utils/logger";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from "vue-router";
 import { Message, MessageBox } from "@/components/Dialog";
 import {
   PageActionBar,
@@ -242,6 +243,8 @@ import {
 } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 const fileStore = useFileStore().store;
 
 // Standard page data
@@ -364,6 +367,7 @@ const refreshedPageThumbnailIds = new Set<number>();
 const failedPageThumbnailIds = new Set<number>();
 let autoRefreshTimer: ReturnType<typeof setTimeout> | null = null;
 let autoRefreshCycle = 0;
+const autoOpenedResourceId = ref<number | null>(null);
 
 const formatModelStat = (value: unknown) => {
   const numericValue = Number(value);
@@ -401,6 +405,39 @@ const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
 
+const getQueryResourceId = () => {
+  const rawResourceId = Array.isArray(route.query.resourceId)
+    ? route.query.resourceId[0]
+    : route.query.resourceId;
+  const rawOpen = Array.isArray(route.query.open)
+    ? route.query.open[0]
+    : route.query.open;
+
+  if (rawOpen === "0") {
+    return null;
+  }
+
+  const parsedId = Number(rawResourceId);
+  return Number.isFinite(parsedId) && parsedId > 0 ? parsedId : null;
+};
+
+const clearDetailQuery = () => {
+  if (
+    route.query.resourceId === undefined &&
+    route.query.open === undefined
+  ) {
+    return;
+  }
+
+  const nextQuery = { ...route.query };
+  delete nextQuery.resourceId;
+  delete nextQuery.open;
+  void router.replace({
+    path: route.path,
+    query: nextQuery,
+  });
+};
+
 const openViewDialog = async (id: number) => {
   viewDialogVisible.value = true;
   detailLoading.value = true;
@@ -421,6 +458,7 @@ const openViewDialog = async (id: number) => {
 };
 
 const handlePanelClose = () => {
+  viewDialogVisible.value = false;
   currentPolygen.value = null;
   hasAnimations.value = false;
   isPreviewHovered.value = false;
@@ -428,6 +466,7 @@ const handlePanelClose = () => {
   refreshingThumbnail.value = false;
   refreshedThumbnailId.value = null;
   loadedModelStats.value = null;
+  clearDetailQuery();
 };
 
 const hasAnimations = ref(false);
@@ -448,15 +487,10 @@ const hasAnimationsFromResourceInfo = (resource: ResourceInfo | null) => {
   }
 };
 
-const hasLegacyThumbnail = (resource: ResourceInfo | null) => {
-  const imageUrl = resource?.image?.url || "";
-  return /\.(jpe?g)(\?|$)/i.test(imageUrl);
-};
-
 const needsThumbnailRefresh = (resource: ResourceInfo | null) => {
   if (!resource) return false;
   const imageUrl = resource.image?.url || "";
-  return !imageUrl || hasLegacyThumbnail(resource);
+  return !imageUrl;
 };
 
 const updateDisplayedThumbnail = (
@@ -680,6 +714,7 @@ const handleDelete = async () => {
     );
     await deletePolygen(String(currentPolygen.value.id));
     viewDialogVisible.value = false;
+    clearDetailQuery();
     refresh();
     Message.success(t("polygen.confirm.success"));
   } catch {
@@ -816,6 +851,25 @@ const formatItemDate = (dateStr?: string) => {
   const d = new Date(dateStr);
   return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
+
+watch(
+  () => [route.query.resourceId, route.query.open],
+  () => {
+    const requestedResourceId = getQueryResourceId();
+    if (requestedResourceId == null) {
+      autoOpenedResourceId.value = null;
+      return;
+    }
+
+    if (autoOpenedResourceId.value === requestedResourceId) {
+      return;
+    }
+
+    autoOpenedResourceId.value = requestedResourceId;
+    void openViewDialog(requestedResourceId);
+  },
+  { immediate: true }
+);
 
 watch(
   () =>

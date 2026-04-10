@@ -64,6 +64,7 @@ describe("resourceRoutes 路由模块", () => {
       );
       expect(r).toBeDefined();
       expect(r?.name).toBe("PolygenIndex");
+      expect((r?.meta as any)?.preserveComponentOnQueryChange).toBe(true);
     });
 
     it("包含 /resource/picture/index 子路由", () => {

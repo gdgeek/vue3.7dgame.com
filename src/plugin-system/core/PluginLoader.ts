@@ -6,7 +6,7 @@ const logger = createLogger("PluginLoader");
 
 /** Default sandbox attributes for plugin iframes */
 const DEFAULT_SANDBOX =
-  "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox";
+  "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads";
 
 /** Timeout in milliseconds for iframe load */
 const _LOAD_TIMEOUT_MS = 30_000;

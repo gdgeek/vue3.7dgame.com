@@ -51,6 +51,9 @@ export class PluginSystem {
   /** PLUGIN_READY message unsubscribe handle */
   private readyUnsubscribe: (() => void) | null = null;
 
+  /** TOKEN_REFRESH_REQUEST message unsubscribe handle */
+  private tokenRefreshUnsubscribe: (() => void) | null = null;
+
   /** Whether initialize() has been called */
   private initialized = false;
 
@@ -134,6 +137,24 @@ export class PluginSystem {
       "PLUGIN_READY",
       (pluginId) => {
         this.handlePluginReady(pluginId);
+      }
+    );
+
+    // Listen for TOKEN_REFRESH_REQUEST from plugins and respond with current token
+    this.tokenRefreshUnsubscribe = this.messageBus.onMessageType(
+      "TOKEN_REFRESH_REQUEST",
+      (pluginId) => {
+        const token = this.authService.getAccessToken() || "";
+        if (token) {
+          logger.info(`Responding to TOKEN_REFRESH_REQUEST from "${pluginId}"`);
+          this.messageBus.sendToPlugin(pluginId, {
+            type: "TOKEN_UPDATE",
+            id: `token-refresh-response-${Date.now()}`,
+            payload: { token },
+          });
+        } else {
+          logger.warn(`TOKEN_REFRESH_REQUEST from "${pluginId}" but no token available`);
+        }
       }
     );
 
@@ -285,6 +306,10 @@ export class PluginSystem {
     if (this.readyUnsubscribe) {
       this.readyUnsubscribe();
       this.readyUnsubscribe = null;
+    }
+    if (this.tokenRefreshUnsubscribe) {
+      this.tokenRefreshUnsubscribe();
+      this.tokenRefreshUnsubscribe = null;
     }
 
     // Destroy sub-modules

@@ -219,5 +219,8 @@ export default {
       title: "ต้นแบบ",
       list: "รายการ",
     },
+    plugin: {
+      title: "ปลั๊กอิน",
+    },
   },
 };

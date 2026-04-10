@@ -217,5 +217,8 @@ export default {
       title: "原型",
       list: "列表",
     },
+    plugin: {
+      title: "插件",
+    },
   },
 };

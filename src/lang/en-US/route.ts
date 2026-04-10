@@ -219,5 +219,8 @@ export default {
       title: "Phototype",
       list: "List",
     },
+    plugin: {
+      title: "Plugins",
+    },
   },
 };
