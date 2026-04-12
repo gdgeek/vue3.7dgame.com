@@ -10,7 +10,9 @@ const polygenIndexSource = fs.readFileSync(
 
 describe("polygen thumbnail refresh logic", () => {
   it("only refreshes when a resource has no thumbnail url", () => {
-    expect(polygenIndexSource).toContain("const needsThumbnailRefresh = (resource: ResourceInfo | null) => {");
+    expect(polygenIndexSource).toContain(
+      "const needsThumbnailRefresh = (resource: ResourceInfo | null) => {"
+    );
     expect(polygenIndexSource).toContain("return !imageUrl;");
     expect(polygenIndexSource).not.toContain("hasLegacyThumbnail");
     expect(polygenIndexSource).not.toContain("/\\.(jpe?g)(\\?|$)/i");

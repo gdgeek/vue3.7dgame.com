@@ -422,10 +422,7 @@ const getQueryResourceId = () => {
 };
 
 const clearDetailQuery = () => {
-  if (
-    route.query.resourceId === undefined &&
-    route.query.open === undefined
-  ) {
+  if (route.query.resourceId === undefined && route.query.open === undefined) {
     return;
   }
 

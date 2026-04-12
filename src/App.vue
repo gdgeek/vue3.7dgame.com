@@ -12,11 +12,7 @@
   </router-view> -->
   <el-config-provider :locale="elementLocale">
     <router-view v-slot="{ Component, route }">
-      <transition
-        name="page"
-        mode="out-in"
-        :key="getPageTransitionKey(route)"
-      >
+      <transition name="page" mode="out-in" :key="getPageTransitionKey(route)">
         <component :is="Component"></component>
       </transition>
     </router-view>

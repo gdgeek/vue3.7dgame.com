@@ -114,7 +114,10 @@ describe("plugin-system/views/PluginLayout.vue", () => {
   });
 
   afterEach(() => {
-    cleanups.splice(0).reverse().forEach((fn) => fn());
+    cleanups
+      .splice(0)
+      .reverse()
+      .forEach((fn) => fn());
     mockInit.mockClear();
     mockActivatePlugin.mockClear();
     mockDeactivatePlugin.mockClear();
@@ -152,7 +155,9 @@ describe("plugin-system/views/PluginLayout.vue", () => {
   it("routes host navigation events from the active plugin iframe", async () => {
     const { el } = await mountView();
 
-    const container = el.querySelector(".plugin-page__iframe") as HTMLDivElement;
+    const container = el.querySelector(
+      ".plugin-page__iframe"
+    ) as HTMLDivElement;
     const iframe = document.createElement("iframe");
     const iframeWindow = { postMessage: vi.fn() };
     Object.defineProperty(iframe, "contentWindow", {

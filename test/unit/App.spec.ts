@@ -133,7 +133,10 @@ describe("App.vue route transition key", () => {
   });
 
   afterEach(() => {
-    cleanups.splice(0).reverse().forEach((fn) => fn());
+    cleanups
+      .splice(0)
+      .reverse()
+      .forEach((fn) => fn());
     vi.unstubAllGlobals();
     vi.resetModules();
   });

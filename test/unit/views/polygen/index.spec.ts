@@ -55,7 +55,12 @@ vi.mock("@/components/Dialog", () => ({
 
 vi.mock("@/components/StandardPage", () => {
   const stub = (name: string, template: string) =>
-    defineComponent({ name, props: ["items", "modelValue"], emits: ["close"], template });
+    defineComponent({
+      name,
+      props: ["items", "modelValue"],
+      emits: ["close"],
+      template,
+    });
 
   return {
     PageActionBar: stub(
@@ -66,9 +71,15 @@ vi.mock("@/components/StandardPage", () => {
       "ViewContainer",
       "<div class='view-container-stub'><slot name='empty' /></div>"
     ),
-    PagePagination: stub("PagePagination", "<div class='page-pagination-stub'></div>"),
+    PagePagination: stub(
+      "PagePagination",
+      "<div class='page-pagination-stub'></div>"
+    ),
     EmptyState: stub("EmptyState", "<div class='empty-state-stub'></div>"),
-    StandardCard: stub("StandardCard", "<div class='standard-card-stub'></div>"),
+    StandardCard: stub(
+      "StandardCard",
+      "<div class='standard-card-stub'></div>"
+    ),
     DetailPanel: defineComponent({
       name: "DetailPanel",
       props: ["modelValue"],
@@ -240,7 +251,10 @@ describe("views/polygen/index.vue", () => {
   });
 
   afterEach(() => {
-    cleanups.splice(0).reverse().forEach((fn) => fn());
+    cleanups
+      .splice(0)
+      .reverse()
+      .forEach((fn) => fn());
     vi.resetModules();
   });
 

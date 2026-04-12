@@ -153,7 +153,9 @@ export class PluginSystem {
             payload: { token },
           });
         } else {
-          logger.warn(`TOKEN_REFRESH_REQUEST from "${pluginId}" but no token available`);
+          logger.warn(
+            `TOKEN_REFRESH_REQUEST from "${pluginId}" but no token available`
+          );
         }
       }
     );
