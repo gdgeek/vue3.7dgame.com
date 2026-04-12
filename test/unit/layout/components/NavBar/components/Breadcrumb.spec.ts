@@ -14,6 +14,13 @@ const mockRoute = {
 const mockPush = vi.fn();
 
 vi.mock("vue-router", () => ({
+  createRouter: vi.fn(() => ({
+    push: mockPush,
+    replace: vi.fn(),
+    beforeEach: vi.fn(),
+    afterEach: vi.fn(),
+  })),
+  createWebHistory: vi.fn(() => ({})),
   useRoute: vi.fn(() => mockRoute),
   useRouter: vi.fn(() => ({
     push: mockPush,
@@ -28,6 +35,16 @@ vi.mock("vue-i18n", () => ({
       return k;
     },
   })),
+}));
+
+vi.mock("@/lang", () => ({
+  default: {
+    global: {
+      locale: { value: "zh-CN" },
+      te: (k: string) => k === "route.dashboard",
+      t: (k: string) => k,
+    },
+  },
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

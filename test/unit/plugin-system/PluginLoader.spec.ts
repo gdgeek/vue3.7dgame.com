@@ -75,7 +75,7 @@ describe("PluginLoader", () => {
 
       const iframe = container.querySelector("iframe");
       expect(iframe?.getAttribute("sandbox")).toBe(
-        "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+        "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
       );
     });
 
