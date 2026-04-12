@@ -32,7 +32,7 @@ function isPluginsConfig(value: unknown): value is PluginsConfig {
  * 合并策略（本地与 DB 完全平行，互不覆盖）：
  * 1. 本地 `/config/plugins.json` — 本地内置插件，保留声明的分组
  *    `builtins` 分组为保留 id，DB 无法覆盖
- * 2. 后端 API `GET /v1/plugin/list?domain={hostname}` — DB 插件，保留各自分组
+ * 2. 后端 API `GET /v1/plugin/list` — DB 插件，保留各自分组
  *    DB 中与本地同 group id 的分组定义被忽略（本地优先）
  * 3. 两边插件全部显示，各自属于声明的分组，不去重
  *
@@ -125,12 +125,10 @@ export class ConfigService {
     }
   }
 
-  /** 从后端 API 加载插件列表（自动附带当前域名） */
+  /** 从后端 API 加载插件列表 */
   async loadApiConfig(): Promise<PluginsConfig> {
     try {
-      const domain = window.location.hostname;
       const res = await request.get(buildSystemAdminUrl("/v1/plugin/list"), {
-        params: { domain },
         skipErrorMessage: true,
       });
       const data: unknown = res.data?.data ?? res.data;
