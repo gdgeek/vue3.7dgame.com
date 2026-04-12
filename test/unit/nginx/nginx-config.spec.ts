@@ -57,6 +57,10 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("# __API_LOCATIONS__");
   });
 
+  it("contains # __CONFIG_LOCATIONS__ placeholder for dynamic config API", () => {
+    expect(nginxConfig).toContain("# __CONFIG_LOCATIONS__");
+  });
+
   it("contains # __DOMAIN_LOCATIONS__ placeholder for dynamic domain API config", () => {
     expect(nginxConfig).toContain("# __DOMAIN_LOCATIONS__");
   });
@@ -184,6 +188,10 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("APP_API");
   });
 
+  it("reads APP_CONFIG_N_URL numbered environment variables", () => {
+    expect(entrypointScript).toContain("APP_CONFIG");
+  });
+
   it("reads APP_DOMAIN_N_URL numbered environment variables", () => {
     expect(entrypointScript).toContain("APP_DOMAIN");
   });
@@ -200,8 +208,16 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain('"/api-domain/"');
   });
 
+  it("generates /api-config/ failover chain", () => {
+    expect(entrypointScript).toContain('"/api-config/"');
+  });
+
   it("replaces # __API_LOCATIONS__ placeholder", () => {
     expect(entrypointScript).toContain("__API_LOCATIONS__");
+  });
+
+  it("replaces # __CONFIG_LOCATIONS__ placeholder", () => {
+    expect(entrypointScript).toContain("__CONFIG_LOCATIONS__");
   });
 
   it("replaces # __DOMAIN_LOCATIONS__ placeholder", () => {
@@ -359,6 +375,7 @@ describe("Property 5: Environment-aware URL selection", () => {
           "utf-8"
         );
         expect(envSource).toMatch(/:\s*["']\/api["']/);
+        expect(envSource).toMatch(/:\s*["']\/api-config["']/);
         expect(envSource).toMatch(/:\s*["']\/api-domain["']/);
         expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
       }),

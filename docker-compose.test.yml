@@ -4,6 +4,8 @@ services:
     environment:
       - APP_API_1_URL=https://api.your-domain.com
       - APP_API_2_URL=https://backup-api.your-domain.com
+      - APP_CONFIG_1_URL=https://config-api.your-domain.com
+      - APP_CONFIG_2_URL=https://backup-config-api.your-domain.com
       - APP_DOMAIN_1_URL=https://domain-info.your-domain.com
       - APP_DOMAIN_2_URL=https://backup-domain-info.your-domain.com
       - APP_DOC_API_URL=https://docs.your-domain.com/wp-json/wp/v2

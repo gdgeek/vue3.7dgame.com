@@ -37,6 +37,9 @@ function title(): string {
 
 const environment = {
   api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api",
+  config_api: import.meta.env.DEV
+    ? import.meta.env.VITE_APP_CONFIG_API_URL || ""
+    : "/api-config",
   doc: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOC_API || ""
     : "/api-doc",
