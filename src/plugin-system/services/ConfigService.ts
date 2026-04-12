@@ -1,5 +1,6 @@
 import { createLogger } from "@/utils/logger";
 import request from "@/utils/request";
+import { buildSystemAdminUrl } from "@/plugin-system/services/systemAdminApi";
 
 import type { PluginsConfig } from "@/plugin-system/types";
 
@@ -128,7 +129,7 @@ export class ConfigService {
   async loadApiConfig(): Promise<PluginsConfig> {
     try {
       const domain = window.location.hostname;
-      const res = await request.get("/v1/plugin/list", {
+      const res = await request.get(buildSystemAdminUrl("/v1/plugin/list"), {
         params: { domain },
         skipErrorMessage: true,
       });

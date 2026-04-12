@@ -583,6 +583,8 @@ const loadSceneDraftState = () => {
   draftVersions.value = [];
   autoSaveEnabled.value = true;
   autoSaveIntervalSeconds.value = DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+  lastSaveTrigger.value = null;
+  lastSavedAt.value = null;
 
   if (!buildSceneDraftStorageKey.value || !buildSceneDraftSettingsKey.value) {
     return;
@@ -1396,6 +1398,24 @@ const refresh = async () => {
     logger.error(error);
   }
 };
+
+const resetEditorStateForSceneChange = () => {
+  init = false;
+  isRestoringDraft.value = false;
+  pendingRestorePayload.value = null;
+  hasUnsavedChangesBeforeUnload.value = false;
+  metaDetail.value = null;
+  entityScenes.value = [];
+  loadSceneDraftState();
+  restartAutoSaveTimer();
+  editorFrameKey.value += 1;
+};
+
+watch(id, (newId, oldId) => {
+  if (!Number.isFinite(newId) || newId === oldId) return;
+  resetEditorStateForSceneChange();
+});
+
 // 生命周期钩子
 onMounted(() => {
   loadSceneDraftState();
