@@ -189,8 +189,9 @@ function provideTableData(data: Ref<Record<string, unknown>[]>) {
     },
   });
   void provider;
-  (ElTableStub as unknown as { __tableData?: Ref<Record<string, unknown>[]> }).__tableData =
-    data;
+  (
+    ElTableStub as unknown as { __tableData?: Ref<Record<string, unknown>[]> }
+  ).__tableData = data;
 }
 
 const ElTableColumnStub = defineComponent({
@@ -207,9 +208,11 @@ const ElTableColumnStub = defineComponent({
   },
   setup(props, { slots }) {
     const data =
-      (ElTableStub as unknown as {
-        __tableData?: Ref<Record<string, unknown>[]>;
-      }).__tableData ?? ref<Record<string, unknown>[]>([]);
+      (
+        ElTableStub as unknown as {
+          __tableData?: Ref<Record<string, unknown>[]>;
+        }
+      ).__tableData ?? ref<Record<string, unknown>[]>([]);
 
     return () =>
       h(
@@ -225,7 +228,9 @@ const ElTableColumnStub = defineComponent({
             slots.default
               ? slots.default({ row, $index: index })
               : String(
-                  props.prop ? (row[props.prop] as string | number | undefined) ?? "" : ""
+                  props.prop
+                    ? ((row[props.prop] as string | number | undefined) ?? "")
+                    : ""
                 )
           )
         )
@@ -284,7 +289,10 @@ function findTagsByText(el: HTMLElement, text: string) {
 }
 
 afterEach(() => {
-  cleanups.splice(0).reverse().forEach((fn) => fn());
+  cleanups
+    .splice(0)
+    .reverse()
+    .forEach((fn) => fn());
   vi.clearAllMocks();
 });
 

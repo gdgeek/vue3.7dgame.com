@@ -66,7 +66,9 @@ describe("plugin-system store permission loading", () => {
   });
 
   it("init does not eagerly fetch plugin permissions", async () => {
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -80,7 +82,9 @@ describe("plugin-system store permission loading", () => {
       data: { code: 0, data: { actions: ["view"] } },
     });
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -124,7 +128,9 @@ describe("plugin-system store permission loading", () => {
         data: { code: 0, data: { actions: ["edit"] } },
       });
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -143,7 +149,9 @@ describe("plugin-system store permission loading", () => {
       refreshToken: "refresh-current",
     });
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -168,7 +176,9 @@ describe("plugin-system store permission loading", () => {
         data: { code: 0, data: { actions: ["view"] } },
       });
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -194,7 +204,9 @@ describe("plugin-system store permission loading", () => {
       data: { code: 0, data: { actions: ["view"] } },
     });
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -208,18 +220,20 @@ describe("plugin-system store permission loading", () => {
 
   it("deduplicates in-flight permission requests for the same plugin", async () => {
     let resolveRequest:
-      | ((value: { data: { code: number; data: { actions: string[] } } }) => void)
+      | ((value: {
+          data: { code: number; data: { actions: string[] } };
+        }) => void)
       | undefined;
     const responsePromise = new Promise<{
       data: { code: number; data: { actions: string[] } };
     }>((resolve) => {
       resolveRequest = resolve;
     });
-    mockGetAllowedActions.mockImplementation(
-      () => responsePromise
-    );
+    mockGetAllowedActions.mockImplementation(() => responsePromise);
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -240,10 +254,14 @@ describe("plugin-system store permission loading", () => {
   it("does not let stale responses overwrite newer token state", async () => {
     const Token = (await import("@/store/modules/token")).default;
     let resolveOldRequest:
-      | ((value: { data: { code: number; data: { actions: string[] } } }) => void)
+      | ((value: {
+          data: { code: number; data: { actions: string[] } };
+        }) => void)
       | undefined;
     let resolveNewRequest:
-      | ((value: { data: { code: number; data: { actions: string[] } } }) => void)
+      | ((value: {
+          data: { code: number; data: { actions: string[] } };
+        }) => void)
       | undefined;
 
     const oldDeferred = new Promise<{
@@ -266,7 +284,9 @@ describe("plugin-system store permission loading", () => {
       .mockReturnValueOnce(oldDeferred)
       .mockReturnValueOnce(newDeferred);
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -321,7 +341,9 @@ describe("plugin-system store permission loading", () => {
         data: { code: 0, data: { actions: ["edit"] } },
       });
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -362,7 +384,9 @@ describe("plugin-system store permission loading", () => {
     );
 
     let resolveCurrentTokenRequest:
-      | ((value: { data: { code: number; data: { actions: string[] } } }) => void)
+      | ((value: {
+          data: { code: number; data: { actions: string[] } };
+        }) => void)
       | undefined;
     const currentTokenRequest = new Promise<{
       data: { code: number; data: { actions: string[] } };
@@ -380,7 +404,9 @@ describe("plugin-system store permission loading", () => {
       .mockRejectedValueOnce({ response: { status: 401 } })
       .mockReturnValueOnce(currentTokenRequest);
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -417,7 +443,9 @@ describe("plugin-system store permission loading", () => {
   });
 
   it("maps 403 to forbidden and retries once before degrading on 5xx", async () => {
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -440,7 +468,9 @@ describe("plugin-system store permission loading", () => {
       data: { code: 0, data: {} },
     });
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -464,7 +494,9 @@ describe("plugin-system store permission loading", () => {
     mockGetAllowedActions.mockRejectedValueOnce(pluginError);
     mockProbeHostSession.mockRejectedValueOnce(hostError);
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();
@@ -483,7 +515,9 @@ describe("plugin-system store permission loading", () => {
     mockGetAllowedActions.mockRejectedValueOnce({ response: { status: 401 } });
     mockProbeHostSession.mockRejectedValueOnce(hostError);
 
-    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
     const store = usePluginSystemStore();
 
     await store.init();

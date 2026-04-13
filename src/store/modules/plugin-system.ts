@@ -19,7 +19,10 @@ type PluginAccessResult = {
   actions: string[];
 };
 
-const inFlightPluginAccessRequests = new Map<string, Promise<PluginAccessResult>>();
+const inFlightPluginAccessRequests = new Map<
+  string,
+  Promise<PluginAccessResult>
+>();
 
 function buildTokenFingerprint(accessToken?: string): string {
   if (!accessToken) {
@@ -92,7 +95,7 @@ function getCurrentTokenAwarePluginAccess(
     return {
       status,
       actions:
-        status === "loading" ? [] : state.pluginPermissions[pluginId] ?? [],
+        status === "loading" ? [] : (state.pluginPermissions[pluginId] ?? []),
     };
   }
 
@@ -277,7 +280,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         try {
           const res = await requestPluginAccessWithRetry(pluginId);
           const actions =
-            res.data?.code === 0 ? res.data.data?.actions ?? [] : [];
+            res.data?.code === 0 ? (res.data.data?.actions ?? []) : [];
 
           if (getCurrentTokenFingerprint() !== fingerprint) {
             return handoffToCurrentTokenAccess();

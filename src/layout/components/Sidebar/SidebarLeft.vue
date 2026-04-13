@@ -387,10 +387,7 @@
         </div>
 
         <!-- 实用工具 (三层目录: 实用工具 → 分组 → 具体插件) -->
-        <div
-          v-if="pluginStore.hasConfiguredEnabledPlugins"
-          class="nav-group"
-        >
+        <div v-if="pluginStore.hasConfiguredEnabledPlugins" class="nav-group">
           <el-popover
             placement="right"
             :width="220"

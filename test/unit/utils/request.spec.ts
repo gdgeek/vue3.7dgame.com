@@ -222,7 +222,9 @@ describe("request interceptor logic", () => {
     };
     const refreshError = new Error("refresh failed");
     (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(expiringToken);
-    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockRejectedValue(refreshError);
+    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockRejectedValue(
+      refreshError
+    );
 
     await import("@/utils/request");
     const reqInterceptor =

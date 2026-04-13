@@ -100,8 +100,7 @@ async function mountView() {
   });
   app.component("el-result", {
     props: ["title", "subTitle"],
-    template:
-      "<div>{{ title }}{{ subTitle }}<slot name='extra' /></div>",
+    template: "<div>{{ title }}{{ subTitle }}<slot name='extra' /></div>",
   });
   app.component("el-empty", {
     template: "<div></div>",
@@ -243,7 +242,10 @@ describe("plugin-system/views/PluginLayout.vue", () => {
   });
 
   it("does not activate a stale plugin after switching routes", async () => {
-    const staleAccess = createDeferred<{ status: "visible"; actions: ["view"] }>();
+    const staleAccess = createDeferred<{
+      status: "visible";
+      actions: ["view"];
+    }>();
     mockEnsurePluginAccess.mockImplementation((id: string) => {
       if (id === "ai-3d-generator-v3") {
         return staleAccess.promise;

@@ -6,7 +6,9 @@ interface HostSessionResponse {
   data?: unknown;
 }
 
-export function probeHostSession(): Promise<AxiosResponse<HostSessionResponse>> {
+export function probeHostSession(): Promise<
+  AxiosResponse<HostSessionResponse>
+> {
   return request.get("/v1/user/info", {
     authScope: "host",
     skipErrorMessage: true,

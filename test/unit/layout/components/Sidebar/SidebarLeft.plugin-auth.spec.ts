@@ -128,7 +128,10 @@ describe("SidebarLeft plugin auth", () => {
   });
 
   afterEach(() => {
-    cleanups.splice(0).reverse().forEach((fn) => fn());
+    cleanups
+      .splice(0)
+      .reverse()
+      .forEach((fn) => fn());
     vi.clearAllMocks();
   });
 
