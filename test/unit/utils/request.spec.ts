@@ -18,6 +18,8 @@ const mockService = vi.hoisted(() => {
   return fn;
 });
 
+const mockRouterPush = vi.hoisted(() => vi.fn());
+
 vi.mock("axios", () => ({
   default: {
     create: vi.fn(() => mockService),
@@ -27,7 +29,7 @@ vi.mock("axios", () => ({
 
 vi.mock("@/router", () => ({
   useRouter: vi.fn(() => ({
-    push: vi.fn(),
+    push: mockRouterPush,
   })),
 }));
 
@@ -265,7 +267,7 @@ describe("response interceptor logic", () => {
     ).toHaveBeenCalled();
   });
 
-  it("handles 401 response by calling removeToken", async () => {
+  it("does not logout for plugin-scoped 401 responses", async () => {
     const Token = (await import("@/store/modules/token")).default;
     await import("@/utils/request");
 
@@ -274,10 +276,29 @@ describe("response interceptor logic", () => {
     const error = {
       message: "Unauthorized",
       response: { status: 401, data: {} },
-      config: { _retry: false },
+      config: { authScope: "plugin", skipErrorMessage: true },
     };
-    await errInterceptor(error).catch(() => {});
-    expect(Token.removeToken).toHaveBeenCalled();
+
+    await expect(errInterceptor(error)).rejects.toBe(error);
+    expect(Token.removeToken).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it("still logs out for host-scoped 401 responses", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+    const error = {
+      message: "Unauthorized",
+      response: { status: 401, data: {} },
+      config: { authScope: "host" },
+    };
+
+    await expect(errInterceptor(error)).rejects.toBeDefined();
+    expect(Token.removeToken).toHaveBeenCalledOnce();
+    expect(mockRouterPush).toHaveBeenCalledWith({ path: "/site/logout" });
   });
 
   it("handles 500 response by showing error message", async () => {

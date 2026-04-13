@@ -155,6 +155,12 @@ function handleUnauthorized(
   return Promise.reject(rejectionReason);
 }
 
+function getAuthScope(
+  config?: import("axios").InternalAxiosRequestConfig
+): "host" | "plugin" {
+  return config?.authScope ?? "host";
+}
+
 // 响应拦截器（Auth / HTTP 错误处理）
 service.interceptors.response.use(
   (response: AxiosResponse) => {
@@ -179,6 +185,9 @@ service.interceptors.response.use(
       return Promise.reject(error);
     }
     if (response.status === 401) {
+      if (getAuthScope(axiosError.config) === "plugin") {
+        return Promise.reject(error);
+      }
       return handleUnauthorized(router, error);
     } else if (response.status === 404) {
       if (!skipErrorMessage) {
