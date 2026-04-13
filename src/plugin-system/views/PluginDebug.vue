@@ -86,8 +86,12 @@ function stateTagType(
   }
 }
 
+function permissionAccessState(pluginId: string) {
+  return accessStates.value[pluginId] ?? "unknown";
+}
+
 function permissionLabel(pluginId: string): string {
-  const state = accessStates.value[pluginId] ?? "unknown";
+  const state = permissionAccessState(pluginId);
   const actions = permissions.value[pluginId] ?? [];
 
   if (state === "unknown") return "未获取";
@@ -98,11 +102,21 @@ function permissionLabel(pluginId: string): string {
   return actions.join(", ") || "已可见";
 }
 
-function permissionTagType(pluginId: string): "success" | "danger" | "info" {
-  const actions = permissions.value[pluginId];
-  if (!actions) return "info";
-  if (actions.length === 0) return "danger";
-  return "success";
+function permissionTagType(
+  pluginId: string
+): "success" | "warning" | "danger" | "info" {
+  switch (permissionAccessState(pluginId)) {
+    case "loading":
+      return "warning";
+    case "forbidden":
+      return "danger";
+    case "degraded":
+      return "warning";
+    case "visible":
+      return "success";
+    default:
+      return "info";
+  }
 }
 
 onMounted(() => {
