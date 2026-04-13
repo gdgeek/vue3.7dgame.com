@@ -25,6 +25,7 @@ const _pluginInfo = computed(() => {
 
 const loading = ref(false);
 const error = ref<string | null>(null);
+const accessState = ref<"idle" | "forbidden" | "degraded">("idle");
 const mountedPluginId = ref<string | null>(null);
 
 /**
@@ -34,6 +35,7 @@ const mountedPluginId = ref<string | null>(null);
 watch(
   pluginId,
   async (newId, oldId) => {
+    accessState.value = "idle";
     error.value = null;
 
     // 卸载旧插件
@@ -50,6 +52,19 @@ watch(
     try {
       // 确保插件系统已初始化（幂等）
       await store.init();
+
+      const access = await store.ensurePluginAccess(newId);
+      if (access.status === "forbidden") {
+        accessState.value = "forbidden";
+        loading.value = false;
+        return;
+      }
+      if (access.status === "degraded") {
+        accessState.value = "degraded";
+        error.value = "插件暂时不可用，请稍后重试";
+        loading.value = false;
+        return;
+      }
 
       // 等待 DOM 容器就绪
       await nextTickContainer();
@@ -224,6 +239,14 @@ onBeforeUnmount(() => {
         <Loading></Loading>
       </el-icon>
       <p>插件加载中...</p>
+    </div>
+
+    <div v-else-if="accessState === 'forbidden'" class="plugin-page__error">
+      <el-result
+        icon="warning"
+        title="无权限访问插件"
+        sub-title="当前账号没有该插件的访问权限"
+      ></el-result>
     </div>
 
     <!-- 错误状态 -->

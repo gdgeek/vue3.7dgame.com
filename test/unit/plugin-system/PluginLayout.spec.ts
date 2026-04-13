@@ -10,6 +10,7 @@ const mockRoute = reactive({
 const mockActivatePlugin = vi.fn();
 const mockDeactivatePlugin = vi.fn();
 const mockInit = vi.fn();
+const mockEnsurePluginAccess = vi.fn();
 const mockBroadcastThemeChange = vi.fn();
 const mockBroadcastLangChange = vi.fn();
 const mockRouterPush = vi.fn();
@@ -35,6 +36,7 @@ vi.mock("vue-router", () => ({
 vi.mock("@/store/modules/plugin-system", () => ({
   usePluginSystemStore: vi.fn(() => ({
     init: mockInit,
+    ensurePluginAccess: mockEnsurePluginAccess,
     activatePlugin: mockActivatePlugin,
     deactivatePlugin: mockDeactivatePlugin,
     plugins: mockPlugins,
@@ -78,7 +80,9 @@ async function mountView() {
     template: "<button><slot /></button>",
   });
   app.component("el-result", {
-    template: "<div><slot name='extra' /></div>",
+    props: ["title", "subTitle"],
+    template:
+      "<div>{{ title }}{{ subTitle }}<slot name='extra' /></div>",
   });
   app.component("el-empty", {
     template: "<div></div>",
@@ -100,6 +104,10 @@ describe("plugin-system/views/PluginLayout.vue", () => {
   beforeEach(() => {
     mockRoute.params.pluginId = "ai-3d-generator-v3";
     mockInit.mockResolvedValue(undefined);
+    mockEnsurePluginAccess.mockResolvedValue({
+      status: "visible",
+      actions: ["view"],
+    });
     mockActivatePlugin.mockImplementation(async (pluginId: string) => {
       const info = mockPlugins.get(pluginId);
       if (info) {
@@ -119,6 +127,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
       .reverse()
       .forEach((fn) => fn());
     mockInit.mockClear();
+    mockEnsurePluginAccess.mockClear();
     mockActivatePlugin.mockClear();
     mockDeactivatePlugin.mockClear();
     mockPlugins.get("ai-3d-generator-v3")!.state = "unloaded";
@@ -129,6 +138,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     const { el } = await mountView();
 
     expect(mockInit).toHaveBeenCalledOnce();
+    expect(mockEnsurePluginAccess).toHaveBeenCalledWith("ai-3d-generator-v3");
     expect(mockActivatePlugin).toHaveBeenCalledOnce();
     expect(mockActivatePlugin).toHaveBeenCalledWith(
       "ai-3d-generator-v3",
@@ -139,6 +149,30 @@ describe("plugin-system/views/PluginLayout.vue", () => {
       })
     );
     expect(el.querySelector(".plugin-page__iframe")).not.toBeNull();
+  });
+
+  it("checks plugin access before activation", async () => {
+    mockEnsurePluginAccess.mockResolvedValue({
+      status: "visible",
+      actions: ["view"],
+    });
+
+    await mountView();
+
+    expect(mockEnsurePluginAccess).toHaveBeenCalledWith("ai-3d-generator-v3");
+    expect(mockActivatePlugin).toHaveBeenCalledOnce();
+  });
+
+  it("does not activate forbidden plugins", async () => {
+    mockEnsurePluginAccess.mockResolvedValue({
+      status: "forbidden",
+      actions: [],
+    });
+
+    const { el } = await mountView();
+
+    expect(mockActivatePlugin).not.toHaveBeenCalled();
+    expect(el.textContent).toContain("无权限访问插件");
   });
 
   it("deactivates the last mounted plugin even if the route param is already cleared", async () => {

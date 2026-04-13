@@ -387,13 +387,17 @@
         </div>
 
         <!-- 实用工具 (三层目录: 实用工具 → 分组 → 具体插件) -->
-        <div v-if="pluginStore.enabledPlugins.length > 0" class="nav-group">
+        <div
+          v-if="pluginStore.hasConfiguredEnabledPlugins"
+          class="nav-group"
+        >
           <el-popover
             placement="right"
             :width="220"
             trigger="hover"
             :disabled="!collapsed"
             popper-class="sidebar-submenu-popover"
+            @show="ensurePluginMenuAccess"
           >
             <template #reference>
               <div class="menu-trigger-wrapper">
@@ -605,7 +609,14 @@ const menuOpen = ref<Record<string, boolean>>({
   plugins: currentPath.value.startsWith("/plugins"),
 });
 
+const ensurePluginMenuAccess = () => {
+  void pluginStore.ensureAllEnabledPluginAccess();
+};
+
 const toggleMenu = (key: string) => {
+  if (key === "plugins") {
+    ensurePluginMenuAccess();
+  }
   menuOpen.value[key] = !menuOpen.value[key];
 };
 

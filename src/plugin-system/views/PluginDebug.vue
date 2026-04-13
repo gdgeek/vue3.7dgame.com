@@ -33,6 +33,7 @@ const plugins = computed(() => Array.from(store.plugins.values()));
 const menuGroups = computed(() => store.menuGroups);
 const enabledPlugins = computed(() => store.enabledPlugins);
 const permissions = computed(() => store.pluginPermissions);
+const accessStates = computed(() => store.pluginAccessStates);
 
 const stateStats = computed(() => {
   const stats = { unloaded: 0, loading: 0, active: 0, error: 0, total: 0 };
@@ -86,11 +87,15 @@ function stateTagType(
 }
 
 function permissionLabel(pluginId: string): string {
-  const actions = permissions.value[pluginId];
-  if (!actions) return "未获取";
-  if (actions.length === 0) return "无权限（隐藏）";
+  const state = accessStates.value[pluginId] ?? "unknown";
+  const actions = permissions.value[pluginId] ?? [];
+
+  if (state === "unknown") return "未获取";
+  if (state === "loading") return "加载中";
+  if (state === "forbidden") return "无权限";
+  if (state === "degraded") return "服务降级";
   if (actions.includes("*")) return "全部权限";
-  return actions.join(", ");
+  return actions.join(", ") || "已可见";
 }
 
 function permissionTagType(pluginId: string): "success" | "danger" | "info" {
@@ -153,7 +158,7 @@ onMounted(() => {
       </el-col>
       <el-col :span="4">
         <el-card shadow="hover">
-          <el-statistic title="已启用" :value="enabledPlugins.length">
+          <el-statistic title="可见插件" :value="enabledPlugins.length">
             <template #prefix>
               <el-icon color="#67c23a">
                 <SuccessFilled></SuccessFilled>
