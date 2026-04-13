@@ -14,7 +14,7 @@ type PluginAccessState =
   | "degraded";
 
 function buildTokenFingerprint(accessToken?: string): string {
-  return accessToken ? accessToken.slice(0, 12) : "anonymous";
+  return accessToken ?? "anonymous";
 }
 
 async function requestPluginAccessWithRetry(pluginId: string) {

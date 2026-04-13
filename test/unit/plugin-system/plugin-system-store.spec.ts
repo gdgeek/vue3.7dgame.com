@@ -40,8 +40,12 @@ vi.mock("@/store/modules/token", () => ({
 describe("plugin-system store permission loading", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    vi.clearAllMocks();
     vi.resetModules();
+    mockInitialize.mockReset();
+    mockGetConfig.mockReset();
+    mockGetAllPlugins.mockReset();
+    mockGetAllowedActions.mockReset();
+    mockProbeHostSession.mockReset();
     mockGetConfig.mockReturnValue({
       version: "1.0.0",
       menuGroups: [{ id: "admin", name: "Admin", order: 1 }],
@@ -86,6 +90,42 @@ describe("plugin-system store permission loading", () => {
     expect(store.pluginAccessStates["user-management"]).toBe("visible");
     expect(store.pluginPermissions["user-management"]).toEqual(["view"]);
     expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
+  });
+
+  it("reloads permissions when the token fingerprint changes", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    (Token.getToken as ReturnType<typeof vi.fn>)
+      .mockReturnValueOnce({
+        accessToken: "token-visible-001",
+        refreshToken: "refresh-visible-001",
+      })
+      .mockReturnValueOnce({
+        accessToken: "token-visible-001",
+        refreshToken: "refresh-visible-001",
+      })
+      .mockReturnValueOnce({
+        accessToken: "token-visible-002",
+        refreshToken: "refresh-visible-002",
+      });
+
+    mockGetAllowedActions
+      .mockResolvedValueOnce({
+        data: { code: 0, data: { actions: ["view"] } },
+      })
+      .mockResolvedValueOnce({
+        data: { code: 0, data: { actions: ["edit"] } },
+      });
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+    await store.ensurePluginAccess("user-management");
+    await store.ensurePluginAccess("user-management");
+    await store.ensurePluginAccess("user-management");
+
+    expect(mockGetAllowedActions).toHaveBeenCalledTimes(2);
+    expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
   });
 
   it("maps 403 to forbidden and retries once before degrading on 5xx", async () => {
