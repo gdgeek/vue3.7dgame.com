@@ -6,6 +6,33 @@ import type { PluginInfo, PluginsConfig, MenuGroup } from "@/plugin-system";
 import { getSystemAdminAllowedActions } from "@/plugin-system/services/systemAdminApi";
 import Token from "@/store/modules/token";
 
+type PluginAccessState =
+  | "unknown"
+  | "loading"
+  | "visible"
+  | "forbidden"
+  | "degraded";
+
+function buildTokenFingerprint(accessToken?: string): string {
+  return accessToken ? accessToken.slice(0, 12) : "anonymous";
+}
+
+async function requestPluginAccessWithRetry(pluginId: string) {
+  try {
+    return await getSystemAdminAllowedActions(pluginId);
+  } catch (err) {
+    const status = (err as { response?: { status?: number } }).response?.status;
+    const shouldRetry = status == null || status >= 500;
+
+    if (!shouldRetry) {
+      throw err;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return getSystemAdminAllowedActions(pluginId);
+  }
+}
+
 interface PluginSystemState {
   initialized: boolean;
   config: PluginsConfig | null;
@@ -15,6 +42,8 @@ interface PluginSystemState {
   error: string | null;
   /** 每个插件的允许操作列表，key 为 pluginId */
   pluginPermissions: Record<string, string[]>;
+  pluginAccessStates: Record<string, PluginAccessState>;
+  pluginPermissionFingerprints: Record<string, string>;
 }
 
 export const usePluginSystemStore = defineStore("plugin-system", {
@@ -26,6 +55,8 @@ export const usePluginSystemStore = defineStore("plugin-system", {
     loading: false,
     error: null,
     pluginPermissions: {},
+    pluginAccessStates: {},
+    pluginPermissionFingerprints: {},
   }),
 
   getters: {
@@ -39,9 +70,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const grouped = new Map<string, PluginInfo[]>();
       for (const plugin of state.plugins.values()) {
         if (!plugin.enabled) continue;
-        // 默认关闭：只有 API 成功返回了非空 actions 才显示
-        const actions = state.pluginPermissions[plugin.pluginId];
-        if (!actions || actions.length === 0) continue;
+        if (state.pluginAccessStates[plugin.pluginId] !== "visible") continue;
 
         const list = grouped.get(plugin.group) ?? [];
         list.push(plugin);
@@ -56,15 +85,20 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       return grouped;
     },
 
+    configuredEnabledPlugins(state): PluginInfo[] {
+      return Array.from(state.plugins.values()).filter((p) => p.enabled);
+    },
+
+    hasConfiguredEnabledPlugins(): boolean {
+      return this.configuredEnabledPlugins.length > 0;
+    },
+
     enabledPlugins(state): PluginInfo[] {
-      const enabled = Array.from(state.plugins.values()).filter(
-        (p) => p.enabled
+      return Array.from(state.plugins.values()).filter(
+        (plugin) =>
+          plugin.enabled &&
+          state.pluginAccessStates[plugin.pluginId] === "visible"
       );
-      // 默认关闭：只有 API 成功返回了非空 actions 才显示
-      return enabled.filter((p) => {
-        const actions = state.pluginPermissions[p.pluginId];
-        return actions !== undefined && actions.length > 0;
-      });
     },
 
     menuGroups(state): MenuGroup[] {
@@ -86,11 +120,10 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         const pluginsMap = new Map<string, PluginInfo>();
         for (const p of pluginSystem.getAllPlugins()) {
           pluginsMap.set(p.pluginId, p);
+          this.pluginPermissions[p.pluginId] = [];
+          this.pluginAccessStates[p.pluginId] = "unknown";
         }
         this.plugins = pluginsMap;
-
-        // 异步加载各插件的权限（不阻塞初始化）
-        this.fetchAllPluginPermissions();
       } catch (err: unknown) {
         this.error =
           err instanceof Error
@@ -101,47 +134,53 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       }
     },
 
-    /** 批量获取所有已启用插件的权限 */
-    async fetchAllPluginPermissions() {
+    async ensurePluginAccess(
+      pluginId: string,
+      options: { force?: boolean } = {}
+    ) {
       const token = Token.getToken();
-      if (!token?.accessToken) return;
+      const fingerprint = buildTokenFingerprint(token?.accessToken);
+      const status = this.pluginAccessStates[pluginId] ?? "unknown";
 
-      const enabledIds = Array.from(
-        this.plugins.values() as Iterable<PluginInfo>
-      )
-        .filter((p) => p.enabled)
-        .map((p) => p.pluginId);
+      if (
+        !options.force &&
+        this.pluginPermissionFingerprints[pluginId] === fingerprint &&
+        status !== "unknown" &&
+        status !== "loading"
+      ) {
+        return {
+          status,
+          actions: this.pluginPermissions[pluginId] ?? [],
+        };
+      }
 
-      // 默认全部关闭（空数组），只有 API 成功返回才打开
-      for (const pluginId of enabledIds) {
+      this.pluginAccessStates[pluginId] = "loading";
+
+      try {
+        const res = await requestPluginAccessWithRetry(pluginId);
+        const actions = res.data?.code === 0 ? res.data.data?.actions ?? [] : [];
+        this.pluginPermissions[pluginId] = actions;
+        this.pluginPermissionFingerprints[pluginId] = fingerprint;
+        this.pluginAccessStates[pluginId] =
+          actions.length > 0 ? "visible" : "forbidden";
+      } catch (err) {
+        const status = (err as { response?: { status?: number } }).response
+          ?.status;
         this.pluginPermissions[pluginId] = [];
+        this.pluginPermissionFingerprints[pluginId] = fingerprint;
+        this.pluginAccessStates[pluginId] =
+          status === 403 ? "forbidden" : "degraded";
       }
 
-      let permissionApiUnavailable = false;
+      return {
+        status: this.pluginAccessStates[pluginId],
+        actions: this.pluginPermissions[pluginId] ?? [],
+      };
+    },
 
-      for (const pluginId of enabledIds) {
-        if (permissionApiUnavailable) break;
-        try {
-          const res = await getSystemAdminAllowedActions(pluginId);
-          if (res.data?.code === 0) {
-            this.pluginPermissions[pluginId] = res.data.data?.actions ?? [];
-          }
-          // code !== 0 时保持默认空数组（关闭）
-        } catch (err) {
-          const status = (err as { response?: { status?: number } })?.response
-            ?.status;
-          if (status === 404) {
-            permissionApiUnavailable = true;
-          }
-          // API 失败时保持默认空数组（关闭）
-        }
-      }
-
-      // 权限 API 不可用时（如后端尚未实现），默认开放所有插件
-      if (permissionApiUnavailable) {
-        for (const pluginId of enabledIds) {
-          this.pluginPermissions[pluginId] = ["*"];
-        }
+    async ensureAllEnabledPluginAccess() {
+      for (const plugin of this.configuredEnabledPlugins) {
+        await this.ensurePluginAccess(plugin.pluginId);
       }
     },
 
@@ -204,6 +243,8 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         this.plugins = new Map();
         this.activePluginId = null;
         this.pluginPermissions = {};
+        this.pluginAccessStates = {};
+        this.pluginPermissionFingerprints = {};
         await this.init();
       } catch (err: unknown) {
         this.error =
