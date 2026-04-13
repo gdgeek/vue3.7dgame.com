@@ -266,6 +266,57 @@ describe("plugin-system store permission loading", () => {
     expect(store.pluginAccessStates["user-management"]).toBe("visible");
   });
 
+  it("does not let a stale 401-plus-host-probe result overwrite newer token state", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    let currentToken = { accessToken: "token-old", refreshToken: "r-old" };
+    (Token.getToken as ReturnType<typeof vi.fn>).mockImplementation(
+      () => currentToken
+    );
+
+    let resolveHostProbe:
+      | ((value: { data: { code: number; data: {} } }) => void)
+      | undefined;
+    let resolveHostProbeStarted: (() => void) | undefined;
+    const hostProbeStarted = new Promise<void>((resolve) => {
+      resolveHostProbeStarted = resolve;
+    });
+    const pendingHostProbe = new Promise<{ data: { code: number; data: {} } }>(
+      (resolve) => {
+        resolveHostProbe = resolve;
+      }
+    );
+    mockProbeHostSession.mockImplementationOnce(() => {
+      currentToken = { accessToken: "token-new", refreshToken: "r-new" };
+      resolveHostProbeStarted?.();
+      return pendingHostProbe;
+    });
+
+    mockGetAllowedActions
+      .mockRejectedValueOnce({ response: { status: 401 } })
+      .mockResolvedValueOnce({
+        data: { code: 0, data: { actions: ["edit"] } },
+      });
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    const oldRequest = store.ensurePluginAccess("user-management");
+    await hostProbeStarted;
+    await store.ensurePluginAccess("user-management");
+
+    resolveHostProbe?.({
+      data: { code: 0, data: {} },
+    });
+    await oldRequest;
+
+    expect(mockGetAllowedActions).toHaveBeenCalledTimes(2);
+    expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
+    expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
+    expect(store.pluginAccessStates["user-management"]).toBe("visible");
+  });
+
   it("maps 403 to forbidden and retries once before degrading on 5xx", async () => {
     const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
     const store = usePluginSystemStore();
@@ -326,5 +377,21 @@ describe("plugin-system store permission loading", () => {
     expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
     expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
     expect(store.pluginAccessStates["user-management"]).toBe("loading");
+  });
+
+  it("does not reject plugin preload when host session has already expired", async () => {
+    const hostError = { response: { status: 401 }, message: "host expired" };
+    mockGetAllowedActions.mockRejectedValueOnce({ response: { status: 401 } });
+    mockProbeHostSession.mockRejectedValueOnce(hostError);
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    await expect(store.ensureAllEnabledPluginAccess()).resolves.toBeUndefined();
+
+    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
+    expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
   });
 });

@@ -202,6 +202,19 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     expect(el.textContent).toContain("无权限访问插件");
   });
 
+  it("does not replace host-expiry handling with local plugin error text on 401", async () => {
+    mockEnsurePluginAccess.mockRejectedValueOnce({
+      response: { status: 401 },
+      message: "host expired",
+    });
+
+    const { el } = await mountView();
+
+    expect(mockActivatePlugin).not.toHaveBeenCalled();
+    expect(el.textContent).not.toContain("加载插件失败");
+    expect(el.textContent).not.toContain("host expired");
+  });
+
   it("retries degraded access by checking access again before activation", async () => {
     mockEnsurePluginAccess
       .mockResolvedValueOnce({

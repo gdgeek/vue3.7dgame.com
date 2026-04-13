@@ -230,6 +230,13 @@ export const usePluginSystemStore = defineStore("plugin-system", {
                 throw hostErr;
               }
             }
+
+            if (getCurrentTokenFingerprint() !== fingerprint) {
+              return {
+                status: this.pluginAccessStates[pluginId] ?? "unknown",
+                actions: this.pluginPermissions[pluginId] ?? [],
+              };
+            }
           }
 
           this.pluginPermissions[pluginId] = [];
@@ -257,7 +264,18 @@ export const usePluginSystemStore = defineStore("plugin-system", {
 
     async ensureAllEnabledPluginAccess() {
       for (const plugin of this.configuredEnabledPlugins) {
-        await this.ensurePluginAccess(plugin.pluginId);
+        try {
+          await this.ensurePluginAccess(plugin.pluginId);
+        } catch (err) {
+          const errorStatus = (err as { response?: { status?: number } })
+            .response?.status;
+
+          if (errorStatus === 401) {
+            return;
+          }
+
+          throw err;
+        }
       }
     },
 
