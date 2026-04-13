@@ -76,11 +76,14 @@ describe("web api-config routing semantics", () => {
   });
 
   it("vite dev server proxies /api-config to the system-admin backend", () => {
-    const source = readFileSync(resolve(process.cwd(), "vite.config.ts"), "utf-8");
+    const source = readFileSync(
+      resolve(process.cwd(), "vite.config.ts"),
+      "utf-8"
+    );
 
     expect(source).toContain('"/api-config"');
     expect(source).toContain("VITE_APP_CONFIG_API_URL");
-    expect(source).toContain("path.replace(/^\\/api-config/, \"\")");
+    expect(source).toContain('path.replace(/^\\/api-config/, "")');
   });
 
   it("nginx template keeps a dedicated placeholder for /api-config proxy locations", () => {
@@ -99,7 +102,9 @@ describe("web api-config routing semantics", () => {
       "utf-8"
     );
 
-    expect(source).toContain('generate_lb_config "APP_CONFIG" "/api-config/" "config"');
+    expect(source).toContain(
+      'generate_lb_config "APP_CONFIG" "/api-config/" "config"'
+    );
     expect(source).toContain("APP_CONFIG");
     expect(source).toContain("__CONFIG_LOCATIONS__");
   });
