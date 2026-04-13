@@ -375,7 +375,7 @@ describe("Property 5: Environment-aware URL selection", () => {
           "utf-8"
         );
         expect(envSource).toMatch(/:\s*["']\/api["']/);
-        expect(envSource).toMatch(/:\s*["']\/api-config["']/);
+        expect(envSource).toMatch(/:\s*["']\/api-config\/api["']/);
         expect(envSource).toMatch(/:\s*["']\/api-domain["']/);
         expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
       }),
