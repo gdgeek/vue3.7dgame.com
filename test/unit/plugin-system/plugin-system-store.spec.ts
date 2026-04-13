@@ -128,6 +128,83 @@ describe("plugin-system store permission loading", () => {
     expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
   });
 
+  it("does not treat degraded as a stable cached result", async () => {
+    mockGetAllowedActions
+      .mockRejectedValueOnce({ response: { status: 500 } })
+      .mockRejectedValueOnce({ response: { status: 502 } })
+      .mockResolvedValueOnce({
+        data: { code: 0, data: { actions: ["view"] } },
+      });
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+    await store.ensurePluginAccess("user-management");
+    expect(store.pluginAccessStates["user-management"]).toBe("degraded");
+
+    await store.ensurePluginAccess("user-management");
+
+    expect(mockGetAllowedActions).toHaveBeenCalledTimes(3);
+    expect(store.pluginAccessStates["user-management"]).toBe("visible");
+    expect(store.pluginPermissions["user-management"]).toEqual(["view"]);
+  });
+
+  it("stores an opaque fingerprint instead of the raw access token", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    const accessToken = "token-visible-001";
+    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue({
+      accessToken,
+      refreshToken: "refresh-visible-001",
+    });
+
+    mockGetAllowedActions.mockResolvedValue({
+      data: { code: 0, data: { actions: ["view"] } },
+    });
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+    await store.ensurePluginAccess("user-management");
+
+    expect(store.pluginPermissionFingerprints["user-management"]).toBeTruthy();
+    expect(store.pluginPermissionFingerprints["user-management"]).not.toBe(
+      accessToken
+    );
+  });
+
+  it("deduplicates in-flight permission requests for the same plugin", async () => {
+    let resolveRequest:
+      | ((value: { data: { code: number; data: { actions: string[] } } }) => void)
+      | undefined;
+    const responsePromise = new Promise<{
+      data: { code: number; data: { actions: string[] } };
+    }>((resolve) => {
+      resolveRequest = resolve;
+    });
+    mockGetAllowedActions.mockImplementation(
+      () => responsePromise
+    );
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    const pendingA = store.ensurePluginAccess("user-management");
+    const pendingB = store.ensurePluginAccess("user-management");
+
+    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
+
+    resolveRequest?.({
+      data: { code: 0, data: { actions: ["view"] } },
+    });
+
+    await Promise.all([pendingA, pendingB]);
+    expect(store.pluginPermissions["user-management"]).toEqual(["view"]);
+  });
+
   it("maps 403 to forbidden and retries once before degrading on 5xx", async () => {
     const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
     const store = usePluginSystemStore();

@@ -13,8 +13,24 @@ type PluginAccessState =
   | "forbidden"
   | "degraded";
 
+type PluginAccessResult = {
+  status: PluginAccessState;
+  actions: string[];
+};
+
+const inFlightPluginAccessRequests = new Map<string, Promise<PluginAccessResult>>();
+
 function buildTokenFingerprint(accessToken?: string): string {
-  return accessToken ?? "anonymous";
+  if (!accessToken) {
+    return "anonymous";
+  }
+
+  let hash = 5381;
+  for (let i = 0; i < accessToken.length; i += 1) {
+    hash = (hash * 33) ^ accessToken.charCodeAt(i);
+  }
+
+  return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
 async function requestPluginAccessWithRetry(pluginId: string) {
@@ -31,6 +47,12 @@ async function requestPluginAccessWithRetry(pluginId: string) {
     await new Promise((resolve) => setTimeout(resolve, 300));
     return getSystemAdminAllowedActions(pluginId);
   }
+}
+
+function isStableAccessState(
+  status: PluginAccessState
+): status is "visible" | "forbidden" {
+  return status === "visible" || status === "forbidden";
 }
 
 interface PluginSystemState {
@@ -141,12 +163,12 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const token = Token.getToken();
       const fingerprint = buildTokenFingerprint(token?.accessToken);
       const status = this.pluginAccessStates[pluginId] ?? "unknown";
+      const requestKey = `${pluginId}:${fingerprint}`;
 
       if (
         !options.force &&
         this.pluginPermissionFingerprints[pluginId] === fingerprint &&
-        status !== "unknown" &&
-        status !== "loading"
+        isStableAccessState(status)
       ) {
         return {
           status,
@@ -154,28 +176,48 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         };
       }
 
-      this.pluginAccessStates[pluginId] = "loading";
-
-      try {
-        const res = await requestPluginAccessWithRetry(pluginId);
-        const actions = res.data?.code === 0 ? res.data.data?.actions ?? [] : [];
-        this.pluginPermissions[pluginId] = actions;
-        this.pluginPermissionFingerprints[pluginId] = fingerprint;
-        this.pluginAccessStates[pluginId] =
-          actions.length > 0 ? "visible" : "forbidden";
-      } catch (err) {
-        const status = (err as { response?: { status?: number } }).response
-          ?.status;
-        this.pluginPermissions[pluginId] = [];
-        this.pluginPermissionFingerprints[pluginId] = fingerprint;
-        this.pluginAccessStates[pluginId] =
-          status === 403 ? "forbidden" : "degraded";
+      if (!options.force) {
+        const inFlightRequest = inFlightPluginAccessRequests.get(requestKey);
+        if (inFlightRequest) {
+          return inFlightRequest;
+        }
       }
 
-      return {
-        status: this.pluginAccessStates[pluginId],
-        actions: this.pluginPermissions[pluginId] ?? [],
-      };
+      const accessRequest = (async (): Promise<PluginAccessResult> => {
+        this.pluginAccessStates[pluginId] = "loading";
+
+        try {
+          const res = await requestPluginAccessWithRetry(pluginId);
+          const actions =
+            res.data?.code === 0 ? res.data.data?.actions ?? [] : [];
+          this.pluginPermissions[pluginId] = actions;
+          this.pluginPermissionFingerprints[pluginId] = fingerprint;
+          this.pluginAccessStates[pluginId] =
+            actions.length > 0 ? "visible" : "forbidden";
+        } catch (err) {
+          const errorStatus = (err as { response?: { status?: number } })
+            .response?.status;
+          this.pluginPermissions[pluginId] = [];
+          this.pluginPermissionFingerprints[pluginId] = fingerprint;
+          this.pluginAccessStates[pluginId] =
+            errorStatus === 403 ? "forbidden" : "degraded";
+        } finally {
+          if (!options.force) {
+            inFlightPluginAccessRequests.delete(requestKey);
+          }
+        }
+
+        return {
+          status: this.pluginAccessStates[pluginId],
+          actions: this.pluginPermissions[pluginId] ?? [],
+        };
+      })();
+
+      if (!options.force) {
+        inFlightPluginAccessRequests.set(requestKey, accessRequest);
+      }
+
+      return accessRequest;
     },
 
     async ensureAllEnabledPluginAccess() {
@@ -245,6 +287,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         this.pluginPermissions = {};
         this.pluginAccessStates = {};
         this.pluginPermissionFingerprints = {};
+        inFlightPluginAccessRequests.clear();
         await this.init();
       } catch (err: unknown) {
         this.error =
