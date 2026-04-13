@@ -28,6 +28,8 @@ export interface PluginLoadOptions {
   theme?: string;
   /** Plugin version string, appended as ?v=xxx to bust cache */
   version?: string;
+  /** Cache-busting token for the iframe entry document */
+  cacheBust?: string;
 }
 
 /**
@@ -70,10 +72,11 @@ export class PluginLoader {
       }
     }
 
-    // Build iframe URL with optional lang/theme/version query params
+    // Build iframe URL with optional lang/theme/version/cache-busting query params
     const iframeUrl = this.buildPluginUrl(manifest.url, {
       ...options,
       version: options?.version ?? manifest.version,
+      cacheBust: options?.cacheBust ?? String(Date.now()),
     });
 
     logger.info(`Loading plugin "${pluginId}" from ${iframeUrl}`);
@@ -211,7 +214,7 @@ export class PluginLoader {
   }
 
   /**
-   * Build the full iframe URL by appending lang/theme/version query parameters.
+   * Build the full iframe URL by appending lang/theme/version/cache-busting query parameters.
    */
   private buildPluginUrl(baseUrl: string, options?: PluginLoadOptions): string {
     if (!options) return baseUrl;
@@ -222,6 +225,8 @@ export class PluginLoader {
       params.push(`theme=${encodeURIComponent(options.theme)}`);
     if (options.version)
       params.push(`v=${encodeURIComponent(options.version)}`);
+    if (options.cacheBust)
+      params.push(`cb=${encodeURIComponent(options.cacheBust)}`);
     return params.length > 0
       ? `${baseUrl}${separator}${params.join("&")}`
       : baseUrl;

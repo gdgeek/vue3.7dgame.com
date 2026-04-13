@@ -60,13 +60,17 @@ describe("PluginLoader", () => {
   });
 
   describe("load", () => {
-    it("should create an iframe with correct src attribute", async () => {
+    it("should create an iframe with a cache-busted src attribute", async () => {
+      const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1713196923000);
       const manifest = createManifest({ url: "https://editor.example.com/v2" });
       await loadWithAutoFire(loader, manifest, container);
 
       const iframe = container.querySelector("iframe");
       expect(iframe).not.toBeNull();
-      expect(iframe?.src).toBe("https://editor.example.com/v2?v=1.0.0");
+      expect(iframe?.src).toBe(
+        "https://editor.example.com/v2?v=1.0.0&cb=1713196923000"
+      );
+      nowSpy.mockRestore();
     });
 
     it("should set default sandbox attribute when manifest.sandbox is undefined", async () => {
