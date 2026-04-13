@@ -301,6 +301,23 @@ describe("response interceptor logic", () => {
     expect(mockRouterPush).toHaveBeenCalledWith({ path: "/site/logout" });
   });
 
+  it("defaults to host-scoped logout when authScope is omitted", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+    const error = {
+      message: "Unauthorized",
+      response: { status: 401, data: {} },
+      config: {},
+    };
+
+    await expect(errInterceptor(error)).rejects.toBeDefined();
+    expect(Token.removeToken).toHaveBeenCalledOnce();
+    expect(mockRouterPush).toHaveBeenCalledWith({ path: "/site/logout" });
+  });
+
   it("handles 500 response by showing error message", async () => {
     const { ElMessage } = await import("element-plus");
     await import("@/utils/request");
