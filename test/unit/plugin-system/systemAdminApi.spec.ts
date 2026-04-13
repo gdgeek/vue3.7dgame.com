@@ -18,7 +18,7 @@ describe("systemAdminApi", () => {
   it("builds plugin API URLs from the /api-config runtime base", async () => {
     vi.doMock("@/environment", () => ({
       default: {
-        config_api: "/api-config",
+        config_api: "/api-config/api",
       },
     }));
 
@@ -27,17 +27,17 @@ describe("systemAdminApi", () => {
     );
 
     expect(buildSystemAdminUrl("/v1/plugin/list")).toBe(
-      "/api-config/v1/plugin/list"
+      "/api-config/api/v1/plugin/list"
     );
     expect(buildSystemAdminUrl("v1/plugin/allowed-actions")).toBe(
-      "/api-config/v1/plugin/allowed-actions"
+      "/api-config/api/v1/plugin/allowed-actions"
     );
   });
 
   it("issues requests with an empty baseURL override so /api-config is not prefixed by /api", async () => {
     vi.doMock("@/environment", () => ({
       default: {
-        config_api: "/api-config",
+        config_api: "/api-config/api",
       },
     }));
 
@@ -48,7 +48,7 @@ describe("systemAdminApi", () => {
     await getSystemAdminAllowedActions("user-management");
 
     expect(mockRequestGet).toHaveBeenCalledWith(
-      "/api-config/v1/plugin/allowed-actions",
+      "/api-config/api/v1/plugin/allowed-actions",
       expect.objectContaining({
         baseURL: "",
         params: { plugin_name: "user-management" },

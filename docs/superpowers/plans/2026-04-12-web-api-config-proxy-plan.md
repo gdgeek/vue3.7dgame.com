@@ -29,9 +29,9 @@ describe("systemAdminApi", () => {
     vi.doUnmock("@/environment");
   });
 
-  it("builds plugin API URLs from the /api-config runtime base", async () => {
+  it("builds plugin API URLs from the /api-config/api runtime base", async () => {
     vi.doMock("@/environment", () => ({
-      default: { config_api: "/api-config" },
+      default: { config_api: "/api-config/api" },
     }));
 
     const { buildSystemAdminUrl } = await import(
@@ -39,7 +39,7 @@ describe("systemAdminApi", () => {
     );
 
     expect(buildSystemAdminUrl("/v1/plugin/list")).toBe(
-      "/api-config/v1/plugin/list"
+      "/api-config/api/v1/plugin/list"
     );
   });
 });
@@ -87,7 +87,7 @@ const environment = {
   api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api",
   config_api: import.meta.env.DEV
     ? import.meta.env.VITE_APP_CONFIG_API_URL || ""
-    : "/api-config",
+    : "/api-config/api",
   doc: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOC_API || ""
     : "/api-doc",
@@ -116,7 +116,7 @@ VITE_APP_CONFIG_API_URL="http://localhost:8088/api"
 ```
 
 ```dotenv
-VITE_APP_CONFIG_API_URL="/api-config"
+VITE_APP_CONFIG_API_URL="/api-config/api"
 ```
 
 ```dotenv
@@ -128,7 +128,7 @@ VITE_APP_CONFIG_API_URL="{scheme}//system-admin.plugins.{domain}/backend/api"
 Run: `pnpm vitest run test/unit/plugin-system/systemAdminApi.spec.ts test/unit/plugin-system/ConfigService.spec.ts`
 
 Expected:
-- `systemAdminApi.spec.ts` passes with `/api-config`.
+- `systemAdminApi.spec.ts` passes with `/api-config/api`.
 - `ConfigService.spec.ts` stays green because it still uses `buildSystemAdminUrl()` transparently.
 
 ### Task 3: Add `/api-config` To Generated Nginx Proxy Chains

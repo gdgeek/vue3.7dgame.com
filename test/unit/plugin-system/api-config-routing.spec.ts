@@ -6,7 +6,7 @@ const mockRequestGet = vi.fn();
 
 vi.mock("@/environment", () => ({
   default: {
-    config_api: "/api-config",
+    config_api: "/api-config/api",
   },
 }));
 
@@ -22,7 +22,7 @@ describe("web api-config routing semantics", () => {
     vi.resetModules();
   });
 
-  it("systemAdminApi routes plugin list requests via /api-config/v1/plugin/list", async () => {
+  it("systemAdminApi routes plugin list requests via /api-config/api/v1/plugin/list", async () => {
     const { getSystemAdminPluginList } = await import(
       "@/plugin-system/services/systemAdminApi"
     );
@@ -30,7 +30,7 @@ describe("web api-config routing semantics", () => {
     await getSystemAdminPluginList();
 
     expect(mockRequestGet).toHaveBeenCalledWith(
-      "/api-config/v1/plugin/list",
+      "/api-config/api/v1/plugin/list",
       expect.objectContaining({
         baseURL: "",
         skipErrorMessage: true,
@@ -38,7 +38,7 @@ describe("web api-config routing semantics", () => {
     );
   });
 
-  it("systemAdminApi routes allowed-actions requests via /api-config/v1/plugin/allowed-actions", async () => {
+  it("systemAdminApi routes allowed-actions requests via /api-config/api/v1/plugin/allowed-actions", async () => {
     const { getSystemAdminAllowedActions } = await import(
       "@/plugin-system/services/systemAdminApi"
     );
@@ -46,7 +46,7 @@ describe("web api-config routing semantics", () => {
     await getSystemAdminAllowedActions("user-management");
 
     expect(mockRequestGet).toHaveBeenCalledWith(
-      "/api-config/v1/plugin/allowed-actions",
+      "/api-config/api/v1/plugin/allowed-actions",
       expect.objectContaining({
         baseURL: "",
         params: { plugin_name: "user-management" },
