@@ -32,8 +32,8 @@ const config = computed(() => store.config);
 const plugins = computed(() => Array.from(store.plugins.values()));
 const menuGroups = computed(() => store.menuGroups);
 const enabledPlugins = computed(() => store.enabledPlugins);
-const permissions = computed(() => store.pluginPermissions);
-const accessStates = computed(() => store.pluginAccessStates);
+const permissions = computed(() => store.currentTokenPluginPermissions);
+const accessStates = computed(() => store.currentTokenPluginAccessStates);
 
 const stateStats = computed(() => {
   const stats = { unloaded: 0, loading: 0, active: 0, error: 0, total: 0 };

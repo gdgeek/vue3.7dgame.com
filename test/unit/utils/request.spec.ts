@@ -212,6 +212,33 @@ describe("request interceptor logic", () => {
     expect(Token.removeToken).toHaveBeenCalled();
   });
 
+  it("does not log out the host when plugin-scoped refresh fails proactively", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    const AuthAPI = await import("@/api/v1/auth");
+    const expiringToken = {
+      accessToken: "old-token",
+      refreshToken: "refresh-token",
+      expires: new Date(Date.now() + 1 * 60 * 1000).toISOString(),
+    };
+    const refreshError = new Error("refresh failed");
+    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(expiringToken);
+    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockRejectedValue(refreshError);
+
+    await import("@/utils/request");
+    const reqInterceptor =
+      mockService.interceptors.request.use.mock.calls[0]?.[0];
+    const config = {
+      url: "/v1/data",
+      headers: {},
+      baseURL: "",
+      authScope: "plugin",
+    };
+
+    await expect(reqInterceptor(config)).rejects.toBe(refreshError);
+    expect(Token.removeToken).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
   it("skips token refresh for whitelisted URLs", async () => {
     const Token = (await import("@/store/modules/token")).default;
     const AuthAPI = await import("@/api/v1/auth");

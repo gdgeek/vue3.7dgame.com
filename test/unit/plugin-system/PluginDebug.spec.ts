@@ -101,6 +101,20 @@ const mockStore = {
     "degraded-plugin": "degraded",
     "visible-plugin": "visible",
   },
+  currentTokenPluginPermissions: {
+    "unknown-plugin": [],
+    "loading-plugin": [],
+    "forbidden-plugin": [],
+    "degraded-plugin": [],
+    "visible-plugin": ["view"],
+  },
+  currentTokenPluginAccessStates: {
+    "unknown-plugin": "unknown",
+    "loading-plugin": "loading",
+    "forbidden-plugin": "forbidden",
+    "degraded-plugin": "degraded",
+    "visible-plugin": "visible",
+  },
   pluginsByGroup: new Map(),
   initialized: true,
   loading: false,
@@ -293,5 +307,17 @@ describe("plugin-system/views/PluginDebug.vue", () => {
     for (const node of findTagsByText(el, "view")) {
       expect(node.getAttribute("data-type")).toBe("success");
     }
+  });
+
+  it("renders current-token-aware permission state instead of stale raw cache", async () => {
+    mockStore.pluginPermissions["visible-plugin"] = ["view"];
+    mockStore.pluginAccessStates["visible-plugin"] = "visible";
+    mockStore.currentTokenPluginPermissions["visible-plugin"] = [];
+    mockStore.currentTokenPluginAccessStates["visible-plugin"] = "unknown";
+
+    const { el } = await mountView();
+
+    expect(el.textContent).toContain("未获取");
+    expect(el.textContent).not.toContain("view");
   });
 });

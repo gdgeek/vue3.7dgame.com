@@ -73,6 +73,46 @@ interface PluginSystemState {
   pluginPermissionFingerprints: Record<string, string>;
 }
 
+function buildPluginAccessRequestKey(pluginId: string, fingerprint: string) {
+  return `${pluginId}:${fingerprint}`;
+}
+
+function getCurrentTokenAwarePluginAccess(
+  state: Pick<
+    PluginSystemState,
+    "pluginPermissions" | "pluginAccessStates" | "pluginPermissionFingerprints"
+  >,
+  pluginId: string
+): PluginAccessResult {
+  const status = state.pluginAccessStates[pluginId] ?? "unknown";
+  const currentFingerprint = getCurrentTokenFingerprint();
+  const cachedFingerprint = state.pluginPermissionFingerprints[pluginId];
+
+  if (cachedFingerprint === currentFingerprint) {
+    return {
+      status,
+      actions:
+        status === "loading" ? [] : state.pluginPermissions[pluginId] ?? [],
+    };
+  }
+
+  if (
+    inFlightPluginAccessRequests.has(
+      buildPluginAccessRequestKey(pluginId, currentFingerprint)
+    )
+  ) {
+    return {
+      status: "loading",
+      actions: [],
+    };
+  }
+
+  return {
+    status: "unknown",
+    actions: [],
+  };
+}
+
 export const usePluginSystemStore = defineStore("plugin-system", {
   state: (): PluginSystemState => ({
     initialized: false,
@@ -97,7 +137,12 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const grouped = new Map<string, PluginInfo[]>();
       for (const plugin of state.plugins.values()) {
         if (!plugin.enabled) continue;
-        if (state.pluginAccessStates[plugin.pluginId] !== "visible") continue;
+        if (
+          getCurrentTokenAwarePluginAccess(state, plugin.pluginId).status !==
+          "visible"
+        ) {
+          continue;
+        }
 
         const list = grouped.get(plugin.group) ?? [];
         list.push(plugin);
@@ -124,8 +169,35 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       return Array.from(state.plugins.values()).filter(
         (plugin) =>
           plugin.enabled &&
-          state.pluginAccessStates[plugin.pluginId] === "visible"
+          getCurrentTokenAwarePluginAccess(state, plugin.pluginId).status ===
+            "visible"
       );
+    },
+
+    currentTokenPluginAccessStates(state): Record<string, PluginAccessState> {
+      const accessStates: Record<string, PluginAccessState> = {};
+
+      for (const pluginId of Object.keys(state.pluginAccessStates)) {
+        accessStates[pluginId] = getCurrentTokenAwarePluginAccess(
+          state,
+          pluginId
+        ).status;
+      }
+
+      return accessStates;
+    },
+
+    currentTokenPluginPermissions(state): Record<string, string[]> {
+      const permissions: Record<string, string[]> = {};
+
+      for (const pluginId of Object.keys(state.pluginAccessStates)) {
+        permissions[pluginId] = getCurrentTokenAwarePluginAccess(
+          state,
+          pluginId
+        ).actions;
+      }
+
+      return permissions;
     },
 
     menuGroups(state): MenuGroup[] {
@@ -168,7 +240,18 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const token = Token.getToken();
       const fingerprint = buildTokenFingerprint(token?.accessToken);
       const status = this.pluginAccessStates[pluginId] ?? "unknown";
-      const requestKey = `${pluginId}:${fingerprint}`;
+      const requestKey = buildPluginAccessRequestKey(pluginId, fingerprint);
+
+      const handoffToCurrentTokenAccess = () => {
+        if (getCurrentTokenFingerprint() === fingerprint) {
+          return {
+            status: this.pluginAccessStates[pluginId] ?? "unknown",
+            actions: this.pluginPermissions[pluginId] ?? [],
+          };
+        }
+
+        return this.ensurePluginAccess(pluginId);
+      };
 
       if (
         !options.force &&
@@ -197,10 +280,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
             res.data?.code === 0 ? res.data.data?.actions ?? [] : [];
 
           if (getCurrentTokenFingerprint() !== fingerprint) {
-            return {
-              status: this.pluginAccessStates[pluginId] ?? "unknown",
-              actions: this.pluginPermissions[pluginId] ?? [],
-            };
+            return handoffToCurrentTokenAccess();
           }
 
           this.pluginPermissions[pluginId] = actions;
@@ -212,10 +292,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
             .response?.status;
 
           if (getCurrentTokenFingerprint() !== fingerprint) {
-            return {
-              status: this.pluginAccessStates[pluginId] ?? "unknown",
-              actions: this.pluginPermissions[pluginId] ?? [],
-            };
+            return handoffToCurrentTokenAccess();
           }
 
           if (errorStatus === 401) {
@@ -232,10 +309,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
             }
 
             if (getCurrentTokenFingerprint() !== fingerprint) {
-              return {
-                status: this.pluginAccessStates[pluginId] ?? "unknown",
-                actions: this.pluginPermissions[pluginId] ?? [],
-              };
+              return handoffToCurrentTokenAccess();
             }
           }
 

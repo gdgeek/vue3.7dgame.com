@@ -136,6 +136,30 @@ describe("plugin-system store permission loading", () => {
     expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
   });
 
+  it("hides stale cached visibility from current-token getters until access is re-evaluated", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue({
+      accessToken: "token-current",
+      refreshToken: "refresh-current",
+    });
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    store.pluginPermissions["user-management"] = ["view"];
+    store.pluginAccessStates["user-management"] = "visible";
+    store.pluginPermissionFingerprints["user-management"] = "stale-token";
+
+    expect(store.currentTokenPluginAccessStates["user-management"]).toBe(
+      "unknown"
+    );
+    expect(store.currentTokenPluginPermissions["user-management"]).toEqual([]);
+    expect(store.enabledPlugins).toEqual([]);
+    expect(store.pluginsByGroup.get("admin")).toBeUndefined();
+  });
+
   it("does not treat degraded as a stable cached result", async () => {
     mockGetAllowedActions
       .mockRejectedValueOnce({ response: { status: 500 } })
@@ -315,6 +339,81 @@ describe("plugin-system store permission loading", () => {
     expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
     expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
     expect(store.pluginAccessStates["user-management"]).toBe("visible");
+  });
+
+  it("hands stale 401-plus-host-probe callers off to the current-token access resolution", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    let currentToken = { accessToken: "token-old", refreshToken: "r-old" };
+    (Token.getToken as ReturnType<typeof vi.fn>).mockImplementation(
+      () => currentToken
+    );
+
+    let resolveHostProbe:
+      | ((value: { data: { code: number; data: {} } }) => void)
+      | undefined;
+    let resolveHostProbeStarted: (() => void) | undefined;
+    const hostProbeStarted = new Promise<void>((resolve) => {
+      resolveHostProbeStarted = resolve;
+    });
+    const pendingHostProbe = new Promise<{ data: { code: number; data: {} } }>(
+      (resolve) => {
+        resolveHostProbe = resolve;
+      }
+    );
+
+    let resolveCurrentTokenRequest:
+      | ((value: { data: { code: number; data: { actions: string[] } } }) => void)
+      | undefined;
+    const currentTokenRequest = new Promise<{
+      data: { code: number; data: { actions: string[] } };
+    }>((resolve) => {
+      resolveCurrentTokenRequest = resolve;
+    });
+
+    mockProbeHostSession.mockImplementationOnce(() => {
+      currentToken = { accessToken: "token-new", refreshToken: "r-new" };
+      resolveHostProbeStarted?.();
+      return pendingHostProbe;
+    });
+
+    mockGetAllowedActions
+      .mockRejectedValueOnce({ response: { status: 401 } })
+      .mockReturnValueOnce(currentTokenRequest);
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    const staleRequest = store.ensurePluginAccess("user-management");
+    await hostProbeStarted;
+    const currentRequest = store.ensurePluginAccess("user-management");
+
+    let staleSettled = false;
+    staleRequest.finally(() => {
+      staleSettled = true;
+    });
+
+    resolveHostProbe?.({
+      data: { code: 0, data: {} },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(staleSettled).toBe(false);
+
+    resolveCurrentTokenRequest?.({
+      data: { code: 0, data: { actions: ["edit"] } },
+    });
+
+    await expect(staleRequest).resolves.toEqual({
+      status: "visible",
+      actions: ["edit"],
+    });
+    await expect(currentRequest).resolves.toEqual({
+      status: "visible",
+      actions: ["edit"],
+    });
   });
 
   it("maps 403 to forbidden and retries once before degrading on 5xx", async () => {

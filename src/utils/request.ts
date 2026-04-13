@@ -106,6 +106,10 @@ service.interceptors.request.use(
             config.headers.Authorization = `Bearer ${newToken.accessToken}`;
           }
         } catch (err) {
+          if (getAuthScope(config) === "plugin") {
+            return Promise.reject(err);
+          }
+
           // 刷新失败 -> 跳转登录
           const router = useRouter();
           return handleUnauthorized(router, err);
