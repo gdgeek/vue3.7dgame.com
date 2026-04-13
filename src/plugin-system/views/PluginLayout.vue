@@ -27,6 +27,68 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const accessState = ref<"idle" | "forbidden" | "degraded">("idle");
 const mountedPluginId = ref<string | null>(null);
+const activeFlowId = ref(0);
+
+function beginFlow() {
+  activeFlowId.value += 1;
+  return activeFlowId.value;
+}
+
+function isFlowCurrent(flowId: number, expectedId?: string) {
+  return activeFlowId.value === flowId && pluginId.value === expectedId;
+}
+
+async function activatePluginForRoute(
+  targetPluginId: string,
+  flowId: number,
+  options: { forceAccess?: boolean } = {}
+) {
+  // 确保插件系统已初始化（幂等）
+  await store.init();
+  if (!isFlowCurrent(flowId, targetPluginId)) return;
+
+  const access = await store.ensurePluginAccess(
+    targetPluginId,
+    options.forceAccess ? { force: true } : {}
+  );
+  if (!isFlowCurrent(flowId, targetPluginId)) return;
+
+  if (access.status === "forbidden") {
+    accessState.value = "forbidden";
+    return;
+  }
+  if (access.status === "degraded") {
+    accessState.value = "degraded";
+    error.value = "插件暂时不可用，请稍后重试";
+    return;
+  }
+
+  // 等待 DOM 容器就绪
+  await nextTickContainer();
+  if (!isFlowCurrent(flowId, targetPluginId)) return;
+
+  if (!containerRef.value) {
+    throw new Error("Plugin container element not available");
+  }
+
+  // 委托给 core 层：创建 iframe + 注册 MessageBus + 状态机
+  await store.activatePlugin(targetPluginId, containerRef.value, {
+    lang: appStore.language,
+    theme: currentThemeName.value,
+  });
+  if (!isFlowCurrent(flowId, targetPluginId)) {
+    await store.deactivatePlugin(targetPluginId);
+    return;
+  }
+
+  mountedPluginId.value = targetPluginId;
+
+  // 检查激活后的状态
+  const info = store.plugins.get(targetPluginId);
+  if (info?.state === "error") {
+    error.value = info.lastError || "插件加载失败";
+  }
+}
 
 /**
  * 当 pluginId 变化时：卸载旧插件 → 初始化系统 → 激活新插件。
@@ -35,6 +97,7 @@ const mountedPluginId = ref<string | null>(null);
 watch(
   pluginId,
   async (newId, oldId) => {
+    const flowId = beginFlow();
     accessState.value = "idle";
     error.value = null;
 
@@ -46,49 +109,22 @@ watch(
       }
     }
 
-    if (!newId) return;
+    if (!isFlowCurrent(flowId, newId)) return;
+    if (!newId) {
+      loading.value = false;
+      return;
+    }
 
     loading.value = true;
     try {
-      // 确保插件系统已初始化（幂等）
-      await store.init();
-
-      const access = await store.ensurePluginAccess(newId);
-      if (access.status === "forbidden") {
-        accessState.value = "forbidden";
-        loading.value = false;
-        return;
-      }
-      if (access.status === "degraded") {
-        accessState.value = "degraded";
-        error.value = "插件暂时不可用，请稍后重试";
-        loading.value = false;
-        return;
-      }
-
-      // 等待 DOM 容器就绪
-      await nextTickContainer();
-
-      if (!containerRef.value) {
-        throw new Error("Plugin container element not available");
-      }
-
-      // 委托给 core 层：创建 iframe + 注册 MessageBus + 状态机
-      await store.activatePlugin(newId, containerRef.value, {
-        lang: appStore.language,
-        theme: currentThemeName.value,
-      });
-      mountedPluginId.value = newId;
-
-      // 检查激活后的状态
-      const info = store.plugins.get(newId);
-      if (info?.state === "error") {
-        error.value = info.lastError || "插件加载失败";
-      }
+      await activatePluginForRoute(newId, flowId);
     } catch (e: unknown) {
+      if (!isFlowCurrent(flowId, newId)) return;
       error.value = e instanceof Error ? e.message : "加载插件失败";
     } finally {
-      loading.value = false;
+      if (isFlowCurrent(flowId, newId)) {
+        loading.value = false;
+      }
     }
   },
   { immediate: true }
@@ -186,48 +222,34 @@ function handlePluginMessage(event: MessageEvent) {
   });
 }
 
-function handleRetry() {
+async function handleRetry() {
   if (!pluginId.value) return;
   // 强制重新激活：先卸载再加载
   const id = pluginId.value;
-  store.deactivatePlugin(id).then(async () => {
-    if (mountedPluginId.value === id) {
-      mountedPluginId.value = null;
+  const flowId = beginFlow();
+  await store.deactivatePlugin(id);
+  if (mountedPluginId.value === id) {
+    mountedPluginId.value = null;
+  }
+  if (!isFlowCurrent(flowId, id)) {
+    return;
+  }
+
+  loading.value = true;
+  accessState.value = "idle";
+  error.value = null;
+  try {
+    await activatePluginForRoute(id, flowId, { forceAccess: true });
+  } catch (e: unknown) {
+    if (!isFlowCurrent(flowId, id)) {
+      return;
     }
-    loading.value = true;
-    accessState.value = "idle";
-    error.value = null;
-    try {
-      const access = await store.ensurePluginAccess(id, { force: true });
-      if (access.status === "forbidden") {
-        accessState.value = "forbidden";
-        loading.value = false;
-        return;
-      }
-      if (access.status === "degraded") {
-        accessState.value = "degraded";
-        error.value = "插件暂时不可用，请稍后重试";
-        loading.value = false;
-        return;
-      }
-      await nextTickContainer();
-      if (containerRef.value) {
-        await store.activatePlugin(id, containerRef.value, {
-          lang: appStore.language,
-          theme: currentThemeName.value,
-        });
-        mountedPluginId.value = id;
-        const info = store.plugins.get(id);
-        if (info?.state === "error") {
-          error.value = info.lastError || "插件加载失败";
-        }
-      }
-    } catch (e: unknown) {
-      error.value = e instanceof Error ? e.message : "重试失败";
-    } finally {
+    error.value = e instanceof Error ? e.message : "重试失败";
+  } finally {
+    if (isFlowCurrent(flowId, id)) {
       loading.value = false;
     }
-  });
+  }
 }
 
 onMounted(() => {
@@ -235,6 +257,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  activeFlowId.value += 1;
   window.removeEventListener("message", handlePluginMessage);
   const idToDeactivate = mountedPluginId.value ?? pluginId.value;
   if (idToDeactivate) {

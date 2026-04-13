@@ -24,7 +24,25 @@ const mockPlugins = new Map([
       lastError: undefined as string | undefined,
     },
   ],
+  [
+    "plugin-b",
+    {
+      pluginId: "plugin-b",
+      state: "unloaded",
+      lastError: undefined as string | undefined,
+    },
+  ],
 ]);
+
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
 
 vi.mock("vue-router", () => ({
   useRoute: vi.fn(() => mockRoute),
@@ -133,13 +151,18 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     mockDeactivatePlugin.mockClear();
     mockPlugins.get("ai-3d-generator-v3")!.state = "unloaded";
     mockPlugins.get("ai-3d-generator-v3")!.lastError = undefined;
+    mockPlugins.get("plugin-b")!.state = "unloaded";
+    mockPlugins.get("plugin-b")!.lastError = undefined;
   });
 
   it("activates the plugin for the current route", async () => {
     const { el } = await mountView();
 
     expect(mockInit).toHaveBeenCalledOnce();
-    expect(mockEnsurePluginAccess).toHaveBeenCalledWith("ai-3d-generator-v3");
+    expect(mockEnsurePluginAccess).toHaveBeenCalledWith(
+      "ai-3d-generator-v3",
+      {}
+    );
     expect(mockActivatePlugin).toHaveBeenCalledOnce();
     expect(mockActivatePlugin).toHaveBeenCalledWith(
       "ai-3d-generator-v3",
@@ -160,7 +183,10 @@ describe("plugin-system/views/PluginLayout.vue", () => {
 
     await mountView();
 
-    expect(mockEnsurePluginAccess).toHaveBeenCalledWith("ai-3d-generator-v3");
+    expect(mockEnsurePluginAccess).toHaveBeenCalledWith(
+      "ai-3d-generator-v3",
+      {}
+    );
     expect(mockActivatePlugin).toHaveBeenCalledOnce();
   });
 
@@ -201,6 +227,69 @@ describe("plugin-system/views/PluginLayout.vue", () => {
 
     expect(mockEnsurePluginAccess).toHaveBeenCalledTimes(2);
     expect(mockActivatePlugin).toHaveBeenCalledOnce();
+  });
+
+  it("does not activate a stale plugin after switching routes", async () => {
+    const staleAccess = createDeferred<{ status: "visible"; actions: ["view"] }>();
+    mockEnsurePluginAccess.mockImplementation((id: string) => {
+      if (id === "ai-3d-generator-v3") {
+        return staleAccess.promise;
+      }
+      return Promise.resolve({
+        status: "visible" as const,
+        actions: ["view"],
+      });
+    });
+
+    await mountView();
+
+    mockRoute.params.pluginId = "plugin-b";
+    await nextTick();
+    await Promise.resolve();
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    await Promise.resolve();
+
+    staleAccess.resolve({
+      status: "visible",
+      actions: ["view"],
+    });
+    await Promise.resolve();
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    await Promise.resolve();
+
+    expect(mockActivatePlugin).toHaveBeenCalledTimes(1);
+    expect(mockActivatePlugin).toHaveBeenCalledWith(
+      "plugin-b",
+      expect.any(HTMLDivElement),
+      expect.objectContaining({
+        lang: "zh-CN",
+        theme: "edu-friendly",
+      })
+    );
+  });
+
+  it("does not activate the plugin when retry access becomes forbidden", async () => {
+    mockEnsurePluginAccess
+      .mockResolvedValueOnce({
+        status: "degraded",
+        actions: [],
+      })
+      .mockResolvedValueOnce({
+        status: "forbidden",
+        actions: [],
+      });
+
+    const { el } = await mountView();
+
+    const retryButton = el.querySelector("button") as HTMLButtonElement;
+    retryButton.click();
+    await nextTick();
+    await Promise.resolve();
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    await Promise.resolve();
+
+    expect(mockActivatePlugin).not.toHaveBeenCalled();
+    expect(el.textContent).toContain("无权限访问插件");
   });
 
   it("deactivates the last mounted plugin even if the route param is already cleared", async () => {

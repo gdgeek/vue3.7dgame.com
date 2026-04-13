@@ -1,14 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createApp, defineComponent, nextTick } from "vue";
+import { createApp, defineComponent, nextTick, reactive } from "vue";
 
 const mockEnsureAllEnabledPluginAccess = vi.fn();
+const mockMenuGroups = reactive<Array<Record<string, unknown>>>([]);
+const mockPluginsByGroup = reactive(
+  new Map<string, Array<Record<string, unknown>>>()
+);
+const mockCurrentRoute = reactive({
+  path: "/home",
+});
 const mockPluginStore = {
   init: vi.fn(),
   enabledPlugins: [],
   hasConfiguredEnabledPlugins: true,
   initialized: false,
-  menuGroups: [],
-  pluginsByGroup: new Map(),
+  menuGroups: mockMenuGroups,
+  pluginsByGroup: mockPluginsByGroup,
   ensureAllEnabledPluginAccess: mockEnsureAllEnabledPluginAccess,
 };
 
@@ -25,7 +32,7 @@ vi.mock("@/components/Dialog/ConfirmDialog.vue", () => ({
 
 vi.mock("vue-router", () => ({
   useRouter: vi.fn(() => ({
-    currentRoute: { value: { path: "/home" } },
+    currentRoute: { value: mockCurrentRoute },
     push: vi.fn(),
   })),
 }));
@@ -62,8 +69,10 @@ const ElScrollbarStub = defineComponent({
 });
 const ElPopoverStub = defineComponent({
   name: "ElPopover",
+  props: ["width"],
   emits: ["show"],
-  template: "<div class='popover-stub'><slot name='reference' /><slot /></div>",
+  template:
+    "<div class='popover-stub' :data-width='width'><button class='popover-show' @click=\"$emit('show')\"></button><slot name='reference' /><slot /></div>",
 });
 const RouterLinkStub = defineComponent({
   name: "RouterLink",
@@ -83,7 +92,7 @@ const FontAwesomeIconStub = defineComponent({
 
 const cleanups: Array<() => void> = [];
 
-async function mount() {
+async function mount(collapsed = false) {
   const { default: SidebarLeft } = await import(
     "@/layout/components/Sidebar/SidebarLeft.vue"
   );
@@ -92,7 +101,7 @@ async function mount() {
   document.body.appendChild(el);
 
   const app = createApp(SidebarLeft as Parameters<typeof createApp>[0], {
-    collapsed: false,
+    collapsed,
   });
   app.component("el-scrollbar", ElScrollbarStub);
   app.component("el-popover", ElPopoverStub);
@@ -111,6 +120,10 @@ async function mount() {
 
 describe("SidebarLeft plugin auth", () => {
   beforeEach(() => {
+    mockCurrentRoute.path = "/home";
+    mockPluginStore.initialized = false;
+    mockMenuGroups.splice(0, mockMenuGroups.length);
+    mockPluginsByGroup.clear();
     mockEnsureAllEnabledPluginAccess.mockResolvedValue(undefined);
   });
 
@@ -124,6 +137,12 @@ describe("SidebarLeft plugin auth", () => {
     expect(el.textContent).toContain("sidebar.tools");
   });
 
+  it("does not eager load plugin visibility on mount", async () => {
+    await mount();
+
+    expect(mockEnsureAllEnabledPluginAccess).not.toHaveBeenCalled();
+  });
+
   it("loads plugin visibility when the tools root is opened", async () => {
     const { el } = await mount();
     const toolsTrigger = Array.from(el.querySelectorAll(".sidebar-item")).find(
@@ -134,5 +153,63 @@ describe("SidebarLeft plugin auth", () => {
     await nextTick();
 
     expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
+  });
+
+  it("does not load plugin visibility again when the tools root is closed", async () => {
+    const { el } = await mount();
+    const toolsTrigger = Array.from(el.querySelectorAll(".sidebar-item")).find(
+      (node) => node.textContent?.includes("sidebar.tools")
+    ) as HTMLElement;
+
+    toolsTrigger.click();
+    await nextTick();
+    toolsTrigger.click();
+    await nextTick();
+
+    expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
+  });
+
+  it("loads plugin visibility when the collapsed popover is shown", async () => {
+    const { el } = await mount(true);
+    const pluginPopoverShow = el.querySelector(
+      ".popover-stub[data-width='220'] .popover-show"
+    ) as HTMLButtonElement;
+
+    pluginPopoverShow.click();
+    await nextTick();
+
+    expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
+  });
+
+  it("expands the active plugin group after plugin visibility becomes available", async () => {
+    mockCurrentRoute.path = "/plugins/ai-3d-generator-v3";
+    mockPluginStore.initialized = true;
+    mockMenuGroups.push({
+      id: "ai-tools",
+      name: "AI Tools",
+      nameI18n: null,
+      order: 1,
+      icon: "toolbox",
+    });
+
+    const { el } = await mount();
+
+    expect(el.querySelector(".submenu-level3")).toBeNull();
+
+    mockPluginsByGroup.set("ai-tools", [
+      {
+        pluginId: "ai-3d-generator-v3",
+        name: "AI 3D Generator",
+        nameI18n: null,
+        group: "ai-tools",
+        order: 1,
+      },
+    ]);
+    await nextTick();
+    await nextTick();
+
+    const level3Menu = el.querySelector(".submenu-level3") as HTMLDivElement;
+    expect(level3Menu).not.toBeNull();
+    expect(level3Menu.style.display).not.toBe("none");
   });
 });

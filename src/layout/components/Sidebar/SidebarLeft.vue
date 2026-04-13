@@ -562,7 +562,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import ConfirmDialog from "@/components/Dialog/ConfirmDialog.vue";
@@ -614,7 +614,7 @@ const ensurePluginMenuAccess = () => {
 };
 
 const toggleMenu = (key: string) => {
-  if (key === "plugins") {
+  if (key === "plugins" && !menuOpen.value.plugins) {
     ensurePluginMenuAccess();
   }
   menuOpen.value[key] = !menuOpen.value[key];
@@ -632,25 +632,22 @@ const visibleMenuGroups = computed(() => {
   );
 });
 
-// Auto-expand plugin sub-groups when store is initialized and on plugin route
-watch(
-  () => pluginStore.initialized,
-  (initialized) => {
-    if (!initialized || !currentPath.value.startsWith("/plugins")) return;
-    const activePluginId = currentPath.value
-      .split("/plugins/")[1]
-      ?.split("?")[0];
-    if (!activePluginId) return;
-    // Find which group this plugin belongs to
-    for (const [groupId, plugins] of pluginStore.pluginsByGroup) {
-      if (plugins.some((p) => p.pluginId === activePluginId)) {
-        menuOpen.value[`plugin-group-${groupId}`] = true;
-        break;
-      }
+watchEffect(() => {
+  if (!pluginStore.initialized || !currentPath.value.startsWith("/plugins")) {
+    return;
+  }
+
+  const activePluginId = currentPath.value.split("/plugins/")[1]?.split("?")[0];
+  if (!activePluginId) return;
+
+  for (const [groupId, plugins] of pluginStore.pluginsByGroup) {
+    if (plugins.some((p) => p.pluginId === activePluginId)) {
+      menuOpen.value.plugins = true;
+      menuOpen.value[`plugin-group-${groupId}`] = true;
+      break;
     }
-  },
-  { immediate: true }
-);
+  }
+});
 
 const handleLogout = () => {
   showLogoutDialog.value = true;
