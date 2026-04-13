@@ -32,6 +32,12 @@ describe("docker-compose.prod.yml — environment variables", () => {
     expect(composeConfig).toContain("APP_CONFIG_2_URL=");
   });
 
+  it("uses host-only APP_CONFIG backends without any path suffix", () => {
+    expect(composeConfig).not.toMatch(
+      /APP_CONFIG_\d+_URL=https?:\/\/[^/\s]+\/[^\s]*/
+    );
+  });
+
   it("contains APP_DOMAIN_1_URL (primary domain backend)", () => {
     expect(composeConfig).toContain("APP_DOMAIN_1_URL=");
   });
