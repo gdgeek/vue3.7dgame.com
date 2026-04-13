@@ -57,4 +57,31 @@ describe("systemAdminApi", () => {
       })
     );
   });
+
+  it("overrides caller authScope and baseURL for system-admin requests", async () => {
+    vi.doMock("@/environment", () => ({
+      default: {
+        config_api: "/api-config/api",
+      },
+    }));
+
+    const { getSystemAdmin } = await import(
+      "@/plugin-system/services/systemAdminApi"
+    );
+
+    await getSystemAdmin("/v1/plugin/list", {
+      authScope: "host",
+      baseURL: "/custom",
+      params: { source: "test" },
+    } as unknown as Parameters<typeof getSystemAdmin>[1]);
+
+    expect(mockRequestGet).toHaveBeenCalledWith(
+      "/api-config/api/v1/plugin/list",
+      expect.objectContaining({
+        authScope: "plugin",
+        baseURL: "",
+        params: { source: "test" },
+      })
+    );
+  });
 });

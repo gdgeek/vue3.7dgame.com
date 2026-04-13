@@ -11,7 +11,7 @@ export function buildSystemAdminUrl(path: string): string {
 
 export function getSystemAdmin<T = unknown>(
   path: string,
-  config?: AxiosRequestConfig
+  config?: Omit<AxiosRequestConfig, "authScope" | "baseURL">
 ): Promise<AxiosResponse<T>> {
   return request.get<T>(buildSystemAdminUrl(path), {
     ...config,
