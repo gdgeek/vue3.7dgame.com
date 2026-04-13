@@ -15,6 +15,7 @@ export function getSystemAdmin<T = unknown>(
 ): Promise<AxiosResponse<T>> {
   return request.get<T>(buildSystemAdminUrl(path), {
     ...config,
+    authScope: "plugin",
     // The shared request instance defaults to /api; blank it here so /api-config stays intact.
     baseURL: "",
   });

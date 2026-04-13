@@ -32,6 +32,7 @@ describe("web api-config routing semantics", () => {
     expect(mockRequestGet).toHaveBeenCalledWith(
       "/api-config/api/v1/plugin/list",
       expect.objectContaining({
+        authScope: "plugin",
         baseURL: "",
         skipErrorMessage: true,
       })
@@ -48,6 +49,7 @@ describe("web api-config routing semantics", () => {
     expect(mockRequestGet).toHaveBeenCalledWith(
       "/api-config/api/v1/plugin/allowed-actions",
       expect.objectContaining({
+        authScope: "plugin",
         baseURL: "",
         params: { plugin_name: "user-management" },
         skipErrorMessage: true,

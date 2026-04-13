@@ -50,6 +50,7 @@ describe("systemAdminApi", () => {
     expect(mockRequestGet).toHaveBeenCalledWith(
       "/api-config/api/v1/plugin/allowed-actions",
       expect.objectContaining({
+        authScope: "plugin",
         baseURL: "",
         params: { plugin_name: "user-management" },
         skipErrorMessage: true,
