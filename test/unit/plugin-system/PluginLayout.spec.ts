@@ -77,7 +77,8 @@ async function mountView() {
     template: "<div><slot /></div>",
   });
   app.component("el-button", {
-    template: "<button><slot /></button>",
+    emits: ["click"],
+    template: "<button @click=\"$emit('click')\"><slot /></button>",
   });
   app.component("el-result", {
     props: ["title", "subTitle"],
@@ -173,6 +174,33 @@ describe("plugin-system/views/PluginLayout.vue", () => {
 
     expect(mockActivatePlugin).not.toHaveBeenCalled();
     expect(el.textContent).toContain("无权限访问插件");
+  });
+
+  it("retries degraded access by checking access again before activation", async () => {
+    mockEnsurePluginAccess
+      .mockResolvedValueOnce({
+        status: "degraded",
+        actions: [],
+      })
+      .mockResolvedValueOnce({
+        status: "visible",
+        actions: ["view"],
+      });
+
+    const { el } = await mountView();
+
+    expect(mockActivatePlugin).not.toHaveBeenCalled();
+    expect(el.textContent).toContain("插件暂时不可用，请稍后重试");
+
+    const retryButton = el.querySelector("button") as HTMLButtonElement;
+    retryButton.click();
+    await nextTick();
+    await Promise.resolve();
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    await Promise.resolve();
+
+    expect(mockEnsurePluginAccess).toHaveBeenCalledTimes(2);
+    expect(mockActivatePlugin).toHaveBeenCalledOnce();
   });
 
   it("deactivates the last mounted plugin even if the route param is already cleared", async () => {

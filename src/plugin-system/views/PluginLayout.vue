@@ -195,8 +195,21 @@ function handleRetry() {
       mountedPluginId.value = null;
     }
     loading.value = true;
+    accessState.value = "idle";
     error.value = null;
     try {
+      const access = await store.ensurePluginAccess(id, { force: true });
+      if (access.status === "forbidden") {
+        accessState.value = "forbidden";
+        loading.value = false;
+        return;
+      }
+      if (access.status === "degraded") {
+        accessState.value = "degraded";
+        error.value = "插件暂时不可用，请稍后重试";
+        loading.value = false;
+        return;
+      }
       await nextTickContainer();
       if (containerRef.value) {
         await store.activatePlugin(id, containerRef.value, {
