@@ -283,4 +283,48 @@ describe("plugin-system store permission loading", () => {
     expect(mockGetAllowedActions).toHaveBeenCalledTimes(3);
     expect(store.pluginAccessStates["user-management"]).toBe("degraded");
   });
+
+  it("treats plugin auth 401 as degraded when the host session probe succeeds", async () => {
+    mockGetAllowedActions.mockRejectedValueOnce({ response: { status: 401 } });
+    mockProbeHostSession.mockResolvedValueOnce({
+      data: { code: 0, data: {} },
+    });
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    await expect(
+      store.ensurePluginAccess("user-management", { force: true })
+    ).resolves.toEqual({
+      status: "degraded",
+      actions: [],
+    });
+
+    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
+    expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
+    expect(store.pluginAccessStates["user-management"]).toBe("degraded");
+    expect(store.pluginPermissions["user-management"]).toEqual([]);
+  });
+
+  it("rethrows the host 401 when plugin auth 401 is caused by host session expiry", async () => {
+    const pluginError = { response: { status: 401 } };
+    const hostError = { response: { status: 401 }, message: "host expired" };
+    mockGetAllowedActions.mockRejectedValueOnce(pluginError);
+    mockProbeHostSession.mockRejectedValueOnce(hostError);
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    await expect(
+      store.ensurePluginAccess("user-management", { force: true })
+    ).rejects.toBe(hostError);
+
+    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
+    expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
+    expect(store.pluginAccessStates["user-management"]).toBe("loading");
+  });
 });

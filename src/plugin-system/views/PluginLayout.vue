@@ -29,6 +29,10 @@ const accessState = ref<"idle" | "forbidden" | "degraded">("idle");
 const mountedPluginId = ref<string | null>(null);
 const activeFlowId = ref(0);
 
+function getErrorStatus(error: unknown) {
+  return (error as { response?: { status?: number } })?.response?.status;
+}
+
 function beginFlow() {
   activeFlowId.value += 1;
   return activeFlowId.value;
@@ -120,6 +124,7 @@ watch(
       await activatePluginForRoute(newId, flowId);
     } catch (e: unknown) {
       if (!isFlowCurrent(flowId, newId)) return;
+      if (getErrorStatus(e) === 401) return;
       error.value = e instanceof Error ? e.message : "加载插件失败";
     } finally {
       if (isFlowCurrent(flowId, newId)) {
@@ -242,6 +247,9 @@ async function handleRetry() {
     await activatePluginForRoute(id, flowId, { forceAccess: true });
   } catch (e: unknown) {
     if (!isFlowCurrent(flowId, id)) {
+      return;
+    }
+    if (getErrorStatus(e) === 401) {
       return;
     }
     error.value = e instanceof Error ? e.message : "重试失败";

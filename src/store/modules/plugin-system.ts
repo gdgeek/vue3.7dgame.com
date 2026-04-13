@@ -4,6 +4,7 @@ import type { PluginLoadOptions } from "@/plugin-system/core/PluginLoader";
 import { store } from "@/store";
 import type { PluginInfo, PluginsConfig, MenuGroup } from "@/plugin-system";
 import { getSystemAdminAllowedActions } from "@/plugin-system/services/systemAdminApi";
+import { probeHostSession } from "@/plugin-system/services/hostSessionApi";
 import Token from "@/store/modules/token";
 
 type PluginAccessState =
@@ -215,6 +216,20 @@ export const usePluginSystemStore = defineStore("plugin-system", {
               status: this.pluginAccessStates[pluginId] ?? "unknown",
               actions: this.pluginPermissions[pluginId] ?? [],
             };
+          }
+
+          if (errorStatus === 401) {
+            try {
+              await probeHostSession();
+            } catch (hostErr) {
+              const hostErrorStatus = (
+                hostErr as { response?: { status?: number } }
+              ).response?.status;
+
+              if (hostErrorStatus === 401) {
+                throw hostErr;
+              }
+            }
           }
 
           this.pluginPermissions[pluginId] = [];
