@@ -104,6 +104,14 @@ describe("plugin-system store permission loading", () => {
         refreshToken: "refresh-visible-001",
       })
       .mockReturnValueOnce({
+        accessToken: "token-visible-001",
+        refreshToken: "refresh-visible-001",
+      })
+      .mockReturnValueOnce({
+        accessToken: "token-visible-002",
+        refreshToken: "refresh-visible-002",
+      })
+      .mockReturnValue({
         accessToken: "token-visible-002",
         refreshToken: "refresh-visible-002",
       });
@@ -203,6 +211,59 @@ describe("plugin-system store permission loading", () => {
 
     await Promise.all([pendingA, pendingB]);
     expect(store.pluginPermissions["user-management"]).toEqual(["view"]);
+  });
+
+  it("does not let stale responses overwrite newer token state", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    let resolveOldRequest:
+      | ((value: { data: { code: number; data: { actions: string[] } } }) => void)
+      | undefined;
+    let resolveNewRequest:
+      | ((value: { data: { code: number; data: { actions: string[] } } }) => void)
+      | undefined;
+
+    const oldDeferred = new Promise<{
+      data: { code: number; data: { actions: string[] } };
+    }>((resolve) => {
+      resolveOldRequest = resolve;
+    });
+    const newDeferred = new Promise<{
+      data: { code: number; data: { actions: string[] } };
+    }>((resolve) => {
+      resolveNewRequest = resolve;
+    });
+
+    (Token.getToken as ReturnType<typeof vi.fn>)
+      .mockReturnValueOnce({ accessToken: "token-old", refreshToken: "r-old" })
+      .mockReturnValueOnce({ accessToken: "token-new", refreshToken: "r-new" })
+      .mockReturnValue({ accessToken: "token-new", refreshToken: "r-new" });
+
+    mockGetAllowedActions
+      .mockReturnValueOnce(oldDeferred)
+      .mockReturnValueOnce(newDeferred);
+
+    const { usePluginSystemStore } = await import("@/store/modules/plugin-system");
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    const oldRequest = store.ensurePluginAccess("user-management");
+    const newRequest = store.ensurePluginAccess("user-management", {
+      force: true,
+    });
+
+    resolveNewRequest?.({
+      data: { code: 0, data: { actions: ["edit"] } },
+    });
+    await newRequest;
+
+    resolveOldRequest?.({
+      data: { code: 0, data: { actions: ["view"] } },
+    });
+    await oldRequest;
+
+    expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
+    expect(store.pluginAccessStates["user-management"]).toBe("visible");
   });
 
   it("maps 403 to forbidden and retries once before degrading on 5xx", async () => {

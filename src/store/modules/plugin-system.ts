@@ -55,6 +55,10 @@ function isStableAccessState(
   return status === "visible" || status === "forbidden";
 }
 
+function getCurrentTokenFingerprint() {
+  return buildTokenFingerprint(Token.getToken()?.accessToken);
+}
+
 interface PluginSystemState {
   initialized: boolean;
   config: PluginsConfig | null;
@@ -190,6 +194,14 @@ export const usePluginSystemStore = defineStore("plugin-system", {
           const res = await requestPluginAccessWithRetry(pluginId);
           const actions =
             res.data?.code === 0 ? res.data.data?.actions ?? [] : [];
+
+          if (getCurrentTokenFingerprint() !== fingerprint) {
+            return {
+              status: this.pluginAccessStates[pluginId] ?? "unknown",
+              actions: this.pluginPermissions[pluginId] ?? [],
+            };
+          }
+
           this.pluginPermissions[pluginId] = actions;
           this.pluginPermissionFingerprints[pluginId] = fingerprint;
           this.pluginAccessStates[pluginId] =
@@ -197,6 +209,14 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         } catch (err) {
           const errorStatus = (err as { response?: { status?: number } })
             .response?.status;
+
+          if (getCurrentTokenFingerprint() !== fingerprint) {
+            return {
+              status: this.pluginAccessStates[pluginId] ?? "unknown",
+              actions: this.pluginPermissions[pluginId] ?? [],
+            };
+          }
+
           this.pluginPermissions[pluginId] = [];
           this.pluginPermissionFingerprints[pluginId] = fingerprint;
           this.pluginAccessStates[pluginId] =
