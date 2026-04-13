@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const mockRequestGet = vi.fn();
+
+vi.mock("@/utils/request", () => ({
+  default: {
+    get: (...args: unknown[]) => mockRequestGet(...args),
+  },
+}));
+
 describe("systemAdminApi", () => {
   afterEach(() => {
     vi.resetModules();
@@ -23,6 +31,29 @@ describe("systemAdminApi", () => {
     );
     expect(buildSystemAdminUrl("v1/plugin/allowed-actions")).toBe(
       "/api-config/v1/plugin/allowed-actions"
+    );
+  });
+
+  it("issues requests with an empty baseURL override so /api-config is not prefixed by /api", async () => {
+    vi.doMock("@/environment", () => ({
+      default: {
+        config_api: "/api-config",
+      },
+    }));
+
+    const { getSystemAdminAllowedActions } = await import(
+      "@/plugin-system/services/systemAdminApi"
+    );
+
+    await getSystemAdminAllowedActions("user-management");
+
+    expect(mockRequestGet).toHaveBeenCalledWith(
+      "/api-config/v1/plugin/allowed-actions",
+      expect.objectContaining({
+        baseURL: "",
+        params: { plugin_name: "user-management" },
+        skipErrorMessage: true,
+      })
     );
   });
 });

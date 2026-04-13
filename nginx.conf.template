@@ -47,14 +47,14 @@ server {
         proxy_send_timeout 120s;
     }
 
-    # ============ 反向代理 - 配置 API (由 docker-entrypoint.sh 动态生成) ============
-    # __CONFIG_LOCATIONS__
-
     # ============ 反向代理 - 域名信息 API (由 docker-entrypoint.sh 动态生成) ============
     # __DOMAIN_LOCATIONS__
 
     # ============ 反向代理 - API (由 docker-entrypoint.sh 动态生成) ============
     # __API_LOCATIONS__
+
+    # ============ 反向代理 - 配置 API (由 docker-entrypoint.sh 动态生成) ============
+    # __CONFIG_LOCATIONS__
 
     # ============ 自定义 JSON 错误响应 ============
     error_page 502 /502.json;

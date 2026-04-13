@@ -17,10 +17,11 @@ vi.mock("@/utils/logger", () => ({
   }),
 }));
 
-// Mock request (used by loadApiConfig)
-const mockRequestGet = vi.fn();
-vi.mock("@/utils/request", () => ({
-  default: { get: (...args: unknown[]) => mockRequestGet(...args) },
+// Mock systemAdminApi (used by loadApiConfig)
+const mockGetSystemAdminPluginList = vi.fn();
+vi.mock("@/plugin-system/services/systemAdminApi", () => ({
+  getSystemAdminPluginList: (...args: unknown[]) =>
+    mockGetSystemAdminPluginList(...args),
 }));
 
 // Import after mocks are set up
@@ -74,9 +75,9 @@ function mockLocalFetchError(error: Error) {
 
 function mockApiConfig(config: PluginsConfig | null) {
   if (config) {
-    mockRequestGet.mockResolvedValue({ data: { data: config } });
+    mockGetSystemAdminPluginList.mockResolvedValue({ data: { data: config } });
   } else {
-    mockRequestGet.mockRejectedValue(new Error("API error"));
+    mockGetSystemAdminPluginList.mockRejectedValue(new Error("API error"));
   }
 }
 
@@ -89,7 +90,7 @@ describe("ConfigService", () => {
 
   beforeEach(() => {
     service = new ConfigService();
-    mockRequestGet.mockReset();
+    mockGetSystemAdminPluginList.mockReset();
   });
 
   afterEach(() => {
@@ -218,7 +219,7 @@ describe("ConfigService", () => {
 
       // fetch called once for local, request.get called once for API
       expect(global.fetch).toHaveBeenCalledTimes(1);
-      expect(mockRequestGet).toHaveBeenCalledTimes(1);
+      expect(mockGetSystemAdminPluginList).toHaveBeenCalledTimes(1);
     });
   });
 

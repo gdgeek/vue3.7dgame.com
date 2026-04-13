@@ -3,9 +3,8 @@ import { pluginSystem } from "@/plugin-system";
 import type { PluginLoadOptions } from "@/plugin-system/core/PluginLoader";
 import { store } from "@/store";
 import type { PluginInfo, PluginsConfig, MenuGroup } from "@/plugin-system";
-import { buildSystemAdminUrl } from "@/plugin-system/services/systemAdminApi";
+import { getSystemAdminAllowedActions } from "@/plugin-system/services/systemAdminApi";
 import Token from "@/store/modules/token";
-import request from "@/utils/request";
 
 interface PluginSystemState {
   initialized: boolean;
@@ -123,13 +122,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       for (const pluginId of enabledIds) {
         if (permissionApiUnavailable) break;
         try {
-          const res = await request.get(
-            buildSystemAdminUrl("/v1/plugin/allowed-actions"),
-            {
-              params: { plugin_name: pluginId },
-              skipErrorMessage: true,
-            }
-          );
+          const res = await getSystemAdminAllowedActions(pluginId);
           if (res.data?.code === 0) {
             this.pluginPermissions[pluginId] = res.data.data?.actions ?? [];
           }

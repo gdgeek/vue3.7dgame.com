@@ -1,6 +1,5 @@
 import { createLogger } from "@/utils/logger";
-import request from "@/utils/request";
-import { buildSystemAdminUrl } from "@/plugin-system/services/systemAdminApi";
+import { getSystemAdminPluginList } from "@/plugin-system/services/systemAdminApi";
 
 import type { PluginsConfig } from "@/plugin-system/types";
 
@@ -128,9 +127,7 @@ export class ConfigService {
   /** 从后端 API 加载插件列表 */
   async loadApiConfig(): Promise<PluginsConfig> {
     try {
-      const res = await request.get(buildSystemAdminUrl("/v1/plugin/list"), {
-        skipErrorMessage: true,
-      });
+      const res = await getSystemAdminPluginList();
       const data: unknown = res.data?.data ?? res.data;
       if (!isPluginsConfig(data)) {
         logger.warn("Plugin list API returned invalid format, skipping");

@@ -369,7 +369,7 @@ inject_locations "# __DOMAIN_LOCATIONS__" "$DOMAIN_LOCATIONS"
 
 echo "[entrypoint] Nginx config generated at $OUTPUT"
 
-# --- 5. 替换 plugins.json 中的插件 URL 占位符 ---
+# --- 7. 替换 plugins.json 中的插件 URL 占位符 ---
 PLUGINS_FILE="/usr/share/nginx/html/config/plugins.json"
 if [ -f "$PLUGINS_FILE" ]; then
   echo "[entrypoint] Substituting plugin URLs in $PLUGINS_FILE"
@@ -380,7 +380,7 @@ if [ -f "$PLUGINS_FILE" ]; then
     < "$PLUGINS_FILE" > "${PLUGINS_FILE}.tmp" && mv "${PLUGINS_FILE}.tmp" "$PLUGINS_FILE"
 fi
 
-# --- 6. 生成运行时环境变量注入文件 ---
+# --- 8. 生成运行时环境变量注入文件 ---
 ENV_JS="/usr/share/nginx/html/__env.js"
 echo "[entrypoint] Generating runtime env injection at $ENV_JS"
 cat > "$ENV_JS" <<EOF
@@ -391,5 +391,5 @@ window.__ENV__ = {
 EOF
 echo "[entrypoint] Runtime env: BLOCKLY_URL=${APP_BLOCKLY_URL:-<not set>}, EDITOR_URL=${APP_EDITOR_URL:-<not set>}"
 
-# --- 6. 启动 nginx ---
+# --- 9. 启动 nginx ---
 exec nginx -g 'daemon off;'

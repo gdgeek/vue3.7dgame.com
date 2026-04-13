@@ -76,18 +76,25 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       // 运行是否自动打开浏览器
       open: false,
       strictPort: true,
-      proxy: env.VITE_APP_API_URL
-        ? {
-            /** 代理前缀为 /dev-api 的请求  */
-            [env.VITE_APP_API_URL]: {
-              changeOrigin: true,
-              // 接口地址
-              target: env.VITE_APP_API_URL,
-              rewrite: (path) =>
-                path.replace(new RegExp("^" + env.VITE_APP_API_URL), ""),
-            },
-          }
-        : undefined,
+      proxy: {
+        ...(env.VITE_APP_API_URL
+          ? {
+              /** 代理前缀为 /dev-api 的请求  */
+              [env.VITE_APP_API_URL]: {
+                changeOrigin: true,
+                // 接口地址
+                target: env.VITE_APP_API_URL,
+                rewrite: (path) =>
+                  path.replace(new RegExp("^" + env.VITE_APP_API_URL), ""),
+              },
+            }
+          : {}),
+        "/api-config": {
+          changeOrigin: true,
+          target: env.VITE_APP_CONFIG_API_URL || "http://localhost:8088",
+          rewrite: (path) => path.replace(/^\/api-config/, ""),
+        },
+      },
     },
     plugins: [
       vue(),
