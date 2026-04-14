@@ -17,7 +17,7 @@
           <HomeIdentityStrip
             :site-label="identityDisplay.siteLabel"
             :organizations="identityDisplay.organizations"
-          />
+          ></HomeIdentityStrip>
         </div>
       </el-col>
       <el-col :md="8" :span="24">

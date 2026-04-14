@@ -1,5 +1,8 @@
 <template>
-  <div class="identity-chips" aria-label="Current site and organization context">
+  <div
+    class="identity-chips"
+    aria-label="Current site and organization context"
+  >
     <span class="identity-chip identity-chip--site" :title="siteLabel">
       {{ siteLabel }}
     </span>

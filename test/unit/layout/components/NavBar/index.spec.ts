@@ -158,8 +158,8 @@ describe("layout/components/NavBar/index.vue", () => {
     expect(chips.textContent).toContain("North Campus");
     expect(chips.textContent).toContain("Research Lab");
 
-    const children = Array.from(navbarLeft.children).map((node) =>
-      (node as HTMLElement).className || node.tagName.toLowerCase()
+    const children = Array.from(navbarLeft.children).map(
+      (node) => (node as HTMLElement).className || node.tagName.toLowerCase()
     );
     expect(children[1]).toContain("identity-chips-stub");
     expect(children[2]).toContain("breadcrumb-stub");

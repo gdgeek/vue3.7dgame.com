@@ -4,7 +4,10 @@ import { createApp, nextTick } from "vue";
 const cleanups: Array<() => void> = [];
 
 afterEach(() => {
-  cleanups.splice(0).reverse().forEach((fn) => fn());
+  cleanups
+    .splice(0)
+    .reverse()
+    .forEach((fn) => fn());
 });
 
 async function mount(props: Record<string, unknown>) {

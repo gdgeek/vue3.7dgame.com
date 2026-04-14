@@ -4,7 +4,10 @@ import { createApp, nextTick } from "vue";
 const cleanups: Array<() => void> = [];
 
 afterEach(() => {
-  cleanups.splice(0).reverse().forEach((fn) => fn());
+  cleanups
+    .splice(0)
+    .reverse()
+    .forEach((fn) => fn());
 });
 
 async function mount(props: Record<string, unknown>) {
@@ -50,9 +53,9 @@ describe("HomeIdentityStrip", () => {
       ],
     });
 
-    const chips = Array.from(el.querySelectorAll(".home-identity-chip--org")).map(
-      (node) => node.textContent?.trim()
-    );
+    const chips = Array.from(
+      el.querySelectorAll(".home-identity-chip--org")
+    ).map((node) => node.textContent?.trim());
 
     expect(chips).toEqual(["North Campus", "Research Lab", "Teachers Team"]);
   });

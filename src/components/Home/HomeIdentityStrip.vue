@@ -1,6 +1,9 @@
 <template>
   <div class="home-identity-strip">
-    <span class="home-identity-chip home-identity-chip--site" :title="siteLabel">
+    <span
+      class="home-identity-chip home-identity-chip--site"
+      :title="siteLabel"
+    >
       {{ siteLabel }}
     </span>
 
@@ -53,7 +56,6 @@ defineProps<{
 .home-identity-chip--org {
   color: var(--primary-color, #03a9f4);
   background: color-mix(in srgb, var(--primary-color, #03a9f4) 10%, white);
-  border: 1px solid
-    color-mix(in srgb, var(--primary-color, #03a9f4) 22%, white);
+  border: 1px solid color-mix(in srgb, var(--primary-color, #03a9f4) 22%, white);
 }
 </style>

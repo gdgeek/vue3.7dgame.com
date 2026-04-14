@@ -56,12 +56,17 @@ vi.mock("@/components/Home/QRCodeDialog.vue", async () => {
 const cleanups: Array<() => void> = [];
 
 afterEach(() => {
-  cleanups.splice(0).reverse().forEach((fn) => fn());
+  cleanups
+    .splice(0)
+    .reverse()
+    .forEach((fn) => fn());
   vi.clearAllMocks();
 });
 
 async function mount() {
-  const { default: HomeHeader } = await import("@/components/Home/HomeHeader.vue");
+  const { default: HomeHeader } = await import(
+    "@/components/Home/HomeHeader.vue"
+  );
 
   const el = document.createElement("div");
   document.body.appendChild(el);

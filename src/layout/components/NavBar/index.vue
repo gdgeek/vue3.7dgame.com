@@ -13,7 +13,7 @@
         :site-label="identityDisplay.siteLabel"
         :visible-organizations="identityDisplay.visibleOrganizations"
         :overflow-count="identityDisplay.overflowCount"
-      />
+      ></IdentityChips>
       <Breadcrumb></Breadcrumb>
       <EditorVersionToolbar></EditorVersionToolbar>
     </div>
