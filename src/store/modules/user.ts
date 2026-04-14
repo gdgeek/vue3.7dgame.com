@@ -240,6 +240,7 @@ export const useUserStore = defineStore(
         },
         roles: [],
         perms: [],
+        organizations: [],
       };
 
       if (logoutError) {

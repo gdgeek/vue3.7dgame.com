@@ -1,5 +1,6 @@
 import { describe, it, expectTypeOf } from "vitest";
 import type {
+  OrganizationInfoType,
   _UserDataType,
   UploadFileType,
   FileType,
@@ -13,6 +14,14 @@ import type {
 } from "@/api/user/model";
 
 describe("src/api/user/model.ts round15", () => {
+  it("OrganizationInfoType shape", () => {
+    expectTypeOf<OrganizationInfoType>().toMatchTypeOf<{
+      id: number;
+      name: string;
+      title: string;
+    }>();
+  });
+
   it("_UserDataType shape", () => {
     expectTypeOf<_UserDataType>().toMatchTypeOf<{
       nickname: string | null;
@@ -69,6 +78,7 @@ describe("src/api/user/model.ts round15", () => {
       userInfo: _UserInfoType | null;
       roles: string[] | null;
       perms: string[] | null;
+      organizations?: OrganizationInfoType[];
     }>();
   });
 

@@ -37,12 +37,18 @@ export type _UserInfoType = {
   points: number;
   avatar: FileType | null;
 };
+export type OrganizationInfoType = {
+  id: number;
+  name: string;
+  title: string;
+};
 export type UserInfoType = {
   id: number | null;
   userData: _UserDataType | null;
   userInfo: _UserInfoType | null;
   roles: string[] | null;
   perms: string[] | null;
+  organizations?: OrganizationInfoType[];
 };
 export type UserInfoReturnType = {
   success: boolean;
