@@ -96,6 +96,7 @@ export default {
     },
     list: {
       label: "权限:",
+      organization: "组织:",
       cancel: "删除",
       remove: "移除",
       roles: {
@@ -114,6 +115,15 @@ export default {
       },
       success: "权限更新成功！",
       error: "权限更新失败！",
+    },
+    editor: {
+      title: "编辑用户",
+      form: {
+        username: "用户名",
+        nickname: "昵称",
+        cancel: "取消",
+        submit: "保存",
+      },
     },
     confirm: {
       deleteTitle: "确认删除",

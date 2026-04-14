@@ -143,6 +143,7 @@ export default {
     },
     list: {
       label: "Perms:",
+      organization: "Organizations:",
       cancel: "Delete",
       remove: "Remove",
       roles: {
@@ -162,6 +163,15 @@ export default {
       },
       success: "Permissions updated successfully!",
       error: "Permissions update failed!",
+    },
+    editor: {
+      title: "Edit User",
+      form: {
+        username: "Username",
+        nickname: "Nickname",
+        cancel: "Cancel",
+        submit: "Save",
+      },
     },
     confirm: {
       deleteTitle: "Confirm Delete",

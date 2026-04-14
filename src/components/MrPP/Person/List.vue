@@ -19,6 +19,17 @@
         ></LazyImg>
         <div style="padding: 14px">
           <span>{{ item.username }}</span>
+          <div v-if="item.organizations?.length" class="organization-list">
+            <span class="organization-label">{{ t("manager.list.organization") }}</span>
+            <span
+              v-for="organization in item.organizations"
+              :key="organization.id"
+              class="organization-chip"
+              :title="organization.title"
+            >
+              {{ organization.title }}
+            </span>
+          </div>
           <div class="bottom clearfix">
             <el-descriptions
               v-if="!people(item.roles)"
@@ -57,6 +68,14 @@
             </el-descriptions>
             <el-button
               v-if="people(item.roles)"
+              size="small"
+              class="button button-secondary"
+              @click="openEditor(item)"
+            >
+              {{ t("common.edit") }}
+            </el-button>
+            <el-button
+              v-if="people(item.roles)"
               type="danger"
               size="small"
               class="button"
@@ -72,6 +91,7 @@
     </template>
   </waterfall>
   <!-- </div> -->
+  <PersonEditor ref="editorDialogRef" @refresh="refresh"></PersonEditor>
 </template>
 
 <script setup lang="ts">
@@ -81,6 +101,7 @@ import { getUserAvatarUrl } from "@/utils/avatar";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { deletePerson, putPerson, userData } from "@/api/v1/person";
 import { useUserStore } from "@/store/modules/user";
+import PersonEditor from "./Editor.vue";
 
 import { AbilityRole } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
@@ -94,6 +115,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["refresh"]);
+const editorDialogRef = ref<InstanceType<typeof PersonEditor>>();
 
 const getAblity = (roles: string[]) => {
   if (roles.includes("root")) {
@@ -174,6 +196,16 @@ const refresh = () => {
   emit("refresh");
 };
 
+const openEditor = (item: ViewCard) => {
+  if (!item.id || !item.username) return;
+
+  editorDialogRef.value?.show({
+    id: Number(item.id),
+    username: item.username,
+    nickname: item.nickname ?? "",
+  });
+};
+
 const deleted = async (item: ViewCard) => {
   try {
     await ElMessageBox.confirm(
@@ -235,6 +267,7 @@ type ViewCard = {
   username?: string;
   nickname?: string | null;
   avatar?: userData["avatar"] | null;
+  organizations?: userData["organizations"];
   roles: string[];
   selectedRole: string;
 };
@@ -249,6 +282,7 @@ const transformToViewCard = (items: userData[]): ViewCard[] => {
       username: item.username,
       nickname: item.nickname,
       avatar: item.avatar,
+      organizations: item.organizations,
       roles: item.roles,
       selectedRole: getAblity(item.roles),
     };
@@ -273,9 +307,41 @@ const viewCards = computed(() => {
   line-height: 12px;
 }
 
+.organization-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.organization-label {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 24px;
+}
+
+.organization-chip {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eef6ff;
+  color: #245b9e;
+  font-size: 12px;
+  line-height: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .button {
   // padding: 0;
   float: right;
+}
+
+.button-secondary {
+  margin-right: 8px;
 }
 
 .image {

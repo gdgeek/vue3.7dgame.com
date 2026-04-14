@@ -4,13 +4,20 @@ import qs from "querystringify";
 export type userData = {
   id: string;
   username: string;
-  nickname: string;
+  nickname: string | null;
   roles: string[];
   avatar: {
     url: string;
     [key: string]: unknown;
   };
+  organizations?: PersonOrganization[];
   [key: string]: unknown;
+};
+
+export type PersonOrganization = {
+  id: number;
+  name: string;
+  title: string;
 };
 
 export const postPerson = (data: unknown) => {
@@ -31,6 +38,17 @@ export const deletePerson = (id: number) => {
 export const putPerson = (data: { id: number; auth: string }) => {
   return request({
     url: `/v1/people/auth`,
+    method: "put",
+    data,
+  });
+};
+
+export const putPersonNickname = (
+  id: number,
+  data: { nickname: string | null }
+) => {
+  return request({
+    url: `/v1/people/${id}`,
     method: "put",
     data,
   });

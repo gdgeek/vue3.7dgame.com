@@ -33,7 +33,7 @@ const handleLoaded = async (
       params.sorted,
       params.searched,
       params.current,
-      "avatar,roles"
+      "avatar,roles,organizations"
     );
     callback({
       data: response.data,

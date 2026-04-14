@@ -79,6 +79,31 @@ describe("Person API", () => {
   });
 
   // -------------------------------------------------------------------------
+  // putPersonNickname()
+  // -------------------------------------------------------------------------
+  describe("putPersonNickname()", () => {
+    it("calls PUT /v1/people/{id} with nickname only", async () => {
+      await personApi.putPersonNickname(7, { nickname: "Alice" });
+      expect(request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: "/v1/people/7",
+          method: "put",
+          data: { nickname: "Alice" },
+        })
+      );
+    });
+
+    it("returns the request result", async () => {
+      const mockResp = { data: { success: true } };
+      request.mockResolvedValue(mockResp);
+      const result = await personApi.putPersonNickname(7, {
+        nickname: "Alice",
+      });
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // getPerson()
   // -------------------------------------------------------------------------
   describe("getPerson()", () => {

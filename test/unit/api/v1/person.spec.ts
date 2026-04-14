@@ -43,6 +43,16 @@ describe("api/v1/person", () => {
     });
   });
 
+  it("putPersonNickname updates nickname without changing endpoint shape", async () => {
+    const data = { nickname: "Alice" };
+    await api.putPersonNickname(3, data);
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/people/3",
+      method: "put",
+      data,
+    });
+  });
+
   it("getPerson includes default sort/expand", async () => {
     await api.getPerson();
     const url = request.mock.calls[0][0].url;
