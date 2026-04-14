@@ -28,6 +28,8 @@ describe("buildMetaResourceIndex", () => {
     expect(idx.entity.length).toBe(2);
     expect(idx.polygen.length).toBe(1);
     expect(idx.picture.length).toBe(1);
-    expect(idx.events.inputs).toEqual([{ title: "i1", uuid: "i1", name: "i1" }]);
+    expect(idx.events.inputs).toEqual([
+      { title: "i1", uuid: "i1", name: "i1" },
+    ]);
   });
 });

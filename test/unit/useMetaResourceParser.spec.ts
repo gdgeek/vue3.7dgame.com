@@ -105,9 +105,7 @@ describe("buildMetaResourceIndex — events", () => {
       })
     );
     expect(idx.events.inputs).toEqual([{ title: "111", uuid: "input-uuid" }]);
-    expect(idx.events.outputs).toEqual([
-      { title: "222", uuid: "output-uuid" },
-    ]);
+    expect(idx.events.outputs).toEqual([{ title: "222", uuid: "output-uuid" }]);
   });
 
   it("handles non-array events gracefully", () => {
