@@ -14,6 +14,10 @@
           <p class="home-greeting-subtitle">
             {{ t("homepage.header.subtitle") }}
           </p>
+          <HomeIdentityStrip
+            :site-label="identityDisplay.siteLabel"
+            :organizations="identityDisplay.organizations"
+          />
         </div>
       </el-col>
       <el-col :md="8" :span="24">
@@ -34,6 +38,8 @@
 </template>
 
 <script setup lang="ts">
+import { useIdentityDisplay } from "@/composables/useIdentityDisplay";
+import HomeIdentityStrip from "./HomeIdentityStrip.vue";
 import QRCodeDialog from "./QRCodeDialog.vue";
 import { useUserStore } from "@/store/modules/user";
 import { useScreenStore } from "@/store";
@@ -49,6 +55,7 @@ const codeDialog = ref<QRCodeDialogExpose | null>(null);
 const userStore = useUserStore();
 const { t } = useI18n();
 const screenStore = useScreenStore();
+const identityDisplay = useIdentityDisplay(2);
 const isMobile = computed(() => screenStore.isMobile);
 
 const name = computed(() => {
