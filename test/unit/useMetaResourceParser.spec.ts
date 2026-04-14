@@ -60,8 +60,13 @@ describe("buildMetaResourceIndex — events", () => {
     const idx = buildMetaResourceIndex(
       makeMeta(null, { inputs: ["click", "hover"], outputs: ["done"] })
     );
-    expect(idx.events.inputs).toEqual(["click", "hover"]);
-    expect(idx.events.outputs).toEqual(["done"]);
+    expect(idx.events.inputs).toEqual([
+      { title: "click", uuid: "click", name: "click" },
+      { title: "hover", uuid: "hover", name: "hover" },
+    ]);
+    expect(idx.events.outputs).toEqual([
+      { title: "done", uuid: "done", name: "done" },
+    ]);
   });
 
   it("normalizes object event names with .name field", () => {
@@ -71,8 +76,13 @@ describe("buildMetaResourceIndex — events", () => {
         outputs: [{ name: "done" }],
       })
     );
-    expect(idx.events.inputs).toEqual(["click", "hover"]);
-    expect(idx.events.outputs).toEqual(["done"]);
+    expect(idx.events.inputs).toEqual([
+      { title: "click", uuid: "click", name: "click" },
+      { title: "hover", uuid: "hover", name: "hover" },
+    ]);
+    expect(idx.events.outputs).toEqual([
+      { title: "done", uuid: "done", name: "done" },
+    ]);
   });
 
   it("filters out events with non-string names", () => {
@@ -82,7 +92,22 @@ describe("buildMetaResourceIndex — events", () => {
         outputs: [],
       })
     );
-    expect(idx.events.inputs).toEqual(["valid"]);
+    expect(idx.events.inputs).toEqual([
+      { title: "valid", uuid: "valid", name: "valid" },
+    ]);
+  });
+
+  it("preserves title/uuid event objects from the editor", () => {
+    const idx = buildMetaResourceIndex(
+      makeMeta(null, {
+        inputs: [{ title: "111", uuid: "input-uuid" }],
+        outputs: [{ title: "222", uuid: "output-uuid" }],
+      })
+    );
+    expect(idx.events.inputs).toEqual([{ title: "111", uuid: "input-uuid" }]);
+    expect(idx.events.outputs).toEqual([
+      { title: "222", uuid: "output-uuid" },
+    ]);
   });
 
   it("handles non-array events gracefully", () => {
@@ -426,6 +451,8 @@ describe("buildMetaResourceIndex — recursive tree walking", () => {
     expect(idx.entity.length).toBe(2);
     expect(idx.polygen.length).toBe(1);
     expect(idx.picture.length).toBe(1);
-    expect(idx.events.inputs).toEqual(["i1"]);
+    expect(idx.events.inputs).toEqual([
+      { title: "i1", uuid: "i1", name: "i1" },
+    ]);
   });
 });

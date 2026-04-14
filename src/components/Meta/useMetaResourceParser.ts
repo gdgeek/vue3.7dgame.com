@@ -52,21 +52,73 @@ export interface MetaResourceIndex {
   text: EntityInfo[];
   sound: EntityInfo[];
   entity: EntityInfo[];
-  events: { inputs: string[]; outputs: string[] };
+  events: { inputs: MetaEventInfo[]; outputs: MetaEventInfo[] };
 }
 
-function normalizeEventNames(events: unknown): string[] {
+export interface MetaEventInfo {
+  title: string;
+  uuid: string;
+  name?: string;
+  type?: string;
+}
+
+function normalizeEvents(events: unknown): MetaEventInfo[] {
   if (!Array.isArray(events)) return [];
   return events
     .map((event) => {
-      if (typeof event === "string") return event;
-      if (event && typeof event === "object" && "name" in event) {
-        const name = (event as { name?: unknown }).name;
-        return typeof name === "string" ? name : undefined;
+      if (typeof event === "string") {
+        const normalized = event.trim();
+        if (!normalized) return undefined;
+        return {
+          title: normalized,
+          uuid: normalized,
+          name: normalized,
+        };
       }
-      return undefined;
+
+      if (!event || typeof event !== "object") return undefined;
+
+      const eventObject = event as {
+        title?: unknown;
+        uuid?: unknown;
+        name?: unknown;
+        type?: unknown;
+      };
+
+      const title =
+        typeof eventObject.title === "string" && eventObject.title.trim()
+          ? eventObject.title.trim()
+          : typeof eventObject.name === "string" && eventObject.name.trim()
+            ? eventObject.name.trim()
+            : typeof eventObject.uuid === "string" && eventObject.uuid.trim()
+              ? eventObject.uuid.trim()
+              : typeof eventObject.type === "string" && eventObject.type.trim()
+                ? eventObject.type.trim()
+                : "";
+
+      const uuid =
+        typeof eventObject.uuid === "string" && eventObject.uuid.trim()
+          ? eventObject.uuid.trim()
+          : typeof eventObject.type === "string" && eventObject.type.trim()
+            ? eventObject.type.trim()
+            : typeof eventObject.name === "string" && eventObject.name.trim()
+              ? eventObject.name.trim()
+              : title;
+
+      if (!title || !uuid) return undefined;
+
+      return {
+        title,
+        uuid,
+        ...(typeof eventObject.name === "string" && eventObject.name.trim()
+          ? { name: eventObject.name.trim() }
+          : {}),
+        ...(typeof eventObject.type === "string" && eventObject.type.trim()
+          ? { type: eventObject.type.trim() }
+          : {}),
+      };
     })
-    .filter((name): name is string => Boolean(name));
+    .filter((eventItem): eventItem is MetaEventInfo => Boolean(eventItem));
 }
 
 function parseAction(
@@ -192,8 +244,8 @@ export function buildMetaResourceIndex(meta: metaInfo): MetaResourceIndex {
     entity: [],
     events: meta.events
       ? {
-          inputs: normalizeEventNames(meta.events.inputs),
-          outputs: normalizeEventNames(meta.events.outputs),
+          inputs: normalizeEvents(meta.events.inputs),
+          outputs: normalizeEvents(meta.events.outputs),
         }
       : { inputs: [], outputs: [] },
   };

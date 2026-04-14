@@ -21,15 +21,19 @@ export interface Events {
 
 /** 事件输入 */
 export interface EventInput {
-  name: string;
-  type: string;
+  name?: string;
+  title?: string;
+  type?: string;
+  uuid?: string;
   [key: string]: unknown;
 }
 
 /** 事件输出 */
 export interface EventOutput {
-  name: string;
-  type: string;
+  name?: string;
+  title?: string;
+  type?: string;
+  uuid?: string;
   [key: string]: unknown;
 }
 

@@ -73,8 +73,8 @@ import { useI18n } from "vue-i18n";
 
 interface SignalEventItem {
   title: string;
-  name: string;
-  type: string;
+  name?: string;
+  type?: string;
 }
 
 withDefaults(

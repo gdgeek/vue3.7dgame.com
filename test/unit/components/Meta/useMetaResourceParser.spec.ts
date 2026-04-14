@@ -1,6 +1,6 @@
 /**
  * Unit tests for src/components/Meta/useMetaResourceParser.ts
- * Covers: buildMetaResourceIndex, normalizeEventNames (via events),
+ * Covers: buildMetaResourceIndex, event normalization (via events),
  *         parseAction, parsePoint, walk (via entity/polygen/picture/…).
  */
 import { describe, it, expect } from "vitest";
@@ -84,11 +84,16 @@ describe("buildMetaResourceIndex", () => {
 
   // ─── events normalization ─────────────────────────────────────────────────
 
-  it("normalizes string event names as-is", () => {
+  it("normalizes string event names as displayable event items", () => {
     const events = { inputs: ["clickA", "hoverB"], outputs: ["done"] };
     const result = buildMetaResourceIndex(makeMeta(undefined, events));
-    expect(result.events.inputs).toEqual(["clickA", "hoverB"]);
-    expect(result.events.outputs).toEqual(["done"]);
+    expect(result.events.inputs).toEqual([
+      { title: "clickA", uuid: "clickA", name: "clickA" },
+      { title: "hoverB", uuid: "hoverB", name: "hoverB" },
+    ]);
+    expect(result.events.outputs).toEqual([
+      { title: "done", uuid: "done", name: "done" },
+    ]);
   });
 
   it("normalizes object events that have a name property", () => {
@@ -97,8 +102,26 @@ describe("buildMetaResourceIndex", () => {
       outputs: [{ name: "finish", type: "bool" }],
     };
     const result = buildMetaResourceIndex(makeMeta(undefined, events));
-    expect(result.events.inputs).toEqual(["start"]);
-    expect(result.events.outputs).toEqual(["finish"]);
+    expect(result.events.inputs).toEqual([
+      { title: "start", uuid: "void", name: "start", type: "void" },
+    ]);
+    expect(result.events.outputs).toEqual([
+      { title: "finish", uuid: "bool", name: "finish", type: "bool" },
+    ]);
+  });
+
+  it("preserves editor signal objects that use title and uuid", () => {
+    const events = {
+      inputs: [{ title: "111", uuid: "uuid-input-1" }],
+      outputs: [{ title: "222", uuid: "uuid-output-1" }],
+    };
+    const result = buildMetaResourceIndex(makeMeta(undefined, events));
+    expect(result.events.inputs).toEqual([
+      { title: "111", uuid: "uuid-input-1" },
+    ]);
+    expect(result.events.outputs).toEqual([
+      { title: "222", uuid: "uuid-output-1" },
+    ]);
   });
 
   it("filters out null, number, and nameless-object event entries", () => {
@@ -107,7 +130,9 @@ describe("buildMetaResourceIndex", () => {
       outputs: [],
     };
     const result = buildMetaResourceIndex(makeMeta(undefined, events));
-    expect(result.events.inputs).toEqual(["valid"]);
+    expect(result.events.inputs).toEqual([
+      { title: "valid", uuid: "valid", name: "valid" },
+    ]);
   });
 
   it("returns empty events when events.inputs/outputs are not arrays", () => {
