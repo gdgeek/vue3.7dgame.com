@@ -12,10 +12,12 @@ const mockCurrentRoute = reactive({
 const mockPluginStore = {
   init: vi.fn(),
   enabledPlugins: [],
+  configuredEnabledPlugins: [],
   hasConfiguredEnabledPlugins: true,
   initialized: false,
   menuGroups: mockMenuGroups,
   pluginsByGroup: mockPluginsByGroup,
+  currentTokenPluginAccessStates: {} as Record<string, string>,
   ensureAllEnabledPluginAccess: mockEnsureAllEnabledPluginAccess,
 };
 
@@ -122,6 +124,12 @@ describe("SidebarLeft plugin auth", () => {
   beforeEach(() => {
     mockCurrentRoute.path = "/home";
     mockPluginStore.initialized = false;
+    mockPluginStore.configuredEnabledPlugins = [
+      {
+        pluginId: "ai-3d-generator-v3",
+      },
+    ];
+    mockPluginStore.currentTokenPluginAccessStates = {};
     mockMenuGroups.splice(0, mockMenuGroups.length);
     mockPluginsByGroup.clear();
     mockEnsureAllEnabledPluginAccess.mockResolvedValue(undefined);
@@ -136,8 +144,37 @@ describe("SidebarLeft plugin auth", () => {
   });
 
   it("renders the tools root when configured plugins exist but no plugin is visible yet", async () => {
+    mockPluginStore.configuredEnabledPlugins = [
+      {
+        pluginId: "ai-3d-generator-v3",
+      },
+    ];
+
     const { el } = await mount();
     expect(el.textContent).toContain("sidebar.tools");
+  });
+
+  it("hides the tools root when every configured plugin is confirmed forbidden", async () => {
+    mockPluginStore.initialized = true;
+    mockPluginStore.configuredEnabledPlugins = [
+      {
+        pluginId: "ai-3d-generator-v3",
+      },
+    ];
+    mockPluginStore.currentTokenPluginAccessStates = {
+      "ai-3d-generator-v3": "forbidden",
+    };
+    mockMenuGroups.push({
+      id: "ai-tools",
+      name: "AI Tools",
+      nameI18n: null,
+      order: 1,
+      icon: "toolbox",
+    });
+
+    const { el } = await mount();
+
+    expect(el.textContent).not.toContain("sidebar.tools");
   });
 
   it("does not eager load plugin visibility on mount", async () => {

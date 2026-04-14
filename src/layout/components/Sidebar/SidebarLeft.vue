@@ -387,7 +387,7 @@
         </div>
 
         <!-- 实用工具 (三层目录: 实用工具 → 分组 → 具体插件) -->
-        <div v-if="pluginStore.hasConfiguredEnabledPlugins" class="nav-group">
+        <div v-if="shouldShowPluginTools" class="nav-group">
           <el-popover
             placement="right"
             :width="220"
@@ -627,6 +627,23 @@ const visibleMenuGroups = computed(() => {
   return pluginStore.menuGroups.filter(
     (group) => (pluginStore.pluginsByGroup.get(group.id)?.length ?? 0) > 0
   );
+});
+
+const shouldShowPluginTools = computed(() => {
+  if (!pluginStore.hasConfiguredEnabledPlugins) {
+    return false;
+  }
+
+  if (visibleMenuGroups.value.length > 0) {
+    return true;
+  }
+
+  return pluginStore.configuredEnabledPlugins.some((plugin) => {
+    const accessState =
+      pluginStore.currentTokenPluginAccessStates[plugin.pluginId] ?? "unknown";
+
+    return accessState !== "forbidden";
+  });
 });
 
 watchEffect(() => {
