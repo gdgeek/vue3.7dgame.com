@@ -12,12 +12,12 @@ vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: (key: string) =>
       (
-        {
+        ({
           "manager.editor.form.username": "Username",
           "manager.editor.form.nickname": "Nickname",
           "manager.editor.form.cancel": "Cancel",
           "manager.editor.form.submit": "Save",
-        } as Record<string, string>
+        }) as Record<string, string>
       )[key] ?? key,
   }),
 }));
@@ -126,7 +126,11 @@ function mount(Component: unknown): {
   el: HTMLElement;
   app: App;
   vm: ComponentPublicInstance & {
-    show: (user: { id: number; username: string; nickname?: string | null }) => void;
+    show: (user: {
+      id: number;
+      username: string;
+      nickname?: string | null;
+    }) => void;
   };
 } {
   const el = document.createElement("div");
@@ -138,7 +142,11 @@ function mount(Component: unknown): {
   app.component("el-input", ElInputStub);
   app.component("el-button", ElButtonStub);
   const vm = app.mount(el) as ComponentPublicInstance & {
-    show: (user: { id: number; username: string; nickname?: string | null }) => void;
+    show: (user: {
+      id: number;
+      username: string;
+      nickname?: string | null;
+    }) => void;
   };
   cleanups.push(() => {
     app.unmount();
@@ -162,7 +170,9 @@ describe("MrPP Person Editor", () => {
   });
 
   it("renders username as a disabled input and nickname as editable", async () => {
-    const { default: Editor } = await import("@/components/MrPP/Person/Editor.vue");
+    const { default: Editor } = await import(
+      "@/components/MrPP/Person/Editor.vue"
+    );
     const { el, vm } = mount(Editor);
 
     vm.show({
@@ -187,7 +197,9 @@ describe("MrPP Person Editor", () => {
     const { putPersonNickname } = await import("@/api/v1/person");
     vi.mocked(putPersonNickname).mockResolvedValue({ data: { success: true } });
 
-    const { default: Editor } = await import("@/components/MrPP/Person/Editor.vue");
+    const { default: Editor } = await import(
+      "@/components/MrPP/Person/Editor.vue"
+    );
     const { el, vm } = mount(Editor);
 
     vm.show({

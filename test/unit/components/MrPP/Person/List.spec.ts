@@ -5,13 +5,13 @@ vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: (key: string) =>
       (
-        {
+        ({
           "manager.list.roles.root": "Root",
           "manager.list.roles.admin": "Admin",
           "manager.list.roles.manager": "Manager",
           "manager.list.roles.user": "User",
           "manager.list.label": "Perms",
-        } as Record<string, string>
+        }) as Record<string, string>
       )[key] ?? key,
   }),
 }));
@@ -90,7 +90,7 @@ function mount(Component: unknown, props: Record<string, unknown>) {
   const app = createApp(Component as Parameters<typeof createApp>[0], props);
   app.config.globalProperties.$t = (key: string) =>
     (
-      {
+      ({
         "manager.list.roles.root": "Root",
         "manager.list.roles.admin": "Admin",
         "manager.list.roles.manager": "Manager",
@@ -98,7 +98,7 @@ function mount(Component: unknown, props: Record<string, unknown>) {
         "manager.list.label": "Perms",
         "manager.list.organization": "Organizations",
         "common.edit": "Edit",
-      } as Record<string, string>
+      }) as Record<string, string>
     )[key] ?? key;
   app.component(
     "el-dialog",
@@ -126,7 +126,8 @@ function mount(Component: unknown, props: Record<string, unknown>) {
     defineComponent({
       name: "ElFormItem",
       setup(_props, { slots }) {
-        return () => h("div", { class: "el-form-item-stub" }, slots.default?.());
+        return () =>
+          h("div", { class: "el-form-item-stub" }, slots.default?.());
       },
     })
   );
@@ -206,7 +207,8 @@ function mount(Component: unknown, props: Record<string, unknown>) {
     defineComponent({
       name: "ElButton",
       setup(_props, { slots }) {
-        return () => h("button", { class: "el-button-stub" }, slots.default?.());
+        return () =>
+          h("button", { class: "el-button-stub" }, slots.default?.());
       },
     })
   );

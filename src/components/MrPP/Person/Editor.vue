@@ -1,5 +1,9 @@
 <template>
-  <el-dialog v-model="dialogVisible" :close-on-click-modal="false" width="520px">
+  <el-dialog
+    v-model="dialogVisible"
+    :close-on-click-modal="false"
+    width="520px"
+  >
     <template #header>
       {{ t("manager.editor.title") }}
     </template>

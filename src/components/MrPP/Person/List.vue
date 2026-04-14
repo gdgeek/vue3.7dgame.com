@@ -20,7 +20,9 @@
         <div style="padding: 14px">
           <span>{{ item.username }}</span>
           <div v-if="item.organizations?.length" class="organization-list">
-            <span class="organization-label">{{ t("manager.list.organization") }}</span>
+            <span class="organization-label">{{
+              t("manager.list.organization")
+            }}</span>
             <span
               v-for="organization in item.organizations"
               :key="organization.id"
