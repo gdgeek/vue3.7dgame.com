@@ -304,9 +304,12 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 <style lang="scss" scoped>
 .breadcrumb-nav {
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .crumb-link {

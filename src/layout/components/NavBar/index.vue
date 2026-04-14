@@ -9,6 +9,11 @@
         class="hamburger-container"
         @toggle-click="toggleSideBar"
       ></Hamburger>
+      <IdentityChips
+        :site-label="identityDisplay.siteLabel"
+        :visible-organizations="identityDisplay.visibleOrganizations"
+        :overflow-count="identityDisplay.overflowCount"
+      />
       <Breadcrumb></Breadcrumb>
       <EditorVersionToolbar></EditorVersionToolbar>
     </div>
@@ -22,14 +27,17 @@
 </template>
 
 <script setup lang="ts">
+import { useIdentityDisplay } from "@/composables/useIdentityDisplay";
 import { useAppStore } from "@/store";
 import Breadcrumb from "./components/Breadcrumb.vue";
+import IdentityChips from "./components/IdentityChips.vue";
 import EditorVersionToolbar from "./components/EditorVersionToolbar.vue";
 import HeaderActions from "./components/HeaderActions.vue";
 import UserDropdown from "./components/UserDropdown.vue";
 import Hamburger from "@/components/Hamburger/index.vue";
 
 const appStore = useAppStore();
+const identityDisplay = useIdentityDisplay(2);
 
 function toggleSideBar() {
   appStore.toggleSidebar();
@@ -42,6 +50,7 @@ function toggleSideBar() {
   top: 0;
   z-index: 10;
   display: flex;
+  gap: 16px;
   align-items: center;
   justify-content: space-between;
   height: $navbar-height;
@@ -50,12 +59,15 @@ function toggleSideBar() {
 
 .navbar-left {
   display: flex;
-  gap: 16px;
+  flex: 1 1 auto;
+  gap: 12px;
   align-items: center;
+  min-width: 0;
 }
 
 .navbar-right {
   display: flex;
+  flex-shrink: 0;
   gap: 16px;
   align-items: center;
 }

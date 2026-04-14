@@ -2,7 +2,7 @@
  * Tests for src/layout/components/NavBar/index.vue
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { createApp, nextTick } from "vue";
+import { computed, createApp, nextTick } from "vue";
 
 const mockToggleSidebar = vi.fn();
 const mockAppStore = {
@@ -12,6 +12,25 @@ const mockAppStore = {
 
 vi.mock("@/store", () => ({
   useAppStore: vi.fn(() => mockAppStore),
+}));
+
+vi.mock("@/composables/useIdentityDisplay", () => ({
+  useIdentityDisplay: vi.fn(() =>
+    computed(() => ({
+      siteLabel: "Rokid AR Studio",
+      organizations: [
+        { id: 1, name: "north-campus", title: "North Campus" },
+        { id: 2, name: "research-lab", title: "Research Lab" },
+        { id: 3, name: "teachers-team", title: "Teachers Team" },
+      ],
+      visibleOrganizations: [
+        { id: 1, name: "north-campus", title: "North Campus" },
+        { id: 2, name: "research-lab", title: "Research Lab" },
+      ],
+      overflowCount: 1,
+      hasOrganizations: true,
+    }))
+  ),
 }));
 
 vi.mock("vue-i18n", () => ({
@@ -26,6 +45,18 @@ vi.mock("@/layout/components/NavBar/components/Breadcrumb.vue", async () => {
     default: dc({
       name: "Breadcrumb",
       template: '<div class="breadcrumb-stub"></div>',
+    }),
+  };
+});
+
+vi.mock("@/layout/components/NavBar/components/IdentityChips.vue", async () => {
+  const { defineComponent: dc } = await import("vue");
+  return {
+    default: dc({
+      name: "IdentityChips",
+      props: ["siteLabel", "visibleOrganizations", "overflowCount"],
+      template:
+        "<div class='identity-chips-stub' :data-site='siteLabel' :data-overflow='overflowCount'>{{ visibleOrganizations.map((organization) => organization.title).join('|') }}</div>",
     }),
   };
 });
@@ -114,6 +145,24 @@ describe("layout/components/NavBar/index.vue", () => {
   it("renders Breadcrumb stub", async () => {
     const { el } = await mount();
     expect(el.querySelector(".breadcrumb-stub")).not.toBeNull();
+  });
+
+  it("renders IdentityChips before the breadcrumb and passes site + organization summary", async () => {
+    const { el } = await mount();
+    const chips = el.querySelector(".identity-chips-stub") as HTMLDivElement;
+    const navbarLeft = el.querySelector(".navbar-left") as HTMLDivElement;
+
+    expect(chips).not.toBeNull();
+    expect(chips.dataset.site).toBe("Rokid AR Studio");
+    expect(chips.dataset.overflow).toBe("1");
+    expect(chips.textContent).toContain("North Campus");
+    expect(chips.textContent).toContain("Research Lab");
+
+    const children = Array.from(navbarLeft.children).map((node) =>
+      (node as HTMLElement).className || node.tagName.toLowerCase()
+    );
+    expect(children[1]).toContain("identity-chips-stub");
+    expect(children[2]).toContain("breadcrumb-stub");
   });
 
   it("renders HeaderActions stub", async () => {
