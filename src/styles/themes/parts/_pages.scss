@@ -50,7 +50,10 @@
 .resource-card {
   background: var(--bg-card, var(--ar-card-bg)) !important;
   border-color: var(--border-color, var(--ar-card-border)) !important;
-  border-radius: var(--radius-lg, 20px) !important;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  ) !important;
   transition:
     transform var(--transition-normal, 0.2s),
     box-shadow var(--transition-normal, 0.2s),
@@ -67,13 +70,19 @@
 .detail-panel {
   background: var(--bg-card, var(--ar-card-bg)) !important;
   border-color: var(--border-color, var(--ar-card-border)) !important;
-  border-radius: var(--radius-lg, 20px) !important;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  ) !important;
 
   // 封面区域
   .cover-section {
     .cover-preview {
       background: var(--bg-hover) !important;
-      border-radius: var(--radius-lg, 12px) !important;
+      border-radius: var(
+        --standard-page-max-radius,
+        calc(var(--radius-lg, 24px) / 3)
+      ) !important;
     }
 
     .cover-placeholder {
@@ -85,7 +94,10 @@
     }
 
     .change-cover-btn {
-      border-radius: var(--radius-full, 20px) !important;
+      border-radius: var(
+        --standard-page-max-radius,
+        calc(var(--radius-lg, 24px) / 3)
+      ) !important;
     }
   }
 
@@ -118,7 +130,10 @@
     .tag-item {
       color: var(--primary-color) !important;
       background: var(--primary-light) !important;
-      border-radius: var(--radius-full, 20px) !important;
+      border-radius: var(
+        --standard-page-max-radius,
+        calc(var(--radius-lg, 24px) / 3)
+      ) !important;
     }
 
     .tag-remove {
@@ -219,7 +234,10 @@
   font-family: var(--font-family) !important;
   background: var(--bg-card, var(--ar-card-bg)) !important;
   border-color: var(--border-color, var(--ar-card-border)) !important;
-  border-radius: var(--radius-full, 9999px) !important;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  ) !important;
 
   &:focus {
     border-color: var(--ar-primary) !important;
@@ -230,7 +248,10 @@
 // 对话框主题适配
 .el-dialog {
   background: var(--bg-card, var(--ar-card-bg)) !important;
-  border-radius: var(--radius-lg, 20px) !important;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  ) !important;
 }
 
 // 下拉菜单主题适配

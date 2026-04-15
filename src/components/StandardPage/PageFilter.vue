@@ -152,7 +152,10 @@ const clearSelection = () => {
   user-select: none;
   background: var(--bg-card, #fff);
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
@@ -194,7 +197,10 @@ const clearSelection = () => {
   overflow: hidden;
   background: var(--bg-card, #fff) !important;
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
-  border-radius: var(--radius-md, 20px) !important;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  ) !important;
   box-shadow: var(--shadow-lg, 0 8px 24px rgb(0 0 0 / 12%)) !important;
 
   .filter-content {
@@ -265,7 +271,10 @@ const clearSelection = () => {
     cursor: pointer;
     background: var(--bg-secondary, #f1f5f9);
     border: none;
-    border-radius: var(--radius-full, 9999px);
+    border-radius: var(
+      --standard-page-max-radius,
+      calc(var(--radius-lg, 24px) / 3)
+    );
     transition: all var(--transition-fast, 0.15s ease);
 
     &:hover {

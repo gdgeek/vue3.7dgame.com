@@ -56,8 +56,6 @@
           <StandardCard
             class="polygen-card"
             :image="item.image?.url"
-            image-fit="contain"
-            :contain-padding="false"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :selected="isSelected(item.id)"

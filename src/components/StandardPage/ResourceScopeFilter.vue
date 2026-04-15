@@ -93,7 +93,10 @@ const emit = defineEmits<{
     color: var(--text-primary, #1e293b);
     background: var(--bg-card, #fff) !important;
     border: 1px solid var(--border-color, #e2e8f0) !important;
-    border-radius: var(--radius-full, 9999px);
+    border-radius: var(
+      --standard-page-max-radius,
+      calc(var(--radius-lg, 24px) / 3)
+    );
     box-shadow: none !important;
     transition:
       border-color 0.15s ease,

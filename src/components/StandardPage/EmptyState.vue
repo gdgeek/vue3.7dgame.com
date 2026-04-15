@@ -68,7 +68,10 @@ defineEmits<{
   cursor: pointer;
   background: transparent;
   border: 2px dashed var(--primary-color, #00baff);
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {

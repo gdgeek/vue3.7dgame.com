@@ -34,6 +34,11 @@ body::before {
   opacity: var(--decoration-opacity, 0);
 }
 
+// StandardPage 系列组件的大圆角统一收紧到原大圆角的三分之一
+:root {
+  --standard-page-max-radius: calc(var(--radius-lg, 24px) / 3);
+}
+
 // ============================================
 // 全局组件主题适配
 // ============================================

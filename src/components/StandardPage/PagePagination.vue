@@ -123,7 +123,10 @@ onBeforeUnmount(() => {
     background: var(--bg-page, #f8fafc);
     backdrop-filter: blur(6px);
     border: 1px solid var(--border-color, #e2e8f0);
-    border-radius: var(--radius-full, 9999px);
+    border-radius: var(
+      --standard-page-max-radius,
+      calc(var(--radius-lg, 24px) / 3)
+    );
   }
 }
 
@@ -131,6 +134,10 @@ onBeforeUnmount(() => {
   // el-button handles most styles. We just ensure alignment if needed.
   display: inline-flex;
   align-items: center;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
 }
 
 .page-info {

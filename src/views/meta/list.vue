@@ -49,7 +49,6 @@
         <template #grid-card="{ item }">
           <StandardCard
             :image="item.image?.url"
-            image-fit="contain"
             :title="item.title || item.name || t('meta.list.unnamed')"
             :type-icon="['fas', 'puzzle-piece']"
             :placeholder-icon="['fas', 'puzzle-piece']"
@@ -1629,6 +1628,9 @@ const deletedWindow = async (
   font-size: 16px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
-  border-radius: 26px !important;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  ) !important;
 }
 </style>

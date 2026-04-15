@@ -55,7 +55,7 @@
         <template #grid-card="{ item }">
           <StandardCard
             :image="getVideoCover(item.image?.url)"
-            image-fit="contain"
+            :aspect-ratio="getVideoAspectRatio(item)"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :selected="isSelected(item.id)"
@@ -214,6 +214,7 @@ import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
 import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
+  getAspectRatioFromInfo,
 } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
@@ -231,6 +232,9 @@ const parseVideoInfo = (raw?: string | null): VideoInfo | null => {
   } catch {}
   return null;
 };
+
+const getVideoAspectRatio = (item: ResourceInfo) =>
+  getAspectRatioFromInfo(item.info);
 
 const {
   items,
