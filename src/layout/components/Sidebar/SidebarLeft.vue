@@ -559,7 +559,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watchEffect } from "vue";
+import { ref, computed, watch, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import ConfirmDialog from "@/components/Dialog/ConfirmDialog.vue";
@@ -588,7 +588,7 @@ const ability = useAbility();
 const pluginStore = usePluginSystemStore();
 
 // Initialize plugin system
-pluginStore.init();
+const pluginSystemInitPromise = pluginStore.init();
 
 // Auto-expand submenus based on current route
 const currentPath = computed(() => router.currentRoute.value.path);
@@ -609,6 +609,70 @@ const menuOpen = ref<Record<string, boolean>>({
 const ensurePluginMenuAccess = () => {
   void pluginStore.ensureAllEnabledPluginAccess();
 };
+
+const pluginMenuAccessPreload = ref<Promise<void> | null>(null);
+
+const hasUnknownPluginMenuAccess = () => {
+  return pluginStore.configuredEnabledPlugins.some((plugin) => {
+    const accessState =
+      pluginStore.currentTokenPluginAccessStates[plugin.pluginId] ?? "unknown";
+
+    return accessState === "unknown";
+  });
+};
+
+const preloadPluginMenuAccessForPluginRoute = async () => {
+  if (!currentPath.value.startsWith("/plugins")) {
+    return;
+  }
+
+  if (!pluginStore.hasConfiguredEnabledPlugins) {
+    return;
+  }
+
+  if (pluginMenuAccessPreload.value) {
+    await pluginMenuAccessPreload.value;
+    return;
+  }
+
+  let preloadPromise: Promise<void> | null = null;
+  preloadPromise = (async () => {
+    await pluginSystemInitPromise;
+
+    if (!currentPath.value.startsWith("/plugins")) {
+      return;
+    }
+
+    if (!pluginStore.hasConfiguredEnabledPlugins) {
+      return;
+    }
+
+    if (!hasUnknownPluginMenuAccess()) {
+      return;
+    }
+
+    await pluginStore.ensureAllEnabledPluginAccess();
+  })().finally(() => {
+    if (pluginMenuAccessPreload.value === preloadPromise) {
+      pluginMenuAccessPreload.value = null;
+    }
+  });
+
+  pluginMenuAccessPreload.value = preloadPromise;
+  await preloadPromise;
+};
+
+watch(
+  [
+    currentPath,
+    () => pluginStore.initialized,
+    () => pluginStore.hasConfiguredEnabledPlugins,
+  ],
+  () => {
+    void preloadPluginMenuAccessForPluginRoute();
+  },
+  { immediate: true }
+);
 
 const toggleMenu = (key: string) => {
   if (key === "plugins" && !menuOpen.value.plugins) {
