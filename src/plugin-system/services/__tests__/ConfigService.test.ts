@@ -34,4 +34,45 @@ describe("ConfigService", () => {
     );
     expect(mockGet.mock.calls[0]?.[1]?.params).toBeUndefined();
   });
+
+  it("normalizes blank plugin metadata required by the host registry", async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        version: "1.0.0",
+        menuGroups: [
+          {
+            id: "org:public",
+            name: "公共插件",
+            icon: "Grid",
+            order: 0,
+          },
+        ],
+        plugins: [
+          {
+            id: "ai-3d-generator-v3",
+            name: "AI 3D 生成器 V3",
+            description: "",
+            url: "http://localhost:3008/",
+            icon: "MagicStick",
+            group: "org:public",
+            enabled: true,
+            order: 0,
+            version: "",
+          },
+        ],
+      },
+    });
+
+    const service = new ConfigService();
+    const config = await service.loadApiConfig();
+
+    expect(config.plugins).toEqual([
+      expect.objectContaining({
+        id: "ai-3d-generator-v3",
+        description: "AI 3D 生成器 V3",
+        version: "0.0.0",
+        allowedOrigin: "http://localhost:3008",
+      }),
+    ]);
+  });
 });

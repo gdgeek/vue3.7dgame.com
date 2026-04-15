@@ -108,10 +108,23 @@ describe("PluginRegistry", () => {
     it("should accept a manifest with optional fields", () => {
       const manifest = createValidManifest({
         sandbox: "allow-scripts",
+        allowedHostOrigins: ["https://main.example.com"],
         extraConfig: { theme: "dark" },
       });
       const result = registry.validateManifest(manifest);
       expect(result).toEqual({ valid: true, errors: [] });
+    });
+
+    it("should reject allowlists containing non-string host origins", () => {
+      const manifest = createValidManifest({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        allowedHostOrigins: ["https://main.example.com", 123 as any],
+      });
+      const result = registry.validateManifest(manifest);
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((e: string) => e.includes("allowedHostOrigins"))
+      ).toBe(true);
     });
 
     it("should reject manifest with missing required field", () => {

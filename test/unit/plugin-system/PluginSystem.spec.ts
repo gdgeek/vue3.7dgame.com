@@ -48,6 +48,7 @@ function createManifest(
     enabled: true,
     order: 1,
     allowedOrigin: "https://plugin.example.com",
+    allowedHostOrigins: [],
     version: "1.0.0",
     ...overrides,
   };
@@ -384,6 +385,29 @@ describe("PluginSystem", () => {
       for (const plugin of system.getAllPlugins()) {
         expect(plugin.state).toBe("unloaded");
       }
+    });
+
+    it("should reject hosts outside the plugin allowlist", async () => {
+      const restrictedManifest = createManifest({
+        id: "restricted-plugin",
+        allowedHostOrigins: ["https://allowed-host.example.com"],
+      });
+      configService = createMockConfigService(createConfig([restrictedManifest]));
+      system = new PluginSystem(
+        registry,
+        loader,
+        messageBus,
+        authService,
+        configService
+      );
+
+      await system.initialize();
+      const container = createContainer();
+
+      await system.loadPlugin("restricted-plugin", container);
+
+      expect(loader.load).not.toHaveBeenCalled();
+      expect(system.getPluginState("restricted-plugin")).toBe("error");
     });
   });
 

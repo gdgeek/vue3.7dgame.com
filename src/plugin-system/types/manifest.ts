@@ -46,6 +46,8 @@ export interface PluginManifest {
   order: number;
   /** 允许的 PostMessage origin（用于安全校验） */
   allowedOrigin: string;
+  /** 允许嵌入当前插件的主站 origin 白名单（可选，留空表示不限制） */
+  allowedHostOrigins?: string[];
   /** 插件版本 */
   version: string;
   /** iframe sandbox 属性（可选，默认 'allow-scripts allow-same-origin'） */

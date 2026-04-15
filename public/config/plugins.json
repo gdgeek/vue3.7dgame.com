@@ -3,29 +3,16 @@
   "menuGroups": [
     {
       "id": "builtins",
-      "name": "基础内容",
+      "name": "基础工具",
       "nameI18n": {
-        "zh-CN": "基础内容",
-        "zh-TW": "基礎內容",
-        "en-US": "Built-ins",
-        "ja-JP": "基本機能",
-        "th-TH": "พื้นฐาน"
+        "zh-CN": "基础工具",
+        "zh-TW": "基礎工具",
+        "en-US": "Core Tools",
+        "ja-JP": "基本ツール",
+        "th-TH": "เครื่องมือพื้นฐาน"
       },
       "icon": "Setting",
       "order": 99
-    },
-    {
-      "id": "tools",
-      "name": "实用工具",
-      "nameI18n": {
-        "zh-CN": "实用工具",
-        "zh-TW": "實用工具",
-        "en-US": "Utilities",
-        "ja-JP": "ユーティリティ",
-        "th-TH": "เครื่องมือ"
-      },
-      "icon": "Tools",
-      "order": 100
     }
   ],
   "plugins": [
@@ -45,7 +32,6 @@
       "group": "builtins",
       "enabled": true,
       "order": 1,
-      "allowedOrigin": "http://localhost:3003",
       "version": "1.0.0"
     },
     {
@@ -64,49 +50,7 @@
       "group": "builtins",
       "enabled": true,
       "order": 2,
-      "allowedOrigin": "http://localhost:3005",
       "version": "1.0.0"
-    },
-    {
-      "id": "plugin-template-frontend-only",
-      "name": "纯前端插件模板",
-      "nameI18n": {
-        "zh-CN": "纯前端插件模板",
-        "zh-TW": "純前端外掛模板",
-        "en-US": "Frontend-Only Plugin Template",
-        "ja-JP": "フロントエンド専用プラグインテンプレート",
-        "th-TH": "เทมเพลตปลั๊กอินฝั่งหน้าบ้าน"
-      },
-      "description": "无自有后端的插件开发模板",
-      "url": "http://localhost:3006/",
-      "icon": "Document",
-      "group": "tools",
-      "enabled": true,
-      "order": 1,
-      "allowedOrigin": "http://localhost:3006",
-      "version": "1.0.0"
-    },
-    {
-      "id": "ai-3d-generator-v3",
-      "name": "AI 3D 生成器",
-      "nameI18n": {
-        "zh-CN": "AI 3D 生成器",
-        "zh-TW": "AI 3D 生成器",
-        "en-US": "AI 3D Generator",
-        "ja-JP": "AI 3D ジェネレーター",
-        "th-TH": "AI 3D Generator"
-      },
-      "description": "多供应商 AI 3D 模型生成与上传工具",
-      "url": "http://localhost:3008/",
-      "icon": "MagicStick",
-      "group": "tools",
-      "enabled": true,
-      "order": 2,
-      "allowedOrigin": "http://localhost:3008",
-      "version": "3.0.0",
-      "extraConfig": {
-        "apiBaseUrl": "http://localhost:8089"
-      }
     }
   ]
 }

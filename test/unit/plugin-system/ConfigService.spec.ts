@@ -121,6 +121,47 @@ describe("ConfigService", () => {
   });
 
   describe("loadConfig", () => {
+    it("should derive allowedOrigin from url when local plugins.json omits it", async () => {
+      const localConfig = makeConfig({
+        plugins: [
+          {
+            ...makePlugin(),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            allowedOrigin: undefined as any,
+            url: "https://local.example.com/app/index.html",
+          },
+        ],
+      });
+      mockLocalFetch(localConfig);
+      mockApiConfig({ version: "0.0.0", menuGroups: [], plugins: [] });
+
+      const result = await service.loadConfig();
+
+      expect(result.plugins).toHaveLength(1);
+      expect(result.plugins[0].allowedOrigin).toBe("https://local.example.com");
+    });
+
+    it("should derive allowedOrigin from url when API config omits it", async () => {
+      mockLocalFetch({ version: "0.0.0", menuGroups: [], plugins: [] });
+      mockApiConfig(
+        makeConfig({
+          plugins: [
+            {
+              ...makePlugin(),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              allowedOrigin: undefined as any,
+              url: "https://api.example.com/embedded/plugin",
+            },
+          ],
+        })
+      );
+
+      const result = await service.loadConfig();
+
+      expect(result.plugins).toHaveLength(1);
+      expect(result.plugins[0].allowedOrigin).toBe("https://api.example.com");
+    });
+
     it("should return local config when API has no plugins", async () => {
       const localConfig = makeConfig();
       mockLocalFetch(localConfig);

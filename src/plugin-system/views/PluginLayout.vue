@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, computed, onBeforeUnmount, onMounted } from "vue";
-import { useRoute, useRouter, type LocationQueryRaw } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useTheme } from "@/composables/useTheme";
 import { pluginSystem } from "@/plugin-system";
+import { resolvePluginHostAction } from "@/plugin-system/views/pluginHostActions";
 import { Loading } from "@element-plus/icons-vue";
 
 const route = useRoute();
@@ -164,28 +165,6 @@ function getActivePluginIframe(): HTMLIFrameElement | null {
   return containerRef.value?.querySelector("iframe") ?? null;
 }
 
-function toQueryRecord(value: unknown): LocationQueryRaw {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return {};
-  }
-
-  const query: LocationQueryRaw = {};
-
-  Object.entries(value as Record<string, unknown>).forEach(([key, item]) => {
-    if (Array.isArray(item)) {
-      query[key] = item.map((entry) => String(entry));
-      return;
-    }
-    if (item == null) {
-      query[key] = item;
-      return;
-    }
-    query[key] = String(item);
-  });
-
-  return query;
-}
-
 function handlePluginMessage(event: MessageEvent) {
   const iframe = getActivePluginIframe();
   if (!iframe || event.source !== iframe.contentWindow) {
@@ -212,18 +191,19 @@ function handlePluginMessage(event: MessageEvent) {
   }
 
   const payload = message.payload ?? {};
-  if (payload.event !== "navigate-host") {
+  const action = resolvePluginHostAction(payload);
+  if (!action) {
     return;
   }
 
-  const path = typeof payload.path === "string" ? payload.path : "";
-  if (!path) {
+  if (action.type === "reload-host") {
+    window.location.reload();
     return;
   }
 
   router.push({
-    path,
-    query: toQueryRecord(payload.query),
+    path: action.path,
+    query: action.query,
   });
 }
 
