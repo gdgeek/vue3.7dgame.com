@@ -15,6 +15,7 @@ import viteCompression from "vite-plugin-compression";
 
 import UnoCSS from "unocss/vite";
 import { resolve } from "path";
+import { normalizeDevProxyTarget } from "./build/dev-proxy-target";
 import { pluginEnvJson } from "./build/vite-plugin-env-json";
 import {
   name,
@@ -91,7 +92,9 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           : {}),
         "/api-config": {
           changeOrigin: true,
-          target: env.VITE_APP_CONFIG_API_URL || "http://localhost:8088",
+          target: normalizeDevProxyTarget(
+            env.VITE_APP_CONFIG_API_URL || "http://localhost:8088"
+          ),
           rewrite: (path) => path.replace(/^\/api-config/, ""),
         },
       },
