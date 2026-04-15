@@ -392,7 +392,9 @@ describe("PluginSystem", () => {
         id: "restricted-plugin",
         allowedHostOrigins: ["https://allowed-host.example.com"],
       });
-      configService = createMockConfigService(createConfig([restrictedManifest]));
+      configService = createMockConfigService(
+        createConfig([restrictedManifest])
+      );
       system = new PluginSystem(
         registry,
         loader,

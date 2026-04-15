@@ -26,9 +26,10 @@ const VALID_TRANSITIONS: ReadonlyMap<
 ]);
 
 function isCurrentHostAllowed(manifest: PluginManifest): boolean {
-  const allowedHostOrigins = manifest.allowedHostOrigins
-    ?.map((origin) => origin.trim())
-    .filter((origin) => origin !== "") ?? [];
+  const allowedHostOrigins =
+    manifest.allowedHostOrigins
+      ?.map((origin) => origin.trim())
+      .filter((origin) => origin !== "") ?? [];
 
   if (allowedHostOrigins.length === 0) {
     return true;
