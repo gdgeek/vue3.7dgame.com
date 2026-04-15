@@ -66,28 +66,6 @@
       "order": 2,
       "allowedOrigin": "${PLUGIN_SYSTEM_ADMIN_URL}",
       "version": "1.0.0"
-    },
-    {
-      "id": "ai-3d-generator-v3",
-      "name": "AI 3D 生成器",
-      "nameI18n": {
-        "zh-CN": "AI 3D 生成器",
-        "zh-TW": "AI 3D 生成器",
-        "en-US": "AI 3D Generator",
-        "ja-JP": "AI 3D ジェネレーター",
-        "th-TH": "AI 3D Generator"
-      },
-      "description": "多供应商 AI 3D 模型生成与上传工具",
-      "url": "${PLUGIN_AI_3D_GENERATOR_V3_URL}/",
-      "icon": "MagicStick",
-      "group": "tools",
-      "enabled": true,
-      "order": 2,
-      "allowedOrigin": "${PLUGIN_AI_3D_GENERATOR_V3_URL}",
-      "version": "3.0.0",
-      "extraConfig": {
-        "apiBaseUrl": "http://localhost:8089"
-      }
     }
   ]
 }
