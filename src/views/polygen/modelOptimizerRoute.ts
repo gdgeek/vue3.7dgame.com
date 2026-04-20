@@ -1,4 +1,8 @@
-import type { LocationQuery, LocationQueryRaw, RouteLocationRaw } from "vue-router";
+import type {
+  LocationQuery,
+  LocationQueryRaw,
+  RouteLocationRaw,
+} from "vue-router";
 
 export function buildModelOptimizerRoute(
   query: LocationQuery = {}
