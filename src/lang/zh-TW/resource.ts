@@ -76,6 +76,7 @@ export default {
     },
   },
   polygen: {
+    optimizePolygen: "模型優化",
     uploadPolygen: "上傳模型",
     listPageTitle: "所有模型素材",
     searchPlaceholder: "搜尋模型...",

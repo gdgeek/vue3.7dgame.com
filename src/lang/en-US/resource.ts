@@ -78,6 +78,7 @@ export default {
     },
   },
   polygen: {
+    optimizePolygen: "Model Optimization",
     uploadPolygen: "Upload Polygen",
     listPageTitle: "All Model Assets",
     searchPlaceholder: "Search models...",
