@@ -77,6 +77,7 @@ export default {
     },
   },
   polygen: {
+    optimizePolygen: "ปรับแต่งโมเดล",
     uploadPolygen: "อัปโหลดโมเดล",
     listPageTitle: "ทรัพยากรโมเดลทั้งหมด",
     searchPlaceholder: "ค้นหาโมเดล...",

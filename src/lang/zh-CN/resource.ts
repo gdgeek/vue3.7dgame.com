@@ -78,6 +78,7 @@ export default {
   },
   // 模型管理国际化
   polygen: {
+    optimizePolygen: "模型优化",
     uploadPolygen: "上传模型",
     listPageTitle: "所有模型素材",
     searchPlaceholder: "搜索模型...",
