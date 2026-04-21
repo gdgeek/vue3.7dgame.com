@@ -3,29 +3,16 @@
   "menuGroups": [
     {
       "id": "builtins",
-      "name": "基础内容",
+      "name": "基础工具",
       "nameI18n": {
-        "zh-CN": "基础内容",
-        "zh-TW": "基礎內容",
-        "en-US": "Built-ins",
-        "ja-JP": "基本機能",
-        "th-TH": "พื้นฐาน"
+        "zh-CN": "基础工具",
+        "zh-TW": "基礎工具",
+        "en-US": "Core Tools",
+        "ja-JP": "基本ツール",
+        "th-TH": "เครื่องมือพื้นฐาน"
       },
       "icon": "Setting",
       "order": 99
-    },
-    {
-      "id": "tools",
-      "name": "实用工具",
-      "nameI18n": {
-        "zh-CN": "实用工具",
-        "zh-TW": "實用工具",
-        "en-US": "Utilities",
-        "ja-JP": "ユーティリティ",
-        "th-TH": "เครื่องมือ"
-      },
-      "icon": "Tools",
-      "order": 100
     }
   ],
   "plugins": [

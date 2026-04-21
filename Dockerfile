@@ -41,7 +41,6 @@ ENV APP_DOC_API_URL=http://127.0.0.1:65535
 # 插件 URL 默认值（用于无 compose override 时的本地场景）
 ENV PLUGIN_USER_MANAGEMENT_URL=http://localhost:3003
 ENV PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005
-ENV PLUGIN_AI_3D_GENERATOR_V3_URL=http://localhost:3008
 
 # 将构建的文件复制到 Nginx 默认的静态文件目录
 COPY --from=build /app/dist /usr/share/nginx/html
