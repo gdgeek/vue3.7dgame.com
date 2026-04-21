@@ -4,8 +4,6 @@ export default {
     dashboard: "Dashboard",
     campus: {
       title: "Campus",
-
-      schoolManagement: "School Management",
       teacher: "I am a Teacher",
       student: "I am a Student",
     },
@@ -134,7 +132,6 @@ export default {
     manager: {
       title: "Management",
       userManagement: "User Management",
-      schoolManagement: "School Management",
       classManagement: "Class Management",
       teacherManagement: "Teacher Management",
       studentManagement: "Student Management",

@@ -4,8 +4,6 @@ export default {
     dashboard: "ダッシュボード",
     campus: {
       title: "キャンパス",
-
-      schoolManagement: "学校管理",
       teacher: "私は教師です",
       student: "私は学生です",
     },
@@ -134,7 +132,6 @@ export default {
     manager: {
       title: "管理",
       userManagement: "ユーザー管理",
-      schoolManagement: "学校管理",
       classManagement: "クラス管理",
       teacherManagement: "教師管理",
       studentManagement: "生徒管理",

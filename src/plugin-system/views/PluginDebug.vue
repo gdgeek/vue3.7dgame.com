@@ -16,7 +16,10 @@ import {
   Setting,
 } from "@element-plus/icons-vue";
 
-import type { PluginManifest } from "@/plugin-system/types";
+import type {
+  PluginAccessScope,
+  PluginManifest,
+} from "@/plugin-system/types";
 import type { TabPaneName } from "element-plus";
 
 const store = usePluginSystemStore();
@@ -26,14 +29,26 @@ const refreshing = ref(false);
 const initError = ref<string | null>(null);
 const activeTab: Ref<TabPaneName> = ref("overview");
 
-// --- Computed ---
-
 const config = computed(() => store.config);
 const plugins = computed(() => Array.from(store.plugins.values()));
 const menuGroups = computed(() => store.menuGroups);
 const enabledPlugins = computed(() => store.enabledPlugins);
-const permissions = computed(() => store.currentTokenPluginPermissions);
+const configuredAccessScopes = computed(() => store.pluginAccessScopes);
+const currentTokenAccessScopes = computed(
+  () => store.currentTokenPluginAccessScopes
+);
 const accessStates = computed(() => store.currentTokenPluginAccessStates);
+const hostSession = computed(() => ({
+  resolved: store.hostSessionResolved ?? false,
+  authenticated: store.hostSessionAuthenticated ?? false,
+  roles: store.hostSessionRoles ?? [],
+}));
+const accessDebugPayload = computed(() => ({
+  configuredAccessScopes: configuredAccessScopes.value,
+  currentTokenAccessScopes: currentTokenAccessScopes.value,
+  accessStates: accessStates.value,
+  hostSession: hostSession.value,
+}));
 
 const stateStats = computed(() => {
   const stats = { unloaded: 0, loading: 0, active: 0, error: 0, total: 0 };
@@ -47,8 +62,6 @@ const stateStats = computed(() => {
 const configManifests = computed<PluginManifest[]>(
   () => config.value?.plugins ?? []
 );
-
-// --- Actions ---
 
 async function handleInit() {
   initError.value = null;
@@ -86,26 +99,29 @@ function stateTagType(
   }
 }
 
-function permissionAccessState(pluginId: string) {
+function pluginAccessState(pluginId: string) {
   return accessStates.value[pluginId] ?? "unknown";
 }
 
-function permissionLabel(pluginId: string): string {
-  const state = permissionAccessState(pluginId);
-  const actions = permissions.value[pluginId] ?? [];
+function accessScopeLabel(accessScope: PluginAccessScope | null | undefined) {
+  return accessScope ?? "auth-only";
+}
+
+function accessStateLabel(pluginId: string): string {
+  const state = pluginAccessState(pluginId);
+  const accessScope = currentTokenAccessScopes.value[pluginId];
 
   if (state === "unknown") return "未获取";
   if (state === "loading") return "加载中";
   if (state === "forbidden") return "无权限";
   if (state === "degraded") return "服务降级";
-  if (actions.includes("*")) return "全部权限";
-  return actions.join(", ") || "已可见";
+  return `可见: ${accessScopeLabel(accessScope)}`;
 }
 
-function permissionTagType(
+function accessStateTagType(
   pluginId: string
 ): "success" | "warning" | "danger" | "info" {
-  switch (permissionAccessState(pluginId)) {
+  switch (pluginAccessState(pluginId)) {
     case "loading":
       return "warning";
     case "forbidden":
@@ -119,6 +135,31 @@ function permissionTagType(
   }
 }
 
+function accessStateHint(pluginId: string): string {
+  const state = pluginAccessState(pluginId);
+  const configuredScope = accessScopeLabel(
+    configuredAccessScopes.value[pluginId] ?? null
+  );
+  const currentScope = accessScopeLabel(
+    currentTokenAccessScopes.value[pluginId] ?? null
+  );
+
+  switch (state) {
+    case "unknown":
+      return "尚未完成当前 token 的 verify-token 校验";
+    case "loading":
+      return "正在根据当前登录态校验菜单可见性";
+    case "forbidden":
+      return `当前角色不满足 ${configuredScope}`;
+    case "degraded":
+      return "verify-token 调用异常，宿主暂时隐藏该插件";
+    case "visible":
+      return `当前角色满足 ${currentScope}`;
+    default:
+      return configuredScope;
+  }
+}
+
 onMounted(() => {
   handleInit();
 });
@@ -126,7 +167,6 @@ onMounted(() => {
 
 <template>
   <div class="plugin-debug">
-    <!-- Header -->
     <div class="plugin-debug__header">
       <div class="plugin-debug__title">
         <el-icon :size="24">
@@ -149,7 +189,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Error banner -->
     <el-alert
       v-if="initError || store.error"
       :title="initError || store.error || ''"
@@ -159,7 +198,6 @@ onMounted(() => {
       class="plugin-debug__alert"
     ></el-alert>
 
-    <!-- Stats cards -->
     <el-row :gutter="16" class="plugin-debug__stats">
       <el-col :span="4">
         <el-card shadow="hover">
@@ -225,9 +263,7 @@ onMounted(() => {
       </el-col>
     </el-row>
 
-    <!-- Tabs -->
     <el-tabs v-model="activeTab" class="plugin-debug__tabs">
-      <!-- Tab 1: Overview -->
       <el-tab-pane label="总览" name="overview">
         <el-descriptions title="配置信息" :column="3" border>
           <el-descriptions-item label="配置版本">
@@ -253,10 +289,30 @@ onMounted(() => {
           <el-descriptions-item label="当前语言">
             {{ appStore.language }}
           </el-descriptions-item>
+          <el-descriptions-item label="宿主会话已解析">
+            <el-tag
+              :type="hostSession.resolved ? 'success' : 'info'"
+              size="small"
+            >
+              {{ hostSession.resolved }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="宿主已登录">
+            <el-tag
+              :type="hostSession.authenticated ? 'success' : 'warning'"
+              size="small"
+            >
+              {{ hostSession.authenticated }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="宿主角色">
+            {{
+              hostSession.roles.length ? hostSession.roles.join(", ") : "未获取"
+            }}
+          </el-descriptions-item>
         </el-descriptions>
       </el-tab-pane>
 
-      <!-- Tab 2: Plugin List (runtime) -->
       <el-tab-pane label="运行时插件" name="runtime">
         <el-table :data="plugins" stripe border style="width: 100%">
           <el-table-column
@@ -286,10 +342,17 @@ onMounted(() => {
               </el-icon>
             </template>
           </el-table-column>
-          <el-table-column label="权限" min-width="180">
+          <el-table-column label="access_scope" width="140" align="center">
             <template #default="{ row }">
-              <el-tag :type="permissionTagType(row.pluginId)" size="small">
-                {{ permissionLabel(row.pluginId) }}
+              <el-tag type="info" size="small">
+                {{ accessScopeLabel(row.accessScope) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="菜单访问" min-width="180">
+            <template #default="{ row }">
+              <el-tag :type="accessStateTagType(row.pluginId)" size="small">
+                {{ accessStateLabel(row.pluginId) }}
               </el-tag>
             </template>
           </el-table-column>
@@ -325,7 +388,6 @@ onMounted(() => {
         </el-table>
       </el-tab-pane>
 
-      <!-- Tab 3: Manifest Config -->
       <el-tab-pane label="清单配置" name="manifest">
         <el-table :data="configManifests" stripe border style="width: 100%">
           <el-table-column prop="id" label="ID" width="180"></el-table-column>
@@ -339,6 +401,13 @@ onMounted(() => {
             label="版本"
             width="100"
           ></el-table-column>
+          <el-table-column label="access_scope" width="140" align="center">
+            <template #default="{ row }">
+              <el-tag type="info" size="small">
+                {{ accessScopeLabel(row.accessScope) }}
+              </el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="URL" min-width="280" show-overflow-tooltip>
             <template #default="{ row }">
               <el-link
@@ -408,7 +477,6 @@ onMounted(() => {
         </el-table>
       </el-tab-pane>
 
-      <!-- Tab 4: Menu Groups -->
       <el-tab-pane label="菜单分组" name="groups">
         <el-table :data="menuGroups" stripe border style="width: 100%">
           <el-table-column
@@ -469,8 +537,7 @@ onMounted(() => {
         </el-table>
       </el-tab-pane>
 
-      <!-- Tab 5: Permissions -->
-      <el-tab-pane label="权限详情" name="permissions">
+      <el-tab-pane label="访问详情" name="permissions">
         <el-table :data="plugins" stripe border style="width: 100%">
           <el-table-column
             prop="pluginId"
@@ -482,32 +549,37 @@ onMounted(() => {
               {{ resolveI18nName(row.name, row.nameI18n, appStore.language) }}
             </template>
           </el-table-column>
-          <el-table-column label="权限状态" width="140" align="center">
+          <el-table-column label="配置 access_scope" width="160" align="center">
             <template #default="{ row }">
-              <el-tag :type="permissionTagType(row.pluginId)" size="small">
-                {{ permissionLabel(row.pluginId) }}
+              <el-tag type="info" size="small">
+                {{ accessScopeLabel(configuredAccessScopes[row.pluginId]) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="Actions 列表" min-width="300">
+          <el-table-column label="当前 token 结果" width="140" align="center">
             <template #default="{ row }">
-              <template v-if="permissions[row.pluginId]?.length">
-                <el-tag
-                  v-for="action in permissions[row.pluginId]"
-                  :key="action"
-                  size="small"
-                  type="success"
-                  class="plugin-debug__i18n-tag"
-                >
-                  {{ action }}
-                </el-tag>
-              </template>
-              <span v-else style="color: #909399">空（插件将被隐藏）</span>
+              <el-tag :type="accessStateTagType(row.pluginId)" size="small">
+                {{ accessStateLabel(row.pluginId) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="当前 token access_scope"
+            width="180"
+            align="center"
+          >
+            <template #default="{ row }">
+              <span style="color: #606266">
+                {{ accessScopeLabel(currentTokenAccessScopes[row.pluginId]) }}
+              </span>
             </template>
           </el-table-column>
           <el-table-column label="菜单可见" width="120" align="center">
             <template #default="{ row }">
-              <el-icon v-if="permissions[row.pluginId]?.length" color="#67c23a">
+              <el-icon
+                v-if="pluginAccessState(row.pluginId) === 'visible'"
+                color="#67c23a"
+              >
                 <SuccessFilled></SuccessFilled>
               </el-icon>
               <el-icon v-else color="#f56c6c">
@@ -517,34 +589,32 @@ onMounted(() => {
           </el-table-column>
           <el-table-column label="说明" min-width="250">
             <template #default="{ row }">
-              <span v-if="!permissions[row.pluginId]" style="color: #e6a23c">
+              <span
+                v-if="pluginAccessState(row.pluginId) === 'unknown'"
+                style="color: #e6a23c"
+              >
                 <el-icon>
                   <Warning></Warning>
                 </el-icon>
-                权限尚未获取
+                {{ accessStateHint(row.pluginId) }}
               </span>
               <span
-                v-else-if="permissions[row.pluginId].length === 0"
+                v-else-if="pluginAccessState(row.pluginId) === 'forbidden'"
                 style="color: #f56c6c"
               >
                 <el-icon>
                   <Lock></Lock>
                 </el-icon>
-                API 返回空 actions，插件在菜单中隐藏
+                {{ accessStateHint(row.pluginId) }}
               </span>
-              <span
-                v-else-if="permissions[row.pluginId].includes('*')"
-                style="color: #67c23a"
-              >
-                全部权限（可能是权限 API 404 回退）
+              <span v-else style="color: #67c23a">
+                {{ accessStateHint(row.pluginId) }}
               </span>
-              <span v-else style="color: #67c23a"> 有限权限，插件可见 </span>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
 
-      <!-- Tab 6: Raw JSON -->
       <el-tab-pane label="原始 JSON" name="raw">
         <el-collapse>
           <el-collapse-item title="plugins.json 配置" name="config">
@@ -557,9 +627,9 @@ onMounted(() => {
               JSON.stringify(plugins, null, 2)
             }}</pre>
           </el-collapse-item>
-          <el-collapse-item title="权限数据" name="perms">
+          <el-collapse-item title="访问状态数据" name="perms">
             <pre class="plugin-debug__json">{{
-              JSON.stringify(permissions, null, 2)
+              JSON.stringify(accessDebugPayload, null, 2)
             }}</pre>
           </el-collapse-item>
           <el-collapse-item title="Store 状态" name="store-state">

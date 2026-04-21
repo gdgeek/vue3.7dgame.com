@@ -124,7 +124,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     mockInit.mockResolvedValue(undefined);
     mockEnsurePluginAccess.mockResolvedValue({
       status: "visible",
-      actions: ["view"],
+      accessScope: "admin-only",
     });
     mockActivatePlugin.mockImplementation(async (pluginId: string) => {
       const info = mockPlugins.get(pluginId);
@@ -177,7 +177,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
   it("checks plugin access before activation", async () => {
     mockEnsurePluginAccess.mockResolvedValue({
       status: "visible",
-      actions: ["view"],
+      accessScope: "admin-only",
     });
 
     await mountView();
@@ -192,7 +192,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
   it("does not activate forbidden plugins", async () => {
     mockEnsurePluginAccess.mockResolvedValue({
       status: "forbidden",
-      actions: [],
+      accessScope: "root-only",
     });
 
     const { el } = await mountView();
@@ -218,11 +218,11 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     mockEnsurePluginAccess
       .mockResolvedValueOnce({
         status: "degraded",
-        actions: [],
+        accessScope: "admin-only",
       })
       .mockResolvedValueOnce({
         status: "visible",
-        actions: ["view"],
+        accessScope: "admin-only",
       });
 
     const { el } = await mountView();
@@ -244,7 +244,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
   it("does not activate a stale plugin after switching routes", async () => {
     const staleAccess = createDeferred<{
       status: "visible";
-      actions: ["view"];
+      accessScope: "admin-only";
     }>();
     mockEnsurePluginAccess.mockImplementation((id: string) => {
       if (id === "ai-3d-generator-v3") {
@@ -252,7 +252,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
       }
       return Promise.resolve({
         status: "visible" as const,
-        actions: ["view"],
+        accessScope: "admin-only" as const,
       });
     });
 
@@ -266,7 +266,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
 
     staleAccess.resolve({
       status: "visible",
-      actions: ["view"],
+      accessScope: "admin-only",
     });
     await Promise.resolve();
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
@@ -287,11 +287,11 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     mockEnsurePluginAccess
       .mockResolvedValueOnce({
         status: "degraded",
-        actions: [],
+        accessScope: "admin-only",
       })
       .mockResolvedValueOnce({
         status: "forbidden",
-        actions: [],
+        accessScope: "root-only",
       });
 
     const { el } = await mountView();

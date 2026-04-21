@@ -30,11 +30,10 @@ export default {
       removeConfirmTitle: "削除確認",
     },
     defaultClassName: "新しいクラス",
-    schoolManagement: "学校管理",
     teacherManagement: "教師管理",
     studentManagement: "学生管理",
     school: {
-      principal: "学校管理者",
+      principal: "責任者",
       address: "住所",
       description: "説明",
       classList: "クラスリスト",
@@ -70,11 +69,11 @@ export default {
       phone: "電話",
     },
     principal: {
-      assign: "学校管理者を割り当てる",
+      assign: "責任者を割り当てる",
       selectUser: "ユーザーを選択",
       select: "選択",
-      assignSuccess: "学校管理者の割り当てに成功しました",
-      assignFailed: "学校管理者の割り当てに失敗しました",
+      assignSuccess: "責任者の割り当てに成功しました",
+      assignFailed: "責任者の割り当てに失敗しました",
       username: "ユーザー名",
       nickname: "ニックネーム",
     },
@@ -108,7 +107,7 @@ export default {
       updateSuccess: "学校の更新に成功しました",
       updateFailed: "学校の更新に失敗しました",
       deleteFailed: "学校の削除に失敗しました",
-      clearPrincipalConfirm: "学校管理者をクリアしてもよろしいですか？",
+      clearPrincipalConfirm: "責任者をクリアしてもよろしいですか？",
     },
     creator: {
       form: {

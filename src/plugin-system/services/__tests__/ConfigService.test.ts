@@ -57,6 +57,7 @@ describe("ConfigService", () => {
             group: "org:public",
             enabled: true,
             order: 0,
+            accessScope: "manager-only",
             version: "",
           },
         ],
@@ -72,6 +73,7 @@ describe("ConfigService", () => {
         description: "AI 3D 生成器 V3",
         version: "0.0.0",
         allowedOrigin: "http://localhost:3008",
+        accessScope: "manager-only",
       }),
     ]);
   });

@@ -3,7 +3,6 @@ export default {
   // 管理部分国际化
   manager: {
     title: "添加用户",
-    schoolManagement: "学校管理",
     teacherManagement: "教师管理",
     studentManagement: "学生管理",
     createSchool: "创建学校",
@@ -34,7 +33,7 @@ export default {
     },
     defaultClassName: "新班级",
     school: {
-      principal: "学校管理员",
+      principal: "负责人",
       address: "地址",
     },
     class: {

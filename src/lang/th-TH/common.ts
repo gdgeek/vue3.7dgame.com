@@ -102,8 +102,6 @@ export default {
     scene: "ฉาก",
     selfCreated: "สร้างเอง",
     systemRecommend: "แนะนำโดยระบบ",
-    campusManagement: "การจัดการแคมปัส",
-    schoolManagement: "การจัดการโรงเรียน",
     teacherManagement: "การจัดการครู",
     studentManagement: "การจัดการนักเรียน",
     adminCenter: "ศูนย์ผู้ดูแล",

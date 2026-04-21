@@ -93,7 +93,7 @@ Token 无效 (401)：
 ### 请求
 
 ```
-GET /v1/plugin/check-permission?plugin_name=school-management&action=manage-class
+GET /v1/plugin/check-permission?plugin_name=user-management&action=manage-users
 Authorization: Bearer {jwt_token}
 ```
 
@@ -101,8 +101,8 @@ Authorization: Bearer {jwt_token}
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| plugin_name | string | 是 | 插件标识，如 `school-management` |
-| action | string | 是 | 操作标识，如 `manage-class` |
+| plugin_name | string | 是 | 插件标识，如 `user-management` |
+| action | string | 是 | 操作标识，如 `manage-users` |
 
 ### 成功响应 (200)
 

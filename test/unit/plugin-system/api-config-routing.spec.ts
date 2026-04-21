@@ -39,24 +39,6 @@ describe("web api-config routing semantics", () => {
     );
   });
 
-  it("systemAdminApi routes allowed-actions requests via /api-config/api/v1/plugin/allowed-actions", async () => {
-    const { getSystemAdminAllowedActions } = await import(
-      "@/plugin-system/services/systemAdminApi"
-    );
-
-    await getSystemAdminAllowedActions("user-management");
-
-    expect(mockRequestGet).toHaveBeenCalledWith(
-      "/api-config/api/v1/plugin/allowed-actions",
-      expect.objectContaining({
-        authScope: "plugin",
-        baseURL: "",
-        params: { plugin_name: "user-management" },
-        skipErrorMessage: true,
-      })
-    );
-  });
-
   it("ConfigService delegates plugin list loading to systemAdminApi", () => {
     const source = readFileSync(
       resolve(process.cwd(), "src/plugin-system/services/ConfigService.ts"),
@@ -67,14 +49,25 @@ describe("web api-config routing semantics", () => {
     expect(source).not.toContain('request.get("/v1/plugin/list"');
   });
 
-  it("plugin-system store delegates allowed-actions loading to systemAdminApi", () => {
+  it("plugin-system store no longer delegates visibility loading to systemAdmin allowed-actions", () => {
     const source = readFileSync(
       resolve(process.cwd(), "src/store/modules/plugin-system.ts"),
       "utf-8"
     );
 
-    expect(source).toContain("getSystemAdminAllowedActions(pluginId)");
+    expect(source).toContain("verifyPluginHostSession");
+    expect(source).not.toContain("getSystemAdminAllowedActions(");
     expect(source).not.toContain('request.get("/v1/plugin/allowed-actions"');
+  });
+
+  it("hostSessionApi resolves visibility through /v1/plugin/verify-token", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "src/plugin-system/services/hostSessionApi.ts"),
+      "utf-8"
+    );
+
+    expect(source).toContain('request.get("/v1/plugin/verify-token"');
+    expect(source).not.toContain('request.get("/v1/user/info"');
   });
 
   it("vite dev server proxies /api-config to the system-admin backend", () => {
@@ -109,6 +102,17 @@ describe("web api-config routing semantics", () => {
     );
     expect(source).toContain("APP_CONFIG");
     expect(source).toContain("__CONFIG_LOCATIONS__");
+  });
+
+  it("local plugin config marks user-management as root-only", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "public/config/plugins.json"),
+      "utf-8"
+    );
+
+    expect(source).toContain('"id": "user-management"');
+    expect(source).toContain('"accessScope": "root-only"');
+    expect(source).not.toContain('"accessScope": "admin-only"');
   });
 
   it("production docker compose provides APP_CONFIG upstreams", () => {

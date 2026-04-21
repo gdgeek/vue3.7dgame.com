@@ -42,6 +42,7 @@ function makePlugin(overrides: Partial<PluginManifest> = {}): PluginManifest {
     enabled: true,
     order: 1,
     allowedOrigin: "https://test.example.com",
+    accessScope: "auth-only",
     version: "1.0.0",
     ...overrides,
   };
@@ -139,6 +140,7 @@ describe("ConfigService", () => {
 
       expect(result.plugins).toHaveLength(1);
       expect(result.plugins[0].allowedOrigin).toBe("https://local.example.com");
+      expect(result.plugins[0].accessScope).toBe("auth-only");
     });
 
     it("should derive allowedOrigin from url when API config omits it", async () => {
@@ -160,6 +162,48 @@ describe("ConfigService", () => {
 
       expect(result.plugins).toHaveLength(1);
       expect(result.plugins[0].allowedOrigin).toBe("https://api.example.com");
+      expect(result.plugins[0].accessScope).toBe("auth-only");
+    });
+
+    it("should default plugin accessScope to auth-only when omitted by API", async () => {
+      mockLocalFetch({ version: "0.0.0", menuGroups: [], plugins: [] });
+      mockApiConfig(
+        makeConfig({
+          plugins: [
+            {
+              ...makePlugin(),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              accessScope: undefined as any,
+            },
+          ],
+        })
+      );
+
+      const result = await service.loadConfig();
+
+      expect(result.plugins[0].accessScope).toBe("auth-only");
+    });
+
+    it("should let local accessScope override API accessScope for the same plugin id", async () => {
+      const apiPlugin = makePlugin({
+        id: "shared",
+        name: "API Name",
+        accessScope: "auth-only",
+      });
+      mockApiConfig(makeConfig({ plugins: [apiPlugin] }));
+
+      const localPlugin = makePlugin({
+        id: "shared",
+        name: "Local Name",
+        accessScope: "root-only",
+      });
+      mockLocalFetch(makeConfig({ plugins: [localPlugin] }));
+
+      const result = await service.loadConfig();
+
+      expect(result.plugins).toHaveLength(1);
+      expect(result.plugins[0].name).toBe("Local Name");
+      expect(result.plugins[0].accessScope).toBe("root-only");
     });
 
     it("should return local config when API has no plugins", async () => {

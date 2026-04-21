@@ -4,8 +4,6 @@ export default {
     dashboard: "หน้าหลัก",
     campus: {
       title: "วิทยาเขต",
-
-      schoolManagement: "การจัดการโรงเรียน",
       teacher: "ฉันเป็นครู",
       student: "ฉันเป็นนักเรียน",
     },
@@ -134,7 +132,6 @@ export default {
     manager: {
       title: "การจัดการ",
       userManagement: "การจัดการผู้ใช้",
-      schoolManagement: "การจัดการโรงเรียน",
       classManagement: "การจัดการชั้นเรียน",
       teacherManagement: "การจัดการครู",
       studentManagement: "การจัดการนักเรียน",

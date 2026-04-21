@@ -115,8 +115,6 @@ export default {
     scene: "场景",
     selfCreated: "自己创造",
     systemRecommend: "系统推荐",
-    campusManagement: "校园管理",
-    schoolManagement: "学校管理",
     teacherManagement: "老师管理",
     studentManagement: "学生管理",
     adminCenter: "管理中心",

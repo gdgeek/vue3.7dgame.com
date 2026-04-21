@@ -2,9 +2,13 @@ import { defineStore } from "pinia";
 import { pluginSystem } from "@/plugin-system";
 import type { PluginLoadOptions } from "@/plugin-system/core/PluginLoader";
 import { store } from "@/store";
-import type { PluginInfo, PluginsConfig, MenuGroup } from "@/plugin-system";
-import { getSystemAdminAllowedActions } from "@/plugin-system/services/systemAdminApi";
-import { probeHostSession } from "@/plugin-system/services/hostSessionApi";
+import type {
+  PluginAccessScope,
+  PluginInfo,
+  PluginsConfig,
+  MenuGroup,
+} from "@/plugin-system";
+import { verifyPluginHostSession } from "@/plugin-system/services/hostSessionApi";
 import Token from "@/store/modules/token";
 
 type PluginAccessState =
@@ -16,12 +20,22 @@ type PluginAccessState =
 
 type PluginAccessResult = {
   status: PluginAccessState;
-  actions: string[];
+  accessScope: PluginAccessScope | null;
 };
 
+type HostSessionSnapshot = {
+  authenticated: boolean;
+  roles: string[];
+};
+
+const DEFAULT_ACCESS_SCOPE: PluginAccessScope = "auth-only";
 const inFlightPluginAccessRequests = new Map<
   string,
   Promise<PluginAccessResult>
+>();
+const inFlightHostSessionRequests = new Map<
+  string,
+  Promise<HostSessionSnapshot>
 >();
 
 function buildTokenFingerprint(accessToken?: string): string {
@@ -37,20 +51,14 @@ function buildTokenFingerprint(accessToken?: string): string {
   return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
-async function requestPluginAccessWithRetry(pluginId: string) {
-  try {
-    return await getSystemAdminAllowedActions(pluginId);
-  } catch (err) {
-    const status = (err as { response?: { status?: number } }).response?.status;
-    const shouldRetry = status == null || status >= 500;
-
-    if (!shouldRetry) {
-      throw err;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return getSystemAdminAllowedActions(pluginId);
-  }
+function normalizeAccessScope(
+  value: unknown
+): PluginAccessScope {
+  return value === "admin-only" ||
+    value === "manager-only" ||
+    value === "root-only"
+    ? value
+    : DEFAULT_ACCESS_SCOPE;
 }
 
 function isStableAccessState(
@@ -63,6 +71,27 @@ function getCurrentTokenFingerprint() {
   return buildTokenFingerprint(Token.getToken()?.accessToken);
 }
 
+function isVisibleForScope(
+  accessScope: PluginAccessScope,
+  session: HostSessionSnapshot
+): boolean {
+  if (!session.authenticated) {
+    return false;
+  }
+
+  const roles = session.roles;
+  switch (accessScope) {
+    case "root-only":
+      return roles.includes("root");
+    case "manager-only":
+      return roles.includes("root") || roles.includes("manager");
+    case "admin-only":
+      return roles.includes("root") || roles.includes("admin");
+    default:
+      return true;
+  }
+}
+
 interface PluginSystemState {
   initialized: boolean;
   config: PluginsConfig | null;
@@ -70,10 +99,13 @@ interface PluginSystemState {
   activePluginId: string | null;
   loading: boolean;
   error: string | null;
-  /** 每个插件的允许操作列表，key 为 pluginId */
-  pluginPermissions: Record<string, string[]>;
+  pluginAccessScopes: Record<string, PluginAccessScope | null>;
   pluginAccessStates: Record<string, PluginAccessState>;
   pluginPermissionFingerprints: Record<string, string>;
+  hostSessionFingerprint: string | null;
+  hostSessionRoles: string[];
+  hostSessionAuthenticated: boolean;
+  hostSessionResolved: boolean;
 }
 
 function buildPluginAccessRequestKey(pluginId: string, fingerprint: string) {
@@ -83,7 +115,7 @@ function buildPluginAccessRequestKey(pluginId: string, fingerprint: string) {
 function getCurrentTokenAwarePluginAccess(
   state: Pick<
     PluginSystemState,
-    "pluginPermissions" | "pluginAccessStates" | "pluginPermissionFingerprints"
+    "pluginAccessScopes" | "pluginAccessStates" | "pluginPermissionFingerprints"
   >,
   pluginId: string
 ): PluginAccessResult {
@@ -94,8 +126,8 @@ function getCurrentTokenAwarePluginAccess(
   if (cachedFingerprint === currentFingerprint) {
     return {
       status,
-      actions:
-        status === "loading" ? [] : (state.pluginPermissions[pluginId] ?? []),
+      accessScope:
+        status === "loading" ? null : (state.pluginAccessScopes[pluginId] ?? null),
     };
   }
 
@@ -106,13 +138,13 @@ function getCurrentTokenAwarePluginAccess(
   ) {
     return {
       status: "loading",
-      actions: [],
+      accessScope: null,
     };
   }
 
   return {
     status: "unknown",
-    actions: [],
+    accessScope: null,
   };
 }
 
@@ -124,9 +156,13 @@ export const usePluginSystemStore = defineStore("plugin-system", {
     activePluginId: null,
     loading: false,
     error: null,
-    pluginPermissions: {},
+    pluginAccessScopes: {},
     pluginAccessStates: {},
     pluginPermissionFingerprints: {},
+    hostSessionFingerprint: null,
+    hostSessionRoles: [],
+    hostSessionAuthenticated: false,
+    hostSessionResolved: false,
   }),
 
   getters: {
@@ -190,17 +226,19 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       return accessStates;
     },
 
-    currentTokenPluginPermissions(state): Record<string, string[]> {
-      const permissions: Record<string, string[]> = {};
+    currentTokenPluginAccessScopes(
+      state
+    ): Record<string, PluginAccessScope | null> {
+      const accessScopes: Record<string, PluginAccessScope | null> = {};
 
       for (const pluginId of Object.keys(state.pluginAccessStates)) {
-        permissions[pluginId] = getCurrentTokenAwarePluginAccess(
+        accessScopes[pluginId] = getCurrentTokenAwarePluginAccess(
           state,
           pluginId
-        ).actions;
+        ).accessScope;
       }
 
-      return permissions;
+      return accessScopes;
     },
 
     menuGroups(state): MenuGroup[] {
@@ -219,10 +257,17 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         await pluginSystem.initialize();
         this.initialized = true;
         this.config = pluginSystem.getConfig();
+        const manifestAccessScopes = new Map(
+          (this.config?.plugins ?? []).map((plugin: { id: string; accessScope?: PluginAccessScope }) => [
+            plugin.id,
+            normalizeAccessScope(plugin.accessScope),
+          ])
+        );
         const pluginsMap = new Map<string, PluginInfo>();
         for (const p of pluginSystem.getAllPlugins()) {
           pluginsMap.set(p.pluginId, p);
-          this.pluginPermissions[p.pluginId] = [];
+          this.pluginAccessScopes[p.pluginId] =
+            manifestAccessScopes.get(p.pluginId) ?? DEFAULT_ACCESS_SCOPE;
           this.pluginAccessStates[p.pluginId] = "unknown";
         }
         this.plugins = pluginsMap;
@@ -236,12 +281,80 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       }
     },
 
+    async resolveHostSession(
+      fingerprint: string,
+      options: { force?: boolean } = {}
+    ): Promise<HostSessionSnapshot> {
+      if (
+        !options.force &&
+        this.hostSessionResolved &&
+        this.hostSessionFingerprint === fingerprint
+      ) {
+        return {
+          authenticated: this.hostSessionAuthenticated,
+          roles: this.hostSessionRoles,
+        };
+      }
+
+      if (!options.force) {
+        const inFlightRequest = inFlightHostSessionRequests.get(fingerprint);
+        if (inFlightRequest) {
+          return inFlightRequest;
+        }
+      }
+
+      const token = Token.getToken();
+      if (!token?.accessToken) {
+        const guestSession = { authenticated: false, roles: [] as string[] };
+        this.hostSessionFingerprint = fingerprint;
+        this.hostSessionRoles = guestSession.roles;
+        this.hostSessionAuthenticated = guestSession.authenticated;
+        this.hostSessionResolved = true;
+        return guestSession;
+      }
+
+      const sessionRequest = (async (): Promise<HostSessionSnapshot> => {
+        const response = await verifyPluginHostSession();
+        const payload =
+          (response.data as { data?: { roles?: unknown } }).data ??
+          (response.data as { roles?: unknown });
+        const roles = Array.isArray(payload?.roles)
+          ? payload.roles.filter(
+              (role): role is string =>
+                typeof role === "string" && role.trim().length > 0
+            )
+          : [];
+
+        const session = {
+          authenticated: true,
+          roles,
+        };
+
+        this.hostSessionFingerprint = fingerprint;
+        this.hostSessionRoles = roles;
+        this.hostSessionAuthenticated = true;
+        this.hostSessionResolved = true;
+        return session;
+      })();
+
+      if (!options.force) {
+        inFlightHostSessionRequests.set(fingerprint, sessionRequest);
+      }
+
+      try {
+        return await sessionRequest;
+      } finally {
+        if (!options.force) {
+          inFlightHostSessionRequests.delete(fingerprint);
+        }
+      }
+    },
+
     async ensurePluginAccess(
       pluginId: string,
       options: { force?: boolean } = {}
     ) {
-      const token = Token.getToken();
-      const fingerprint = buildTokenFingerprint(token?.accessToken);
+      const fingerprint = getCurrentTokenFingerprint();
       const status = this.pluginAccessStates[pluginId] ?? "unknown";
       const requestKey = buildPluginAccessRequestKey(pluginId, fingerprint);
 
@@ -249,7 +362,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         if (getCurrentTokenFingerprint() === fingerprint) {
           return {
             status: this.pluginAccessStates[pluginId] ?? "unknown",
-            actions: this.pluginPermissions[pluginId] ?? [],
+            accessScope: this.pluginAccessScopes[pluginId] ?? null,
           };
         }
 
@@ -263,7 +376,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       ) {
         return {
           status,
-          actions: this.pluginPermissions[pluginId] ?? [],
+          accessScope: this.pluginAccessScopes[pluginId] ?? null,
         };
       }
 
@@ -278,18 +391,22 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         this.pluginAccessStates[pluginId] = "loading";
 
         try {
-          const res = await requestPluginAccessWithRetry(pluginId);
-          const actions =
-            res.data?.code === 0 ? (res.data.data?.actions ?? []) : [];
+          const session = await this.resolveHostSession(fingerprint, options);
 
           if (getCurrentTokenFingerprint() !== fingerprint) {
             return handoffToCurrentTokenAccess();
           }
 
-          this.pluginPermissions[pluginId] = actions;
+          const accessScope =
+            this.pluginAccessScopes[pluginId] ?? DEFAULT_ACCESS_SCOPE;
+          this.pluginAccessScopes[pluginId] = accessScope;
           this.pluginPermissionFingerprints[pluginId] = fingerprint;
-          this.pluginAccessStates[pluginId] =
-            actions.length > 0 ? "visible" : "forbidden";
+          this.pluginAccessStates[pluginId] = isVisibleForScope(
+            accessScope,
+            session
+          )
+            ? "visible"
+            : "forbidden";
         } catch (err) {
           const errorStatus = (err as { response?: { status?: number } })
             .response?.status;
@@ -299,27 +416,11 @@ export const usePluginSystemStore = defineStore("plugin-system", {
           }
 
           if (errorStatus === 401) {
-            try {
-              await probeHostSession();
-            } catch (hostErr) {
-              const hostErrorStatus = (
-                hostErr as { response?: { status?: number } }
-              ).response?.status;
-
-              if (hostErrorStatus === 401) {
-                throw hostErr;
-              }
-            }
-
-            if (getCurrentTokenFingerprint() !== fingerprint) {
-              return handoffToCurrentTokenAccess();
-            }
+            throw err;
           }
 
-          this.pluginPermissions[pluginId] = [];
           this.pluginPermissionFingerprints[pluginId] = fingerprint;
-          this.pluginAccessStates[pluginId] =
-            errorStatus === 403 ? "forbidden" : "degraded";
+          this.pluginAccessStates[pluginId] = "degraded";
         } finally {
           if (!options.force) {
             inFlightPluginAccessRequests.delete(requestKey);
@@ -328,7 +429,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
 
         return {
           status: this.pluginAccessStates[pluginId],
-          actions: this.pluginPermissions[pluginId] ?? [],
+          accessScope: this.pluginAccessScopes[pluginId] ?? null,
         };
       })();
 
@@ -414,10 +515,15 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         this.initialized = false;
         this.plugins = new Map();
         this.activePluginId = null;
-        this.pluginPermissions = {};
+        this.pluginAccessScopes = {};
         this.pluginAccessStates = {};
         this.pluginPermissionFingerprints = {};
+        this.hostSessionFingerprint = null;
+        this.hostSessionRoles = [];
+        this.hostSessionAuthenticated = false;
+        this.hostSessionResolved = false;
         inFlightPluginAccessRequests.clear();
+        inFlightHostSessionRequests.clear();
         await this.init();
       } catch (err: unknown) {
         this.error =

@@ -45,6 +45,7 @@
       "group": "builtins",
       "enabled": true,
       "order": 1,
+      "accessScope": "root-only",
       "allowedOrigin": "${PLUGIN_USER_MANAGEMENT_URL}",
       "version": "1.0.0"
     },
@@ -64,6 +65,7 @@
       "group": "builtins",
       "enabled": true,
       "order": 2,
+      "accessScope": "root-only",
       "allowedOrigin": "${PLUGIN_SYSTEM_ADMIN_URL}",
       "version": "1.0.0"
     }

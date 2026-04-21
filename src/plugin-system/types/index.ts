@@ -4,6 +4,7 @@ export type {
   PluginsConfig,
   MenuGroup,
   PluginPublicManifest,
+  PluginAccessScope,
 } from "./manifest";
 
 /** 插件运行状态 */
@@ -20,6 +21,7 @@ export interface PluginInfo {
   state: PluginState;
   enabled: boolean;
   order: number;
+  accessScope?: import("./manifest").PluginAccessScope;
   /** 最后一次错误信息 */
   lastError?: string;
 }

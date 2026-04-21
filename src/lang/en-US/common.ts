@@ -102,8 +102,6 @@ export default {
     scene: "Scene",
     selfCreated: "My Scenes",
     systemRecommend: "Recommended",
-    campusManagement: "Campus Management",
-    schoolManagement: "School Management",
     teacherManagement: "Teacher Management",
     studentManagement: "Student Management",
     adminCenter: "Admin Center",

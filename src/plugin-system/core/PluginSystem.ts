@@ -360,6 +360,7 @@ export class PluginSystem {
       state: "unloaded",
       enabled: manifest.enabled,
       order: manifest.order,
+      accessScope: manifest.accessScope,
     };
   }
 

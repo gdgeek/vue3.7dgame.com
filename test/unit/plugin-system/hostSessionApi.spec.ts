@@ -14,19 +14,25 @@ describe("hostSessionApi", () => {
     vi.resetModules();
   });
 
-  it("probes the host session through /v1/user/info", async () => {
-    const { probeHostSession } = await import(
+  it("verifies plugin host roles through /v1/plugin/verify-token", async () => {
+    const { verifyPluginHostSession } = await import(
       "@/plugin-system/services/hostSessionApi"
     );
 
-    await probeHostSession();
+    await verifyPluginHostSession();
 
     expect(mockRequestGet).toHaveBeenCalledWith(
-      "/v1/user/info",
+      "/v1/plugin/verify-token",
       expect.objectContaining({
         authScope: "host",
         skipErrorMessage: true,
       })
     );
+  });
+
+  it("does not expose the legacy /v1/user/info probe helper anymore", async () => {
+    const module = await import("@/plugin-system/services/hostSessionApi");
+
+    expect("probeHostSession" in module).toBe(false);
   });
 });
