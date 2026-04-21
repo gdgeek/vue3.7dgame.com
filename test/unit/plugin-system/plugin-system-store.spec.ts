@@ -280,9 +280,7 @@ describe("plugin-system store access-scope visibility", () => {
 
   it("deduplicates in-flight host session visibility checks for the same token", async () => {
     let resolveRequest:
-      | ((value: {
-          data: { code: number; data: { roles: string[] } };
-        }) => void)
+      | ((value: { data: { code: number; data: { roles: string[] } } }) => void)
       | undefined;
     const responsePromise = new Promise<{
       data: { code: number; data: { roles: string[] } };
@@ -319,14 +317,10 @@ describe("plugin-system store access-scope visibility", () => {
     );
 
     let resolveOldRequest:
-      | ((value: {
-          data: { code: number; data: { roles: string[] } };
-        }) => void)
+      | ((value: { data: { code: number; data: { roles: string[] } } }) => void)
       | undefined;
     let resolveNewRequest:
-      | ((value: {
-          data: { code: number; data: { roles: string[] } };
-        }) => void)
+      | ((value: { data: { code: number; data: { roles: string[] } } }) => void)
       | undefined;
 
     const oldDeferred = new Promise<{

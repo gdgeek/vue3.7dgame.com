@@ -16,10 +16,7 @@ import {
   Setting,
 } from "@element-plus/icons-vue";
 
-import type {
-  PluginAccessScope,
-  PluginManifest,
-} from "@/plugin-system/types";
+import type { PluginAccessScope, PluginManifest } from "@/plugin-system/types";
 import type { TabPaneName } from "element-plus";
 
 const store = usePluginSystemStore();

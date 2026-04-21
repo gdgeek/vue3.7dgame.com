@@ -51,9 +51,7 @@ function buildTokenFingerprint(accessToken?: string): string {
   return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
-function normalizeAccessScope(
-  value: unknown
-): PluginAccessScope {
+function normalizeAccessScope(value: unknown): PluginAccessScope {
   return value === "admin-only" ||
     value === "manager-only" ||
     value === "root-only"
@@ -127,7 +125,9 @@ function getCurrentTokenAwarePluginAccess(
     return {
       status,
       accessScope:
-        status === "loading" ? null : (state.pluginAccessScopes[pluginId] ?? null),
+        status === "loading"
+          ? null
+          : (state.pluginAccessScopes[pluginId] ?? null),
     };
   }
 
@@ -258,10 +258,12 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         this.initialized = true;
         this.config = pluginSystem.getConfig();
         const manifestAccessScopes = new Map(
-          (this.config?.plugins ?? []).map((plugin: { id: string; accessScope?: PluginAccessScope }) => [
-            plugin.id,
-            normalizeAccessScope(plugin.accessScope),
-          ])
+          (this.config?.plugins ?? []).map(
+            (plugin: { id: string; accessScope?: PluginAccessScope }) => [
+              plugin.id,
+              normalizeAccessScope(plugin.accessScope),
+            ]
+          )
         );
         const pluginsMap = new Map<string, PluginInfo>();
         for (const p of pluginSystem.getAllPlugins()) {
