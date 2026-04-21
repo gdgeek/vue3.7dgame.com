@@ -41,6 +41,7 @@ LB_HTTP_BLOCK=""
 #   $2 = LOC_PATH     location 路径（如 /api/ 或 /api-config/ 或 /api-domain/）
 #   $3 = PREFIX_NAME  Nginx 变量名前缀（如 api 或 domain）
 #   $4 = WITH_GEEK    是否包含 GEEK 自定义头和 WebSocket（yes/no）
+#   $5 = FAILOVER_STATUS_CODES  触发 failover 的状态码（可选，默认 502 503 504）
 #
 # 输出（通过全局变量）：
 #   LB_HTTP_BLOCK  += split_clients + map 块（http 层级）
@@ -51,6 +52,7 @@ generate_lb_config() {
   LOC_PATH="$2"
   PREFIX_NAME="$3"
   WITH_GEEK="$4"
+  FAILOVER_STATUS_CODES="${5:-502 503 504}"
 
   CHAIN_RESULT=""
 
@@ -293,7 +295,7 @@ ${GEEK_BLOCK}
 
         # Failover 到环形下一个后端
         proxy_intercept_errors on;
-        error_page 502 503 504 = @${PREFIX_NAME}_failover;
+        error_page ${FAILOVER_STATUS_CODES} = @${PREFIX_NAME}_failover;
     }
 
     # ============ 反向代理 - ${LOC_PATH} Failover ============
@@ -322,7 +324,9 @@ generate_lb_config "APP_API" "/api/" "api" "yes"
 API_LOCATIONS="$CHAIN_RESULT"
 
 # --- 2. 生成配置 API 负载均衡配置 ---
-generate_lb_config "APP_CONFIG" "/api-config/" "config" "yes"
+# api-config 鉴权依赖 system-admin 版本和主站 Host 上下文；线上双后端滚动期间，
+# 旧实例可能误判有效 token 为 401，因此这里对 401 做一次环形 failover。
+generate_lb_config "APP_CONFIG" "/api-config/" "config" "yes" "401 502 503 504"
 CONFIG_LOCATIONS="$CHAIN_RESULT"
 
 # --- 3. 生成域名信息 API 负载均衡配置 ---

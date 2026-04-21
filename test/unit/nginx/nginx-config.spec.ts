@@ -253,7 +253,18 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
   });
 
   it("uses error_page for failover chaining", () => {
-    expect(entrypointScript).toContain("error_page 502 503 504");
+    expect(entrypointScript).toContain(
+      'FAILOVER_STATUS_CODES="${5:-502 503 504}"'
+    );
+    expect(entrypointScript).toContain(
+      "error_page ${FAILOVER_STATUS_CODES} = @${PREFIX_NAME}_failover;"
+    );
+  });
+
+  it("retries api-config on 401 to tolerate stale auth backends", () => {
+    expect(entrypointScript).toContain(
+      'generate_lb_config "APP_CONFIG" "/api-config/" "config" "yes" "401 502 503 504"'
+    );
   });
 
   it("uses proxy_connect_timeout 5s for fast failover", () => {
