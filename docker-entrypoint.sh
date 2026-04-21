@@ -133,6 +133,8 @@ generate_lb_config() {
         # HTTPS 上游：启用 SNI
         proxy_ssl_server_name on;
         proxy_set_header Host ${host};
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Original-Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
@@ -278,6 +280,8 @@ map \$${PREFIX_NAME}_pool \$${PREFIX_NAME}_fb_host {"
         # HTTPS 上游：启用 SNI
         proxy_ssl_server_name on;
         proxy_set_header Host \$${PREFIX_NAME}_backend_host;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Original-Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
@@ -300,6 +304,8 @@ ${GEEK_BLOCK}
         # HTTPS 上游：启用 SNI
         proxy_ssl_server_name on;
         proxy_set_header Host \$${PREFIX_NAME}_fb_host;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Original-Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;

@@ -232,6 +232,11 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("proxy_set_header Host ${host}");
   });
 
+  it("preserves the original request host for upstream auth context", () => {
+    expect(entrypointScript).toContain("proxy_set_header X-Forwarded-Host \\$host");
+    expect(entrypointScript).toContain("proxy_set_header X-Original-Host \\$host");
+  });
+
   it("includes GEEK custom headers in generated locations", () => {
     expect(entrypointScript).toContain("X-GEEK-Proxy");
     expect(entrypointScript).toContain("X-GEEK-Real-IP");
