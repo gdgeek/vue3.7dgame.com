@@ -10,6 +10,7 @@ import type {
 } from "@/plugin-system";
 import { verifyPluginHostSession } from "@/plugin-system/services/hostSessionApi";
 import Token from "@/store/modules/token";
+import { useUserStore } from "@/store/modules/user";
 
 type PluginAccessState =
   | "unknown"
@@ -67,6 +68,17 @@ function isStableAccessState(
 
 function getCurrentTokenFingerprint() {
   return buildTokenFingerprint(Token.getToken()?.accessToken);
+}
+
+function getKnownHostRoles(): string[] | null {
+  const roles = useUserStore().userInfo?.roles;
+  if (!Array.isArray(roles)) {
+    return null;
+  }
+
+  return roles.filter(
+    (role): role is string => typeof role === "string" && role.trim().length > 0
+  );
 }
 
 function isVisibleForScope(
@@ -316,27 +328,46 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       }
 
       const sessionRequest = (async (): Promise<HostSessionSnapshot> => {
-        const response = await verifyPluginHostSession();
-        const payload =
-          (response.data as { data?: { roles?: unknown } }).data ??
-          (response.data as { roles?: unknown });
-        const roles = Array.isArray(payload?.roles)
-          ? payload.roles.filter(
-              (role): role is string =>
-                typeof role === "string" && role.trim().length > 0
-            )
-          : [];
+        try {
+          const response = await verifyPluginHostSession();
+          const payload =
+            (response.data as { data?: { roles?: unknown } }).data ??
+            (response.data as { roles?: unknown });
+          const roles = Array.isArray(payload?.roles)
+            ? payload.roles.filter(
+                (role): role is string =>
+                  typeof role === "string" && role.trim().length > 0
+              )
+            : [];
 
-        const session = {
-          authenticated: true,
-          roles,
-        };
+          const session = {
+            authenticated: true,
+            roles,
+          };
 
-        this.hostSessionFingerprint = fingerprint;
-        this.hostSessionRoles = roles;
-        this.hostSessionAuthenticated = true;
-        this.hostSessionResolved = true;
-        return session;
+          this.hostSessionFingerprint = fingerprint;
+          this.hostSessionRoles = roles;
+          this.hostSessionAuthenticated = true;
+          this.hostSessionResolved = true;
+          return session;
+        } catch (err) {
+          const errorStatus = (err as { response?: { status?: number } })
+            .response?.status;
+
+          if (errorStatus === 403) {
+            const deniedSession = {
+              authenticated: false,
+              roles: [] as string[],
+            };
+            this.hostSessionFingerprint = fingerprint;
+            this.hostSessionRoles = deniedSession.roles;
+            this.hostSessionAuthenticated = deniedSession.authenticated;
+            this.hostSessionResolved = true;
+            return deniedSession;
+          }
+
+          throw err;
+        }
       })();
 
       if (!options.force) {
@@ -382,6 +413,26 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         };
       }
 
+      const accessScope =
+        this.pluginAccessScopes[pluginId] ?? DEFAULT_ACCESS_SCOPE;
+      const knownRoles = getKnownHostRoles();
+      if (knownRoles !== null) {
+        const knownSession = {
+          authenticated: Boolean(Token.getToken()?.accessToken),
+          roles: knownRoles,
+        };
+
+        if (!isVisibleForScope(accessScope, knownSession)) {
+          this.pluginAccessScopes[pluginId] = accessScope;
+          this.pluginPermissionFingerprints[pluginId] = fingerprint;
+          this.pluginAccessStates[pluginId] = "forbidden";
+          return {
+            status: "forbidden",
+            accessScope,
+          };
+        }
+      }
+
       if (!options.force) {
         const inFlightRequest = inFlightPluginAccessRequests.get(requestKey);
         if (inFlightRequest) {
@@ -399,8 +450,6 @@ export const usePluginSystemStore = defineStore("plugin-system", {
             return handoffToCurrentTokenAccess();
           }
 
-          const accessScope =
-            this.pluginAccessScopes[pluginId] ?? DEFAULT_ACCESS_SCOPE;
           this.pluginAccessScopes[pluginId] = accessScope;
           this.pluginPermissionFingerprints[pluginId] = fingerprint;
           this.pluginAccessStates[pluginId] = isVisibleForScope(

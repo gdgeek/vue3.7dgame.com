@@ -12,6 +12,8 @@ vi.mock("@/utils/request", () => ({
 describe("ConfigService", () => {
   beforeEach(() => {
     mockGet.mockReset();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it("loads plugin config without sending a domain query parameter", async () => {
@@ -33,6 +35,26 @@ describe("ConfigService", () => {
       })
     );
     expect(mockGet.mock.calls[0]?.[1]?.params).toBeUndefined();
+  });
+
+  it("adds a time query parameter when loading local plugins config", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        version: "1.0.0",
+        menuGroups: [],
+        plugins: [],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(Date, "now").mockReturnValue(1712345678901);
+
+    const service = new ConfigService();
+    await service.loadLocalConfig();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/config/plugins.json?time=1712345678901"
+    );
   });
 
   it("normalizes blank plugin metadata required by the host registry", async () => {

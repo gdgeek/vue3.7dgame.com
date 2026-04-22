@@ -19,6 +19,10 @@ const EMPTY_CONFIG: PluginsConfig = {
   plugins: [],
 };
 
+function buildLocalConfigUrl(): string {
+  return `/config/plugins.json?time=${Date.now()}`;
+}
+
 function deriveOriginFromUrl(url: string): string | undefined {
   try {
     return new URL(url).origin;
@@ -146,7 +150,7 @@ export class ConfigService {
   /** 从本地 /config/plugins.json 加载基础插件配置 */
   async loadLocalConfig(): Promise<PluginsConfig> {
     try {
-      const response = await fetch("/config/plugins.json");
+      const response = await fetch(buildLocalConfigUrl());
       if (!response.ok) {
         logger.warn(
           `Local plugins.json not found (${response.status}), skipping`
