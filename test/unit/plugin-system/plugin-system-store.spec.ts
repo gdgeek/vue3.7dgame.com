@@ -382,4 +382,45 @@ describe("plugin-system store access-scope visibility", () => {
 
     expect(mockVerifyPluginHostSession).toHaveBeenCalledTimes(1);
   });
+
+  it("denies scoped plugins from known host roles without probing verify-token", async () => {
+    const { useUserStore } = await import("@/store/modules/user");
+    const userStore = useUserStore();
+    userStore.userInfo = {
+      id: 7,
+      roles: ["user"],
+    } as NonNullable<typeof userStore.userInfo>;
+
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    await expect(store.ensureAllEnabledPluginAccess()).resolves.toBeUndefined();
+
+    expect(mockVerifyPluginHostSession).not.toHaveBeenCalled();
+    expect(store.pluginAccessStates["user-management"]).toBe("forbidden");
+    expect(store.pluginAccessStates["system-admin"]).toBe("forbidden");
+  });
+
+  it("treats forbidden host session probes as a stable denied plugin session", async () => {
+    const hostError = { response: { status: 403 }, message: "forbidden" };
+    mockVerifyPluginHostSession.mockRejectedValueOnce(hostError);
+
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
+    const store = usePluginSystemStore();
+
+    await store.init();
+
+    await expect(store.ensureAllEnabledPluginAccess()).resolves.toBeUndefined();
+
+    expect(mockVerifyPluginHostSession).toHaveBeenCalledTimes(1);
+    expect(store.pluginAccessStates["user-management"]).toBe("forbidden");
+    expect(store.pluginAccessStates["system-admin"]).toBe("forbidden");
+    expect(store.pluginsByGroup.get("admin")).toBeUndefined();
+  });
 });
