@@ -55,7 +55,7 @@
         <template #grid-card="{ item }">
           <StandardCard
             :image="getPictureThumbnailUrl(item)"
-            image-fit="contain"
+            :aspect-ratio="getPictureAspectRatio(item)"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :placeholder-icon="['fas', 'image']"
@@ -211,6 +211,7 @@ import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
 import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
+  getAspectRatioFromInfo,
 } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
@@ -345,6 +346,9 @@ const detailProperties = computed(() => {
 const getPictureThumbnailUrl = (item: ResourceInfo) => {
   return toHttps(item.file?.url || item.image?.url || "");
 };
+
+const getPictureAspectRatio = (item: ResourceInfo) =>
+  getAspectRatioFromInfo(item.info);
 
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;

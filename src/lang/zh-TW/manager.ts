@@ -29,11 +29,10 @@ export default {
       removeConfirmTitle: "移除確認",
     },
     defaultClassName: "新班級",
-    schoolManagement: "學校管理",
     teacherManagement: "教師管理",
     studentManagement: "學生管理",
     school: {
-      principal: "學校管理員",
+      principal: "負責人",
       address: "地址",
       description: "描述",
       classList: "班級列表",
@@ -69,11 +68,11 @@ export default {
       phone: "電話",
     },
     principal: {
-      assign: "分配學校管理員",
+      assign: "分配負責人",
       selectUser: "選擇用戶",
       select: "選擇",
-      assignSuccess: "學校管理員分配成功",
-      assignFailed: "學校管理員分配失敗",
+      assignSuccess: "負責人分配成功",
+      assignFailed: "負責人分配失敗",
       username: "用戶名",
       nickname: "暱稱",
     },
@@ -107,7 +106,7 @@ export default {
       updateSuccess: "學校更新成功",
       updateFailed: "學校更新失敗",
       deleteFailed: "學校刪除失敗",
-      clearPrincipalConfirm: "確認要清空學校管理員嗎？",
+      clearPrincipalConfirm: "確認要清空負責人嗎？",
     },
     creator: {
       form: {

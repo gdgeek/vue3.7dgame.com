@@ -30,11 +30,10 @@ export default {
       removeConfirmTitle: "ยืนยันการนำออก",
     },
     defaultClassName: "ชั้นเรียนใหม่",
-    schoolManagement: "การจัดการโรงเรียน",
     teacherManagement: "การจัดการครู",
     studentManagement: "การจัดการนักเรียน",
     school: {
-      principal: "ผู้ดูแลโรงเรียน",
+      principal: "ผู้รับผิดชอบ",
       address: "ที่อยู่",
       description: "คำอธิบาย",
       classList: "รายชื่อชั้นเรียน",
@@ -70,11 +69,11 @@ export default {
       phone: "โทรศัพท์",
     },
     principal: {
-      assign: "มอบหมายผู้ดูแลโรงเรียน",
+      assign: "มอบหมายผู้รับผิดชอบ",
       selectUser: "เลือกผู้ใช้",
       select: "เลือก",
-      assignSuccess: "มอบหมายผู้ดูแลโรงเรียนสำเร็จ",
-      assignFailed: "การมอบหมายผู้ดูแลโรงเรียนล้มเหลว",
+      assignSuccess: "มอบหมายผู้รับผิดชอบสำเร็จ",
+      assignFailed: "การมอบหมายผู้รับผิดชอบล้มเหลว",
       username: "ชื่อผู้ใช้",
       nickname: "ชื่อเล่น",
     },
@@ -108,7 +107,7 @@ export default {
       updateSuccess: "อัปเดตโรงเรียนสำเร็จ",
       updateFailed: "การอัปเดตโรงเรียนล้มเหลว",
       deleteFailed: "การลบโรงเรียนล้มเหลว",
-      clearPrincipalConfirm: "คุณแน่ใจหรือไม่ว่าต้องการล้างผู้ดูแลโรงเรียน?",
+      clearPrincipalConfirm: "คุณแน่ใจหรือไม่ว่าต้องการล้างผู้รับผิดชอบ?",
     },
     creator: {
       form: {

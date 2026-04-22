@@ -232,6 +232,15 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("proxy_set_header Host ${host}");
   });
 
+  it("preserves the original request host for upstream auth context", () => {
+    expect(entrypointScript).toContain(
+      "proxy_set_header X-Forwarded-Host \\$host"
+    );
+    expect(entrypointScript).toContain(
+      "proxy_set_header X-Original-Host \\$host"
+    );
+  });
+
   it("includes GEEK custom headers in generated locations", () => {
     expect(entrypointScript).toContain("X-GEEK-Proxy");
     expect(entrypointScript).toContain("X-GEEK-Real-IP");
@@ -244,7 +253,18 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
   });
 
   it("uses error_page for failover chaining", () => {
-    expect(entrypointScript).toContain("error_page 502 503 504");
+    expect(entrypointScript).toContain(
+      'FAILOVER_STATUS_CODES="${5:-502 503 504}"'
+    );
+    expect(entrypointScript).toContain(
+      "error_page ${FAILOVER_STATUS_CODES} = @${PREFIX_NAME}_failover;"
+    );
+  });
+
+  it("retries api-config on 401 to tolerate stale auth backends", () => {
+    expect(entrypointScript).toContain(
+      'generate_lb_config "APP_CONFIG" "/api-config/" "config" "yes" "401 502 503 504"'
+    );
   });
 
   it("uses proxy_connect_timeout 5s for fast failover", () => {

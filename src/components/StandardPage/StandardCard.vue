@@ -30,7 +30,7 @@
     </div>
 
     <!-- Thumbnail Area -->
-    <div class="card-thumbnail" :style="{ aspectRatio }" @click="$emit('view')">
+    <div class="card-thumbnail" :style="thumbnailStyle" @click="$emit('view')">
       <div class="thumbnail-inner">
         <div v-if="thumbnailVariant === 'audio'" class="audio-thumbnail">
           <div class="audio-thumbnail-badge">
@@ -44,6 +44,7 @@
           :src="image"
           :alt="title"
           :style="thumbnailImageStyle"
+          @load="handleImageLoad"
         />
         <div v-else class="thumbnail-placeholder">
           <font-awesome-icon :icon="placeholderIcon"></font-awesome-icon>
@@ -107,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -144,7 +145,6 @@ const props = withDefaults(
     selectionMode: false,
     typeIcon: "",
     showCheckbox: true,
-    aspectRatio: "1 / 1",
     imageFit: "cover",
     thumbnailVariant: "default",
     containPadding: true,
@@ -160,6 +160,8 @@ const emit = defineEmits<{
 
 const isHovered = ref(false);
 const isSelected = computed(() => props.selected);
+const fallbackAspectRatio = "1 / 1";
+const resolvedAspectRatio = ref(props.aspectRatio || fallbackAspectRatio);
 const thumbnailImageStyle = computed(() => ({
   objectFit: props.imageFit,
   padding:
@@ -173,8 +175,39 @@ const thumbnailImageStyle = computed(() => ({
       ? `scale(${props.containScale})`
       : undefined,
 }));
+const thumbnailStyle = computed(() => ({
+  aspectRatio: resolvedAspectRatio.value,
+}));
 
 const displayTags = computed(() => props.tags?.slice(0, 2) || []);
+
+watch(
+  () => props.aspectRatio,
+  (value) => {
+    resolvedAspectRatio.value = value || fallbackAspectRatio;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.image,
+  () => {
+    if (!props.aspectRatio) {
+      resolvedAspectRatio.value = fallbackAspectRatio;
+    }
+  }
+);
+
+const handleImageLoad = (event: Event) => {
+  if (props.aspectRatio) return;
+
+  const image = event.target as HTMLImageElement | null;
+  if (!image) return;
+
+  if (image.naturalWidth <= 0 || image.naturalHeight <= 0) return;
+
+  resolvedAspectRatio.value = `${image.naturalWidth} / ${image.naturalHeight}`;
+};
 
 const toggleSelect = () => {
   emit("select", !isSelected.value);
@@ -189,7 +222,10 @@ const toggleSelect = () => {
   overflow: hidden;
   background: var(--bg-card, #fff);
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-lg, 24px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   transition: all var(--transition-normal, 0.2s ease);
 
   &:hover {
@@ -279,7 +315,6 @@ const toggleSelect = () => {
 // ===== Thumbnail =====
 .card-thumbnail {
   position: relative;
-  aspect-ratio: 1 / 1;
   overflow: hidden;
   cursor: pointer;
 }
@@ -374,7 +409,10 @@ const toggleSelect = () => {
   cursor: pointer;
   background: var(--bg-card, #fff);
   border: none;
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   box-shadow: var(--shadow-md, 0 4px 12px rgb(0 0 0 / 15%));
   transition: all var(--transition-fast, 0.15s ease);
   transform: translateY(10px);
@@ -410,7 +448,10 @@ const toggleSelect = () => {
   color: var(--text-primary, #1e293b);
   background: var(--bg-card, #fff);
   backdrop-filter: blur(4px);
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   opacity: 0.9;
 }
 
@@ -419,7 +460,10 @@ const toggleSelect = () => {
   font-size: 12px;
   color: #fff;
   background: var(--bg-overlay, rgb(0 0 0 / 50%));
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
 }
 
 // ===== Content Area =====

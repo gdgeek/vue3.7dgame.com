@@ -17,6 +17,7 @@ export type { PluginLoadOptions } from "./core/PluginLoader";
 
 // Re-export types for convenience
 export type {
+  PluginAccessScope,
   PluginState,
   PluginInfo,
   PluginMessage,

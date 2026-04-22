@@ -69,9 +69,9 @@ function checkPermission(pluginName, action) {
 }
 
 // 使用示例
-app.get('/api/classes',
+app.get('/api/users',
   authMiddleware,
-  checkPermission('school-management', 'manage-class'),
+  checkPermission('user-management', 'manage-users'),
   (req, res) => {
     // req.user 包含用户信息
     res.json({ user: req.user, data: [] });
@@ -151,13 +151,13 @@ http://xrugc-main-api/v1/plugin/check-permission
 - 仅 root 角色可访问
 - 配置项：角色/权限名称 + 插件标识 + 操作标识
 
-例如，允许 `admin` 角色在 `school-management` 插件中执行 `manage-class` 操作：
+例如，允许 `admin` 角色在 `user-management` 插件中执行 `manage-users` 操作：
 
 | role_or_permission | plugin_name | action |
 |---|---|---|
-| admin | school-management | manage-class |
-| teacher | school-management | view-class |
 | admin | user-management | manage-users |
+| teacher | user-management | view-users |
+| root | system-admin | manage-plugins |
 
 ## 注意事项
 

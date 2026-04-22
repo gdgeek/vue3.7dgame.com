@@ -433,7 +433,10 @@ onUnmounted(() => {
   width: 100%;
   overflow: hidden;
   background: var(--bg-secondary, #f1f5f9);
-  border-radius: var(--radius-lg, 16px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
 
   :deep(img),
   :deep(video) {
@@ -669,7 +672,10 @@ onUnmounted(() => {
   font-size: 16px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
-  border-radius: 26px !important;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  ) !important;
 }
 
 .panel-actions :deep(.actions-row) {
@@ -689,7 +695,10 @@ onUnmounted(() => {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   transition: all var(--transition-fast, 0.15s ease);
 }
 
@@ -815,7 +824,10 @@ onUnmounted(() => {
   cursor: pointer;
   background: var(--primary-color, #03a9f4);
   border: none;
-  border-radius: 26px;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   box-shadow: 0 4px 12px var(--primary-light, rgb(3 169 244 / 25%));
   transition: all var(--transition-normal, 0.2s ease);
 
@@ -843,7 +855,10 @@ onUnmounted(() => {
   cursor: pointer;
   background: var(--bg-card, #fff);
   border: 1.5px solid var(--border-color, #e2e8f0);
-  border-radius: 19px;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {
@@ -870,7 +885,10 @@ onUnmounted(() => {
   cursor: pointer;
   background: transparent;
   border: none;
-  border-radius: 19px;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   transition: all var(--transition-fast, 0.15s ease);
 
   &:hover {

@@ -25,6 +25,19 @@ const VALID_TRANSITIONS: ReadonlyMap<
   ["error", new Set(["loading", "unloaded"])],
 ]);
 
+function isCurrentHostAllowed(manifest: PluginManifest): boolean {
+  const allowedHostOrigins =
+    manifest.allowedHostOrigins
+      ?.map((origin) => origin.trim())
+      .filter((origin) => origin !== "") ?? [];
+
+  if (allowedHostOrigins.length === 0) {
+    return true;
+  }
+
+  return allowedHostOrigins.includes(window.location.origin);
+}
+
 /**
  * PluginSystem — 核心协调器
  *
@@ -194,6 +207,13 @@ export class PluginSystem {
     this.transitionState(pluginId, "loading");
 
     try {
+      if (!isCurrentHostAllowed(manifest)) {
+        const errorMessage = `Current host origin "${window.location.origin}" is not allowed for plugin "${pluginId}"`;
+        this.transitionState(pluginId, "error", errorMessage);
+        logger.warn(errorMessage);
+        return;
+      }
+
       const loaded = await this.loader.load(
         pluginId,
         manifest,
@@ -340,6 +360,7 @@ export class PluginSystem {
       state: "unloaded",
       enabled: manifest.enabled,
       order: manifest.order,
+      accessScope: manifest.accessScope,
     };
   }
 

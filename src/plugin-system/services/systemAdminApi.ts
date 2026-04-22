@@ -25,26 +25,10 @@ interface SystemAdminPluginListResponse {
   data?: unknown;
 }
 
-interface SystemAdminAllowedActionsResponse {
-  code?: number;
-  data?: {
-    actions?: string[];
-  };
-}
-
 export function getSystemAdminPluginList(): Promise<
   AxiosResponse<SystemAdminPluginListResponse>
 > {
   return getSystemAdmin("/v1/plugin/list", {
-    skipErrorMessage: true,
-  });
-}
-
-export function getSystemAdminAllowedActions(
-  pluginName: string
-): Promise<AxiosResponse<SystemAdminAllowedActionsResponse>> {
-  return getSystemAdmin("/v1/plugin/allowed-actions", {
-    params: { plugin_name: pluginName },
     skipErrorMessage: true,
   });
 }

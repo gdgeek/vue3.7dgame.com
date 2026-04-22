@@ -666,7 +666,7 @@ export interface AppleIdReturn {
 ### 优先级高（Edu 教育模块）
 
 1. **edu-school.ts**（5 个 any）
-   - 学校管理 API
+   - 教育组织 API
    - 需要创建 `types/edu/school.ts`
 
 2. **edu-student.ts**（5 个 any）

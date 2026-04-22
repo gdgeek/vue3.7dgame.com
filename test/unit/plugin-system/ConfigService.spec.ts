@@ -42,6 +42,7 @@ function makePlugin(overrides: Partial<PluginManifest> = {}): PluginManifest {
     enabled: true,
     order: 1,
     allowedOrigin: "https://test.example.com",
+    accessScope: "auth-only",
     version: "1.0.0",
     ...overrides,
   };
@@ -121,6 +122,90 @@ describe("ConfigService", () => {
   });
 
   describe("loadConfig", () => {
+    it("should derive allowedOrigin from url when local plugins.json omits it", async () => {
+      const localConfig = makeConfig({
+        plugins: [
+          {
+            ...makePlugin(),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            allowedOrigin: undefined as any,
+            url: "https://local.example.com/app/index.html",
+          },
+        ],
+      });
+      mockLocalFetch(localConfig);
+      mockApiConfig({ version: "0.0.0", menuGroups: [], plugins: [] });
+
+      const result = await service.loadConfig();
+
+      expect(result.plugins).toHaveLength(1);
+      expect(result.plugins[0].allowedOrigin).toBe("https://local.example.com");
+      expect(result.plugins[0].accessScope).toBe("auth-only");
+    });
+
+    it("should derive allowedOrigin from url when API config omits it", async () => {
+      mockLocalFetch({ version: "0.0.0", menuGroups: [], plugins: [] });
+      mockApiConfig(
+        makeConfig({
+          plugins: [
+            {
+              ...makePlugin(),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              allowedOrigin: undefined as any,
+              url: "https://api.example.com/embedded/plugin",
+            },
+          ],
+        })
+      );
+
+      const result = await service.loadConfig();
+
+      expect(result.plugins).toHaveLength(1);
+      expect(result.plugins[0].allowedOrigin).toBe("https://api.example.com");
+      expect(result.plugins[0].accessScope).toBe("auth-only");
+    });
+
+    it("should default plugin accessScope to auth-only when omitted by API", async () => {
+      mockLocalFetch({ version: "0.0.0", menuGroups: [], plugins: [] });
+      mockApiConfig(
+        makeConfig({
+          plugins: [
+            {
+              ...makePlugin(),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              accessScope: undefined as any,
+            },
+          ],
+        })
+      );
+
+      const result = await service.loadConfig();
+
+      expect(result.plugins[0].accessScope).toBe("auth-only");
+    });
+
+    it("should let local accessScope override API accessScope for the same plugin id", async () => {
+      const apiPlugin = makePlugin({
+        id: "shared",
+        name: "API Name",
+        accessScope: "auth-only",
+      });
+      mockApiConfig(makeConfig({ plugins: [apiPlugin] }));
+
+      const localPlugin = makePlugin({
+        id: "shared",
+        name: "Local Name",
+        accessScope: "root-only",
+      });
+      mockLocalFetch(makeConfig({ plugins: [localPlugin] }));
+
+      const result = await service.loadConfig();
+
+      expect(result.plugins).toHaveLength(1);
+      expect(result.plugins[0].name).toBe("Local Name");
+      expect(result.plugins[0].accessScope).toBe("root-only");
+    });
+
     it("should return local config when API has no plugins", async () => {
       const localConfig = makeConfig();
       mockLocalFetch(localConfig);

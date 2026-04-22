@@ -86,6 +86,20 @@ export class PluginRegistry {
       }
     }
 
+    if (manifest.allowedHostOrigins !== undefined) {
+      if (!Array.isArray(manifest.allowedHostOrigins)) {
+        errors.push('Field "allowedHostOrigins" must be an array');
+      } else {
+        manifest.allowedHostOrigins.forEach((origin, index) => {
+          if (typeof origin !== "string" || origin.trim() === "") {
+            errors.push(
+              `Field "allowedHostOrigins[${index}]" must be a non-empty string`
+            );
+          }
+        });
+      }
+    }
+
     return { valid: errors.length === 0, errors };
   }
 }

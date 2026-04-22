@@ -101,8 +101,6 @@ export default {
     scene: "場景",
     selfCreated: "我的創作",
     systemRecommend: "系統推薦",
-    campusManagement: "校園管理",
-    schoolManagement: "學校管理",
     teacherManagement: "老師管理",
     studentManagement: "學生管理",
     adminCenter: "管理中心",

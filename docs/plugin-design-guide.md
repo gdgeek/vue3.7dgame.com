@@ -771,19 +771,19 @@ $navbar-height: 64px;
 
 ## 11. 实际案例
 
-### 11.1 学校管理系统前端
+### 11.1 用户管理插件前端
 
-**位置：** `plugins/school-management-system/frontend/`
+**位置：** `plugins/user-management/`
 
 **特点：**
-- 使用 AdminLTE 风格的配色（蓝色主题）
-- 简洁的表格和列表设计
-- 响应式布局支持移动端
+- 使用 Element Plus 风格的后台配色和表单布局
+- 包含列表、批量创建、权限视图等典型后台场景
+- 保持与主框架一致的 iframe 嵌入式交互
 
 **关键文件：**
-- `src/style.css` - 全局样式和 Element Plus 主题覆盖
-- `src/App.vue` - 应用布局结构
-- `src/components/common/` - 通用组件
+- `src/styles/index.css` - 全局样式和主题变量适配
+- `src/layout/AppLayout.vue` - 应用布局结构
+- `src/views/UserList.vue` - 列表页参考实现
 
 ### 11.2 计数器插件
 
@@ -853,7 +853,7 @@ A: 确保使用兼容的版本。主系统使用 Element Plus 2.x，建议插件
 
 ### 参考实现
 
-- **学校管理系统：** `plugins/school-management-system/frontend/`
+- **用户管理插件：** `plugins/user-management/`
 - **计数器插件：** `plugins/counter-plugin/`
 
 ### 文档

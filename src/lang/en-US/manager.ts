@@ -30,12 +30,11 @@ export default {
       removeConfirmTitle: "Remove Confirmation",
     },
     defaultClassName: "New Class",
-    schoolManagement: "School Management",
     classManagement: "Class Management",
     teacherManagement: "Teacher Management",
     studentManagement: "Student Management",
     school: {
-      principal: "School Administrator",
+      principal: "Lead",
       address: "Address",
       description: "Description",
       classList: "Class List",
@@ -81,11 +80,11 @@ export default {
       phone: "Phone",
     },
     principal: {
-      assign: "Assign School Administrator",
+      assign: "Assign Lead",
       selectUser: "Select User",
       select: "Select",
-      assignSuccess: "School administrator assigned successfully",
-      assignFailed: "Failed to assign school administrator",
+      assignSuccess: "Lead assigned successfully",
+      assignFailed: "Failed to assign lead",
       username: "Username",
       nickname: "Nickname",
     },
@@ -119,8 +118,7 @@ export default {
       updateSuccess: "School updated successfully",
       updateFailed: "Failed to update school",
       deleteFailed: "Failed to delete school",
-      clearPrincipalConfirm:
-        "Are you sure you want to clear the school administrator?",
+      clearPrincipalConfirm: "Are you sure you want to clear the lead?",
     },
     creator: {
       form: {

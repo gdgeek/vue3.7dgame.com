@@ -1,3 +1,9 @@
+export type PluginAccessScope =
+  | "auth-only"
+  | "admin-only"
+  | "manager-only"
+  | "root-only";
+
 /**
  * 插件自报元数据 —— 由插件自身在 `public/plugin-manifest.json` 中声明。
  * ConfigService 加载基础配置后会并行 fetch 各插件的此文件，
@@ -44,8 +50,12 @@ export interface PluginManifest {
   enabled: boolean;
   /** 排序权重（越小越靠前） */
   order: number;
+  /** 宿主菜单可见性范围 */
+  accessScope?: PluginAccessScope;
   /** 允许的 PostMessage origin（用于安全校验） */
   allowedOrigin: string;
+  /** 允许嵌入当前插件的主站 origin 白名单（可选，留空表示不限制） */
+  allowedHostOrigins?: string[];
   /** 插件版本 */
   version: string;
   /** iframe sandbox 属性（可选，默认 'allow-scripts allow-same-origin'） */

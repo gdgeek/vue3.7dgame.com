@@ -26,6 +26,7 @@ const mockStore = {
         state: "unloaded",
         enabled: true,
         order: 1,
+        accessScope: "auth-only",
       },
     ],
     [
@@ -40,6 +41,7 @@ const mockStore = {
         state: "unloaded",
         enabled: true,
         order: 2,
+        accessScope: "auth-only",
       },
     ],
     [
@@ -54,6 +56,7 @@ const mockStore = {
         state: "unloaded",
         enabled: true,
         order: 3,
+        accessScope: "root-only",
       },
     ],
     [
@@ -68,6 +71,7 @@ const mockStore = {
         state: "unloaded",
         enabled: true,
         order: 4,
+        accessScope: "manager-only",
       },
     ],
     [
@@ -82,17 +86,18 @@ const mockStore = {
         state: "unloaded",
         enabled: true,
         order: 5,
+        accessScope: "admin-only",
       },
     ],
   ]),
   menuGroups: [],
   enabledPlugins: [],
-  pluginPermissions: {
-    "unknown-plugin": [],
-    "loading-plugin": [],
-    "forbidden-plugin": [],
-    "degraded-plugin": [],
-    "visible-plugin": ["view"],
+  pluginAccessScopes: {
+    "unknown-plugin": "auth-only",
+    "loading-plugin": "auth-only",
+    "forbidden-plugin": "root-only",
+    "degraded-plugin": "manager-only",
+    "visible-plugin": "admin-only",
   },
   pluginAccessStates: {
     "unknown-plugin": "unknown",
@@ -101,12 +106,12 @@ const mockStore = {
     "degraded-plugin": "degraded",
     "visible-plugin": "visible",
   },
-  currentTokenPluginPermissions: {
-    "unknown-plugin": [],
-    "loading-plugin": [],
-    "forbidden-plugin": [],
-    "degraded-plugin": [],
-    "visible-plugin": ["view"],
+  currentTokenPluginAccessScopes: {
+    "unknown-plugin": null,
+    "loading-plugin": null,
+    "forbidden-plugin": "root-only",
+    "degraded-plugin": "manager-only",
+    "visible-plugin": "admin-only",
   },
   currentTokenPluginAccessStates: {
     "unknown-plugin": "unknown",
@@ -312,20 +317,20 @@ describe("plugin-system/views/PluginDebug.vue", () => {
     for (const node of findTagsByText(el, "服务降级")) {
       expect(node.getAttribute("data-type")).toBe("warning");
     }
-    for (const node of findTagsByText(el, "view")) {
+    for (const node of findTagsByText(el, "可见: admin-only")) {
       expect(node.getAttribute("data-type")).toBe("success");
     }
   });
 
-  it("renders current-token-aware permission state instead of stale raw cache", async () => {
-    mockStore.pluginPermissions["visible-plugin"] = ["view"];
+  it("renders current-token-aware access scope state instead of stale raw cache", async () => {
+    mockStore.pluginAccessScopes["visible-plugin"] = "admin-only";
     mockStore.pluginAccessStates["visible-plugin"] = "visible";
-    mockStore.currentTokenPluginPermissions["visible-plugin"] = [];
+    mockStore.currentTokenPluginAccessScopes["visible-plugin"] = null;
     mockStore.currentTokenPluginAccessStates["visible-plugin"] = "unknown";
 
     const { el } = await mountView();
 
     expect(el.textContent).toContain("未获取");
-    expect(el.textContent).not.toContain("view");
+    expect(el.textContent).not.toContain("可见: admin-only");
   });
 });

@@ -54,7 +54,7 @@
       >
         <template #grid-card="{ item }">
           <StandardCard
-            thumbnail-variant="audio"
+            :image="item.image?.url || getDefaultAvatarUrl(item.id, 'thumbs')"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :selected="isSelected(item.id)"
@@ -74,12 +74,11 @@
             ></el-checkbox>
           </div>
           <div class="col-name">
-            <div class="item-thumb item-thumb-audio">
-              <div class="item-thumb-audio-badge">
-                <font-awesome-icon
-                  :icon="['fas', 'headphones']"
-                ></font-awesome-icon>
-              </div>
+            <div class="item-thumb">
+              <img
+                :src="item.image?.url || getDefaultAvatarUrl(item.id, 'thumbs')"
+                :alt="item.name"
+              />
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
           </div>
@@ -211,6 +210,7 @@ import {
   getResourceFormat,
 } from "@/utils/utilityFunctions";
 import { toHttps } from "@/utils/helper";
+import { getDefaultAvatarUrl } from "@/utils/avatar";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
 import {
   denseResourceBreakpoints,

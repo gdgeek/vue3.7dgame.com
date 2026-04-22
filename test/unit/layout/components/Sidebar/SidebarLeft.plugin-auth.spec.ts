@@ -9,17 +9,19 @@ const mockPluginsByGroup = reactive(
 const mockCurrentRoute = reactive({
   path: "/home",
 });
-const mockPluginStore = {
+const mockPluginStore = reactive({
   init: vi.fn(),
-  enabledPlugins: [],
-  configuredEnabledPlugins: [],
-  hasConfiguredEnabledPlugins: true,
+  enabledPlugins: [] as Array<Record<string, unknown>>,
+  configuredEnabledPlugins: [] as Array<Record<string, unknown>>,
+  get hasConfiguredEnabledPlugins() {
+    return this.configuredEnabledPlugins.length > 0;
+  },
   initialized: false,
   menuGroups: mockMenuGroups,
   pluginsByGroup: mockPluginsByGroup,
   currentTokenPluginAccessStates: {} as Record<string, string>,
   ensureAllEnabledPluginAccess: mockEnsureAllEnabledPluginAccess,
-};
+});
 
 vi.mock("@/store/modules/plugin-system", () => ({
   usePluginSystemStore: vi.fn(() => mockPluginStore),
@@ -124,6 +126,7 @@ describe("SidebarLeft plugin auth", () => {
   beforeEach(() => {
     mockCurrentRoute.path = "/home";
     mockPluginStore.initialized = false;
+    mockPluginStore.init.mockResolvedValue(undefined);
     mockPluginStore.configuredEnabledPlugins = [
       {
         pluginId: "ai-3d-generator-v3",
@@ -181,6 +184,60 @@ describe("SidebarLeft plugin auth", () => {
     await mount();
 
     expect(mockEnsureAllEnabledPluginAccess).not.toHaveBeenCalled();
+  });
+
+  it("preloads plugin visibility when entering a plugin route directly", async () => {
+    mockCurrentRoute.path = "/plugins/user-management";
+    mockPluginStore.configuredEnabledPlugins = [
+      {
+        pluginId: "user-management",
+      },
+      {
+        pluginId: "ai-3d-generator-v3",
+      },
+    ];
+    mockPluginStore.init.mockResolvedValue(undefined);
+
+    await mount();
+    await Promise.resolve();
+    await nextTick();
+
+    expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
+  });
+
+  it("preloads plugin visibility after plugin init finishes on direct entry", async () => {
+    mockCurrentRoute.path = "/plugins/user-management";
+    let resolveInit: (() => void) | null = null;
+    mockPluginStore.initialized = false;
+    mockPluginStore.configuredEnabledPlugins = [];
+    mockPluginStore.init.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveInit = resolve;
+        })
+    );
+
+    await mount();
+    await nextTick();
+
+    expect(mockEnsureAllEnabledPluginAccess).not.toHaveBeenCalled();
+
+    mockPluginStore.initialized = true;
+    mockPluginStore.configuredEnabledPlugins = [
+      {
+        pluginId: "user-management",
+      },
+      {
+        pluginId: "system-admin",
+      },
+    ];
+    resolveInit?.();
+
+    await Promise.resolve();
+    await nextTick();
+    await nextTick();
+
+    expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
   });
 
   it("loads plugin visibility when the tools root is opened", async () => {

@@ -29,30 +29,26 @@ describe("systemAdminApi", () => {
     expect(buildSystemAdminUrl("/v1/plugin/list")).toBe(
       "/api-config/api/v1/plugin/list"
     );
-    expect(buildSystemAdminUrl("v1/plugin/allowed-actions")).toBe(
-      "/api-config/api/v1/plugin/allowed-actions"
-    );
   });
 
-  it("issues requests with an empty baseURL override so /api-config is not prefixed by /api", async () => {
+  it("issues plugin list requests with an empty baseURL override so /api-config is not prefixed by /api", async () => {
     vi.doMock("@/environment", () => ({
       default: {
         config_api: "/api-config/api",
       },
     }));
 
-    const { getSystemAdminAllowedActions } = await import(
+    const { getSystemAdminPluginList } = await import(
       "@/plugin-system/services/systemAdminApi"
     );
 
-    await getSystemAdminAllowedActions("user-management");
+    await getSystemAdminPluginList();
 
     expect(mockRequestGet).toHaveBeenCalledWith(
-      "/api-config/api/v1/plugin/allowed-actions",
+      "/api-config/api/v1/plugin/list",
       expect.objectContaining({
         authScope: "plugin",
         baseURL: "",
-        params: { plugin_name: "user-management" },
         skipErrorMessage: true,
       })
     );

@@ -46,7 +46,6 @@
         <template #grid-card="{ item }">
           <StandardCard
             :image="item.image?.url"
-            image-fit="contain"
             :title="item.name || t('verse.listPage.unnamed')"
             :description="item.description"
             :type-icon="['fas', 'layer-group']"
@@ -1517,7 +1516,10 @@ const formatItemDate = (dateStr?: string) => {
   font-size: 16px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
-  border-radius: 26px !important;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  ) !important;
 }
 
 :deep(.panel-actions .dual-primary-btn) {
@@ -1533,7 +1535,10 @@ const formatItemDate = (dateStr?: string) => {
   cursor: pointer;
   background: var(--primary-color, #03a9f4);
   border: none;
-  border-radius: 999px;
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   transition: all 0.2s ease;
 }
 

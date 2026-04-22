@@ -4,8 +4,6 @@ export default {
     dashboard: "首頁",
     campus: {
       title: "校園相關",
-
-      schoolManagement: "學校管理",
       teacher: "我是教師",
       student: "我是學生",
     },
@@ -134,7 +132,6 @@ export default {
     manager: {
       title: "管理",
       userManagement: "用戶管理",
-      schoolManagement: "校園管理",
       classManagement: "班級管理",
       teacherManagement: "教師管理",
       studentManagement: "學生管理",

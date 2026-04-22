@@ -102,8 +102,6 @@ export default {
     scene: "シーン",
     selfCreated: "自分の作成",
     systemRecommend: "おすすめ",
-    campusManagement: "キャンパス管理",
-    schoolManagement: "学校管理",
     teacherManagement: "教師管理",
     studentManagement: "学生管理",
     adminCenter: "管理センター",

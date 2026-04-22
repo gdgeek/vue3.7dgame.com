@@ -361,7 +361,10 @@ defineExpose({
   // Customize action buttons to be pill-shaped
   :deep(.el-button) {
     padding: 8px 20px; // Ensure enough padding for pill shape
-    border-radius: var(--radius-full, 9999px);
+    border-radius: var(
+      --standard-page-max-radius,
+      calc(var(--radius-lg, 24px) / 3)
+    );
   }
 }
 
@@ -389,7 +392,10 @@ defineExpose({
   color: var(--text-primary, #1e293b);
   background: var(--bg-card, #fff);
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(
+    --standard-page-max-radius,
+    calc(var(--radius-lg, 24px) / 3)
+  );
   outline: none;
   transition: all var(--transition-fast, 0.15s ease);
 

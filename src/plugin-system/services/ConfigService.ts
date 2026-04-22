@@ -1,9 +1,16 @@
 import { createLogger } from "@/utils/logger";
 import { getSystemAdminPluginList } from "@/plugin-system/services/systemAdminApi";
 
-import type { PluginsConfig } from "@/plugin-system/types";
+import type { PluginManifest, PluginsConfig } from "@/plugin-system/types";
 
 const logger = createLogger("ConfigService");
+const DEFAULT_ACCESS_SCOPE = "auth-only";
+const ACCESS_SCOPE_VALUES = new Set([
+  "auth-only",
+  "admin-only",
+  "manager-only",
+  "root-only",
+]);
 
 /** Empty config used as fallback when loading fails */
 const EMPTY_CONFIG: PluginsConfig = {
@@ -11,6 +18,41 @@ const EMPTY_CONFIG: PluginsConfig = {
   menuGroups: [],
   plugins: [],
 };
+
+function deriveOriginFromUrl(url: string): string | undefined {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizePlugin(plugin: PluginManifest): PluginManifest {
+  const normalizedName = plugin.name.trim();
+  const normalizedDescription = plugin.description.trim();
+  const normalizedVersion = plugin.version.trim();
+  const normalizedAccessScope =
+    typeof plugin.accessScope === "string" &&
+    ACCESS_SCOPE_VALUES.has(plugin.accessScope)
+      ? plugin.accessScope
+      : DEFAULT_ACCESS_SCOPE;
+
+  return {
+    ...plugin,
+    name: normalizedName,
+    description: normalizedDescription || normalizedName,
+    version: normalizedVersion || "0.0.0",
+    accessScope: normalizedAccessScope,
+    allowedOrigin: deriveOriginFromUrl(plugin.url) ?? plugin.allowedOrigin,
+  };
+}
+
+function normalizeConfig(config: PluginsConfig): PluginsConfig {
+  return {
+    ...config,
+    plugins: config.plugins.map(normalizePlugin),
+  };
+}
 
 /**
  * Type guard: checks whether a value looks like a valid PluginsConfig.
@@ -117,7 +159,7 @@ export class ConfigService {
         return { ...EMPTY_CONFIG };
       }
       logger.info(`Local config loaded: ${data.plugins.length} plugins`);
-      return data;
+      return normalizeConfig(data);
     } catch (err) {
       logger.warn("Error loading local plugins.json:", err);
       return { ...EMPTY_CONFIG };
@@ -133,7 +175,7 @@ export class ConfigService {
         logger.warn("Plugin list API returned invalid format, skipping");
         return { ...EMPTY_CONFIG };
       }
-      return data;
+      return normalizeConfig(data);
     } catch (err) {
       logger.warn("Error loading plugin list API:", err);
       return { ...EMPTY_CONFIG };

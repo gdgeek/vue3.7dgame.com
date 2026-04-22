@@ -4,8 +4,7 @@ import { createPinia, setActivePinia } from "pinia";
 const mockInitialize = vi.fn();
 const mockGetConfig = vi.fn();
 const mockGetAllPlugins = vi.fn();
-const mockGetAllowedActions = vi.fn();
-const mockProbeHostSession = vi.fn();
+const mockVerifyPluginHostSession = vi.fn();
 
 vi.mock("@/plugin-system", () => ({
   pluginSystem: {
@@ -19,13 +18,9 @@ vi.mock("@/plugin-system", () => ({
   },
 }));
 
-vi.mock("@/plugin-system/services/systemAdminApi", () => ({
-  getSystemAdminAllowedActions: (...args: unknown[]) =>
-    mockGetAllowedActions(...args),
-}));
-
 vi.mock("@/plugin-system/services/hostSessionApi", () => ({
-  probeHostSession: (...args: unknown[]) => mockProbeHostSession(...args),
+  verifyPluginHostSession: (...args: unknown[]) =>
+    mockVerifyPluginHostSession(...args),
 }));
 
 vi.mock("@/store/modules/token", () => ({
@@ -37,19 +32,45 @@ vi.mock("@/store/modules/token", () => ({
   },
 }));
 
-describe("plugin-system store permission loading", () => {
+describe("plugin-system store access-scope visibility", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.resetModules();
     mockInitialize.mockReset();
     mockGetConfig.mockReset();
     mockGetAllPlugins.mockReset();
-    mockGetAllowedActions.mockReset();
-    mockProbeHostSession.mockReset();
+    mockVerifyPluginHostSession.mockReset();
     mockGetConfig.mockReturnValue({
       version: "1.0.0",
       menuGroups: [{ id: "admin", name: "Admin", order: 1 }],
-      plugins: [],
+      plugins: [
+        {
+          id: "user-management",
+          name: "User Management",
+          description: "",
+          url: "https://plugins.example.com/user-management",
+          icon: "User",
+          group: "admin",
+          enabled: true,
+          order: 1,
+          version: "1.0.0",
+          allowedOrigin: "https://plugins.example.com",
+          accessScope: "admin-only",
+        },
+        {
+          id: "system-admin",
+          name: "System Admin",
+          description: "",
+          url: "https://plugins.example.com/system-admin",
+          icon: "Setting",
+          group: "admin",
+          enabled: true,
+          order: 2,
+          version: "1.0.0",
+          allowedOrigin: "https://plugins.example.com",
+          accessScope: "root-only",
+        },
+      ],
     });
     mockGetAllPlugins.mockReturnValue([
       {
@@ -62,10 +83,20 @@ describe("plugin-system store permission loading", () => {
         enabled: true,
         order: 1,
       },
+      {
+        pluginId: "system-admin",
+        name: "System Admin",
+        description: "",
+        icon: "Setting",
+        group: "admin",
+        state: "unloaded",
+        enabled: true,
+        order: 2,
+      },
     ]);
   });
 
-  it("init does not eagerly fetch plugin permissions", async () => {
+  it("init does not eagerly verify the host plugin session", async () => {
     const { usePluginSystemStore } = await import(
       "@/store/modules/plugin-system"
     );
@@ -73,13 +104,20 @@ describe("plugin-system store permission loading", () => {
 
     await store.init();
 
-    expect(mockGetAllowedActions).not.toHaveBeenCalled();
+    expect(mockVerifyPluginHostSession).not.toHaveBeenCalled();
     expect(store.pluginAccessStates["user-management"]).toBe("unknown");
   });
 
-  it("loads a plugin on demand and caches by current token fingerprint", async () => {
-    mockGetAllowedActions.mockResolvedValue({
-      data: { code: 0, data: { actions: ["view"] } },
+  it("verifies host roles once and caches per current token fingerprint", async () => {
+    mockVerifyPluginHostSession.mockResolvedValue({
+      data: {
+        code: 0,
+        data: {
+          id: 7,
+          username: "admin",
+          roles: ["admin"],
+        },
+      },
     });
 
     const { usePluginSystemStore } = await import(
@@ -91,12 +129,41 @@ describe("plugin-system store permission loading", () => {
     await store.ensurePluginAccess("user-management");
     await store.ensurePluginAccess("user-management");
 
+    expect(mockVerifyPluginHostSession).toHaveBeenCalledTimes(1);
     expect(store.pluginAccessStates["user-management"]).toBe("visible");
-    expect(store.pluginPermissions["user-management"]).toEqual(["view"]);
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
+    expect(store.currentTokenPluginAccessScopes["user-management"]).toBe(
+      "admin-only"
+    );
   });
 
-  it("reloads permissions when the token fingerprint changes", async () => {
+  it("evaluates root-only plugins as forbidden for non-root sessions", async () => {
+    mockVerifyPluginHostSession.mockResolvedValue({
+      data: {
+        code: 0,
+        data: {
+          id: 7,
+          username: "admin",
+          roles: ["admin"],
+        },
+      },
+    });
+
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
+    const store = usePluginSystemStore();
+
+    await store.init();
+    const result = await store.ensurePluginAccess("system-admin");
+
+    expect(result).toEqual({
+      status: "forbidden",
+      accessScope: "root-only",
+    });
+    expect(store.enabledPlugins).toEqual([]);
+  });
+
+  it("reloads host visibility after the token fingerprint changes", async () => {
     const Token = (await import("@/store/modules/token")).default;
     (Token.getToken as ReturnType<typeof vi.fn>)
       .mockReturnValueOnce({
@@ -120,12 +187,26 @@ describe("plugin-system store permission loading", () => {
         refreshToken: "refresh-visible-002",
       });
 
-    mockGetAllowedActions
+    mockVerifyPluginHostSession
       .mockResolvedValueOnce({
-        data: { code: 0, data: { actions: ["view"] } },
+        data: {
+          code: 0,
+          data: {
+            id: 7,
+            username: "admin",
+            roles: ["admin"],
+          },
+        },
       })
       .mockResolvedValueOnce({
-        data: { code: 0, data: { actions: ["edit"] } },
+        data: {
+          code: 0,
+          data: {
+            id: 1,
+            username: "root",
+            roles: ["root"],
+          },
+        },
       });
 
     const { usePluginSystemStore } = await import(
@@ -134,15 +215,15 @@ describe("plugin-system store permission loading", () => {
     const store = usePluginSystemStore();
 
     await store.init();
-    await store.ensurePluginAccess("user-management");
-    await store.ensurePluginAccess("user-management");
-    await store.ensurePluginAccess("user-management");
+    await store.ensurePluginAccess("system-admin");
+    await store.ensurePluginAccess("system-admin");
+    await store.ensurePluginAccess("system-admin");
 
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(2);
-    expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
+    expect(mockVerifyPluginHostSession).toHaveBeenCalledTimes(2);
+    expect(store.pluginAccessStates["system-admin"]).toBe("visible");
   });
 
-  it("hides stale cached visibility from current-token getters until access is re-evaluated", async () => {
+  it("hides stale cached visibility from current-token getters until re-evaluated", async () => {
     const Token = (await import("@/store/modules/token")).default;
     (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue({
       accessToken: "token-current",
@@ -156,24 +237,30 @@ describe("plugin-system store permission loading", () => {
 
     await store.init();
 
-    store.pluginPermissions["user-management"] = ["view"];
+    store.pluginAccessScopes["user-management"] = "admin-only";
     store.pluginAccessStates["user-management"] = "visible";
     store.pluginPermissionFingerprints["user-management"] = "stale-token";
 
     expect(store.currentTokenPluginAccessStates["user-management"]).toBe(
       "unknown"
     );
-    expect(store.currentTokenPluginPermissions["user-management"]).toEqual([]);
+    expect(store.currentTokenPluginAccessScopes["user-management"]).toBeNull();
     expect(store.enabledPlugins).toEqual([]);
     expect(store.pluginsByGroup.get("admin")).toBeUndefined();
   });
 
   it("does not treat degraded as a stable cached result", async () => {
-    mockGetAllowedActions
+    mockVerifyPluginHostSession
       .mockRejectedValueOnce({ response: { status: 500 } })
-      .mockRejectedValueOnce({ response: { status: 502 } })
       .mockResolvedValueOnce({
-        data: { code: 0, data: { actions: ["view"] } },
+        data: {
+          code: 0,
+          data: {
+            id: 7,
+            username: "admin",
+            roles: ["admin"],
+          },
+        },
       });
 
     const { usePluginSystemStore } = await import(
@@ -187,49 +274,20 @@ describe("plugin-system store permission loading", () => {
 
     await store.ensurePluginAccess("user-management");
 
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(3);
+    expect(mockVerifyPluginHostSession).toHaveBeenCalledTimes(2);
     expect(store.pluginAccessStates["user-management"]).toBe("visible");
-    expect(store.pluginPermissions["user-management"]).toEqual(["view"]);
   });
 
-  it("stores an opaque fingerprint instead of the raw access token", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    const accessToken = "token-visible-001";
-    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue({
-      accessToken,
-      refreshToken: "refresh-visible-001",
-    });
-
-    mockGetAllowedActions.mockResolvedValue({
-      data: { code: 0, data: { actions: ["view"] } },
-    });
-
-    const { usePluginSystemStore } = await import(
-      "@/store/modules/plugin-system"
-    );
-    const store = usePluginSystemStore();
-
-    await store.init();
-    await store.ensurePluginAccess("user-management");
-
-    expect(store.pluginPermissionFingerprints["user-management"]).toBeTruthy();
-    expect(store.pluginPermissionFingerprints["user-management"]).not.toBe(
-      accessToken
-    );
-  });
-
-  it("deduplicates in-flight permission requests for the same plugin", async () => {
+  it("deduplicates in-flight host session visibility checks for the same token", async () => {
     let resolveRequest:
-      | ((value: {
-          data: { code: number; data: { actions: string[] } };
-        }) => void)
+      | ((value: { data: { code: number; data: { roles: string[] } } }) => void)
       | undefined;
     const responsePromise = new Promise<{
-      data: { code: number; data: { actions: string[] } };
+      data: { code: number; data: { roles: string[] } };
     }>((resolve) => {
       resolveRequest = resolve;
     });
-    mockGetAllowedActions.mockImplementation(() => responsePromise);
+    mockVerifyPluginHostSession.mockImplementation(() => responsePromise);
 
     const { usePluginSystemStore } = await import(
       "@/store/modules/plugin-system"
@@ -241,46 +299,42 @@ describe("plugin-system store permission loading", () => {
     const pendingA = store.ensurePluginAccess("user-management");
     const pendingB = store.ensurePluginAccess("user-management");
 
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
+    expect(mockVerifyPluginHostSession).toHaveBeenCalledTimes(1);
 
     resolveRequest?.({
-      data: { code: 0, data: { actions: ["view"] } },
+      data: { code: 0, data: { roles: ["admin"] } },
     });
 
     await Promise.all([pendingA, pendingB]);
-    expect(store.pluginPermissions["user-management"]).toEqual(["view"]);
+    expect(store.pluginAccessStates["user-management"]).toBe("visible");
   });
 
-  it("does not let stale responses overwrite newer token state", async () => {
+  it("does not let stale session responses overwrite newer token state", async () => {
     const Token = (await import("@/store/modules/token")).default;
+    let currentToken = { accessToken: "token-old", refreshToken: "r-old" };
+    (Token.getToken as ReturnType<typeof vi.fn>).mockImplementation(
+      () => currentToken
+    );
+
     let resolveOldRequest:
-      | ((value: {
-          data: { code: number; data: { actions: string[] } };
-        }) => void)
+      | ((value: { data: { code: number; data: { roles: string[] } } }) => void)
       | undefined;
     let resolveNewRequest:
-      | ((value: {
-          data: { code: number; data: { actions: string[] } };
-        }) => void)
+      | ((value: { data: { code: number; data: { roles: string[] } } }) => void)
       | undefined;
 
     const oldDeferred = new Promise<{
-      data: { code: number; data: { actions: string[] } };
+      data: { code: number; data: { roles: string[] } };
     }>((resolve) => {
       resolveOldRequest = resolve;
     });
     const newDeferred = new Promise<{
-      data: { code: number; data: { actions: string[] } };
+      data: { code: number; data: { roles: string[] } };
     }>((resolve) => {
       resolveNewRequest = resolve;
     });
 
-    (Token.getToken as ReturnType<typeof vi.fn>)
-      .mockReturnValueOnce({ accessToken: "token-old", refreshToken: "r-old" })
-      .mockReturnValueOnce({ accessToken: "token-new", refreshToken: "r-new" })
-      .mockReturnValue({ accessToken: "token-new", refreshToken: "r-new" });
-
-    mockGetAllowedActions
+    mockVerifyPluginHostSession
       .mockReturnValueOnce(oldDeferred)
       .mockReturnValueOnce(newDeferred);
 
@@ -291,229 +345,31 @@ describe("plugin-system store permission loading", () => {
 
     await store.init();
 
-    const oldRequest = store.ensurePluginAccess("user-management");
-    const newRequest = store.ensurePluginAccess("user-management", {
+    const oldRequest = store.ensurePluginAccess("system-admin");
+    currentToken = { accessToken: "token-new", refreshToken: "r-new" };
+    const newRequest = store.ensurePluginAccess("system-admin", {
       force: true,
     });
 
     resolveNewRequest?.({
-      data: { code: 0, data: { actions: ["edit"] } },
+      data: { code: 0, data: { roles: ["root"] } },
     });
     await newRequest;
 
     resolveOldRequest?.({
-      data: { code: 0, data: { actions: ["view"] } },
+      data: { code: 0, data: { roles: ["admin"] } },
     });
     await oldRequest;
 
-    expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
-    expect(store.pluginAccessStates["user-management"]).toBe("visible");
-  });
-
-  it("does not let a stale 401-plus-host-probe result overwrite newer token state", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    let currentToken = { accessToken: "token-old", refreshToken: "r-old" };
-    (Token.getToken as ReturnType<typeof vi.fn>).mockImplementation(
-      () => currentToken
+    expect(store.pluginAccessStates["system-admin"]).toBe("visible");
+    expect(store.currentTokenPluginAccessScopes["system-admin"]).toBe(
+      "root-only"
     );
-
-    let resolveHostProbe:
-      | ((value: { data: { code: number; data: {} } }) => void)
-      | undefined;
-    let resolveHostProbeStarted: (() => void) | undefined;
-    const hostProbeStarted = new Promise<void>((resolve) => {
-      resolveHostProbeStarted = resolve;
-    });
-    const pendingHostProbe = new Promise<{ data: { code: number; data: {} } }>(
-      (resolve) => {
-        resolveHostProbe = resolve;
-      }
-    );
-    mockProbeHostSession.mockImplementationOnce(() => {
-      currentToken = { accessToken: "token-new", refreshToken: "r-new" };
-      resolveHostProbeStarted?.();
-      return pendingHostProbe;
-    });
-
-    mockGetAllowedActions
-      .mockRejectedValueOnce({ response: { status: 401 } })
-      .mockResolvedValueOnce({
-        data: { code: 0, data: { actions: ["edit"] } },
-      });
-
-    const { usePluginSystemStore } = await import(
-      "@/store/modules/plugin-system"
-    );
-    const store = usePluginSystemStore();
-
-    await store.init();
-
-    const oldRequest = store.ensurePluginAccess("user-management");
-    await hostProbeStarted;
-    await store.ensurePluginAccess("user-management");
-
-    resolveHostProbe?.({
-      data: { code: 0, data: {} },
-    });
-    await oldRequest;
-
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(2);
-    expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
-    expect(store.pluginPermissions["user-management"]).toEqual(["edit"]);
-    expect(store.pluginAccessStates["user-management"]).toBe("visible");
-  });
-
-  it("hands stale 401-plus-host-probe callers off to the current-token access resolution", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    let currentToken = { accessToken: "token-old", refreshToken: "r-old" };
-    (Token.getToken as ReturnType<typeof vi.fn>).mockImplementation(
-      () => currentToken
-    );
-
-    let resolveHostProbe:
-      | ((value: { data: { code: number; data: {} } }) => void)
-      | undefined;
-    let resolveHostProbeStarted: (() => void) | undefined;
-    const hostProbeStarted = new Promise<void>((resolve) => {
-      resolveHostProbeStarted = resolve;
-    });
-    const pendingHostProbe = new Promise<{ data: { code: number; data: {} } }>(
-      (resolve) => {
-        resolveHostProbe = resolve;
-      }
-    );
-
-    let resolveCurrentTokenRequest:
-      | ((value: {
-          data: { code: number; data: { actions: string[] } };
-        }) => void)
-      | undefined;
-    const currentTokenRequest = new Promise<{
-      data: { code: number; data: { actions: string[] } };
-    }>((resolve) => {
-      resolveCurrentTokenRequest = resolve;
-    });
-
-    mockProbeHostSession.mockImplementationOnce(() => {
-      currentToken = { accessToken: "token-new", refreshToken: "r-new" };
-      resolveHostProbeStarted?.();
-      return pendingHostProbe;
-    });
-
-    mockGetAllowedActions
-      .mockRejectedValueOnce({ response: { status: 401 } })
-      .mockReturnValueOnce(currentTokenRequest);
-
-    const { usePluginSystemStore } = await import(
-      "@/store/modules/plugin-system"
-    );
-    const store = usePluginSystemStore();
-
-    await store.init();
-
-    const staleRequest = store.ensurePluginAccess("user-management");
-    await hostProbeStarted;
-    const currentRequest = store.ensurePluginAccess("user-management");
-
-    let staleSettled = false;
-    staleRequest.finally(() => {
-      staleSettled = true;
-    });
-
-    resolveHostProbe?.({
-      data: { code: 0, data: {} },
-    });
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(staleSettled).toBe(false);
-
-    resolveCurrentTokenRequest?.({
-      data: { code: 0, data: { actions: ["edit"] } },
-    });
-
-    await expect(staleRequest).resolves.toEqual({
-      status: "visible",
-      actions: ["edit"],
-    });
-    await expect(currentRequest).resolves.toEqual({
-      status: "visible",
-      actions: ["edit"],
-    });
-  });
-
-  it("maps 403 to forbidden and retries once before degrading on 5xx", async () => {
-    const { usePluginSystemStore } = await import(
-      "@/store/modules/plugin-system"
-    );
-    const store = usePluginSystemStore();
-
-    await store.init();
-
-    mockGetAllowedActions.mockRejectedValueOnce({ response: { status: 403 } });
-    await store.ensurePluginAccess("user-management", { force: true });
-    expect(store.pluginAccessStates["user-management"]).toBe("forbidden");
-
-    mockGetAllowedActions
-      .mockRejectedValueOnce({ response: { status: 500 } })
-      .mockRejectedValueOnce({ response: { status: 502 } });
-    await store.ensurePluginAccess("user-management", { force: true });
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(3);
-    expect(store.pluginAccessStates["user-management"]).toBe("degraded");
-  });
-
-  it("treats plugin auth 401 as degraded when the host session probe succeeds", async () => {
-    mockGetAllowedActions.mockRejectedValueOnce({ response: { status: 401 } });
-    mockProbeHostSession.mockResolvedValueOnce({
-      data: { code: 0, data: {} },
-    });
-
-    const { usePluginSystemStore } = await import(
-      "@/store/modules/plugin-system"
-    );
-    const store = usePluginSystemStore();
-
-    await store.init();
-
-    await expect(
-      store.ensurePluginAccess("user-management", { force: true })
-    ).resolves.toEqual({
-      status: "degraded",
-      actions: [],
-    });
-
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
-    expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
-    expect(store.pluginAccessStates["user-management"]).toBe("degraded");
-    expect(store.pluginPermissions["user-management"]).toEqual([]);
-  });
-
-  it("rethrows the host 401 when plugin auth 401 is caused by host session expiry", async () => {
-    const pluginError = { response: { status: 401 } };
-    const hostError = { response: { status: 401 }, message: "host expired" };
-    mockGetAllowedActions.mockRejectedValueOnce(pluginError);
-    mockProbeHostSession.mockRejectedValueOnce(hostError);
-
-    const { usePluginSystemStore } = await import(
-      "@/store/modules/plugin-system"
-    );
-    const store = usePluginSystemStore();
-
-    await store.init();
-
-    await expect(
-      store.ensurePluginAccess("user-management", { force: true })
-    ).rejects.toBe(hostError);
-
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
-    expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
-    expect(store.pluginAccessStates["user-management"]).toBe("loading");
   });
 
   it("does not reject plugin preload when host session has already expired", async () => {
     const hostError = { response: { status: 401 }, message: "host expired" };
-    mockGetAllowedActions.mockRejectedValueOnce({ response: { status: 401 } });
-    mockProbeHostSession.mockRejectedValueOnce(hostError);
+    mockVerifyPluginHostSession.mockRejectedValueOnce(hostError);
 
     const { usePluginSystemStore } = await import(
       "@/store/modules/plugin-system"
@@ -524,7 +380,6 @@ describe("plugin-system store permission loading", () => {
 
     await expect(store.ensureAllEnabledPluginAccess()).resolves.toBeUndefined();
 
-    expect(mockGetAllowedActions).toHaveBeenCalledTimes(1);
-    expect(mockProbeHostSession).toHaveBeenCalledTimes(1);
+    expect(mockVerifyPluginHostSession).toHaveBeenCalledTimes(1);
   });
 });

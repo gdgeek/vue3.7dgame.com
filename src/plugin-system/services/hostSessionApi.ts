@@ -6,10 +6,10 @@ interface HostSessionResponse {
   data?: unknown;
 }
 
-export function probeHostSession(): Promise<
+export function verifyPluginHostSession(): Promise<
   AxiosResponse<HostSessionResponse>
 > {
-  return request.get("/v1/user/info", {
+  return request.get("/v1/plugin/verify-token", {
     authScope: "host",
     skipErrorMessage: true,
   });
