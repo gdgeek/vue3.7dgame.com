@@ -606,10 +606,6 @@ const menuOpen = ref<Record<string, boolean>>({
   plugins: currentPath.value.startsWith("/plugins"),
 });
 
-const ensurePluginMenuAccess = () => {
-  void pluginStore.ensureAllEnabledPluginAccess();
-};
-
 const pluginMenuAccessPreload = ref<Promise<void> | null>(null);
 
 const hasUnknownPluginMenuAccess = () => {
@@ -621,15 +617,7 @@ const hasUnknownPluginMenuAccess = () => {
   });
 };
 
-const preloadPluginMenuAccessForPluginRoute = async () => {
-  if (!currentPath.value.startsWith("/plugins")) {
-    return;
-  }
-
-  if (!pluginStore.hasConfiguredEnabledPlugins) {
-    return;
-  }
-
+const preloadPluginMenuAccess = async () => {
   if (pluginMenuAccessPreload.value) {
     await pluginMenuAccessPreload.value;
     return;
@@ -638,10 +626,6 @@ const preloadPluginMenuAccessForPluginRoute = async () => {
   let preloadPromise: Promise<void> | null = null;
   preloadPromise = (async () => {
     await pluginSystemInitPromise;
-
-    if (!currentPath.value.startsWith("/plugins")) {
-      return;
-    }
 
     if (!pluginStore.hasConfiguredEnabledPlugins) {
       return;
@@ -662,6 +646,14 @@ const preloadPluginMenuAccessForPluginRoute = async () => {
   await preloadPromise;
 };
 
+const ensurePluginMenuAccess = () => {
+  if (!hasUnknownPluginMenuAccess()) {
+    return;
+  }
+
+  void preloadPluginMenuAccess();
+};
+
 watch(
   [
     currentPath,
@@ -669,7 +661,7 @@ watch(
     () => pluginStore.hasConfiguredEnabledPlugins,
   ],
   () => {
-    void preloadPluginMenuAccessForPluginRoute();
+    void preloadPluginMenuAccess();
   },
   { immediate: true }
 );
@@ -694,20 +686,7 @@ const visibleMenuGroups = computed(() => {
 });
 
 const shouldShowPluginTools = computed(() => {
-  if (!pluginStore.hasConfiguredEnabledPlugins) {
-    return false;
-  }
-
-  if (visibleMenuGroups.value.length > 0) {
-    return true;
-  }
-
-  return pluginStore.configuredEnabledPlugins.some((plugin) => {
-    const accessState =
-      pluginStore.currentTokenPluginAccessStates[plugin.pluginId] ?? "unknown";
-
-    return accessState !== "forbidden";
-  });
+  return visibleMenuGroups.value.length > 0;
 });
 
 watchEffect(() => {
