@@ -122,6 +122,33 @@ async function mount(collapsed = false) {
   return { el };
 }
 
+function showVisiblePluginMenu() {
+  mockPluginStore.configuredEnabledPlugins = [
+    {
+      pluginId: "ai-3d-generator-v3",
+    },
+  ];
+  mockPluginStore.currentTokenPluginAccessStates = {
+    "ai-3d-generator-v3": "visible",
+  };
+  mockMenuGroups.push({
+    id: "ai-tools",
+    name: "AI Tools",
+    nameI18n: null,
+    order: 1,
+    icon: "toolbox",
+  });
+  mockPluginsByGroup.set("ai-tools", [
+    {
+      pluginId: "ai-3d-generator-v3",
+      name: "AI 3D Generator",
+      nameI18n: null,
+      group: "ai-tools",
+      order: 1,
+    },
+  ]);
+}
+
 describe("SidebarLeft plugin auth", () => {
   beforeEach(() => {
     mockCurrentRoute.path = "/home";
@@ -146,12 +173,19 @@ describe("SidebarLeft plugin auth", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the tools root when configured plugins exist but no plugin is visible yet", async () => {
+  it("hides the tools root until at least one plugin is visible", async () => {
     mockPluginStore.configuredEnabledPlugins = [
       {
         pluginId: "ai-3d-generator-v3",
       },
     ];
+
+    const { el } = await mount();
+    expect(el.textContent).not.toContain("sidebar.tools");
+  });
+
+  it("renders the tools root when a visible plugin group exists", async () => {
+    showVisiblePluginMenu();
 
     const { el } = await mount();
     expect(el.textContent).toContain("sidebar.tools");
@@ -180,10 +214,10 @@ describe("SidebarLeft plugin auth", () => {
     expect(el.textContent).not.toContain("sidebar.tools");
   });
 
-  it("does not eager load plugin visibility on mount", async () => {
+  it("preloads plugin visibility on mount so the tools root only appears for openable plugins", async () => {
     await mount();
 
-    expect(mockEnsureAllEnabledPluginAccess).not.toHaveBeenCalled();
+    expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
   });
 
   it("preloads plugin visibility when entering a plugin route directly", async () => {
@@ -240,7 +274,9 @@ describe("SidebarLeft plugin auth", () => {
     expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
   });
 
-  it("loads plugin visibility when the tools root is opened", async () => {
+  it("does not reload plugin visibility when a resolved tools root is opened", async () => {
+    showVisiblePluginMenu();
+
     const { el } = await mount();
     const toolsTrigger = Array.from(el.querySelectorAll(".sidebar-item")).find(
       (node) => node.textContent?.includes("sidebar.tools")
@@ -249,10 +285,12 @@ describe("SidebarLeft plugin auth", () => {
     toolsTrigger.click();
     await nextTick();
 
-    expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
+    expect(mockEnsureAllEnabledPluginAccess).not.toHaveBeenCalled();
   });
 
-  it("does not load plugin visibility again when the tools root is closed", async () => {
+  it("does not reload plugin visibility again when the tools root is closed", async () => {
+    showVisiblePluginMenu();
+
     const { el } = await mount();
     const toolsTrigger = Array.from(el.querySelectorAll(".sidebar-item")).find(
       (node) => node.textContent?.includes("sidebar.tools")
@@ -263,10 +301,12 @@ describe("SidebarLeft plugin auth", () => {
     toolsTrigger.click();
     await nextTick();
 
-    expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
+    expect(mockEnsureAllEnabledPluginAccess).not.toHaveBeenCalled();
   });
 
-  it("loads plugin visibility when the collapsed popover is shown", async () => {
+  it("does not reload plugin visibility when the resolved collapsed popover is shown", async () => {
+    showVisiblePluginMenu();
+
     const { el } = await mount(true);
     const pluginPopoverShow = el.querySelector(
       ".popover-stub[data-width='220'] .popover-show"
@@ -275,7 +315,7 @@ describe("SidebarLeft plugin auth", () => {
     pluginPopoverShow.click();
     await nextTick();
 
-    expect(mockEnsureAllEnabledPluginAccess).toHaveBeenCalledOnce();
+    expect(mockEnsureAllEnabledPluginAccess).not.toHaveBeenCalled();
   });
 
   it("expands the active plugin group after plugin visibility becomes available", async () => {
