@@ -8,28 +8,24 @@ import type {
   PluginsConfig,
   MenuGroup,
 } from "@/plugin-system";
+import {
+  DEFAULT_ACCESS_SCOPE,
+  buildPluginAccessRequestKey,
+  buildTokenFingerprint,
+  getTokenAwarePluginAccess,
+  isStableAccessState,
+  isVisibleForScope,
+  normalizeAccessScope,
+} from "@/plugin-system/services/pluginAccess";
+import type {
+  HostSessionSnapshot,
+  PluginAccessResult,
+  PluginAccessState,
+} from "@/plugin-system/services/pluginAccess";
 import { verifyPluginHostSession } from "@/plugin-system/services/hostSessionApi";
 import Token from "@/store/modules/token";
 import { useUserStore } from "@/store/modules/user";
 
-type PluginAccessState =
-  | "unknown"
-  | "loading"
-  | "visible"
-  | "forbidden"
-  | "degraded";
-
-type PluginAccessResult = {
-  status: PluginAccessState;
-  accessScope: PluginAccessScope | null;
-};
-
-type HostSessionSnapshot = {
-  authenticated: boolean;
-  roles: string[];
-};
-
-const DEFAULT_ACCESS_SCOPE: PluginAccessScope = "auth-only";
 const inFlightPluginAccessRequests = new Map<
   string,
   Promise<PluginAccessResult>
@@ -38,33 +34,6 @@ const inFlightHostSessionRequests = new Map<
   string,
   Promise<HostSessionSnapshot>
 >();
-
-function buildTokenFingerprint(accessToken?: string): string {
-  if (!accessToken) {
-    return "anonymous";
-  }
-
-  let hash = 5381;
-  for (let i = 0; i < accessToken.length; i += 1) {
-    hash = (hash * 33) ^ accessToken.charCodeAt(i);
-  }
-
-  return (hash >>> 0).toString(16).padStart(8, "0");
-}
-
-function normalizeAccessScope(value: unknown): PluginAccessScope {
-  return value === "admin-only" ||
-    value === "manager-only" ||
-    value === "root-only"
-    ? value
-    : DEFAULT_ACCESS_SCOPE;
-}
-
-function isStableAccessState(
-  status: PluginAccessState
-): status is "visible" | "forbidden" {
-  return status === "visible" || status === "forbidden";
-}
 
 function getCurrentTokenFingerprint() {
   return buildTokenFingerprint(Token.getToken()?.accessToken);
@@ -79,27 +48,6 @@ function getKnownHostRoles(): string[] | null {
   return roles.filter(
     (role): role is string => typeof role === "string" && role.trim().length > 0
   );
-}
-
-function isVisibleForScope(
-  accessScope: PluginAccessScope,
-  session: HostSessionSnapshot
-): boolean {
-  if (!session.authenticated) {
-    return false;
-  }
-
-  const roles = session.roles;
-  switch (accessScope) {
-    case "root-only":
-      return roles.includes("root");
-    case "manager-only":
-      return roles.includes("root") || roles.includes("manager");
-    case "admin-only":
-      return roles.includes("root") || roles.includes("admin");
-    default:
-      return true;
-  }
 }
 
 interface PluginSystemState {
@@ -118,10 +66,6 @@ interface PluginSystemState {
   hostSessionResolved: boolean;
 }
 
-function buildPluginAccessRequestKey(pluginId: string, fingerprint: string) {
-  return `${pluginId}:${fingerprint}`;
-}
-
 function getCurrentTokenAwarePluginAccess(
   state: Pick<
     PluginSystemState,
@@ -129,35 +73,15 @@ function getCurrentTokenAwarePluginAccess(
   >,
   pluginId: string
 ): PluginAccessResult {
-  const status = state.pluginAccessStates[pluginId] ?? "unknown";
   const currentFingerprint = getCurrentTokenFingerprint();
-  const cachedFingerprint = state.pluginPermissionFingerprints[pluginId];
-
-  if (cachedFingerprint === currentFingerprint) {
-    return {
-      status,
-      accessScope:
-        status === "loading"
-          ? null
-          : (state.pluginAccessScopes[pluginId] ?? null),
-    };
-  }
-
-  if (
+  return getTokenAwarePluginAccess(
+    state,
+    pluginId,
+    currentFingerprint,
     inFlightPluginAccessRequests.has(
       buildPluginAccessRequestKey(pluginId, currentFingerprint)
     )
-  ) {
-    return {
-      status: "loading",
-      accessScope: null,
-    };
-  }
-
-  return {
-    status: "unknown",
-    accessScope: null,
-  };
+  );
 }
 
 export const usePluginSystemStore = defineStore("plugin-system", {
