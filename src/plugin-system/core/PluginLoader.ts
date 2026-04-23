@@ -8,9 +8,6 @@ const logger = createLogger("PluginLoader");
 const DEFAULT_SANDBOX =
   "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads";
 
-/** Timeout in milliseconds for iframe load */
-const _LOAD_TIMEOUT_MS = 30_000;
-
 /** Represents a plugin that has been loaded into an iframe */
 export interface LoadedPlugin {
   pluginId: string;
@@ -33,22 +30,22 @@ export interface PluginLoadOptions {
 }
 
 /**
- * PluginLoader — iframe 创建 + Token 注入
+ * PluginLoader — iframe 创建与 INIT 消息发送
  *
- * 负责创建 iframe、设置 sandbox/src、等待加载完成、
- * 发送 INIT 消息注入 Token，以及卸载时销毁 iframe。
+ * 负责创建 iframe、设置 sandbox/src、挂载 iframe，并提供 INIT 发送方法。
+ * 插件业务初始化由 PluginSystem 在收到 PLUGIN_READY 后触发。
  */
 export class PluginLoader {
   private loaded: Map<string, LoadedPlugin> = new Map();
 
   /**
-   * 加载插件：创建 iframe，等待加载，注入 Token。
+   * 加载插件：创建 iframe 并立即返回宿主侧挂载记录。
    *
    * @param pluginId  插件唯一标识
    * @param manifest  插件清单
    * @param container 挂载 iframe 的 DOM 容器
    * @param options   可选的 lang/theme 参数，会附加到 iframe URL
-   * @returns 已加载的插件记录
+   * @returns 已挂载的插件记录
    */
   async load(
     pluginId: string,
@@ -94,13 +91,9 @@ export class PluginLoader {
 
     container.appendChild(iframe);
 
-    // Register in MessageBus IMMEDIATELY after iframe is appended to DOM,
-    // BEFORE waiting for load. The plugin sends PLUGIN_READY during onMounted
-    // which fires before the iframe 'load' event. If we register after load,
-    // PLUGIN_READY is discarded because the origin isn't registered yet.
+    // PluginSystem waits for PLUGIN_READY before sending INIT. The loader only
+    // records that the iframe has been mounted into the host DOM.
     onIframeCreated?.(iframe);
-
-    // Wait for iframe to finish loading with timeout.
 
     const record: LoadedPlugin = {
       pluginId,
@@ -137,35 +130,6 @@ export class PluginLoader {
   /** 检查是否已加载 */
   isLoaded(pluginId: string): boolean {
     return this.loaded.has(pluginId);
-  }
-
-  /**
-   * Wait for the iframe 'load' event, rejecting on timeout.
-   */
-  private waitForLoad(
-    iframe: HTMLIFrameElement,
-    pluginId: string
-  ): Promise<void> {
-    return new Promise<void>((resolve) => {
-      // Try to catch the load event (works when iframe hasn't loaded yet)
-      const onLoad = () => {
-        clearTimeout(timer);
-        resolve();
-      };
-
-      // Attach listener BEFORE setting src to avoid race condition
-      iframe.addEventListener("load", onLoad, { once: true });
-
-      // Fallback: if load event doesn't fire within 3s (e.g. already cached),
-      // resolve anyway — PLUGIN_READY handshake will confirm actual readiness
-      const timer = setTimeout(() => {
-        iframe.removeEventListener("load", onLoad);
-        logger.debug(
-          `waitForLoad("${pluginId}") load event not received after 3s, resolving anyway`
-        );
-        resolve();
-      }, 3_000);
-    });
   }
 
   /**

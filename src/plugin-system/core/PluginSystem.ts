@@ -182,9 +182,11 @@ export class PluginSystem {
   }
 
   /**
-   * 加载并激活插件（创建 iframe）。
+   * 加载并挂载插件 iframe。
    *
    * 状态转换：unloaded → loading → active（或 → error）
+   * 当前 active 表示宿主已挂载 iframe 并建立消息连接；
+   * 插件业务初始化仍由 PLUGIN_READY → INIT 完成。
    *
    * @param pluginId  插件唯一标识
    * @param container 挂载 iframe 的 DOM 容器
@@ -235,7 +237,7 @@ export class PluginSystem {
       );
 
       logger.debug(
-        `loadPlugin("${pluginId}") iframe loaded, origin=${loaded.origin}`
+        `loadPlugin("${pluginId}") iframe mounted, origin=${loaded.origin}`
       );
 
       // Transition: loading → active

@@ -42,6 +42,7 @@ export type PluginMessageType =
   | "INIT"
   | "PLUGIN_READY"
   | "TOKEN_UPDATE"
+  | "TOKEN_REFRESH_REQUEST"
   | "THEME_CHANGE"
   | "LANG_CHANGE"
   | "REQUEST"

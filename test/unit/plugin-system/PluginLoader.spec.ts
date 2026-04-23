@@ -32,22 +32,12 @@ function createContainer(): HTMLElement {
   return document.createElement("div");
 }
 
-/**
- * Helper: load a plugin and immediately fire the iframe 'load' event
- * so the promise resolves without waiting for a real network request.
- */
-async function loadWithAutoFire(
+async function loadMountedPlugin(
   loader: PluginLoader,
   manifest: PluginManifest,
   container: HTMLElement
 ): Promise<LoadedPlugin> {
-  const loadPromise = loader.load(manifest.id, manifest, container);
-
-  // The iframe has been appended synchronously — grab it and fire 'load'
-  const iframe = container.querySelector("iframe") as HTMLIFrameElement;
-  iframe.dispatchEvent(new Event("load"));
-
-  return loadPromise;
+  return loader.load(manifest.id, manifest, container);
 }
 
 describe("PluginLoader", () => {
@@ -63,7 +53,7 @@ describe("PluginLoader", () => {
     it("should create an iframe with a cache-busted src attribute", async () => {
       const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1713196923000);
       const manifest = createManifest({ url: "https://editor.example.com/v2" });
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
 
       const iframe = container.querySelector("iframe");
       expect(iframe).not.toBeNull();
@@ -75,7 +65,7 @@ describe("PluginLoader", () => {
 
     it("should set default sandbox attribute when manifest.sandbox is undefined", async () => {
       const manifest = createManifest({ sandbox: undefined });
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
 
       const iframe = container.querySelector("iframe");
       expect(iframe?.getAttribute("sandbox")).toBe(
@@ -85,7 +75,7 @@ describe("PluginLoader", () => {
 
     it("should use custom sandbox attribute from manifest", async () => {
       const manifest = createManifest({ sandbox: "allow-scripts" });
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
 
       const iframe = container.querySelector("iframe");
       expect(iframe?.getAttribute("sandbox")).toBe("allow-scripts");
@@ -93,7 +83,7 @@ describe("PluginLoader", () => {
 
     it("should set iframe style to fill container with no border", async () => {
       const manifest = createManifest();
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
 
       const iframe = container.querySelector("iframe") as HTMLIFrameElement;
       expect(iframe.style.width).toBe("100%");
@@ -103,7 +93,7 @@ describe("PluginLoader", () => {
 
     it("should append iframe to the container element", async () => {
       const manifest = createManifest();
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
 
       expect(container.children.length).toBe(1);
       expect(container.children[0].tagName).toBe("IFRAME");
@@ -112,7 +102,7 @@ describe("PluginLoader", () => {
     it("should return a LoadedPlugin record with correct fields", async () => {
       const manifest = createManifest({ id: "my-plugin" });
       const before = Date.now();
-      const result = await loadWithAutoFire(loader, manifest, container);
+      const result = await loadMountedPlugin(loader, manifest, container);
 
       expect(result.pluginId).toBe("my-plugin");
       expect(result.iframe).toBeInstanceOf(HTMLIFrameElement);
@@ -124,8 +114,11 @@ describe("PluginLoader", () => {
     it("should not auto-send INIT postMessage after load (INIT is sent by PluginSystem on PLUGIN_READY)", async () => {
       const manifest = createManifest();
 
-      const loadPromise = loader.load(manifest.id, manifest, container);
-      const iframe = container.querySelector("iframe") as HTMLIFrameElement;
+      const { iframe } = await loadMountedPlugin(
+        loader,
+        manifest,
+        container
+      );
 
       // Spy on contentWindow.postMessage (jsdom provides a contentWindow)
       const postMessageSpy = vi.fn();
@@ -134,17 +127,14 @@ describe("PluginLoader", () => {
         writable: true,
       });
 
-      iframe.dispatchEvent(new Event("load"));
-      await loadPromise;
-
       // load() no longer sends INIT — that's handled by PluginSystem after PLUGIN_READY
       expect(postMessageSpy).not.toHaveBeenCalled();
     });
 
     it("should return existing record if plugin is already loaded", async () => {
       const manifest = createManifest();
-      const first = await loadWithAutoFire(loader, manifest, container);
-      const second = await loadWithAutoFire(loader, manifest, container);
+      const first = await loadMountedPlugin(loader, manifest, container);
+      const second = await loadMountedPlugin(loader, manifest, container);
 
       expect(second).toBe(first);
       // Only one iframe should exist
@@ -152,13 +142,10 @@ describe("PluginLoader", () => {
     });
   });
 
-  describe("load timeout", () => {
-    it("should resolve even when iframe does not fire load event (no timeout rejection)", async () => {
+  describe("immediate host-side mount", () => {
+    it("should resolve without waiting for an iframe load event", async () => {
       const manifest = createManifest();
-      const loadPromise = loader.load(manifest.id, manifest, container);
-
-      // load() now resolves immediately without waiting for iframe load event
-      const result = await loadPromise;
+      const result = await loader.load(manifest.id, manifest, container);
       expect(result.pluginId).toBe(manifest.id);
     });
   });
@@ -166,7 +153,7 @@ describe("PluginLoader", () => {
   describe("unload", () => {
     it("should remove iframe from DOM", async () => {
       const manifest = createManifest();
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
 
       expect(container.querySelector("iframe")).not.toBeNull();
 
@@ -177,7 +164,7 @@ describe("PluginLoader", () => {
 
     it("should remove plugin from loaded map", async () => {
       const manifest = createManifest();
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
 
       expect(loader.isLoaded(manifest.id)).toBe(true);
 
@@ -195,7 +182,7 @@ describe("PluginLoader", () => {
   describe("getLoaded", () => {
     it("should return the loaded plugin record", async () => {
       const manifest = createManifest({ id: "alpha" });
-      const loaded = await loadWithAutoFire(loader, manifest, container);
+      const loaded = await loadMountedPlugin(loader, manifest, container);
 
       expect(loader.getLoaded("alpha")).toBe(loaded);
     });
@@ -208,7 +195,7 @@ describe("PluginLoader", () => {
   describe("isLoaded", () => {
     it("should return true for a loaded plugin", async () => {
       const manifest = createManifest();
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
 
       expect(loader.isLoaded(manifest.id)).toBe(true);
     });
@@ -219,7 +206,7 @@ describe("PluginLoader", () => {
 
     it("should return false after unloading", async () => {
       const manifest = createManifest();
-      await loadWithAutoFire(loader, manifest, container);
+      await loadMountedPlugin(loader, manifest, container);
       loader.unload(manifest.id);
 
       expect(loader.isLoaded(manifest.id)).toBe(false);

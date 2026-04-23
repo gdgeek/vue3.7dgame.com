@@ -266,6 +266,23 @@ describe("PluginSystem", () => {
       );
     });
 
+    it("should set up TOKEN_REFRESH_REQUEST message listener", async () => {
+      await system.initialize();
+
+      expect(messageBus.onMessageType).toHaveBeenCalledWith(
+        "TOKEN_REFRESH_REQUEST",
+        expect.any(Function)
+      );
+    });
+
+    it("should expose plugin EVENT subscriptions through MessageBus", () => {
+      const handler = vi.fn();
+
+      system.onPluginEvent(handler);
+
+      expect(messageBus.onMessageType).toHaveBeenCalledWith("EVENT", handler);
+    });
+
     it("should not re-initialize if already initialized", async () => {
       await system.initialize();
       await system.initialize();
