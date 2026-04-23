@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 
 # 复制依赖文件
@@ -15,7 +15,7 @@ COPY . .
 RUN pnpm run build
 
 # 开发阶段
-FROM node:20-alpine AS dev
+FROM node:24-alpine AS dev
 WORKDIR /app
 COPY package.json ./
 RUN npm install pnpm -g
