@@ -17,9 +17,24 @@ function createMessage(overrides: Partial<PluginMessage> = {}): PluginMessage {
 /** Helper to create a mock iframe with a postMessage spy */
 function createMockIframe(origin: string): HTMLIFrameElement {
   const postMessageSpy = vi.fn();
+  const frameWindow = { postMessage: postMessageSpy };
   return {
-    contentWindow: { postMessage: postMessageSpy },
+    contentWindow: frameWindow,
   } as unknown as HTMLIFrameElement;
+}
+
+function dispatchPluginMessage(
+  iframe: HTMLIFrameElement,
+  origin: string,
+  message: PluginMessage = createMessage()
+) {
+  window.dispatchEvent(
+    new MessageEvent("message", {
+      data: message,
+      origin,
+      source: iframe.contentWindow as MessageEventSource,
+    })
+  );
 }
 
 describe("MessageBus", () => {
@@ -118,12 +133,7 @@ describe("MessageBus", () => {
       bus.onMessage(handler);
 
       const msg = createMessage({ type: "PLUGIN_READY" });
-      window.dispatchEvent(
-        new MessageEvent("message", {
-          data: msg,
-          origin: "https://a.example.com",
-        })
-      );
+      dispatchPluginMessage(iframe, "https://a.example.com", msg);
 
       expect(handler).toHaveBeenCalledWith("pluginA", msg);
     });
@@ -136,12 +146,7 @@ describe("MessageBus", () => {
       const unsub = bus.onMessage(handler);
       unsub();
 
-      window.dispatchEvent(
-        new MessageEvent("message", {
-          data: createMessage(),
-          origin: "https://a.example.com",
-        })
-      );
+      dispatchPluginMessage(iframe, "https://a.example.com");
 
       expect(handler).not.toHaveBeenCalled();
     });
@@ -157,11 +162,10 @@ describe("MessageBus", () => {
       bus.onMessageType("PLUGIN_READY", readyHandler);
       bus.onMessageType("EVENT", eventHandler);
 
-      window.dispatchEvent(
-        new MessageEvent("message", {
-          data: createMessage({ type: "PLUGIN_READY", id: "r1" }),
-          origin: "https://a.example.com",
-        })
+      dispatchPluginMessage(
+        iframe,
+        "https://a.example.com",
+        createMessage({ type: "PLUGIN_READY", id: "r1" })
       );
 
       expect(readyHandler).toHaveBeenCalledTimes(1);
@@ -176,12 +180,7 @@ describe("MessageBus", () => {
       const unsub = bus.onMessageType("EVENT", handler);
       unsub();
 
-      window.dispatchEvent(
-        new MessageEvent("message", {
-          data: createMessage({ type: "EVENT" }),
-          origin: "https://a.example.com",
-        })
-      );
+      dispatchPluginMessage(iframe, "https://a.example.com", createMessage({ type: "EVENT" }));
 
       expect(handler).not.toHaveBeenCalled();
     });
@@ -216,6 +215,47 @@ describe("MessageBus", () => {
           origin: "https://a.example.com.evil.com",
         })
       );
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it("should route same-origin messages by event source", () => {
+      const iframeA = createMockIframe("https://shared.example.com");
+      const iframeB = createMockIframe("https://shared.example.com");
+      bus.registerPlugin("pluginA", iframeA, "https://shared.example.com");
+      bus.registerPlugin("pluginB", iframeB, "https://shared.example.com");
+
+      const handler = vi.fn();
+      bus.onMessage(handler);
+
+      const msg = createMessage({ id: "from-b" });
+      dispatchPluginMessage(iframeB, "https://shared.example.com", msg);
+
+      expect(handler).toHaveBeenCalledOnce();
+      expect(handler).toHaveBeenCalledWith("pluginB", msg);
+    });
+
+    it("should discard messages when origin matches but source does not", () => {
+      const iframe = createMockIframe("https://a.example.com");
+      const unknownIframe = createMockIframe("https://a.example.com");
+      bus.registerPlugin("pluginA", iframe, "https://a.example.com");
+
+      const handler = vi.fn();
+      bus.onMessage(handler);
+
+      dispatchPluginMessage(unknownIframe, "https://a.example.com");
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it("should discard messages when source matches but origin does not", () => {
+      const iframe = createMockIframe("https://a.example.com");
+      bus.registerPlugin("pluginA", iframe, "https://a.example.com");
+
+      const handler = vi.fn();
+      bus.onMessage(handler);
+
+      dispatchPluginMessage(iframe, "https://evil.example.com");
 
       expect(handler).not.toHaveBeenCalled();
     });
@@ -255,12 +295,7 @@ describe("MessageBus", () => {
       bus.onMessage(badHandler);
       bus.onMessage(goodHandler);
 
-      window.dispatchEvent(
-        new MessageEvent("message", {
-          data: createMessage(),
-          origin: "https://a.example.com",
-        })
-      );
+      dispatchPluginMessage(iframe, "https://a.example.com");
 
       expect(goodHandler).toHaveBeenCalledTimes(1);
     });

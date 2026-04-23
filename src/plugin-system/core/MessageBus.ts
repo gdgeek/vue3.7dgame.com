@@ -130,14 +130,13 @@ export class MessageBus {
    * Verifies origin against registered plugins before dispatching.
    */
   private handleMessage(event: MessageEvent): void {
-    // Find the plugin whose registered origin matches the event origin
-    const pluginId = this.findPluginByOrigin(event.origin);
+    const pluginId = this.findPluginByEvent(event);
     if (!pluginId) {
       // Only warn once per unknown origin to avoid log flooding
       if (!this.warnedOrigins.has(event.origin)) {
         this.warnedOrigins.add(event.origin);
         logger.warn(
-          `Message from unregistered origin discarded: ${event.origin}`
+          `Message from unregistered plugin window discarded: ${event.origin}`
         );
       }
       return;
@@ -167,10 +166,13 @@ export class MessageBus {
     }
   }
 
-  /** Resolve a pluginId from an event origin */
-  private findPluginByOrigin(origin: string): string | undefined {
+  /** Resolve a pluginId from both event source and origin. */
+  private findPluginByEvent(event: MessageEvent): string | undefined {
     for (const [pluginId, connection] of this.connections) {
-      if (connection.origin === origin) {
+      if (
+        connection.origin === event.origin &&
+        connection.iframe.contentWindow === event.source
+      ) {
         return pluginId;
       }
     }
