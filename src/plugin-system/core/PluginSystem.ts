@@ -225,7 +225,7 @@ export class PluginSystem {
         manifest,
         container,
         options,
-        // Register in MessageBus as soon as iframe is in DOM (before load event),
+        // Register in MessageBus as soon as the iframe is mounted into the host DOM,
         // so PLUGIN_READY from the plugin is not discarded.
         (iframe) => {
           this.messageBus.registerPlugin(
