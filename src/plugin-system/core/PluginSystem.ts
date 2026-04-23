@@ -5,6 +5,10 @@ import type { PluginLoadOptions } from "@/plugin-system/core/PluginLoader";
 import { MessageBus } from "@/plugin-system/core/MessageBus";
 import { AuthService } from "@/plugin-system/services/AuthService";
 import { ConfigService } from "@/plugin-system/services/ConfigService";
+import type {
+  MessageHandler,
+  Unsubscribe,
+} from "@/plugin-system/core/MessageBus";
 
 import type {
   PluginState,
@@ -474,6 +478,15 @@ export class PluginSystem {
       id: `lang-change-${Date.now()}`,
       payload: { lang },
     });
+  }
+
+  /**
+   * Subscribe to semantic EVENT messages from registered plugin iframes.
+   * The MessageBus has already validated source and origin before invoking
+   * the handler.
+   */
+  onPluginEvent(handler: MessageHandler): Unsubscribe {
+    return this.messageBus.onMessageType("EVENT", handler);
   }
 
   /** 获取 PluginLoader 实例（供视图层获取 iframe 引用） */

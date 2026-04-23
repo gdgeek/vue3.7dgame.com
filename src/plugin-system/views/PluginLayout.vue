@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, watch, computed, onBeforeUnmount, onMounted } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useTheme } from "@/composables/useTheme";
 import { pluginSystem } from "@/plugin-system";
 import { resolvePluginHostAction } from "@/plugin-system/views/pluginHostActions";
+import type { PluginMessage } from "@/plugin-system/types";
 import { Loading } from "@element-plus/icons-vue";
 
 const route = useRoute();
@@ -29,6 +30,7 @@ const error = ref<string | null>(null);
 const accessState = ref<"idle" | "forbidden" | "degraded">("idle");
 const mountedPluginId = ref<string | null>(null);
 const activeFlowId = ref(0);
+let unsubscribePluginEvents: (() => void) | null = null;
 
 function getErrorStatus(error: unknown) {
   return (error as { response?: { status?: number } })?.response?.status;
@@ -161,31 +163,16 @@ function nextTickContainer(): Promise<void> {
   });
 }
 
-function getActivePluginIframe(): HTMLIFrameElement | null {
-  return containerRef.value?.querySelector("iframe") ?? null;
-}
-
-function handlePluginMessage(event: MessageEvent) {
-  const iframe = getActivePluginIframe();
-  if (!iframe || event.source !== iframe.contentWindow) {
+function handlePluginEvent(sourcePluginId: string, message: PluginMessage) {
+  const currentRoutePluginId = pluginId.value;
+  const mountedId = mountedPluginId.value;
+  if (!currentRoutePluginId || !mountedId) {
+    return;
+  }
+  if (sourcePluginId !== currentRoutePluginId || sourcePluginId !== mountedId) {
     return;
   }
 
-  const iframeOrigin = (() => {
-    try {
-      return new URL(iframe.src).origin;
-    } catch {
-      return "";
-    }
-  })();
-  if (iframeOrigin && event.origin !== iframeOrigin) {
-    return;
-  }
-
-  const message = event.data as {
-    type?: string;
-    payload?: Record<string, unknown>;
-  };
   if (message?.type !== "EVENT") {
     return;
   }
@@ -241,12 +228,13 @@ async function handleRetry() {
 }
 
 onMounted(() => {
-  window.addEventListener("message", handlePluginMessage);
+  unsubscribePluginEvents = pluginSystem.onPluginEvent(handlePluginEvent);
 });
 
 onBeforeUnmount(() => {
   activeFlowId.value += 1;
-  window.removeEventListener("message", handlePluginMessage);
+  unsubscribePluginEvents?.();
+  unsubscribePluginEvents = null;
   const idToDeactivate = mountedPluginId.value ?? pluginId.value;
   if (idToDeactivate) {
     store.deactivatePlugin(idToDeactivate);

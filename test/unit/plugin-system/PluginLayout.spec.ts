@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp, nextTick, reactive, ref } from "vue";
+import type { PluginMessage } from "@/plugin-system/types";
 
 const mockRoute = reactive({
   params: {
@@ -14,6 +15,16 @@ const mockEnsurePluginAccess = vi.fn();
 const mockBroadcastThemeChange = vi.fn();
 const mockBroadcastLangChange = vi.fn();
 const mockRouterPush = vi.fn();
+let pluginEventHandler:
+  | ((pluginId: string, message: PluginMessage) => void)
+  | undefined;
+const mockUnsubscribePluginEvent = vi.fn();
+const mockOnPluginEvent = vi.fn(
+  (handler: (pluginId: string, message: PluginMessage) => void) => {
+    pluginEventHandler = handler;
+    return mockUnsubscribePluginEvent;
+  }
+);
 
 const mockPlugins = new Map([
   [
@@ -77,6 +88,7 @@ vi.mock("@/plugin-system", () => ({
   pluginSystem: {
     broadcastThemeChange: mockBroadcastThemeChange,
     broadcastLangChange: mockBroadcastLangChange,
+    onPluginEvent: mockOnPluginEvent,
   },
 }));
 
@@ -137,6 +149,9 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     mockBroadcastThemeChange.mockReset();
     mockBroadcastLangChange.mockReset();
     mockRouterPush.mockReset();
+    pluginEventHandler = undefined;
+    mockOnPluginEvent.mockClear();
+    mockUnsubscribePluginEvent.mockClear();
   });
 
   afterEach(() => {
@@ -318,41 +333,65 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     expect(mockDeactivatePlugin).toHaveBeenCalledWith("ai-3d-generator-v3");
   });
 
-  it("routes host navigation events from the active plugin iframe", async () => {
-    const { el } = await mountView();
+  it("ignores host events from stale plugin ids during route switches", async () => {
+    await mountView();
 
-    const container = el.querySelector(
-      ".plugin-page__iframe"
-    ) as HTMLDivElement;
-    const iframe = document.createElement("iframe");
-    const iframeWindow = { postMessage: vi.fn() };
-    Object.defineProperty(iframe, "contentWindow", {
-      value: iframeWindow,
-      configurable: true,
+    const deactivation = createDeferred<void>();
+    mockDeactivatePlugin.mockImplementationOnce(async () => {
+      return deactivation.promise;
     });
-    iframe.src = "http://localhost:3101/?lang=zh-CN&theme=edu-friendly";
-    container.appendChild(iframe);
 
-    window.dispatchEvent(
-      new MessageEvent("message", {
-        source: iframeWindow as unknown as MessageEventSource,
-        origin: "http://localhost:3101",
-        data: {
-          type: "EVENT",
-          id: "event-1",
-          payload: {
-            event: "navigate-host",
-            path: "/resource/polygen/index",
-            query: {
-              lang: "zh-CN",
-              theme: "edu-friendly",
-              resourceId: "5391",
-              open: "1",
-            },
-          },
+    mockRoute.params.pluginId = "plugin-b";
+    await nextTick();
+    await Promise.resolve();
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    await Promise.resolve();
+
+    expect(mockOnPluginEvent).toHaveBeenCalledOnce();
+    expect(pluginEventHandler).toBeDefined();
+
+    pluginEventHandler?.("ai-3d-generator-v3", {
+      type: "EVENT",
+      id: "event-stale",
+      payload: {
+        event: "navigate-host",
+        path: "/resource/legacy/index",
+        query: {
+          lang: "zh-CN",
+          theme: "edu-friendly",
+          resourceId: "7391",
         },
-      })
-    );
+      },
+    });
+
+    await nextTick();
+
+    expect(mockRouterPush).not.toHaveBeenCalled();
+
+    deactivation.resolve();
+    await Promise.resolve();
+  });
+
+  it("routes host navigation events from the mounted plugin through PluginSystem", async () => {
+    await mountView();
+
+    expect(mockOnPluginEvent).toHaveBeenCalledOnce();
+    expect(pluginEventHandler).toBeDefined();
+
+    pluginEventHandler?.("ai-3d-generator-v3", {
+      type: "EVENT",
+      id: "event-1",
+      payload: {
+        event: "navigate-host",
+        path: "/resource/polygen/index",
+        query: {
+          lang: "zh-CN",
+          theme: "edu-friendly",
+          resourceId: "5391",
+          open: "1",
+        },
+      },
+    });
 
     await nextTick();
 
@@ -365,5 +404,13 @@ describe("plugin-system/views/PluginLayout.vue", () => {
         open: "1",
       },
     });
+  });
+
+  it("unsubscribes plugin event handlers when unmounted", async () => {
+    const { app } = await mountView();
+
+    app.unmount();
+
+    expect(mockUnsubscribePluginEvent).toHaveBeenCalledOnce();
   });
 });
