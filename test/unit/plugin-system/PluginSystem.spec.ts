@@ -155,7 +155,6 @@ function createMockConfigService(
   const cs = Object.create(ConfigService.prototype) as ConfigService;
   cs.loadConfig = vi.fn(async () => config);
   cs.getConfig = vi.fn(() => config);
-  cs.loadStaticConfig = vi.fn(async () => config);
   cs.getDomainPluginConfig = vi.fn(() => null);
   cs.refreshConfig = vi.fn(async () => config);
   return cs;

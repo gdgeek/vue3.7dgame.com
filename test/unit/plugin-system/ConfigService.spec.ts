@@ -98,29 +98,6 @@ describe("ConfigService", () => {
     vi.restoreAllMocks();
   });
 
-  describe("loadStaticConfig (deprecated, maps to loadApiConfig)", () => {
-    it("should load and return valid config from API", async () => {
-      const config = makeConfig();
-      mockApiConfig(config);
-
-      const result = await service.loadStaticConfig();
-
-      expect(result).toEqual(config);
-    });
-
-    it("should return empty config when API fails", async () => {
-      mockApiConfig(null);
-
-      const result = await service.loadStaticConfig();
-
-      expect(result).toEqual({
-        version: "0.0.0",
-        menuGroups: [],
-        plugins: [],
-      });
-    });
-  });
-
   describe("loadConfig", () => {
     it("should derive allowedOrigin from url when local plugins.json omits it", async () => {
       const localConfig = makeConfig({

@@ -5,10 +5,10 @@ export type PluginAccessScope =
   | "root-only";
 
 /**
- * 插件自报元数据 —— 由插件自身在 `public/plugin-manifest.json` 中声明。
- * ConfigService 加载基础配置后会并行 fetch 各插件的此文件，
- * 用其中的 i18n 数据覆盖 DB / plugins.json 中的同名字段，
- * 实现「多语言文字由插件自己维护」的设计目标。
+ * 插件自报元数据结构。
+ *
+ * 当前宿主不会自动 fetch 插件自身的 `public/plugin-manifest.json`。
+ * 保留此类型仅用于描述未来可支持的插件自报元数据格式。
  */
 export interface PluginPublicManifest {
   /** 插件 ID，必须与主框架注册的 id 一致 */
@@ -19,8 +19,7 @@ export interface PluginPublicManifest {
   descriptionI18n?: Record<string, string>;
   /**
    * 插件所属分组的 i18n 信息（可选）。
-   * 若提供，ConfigService 会用此数据更新对应 MenuGroup 的 nameI18n，
-   * 实现分组名称也由插件插件声明。
+   * 当前宿主不会自动用此字段更新 MenuGroup。
    */
   group?: {
     id: string;

@@ -74,12 +74,11 @@ function isPluginsConfig(value: unknown): value is PluginsConfig {
 /**
  * ConfigService — 插件配置加载服务
  *
- * 合并策略（本地与 DB 完全平行，互不覆盖）：
- * 1. 本地 `/config/plugins.json` — 本地内置插件，保留声明的分组
- *    `builtins` 分组为保留 id，DB 无法覆盖
- * 2. 后端 API `GET /v1/plugin/list` — DB 插件，保留各自分组
- *    DB 中与本地同 group id 的分组定义被忽略（本地优先）
- * 3. 两边插件全部显示，各自属于声明的分组，不去重
+ * 合并策略：
+ * 1. 后端 API `GET /v1/plugin/list` 作为基础配置。
+ * 2. 本地 `/config/plugins.json` 中同 id 插件覆盖 API 插件。
+ * 3. 本地新增插件追加到 API 插件之后。
+ * 4. menuGroups 使用同样策略：API 为基础，本地同 id 覆盖，本地新增追加。
  *
  * 任意一层加载失败都不影响其他层，确保最大可用性。
  */
@@ -92,9 +91,7 @@ export class ConfigService {
   }
 
   /**
-   * 加载配置：本地与 DB 完全平行，互不覆盖。
-   * 分组：本地优先（本地声明的 group id 不被 DB 覆盖）；DB 独有分组追加。
-   * 插件：本地 + DB 全部显示，各自保留声明的 group。
+   * 加载配置：API 为基础，本地同 id 覆盖，本地新增追加。
    */
   async loadConfig(): Promise<PluginsConfig> {
     if (this.cachedConfig) {
@@ -184,11 +181,6 @@ export class ConfigService {
       logger.warn("Error loading plugin list API:", err);
       return { ...EMPTY_CONFIG };
     }
-  }
-
-  /** @deprecated 改名为 loadApiConfig，保留以兼容旧调用方 */
-  async loadStaticConfig(): Promise<PluginsConfig> {
-    return this.loadApiConfig();
   }
 
   /** 强制刷新配置 */
