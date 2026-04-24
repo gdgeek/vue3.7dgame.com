@@ -13,6 +13,19 @@
       },
       "icon": "Setting",
       "order": 99
+    },
+    {
+      "id": "tools",
+      "name": "实用工具",
+      "nameI18n": {
+        "zh-CN": "实用工具",
+        "zh-TW": "實用工具",
+        "en-US": "Tools",
+        "ja-JP": "ユーティリティ",
+        "th-TH": "เครื่องมือ"
+      },
+      "icon": "MagicStick",
+      "order": 50
     }
   ],
   "plugins": [
@@ -52,6 +65,25 @@
       "enabled": true,
       "order": 2,
       "accessScope": "root-only",
+      "version": "1.0.0"
+    },
+    {
+      "id": "ai-3d-generator-v3",
+      "name": "AI 3D 生成器 V3",
+      "nameI18n": {
+        "zh-CN": "AI 3D 生成器 V3",
+        "zh-TW": "AI 3D 產生器 V3",
+        "en-US": "AI 3D Generator V3",
+        "ja-JP": "AI 3D ジェネレーター V3",
+        "th-TH": "AI 3D Generator V3"
+      },
+      "description": "基于 3D 生成服务与 COS 的独立 3D 生成插件",
+      "url": "http://localhost:3008/",
+      "icon": "MagicStick",
+      "group": "tools",
+      "enabled": true,
+      "order": 3,
+      "accessScope": "auth-only",
       "version": "1.0.0"
     }
   ]
