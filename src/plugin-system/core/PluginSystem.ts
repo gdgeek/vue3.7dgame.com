@@ -217,7 +217,7 @@ export class PluginSystem {
         const errorMessage = `Current host origin "${window.location.origin}" is not allowed for plugin "${pluginId}"`;
         this.transitionState(pluginId, "error", errorMessage);
         logger.warn(errorMessage);
-        return;
+        throw new Error(errorMessage);
       }
 
       const loaded = await this.loader.load(
@@ -250,9 +250,13 @@ export class PluginSystem {
       const errorMessage = err instanceof Error ? err.message : String(err);
 
       // Transition: loading → error
-      this.transitionState(pluginId, "error", errorMessage);
+      const alreadyInErrorState = pluginInfo.state === "error";
+      if (!alreadyInErrorState) {
+        this.transitionState(pluginId, "error", errorMessage);
+      }
 
       logger.error(`Failed to load plugin "${pluginId}":`, err);
+      throw err;
     }
   }
 

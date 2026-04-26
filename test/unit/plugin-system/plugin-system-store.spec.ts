@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from "pinia";
 const mockInitialize = vi.fn();
 const mockGetConfig = vi.fn();
 const mockGetAllPlugins = vi.fn();
+const mockLoadPlugin = vi.fn();
 const mockVerifyPluginHostSession = vi.fn();
 
 vi.mock("@/plugin-system", () => ({
@@ -12,7 +13,7 @@ vi.mock("@/plugin-system", () => ({
     getConfig: (...args: unknown[]) => mockGetConfig(...args),
     getAllPlugins: (...args: unknown[]) => mockGetAllPlugins(...args),
     destroy: vi.fn(),
-    loadPlugin: vi.fn(),
+    loadPlugin: (...args: unknown[]) => mockLoadPlugin(...args),
     unloadPlugin: vi.fn(),
     getPluginState: vi.fn(() => "unloaded"),
   },
@@ -39,6 +40,7 @@ describe("plugin-system store access-scope visibility", () => {
     mockInitialize.mockReset();
     mockGetConfig.mockReset();
     mockGetAllPlugins.mockReset();
+    mockLoadPlugin.mockReset();
     mockVerifyPluginHostSession.mockReset();
     mockGetConfig.mockReturnValue({
       version: "1.0.0",
@@ -276,6 +278,25 @@ describe("plugin-system store access-scope visibility", () => {
 
     expect(mockVerifyPluginHostSession).toHaveBeenCalledTimes(2);
     expect(store.pluginAccessStates["user-management"]).toBe("visible");
+  });
+
+  it("does not set activePluginId when plugin activation fails", async () => {
+    mockLoadPlugin.mockRejectedValueOnce(new Error("Load failed"));
+
+    const { usePluginSystemStore } = await import(
+      "@/store/modules/plugin-system"
+    );
+    const store = usePluginSystemStore();
+
+    await store.init();
+    await store.activatePlugin("user-management", document.createElement("div"));
+
+    expect(store.activePluginId).toBeNull();
+    expect(store.error).toBe("Load failed");
+    expect(store.plugins.get("user-management")?.state).toBe("error");
+    expect(store.plugins.get("user-management")?.lastError).toBe(
+      "Load failed"
+    );
   });
 
   it("deduplicates in-flight host session visibility checks for the same token", async () => {

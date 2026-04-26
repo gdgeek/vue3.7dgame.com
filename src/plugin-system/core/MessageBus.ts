@@ -142,7 +142,13 @@ export class MessageBus {
       return;
     }
 
-    const message = event.data as PluginMessage;
+    const message = this.parsePluginMessage(event.data);
+    if (!message) {
+      logger.warn(
+        `Message from plugin "${pluginId}" discarded due to invalid shape`
+      );
+      return;
+    }
 
     // Dispatch to general handlers
     for (const handler of this.handlers) {
@@ -177,6 +183,24 @@ export class MessageBus {
       }
     }
     return undefined;
+  }
+
+  private parsePluginMessage(data: unknown): PluginMessage | null {
+    if (typeof data !== "object" || data === null) {
+      return null;
+    }
+
+    const message = data as Partial<PluginMessage>;
+    if (
+      typeof message.type !== "string" ||
+      message.type.trim() === "" ||
+      typeof message.id !== "string" ||
+      message.id.trim() === ""
+    ) {
+      return null;
+    }
+
+    return message as PluginMessage;
   }
 }
 

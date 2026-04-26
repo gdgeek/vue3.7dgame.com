@@ -361,8 +361,24 @@ describe("PluginSystem", () => {
       await system.initialize();
       const container = createContainer();
 
-      await system.loadPlugin("plugin-a", container);
+      await expect(system.loadPlugin("plugin-a", container)).rejects.toThrow(
+        "Load failed"
+      );
 
+      expect(system.getPluginState("plugin-a")).toBe("error");
+    });
+
+    it("should reject when loader fails", async () => {
+      (loader.load as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error("Load failed")
+      );
+
+      await system.initialize();
+      const container = createContainer();
+
+      await expect(system.loadPlugin("plugin-a", container)).rejects.toThrow(
+        "Load failed"
+      );
       expect(system.getPluginState("plugin-a")).toBe("error");
     });
 
@@ -374,7 +390,9 @@ describe("PluginSystem", () => {
       await system.initialize();
       const container = createContainer();
 
-      await system.loadPlugin("plugin-a", container);
+      await expect(system.loadPlugin("plugin-a", container)).rejects.toThrow(
+        "Network timeout"
+      );
 
       const info = system
         .getAllPlugins()
@@ -422,7 +440,11 @@ describe("PluginSystem", () => {
       await system.initialize();
       const container = createContainer();
 
-      await system.loadPlugin("restricted-plugin", container);
+      await expect(
+        system.loadPlugin("restricted-plugin", container)
+      ).rejects.toThrow(
+        'Current host origin "http://localhost:3000" is not allowed for plugin "restricted-plugin"'
+      );
 
       expect(loader.load).not.toHaveBeenCalled();
       expect(system.getPluginState("restricted-plugin")).toBe("error");
@@ -490,7 +512,9 @@ describe("PluginSystem", () => {
 
       await system.initialize();
       const container = createContainer();
-      await system.loadPlugin("plugin-a", container);
+      await expect(system.loadPlugin("plugin-a", container)).rejects.toThrow(
+        "fail"
+      );
       expect(system.getPluginState("plugin-a")).toBe("error");
 
       await system.unloadPlugin("plugin-a");
@@ -523,7 +547,9 @@ describe("PluginSystem", () => {
 
       await system.initialize();
       const container = createContainer();
-      await system.loadPlugin("plugin-a", container);
+      await expect(system.loadPlugin("plugin-a", container)).rejects.toThrow(
+        "fail"
+      );
       expect(system.getPluginState("plugin-a")).toBe("error");
 
       // Retry — should succeed
@@ -538,7 +564,9 @@ describe("PluginSystem", () => {
 
       await system.initialize();
       const container = createContainer();
-      await system.loadPlugin("plugin-a", container);
+      await expect(system.loadPlugin("plugin-a", container)).rejects.toThrow(
+        "fail"
+      );
       expect(system.getPluginState("plugin-a")).toBe("error");
 
       await system.unloadPlugin("plugin-a");
@@ -552,7 +580,9 @@ describe("PluginSystem", () => {
 
       await system.initialize();
       const container = createContainer();
-      await system.loadPlugin("plugin-a", container);
+      await expect(system.loadPlugin("plugin-a", container)).rejects.toThrow(
+        "some error"
+      );
 
       const infoWithError = system
         .getAllPlugins()
@@ -597,7 +627,9 @@ describe("PluginSystem", () => {
       const containerB = createContainer();
 
       // Load both — A should fail, B should succeed
-      await system.loadPlugin("plugin-a", containerA);
+      await expect(system.loadPlugin("plugin-a", containerA)).rejects.toThrow(
+        "Plugin A crashed"
+      );
       await system.loadPlugin("plugin-b", containerB);
 
       expect(system.getPluginState("plugin-a")).toBe("error");
@@ -786,7 +818,9 @@ describe("PluginSystem", () => {
 
       await system.initialize();
       const container = createContainer();
-      await system.loadPlugin("plugin-a", container);
+      await expect(system.loadPlugin("plugin-a", container)).rejects.toThrow(
+        "test-error"
+      );
 
       // console.error is always called (even in non-dev mode) for errors
       const errorCalls = errorSpy.mock.calls.map((args) => args.join(" "));

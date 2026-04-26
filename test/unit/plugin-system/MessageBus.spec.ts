@@ -261,6 +261,44 @@ describe("MessageBus", () => {
     });
   });
 
+  describe("message shape", () => {
+    it("should discard registered iframe messages without a string type", () => {
+      const iframe = createMockIframe("https://a.example.com");
+      bus.registerPlugin("pluginA", iframe, "https://a.example.com");
+
+      const handler = vi.fn();
+      bus.onMessage(handler);
+
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          data: { id: "missing-type" },
+          origin: "https://a.example.com",
+          source: iframe.contentWindow as MessageEventSource,
+        })
+      );
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it("should discard registered iframe messages without a string id", () => {
+      const iframe = createMockIframe("https://a.example.com");
+      bus.registerPlugin("pluginA", iframe, "https://a.example.com");
+
+      const handler = vi.fn();
+      bus.onMessage(handler);
+
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          data: { type: "EVENT" },
+          origin: "https://a.example.com",
+          source: iframe.contentWindow as MessageEventSource,
+        })
+      );
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+  });
+
   describe("destroy", () => {
     it("should stop receiving messages after destroy", () => {
       const iframe = createMockIframe("https://a.example.com");
