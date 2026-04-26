@@ -23,4 +23,25 @@ describe("resolvePluginHostAction", () => {
       query: { lang: "zh-CN", theme: "modern-blue" },
     });
   });
+
+  it("returns a plugin URL sync action for plugin-url-changed events", () => {
+    expect(
+      resolvePluginHostAction({
+        event: "plugin-url-changed",
+        pluginUrl: "/sample?tab=detail#top",
+      })
+    ).toEqual({
+      type: "sync-plugin-url",
+      pluginUrl: "/sample?tab=detail#top",
+    });
+  });
+
+  it("ignores unsafe plugin URL sync payloads", () => {
+    expect(
+      resolvePluginHostAction({
+        event: "plugin-url-changed",
+        pluginUrl: "https://example.com/sample",
+      })
+    ).toBeNull();
+  });
 });

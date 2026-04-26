@@ -1,4 +1,5 @@
 import { createLogger } from "@/utils/logger";
+import { buildPluginIframeUrl } from "@/plugin-system/utils/pluginUrl";
 
 import type { PluginManifest, PluginState } from "@/plugin-system/types";
 
@@ -23,6 +24,8 @@ export interface PluginLoadOptions {
   lang?: string;
   /** Current theme name, e.g. "edu-friendly" */
   theme?: string;
+  /** Relative URL inside the plugin app, e.g. "/sample?tab=detail" */
+  pluginUrl?: string;
   /** Plugin version string, appended as ?v=xxx to bust cache */
   version?: string;
   /** Cache-busting token for the iframe entry document */
@@ -181,19 +184,7 @@ export class PluginLoader {
    * Build the full iframe URL by appending lang/theme/version/cache-busting query parameters.
    */
   private buildPluginUrl(baseUrl: string, options?: PluginLoadOptions): string {
-    if (!options) return baseUrl;
-    const separator = baseUrl.includes("?") ? "&" : "?";
-    const params: string[] = [];
-    if (options.lang) params.push(`lang=${encodeURIComponent(options.lang)}`);
-    if (options.theme)
-      params.push(`theme=${encodeURIComponent(options.theme)}`);
-    if (options.version)
-      params.push(`v=${encodeURIComponent(options.version)}`);
-    if (options.cacheBust)
-      params.push(`cb=${encodeURIComponent(options.cacheBust)}`);
-    return params.length > 0
-      ? `${baseUrl}${separator}${params.join("&")}`
-      : baseUrl;
+    return buildPluginIframeUrl(baseUrl, options);
   }
 }
 

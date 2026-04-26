@@ -5,6 +5,7 @@ import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useTheme } from "@/composables/useTheme";
 import { pluginSystem } from "@/plugin-system";
+import { normalizePluginUrlQuery } from "@/plugin-system/utils/pluginUrl";
 import { resolvePluginHostAction } from "@/plugin-system/views/pluginHostActions";
 import type { PluginMessage } from "@/plugin-system/types";
 import { Loading } from "@element-plus/icons-vue";
@@ -82,6 +83,7 @@ async function activatePluginForRoute(
   await store.activatePlugin(targetPluginId, containerRef.value, {
     lang: appStore.language,
     theme: currentThemeName.value,
+    pluginUrl: normalizePluginUrlQuery(route.query.pluginUrl) ?? undefined,
   });
   if (!isFlowCurrent(flowId, targetPluginId)) {
     await store.deactivatePlugin(targetPluginId);
@@ -185,6 +187,21 @@ function handlePluginEvent(sourcePluginId: string, message: PluginMessage) {
 
   if (action.type === "reload-host") {
     window.location.reload();
+    return;
+  }
+
+  if (action.type === "sync-plugin-url") {
+    if (route.query.pluginUrl === action.pluginUrl) {
+      return;
+    }
+
+    router.replace({
+      path: route.path,
+      query: {
+        ...route.query,
+        pluginUrl: action.pluginUrl,
+      },
+    });
     return;
   }
 

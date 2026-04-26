@@ -1,10 +1,15 @@
 import type { LocationQueryRaw } from "vue-router";
+import { normalizePluginUrlParam } from "@/plugin-system/utils/pluginUrl";
 
 export type PluginHostAction =
   | {
       type: "navigate-host";
       path: string;
       query: LocationQueryRaw;
+    }
+  | {
+      type: "sync-plugin-url";
+      pluginUrl: string;
     }
   | {
       type: "reload-host";
@@ -40,6 +45,11 @@ export function resolvePluginHostAction(
 
   if (event === "plugin-registry-changed") {
     return { type: "reload-host" };
+  }
+
+  if (event === "plugin-url-changed") {
+    const pluginUrl = normalizePluginUrlParam(payload.pluginUrl);
+    return pluginUrl ? { type: "sync-plugin-url", pluginUrl } : null;
   }
 
   if (event !== "navigate-host") {

@@ -3,9 +3,11 @@ import { createApp, nextTick, reactive, ref } from "vue";
 import type { PluginMessage } from "@/plugin-system/types";
 
 const mockRoute = reactive({
+  path: "/plugins/ai-3d-generator-v3",
   params: {
     pluginId: "ai-3d-generator-v3" as string | undefined,
   },
+  query: {} as Record<string, string | undefined>,
 });
 
 const mockActivatePlugin = vi.fn();
@@ -15,6 +17,7 @@ const mockEnsurePluginAccess = vi.fn();
 const mockBroadcastThemeChange = vi.fn();
 const mockBroadcastLangChange = vi.fn();
 const mockRouterPush = vi.fn();
+const mockRouterReplace = vi.fn();
 let pluginEventHandler:
   | ((pluginId: string, message: PluginMessage) => void)
   | undefined;
@@ -59,6 +62,7 @@ vi.mock("vue-router", () => ({
   useRoute: vi.fn(() => mockRoute),
   useRouter: vi.fn(() => ({
     push: mockRouterPush,
+    replace: mockRouterReplace,
   })),
 }));
 
@@ -132,7 +136,9 @@ async function mountView() {
 
 describe("plugin-system/views/PluginLayout.vue", () => {
   beforeEach(() => {
+    mockRoute.path = "/plugins/ai-3d-generator-v3";
     mockRoute.params.pluginId = "ai-3d-generator-v3";
+    mockRoute.query = {};
     mockInit.mockResolvedValue(undefined);
     mockEnsurePluginAccess.mockResolvedValue({
       status: "visible",
@@ -149,6 +155,7 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     mockBroadcastThemeChange.mockReset();
     mockBroadcastLangChange.mockReset();
     mockRouterPush.mockReset();
+    mockRouterReplace.mockReset();
     pluginEventHandler = undefined;
     mockOnPluginEvent.mockClear();
     mockUnsubscribePluginEvent.mockClear();
@@ -402,6 +409,28 @@ describe("plugin-system/views/PluginLayout.vue", () => {
         theme: "edu-friendly",
         resourceId: "5391",
         open: "1",
+      },
+    });
+  });
+
+  it("syncs mounted plugin URL change events into the host route query", async () => {
+    await mountView();
+
+    pluginEventHandler?.("ai-3d-generator-v3", {
+      type: "EVENT",
+      id: "event-plugin-url",
+      payload: {
+        event: "plugin-url-changed",
+        pluginUrl: "/sample?tab=detail#top",
+      },
+    });
+
+    await nextTick();
+
+    expect(mockRouterReplace).toHaveBeenCalledWith({
+      path: "/plugins/ai-3d-generator-v3",
+      query: {
+        pluginUrl: "/sample?tab=detail#top",
       },
     });
   });

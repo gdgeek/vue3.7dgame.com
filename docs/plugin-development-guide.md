@@ -22,7 +22,7 @@
 web 主前端
   PluginSystem / PluginLoader / MessageBus
   PluginLayout.vue
-    iframe src = plugin.url + ?lang=...&theme=...
+    iframe src = plugin.url + pluginUrl + ?lang=...&theme=...
       插件独立 Web 应用
         usePluginMessageBridge
         /api/* 反向代理
@@ -36,6 +36,7 @@ web 主前端
 - 合并菜单分组和插件清单
 - 按 `accessScope` 决定菜单可见性
 - 创建 iframe，校验 `allowedOrigin`，执行 `PLUGIN_READY -> INIT` 握手
+- 通过宿主路由的 `?pluginUrl=` 记录插件内部相对路径，并在刷新时恢复插件内部页面
 - 在 token 刷新时向已加载插件广播 `TOKEN_UPDATE`
 
 普通插件负责：
@@ -44,6 +45,7 @@ web 主前端
 - 收到 `INIT` 后保存 token、主题和额外配置
 - 用 `/api/v1/plugin/verify-token` 获取当前用户角色
 - 在插件本地做能力判断
+- 内部路由变化后发送 `plugin-url-changed` 事件，把当前插件相对路径同步给宿主
 - 处理 `TOKEN_UPDATE`、`THEME_CHANGE`、`LANG_CHANGE`、`DESTROY`
 
 ## 插件注册
@@ -148,6 +150,37 @@ interface PluginMessage {
 | `LANG_CHANGE` | 主系统 -> 插件 | 语言切换 |
 | `DESTROY` | 主系统 -> 插件 | iframe 即将卸载 |
 | `REQUEST` / `RESPONSE` / `EVENT` | 双向 | 扩展通信 |
+
+## 插件 URL 刷新恢复
+
+宿主路由形态是 `/plugins/{pluginId}?pluginUrl=/plugin/internal/path`。`pluginUrl` 只允许插件内部相对路径，宿主会拒绝外部 URL、协议 URL、`//` 开头路径和反斜杠路径，并会移除 `lang`、`theme`、`v`、`cb` 等宿主控制参数。
+
+加载插件 iframe 时，宿主会把 `pluginUrl` 合并到插件入口 URL：
+
+```text
+/plugins/my-plugin?pluginUrl=/sample?tab=detail#top
+→ iframe src = http://plugin-host/sample?tab=detail&lang=zh-CN&theme=modern-blue&v=...
+```
+
+标准插件应在内部路由变化后通知宿主：
+
+```ts
+router.afterEach((to) => {
+  window.parent.postMessage(
+    {
+      type: "EVENT",
+      id: `plugin-url-changed-${Date.now()}`,
+      payload: {
+        event: "plugin-url-changed",
+        pluginUrl: to.fullPath
+      }
+    },
+    "*"
+  )
+})
+```
+
+宿主收到同一已挂载插件 iframe 发出的 `plugin-url-changed` 后，会用 `router.replace` 更新当前宿主地址栏的 `pluginUrl` 查询参数。这样用户刷新浏览器、复制链接或重新打开当前插件页时，可以回到插件内部的同一个相对路由。
 
 插件端最小实现：
 
