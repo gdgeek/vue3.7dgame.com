@@ -30,7 +30,7 @@ function readText(relativePath: string): string {
 }
 
 describe("local static plugin config", () => {
-  it("keeps builtins and tools menu groups in public/config/plugins.json", () => {
+  it("keeps only the builtins menu group in public/config/plugins.json", () => {
     const config = readJson("public/config/plugins.json");
 
     expect(config.menuGroups).toEqual([
@@ -38,24 +38,21 @@ describe("local static plugin config", () => {
         id: "builtins",
         name: "基础工具",
       }),
-      expect.objectContaining({
-        id: "tools",
-        name: "实用工具",
-      }),
     ]);
   });
 
-  it("keeps user-management, system-admin and ai-3d-generator-v3 in public/config/plugins.json", () => {
+  it("keeps only user-management and system-admin in public/config/plugins.json", () => {
     const config = readJson("public/config/plugins.json");
 
     expect(config.plugins.map((plugin) => plugin.id)).toEqual([
       "user-management",
       "system-admin",
-      "ai-3d-generator-v3",
     ]);
     expect(config.plugins[0].group).toBe("builtins");
     expect(config.plugins[1].group).toBe("builtins");
-    expect(config.plugins[2].group).toBe("tools");
+    expect(config.plugins.every((plugin) => plugin.group === "builtins")).toBe(
+      true
+    );
   });
 
   it("keeps only the builtins menu group in public/config/plugins.json.template", () => {
