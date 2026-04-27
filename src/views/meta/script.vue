@@ -840,7 +840,14 @@ defineExpose({ run });
   top: -8px;
   padding-right: 280px;
   margin: 0 !important;
+  overflow: visible !important;
   border-bottom: none !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__nav-wrap),
+.script-tabs-wrapper :deep(.el-tabs__nav-scroll),
+.script-tabs-wrapper :deep(.el-tabs__nav) {
+  overflow: visible !important;
 }
 
 .script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__nav) {
