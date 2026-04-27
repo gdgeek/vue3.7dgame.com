@@ -846,8 +846,10 @@ onMounted(async () => {
   .script-loaded-metas-popper .el-select-dropdown__item.hover,
   .script-loaded-metas-popper .el-select-dropdown__item:hover,
   .script-loaded-metas-popper .el-select-dropdown__item.is-hovering,
-  .script-loaded-metas-popper.el-select-dropdown .el-select-dropdown__item.hover,
-  .script-loaded-metas-popper.el-select-dropdown .el-select-dropdown__item:hover,
+  .script-loaded-metas-popper.el-select-dropdown
+    .el-select-dropdown__item.hover,
+  .script-loaded-metas-popper.el-select-dropdown
+    .el-select-dropdown__item:hover,
   .script-loaded-metas-popper.el-select-dropdown
     .el-select-dropdown__item.is-hovering,
   .script-loaded-metas-popper.el-select__popper .el-select-dropdown__item.hover,
