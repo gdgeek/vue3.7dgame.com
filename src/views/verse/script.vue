@@ -835,14 +835,30 @@ onMounted(async () => {
   text-align: left;
 }
 
+:global(.script-loaded-metas-popper) {
+  --script-select-hover-bg: rgb(3 169 244 / 18%);
+  --script-select-hover-ring: rgb(3 169 244 / 24%);
+  --bg-hover: var(--script-select-hover-bg);
+  --el-fill-color-light: var(--script-select-hover-bg);
+}
+
 :global(
+  .script-loaded-metas-popper .el-select-dropdown__item.hover,
+  .script-loaded-metas-popper .el-select-dropdown__item:hover,
+  .script-loaded-metas-popper .el-select-dropdown__item.is-hovering,
+  .script-loaded-metas-popper.el-select-dropdown .el-select-dropdown__item.hover,
+  .script-loaded-metas-popper.el-select-dropdown .el-select-dropdown__item:hover,
+  .script-loaded-metas-popper.el-select-dropdown
+    .el-select-dropdown__item.is-hovering,
   .script-loaded-metas-popper.el-select__popper .el-select-dropdown__item.hover,
   .script-loaded-metas-popper.el-select__popper .el-select-dropdown__item:hover,
   .script-loaded-metas-popper.el-select__popper
     .el-select-dropdown__item.is-hovering
 ) {
   color: var(--primary-color, #03a9f4) !important;
-  background: var(--primary-light, rgb(3 169 244 / 12%)) !important;
+  background-color: var(--script-select-hover-bg) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--script-select-hover-ring) !important;
 }
 
 :global(
@@ -882,14 +898,14 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary, #64748b);
-  background: var(--bg-card, #fff);
   height: 30px !important;
   min-height: 0 !important;
   padding: 0 12px !important;
   font-size: 12px;
   line-height: 1.1;
+  color: var(--text-secondary, #64748b);
   white-space: nowrap;
+  background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #d6deea) !important;
   border-radius: 8px;
   outline: none !important;
@@ -931,17 +947,14 @@ onMounted(async () => {
   overflow: hidden;
   background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #d6deea);
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
+  border-radius: 12px;
 }
 
 .blockly-editor-frame {
   display: block;
+  background: var(--bg-card, #fff);
   border: 0;
   border-radius: inherit;
-  background: var(--bg-card, #fff);
 }
 
 .script-editor-loading-indicator {
