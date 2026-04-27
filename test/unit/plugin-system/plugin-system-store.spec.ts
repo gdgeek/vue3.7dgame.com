@@ -289,14 +289,15 @@ describe("plugin-system store access-scope visibility", () => {
     const store = usePluginSystemStore();
 
     await store.init();
-    await store.activatePlugin("user-management", document.createElement("div"));
+    await store.activatePlugin(
+      "user-management",
+      document.createElement("div")
+    );
 
     expect(store.activePluginId).toBeNull();
     expect(store.error).toBe("Load failed");
     expect(store.plugins.get("user-management")?.state).toBe("error");
-    expect(store.plugins.get("user-management")?.lastError).toBe(
-      "Load failed"
-    );
+    expect(store.plugins.get("user-management")?.lastError).toBe("Load failed");
   });
 
   it("deduplicates in-flight host session visibility checks for the same token", async () => {

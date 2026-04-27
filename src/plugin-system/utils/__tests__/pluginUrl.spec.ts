@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildPluginIframeUrl,
-  normalizePluginUrlParam,
-} from "../pluginUrl";
+import { buildPluginIframeUrl, normalizePluginUrlParam } from "../pluginUrl";
 
 describe("plugin URL helpers", () => {
   it("normalizes relative pluginUrl values", () => {

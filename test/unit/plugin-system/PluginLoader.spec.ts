@@ -114,11 +114,7 @@ describe("PluginLoader", () => {
     it("should not auto-send INIT postMessage after load (INIT is sent by PluginSystem on PLUGIN_READY)", async () => {
       const manifest = createManifest();
 
-      const { iframe } = await loadMountedPlugin(
-        loader,
-        manifest,
-        container
-      );
+      const { iframe } = await loadMountedPlugin(loader, manifest, container);
 
       // Spy on contentWindow.postMessage (jsdom provides a contentWindow)
       const postMessageSpy = vi.fn();

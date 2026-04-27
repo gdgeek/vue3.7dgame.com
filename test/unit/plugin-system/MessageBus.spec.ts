@@ -180,7 +180,11 @@ describe("MessageBus", () => {
       const unsub = bus.onMessageType("EVENT", handler);
       unsub();
 
-      dispatchPluginMessage(iframe, "https://a.example.com", createMessage({ type: "EVENT" }));
+      dispatchPluginMessage(
+        iframe,
+        "https://a.example.com",
+        createMessage({ type: "EVENT" })
+      );
 
       expect(handler).not.toHaveBeenCalled();
     });
