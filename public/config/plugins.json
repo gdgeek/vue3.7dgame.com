@@ -13,6 +13,19 @@
       },
       "icon": "Setting",
       "order": 99
+    },
+    {
+      "id": "ar",
+      "name": "AR 工具",
+      "nameI18n": {
+        "zh-CN": "AR 工具",
+        "zh-TW": "AR 工具",
+        "en-US": "AR Tools",
+        "ja-JP": "AR ツール",
+        "th-TH": "เครื่องมือ AR"
+      },
+      "icon": "Location",
+      "order": 20
     }
   ],
   "plugins": [
@@ -52,6 +65,25 @@
       "enabled": true,
       "order": 2,
       "accessScope": "root-only",
+      "version": "1.0.0"
+    },
+    {
+      "id": "ar-slam-localization",
+      "name": "AR SLAM 定位",
+      "nameI18n": {
+        "zh-CN": "AR SLAM 定位",
+        "zh-TW": "AR SLAM 定位",
+        "en-US": "AR SLAM Localization",
+        "ja-JP": "AR SLAM ローカライズ",
+        "th-TH": "AR SLAM Localization"
+      },
+      "description": "上传空间扫描包，预览 GLB 模型，并创建场景绑定草稿",
+      "url": "http://localhost:3016/",
+      "icon": "Location",
+      "group": "ar",
+      "enabled": true,
+      "order": 10,
+      "allowedOrigin": "http://localhost:3016",
       "version": "1.0.0"
     }
   ]

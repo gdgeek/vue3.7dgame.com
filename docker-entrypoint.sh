@@ -385,7 +385,8 @@ if [ -f "$PLUGINS_FILE" ]; then
   echo "[entrypoint] Substituting plugin URLs in $PLUGINS_FILE"
   echo "[entrypoint]   PLUGIN_USER_MANAGEMENT_URL=${PLUGIN_USER_MANAGEMENT_URL:-<not set>}"
   echo "[entrypoint]   PLUGIN_SYSTEM_ADMIN_URL=${PLUGIN_SYSTEM_ADMIN_URL:-<not set>}"
-  envsubst '$PLUGIN_USER_MANAGEMENT_URL $PLUGIN_SYSTEM_ADMIN_URL' \
+  echo "[entrypoint]   PLUGIN_AR_SLAM_LOCALIZATION_URL=${PLUGIN_AR_SLAM_LOCALIZATION_URL:-<not set>}"
+  envsubst '$PLUGIN_USER_MANAGEMENT_URL $PLUGIN_SYSTEM_ADMIN_URL $PLUGIN_AR_SLAM_LOCALIZATION_URL' \
     < "$PLUGINS_FILE" > "${PLUGINS_FILE}.tmp" && mv "${PLUGINS_FILE}.tmp" "$PLUGINS_FILE"
 fi
 
