@@ -61,6 +61,10 @@ import type {
 } from "@/composables/useScriptEditorBase";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
+import {
+  VERSE_SCENE_EXPAND,
+  buildVerseEditorInitConfig,
+} from "./sceneSpace";
 
 // 组件状态
 const userStore = useUserStore();
@@ -174,21 +178,21 @@ const verse = ref<VerseData | null>(null);
 const pushVerseToEditor = (nextVerse: VerseData) => {
   postStandardMessage("INIT", {
     token: null,
-    config: {
+    config: buildVerseEditorInitConfig({
       id: id.value,
-      data: nextVerse,
+      verse: nextVerse,
       saveable: saveable.value,
       user: {
         id: userStore.userInfo?.id || null,
         role: userStore.getRole(),
       },
-    },
+    }),
   });
 };
 
 // 刷新场景数据
 const refresh = async () => {
-  const response = await getVerse(id.value, "metas, resources");
+  const response = await getVerse(id.value, VERSE_SCENE_EXPAND);
   verse.value = response.data;
   saveable.value = verse.value ? verse.value.editable : false;
   if (verse.value) {
@@ -1118,6 +1122,15 @@ onBeforeUnmount(() => {
   flex-direction: column;
   height: calc(100vh - 60px);
   overflow: hidden;
+
+  :deep(.el-container) {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  :deep(.el-main) {
+    position: relative;
+  }
 }
 
 .content {
