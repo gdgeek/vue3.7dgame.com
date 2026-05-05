@@ -3,8 +3,7 @@ import type { VerseData } from "@/api/v1/verse";
 export const VERSE_SCENE_EXPAND =
   "metas, resources, space, space.mesh, space.file, space.image";
 
-export const SPACE_REFERENCE_VISIBILITY_ACTION =
-  "set-space-reference-visible";
+export const SPACE_REFERENCE_VISIBILITY_ACTION = "set-space-reference-visible";
 
 export type VerseEditorUser = {
   id: number | null;
