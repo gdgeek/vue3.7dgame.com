@@ -2,7 +2,7 @@
  * Verse（场景）相关类型定义
  */
 
-import type { Author, JsonValue } from "./common";
+import type { Author, FileInfo, JsonValue } from "./common";
 import type { MetaInfo as MetaInfoFull } from "./meta";
 
 /** 图片详情 */
@@ -68,6 +68,21 @@ export interface VerseTag {
   type?: string;
 }
 
+/** 场景绑定空间 */
+export interface SpaceInfo {
+  id: number;
+  name: string;
+  user_id?: number;
+  mesh_id?: number;
+  image_id?: number | null;
+  file_id?: number | null;
+  created_at?: string;
+  data?: JsonValue;
+  mesh?: FileInfo;
+  image?: FileInfo | null;
+  file?: FileInfo | null;
+}
+
 /** 场景数据 */
 export interface VerseData {
   id: number;
@@ -93,6 +108,7 @@ export interface VerseData {
   verseCode?: VerseCode | null;
   verseTags?: VerseTag[];
   tags?: VerseTag[];
+  space?: SpaceInfo | null;
   updated_at?: string;
 }
 
