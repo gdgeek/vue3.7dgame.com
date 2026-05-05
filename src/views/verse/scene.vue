@@ -61,10 +61,7 @@ import type {
 } from "@/composables/useScriptEditorBase";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
-import {
-  VERSE_SCENE_EXPAND,
-  buildVerseEditorInitConfig,
-} from "./sceneSpace";
+import { VERSE_SCENE_EXPAND, buildVerseEditorInitConfig } from "./sceneSpace";
 
 // 组件状态
 const userStore = useUserStore();
