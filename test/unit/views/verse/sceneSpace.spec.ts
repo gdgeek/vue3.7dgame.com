@@ -81,6 +81,69 @@ describe("sceneSpace", () => {
     expect(config.data.space?.mesh?.url).toBe("https://example.test/space.glb");
   });
 
+  it("keeps Area Target Scanner space data and files in the editor init config", () => {
+    const verse = {
+      ...baseVerse,
+      space: {
+        id: 8,
+        name: "uv_unwrap_fixed.zip",
+        mesh_id: 31,
+        file_id: 32,
+        image_id: 33,
+        data: {
+          source: "ar-slam-localization",
+          provider: "area-target-scanner",
+          zipMd5: "area-target-content-md5",
+          zipName: "uv_unwrap_fixed.zip",
+          thumbnailFileId: 33,
+        },
+        mesh: {
+          id: 31,
+          md5: "mesh-md5",
+          type: "model/gltf-binary",
+          url: "https://example.test/spaces/area-target-content-md5/mesh.glb",
+          filename: "mesh.glb",
+          size: 1538052,
+          key: "spaces/area-target-content-md5/mesh.glb",
+        },
+        file: {
+          id: 32,
+          md5: "file-md5",
+          type: "application/zip",
+          url: "https://example.test/spaces/area-target-content-md5/file.zip",
+          filename: "file.zip",
+          size: 892928,
+          key: "spaces/area-target-content-md5/file.zip",
+        },
+        image: {
+          id: 33,
+          md5: "image-md5",
+          type: "image/png",
+          url: "https://example.test/spaces/area-target-content-md5/image.png",
+          filename: "image.png",
+          size: 1024,
+          key: "spaces/area-target-content-md5/image.png",
+        },
+      },
+    } satisfies VerseData;
+
+    const config = buildVerseEditorInitConfig({
+      id: 626,
+      verse,
+      saveable: true,
+      user: { id: 1, role: "admin" },
+    });
+    const spaceData = config.data.space?.data as Record<string, unknown>;
+
+    expect(spaceData.provider).toBe("area-target-scanner");
+    expect(config.data.space?.mesh?.url).toBe(
+      "https://example.test/spaces/area-target-content-md5/mesh.glb"
+    );
+    expect(config.data.space?.file?.url).toBe(
+      "https://example.test/spaces/area-target-content-md5/file.zip"
+    );
+  });
+
   it("builds a space reference visibility request", () => {
     expect(buildSpaceVisibilityRequest(false)).toEqual({
       action: SPACE_REFERENCE_VISIBILITY_ACTION,
