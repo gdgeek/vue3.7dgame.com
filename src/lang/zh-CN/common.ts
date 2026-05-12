@@ -71,6 +71,16 @@ export default {
       summaryModified: "修改 {items}",
       entry: "版本管理",
     },
+    unityPreview: {
+      entry: "运行场景",
+      title: "运行场景",
+      helpClick: "单击画面后可操作场景",
+      helpRotate: "按住 Alt + 鼠标左键旋转视角",
+      helpZoomPan: "滚轮缩放视角，右键平移视角",
+      helpFullscreen: "全屏可获得更完整预览",
+      fullscreen: "全屏运行场景",
+      close: "关闭运行场景",
+    },
     message: {
       createSuccess: "创建成功",
       saveSuccess: "保存成功",

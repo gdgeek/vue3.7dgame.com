@@ -180,6 +180,71 @@
           @clear-history="clearDraftHistory"
           @restore="restoreDraftVersion"
         ></ScriptDraftDialog>
+        <el-dialog
+          v-model="unityPreviewVisible"
+          width="min(1120px, calc(100vw - 64px))"
+          :show-close="false"
+          :close-on-click-modal="false"
+          :close-on-press-escape="true"
+          class="unity-preview-dialog"
+          @closed="handleUnityPreviewClosed"
+        >
+          <template #header="{ close, titleId, titleClass }">
+            <div class="unity-preview-header">
+              <div class="unity-preview-title-wrap">
+                <span :id="titleId" :class="titleClass">{{
+                  t("common.unityPreview.title")
+                }}</span>
+                <el-tooltip
+                  effect="dark"
+                  placement="bottom-start"
+                  popper-class="unity-preview-help-tooltip"
+                >
+                  <template #content>
+                    <div class="unity-preview-help">
+                      <div>{{ t("common.unityPreview.helpClick") }}</div>
+                      <div>{{ t("common.unityPreview.helpRotate") }}</div>
+                      <div>{{ t("common.unityPreview.helpZoomPan") }}</div>
+                      <div>{{ t("common.unityPreview.helpFullscreen") }}</div>
+                    </div>
+                  </template>
+                  <el-icon class="unity-preview-help-icon">
+                    <QuestionFilled></QuestionFilled>
+                  </el-icon>
+                </el-tooltip>
+              </div>
+              <div class="unity-preview-header-actions">
+                <button
+                  class="unity-preview-header-button"
+                  type="button"
+                  :aria-label="t('common.unityPreview.fullscreen')"
+                  @click="toggleUnityPreviewFullscreen"
+                >
+                  <el-icon><FullScreen></FullScreen></el-icon>
+                </button>
+                <button
+                  class="unity-preview-header-button"
+                  type="button"
+                  :aria-label="t('common.unityPreview.close')"
+                  @click="close"
+                >
+                  <el-icon><Close></Close></el-icon>
+                </button>
+              </div>
+            </div>
+          </template>
+          <div ref="unityPreviewFrameWrap" class="unity-preview-frame-wrap">
+            <iframe
+              v-if="unityPreviewFrameVisible"
+              :key="unityPreviewFrameKey"
+              ref="unityPreviewFrame"
+              class="unity-preview-frame"
+              :src="unityPreviewSrc"
+              allow="autoplay; fullscreen; gamepad; xr-spatial-tracking"
+              @load="handleUnityPreviewLoad"
+            ></iframe>
+          </div>
+        </el-dialog>
       </el-main>
     </el-container>
   </div>
@@ -188,7 +253,14 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { logger } from "@/utils/logger";
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  nextTick,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   getVerse,
@@ -210,7 +282,13 @@ import {
   type ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
 import { buildScriptRuntime } from "@/composables/useScriptRuntime";
-import { CopyDocument, Loading } from "@element-plus/icons-vue";
+import {
+  Close,
+  CopyDocument,
+  FullScreen,
+  Loading,
+  QuestionFilled,
+} from "@element-plus/icons-vue";
 import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
 import {
   useEditorVersionToolbar,
@@ -218,11 +296,20 @@ import {
 } from "@/composables/useEditorVersionToolbar";
 import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
+import env from "@/environment";
+import {
+  extractUnityPreviewLuaActions,
+  normalizeUnityPreviewMetaLua,
+  normalizeUnityPreviewVerseLua,
+  readUnityPreviewMetaJavaScriptCode,
+  readUnityPreviewMetaLuaCode,
+} from "@/utils/unityPreviewLua";
 
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
 const verse = ref<VerseData>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
+const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const route = useRoute();
 const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
@@ -490,7 +577,9 @@ onMounted(() => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
+    onRunPreview: openUnityPreview,
   });
+  window.addEventListener("message", handleUnityPreviewMessage);
 });
 
 watch(toolbarStatus, (status) => {
@@ -499,6 +588,7 @@ watch(toolbarStatus, (status) => {
 
 onBeforeUnmount(() => {
   unregisterToolbar(toolbarOwner);
+  window.removeEventListener("message", handleUnityPreviewMessage);
 });
 
 // ---------- resource computed（Verse 专有：构建事件 inputs/outputs）----------
@@ -577,6 +667,442 @@ const handlePolygen = (uuid: string) => {
       scenePlayer.value?.playAnimation(modelUuid, animationName);
     },
   };
+};
+
+const unityPreviewVisible = ref(false);
+const unityPreviewFrameVisible = ref(false);
+const unityPreviewReady = ref(false);
+const unityPreviewStatus = ref("正在加载 Unity 运行器...");
+const unityPreviewFrameKey = ref(0);
+const unityPreviewFrame = ref<HTMLIFrameElement | null>(null);
+const unityPreviewFrameWrap = ref<HTMLElement | null>(null);
+const pendingUnityPreviewPayload = ref<unknown>(null);
+const unityPreviewPanMode = ref(false);
+let unityPreviewRunningFallbackTimer: number | undefined;
+const UNITY_PREVIEW_VERSE_EXPAND =
+  "id,name,description,data,metas,metas.code,metas.metaCode,resources,code,uuid,verseCode";
+
+const unityPreviewSrc = computed(() => {
+  const url = new URL(env.unityPreview, window.location.href);
+  url.searchParams.set("embed", "1");
+  url.searchParams.set("v", String(unityPreviewFrameKey.value));
+  return url.toString();
+});
+
+const unityPreviewTargetOrigin = computed(() => {
+  try {
+    return new URL(env.unityPreview, window.location.href).origin;
+  } catch (error) {
+    logger.warn(
+      "Unity preview url is invalid, falling back to wildcard",
+      error
+    );
+    return "*";
+  }
+});
+
+const unityPreviewProxyOrigin = computed(() => {
+  try {
+    const url = new URL(env.unityPreview, window.location.href);
+    const host = url.host === "localhost:8080" ? "127.0.0.1:8080" : url.host;
+    return `http://${host}`;
+  } catch {
+    return "http://127.0.0.1:8080";
+  }
+});
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const cloneForPreview = (value: unknown): unknown => {
+  try {
+    return structuredClone(value);
+  } catch {
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch {
+      return null;
+    }
+  }
+};
+
+const normalizePreviewData = (value: unknown): unknown => {
+  if (typeof value !== "string") {
+    return cloneForPreview(value);
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
+const UNITY_PREVIEW_ASSET_PATH_RE =
+  /\.(?:png|jpe?g|gif|webp|bmp|svg|mp3|wav|ogg|m4a|mp4|webm|glb|gltf|fbx|obj|vox)(?:[?#]|$)/i;
+const UNITY_PREVIEW_LEGACY_COS_HOST =
+  "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com";
+const UNITY_PREVIEW_CDN_HOST = "data.7dgame.com";
+
+const unityPreviewAssetBaseOrigin = (): string => {
+  try {
+    if (/^https?:\/\//i.test(env.api)) {
+      return new URL(env.api).origin;
+    }
+  } catch {
+    // Fall back to the current page origin below.
+  }
+
+  return window.location.origin;
+};
+
+const normalizeUnityPreviewRemoteAssetUrl = (value: string): string => {
+  try {
+    const url = new URL(value.replace(/\\\//g, "/"));
+    const originalUrl = url.toString();
+    let changed = false;
+
+    if (url.protocol === "http:") {
+      url.protocol = "https:";
+      changed = true;
+    }
+
+    if (url.hostname === UNITY_PREVIEW_LEGACY_COS_HOST) {
+      url.protocol = "https:";
+      url.hostname = UNITY_PREVIEW_CDN_HOST;
+      changed = true;
+    }
+
+    const normalizedUrl = url.toString();
+    if (changed) {
+      logger.log("[WebPreview][Payload] normalize asset url", {
+        url: originalUrl,
+        normalizedUrl,
+      });
+    }
+
+    return normalizedUrl;
+  } catch {
+    return value;
+  }
+};
+
+const toUnityPreviewProxyUrl = (value: string): string => {
+  const normalizedValue = value.replace(/\\\//g, "/");
+  if (!/^https?:\/\//i.test(normalizedValue)) {
+    if (normalizedValue.startsWith("//")) {
+      const absoluteUrl = normalizeUnityPreviewRemoteAssetUrl(
+        `${window.location.protocol}${normalizedValue}`
+      );
+      return `${unityPreviewProxyOrigin.value}/__xrugc_proxy__?url=${encodeURIComponent(
+        absoluteUrl
+      )}`;
+    }
+
+    if (
+      normalizedValue.startsWith("/__xrugc_proxy__") ||
+      normalizedValue.startsWith("\\/__xrugc_proxy__")
+    ) {
+      return `${unityPreviewProxyOrigin.value}${normalizedValue.replace(
+        /^\\\//,
+        "/"
+      )}`;
+    }
+
+    if (
+      !normalizedValue.startsWith("/") ||
+      !UNITY_PREVIEW_ASSET_PATH_RE.test(normalizedValue)
+    ) {
+      return value;
+    }
+
+    const absoluteUrl = new URL(
+      normalizedValue,
+      unityPreviewAssetBaseOrigin()
+    ).toString();
+    const normalizedAssetUrl = normalizeUnityPreviewRemoteAssetUrl(absoluteUrl);
+    logger.log("[WebPreview][Payload] proxy relative asset url", {
+      url: normalizedValue,
+      absoluteUrl: normalizedAssetUrl,
+    });
+
+    return `${unityPreviewProxyOrigin.value}/__xrugc_proxy__?url=${encodeURIComponent(
+      normalizedAssetUrl
+    )}`;
+  }
+
+  try {
+    const url = new URL(normalizedValue);
+    if (url.pathname === "/__xrugc_proxy__") {
+      return `${unityPreviewProxyOrigin.value}${url.pathname}${url.search}`;
+    }
+
+    if (url.origin === unityPreviewProxyOrigin.value) {
+      return normalizedValue;
+    }
+  } catch {
+    return value;
+  }
+
+  const normalizedAssetUrl =
+    normalizeUnityPreviewRemoteAssetUrl(normalizedValue);
+  return `${unityPreviewProxyOrigin.value}/__xrugc_proxy__?url=${encodeURIComponent(
+    normalizedAssetUrl
+  )}`;
+};
+
+const rewriteUnityPreviewStringUrls = (value: string): string => {
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith("{") || trimmed.startsWith("[")) &&
+    trimmed.length >= 2
+  ) {
+    try {
+      const parsed = JSON.parse(value);
+      rewriteUnityPreviewUrls(parsed);
+      return JSON.stringify(parsed);
+    } catch {
+      // Fall through to plain text URL replacement.
+    }
+  }
+
+  const proxied = toUnityPreviewProxyUrl(value);
+  if (proxied !== value) {
+    return proxied;
+  }
+
+  return value.replace(/https?:\\?\/\\?\/[^\s"'<>]+/gi, (url) =>
+    toUnityPreviewProxyUrl(url)
+  );
+};
+
+const rewriteUnityPreviewUrls = (value: unknown): void => {
+  if (!value || typeof value !== "object") return;
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      if (typeof item === "string") {
+        value[index] = rewriteUnityPreviewStringUrls(item);
+      } else {
+        rewriteUnityPreviewUrls(item);
+      }
+    });
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  Object.entries(record).forEach(([key, item]) => {
+    if (typeof item === "string") {
+      record[key] = rewriteUnityPreviewStringUrls(item);
+    } else {
+      rewriteUnityPreviewUrls(item);
+    }
+  });
+};
+
+const normalizeUnityPreviewMetas = (metas: unknown): unknown[] => {
+  if (!Array.isArray(metas)) return [];
+
+  return metas.map((meta) => {
+    const cloned = cloneForPreview(meta);
+    const record = isRecord(cloned) ? cloned : {};
+    const code = readUnityPreviewMetaLuaCode(record);
+    const normalizedCode = normalizeUnityPreviewMetaLua(code);
+    return {
+      ...record,
+      code: normalizedCode,
+      script: normalizedCode,
+      prefab: record.prefab ?? record.prefabs ?? 0,
+    };
+  });
+};
+
+const summarizeUnityPreviewPayload = (payload: unknown) => {
+  const record = isRecord(payload) ? payload : {};
+  const scene = isRecord(record.scene) ? record.scene : {};
+  const script = isRecord(record.script) ? record.script : {};
+  const metas = Array.isArray(record.metas) ? record.metas : [];
+
+  return {
+    sceneId: scene.id ?? record.sceneId ?? record.id,
+    sceneName: scene.name ?? record.title ?? record.name,
+    resources: Array.isArray(record.resources) ? record.resources.length : 0,
+    metas: metas.length,
+    luaLength: typeof script.lua === "string" ? script.lua.length : 0,
+    luaActions: extractUnityPreviewLuaActions(script.lua),
+    metaActions: metas.slice(0, 12).map((meta, index) => {
+      const metaRecord = isRecord(meta) ? meta : {};
+      const code = readUnityPreviewMetaLuaCode(metaRecord);
+      return {
+        index,
+        id: metaRecord.id,
+        title: metaRecord.title ?? metaRecord.name,
+        codeLength: typeof code === "string" ? code.length : 0,
+        actions: extractUnityPreviewLuaActions(code),
+      };
+    }),
+    javascriptLength:
+      typeof script.javascript === "string" ? script.javascript.length : 0,
+  };
+};
+
+const ensureUnityPreviewRuntimeData = async () => {
+  if (verseMetasWithLuaCodeData.value) return;
+  if (!Number.isFinite(id.value)) return;
+
+  const response = await getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua");
+  verseMetasWithLuaCodeData.value =
+    response.data as unknown as VerseMetasWithJsCode;
+};
+
+const buildUnityPreviewPayload = () => {
+  const runtimeData =
+    verseMetasWithLuaCodeData.value ?? verseMetasWithJsCodeData.value;
+
+  return {
+    protocolVersion: 1,
+    source: "xrugc-web-script-page",
+    sceneType: "verse",
+    scene: {
+      id: verse.value?.id ?? id.value,
+      uuid: verse.value?.uuid ?? null,
+      name: verse.value?.name ?? "",
+      description: verse.value?.description ?? "",
+      data: normalizePreviewData(
+        runtimeData?.data ?? verse.value?.data ?? null
+      ),
+    },
+    resources: cloneForPreview(runtimeData?.resources ?? []),
+    metas: normalizeUnityPreviewMetas(runtimeData?.metas ?? []),
+    script: {
+      blockly: cloneForPreview(unsavedBlocklyData.value),
+      lua: normalizeUnityPreviewVerseLua(LuaCode.value),
+      javascript: JavaScriptCode.value,
+      metasJavaScript: metasJavaScriptCode.value,
+    },
+  };
+};
+
+const postUnityPreviewPayload = (payload: unknown) => {
+  const targetWindow = unityPreviewFrame.value?.contentWindow;
+  if (!targetWindow) {
+    ElMessage.error("Unity 运行器尚未加载完成");
+    return;
+  }
+
+  const postablePayload = cloneForPreview(payload);
+  rewriteUnityPreviewUrls(postablePayload);
+  targetWindow.postMessage(
+    {
+      type: "xrugc-load-scene-json",
+      payload: postablePayload,
+    },
+    unityPreviewTargetOrigin.value
+  );
+  unityPreviewStatus.value = "场景数据已发送到 Unity";
+  clearUnityPreviewRunningFallbackTimer();
+  unityPreviewRunningFallbackTimer = window.setTimeout(() => {
+    if (unityPreviewVisible.value) {
+      unityPreviewStatus.value =
+        "Unity 已接收场景数据，若画面为空请刷新运行器或重新打包";
+    }
+  }, 15000);
+  logger.log(
+    "[UnityPreview] scene payload sent",
+    summarizeUnityPreviewPayload(postablePayload)
+  );
+};
+
+const postUnityPreviewCameraMode = () => {
+  const targetWindow = unityPreviewFrame.value?.contentWindow;
+  if (!targetWindow) {
+    return;
+  }
+
+  const mode = unityPreviewPanMode.value ? "pan" : "orbit";
+  targetWindow.postMessage(
+    {
+      type: "unity-web-preview-camera-mode",
+      mode,
+    },
+    unityPreviewTargetOrigin.value
+  );
+  logger.log("[UnityPreview] camera mode sent", mode);
+};
+
+const clearUnityPreviewRunningFallbackTimer = () => {
+  if (unityPreviewRunningFallbackTimer !== undefined) {
+    window.clearTimeout(unityPreviewRunningFallbackTimer);
+    unityPreviewRunningFallbackTimer = undefined;
+  }
+};
+
+const sendSceneToUnityPreview = async () => {
+  await ensureUnityPreviewRuntimeData();
+  const payload = buildUnityPreviewPayload();
+  pendingUnityPreviewPayload.value = payload;
+  postUnityPreviewPayload(payload);
+};
+
+const handleUnityPreviewMessage = (event: MessageEvent) => {
+  if (event.source !== unityPreviewFrame.value?.contentWindow) return;
+  if (!isRecord(event.data)) return;
+
+  if (event.data.type === "unity-web-preview-ready") {
+    unityPreviewReady.value = true;
+    unityPreviewStatus.value = "Unity 已就绪，正在发送场景...";
+    void sendSceneToUnityPreview();
+    postUnityPreviewCameraMode();
+  }
+
+  if (event.data.type === "unity-web-preview-scene-forwarded") {
+    unityPreviewStatus.value = "Unity 桥接已接收场景数据，正在本地加载...";
+  }
+
+  if (event.data.type === "unity-web-preview-scene-running") {
+    clearUnityPreviewRunningFallbackTimer();
+    unityPreviewStatus.value = "场景已在 Unity 中运行";
+  }
+};
+
+const handleUnityPreviewLoad = () => {
+  unityPreviewStatus.value = "Unity 运行器加载中...";
+};
+
+const openUnityPreview = async () => {
+  if (!verse.value) {
+    ElMessage.error("场景数据尚未加载完成");
+    return;
+  }
+
+  await ensureUnityPreviewRuntimeData();
+  pendingUnityPreviewPayload.value = buildUnityPreviewPayload();
+  unityPreviewReady.value = false;
+  unityPreviewPanMode.value = false;
+  unityPreviewStatus.value = "正在加载 Unity 运行器...";
+  unityPreviewFrameKey.value += 1;
+  unityPreviewFrameVisible.value = true;
+  unityPreviewVisible.value = true;
+};
+
+const toggleUnityPreviewFullscreen = () => {
+  const target = unityPreviewFrameWrap.value;
+  if (!target) return;
+
+  if (document.fullscreenElement === target) {
+    document.exitFullscreen?.();
+    return;
+  }
+
+  target.requestFullscreen?.();
+};
+
+const handleUnityPreviewClosed = () => {
+  clearUnityPreviewRunningFallbackTimer();
+  unityPreviewReady.value = false;
+  unityPreviewFrameVisible.value = false;
+  unityPreviewPanMode.value = false;
+  unityPreviewStatus.value = "正在加载 Unity 运行器...";
 };
 
 // ---------- Verse 专有：run ----------
@@ -729,16 +1255,18 @@ onMounted(async () => {
       id.value,
       "metas, module, share, verseCode"
     );
-    const response2 = await getVerse(
-      id.value,
-      "id,name,description,data,metas,resources,code,uuid,code",
-      "js"
-    );
+    const [responseLua, responseJs] = await Promise.all([
+      getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
+      getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "js"),
+    ]);
     verse.value = response.data;
     logger.error(verse.value);
-    verseMetasWithJsCodeData.value = response2.data;
-    metasJavaScriptCode.value = response2.data.metas
-      .map((meta: meta) => meta.script)
+    verseMetasWithLuaCodeData.value =
+      responseLua.data as unknown as VerseMetasWithJsCode;
+    verseMetasWithJsCodeData.value =
+      responseJs.data as unknown as VerseMetasWithJsCode;
+    metasJavaScriptCode.value = verseMetasWithJsCodeData.value.metas
+      .map((meta: meta) => readUnityPreviewMetaJavaScriptCode(meta))
       .join("\n");
     logger.log("Verse", verse.value);
     logger.log("metasJavaScriptCode", metasJavaScriptCode.value);
@@ -1030,6 +1558,136 @@ onMounted(async () => {
 
 .scene-exit-btn {
   margin-right: 8px;
+}
+
+:global(.unity-preview-dialog.el-dialog) {
+  --el-dialog-padding-primary: 0;
+
+  padding: 0 !important;
+  overflow: hidden;
+  background: #2f3a4a;
+  border: 0;
+  border-radius: 8px;
+  outline: none;
+  box-shadow: 0 18px 44px rgb(15 23 42 / 28%);
+}
+
+:global(.unity-preview-dialog *) {
+  outline: none;
+}
+
+:global(.unity-preview-dialog .el-dialog__header) {
+  padding: 0;
+  margin: 0;
+  background: #263443;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+.unity-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 12px 0 18px;
+}
+
+.unity-preview-title-wrap {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.unity-preview-help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 14px;
+  color: rgb(255 255 255 / 58%);
+  cursor: help;
+}
+
+.unity-preview-help-icon:hover {
+  color: rgb(255 255 255 / 86%);
+}
+
+:global(.unity-preview-help-tooltip) {
+  max-width: 220px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.unity-preview-help {
+  display: grid;
+  gap: 2px;
+}
+
+:global(.unity-preview-dialog .el-dialog__title) {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 92%);
+}
+
+.unity-preview-header-actions {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.unity-preview-header-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: rgb(255 255 255 / 88%);
+  cursor: pointer;
+  background: rgb(255 255 255 / 8%);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 6px;
+}
+
+.unity-preview-header-button:hover {
+  color: #fff;
+  background: rgb(255 255 255 / 10%);
+  border-color: rgb(255 255 255 / 12%);
+}
+
+:global(.unity-preview-dialog .el-dialog__body) {
+  display: flex;
+  flex-direction: column;
+  height: min(630px, calc(100vh - 156px));
+  padding: 0;
+  overflow: hidden;
+  background: #2f3a4a;
+}
+
+.unity-preview-frame-wrap {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #2f3a4a;
+}
+
+.unity-preview-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  background: #2f3a4a;
+  border: 0;
+  outline: none;
+}
+
+.unity-preview-frame-wrap:fullscreen {
+  width: 100vw;
+  height: 100vh;
 }
 
 /* 全屏时的样式 */
