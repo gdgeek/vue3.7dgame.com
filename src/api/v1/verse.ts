@@ -28,7 +28,21 @@ export type meta = {
   title: string;
   prefabs: number;
   type: string;
-  script: string;
+  script?: string;
+  lua?: string;
+  js?: string;
+  code?:
+    | string
+    | {
+        blockly?: string;
+        lua?: string;
+        js?: string;
+      };
+  metaCode?: {
+    blockly?: string;
+    lua?: string;
+    js?: string;
+  };
 };
 
 export type VerseMetasWithJsCode = {

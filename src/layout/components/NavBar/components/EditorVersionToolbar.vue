@@ -1,5 +1,16 @@
 <template>
   <div v-if="editorVersionToolbarState.active" class="editor-version-toolbar">
+    <el-button
+      v-if="editorVersionToolbarState.onRunPreview"
+      class="toolbar-entry-btn"
+      size="small"
+      @click="runPreview"
+    >
+      <el-icon class="entry-icon">
+        <VideoPlay></VideoPlay>
+      </el-icon>
+      {{ t("common.unityPreview.entry") }}
+    </el-button>
     <el-button class="toolbar-entry-btn" size="small" @click="openDialog">
       <font-awesome-icon
         class="entry-icon"
@@ -13,14 +24,17 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
+import { VideoPlay } from "@element-plus/icons-vue";
 
 const { t } = useI18n();
-const { editorVersionToolbarState, openDialog } = useEditorVersionToolbar();
+const { editorVersionToolbarState, openDialog, runPreview } =
+  useEditorVersionToolbar();
 </script>
 
 <style lang="scss" scoped>
 .editor-version-toolbar {
   display: flex;
+  gap: 8px;
   align-items: center;
   margin-left: 4px;
 }
@@ -32,6 +46,10 @@ const { editorVersionToolbarState, openDialog } = useEditorVersionToolbar();
 }
 
 .entry-icon {
+  margin-right: 6px;
+}
+
+.toolbar-entry-btn :deep(.el-icon.entry-icon) {
   margin-right: 6px;
 }
 </style>
