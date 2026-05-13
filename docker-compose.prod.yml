@@ -21,6 +21,8 @@ services:
       # Blockly / Editor iframe URL（运行时注入）
       - APP_BLOCKLY_URL=https://blockly.bujiaban.com
       - APP_EDITOR_URL=https://editor.bujiaban.com
+      # Unity WebGL 运行器 URL（运行时注入；可填独立域名或同域 /unity-web-preview/）
+      - APP_UNITY_PREVIEW_URL=/unity-web-preview/
       # 插件 URL（运行时注入到 plugins.json）
       - PLUGIN_USER_MANAGEMENT_URL=http://localhost:3003
       - PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005

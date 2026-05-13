@@ -395,10 +395,11 @@ echo "[entrypoint] Generating runtime env injection at $ENV_JS"
 cat > "$ENV_JS" <<EOF
 window.__ENV__ = {
   BLOCKLY_URL: "${APP_BLOCKLY_URL:-}",
-  EDITOR_URL: "${APP_EDITOR_URL:-}"
+  EDITOR_URL: "${APP_EDITOR_URL:-}",
+  UNITY_PREVIEW_URL: "${APP_UNITY_PREVIEW_URL:-}"
 };
 EOF
-echo "[entrypoint] Runtime env: BLOCKLY_URL=${APP_BLOCKLY_URL:-<not set>}, EDITOR_URL=${APP_EDITOR_URL:-<not set>}"
+echo "[entrypoint] Runtime env: BLOCKLY_URL=${APP_BLOCKLY_URL:-<not set>}, EDITOR_URL=${APP_EDITOR_URL:-<not set>}, UNITY_PREVIEW_URL=${APP_UNITY_PREVIEW_URL:-<not set>}"
 
 # --- 9. 启动 nginx ---
 exec nginx -g 'daemon off;'
