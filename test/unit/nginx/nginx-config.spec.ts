@@ -417,6 +417,17 @@ describe("Property 5: Environment-aware URL selection", () => {
     );
   });
 
+  it("development hosts use the development WebGL preview domain by default", () => {
+    const envSource = readFileSync(
+      resolve(__dirname, "../../../src/environment.ts"),
+      "utf-8"
+    );
+
+    expect(envSource).toContain("webgl-preview.d.plugins.xrugc.com/embed.html");
+    expect(envSource).toContain("webgl-preview.plugins.xrugc.com/embed.html");
+    expect(envSource).toContain(".dev.xrugc.com");
+  });
+
   it("environment.ts does not import ReplaceURL, ReplaceIP, or GetIP", () => {
     fc.assert(
       fc.property(fc.constant(null), () => {

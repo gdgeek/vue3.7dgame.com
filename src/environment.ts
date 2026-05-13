@@ -35,6 +35,39 @@ function title(): string {
 }
 */
 
+const productionUnityPreviewUrl =
+  "https://webgl-preview.plugins.xrugc.com/embed.html";
+const developUnityPreviewUrl =
+  "https://webgl-preview.d.plugins.xrugc.com/embed.html";
+
+const getRuntimeEnv = () =>
+  (window as unknown as Record<string, Record<string, string>>).__ENV__ || {};
+
+const isDevelopHost = () => {
+  const hostname = window.location.hostname.toLowerCase();
+  return hostname.includes(".dev.xrugc.com") || hostname.includes(".d.xrugc.com");
+};
+
+const resolveUnityPreviewUrl = () => {
+  const configuredUrl =
+    getRuntimeEnv().UNITY_PREVIEW_URL ||
+    import.meta.env.VITE_APP_UNITY_PREVIEW_URL ||
+    "";
+
+  if (
+    isDevelopHost() &&
+    (!configuredUrl || configuredUrl === productionUnityPreviewUrl)
+  ) {
+    return developUnityPreviewUrl;
+  }
+
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
+  return import.meta.env.DEV ? "http://127.0.0.1:8080/" : productionUnityPreviewUrl;
+};
+
 const environment = {
   api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api",
   config_api: "/api-config/api",
@@ -42,22 +75,14 @@ const environment = {
     ? import.meta.env.VITE_APP_DOC_API || ""
     : "/api-doc",
   blockly:
-    (window as unknown as Record<string, Record<string, string>>).__ENV__
-      ?.BLOCKLY_URL ||
+    getRuntimeEnv().BLOCKLY_URL ||
     import.meta.env.VITE_APP_BLOCKLY_URL ||
     "",
   editor:
-    (window as unknown as Record<string, Record<string, string>>).__ENV__
-      ?.EDITOR_URL ||
+    getRuntimeEnv().EDITOR_URL ||
     import.meta.env.VITE_APP_EDITOR_URL ||
     "",
-  unityPreview:
-    (window as unknown as Record<string, Record<string, string>>).__ENV__
-      ?.UNITY_PREVIEW_URL ||
-    import.meta.env.VITE_APP_UNITY_PREVIEW_URL ||
-    (import.meta.env.DEV
-      ? "http://127.0.0.1:8080/"
-      : "https://webgl-preview.plugins.xrugc.com/embed.html"),
+  unityPreview: resolveUnityPreviewUrl(),
   domain_info: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
     : "/api-domain",
