@@ -45,7 +45,9 @@ const getRuntimeEnv = () =>
 
 const isDevelopHost = () => {
   const hostname = window.location.hostname.toLowerCase();
-  return hostname.includes(".dev.xrugc.com") || hostname.includes(".d.xrugc.com");
+  return (
+    hostname.includes(".dev.xrugc.com") || hostname.includes(".d.xrugc.com")
+  );
 };
 
 const resolveUnityPreviewUrl = () => {
@@ -65,7 +67,9 @@ const resolveUnityPreviewUrl = () => {
     return configuredUrl;
   }
 
-  return import.meta.env.DEV ? "http://127.0.0.1:8080/" : productionUnityPreviewUrl;
+  return import.meta.env.DEV
+    ? "http://127.0.0.1:8080/"
+    : productionUnityPreviewUrl;
 };
 
 const environment = {
@@ -75,13 +79,9 @@ const environment = {
     ? import.meta.env.VITE_APP_DOC_API || ""
     : "/api-doc",
   blockly:
-    getRuntimeEnv().BLOCKLY_URL ||
-    import.meta.env.VITE_APP_BLOCKLY_URL ||
-    "",
+    getRuntimeEnv().BLOCKLY_URL || import.meta.env.VITE_APP_BLOCKLY_URL || "",
   editor:
-    getRuntimeEnv().EDITOR_URL ||
-    import.meta.env.VITE_APP_EDITOR_URL ||
-    "",
+    getRuntimeEnv().EDITOR_URL || import.meta.env.VITE_APP_EDITOR_URL || "",
   unityPreview: resolveUnityPreviewUrl(),
   domain_info: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
