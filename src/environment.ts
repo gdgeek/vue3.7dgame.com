@@ -55,7 +55,9 @@ const environment = {
     (window as unknown as Record<string, Record<string, string>>).__ENV__
       ?.UNITY_PREVIEW_URL ||
     import.meta.env.VITE_APP_UNITY_PREVIEW_URL ||
-    (import.meta.env.DEV ? "http://127.0.0.1:8080/" : "/unity-web-preview/"),
+    (import.meta.env.DEV
+      ? "http://127.0.0.1:8080/"
+      : "https://webgl-preview.plugins.xrugc.com/embed.html"),
   domain_info: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
     : "/api-domain",
