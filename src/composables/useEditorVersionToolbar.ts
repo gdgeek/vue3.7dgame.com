@@ -6,6 +6,7 @@ type EditorVersionToolbarState = {
   active: boolean;
   owner: string | null;
   status: EditorToolbarStatus;
+  onRunPreview: (() => void) | null;
   onOpen: (() => void) | null;
 };
 
@@ -13,6 +14,7 @@ const state = reactive<EditorVersionToolbarState>({
   active: false,
   owner: null,
   status: "saved",
+  onRunPreview: null,
   onOpen: null,
 });
 
@@ -20,6 +22,7 @@ const resetState = () => {
   state.active = false;
   state.owner = null;
   state.status = "saved";
+  state.onRunPreview = null;
   state.onOpen = null;
 };
 
@@ -31,6 +34,7 @@ export const useEditorVersionToolbar = () => {
     state.active = true;
     state.owner = owner;
     state.status = payload.status || "saved";
+    state.onRunPreview = payload.onRunPreview || null;
     state.onOpen = payload.onOpen || null;
   };
 
@@ -48,11 +52,16 @@ export const useEditorVersionToolbar = () => {
     state.onOpen?.();
   };
 
+  const runPreview = () => {
+    state.onRunPreview?.();
+  };
+
   return {
     editorVersionToolbarState: readonly(state),
     registerToolbar,
     updateToolbarStatus,
     unregisterToolbar,
     openDialog,
+    runPreview,
   };
 };

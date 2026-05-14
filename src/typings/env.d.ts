@@ -13,6 +13,8 @@ interface ImportMetaEnv {
   VITE_APP_PORT: number;
   /** API 地址 */
   VITE_APP_API_URL: string;
+  /** Unity WebGL 场景预览地址 */
+  VITE_APP_UNITY_PREVIEW_URL?: string;
   /** 是否开启 Mock 服务 */
   VITE_MOCK_DEV_SERVER: boolean;
 }

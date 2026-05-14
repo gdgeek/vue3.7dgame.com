@@ -72,6 +72,16 @@ export default {
       summaryModified: "{items} を変更",
       entry: "バージョン管理",
     },
+    unityPreview: {
+      entry: "シーンを実行",
+      title: "シーンを実行",
+      helpClick: "画面をクリックするとシーンを操作できます",
+      helpRotate: "Alt + マウス左ボタンで視点を回転",
+      helpZoomPan: "ホイールでズーム、右ボタンでパン",
+      helpFullscreen: "全画面でより広くプレビューできます",
+      fullscreen: "シーンを全画面で実行",
+      close: "シーン実行を閉じる",
+    },
     message: {
       createSuccess: "作成成功",
       saveSuccess: "保存成功",

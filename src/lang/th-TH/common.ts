@@ -72,6 +72,16 @@ export default {
       summaryModified: "แก้ไข {items}",
       entry: "จัดการเวอร์ชัน",
     },
+    unityPreview: {
+      entry: "รันฉาก",
+      title: "รันฉาก",
+      helpClick: "คลิกที่ภาพเพื่อควบคุมฉาก",
+      helpRotate: "กด Alt + ปุ่มซ้ายของเมาส์ค้างไว้เพื่อหมุนมุมมอง",
+      helpZoomPan: "ใช้ล้อเมาส์เพื่อซูม ปุ่มขวาเพื่อเลื่อนมุมมอง",
+      helpFullscreen: "ใช้เต็มหน้าจอเพื่อดูตัวอย่างได้ครบขึ้น",
+      fullscreen: "รันฉากแบบเต็มหน้าจอ",
+      close: "ปิดการรันฉาก",
+    },
     message: {
       createSuccess: "สร้างสำเร็จ",
       saveSuccess: "บันทึกสำเร็จ",

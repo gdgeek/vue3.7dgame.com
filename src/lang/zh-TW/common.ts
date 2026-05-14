@@ -71,6 +71,16 @@ export default {
       summaryModified: "修改 {items}",
       entry: "版本管理",
     },
+    unityPreview: {
+      entry: "運行場景",
+      title: "運行場景",
+      helpClick: "單擊畫面後可操作場景",
+      helpRotate: "按住 Alt + 滑鼠左鍵旋轉視角",
+      helpZoomPan: "滾輪縮放視角，右鍵平移視角",
+      helpFullscreen: "全螢幕可獲得更完整預覽",
+      fullscreen: "全螢幕運行場景",
+      close: "關閉運行場景",
+    },
     message: {
       createSuccess: "創建成功",
       saveSuccess: "保存成功",
