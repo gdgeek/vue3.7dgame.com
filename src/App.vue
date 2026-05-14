@@ -15,8 +15,8 @@
       <transition name="page" mode="out-in" :key="getPageTransitionKey(route)">
         <component :is="Component"></component>
       </transition>
+      <UnityPreviewHost :route-path="route.path"></UnityPreviewHost>
     </router-view>
-    <UnityPreviewHost></UnityPreviewHost>
   </el-config-provider>
   <span class="global-version">v{{ appVersion }}</span>
 </template>
