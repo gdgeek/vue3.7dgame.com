@@ -215,6 +215,7 @@ import {
   type VerseData,
   type VerseMetasWithJsCode,
 } from "@/api/v1/verse";
+import { getMeta } from "@/api/v1/meta";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { takePhoto } from "@/api/v1/verse";
@@ -346,10 +347,70 @@ type VerseMeta = {
   id: number | string;
   name?: string;
   title?: string;
+  script?: string;
+  code?: string | { js?: string };
+  js?: string;
+  metaCode?: { js?: string };
   events?: {
     inputs?: VerseMetaEventItem[];
     outputs?: VerseMetaEventItem[];
   };
+};
+
+const getMetaJavaScriptCode = (meta: VerseMeta | meta): string => {
+  const candidate = meta as VerseMeta;
+  if (typeof candidate.script === "string") return candidate.script;
+  if (typeof candidate.js === "string") return candidate.js;
+  if (typeof candidate.metaCode?.js === "string") return candidate.metaCode.js;
+  if (typeof candidate.code === "string") return candidate.code;
+  if (
+    candidate.code &&
+    typeof candidate.code === "object" &&
+    typeof candidate.code.js === "string"
+  ) {
+    return candidate.code.js;
+  }
+  return "";
+};
+
+const loadMetaJavaScriptCode = async (metas: Array<VerseMeta | meta>) => {
+  const directScripts = metas.map((metaItem) => ({
+    id: metaItem.id,
+    script: getMetaJavaScriptCode(metaItem),
+  }));
+  const missingMetaIds = directScripts
+    .filter((item) => !item.script.trim())
+    .map((item) => item.id)
+    .filter(
+      (metaId, index, array) => metaId && array.indexOf(metaId) === index
+    );
+
+  if (missingMetaIds.length === 0) {
+    return directScripts
+      .map((item) => item.script)
+      .filter((script) => script.trim());
+  }
+
+  const fetchedScripts = await Promise.all(
+    missingMetaIds.map(async (metaId) => {
+      try {
+        const response = await getMeta(metaId, { expand: "metaCode" });
+        return { id: metaId, script: response.data.metaCode?.js || "" };
+      } catch (error) {
+        logger.error("实体脚本补充加载失败:", { metaId, error });
+        return { id: metaId, script: "" };
+      }
+    })
+  );
+  const fetchedScriptById = new Map(
+    fetchedScripts.map((item) => [item.id?.toString(), item.script])
+  );
+
+  return directScripts
+    .map(
+      (item) => item.script || fetchedScriptById.get(item.id?.toString()) || ""
+    )
+    .filter((script) => script.trim());
 };
 
 // ---------- initEditor（Verse 版）----------
@@ -614,51 +675,41 @@ const run = async () => {
     }
   }
 
-  const waitForModels = () =>
-    new Promise((resolve) => {
-      const checkModels = () => {
-        const metasData = verseMetasWithJsCodeData.value!.metas!;
-        let expectedModels = 0;
-        const countEntities = (entities: VerseEntityNode[]): number => {
-          let count = 0;
-          for (const entity of entities) {
-            count++;
-            if (entity.children?.entities?.length > 0) {
-              count += countEntities(entity.children.entities);
-            }
-          }
-          return count;
-        };
-        for (const meta of metasData) {
-          const metaData = meta.data as {
-            children?: { entities?: VerseEntityNode[] };
-          };
-          if (metaData?.children?.entities) {
-            expectedModels += countEntities(metaData.children.entities);
-          }
-        }
-        if (scenePlayer.value?.sources.size === expectedModels) {
-          logger.error("所有资源加载完成:", {
-            expected: expectedModels,
-            loaded: scenePlayer.value!.sources.size,
-          });
-          resolve(true);
-        } else {
-          logger.log("等待资源加载...", {
-            expected: expectedModels,
-            current: scenePlayer.value?.sources.size || 0,
-          });
-          setTimeout(checkModels, 100);
-        }
-      };
-      checkModels();
+  const waitForScenePlayerReady = async () => {
+    if (!scenePlayer.value) {
+      throw new Error("ScenePlayer未初始化");
+    }
+    await scenePlayer.value.whenReady();
+    if (scenePlayer.value.sceneLoadError) {
+      throw scenePlayer.value.sceneLoadError;
+    }
+    logger.log("场景资源加载流程完成:", {
+      loaded: scenePlayer.value.sources.size,
     });
+  };
 
-  await waitForModels();
+  try {
+    await waitForScenePlayerReady();
+  } catch (error) {
+    logger.error("场景资源加载失败:", error);
+    ElMessage.error(
+      `场景资源加载失败: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return;
+  }
 
-  if (JavaScriptCode.value) {
-    window.meta = {};
-    window.verse = {};
+  const runtimeCode = [metasJavaScriptCode.value, JavaScriptCode.value]
+    .filter((code) => typeof code === "string" && code.trim())
+    .join("\n");
+
+  if (runtimeCode) {
+    const instanceId = scenePlayer.value!.sceneInstanceId;
+    window.__sceneCallbacks = window.__sceneCallbacks ?? {};
+    window.__sceneCallbacks[instanceId] = {};
+    window.meta = window.__sceneCallbacks[instanceId];
+    window.verse = window.__sceneCallbacks[instanceId];
     const {
       Vector3,
       polygen,
@@ -694,13 +745,40 @@ const run = async () => {
 
     try {
       const wrappedCode = `
-            return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
-              const meta = window.meta;
-              const verse = window.verse;
+            return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity, logger) {
+              const meta = window.__sceneCallbacks['${instanceId}'];
+              const verse = window.__sceneCallbacks['${instanceId}'];
               const index = ${verse.value?.id};
+              const _G = {
+                handlePolygen,
+                polygen,
+                handleSound,
+                sound,
+                THREE,
+                task,
+                tween,
+                helper,
+                animation,
+                event,
+                text,
+                point,
+                transform,
+                Vector3,
+                argument,
+                handleText,
+                handleEntity,
+              };
+              window._G = _G;
+              const _runtimeBeforeKeys = Object.keys(meta);
 
-              ${metasJavaScriptCode.value}
-              ${JavaScriptCode.value}
+              ${runtimeCode}
+
+              logger.log('实体脚本运行时注册结果:', {
+                before: _runtimeBeforeKeys,
+                after: Object.keys(meta),
+                hasMetaInit: typeof meta['@init'] === 'function',
+                hasVerseInit: typeof verse['#init'] === 'function',
+              });
 
               if (typeof meta['@init'] === 'function') {
                 await meta['@init']();
@@ -728,7 +806,8 @@ const run = async () => {
         Vector3,
         argument,
         handleText,
-        handleEntity
+        handleEntity,
+        logger
       );
     } catch (e) {
       logger.error("执行代码出错:", e);
@@ -755,9 +834,16 @@ onMounted(async () => {
     verse.value = response.data;
     logger.error(verse.value);
     verseMetasWithJsCodeData.value = response2.data;
-    metasJavaScriptCode.value = response2.data.metas
-      .map((meta: meta) => meta.script)
-      .join("\n");
+    const metaScripts = await loadMetaJavaScriptCode(response2.data.metas);
+    metasJavaScriptCode.value = metaScripts.join("\n");
+    logger.log("实体脚本加载结果", {
+      metaCount: response2.data.metas.length,
+      scriptCount: metaScripts.length,
+      codeLength: metasJavaScriptCode.value.length,
+      metaKeys: response2.data.metas.map((metaItem: meta) =>
+        Object.keys(metaItem)
+      ),
+    });
     logger.log("Verse", verse.value);
     logger.log("metasJavaScriptCode", metasJavaScriptCode.value);
     if (verse.value && verse.value.data) {

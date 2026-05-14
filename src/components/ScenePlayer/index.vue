@@ -95,6 +95,13 @@ const scene = ref<HTMLDivElement | null>(null);
 
 const sources: Map<string, SourceRecord> = new Map();
 const mixers: Map<string, THREE.AnimationMixer> = new Map();
+const sceneReady = ref(false);
+const sceneLoadError = ref<unknown>(null);
+const resourceLoadErrors = ref<import("./types").ResourceLoadIssue[]>([]);
+let resolveSceneReady: (() => void) | null = null;
+const sceneReadyPromise = new Promise<void>((resolve) => {
+  resolveSceneReady = resolve;
+});
 
 const collisionObjects = ref<CollisionObject[]>([]);
 const rotatingObjects = ref<RotatingObject[]>([]);
@@ -166,206 +173,229 @@ const isMetaData = (
 ): value is { children?: { entities?: unknown[] } } =>
   isRecord(value) && ("children" in value || "entities" in value);
 
+const getSourceMesh = (source: SourceRecord | undefined) => {
+  if (!source?.data || !("mesh" in source.data)) return undefined;
+  return source.data.mesh;
+};
+
 // ─── onMounted: full scene initialisation ─────────────────────────────────────
 
 /** Holds the destroy() function returned by useResourceLoaders so onUnmounted can call it. */
 let destroyLoaders: (() => void) | null = null;
 
 onMounted(async () => {
-  if (!scene.value) return;
-
-  // ── Build LoaderContext ────────────────────────────────────────────────────
-
-  // renderer and camera are not yet available; they will be populated below
-  // after setupScene is called. LoaderContext holds plain references that
-  // useResourceLoaders reads at call time, so late assignment is safe.
-  const ctx: LoaderContext = {
-    renderer: null,
-    camera: null,
-    threeScene,
-    controls,
-    mouse,
-    raycaster,
-    sources,
-    mixers,
-    collisionObjects,
-    rotatingObjects,
-    moveableObjects,
-    dragState,
-    sceneInstanceId,
-    triggerEvent,
-    findResource,
-  };
-
-  // ── Frame callback (used inside animation loop) ───────────────────────────
-
-  const onFrame = (delta: number) => {
-    mixers.forEach((mixer) => mixer.update(delta));
-
-    // Rotate objects
-    rotatingObjects.value.forEach((obj) => {
-      if (obj.checkVisibility && !obj.mesh.visible) return;
-      obj.mesh.rotation.x += obj.speed.x * delta;
-      obj.mesh.rotation.y += obj.speed.y * delta;
-      obj.mesh.rotation.z += obj.speed.z * delta;
-    });
-
-    // Collision detection
-    if (collisionObjects.value.length > 0) {
-      for (const collisionObj of collisionObjects.value) {
-        const source = sources.get(collisionObj.sourceUuid);
-        const target = sources.get(collisionObj.targetUuid);
-        const sourceModel =
-          source?.type === "model" ? source.data.mesh : undefined;
-        const targetModel =
-          target?.type === "model" ? target.data.mesh : undefined;
-
-        if (!sourceModel || !targetModel) continue;
-        if (
-          collisionObj.checkVisibility &&
-          (!sourceModel.visible || !targetModel.visible)
-        ) {
-          continue;
-        }
-
-        if (!sourceModel.position.equals(collisionObj.lastPosition)) {
-          collisionObj.boundingBox.setFromObject(sourceModel);
-          const targetBox = new THREE.Box3().setFromObject(targetModel);
-          const isColliding = collisionObj.boundingBox.intersectsBox(targetBox);
-
-          if (isColliding && !collisionObj.isColliding) {
-            collisionObj.isColliding = true;
-            logger.log("[ScenePlayer] Collision detected:", {
-              source: collisionObj.sourceUuid,
-              target: collisionObj.targetUuid,
-            });
-            triggerEvent(collisionObj.eventUuid).catch((error) => {
-              logger.error(
-                "[ScenePlayer] Collision event handler failed:",
-                error
-              );
-            });
-          } else if (!isColliding && collisionObj.isColliding) {
-            collisionObj.isColliding = false;
-          }
-
-          collisionObj.lastPosition.copy(sourceModel.position);
-        }
-      }
-    }
-  };
-
-  // ── Initialise Three.js scene ─────────────────────────────────────────────
-
-  sceneSetup.setupScene(scene.value, {
-    isDark: isDark.value,
-    mode: mode.value,
-    controls,
-    onFrame,
-  });
-
-  // Populate ctx with renderer and camera now that setupScene has run
-  ctx.renderer = sceneSetup.getRenderer();
-  ctx.camera = sceneSetup.getCamera();
-
-  // ── Initialise resource loaders ───────────────────────────────────────────
-
-  const { processEntities, destroy } = useResourceLoaders(ctx);
-  destroyLoaders = destroy;
-
-  // ── Load scene data ───────────────────────────────────────────────────────
-
-  if (mode.value === "meta" && props.meta) {
-    const metaData = props.meta.data;
-    logger.log("[ScenePlayer] Parsed metaData:", metaData);
-
-    if (isMetaData(metaData) && metaData.children?.entities) {
-      await processEntities(
-        metaData.children.entities as import("./types").EntityNode[]
-      );
-    } else {
-      logger.error("[ScenePlayer] Invalid metaData format:", metaData);
-    }
-  } else if (mode.value === "verse" && props.verse) {
-    const {
-      parseVerseData,
-      isVerseMetaInfo,
-      initEventContainer,
-      eventContainer,
-    } = useVerseMode(props.verse);
-
-    const verseData = parseVerseData();
-    logger.log("[ScenePlayer] Parsed verse data:", props.verse);
-
-    if (verseData?.children?.modules) {
-      for (const module of verseData.children.modules as Entity[]) {
-        const moduleParams = module.parameters as
-          | {
-              meta_id?: string | number;
-              uuid: string;
-              transform?: TransformData;
-              [key: string]: unknown;
-            }
-          | undefined;
-
-        if (!moduleParams?.meta_id) continue;
-
-        const metaId = moduleParams.meta_id;
-        const meta = props.verse.metas.find(
-          (candidate): candidate is import("./types").VerseMetaInfo =>
-            isVerseMetaInfo(candidate) &&
-            String((candidate as import("./types").VerseMetaInfo).id) ===
-              String(metaId)
-        );
-
-        if (meta?.data) {
-          let metaData: {
-            children?: { entities?: import("./types").EntityNode[] };
-          } | null = null;
-          if (typeof meta.data === "string") {
-            try {
-              metaData = JSON.parse(meta.data) as {
-                children?: { entities?: import("./types").EntityNode[] };
-              };
-            } catch (e) {
-              logger.warn(
-                "[ScenePlayer] Failed to parse meta.data JSON, skipping module:",
-                e
-              );
-              continue;
-            }
-          } else {
-            metaData = meta.data as {
-              children?: { entities?: import("./types").EntityNode[] };
-            };
-          }
-
-          logger.log("[ScenePlayer] Parsed metaData:", metaData);
-
-          if (metaData?.children?.entities) {
-            await processEntities(
-              metaData.children.entities,
-              moduleParams.transform
-            );
-          }
-        }
-      }
-    }
-
-    initEventContainer();
-    logger.log("[ScenePlayer] Event container:", eventContainer.value);
+  if (!scene.value) {
+    sceneReady.value = true;
+    resolveSceneReady?.();
+    return;
   }
 
-  // ── ResizeObserver / fullscreen watcher ───────────────────────────────────
+  try {
+    // ── Build LoaderContext ────────────────────────────────────────────────────
 
-  watch(
-    () => props.isSceneFullscreen,
-    () => {
-      if (!scene.value) return;
-      setTimeout(() => sceneSetup.handleResize(scene.value!), 50);
-      setTimeout(() => sceneSetup.handleResize(scene.value!), 100);
+    // renderer and camera are not yet available; they will be populated below
+    // after setupScene is called. LoaderContext holds plain references that
+    // useResourceLoaders reads at call time, so late assignment is safe.
+    const ctx: LoaderContext = {
+      renderer: null,
+      camera: null,
+      threeScene,
+      controls,
+      mouse,
+      raycaster,
+      sources,
+      mixers,
+      collisionObjects,
+      rotatingObjects,
+      moveableObjects,
+      dragState,
+      sceneInstanceId,
+      resourceLoadErrors,
+      triggerEvent,
+      findResource,
+    };
+
+    // ── Frame callback (used inside animation loop) ───────────────────────────
+
+    const onFrame = (delta: number) => {
+      mixers.forEach((mixer) => mixer.update(delta));
+
+      // Rotate objects
+      rotatingObjects.value.forEach((obj) => {
+        if (obj.checkVisibility && !obj.mesh.visible) return;
+        obj.mesh.rotation.x += obj.speed.x * delta;
+        obj.mesh.rotation.y += obj.speed.y * delta;
+        obj.mesh.rotation.z += obj.speed.z * delta;
+      });
+
+      // Collision detection
+      if (collisionObjects.value.length > 0) {
+        for (const collisionObj of collisionObjects.value) {
+          const source = sources.get(collisionObj.sourceUuid);
+          const target = sources.get(collisionObj.targetUuid);
+          const sourceModel = getSourceMesh(source);
+          const targetModel = getSourceMesh(target);
+
+          if (!sourceModel || !targetModel) continue;
+          if (
+            collisionObj.checkVisibility &&
+            (!sourceModel.visible || !targetModel.visible)
+          ) {
+            continue;
+          }
+
+          if (!sourceModel.position.equals(collisionObj.lastPosition)) {
+            collisionObj.boundingBox.setFromObject(sourceModel);
+            const targetBox = new THREE.Box3().setFromObject(targetModel);
+            const isColliding =
+              collisionObj.boundingBox.intersectsBox(targetBox);
+
+            if (isColliding && !collisionObj.isColliding) {
+              collisionObj.isColliding = true;
+              logger.log("[ScenePlayer] Collision detected:", {
+                source: collisionObj.sourceUuid,
+                target: collisionObj.targetUuid,
+              });
+              triggerEvent(collisionObj.eventUuid).catch((error) => {
+                logger.error(
+                  "[ScenePlayer] Collision event handler failed:",
+                  error
+                );
+              });
+            } else if (!isColliding && collisionObj.isColliding) {
+              collisionObj.isColliding = false;
+            }
+
+            collisionObj.lastPosition.copy(sourceModel.position);
+          }
+        }
+      }
+    };
+
+    // ── Initialise Three.js scene ─────────────────────────────────────────────
+
+    sceneSetup.setupScene(scene.value, {
+      isDark: isDark.value,
+      mode: mode.value,
+      controls,
+      onFrame,
+    });
+
+    // Populate ctx with renderer and camera now that setupScene has run
+    ctx.renderer = sceneSetup.getRenderer();
+    ctx.camera = sceneSetup.getCamera();
+
+    // ── Initialise resource loaders ───────────────────────────────────────────
+
+    const { processEntities, destroy } = useResourceLoaders(ctx);
+    destroyLoaders = destroy;
+
+    // ── Load scene data ───────────────────────────────────────────────────────
+
+    if (mode.value === "meta" && props.meta) {
+      const metaData = props.meta.data;
+      logger.log("[ScenePlayer] Parsed metaData:", metaData);
+
+      if (isMetaData(metaData) && metaData.children?.entities) {
+        await processEntities(
+          metaData.children.entities as import("./types").EntityNode[]
+        );
+      } else {
+        logger.error("[ScenePlayer] Invalid metaData format:", metaData);
+      }
+    } else if (mode.value === "verse" && props.verse) {
+      const {
+        parseVerseData,
+        isVerseMetaInfo,
+        initEventContainer,
+        eventContainer,
+      } = useVerseMode(props.verse);
+
+      const verseData = parseVerseData();
+      logger.log("[ScenePlayer] Parsed verse data:", props.verse);
+
+      if (verseData?.children?.modules) {
+        for (const module of verseData.children.modules as Entity[]) {
+          const moduleParams = module.parameters as
+            | {
+                meta_id?: string | number;
+                uuid: string;
+                transform?: TransformData;
+                [key: string]: unknown;
+              }
+            | undefined;
+
+          if (!moduleParams?.meta_id) continue;
+
+          const metaId = moduleParams.meta_id;
+          const meta = props.verse.metas.find(
+            (candidate): candidate is import("./types").VerseMetaInfo =>
+              isVerseMetaInfo(candidate) &&
+              String((candidate as import("./types").VerseMetaInfo).id) ===
+                String(metaId)
+          );
+
+          if (meta?.data) {
+            let metaData: {
+              children?: { entities?: import("./types").EntityNode[] };
+            } | null = null;
+            if (typeof meta.data === "string") {
+              try {
+                metaData = JSON.parse(meta.data) as {
+                  children?: { entities?: import("./types").EntityNode[] };
+                };
+              } catch (e) {
+                logger.warn(
+                  "[ScenePlayer] Failed to parse meta.data JSON, skipping module:",
+                  e
+                );
+                continue;
+              }
+            } else {
+              metaData = meta.data as {
+                children?: { entities?: import("./types").EntityNode[] };
+              };
+            }
+
+            logger.log("[ScenePlayer] Parsed metaData:", metaData);
+
+            if (metaData?.children?.entities) {
+              await processEntities(
+                metaData.children.entities,
+                moduleParams.transform
+              );
+            }
+          }
+        }
+      }
+
+      initEventContainer();
+      logger.log("[ScenePlayer] Event container:", eventContainer.value);
     }
-  );
+
+    if (resourceLoadErrors.value.length > 0) {
+      throw new Error(
+        `场景中有 ${resourceLoadErrors.value.length} 个资源加载失败`
+      );
+    }
+
+    // ── ResizeObserver / fullscreen watcher ───────────────────────────────────
+
+    watch(
+      () => props.isSceneFullscreen,
+      () => {
+        if (!scene.value) return;
+        setTimeout(() => sceneSetup.handleResize(scene.value!), 50);
+        setTimeout(() => sceneSetup.handleResize(scene.value!), 100);
+      }
+    );
+  } catch (error) {
+    sceneLoadError.value = error;
+    logger.error("[ScenePlayer] Failed to initialise scene:", error);
+  } finally {
+    sceneReady.value = true;
+    resolveSceneReady?.();
+  }
 });
 
 // ─── Watchers ─────────────────────────────────────────────────────────────────
@@ -423,6 +453,10 @@ onUnmounted(() => {
 
 defineExpose({
   sources,
+  sceneReady,
+  sceneLoadError,
+  resourceLoadErrors,
+  whenReady: () => (sceneReady.value ? Promise.resolve() : sceneReadyPromise),
   playAnimation,
   getAudioUrl,
   playQueuedAudio,

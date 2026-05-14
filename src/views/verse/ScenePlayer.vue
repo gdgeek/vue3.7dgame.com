@@ -24,6 +24,18 @@ defineExpose({
   get sources() {
     return playerRef.value?.sources;
   },
+  get sceneReady() {
+    return playerRef.value?.sceneReady;
+  },
+  get sceneLoadError() {
+    return playerRef.value?.sceneLoadError;
+  },
+  get resourceLoadErrors() {
+    return playerRef.value?.resourceLoadErrors;
+  },
+  whenReady() {
+    return playerRef.value?.whenReady() ?? Promise.resolve();
+  },
   playAnimation(uuid: string, animationName: string) {
     return playerRef.value?.playAnimation(uuid, animationName);
   },

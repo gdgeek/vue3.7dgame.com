@@ -21,6 +21,15 @@ export type TaskObject = {
   data?: unknown;
 };
 
+type AudioRuntimeInput =
+  | HTMLAudioElement
+  | {
+      url?: string;
+      src?: string;
+    }
+  | undefined
+  | null;
+
 /** ScenePlayer 中 sources Map 的值类型 */
 export type SceneSource = {
   type: string;
@@ -88,6 +97,20 @@ export function buildScriptRuntime(
     return new Audio(audioUrl);
   };
 
+  const resolveAudioElement = (
+    audio: AudioRuntimeInput
+  ): HTMLAudioElement | undefined => {
+    if (!audio) return undefined;
+    if (audio instanceof HTMLAudioElement) return audio;
+    if (isRecord(audio)) {
+      const url = audio.url ?? audio.src;
+      if (typeof url === "string" && url.trim()) {
+        return new Audio(url);
+      }
+    }
+    return undefined;
+  };
+
   // ---- polygen API ----
   const polygen = {
     playAnimation: (
@@ -108,32 +131,31 @@ export function buildScriptRuntime(
 
   // ---- sound API ----
   const sound = {
-    play: async (
-      audio: HTMLAudioElement | undefined,
-      skipQueue: boolean = false
-    ) => {
-      if (!audio) {
+    play: async (audio: AudioRuntimeInput, skipQueue: boolean = false) => {
+      const audioElement = resolveAudioElement(audio);
+      if (!audioElement) {
         logger.error("音频资源无效");
         return;
       }
-      await scenePlayerRef.value?.playQueuedAudio(audio, skipQueue);
+      await scenePlayerRef.value?.playQueuedAudio(audioElement, skipQueue);
     },
 
-    createTask: (audio: HTMLAudioElement | undefined): TaskObject | null => {
-      if (!audio) {
+    createTask: (audio: AudioRuntimeInput): TaskObject | null => {
+      const audioElement = resolveAudioElement(audio);
+      if (!audioElement) {
         logger.error("音频资源无效");
         return null;
       }
       return {
         type: "audio",
         execute: async () => {
-          await scenePlayerRef.value?.playQueuedAudio(audio);
+          await scenePlayerRef.value?.playQueuedAudio(audioElement);
         },
-        data: audio,
+        data: audioElement,
       };
     },
 
-    playTask: (audio: HTMLAudioElement | undefined): TaskObject | null => {
+    playTask: (audio: AudioRuntimeInput): TaskObject | null => {
       const taskObj = sound.createTask(audio);
       if (!taskObj) return null;
       taskObj.execute?.();

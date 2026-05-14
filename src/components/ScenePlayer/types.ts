@@ -145,6 +145,12 @@ export type VerseMetaInfo = {
   events?: unknown;
 };
 
+export type ResourceLoadIssue = {
+  uuid?: string;
+  resource?: string | number;
+  message: string;
+};
+
 // ─── Loader context ───────────────────────────────────────────────────────────
 
 /**
@@ -165,6 +171,7 @@ export type LoaderContext = {
   moveableObjects: Ref<MoveableObject[]>;
   dragState: DragState;
   sceneInstanceId: string;
+  resourceLoadErrors: Ref<ResourceLoadIssue[]>;
   triggerEvent: (eventId: string) => Promise<void>;
   findResource: (id: string | number) => ResourceLike | undefined;
 };
