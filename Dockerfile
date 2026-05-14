@@ -30,6 +30,7 @@ FROM nginx:alpine
 
 # Nginx 配置模板
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+RUN mkdir -p /var/cache/nginx/webgl-preview && chown -R nginx:nginx /var/cache/nginx
 
 # 自定义 entrypoint（动态生成 API failover 配置）
 COPY docker-entrypoint.sh /docker-entrypoint.sh
