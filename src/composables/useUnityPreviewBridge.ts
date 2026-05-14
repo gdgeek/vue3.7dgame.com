@@ -72,12 +72,13 @@ export const useUnityPreviewBridge = ({
   const frameKey = ref(0);
   const panMode = ref(false);
   const pendingPayload = ref<unknown>(null);
+  const hasPendingPayload = ref(false);
   let runningFallbackTimer: number | undefined;
 
   const src = computed(() => {
     const url = resolveUnityPreviewUrl();
     url.searchParams.set("embed", "1");
-    url.searchParams.set("v", String(frameKey.value));
+    url.searchParams.set("runner", env.buildVersion);
     return url.toString();
   });
 
@@ -152,6 +153,7 @@ export const useUnityPreviewBridge = ({
     await ensureRuntimeData?.();
     const payload = await buildPayload();
     pendingPayload.value = payload;
+    hasPendingPayload.value = true;
     postPayload(payload);
   };
 
@@ -162,7 +164,11 @@ export const useUnityPreviewBridge = ({
     if (event.data.type === "unity-web-preview-ready") {
       ready.value = true;
       status.value = "Unity 已就绪，正在发送场景...";
-      void send();
+      if (hasPendingPayload.value) {
+        postPayload(pendingPayload.value);
+      } else {
+        void send();
+      }
       postCameraMode();
     }
 
@@ -189,18 +195,19 @@ export const useUnityPreviewBridge = ({
 
     await ensureRuntimeData?.();
     pendingPayload.value = await buildPayload();
-    ready.value = false;
+    hasPendingPayload.value = true;
     panMode.value = false;
-    status.value = initialStatus;
-    frameKey.value += 1;
+    status.value = ready.value ? "Unity 已就绪，正在发送场景..." : initialStatus;
     frameVisible.value = true;
     visible.value = true;
+    if (ready.value) {
+      postPayload(pendingPayload.value);
+      postCameraMode();
+    }
   };
 
   const handleClosed = () => {
     clearRunningFallbackTimer();
-    ready.value = false;
-    frameVisible.value = false;
     panMode.value = false;
     status.value = initialStatus;
   };
