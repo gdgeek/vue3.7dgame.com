@@ -134,16 +134,6 @@
                     </el-card>
                   </div>
                 </el-dialog>
-                <UnityPreviewDialog
-                  ref="unityPreviewDialog"
-                  v-model="unityPreviewVisible"
-                  :frame-visible="unityPreviewFrameVisible"
-                  :frame-key="unityPreviewFrameKey"
-                  :src="unityPreviewSrc"
-                  @closed="handleUnityPreviewClosed"
-                  @frame-load="handleUnityPreviewLoad"
-                ></UnityPreviewDialog>
-
                 <iframe
                   style="width: 100%; height: 100%; padding: 0; margin: 0"
                   id="editor"
@@ -271,7 +261,6 @@ import {
   Aim,
   VideoPlay,
 } from "@element-plus/icons-vue";
-import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
 import {
   normalizeUnityPreviewVerseLua,
@@ -608,13 +597,6 @@ const unityPreview = useUnityPreviewBridge({
   canOpen: () => (verse.value ? true : "场景数据尚未加载完成"),
   notifyError: (message) => Message.error(message),
 });
-const unityPreviewDialog = unityPreview.dialogRef;
-const unityPreviewVisible = unityPreview.visible;
-const unityPreviewFrameVisible = unityPreview.frameVisible;
-const unityPreviewFrameKey = unityPreview.frameKey;
-const unityPreviewSrc = unityPreview.src;
-const handleUnityPreviewLoad = unityPreview.handleLoad;
-const handleUnityPreviewClosed = unityPreview.handleClosed;
 const openUnityPreview = unityPreview.open;
 
 const run = async () => {

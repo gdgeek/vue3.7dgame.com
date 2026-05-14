@@ -84,7 +84,25 @@ const emit = defineEmits<{
   (event: "frameLoad"): void;
 }>();
 
-const { t } = useI18n();
+const fallbackMessages: Record<string, string> = {
+  "common.unityPreview.title": "运行场景",
+  "common.unityPreview.helpClick": "单击选择",
+  "common.unityPreview.helpRotate": "拖动旋转视角",
+  "common.unityPreview.helpZoomPan": "滚轮缩放，右键平移",
+  "common.unityPreview.helpFullscreen": "全屏预览",
+  "common.unityPreview.fullscreen": "全屏",
+  "common.unityPreview.close": "关闭",
+};
+
+const i18n = (() => {
+  try {
+    return useI18n();
+  } catch {
+    return null;
+  }
+})();
+
+const t = (key: string) => i18n?.t(key) ?? fallbackMessages[key] ?? key;
 const frame = ref<HTMLIFrameElement | null>(null);
 const frameWrap = ref<HTMLElement | null>(null);
 

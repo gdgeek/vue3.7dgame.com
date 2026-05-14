@@ -180,15 +180,6 @@
           @clear-history="clearDraftHistory"
           @restore="restoreDraftVersion"
         ></ScriptDraftDialog>
-        <UnityPreviewDialog
-          ref="unityPreviewDialog"
-          v-model="unityPreviewVisible"
-          :frame-visible="unityPreviewFrameVisible"
-          :frame-key="unityPreviewFrameKey"
-          :src="unityPreviewSrc"
-          @closed="handleUnityPreviewClosed"
-          @frame-load="handleUnityPreviewLoad"
-        ></UnityPreviewDialog>
       </el-main>
     </el-container>
   </div>
@@ -234,7 +225,6 @@ import {
 } from "@/composables/useEditorVersionToolbar";
 import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
-import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
 import {
   normalizeUnityPreviewVerseLua,
@@ -652,13 +642,6 @@ const unityPreview = useUnityPreviewBridge({
   canOpen: () => (verse.value ? true : "场景数据尚未加载完成"),
   notifyError: (message) => ElMessage.error(message),
 });
-const unityPreviewDialog = unityPreview.dialogRef;
-const unityPreviewVisible = unityPreview.visible;
-const unityPreviewFrameVisible = unityPreview.frameVisible;
-const unityPreviewFrameKey = unityPreview.frameKey;
-const unityPreviewSrc = unityPreview.src;
-const handleUnityPreviewLoad = unityPreview.handleLoad;
-const handleUnityPreviewClosed = unityPreview.handleClosed;
 const openUnityPreview = unityPreview.open;
 
 // ---------- Verse 专有：run ----------

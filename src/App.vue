@@ -16,6 +16,7 @@
         <component :is="Component"></component>
       </transition>
     </router-view>
+    <UnityPreviewHost></UnityPreviewHost>
   </el-config-provider>
   <span class="global-version">v{{ appVersion }}</span>
 </template>
@@ -34,6 +35,7 @@ import { useDomainStore } from "@/store/modules/domain";
 import { UpdateRoutes } from "@/router";
 import Token from "@/store/modules/token";
 import { disposeKTX2Loader } from "@/lib/three/loaders";
+import UnityPreviewHost from "@/components/UnityPreviewHost.vue";
 
 /** @type {string} */
 const appVersion = __APP_VERSION__;

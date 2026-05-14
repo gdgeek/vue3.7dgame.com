@@ -28,15 +28,6 @@
       @clear-history="clearDraftHistory"
       @restore="restoreDraftVersion"
     ></ScriptDraftDialog>
-    <UnityPreviewDialog
-      ref="unityPreviewDialog"
-      v-model="unityPreviewVisible"
-      :frame-visible="unityPreviewFrameVisible"
-      :frame-key="unityPreviewFrameKey"
-      :src="unityPreviewSrc"
-      @closed="handleUnityPreviewClosed"
-      @frame-load="handleUnityPreviewLoad"
-    ></UnityPreviewDialog>
   </div>
 </template>
 
@@ -77,7 +68,6 @@ import type {
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
 import { VERSE_SCENE_EXPAND, buildVerseEditorInitConfig } from "./sceneSpace";
-import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
 import {
   normalizeUnityPreviewVerseLua,
@@ -253,13 +243,6 @@ const unityPreview = useUnityPreviewBridge({
     verse.value || Number.isFinite(id.value) ? true : "场景数据尚未加载完成",
   notifyError: (message) => ElMessage.error(message),
 });
-const unityPreviewDialog = unityPreview.dialogRef;
-const unityPreviewVisible = unityPreview.visible;
-const unityPreviewFrameVisible = unityPreview.frameVisible;
-const unityPreviewFrameKey = unityPreview.frameKey;
-const unityPreviewSrc = unityPreview.src;
-const handleUnityPreviewLoad = unityPreview.handleLoad;
-const handleUnityPreviewClosed = unityPreview.handleClosed;
 const openUnityPreview = unityPreview.open;
 
 // 监听语言变化
