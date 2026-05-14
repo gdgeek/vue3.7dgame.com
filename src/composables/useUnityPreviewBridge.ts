@@ -26,6 +26,7 @@ const visible = ref(false);
 const frameVisible = ref(false);
 const ready = ref(false);
 const status = ref(initialStatus);
+const sceneLoading = ref(false);
 const frameKey = ref(0);
 const panMode = ref(false);
 const pendingPayload = ref<unknown>(null);
@@ -34,6 +35,7 @@ const hasPendingPayload = ref(false);
 let activeOptions: UseUnityPreviewBridgeOptions | null = null;
 let pendingOptions: UseUnityPreviewBridgeOptions | null = null;
 let runningFallbackTimer: number | undefined;
+let previewRunCounter = 0;
 
 const resolveUnityPreviewUrl = () => {
   try {
@@ -113,6 +115,13 @@ const postPayload = (
   }
 
   const postablePayload = cloneForUnityPreview(payload);
+  const previewRunId = `unity-preview-${Date.now()}-${++previewRunCounter}`;
+  if (postablePayload && typeof postablePayload === "object") {
+    Object.assign(postablePayload, {
+      previewRunId,
+      previewRunAt: new Date().toISOString(),
+    });
+  }
   rewriteUnityPreviewUrls(
     postablePayload,
     proxyOrigin.value,
@@ -130,10 +139,10 @@ const postPayload = (
     return;
   }
 
-  status.value = "场景数据已发送到 Unity";
+  status.value = "场景数据已发送到 Unity，正在重新加载场景...";
   clearRunningFallbackTimer();
   runningFallbackTimer = window.setTimeout(() => {
-    if (visible.value) {
+    if (visible.value && sceneLoading.value) {
       status.value = "Unity 已接收场景数据，若画面为空请刷新运行器或重新打包";
     }
   }, 15000);
@@ -189,11 +198,13 @@ const handleMessage = (event: MessageEvent) => {
   }
 
   if (event.data.type === "unity-web-preview-scene-forwarded") {
-    status.value = "Unity 桥接已接收场景数据，正在本地加载...";
+    status.value = "Unity 桥接已接收场景数据，正在重新加载场景...";
   }
 
   if (event.data.type === "unity-web-preview-scene-running") {
     clearRunningFallbackTimer();
+    sceneLoading.value = false;
+    pendingOptions = null;
     status.value = "场景已在 Unity 中运行";
   }
 };
@@ -213,8 +224,9 @@ const openWithOptions = async (options: UseUnityPreviewBridgeOptions) => {
   pendingOptions = options;
   pendingPayload.value = null;
   hasPendingPayload.value = false;
+  sceneLoading.value = true;
   panMode.value = false;
-  status.value = ready.value ? "Unity 已就绪，正在发送场景..." : initialStatus;
+  status.value = ready.value ? "正在重新加载场景..." : initialStatus;
   frameVisible.value = true;
   visible.value = true;
   if (ready.value) {
@@ -226,6 +238,7 @@ const openWithOptions = async (options: UseUnityPreviewBridgeOptions) => {
 const handleClosed = () => {
   clearRunningFallbackTimer();
   pendingOptions = null;
+  sceneLoading.value = false;
   panMode.value = false;
   status.value = ready.value ? "Unity 已就绪" : initialStatus;
 };
@@ -246,6 +259,7 @@ export const useUnityPreviewHost = () => {
     frameVisible,
     ready,
     status,
+    sceneLoading,
     frameKey,
     panMode,
     pendingPayload,
@@ -272,6 +286,7 @@ export const useUnityPreviewBridge = (
     frameVisible,
     ready,
     status,
+    sceneLoading,
     frameKey,
     panMode,
     pendingPayload,

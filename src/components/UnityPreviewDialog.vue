@@ -62,6 +62,9 @@
         allow="autoplay; fullscreen; gamepad; xr-spatial-tracking"
         @load="$emit('frameLoad')"
       ></iframe>
+      <div v-if="frameVisible && sceneLoading" class="unity-preview-loading">
+        <span>{{ status }}</span>
+      </div>
     </div>
   </el-dialog>
 </template>
@@ -76,6 +79,8 @@ const props = defineProps<{
   frameVisible: boolean;
   frameKey: number;
   src: string;
+  sceneLoading?: boolean;
+  status?: string;
 }>();
 
 const emit = defineEmits<{
@@ -244,6 +249,7 @@ defineExpose({
 }
 
 .unity-preview-frame-wrap {
+  position: relative;
   display: flex;
   flex: 1;
   align-items: flex-start;
@@ -262,6 +268,20 @@ defineExpose({
   background: #2f3a4a;
   border: 0;
   outline: none;
+}
+
+.unity-preview-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 88%);
+  text-align: center;
+  background: rgb(18 24 32 / 78%);
 }
 
 .unity-preview-frame-wrap:fullscreen {

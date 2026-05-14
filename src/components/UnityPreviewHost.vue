@@ -5,6 +5,8 @@
     :frame-visible="unityPreviewFrameVisible"
     :frame-key="unityPreviewFrameKey"
     :src="unityPreviewSrc"
+    :scene-loading="unityPreviewSceneLoading"
+    :status="unityPreviewStatus"
     @closed="handleUnityPreviewClosed"
     @frame-load="handleUnityPreviewLoad"
   ></UnityPreviewDialog>
@@ -25,6 +27,8 @@ const unityPreviewVisible = unityPreview.visible;
 const unityPreviewFrameVisible = unityPreview.frameVisible;
 const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
+const unityPreviewSceneLoading = unityPreview.sceneLoading;
+const unityPreviewStatus = unityPreview.status;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
 
