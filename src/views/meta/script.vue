@@ -23,17 +23,6 @@
                   ></el-option>
                 </el-select>
                 <el-button
-                  class="script-run-button"
-                  type="primary"
-                  size="small"
-                  @click="run"
-                >
-                  <el-icon class="script-run-icon">
-                    <VideoPlay></VideoPlay>
-                  </el-icon>
-                  测试运行
-                </el-button>
-                <el-button
                   type="primary"
                   size="small"
                   @click="goBackToSceneEditor"
@@ -195,7 +184,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { CopyDocument, Loading, VideoPlay } from "@element-plus/icons-vue";
+import { CopyDocument, Loading } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -813,17 +802,6 @@ defineExpose({ run });
   display: flex;
   gap: 8px;
   align-items: center;
-}
-
-.script-run-button {
-  display: inline-flex;
-  align-items: center;
-}
-
-.script-run-icon {
-  margin-right: 4px;
-  font-size: 14px;
-  color: inherit;
 }
 
 .script-used-scenes-select {
