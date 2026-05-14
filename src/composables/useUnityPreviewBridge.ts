@@ -197,7 +197,9 @@ export const useUnityPreviewBridge = ({
     pendingPayload.value = await buildPayload();
     hasPendingPayload.value = true;
     panMode.value = false;
-    status.value = ready.value ? "Unity 已就绪，正在发送场景..." : initialStatus;
+    status.value = ready.value
+      ? "Unity 已就绪，正在发送场景..."
+      : initialStatus;
     frameVisible.value = true;
     visible.value = true;
     if (ready.value) {
