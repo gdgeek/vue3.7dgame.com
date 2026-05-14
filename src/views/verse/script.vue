@@ -188,14 +188,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { logger } from "@/utils/logger";
-import {
-  ref,
-  computed,
-  onMounted,
-  onBeforeUnmount,
-  watch,
-  nextTick,
-} from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   getVerse,
@@ -225,23 +218,11 @@ import {
 } from "@/composables/useEditorVersionToolbar";
 import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
-import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
-import {
-  normalizeUnityPreviewVerseLua,
-  readUnityPreviewMetaJavaScriptCode,
-} from "@/utils/unityPreviewLua";
-import {
-  cloneForUnityPreview,
-  normalizeUnityPreviewData,
-  normalizeUnityPreviewMetas,
-  UNITY_PREVIEW_VERSE_EXPAND,
-} from "@/utils/unityPreviewPayload";
 
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
 const verse = ref<VerseData>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
-const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const route = useRoute();
 const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
@@ -509,7 +490,6 @@ onMounted(() => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
-    onRunPreview: openUnityPreview,
   });
 });
 
@@ -598,50 +578,6 @@ const handlePolygen = (uuid: string) => {
     },
   };
 };
-
-const ensureUnityPreviewRuntimeData = async () => {
-  if (!Number.isFinite(id.value)) return;
-
-  const response = await getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua");
-  verseMetasWithLuaCodeData.value =
-    response.data as unknown as VerseMetasWithJsCode;
-};
-
-const buildUnityPreviewPayload = () => {
-  const runtimeData =
-    verseMetasWithLuaCodeData.value ?? verseMetasWithJsCodeData.value;
-
-  return {
-    protocolVersion: 1,
-    source: "xrugc-web-script-page",
-    sceneType: "verse",
-    scene: {
-      id: verse.value?.id ?? id.value,
-      uuid: verse.value?.uuid ?? null,
-      name: verse.value?.name ?? "",
-      description: verse.value?.description ?? "",
-      data: normalizeUnityPreviewData(
-        runtimeData?.data ?? verse.value?.data ?? null
-      ),
-    },
-    resources: cloneForUnityPreview(runtimeData?.resources ?? []),
-    metas: normalizeUnityPreviewMetas(runtimeData?.metas ?? []),
-    script: {
-      blockly: cloneForUnityPreview(unsavedBlocklyData.value),
-      lua: normalizeUnityPreviewVerseLua(LuaCode.value),
-      javascript: JavaScriptCode.value,
-      metasJavaScript: metasJavaScriptCode.value,
-    },
-  };
-};
-
-const unityPreview = useUnityPreviewBridge({
-  ensureRuntimeData: ensureUnityPreviewRuntimeData,
-  buildPayload: buildUnityPreviewPayload,
-  canOpen: () => (verse.value ? true : "场景数据尚未加载完成"),
-  notifyError: (message) => ElMessage.error(message),
-});
-const openUnityPreview = unityPreview.open;
 
 // ---------- Verse 专有：run ----------
 const _run = async () => {
@@ -793,18 +729,16 @@ onMounted(async () => {
       id.value,
       "metas, module, share, verseCode"
     );
-    const [responseLua, responseJs] = await Promise.all([
-      getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
-      getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "js"),
-    ]);
+    const response2 = await getVerse(
+      id.value,
+      "id,name,description,data,metas,resources,code,uuid,code",
+      "js"
+    );
     verse.value = response.data;
     logger.error(verse.value);
-    verseMetasWithLuaCodeData.value =
-      responseLua.data as unknown as VerseMetasWithJsCode;
-    verseMetasWithJsCodeData.value =
-      responseJs.data as unknown as VerseMetasWithJsCode;
-    metasJavaScriptCode.value = verseMetasWithJsCodeData.value.metas
-      .map((meta: meta) => readUnityPreviewMetaJavaScriptCode(meta))
+    verseMetasWithJsCodeData.value = response2.data;
+    metasJavaScriptCode.value = response2.data.metas
+      .map((meta: meta) => meta.script)
       .join("\n");
     logger.log("Verse", verse.value);
     logger.log("metasJavaScriptCode", metasJavaScriptCode.value);

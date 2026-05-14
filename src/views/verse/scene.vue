@@ -41,13 +41,7 @@ import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
 import { Message } from "@/components/Dialog";
-import {
-  putVerse,
-  getVerse,
-  type meta,
-  type VerseData,
-  type VerseMetasWithJsCode,
-} from "@/api/v1/verse";
+import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
 import type { JsonValue } from "@/api/v1/types/common";
 import { getPrefab } from "@/api/v1/prefab";
 import { useAppStore } from "@/store/modules/app";
@@ -68,18 +62,6 @@ import type {
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
 import { VERSE_SCENE_EXPAND, buildVerseEditorInitConfig } from "./sceneSpace";
-import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
-import {
-  normalizeUnityPreviewVerseLua,
-  readUnityPreviewMetaJavaScriptCode,
-} from "@/utils/unityPreviewLua";
-import {
-  cloneForUnityPreview,
-  normalizeUnityPreviewData,
-  normalizeUnityPreviewMetas,
-  readUnityPreviewVerseCode,
-  UNITY_PREVIEW_VERSE_EXPAND,
-} from "@/utils/unityPreviewPayload";
 
 // 组件状态
 const userStore = useUserStore();
@@ -181,68 +163,6 @@ const src = computed(() => {
 
   return url;
 });
-
-const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
-const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
-
-const ensureUnityPreviewRuntimeData = async () => {
-  if (!Number.isFinite(id.value)) return;
-
-  const [responseLua, responseJs] = await Promise.all([
-    getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
-    getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "js"),
-  ]);
-  verseMetasWithLuaCodeData.value =
-    responseLua.data as unknown as VerseMetasWithJsCode;
-  verseMetasWithJsCodeData.value =
-    responseJs.data as unknown as VerseMetasWithJsCode;
-};
-
-const buildUnityPreviewPayload = () => {
-  const runtimeData =
-    verseMetasWithLuaCodeData.value ?? verseMetasWithJsCodeData.value;
-  const scriptJsRuntimeData =
-    verseMetasWithJsCodeData.value ?? verseMetasWithLuaCodeData.value;
-  const luaCode = readUnityPreviewVerseCode(runtimeData, "lua");
-  const jsCode = readUnityPreviewVerseCode(scriptJsRuntimeData, "javascript");
-  const metasJavaScriptCode = (
-    (scriptJsRuntimeData?.metas ?? []) as unknown as meta[]
-  )
-    .map((item) => readUnityPreviewMetaJavaScriptCode(item))
-    .join("\n");
-
-  return {
-    protocolVersion: 1,
-    source: "xrugc-web-scene-editor",
-    sceneType: "verse",
-    scene: {
-      id: verse.value?.id ?? id.value,
-      uuid: verse.value?.uuid ?? runtimeData?.uuid ?? null,
-      name: verse.value?.name ?? runtimeData?.name ?? "",
-      description: verse.value?.description ?? runtimeData?.description ?? "",
-      data: normalizeUnityPreviewData(
-        runtimeData?.data ?? verse.value?.data ?? null
-      ),
-    },
-    resources: cloneForUnityPreview(runtimeData?.resources ?? []),
-    metas: normalizeUnityPreviewMetas(runtimeData?.metas ?? []),
-    script: {
-      blockly: null,
-      lua: normalizeUnityPreviewVerseLua(luaCode),
-      javascript: jsCode,
-      metasJavaScript: metasJavaScriptCode,
-    },
-  };
-};
-
-const unityPreview = useUnityPreviewBridge({
-  ensureRuntimeData: ensureUnityPreviewRuntimeData,
-  buildPayload: buildUnityPreviewPayload,
-  canOpen: () =>
-    verse.value || Number.isFinite(id.value) ? true : "场景数据尚未加载完成",
-  notifyError: (message) => ElMessage.error(message),
-});
-const openUnityPreview = unityPreview.open;
 
 // 监听语言变化
 watch(
@@ -1144,7 +1064,6 @@ onMounted(() => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
-    onRunPreview: openUnityPreview,
   });
   restartAutoSaveTimer();
   window.addEventListener("message", handleMessage);

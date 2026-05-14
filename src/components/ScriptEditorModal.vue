@@ -69,17 +69,6 @@
                         JavaScript
                       </el-button>
                       <el-button
-                        class="unity-preview-trigger-button"
-                        size="small"
-                        style="margin-right: 10px"
-                        @click="openUnityPreview"
-                      >
-                        <el-icon class="button-icon">
-                          <VideoPlay></VideoPlay>
-                        </el-icon>
-                        {{ t("common.unityPreview.entry") }}
-                      </el-button>
-                      <el-button
                         size="small"
                         type="primary"
                         style="margin-right: 10px"
@@ -134,6 +123,7 @@
                     </el-card>
                   </div>
                 </el-dialog>
+
                 <iframe
                   style="width: 100%; height: 100%; padding: 0; margin: 0"
                   id="editor"
@@ -255,23 +245,7 @@ import {
   buildScriptRuntime,
   type ScenePlayerLike,
 } from "@/composables/useScriptRuntime";
-import {
-  CopyDocument,
-  FullScreen,
-  Aim,
-  VideoPlay,
-} from "@element-plus/icons-vue";
-import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
-import {
-  normalizeUnityPreviewVerseLua,
-  readUnityPreviewMetaJavaScriptCode,
-} from "@/utils/unityPreviewLua";
-import {
-  cloneForUnityPreview,
-  normalizeUnityPreviewData,
-  normalizeUnityPreviewMetas,
-  UNITY_PREVIEW_VERSE_EXPAND,
-} from "@/utils/unityPreviewPayload";
+import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
 
 // Props
 interface Props {
@@ -306,7 +280,6 @@ const dialogTitle = computed(() => {
 const loading = ref(false);
 const verse = ref<VerseData>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
-const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const metasJavaScriptCode = ref("");
 let map = new Map<string, Array<{ uuid: string; title: string }>>();
 
@@ -550,54 +523,6 @@ const handlePolygen = async (uuid: string) => {
   };
 };
 
-const ensureUnityPreviewRuntimeData = async () => {
-  if (!props.verseId) return;
-
-  const response = await getVerse(
-    props.verseId,
-    UNITY_PREVIEW_VERSE_EXPAND,
-    "lua"
-  );
-  verseMetasWithLuaCodeData.value =
-    response.data as unknown as VerseMetasWithJsCode;
-};
-
-const buildUnityPreviewPayload = () => {
-  const runtimeData =
-    verseMetasWithLuaCodeData.value ?? verseMetasWithJsCodeData.value;
-
-  return {
-    protocolVersion: 1,
-    source: "xrugc-web-script-editor",
-    sceneType: "verse",
-    scene: {
-      id: verse.value?.id ?? props.verseId,
-      uuid: verse.value?.uuid ?? null,
-      name: verse.value?.name ?? "",
-      description: verse.value?.description ?? "",
-      data: normalizeUnityPreviewData(
-        runtimeData?.data ?? verse.value?.data ?? null
-      ),
-    },
-    resources: cloneForUnityPreview(runtimeData?.resources ?? []),
-    metas: normalizeUnityPreviewMetas(runtimeData?.metas ?? []),
-    script: {
-      blockly: cloneForUnityPreview(unsavedBlocklyData.value),
-      lua: normalizeUnityPreviewVerseLua(LuaCode.value),
-      javascript: JavaScriptCode.value,
-      metasJavaScript: metasJavaScriptCode.value,
-    },
-  };
-};
-
-const unityPreview = useUnityPreviewBridge({
-  ensureRuntimeData: ensureUnityPreviewRuntimeData,
-  buildPayload: buildUnityPreviewPayload,
-  canOpen: () => (verse.value ? true : "场景数据尚未加载完成"),
-  notifyError: (message) => Message.error(message),
-});
-const openUnityPreview = unityPreview.open;
-
 const run = async () => {
   const wasFullscreen = isFullscreen.value;
   if (wasFullscreen) {
@@ -758,17 +683,16 @@ const loadVerseData = async () => {
       props.verseId,
       "metas, module, share, verseCode"
     );
-    const [responseLua, responseJs] = await Promise.all([
-      getVerse(props.verseId, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
-      getVerse(props.verseId, UNITY_PREVIEW_VERSE_EXPAND, "js"),
-    ]);
+    const response2 = await getVerse(
+      props.verseId,
+      "id,name,description,data,metas,resources,code,uuid,code",
+      "js"
+    );
     verse.value = response.data;
     verseMetasWithJsCodeData.value =
-      responseJs.data as unknown as VerseMetasWithJsCode;
-    verseMetasWithLuaCodeData.value =
-      responseLua.data as unknown as VerseMetasWithJsCode;
-    metasJavaScriptCode.value = (verseMetasWithJsCodeData.value.metas as meta[])
-      .map((m) => readUnityPreviewMetaJavaScriptCode(m))
+      response2.data as unknown as VerseMetasWithJsCode;
+    metasJavaScriptCode.value = (response2.data.metas as unknown as meta[])
+      .map((m) => m.script)
       .join("\n");
 
     if (verse.value && verse.value.data) {
@@ -844,40 +768,6 @@ watch(
 
 .icon {
   margin-right: 5px;
-}
-
-.button-icon {
-  margin-right: 4px;
-}
-
-.unity-preview-trigger-button {
-  height: 30px;
-  padding: 0 13px;
-  font-weight: 500;
-  color: var(--primary-color, #06a7ee);
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--primary-color, #06a7ee);
-  border-radius: 8px;
-  box-shadow: none;
-}
-
-.unity-preview-trigger-button:hover,
-.unity-preview-trigger-button:focus {
-  color: var(--primary-color, #06a7ee);
-  background: var(--primary-light, rgb(3 169 244 / 10%));
-  border-color: var(--primary-color, #06a7ee);
-  box-shadow: none;
-}
-
-.unity-preview-trigger-button:active {
-  color: var(--primary-color, #06a7ee);
-  background: var(--primary-light, rgb(3 169 244 / 14%));
-  border-color: var(--primary-color, #06a7ee);
-  box-shadow: none;
-}
-
-.unity-preview-trigger-button .button-icon {
-  color: currentcolor;
 }
 
 .code-container {

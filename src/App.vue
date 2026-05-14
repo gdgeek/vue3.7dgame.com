@@ -15,7 +15,6 @@
       <transition name="page" mode="out-in" :key="getPageTransitionKey(route)">
         <component :is="Component"></component>
       </transition>
-      <UnityPreviewHost :route-path="route.path"></UnityPreviewHost>
     </router-view>
   </el-config-provider>
   <span class="global-version">v{{ appVersion }}</span>
@@ -35,7 +34,6 @@ import { useDomainStore } from "@/store/modules/domain";
 import { UpdateRoutes } from "@/router";
 import Token from "@/store/modules/token";
 import { disposeKTX2Loader } from "@/lib/three/loaders";
-import UnityPreviewHost from "@/components/UnityPreviewHost.vue";
 
 /** @type {string} */
 const appVersion = __APP_VERSION__;
