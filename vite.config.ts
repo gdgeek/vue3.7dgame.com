@@ -50,6 +50,12 @@ const pathSrc = resolve(__dirname, "src");
 //  https://cn.vitejs.dev/config
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const env = loadEnv(mode, process.cwd());
+  const configApiProxyTarget = normalizeDevProxyTarget(
+    env.VITE_APP_CONFIG_API_URL || "http://localhost:8088"
+  );
+  const configApiProxyKeepsPrefix =
+    /^https?:\/\/d\.dev\.xrugc\.com(?:\/|$)/.test(configApiProxyTarget);
+
   return {
     resolve: {
       alias: {
@@ -92,10 +98,11 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           : {}),
         "/api-config": {
           changeOrigin: true,
-          target: normalizeDevProxyTarget(
-            env.VITE_APP_CONFIG_API_URL || "http://localhost:8088"
-          ),
-          rewrite: (path) => path.replace(/^\/api-config/, ""),
+          target: configApiProxyTarget,
+          rewrite: (path) =>
+            configApiProxyKeepsPrefix
+              ? path
+              : path.replace(/^\/api-config/, ""),
         },
       },
     },
