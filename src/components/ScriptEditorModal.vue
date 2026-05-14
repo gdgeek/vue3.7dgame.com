@@ -551,7 +551,6 @@ const handlePolygen = async (uuid: string) => {
 };
 
 const ensureUnityPreviewRuntimeData = async () => {
-  if (verseMetasWithLuaCodeData.value) return;
   if (!props.verseId) return;
 
   const response = await getVerse(

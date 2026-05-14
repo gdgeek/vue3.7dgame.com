@@ -600,7 +600,6 @@ const handlePolygen = (uuid: string) => {
 };
 
 const ensureUnityPreviewRuntimeData = async () => {
-  if (verseMetasWithLuaCodeData.value) return;
   if (!Number.isFinite(id.value)) return;
 
   const response = await getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua");

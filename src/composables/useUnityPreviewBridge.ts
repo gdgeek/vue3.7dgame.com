@@ -32,6 +32,7 @@ const pendingPayload = ref<unknown>(null);
 const hasPendingPayload = ref(false);
 
 let activeOptions: UseUnityPreviewBridgeOptions | null = null;
+let pendingOptions: UseUnityPreviewBridgeOptions | null = null;
 let runningFallbackTimer: number | undefined;
 
 const resolveUnityPreviewUrl = () => {
@@ -157,18 +158,22 @@ const postCameraMode = () => {
   logger.log("[UnityPreview] camera mode sent", mode);
 };
 
-const send = async () => {
-  if (!activeOptions) {
+const sendWithOptions = async (
+  options: UseUnityPreviewBridgeOptions | null
+) => {
+  if (!options) {
     notifyActiveError("Unity 预览上下文尚未初始化");
     return;
   }
 
-  await activeOptions.ensureRuntimeData?.();
-  const payload = await activeOptions.buildPayload();
+  await options.ensureRuntimeData?.();
+  const payload = await options.buildPayload();
   pendingPayload.value = payload;
   hasPendingPayload.value = true;
-  postPayload(payload, activeOptions.notifyError);
+  postPayload(payload, options.notifyError);
 };
+
+const send = () => sendWithOptions(pendingOptions ?? activeOptions);
 
 const handleMessage = (event: MessageEvent) => {
   if (!dialogRef.value?.isFrameSource(event.source)) return;
@@ -177,10 +182,8 @@ const handleMessage = (event: MessageEvent) => {
   if (event.data.type === "unity-web-preview-ready") {
     ready.value = true;
     status.value = "Unity 已就绪，正在发送场景...";
-    if (hasPendingPayload.value) {
-      postPayload(pendingPayload.value);
-    } else {
-      void send();
+    if (visible.value && pendingOptions) {
+      void sendWithOptions(pendingOptions);
     }
     postCameraMode();
   }
@@ -207,21 +210,22 @@ const openWithOptions = async (options: UseUnityPreviewBridgeOptions) => {
     return;
   }
 
-  await options.ensureRuntimeData?.();
-  pendingPayload.value = await options.buildPayload();
-  hasPendingPayload.value = true;
+  pendingOptions = options;
+  pendingPayload.value = null;
+  hasPendingPayload.value = false;
   panMode.value = false;
   status.value = ready.value ? "Unity 已就绪，正在发送场景..." : initialStatus;
   frameVisible.value = true;
   visible.value = true;
   if (ready.value) {
-    postPayload(pendingPayload.value, options.notifyError);
+    await sendWithOptions(options);
     postCameraMode();
   }
 };
 
 const handleClosed = () => {
   clearRunningFallbackTimer();
+  pendingOptions = null;
   panMode.value = false;
   status.value = ready.value ? "Unity 已就绪" : initialStatus;
 };

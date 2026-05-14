@@ -186,7 +186,6 @@ const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 
 const ensureUnityPreviewRuntimeData = async () => {
-  if (verseMetasWithLuaCodeData.value && verseMetasWithJsCodeData.value) return;
   if (!Number.isFinite(id.value)) return;
 
   const [responseLua, responseJs] = await Promise.all([
