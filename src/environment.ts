@@ -35,6 +35,39 @@ function title(): string {
 }
 */
 
+const productionUnityPreviewUrl = "/webgl-preview/embed.html";
+const developUnityPreviewUrl = "/webgl-preview/embed.html";
+
+const getRuntimeEnv = () =>
+  (window as unknown as Record<string, Record<string, string>>).__ENV__ || {};
+
+const isDevelopHost = () => {
+  const hostname = window.location.hostname.toLowerCase();
+  return (
+    hostname.includes(".dev.xrugc.com") || hostname.includes(".d.xrugc.com")
+  );
+};
+
+const resolveUnityPreviewUrl = () => {
+  const configuredUrl =
+    getRuntimeEnv().UNITY_PREVIEW_URL ||
+    import.meta.env.VITE_APP_UNITY_PREVIEW_URL ||
+    "";
+
+  if (
+    isDevelopHost() &&
+    (!configuredUrl || configuredUrl === productionUnityPreviewUrl)
+  ) {
+    return developUnityPreviewUrl;
+  }
+
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
+  return productionUnityPreviewUrl;
+};
+
 const environment = {
   api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api",
   config_api: "/api-config/api",
@@ -52,10 +85,7 @@ const environment = {
     import.meta.env.VITE_APP_EDITOR_URL ||
     "",
   unityPreview:
-    (window as unknown as Record<string, Record<string, string>>).__ENV__
-      ?.UNITY_PREVIEW_URL ||
-    import.meta.env.VITE_APP_UNITY_PREVIEW_URL ||
-    (import.meta.env.DEV ? "http://127.0.0.1:8080/" : "/unity-web-preview/"),
+    resolveUnityPreviewUrl(),
   domain_info: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
     : "/api-domain",

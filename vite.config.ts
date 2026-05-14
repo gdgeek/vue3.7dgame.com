@@ -104,6 +104,21 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
               ? path
               : path.replace(/^\/api-config/, ""),
         },
+        "/webgl-preview": {
+          changeOrigin: true,
+          target: normalizeDevProxyTarget(
+            env.VITE_APP_UNITY_PREVIEW_PROXY_TARGET ||
+              "https://webgl-preview.plugins.xrugc.com"
+          ),
+          rewrite: (path) => path.replace(/^\/webgl-preview/, ""),
+        },
+        "/__xrugc_proxy__": {
+          changeOrigin: true,
+          target: normalizeDevProxyTarget(
+            env.VITE_APP_UNITY_PREVIEW_PROXY_TARGET ||
+              "https://webgl-preview.plugins.xrugc.com"
+          ),
+        },
       },
     },
     plugins: [

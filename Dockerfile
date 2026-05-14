@@ -37,13 +37,14 @@ RUN chmod +x /docker-entrypoint.sh
 
 # 非动态 failover 的 APP_ 环境变量默认值（API 和 Domain 由 entrypoint 动态处理）
 ENV APP_DOC_API_URL=http://127.0.0.1:65535
+ENV APP_UNITY_PREVIEW_UPSTREAM=https://webgl-preview.plugins.xrugc.com
 
 # 插件 URL 默认值（用于无 compose override 时的本地场景）
 ENV PLUGIN_USER_MANAGEMENT_URL=http://localhost:3003
 ENV PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005
 
-# Unity WebGL 运行器默认同域路径，可在部署时用 APP_UNITY_PREVIEW_URL 覆盖
-ENV APP_UNITY_PREVIEW_URL=/unity-web-preview/
+# Unity WebGL 运行器默认走主站同域 /webgl-preview/ 代理，可在部署时用 APP_UNITY_PREVIEW_URL 覆盖
+ENV APP_UNITY_PREVIEW_URL=/webgl-preview/embed.html
 
 # 将构建的文件复制到 Nginx 默认的静态文件目录
 COPY --from=build /app/dist /usr/share/nginx/html

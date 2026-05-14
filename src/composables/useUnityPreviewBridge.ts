@@ -29,20 +29,20 @@ const resolveUnityPreviewUrl = () => {
       "Unity preview url is invalid, falling back to local preview",
       error
     );
-    return new URL("http://127.0.0.1:8080/");
+    return new URL("/webgl-preview/embed.html", window.location.href);
   }
 };
 
 const resolveUnityPreviewProxyOrigin = (): string => {
   try {
     const url = resolveUnityPreviewUrl();
-    if (url.hostname === "localhost" && url.port === "8080") {
-      return "http://127.0.0.1:8080";
+    if (url.hostname === "localhost" && url.port === "3006") {
+      return "http://127.0.0.1:3006";
     }
 
     return url.origin;
   } catch {
-    return "http://127.0.0.1:8080";
+    return window.location.origin;
   }
 };
 

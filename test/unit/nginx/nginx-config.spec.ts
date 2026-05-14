@@ -85,6 +85,12 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("location /api-doc/");
   });
 
+  it("contains same-origin WebGL preview proxy locations", () => {
+    expect(nginxConfig).toContain("location ^~ /webgl-preview/");
+    expect(nginxConfig).toContain("location = /__xrugc_proxy__");
+    expect(nginxConfig).toContain("${APP_UNITY_PREVIEW_UPSTREAM}");
+  });
+
   it("proxy_pass uses ${APP_DOC_API_URL} variable", () => {
     expect(nginxConfig).toContain("${APP_DOC_API_URL}");
   });
@@ -415,6 +421,16 @@ describe("Property 5: Environment-aware URL selection", () => {
       }),
       { numRuns: 100 }
     );
+  });
+
+  it("uses the same-origin WebGL preview path by default", () => {
+    const envSource = readFileSync(
+      resolve(__dirname, "../../../src/environment.ts"),
+      "utf-8"
+    );
+
+    expect(envSource).toContain("/webgl-preview/embed.html");
+    expect(envSource).toContain("UNITY_PREVIEW_URL");
   });
 
   it("environment.ts does not import ReplaceURL, ReplaceIP, or GetIP", () => {

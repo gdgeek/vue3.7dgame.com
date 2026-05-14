@@ -17,12 +17,12 @@ describe("unityPreviewPayload", () => {
 
     rewriteUnityPreviewUrls(
       payload,
-      "http://127.0.0.1:8080",
+      "https://xrugc.com",
       "https://api.d.xrteeth.com"
     );
 
     expect(payload.resources[0].url).toBe(
-      "http://127.0.0.1:8080/__xrugc_proxy__?url=https%3A%2F%2Fdata.7dgame.com%2Fmodel.glb"
+      "https://xrugc.com/__xrugc_proxy__?url=https%3A%2F%2Fdata.7dgame.com%2Fmodel.glb"
     );
   });
 
@@ -33,12 +33,12 @@ describe("unityPreviewPayload", () => {
 
     rewriteUnityPreviewUrls(
       payload,
-      "http://127.0.0.1:8080",
+      "https://xrugc.com",
       "https://api.d.xrteeth.com"
     );
 
     expect(payload.audio).toBe(
-      "http://127.0.0.1:8080/__xrugc_proxy__?url=https%3A%2F%2Fapi.d.xrteeth.com%2Fuploads%2Fbackground.mp3"
+      "https://xrugc.com/__xrugc_proxy__?url=https%3A%2F%2Fapi.d.xrteeth.com%2Fuploads%2Fbackground.mp3"
     );
   });
 
@@ -50,7 +50,7 @@ describe("unityPreviewPayload", () => {
 
     rewriteUnityPreviewUrls(
       payload,
-      "http://127.0.0.1:8080",
+      "https://xrugc.com",
       "https://api.d.xrteeth.com"
     );
 
