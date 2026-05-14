@@ -2,7 +2,7 @@
   <div class="verse-code">
     <el-container>
       <el-main>
-        <el-card class="box-card">
+        <el-card class="box-card" :class="{ 'is-running-preview': disabled }">
           <el-container v-if="!disabled">
             <div class="script-tabs-wrapper">
               <div v-if="meta" class="script-tabs-actions">
@@ -22,6 +22,17 @@
                     :value="scene.id"
                   ></el-option>
                 </el-select>
+                <el-button
+                  class="script-run-button"
+                  type="primary"
+                  size="small"
+                  @click="run"
+                >
+                  <el-icon class="script-run-icon">
+                    <VideoPlay></VideoPlay>
+                  </el-icon>
+                  测试运行
+                </el-button>
                 <el-button
                   type="primary"
                   size="small"
@@ -149,7 +160,7 @@
                 class="scene-fullscreen-btn"
                 size="small"
                 type="primary"
-                plain
+                title="全屏预览"
                 @click="toggleSceneFullscreen"
               >
                 <font-awesome-icon
@@ -184,7 +195,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { CopyDocument, Loading } from "@element-plus/icons-vue";
+import { CopyDocument, Loading, VideoPlay } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -804,6 +815,17 @@ defineExpose({ run });
   align-items: center;
 }
 
+.script-run-button {
+  display: inline-flex;
+  align-items: center;
+}
+
+.script-run-icon {
+  margin-right: 4px;
+  font-size: 14px;
+  color: inherit;
+}
+
 .script-used-scenes-select {
   width: 180px;
 }
@@ -857,7 +879,7 @@ defineExpose({ run });
 .script-tabs-wrapper :deep(.el-tabs__header) {
   position: relative;
   top: -8px;
-  padding-right: 280px;
+  padding-right: 460px;
   margin: 0 !important;
   overflow: visible !important;
   border-bottom: none !important;
@@ -988,12 +1010,34 @@ defineExpose({ run });
   position: relative;
   width: 100%;
   height: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #1f2937;
+  border-radius: 18px;
+}
+
+.is-running-preview {
+  --run-preview-gap: 20px;
+
+  overflow: hidden;
+  height: calc(100dvh - 68px - (var(--run-preview-gap) * 2));
+  background: #1f2937;
+  border: 0;
+  border-radius: 18px;
+  border-color: #1f2937;
+  box-shadow: none;
+}
+
+.is-running-preview :deep(.el-card__body) {
+  height: 100%;
+  padding: 0;
+  background: #1f2937;
 }
 
 .scene-fullscreen-controls {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 14px;
+  right: 14px;
   z-index: 100;
 }
 
@@ -1001,12 +1045,13 @@ defineExpose({ run });
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .scene-fullscreen-btn :deep(.svg-inline--fa) {
   font-size: 14px;
   line-height: 1;
+  color: #fff;
 }
 
 .scene-exit-btn {
@@ -1014,9 +1059,13 @@ defineExpose({ run });
 }
 
 /* 全屏时的样式 */
-:fullscreen .runArea {
+:fullscreen .runArea,
+.runArea:fullscreen {
+  width: 100vw !important;
+  max-width: none !important;
   height: 100vh !important;
   padding: 0;
+  aspect-ratio: auto;
 }
 
 :fullscreen .scene-fullscreen-btn {
