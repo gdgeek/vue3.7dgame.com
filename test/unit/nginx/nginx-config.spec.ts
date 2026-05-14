@@ -94,13 +94,17 @@ describe("nginx.conf.template — static proxy location blocks", () => {
   it("caches proxied WebGL preview assets on the web server", () => {
     const block = extractLocationBlock(nginxConfig, "^~ /webgl-preview/");
 
-    expect(nginxConfig).toContain("proxy_cache_path /var/cache/nginx/webgl-preview");
+    expect(nginxConfig).toContain(
+      "proxy_cache_path /var/cache/nginx/webgl-preview"
+    );
     expect(nginxConfig).toContain("keys_zone=webgl_preview_cache:256m");
     expect(block).toContain("proxy_buffering on");
     expect(block).toContain("proxy_cache webgl_preview_cache");
     expect(block).toContain("proxy_cache_lock on");
     expect(block).toContain("proxy_cache_valid 200 206 1y");
-    expect(block).toContain("add_header X-WebGL-Preview-Cache $upstream_cache_status always");
+    expect(block).toContain(
+      "add_header X-WebGL-Preview-Cache $upstream_cache_status always"
+    );
   });
 
   it("proxy_pass uses ${APP_DOC_API_URL} variable", () => {

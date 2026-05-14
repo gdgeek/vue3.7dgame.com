@@ -84,8 +84,7 @@ const environment = {
       ?.EDITOR_URL ||
     import.meta.env.VITE_APP_EDITOR_URL ||
     "",
-  unityPreview:
-    resolveUnityPreviewUrl(),
+  unityPreview: resolveUnityPreviewUrl(),
   domain_info: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
     : "/api-domain",
