@@ -103,7 +103,7 @@ export function combineTransforms(
  * @param ctx - Shared mutable context with renderer, camera, scene, sources, etc.
  */
 export function useResourceLoaders(ctx: LoaderContext) {
-  const { threeScene, sources, mixers, findResource } = ctx;
+  const { threeScene, sources, mixers, findResource, resourceLoadErrors } = ctx;
 
   /** Set to true on destroy() to prevent post-unmount async callbacks from mutating scene state. */
   let _destroyed = false;
@@ -128,6 +128,18 @@ export function useResourceLoaders(ctx: LoaderContext) {
       return (resource as { content: string }).content;
     }
     return undefined;
+  };
+
+  const recordLoadError = (
+    entity: EntityNode,
+    message: string,
+    resource?: string | number
+  ) => {
+    resourceLoadErrors.value.push({
+      uuid: entity.parameters?.uuid,
+      resource,
+      message,
+    });
   };
 
   /**
@@ -157,6 +169,22 @@ export function useResourceLoaders(ctx: LoaderContext) {
       );
     }
     mesh.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
+  };
+
+  const applyEntityComponents = (
+    mesh: THREE.Object3D,
+    uuid: string,
+    entity: EntityNode,
+    sourceData: SourceRecord
+  ): SourceRecord => {
+    if (!entity.children?.components?.length) return sourceData;
+    return applyComponents({
+      mesh,
+      uuid,
+      components: entity.children.components,
+      ctx,
+      sourceData,
+    });
   };
 
   // ─── loadModel ──────────────────────────────────────────────────────────────
@@ -306,7 +334,10 @@ export function useResourceLoaders(ctx: LoaderContext) {
                 },
               } as SourceVideoData,
             };
-            sources.set(uuid, sourceData);
+            sources.set(
+              uuid,
+              applyEntityComponents(mesh, uuid, entity, sourceData)
+            );
             threeScene.add(mesh);
 
             if (entity.parameters.play) {
@@ -393,7 +424,7 @@ export function useResourceLoaders(ctx: LoaderContext) {
             mesh.renderOrder = 1;
 
             const uuid = entity.parameters.uuid.toString();
-            sources.set(uuid, {
+            const sourceData: SourceRecord = {
               type: "picture",
               data: {
                 mesh,
@@ -401,7 +432,11 @@ export function useResourceLoaders(ctx: LoaderContext) {
                   mesh.visible = isVisible;
                 },
               },
-            });
+            };
+            sources.set(
+              uuid,
+              applyEntityComponents(mesh, uuid, entity, sourceData)
+            );
 
             threeScene.add(mesh);
             resolve(mesh);
@@ -472,7 +507,7 @@ export function useResourceLoaders(ctx: LoaderContext) {
           }
 
           const uuid = entity.parameters.uuid.toString();
-          sources.set(uuid, {
+          const sourceData: SourceRecord = {
             type: "text",
             data: {
               mesh,
@@ -489,7 +524,11 @@ export function useResourceLoaders(ctx: LoaderContext) {
                 mesh.visible = isVisible;
               },
             },
-          });
+          };
+          sources.set(
+            uuid,
+            applyEntityComponents(mesh, uuid, entity, sourceData)
+          );
 
           threeScene.add(mesh);
           resolve(mesh);
@@ -752,6 +791,10 @@ export function useResourceLoaders(ctx: LoaderContext) {
           );
         } catch (error) {
           logger.error("[ScenePlayer] Failed to process text entity:", error);
+          recordLoadError(
+            entity,
+            error instanceof Error ? error.message : String(error)
+          );
         }
       } else if (entity.type === "Entity") {
         logger.log(
@@ -789,7 +832,19 @@ export function useResourceLoaders(ctx: LoaderContext) {
             );
           } catch (error) {
             logger.error("[ScenePlayer] Failed to load model:", error);
+            recordLoadError(
+              entity,
+              error instanceof Error ? error.message : String(error),
+              resourceId
+            );
           }
+        } else {
+          const message = `Resource not found: ${resourceId}`;
+          logger.error("[ScenePlayer] Resource not found:", {
+            uuid: entity.parameters?.uuid,
+            resourceId,
+          });
+          recordLoadError(entity, message, resourceId);
         }
       }
 
