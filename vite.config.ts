@@ -50,6 +50,12 @@ const pathSrc = resolve(__dirname, "src");
 //  https://cn.vitejs.dev/config
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const env = loadEnv(mode, process.cwd());
+  const configApiProxyTarget = normalizeDevProxyTarget(
+    env.VITE_APP_CONFIG_API_URL || "http://localhost:8088"
+  );
+  const configApiProxyKeepsPrefix =
+    /^https?:\/\/d\.dev\.xrugc\.com(?:\/|$)/.test(configApiProxyTarget);
+
   return {
     resolve: {
       alias: {
@@ -92,10 +98,26 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           : {}),
         "/api-config": {
           changeOrigin: true,
+          target: configApiProxyTarget,
+          rewrite: (path) =>
+            configApiProxyKeepsPrefix
+              ? path
+              : path.replace(/^\/api-config/, ""),
+        },
+        "/webgl-preview": {
+          changeOrigin: true,
           target: normalizeDevProxyTarget(
-            env.VITE_APP_CONFIG_API_URL || "http://localhost:8088"
+            env.VITE_APP_UNITY_PREVIEW_PROXY_TARGET ||
+              "https://webgl-preview.plugins.xrugc.com"
           ),
-          rewrite: (path) => path.replace(/^\/api-config/, ""),
+          rewrite: (path) => path.replace(/^\/webgl-preview/, ""),
+        },
+        "/__xrugc_proxy__": {
+          changeOrigin: true,
+          target: normalizeDevProxyTarget(
+            env.VITE_APP_UNITY_PREVIEW_PROXY_TARGET ||
+              "https://webgl-preview.plugins.xrugc.com"
+          ),
         },
       },
     },

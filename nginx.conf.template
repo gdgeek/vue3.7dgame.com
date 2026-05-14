@@ -2,6 +2,13 @@
 
 # __LB_HTTP_BLOCK__
 
+proxy_cache_path /var/cache/nginx/webgl-preview
+    levels=1:2
+    keys_zone=webgl_preview_cache:256m
+    max_size=20g
+    inactive=30d
+    use_temp_path=off;
+
 server {
     listen 80;
     server_name localhost;
@@ -45,6 +52,54 @@ server {
         proxy_connect_timeout 60s;
         proxy_read_timeout 120s;
         proxy_send_timeout 120s;
+    }
+
+    # ============ 反向代理 - Unity WebGL 运行器（同域入口，便于主站/CDN 缓存） ============
+    location ^~ /webgl-preview/ {
+        proxy_pass ${APP_UNITY_PREVIEW_UPSTREAM}/;
+
+        proxy_ssl_server_name on;
+        proxy_http_version 1.1;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+        proxy_set_header Range $http_range;
+        proxy_set_header If-Range $http_if_range;
+        proxy_buffering on;
+        proxy_cache webgl_preview_cache;
+        proxy_cache_lock on;
+        proxy_cache_revalidate on;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        proxy_cache_valid 200 206 1y;
+        proxy_cache_valid 404 1m;
+        add_header X-WebGL-Preview-Cache $upstream_cache_status always;
+        proxy_intercept_errors off;
+
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+    }
+
+    location = /__xrugc_proxy__ {
+        proxy_pass ${APP_UNITY_PREVIEW_UPSTREAM}/__xrugc_proxy__?$args;
+
+        proxy_ssl_server_name on;
+        proxy_http_version 1.1;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+        proxy_set_header Range $http_range;
+        proxy_set_header If-Range $http_if_range;
+        proxy_buffering off;
+        proxy_intercept_errors off;
+
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
     }
 
     # ============ 反向代理 - 域名信息 API (由 docker-entrypoint.sh 动态生成) ============
