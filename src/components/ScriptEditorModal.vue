@@ -69,17 +69,6 @@
                         JavaScript
                       </el-button>
                       <el-button
-                        class="unity-preview-trigger-button"
-                        size="small"
-                        style="margin-right: 10px"
-                        @click="openUnityPreview"
-                      >
-                        <el-icon class="button-icon">
-                          <VideoPlay></VideoPlay>
-                        </el-icon>
-                        {{ t("common.unityPreview.entry") }}
-                      </el-button>
-                      <el-button
                         size="small"
                         type="primary"
                         style="margin-right: 10px"
@@ -269,7 +258,6 @@ import {
   CopyDocument,
   FullScreen,
   Aim,
-  VideoPlay,
 } from "@element-plus/icons-vue";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";

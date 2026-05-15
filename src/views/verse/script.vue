@@ -519,7 +519,6 @@ onMounted(() => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
-    onRunPreview: openUnityPreview,
   });
 });
 

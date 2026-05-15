@@ -1162,7 +1162,6 @@ onMounted(() => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
-    onRunPreview: openUnityPreview,
   });
   restartAutoSaveTimer();
   window.addEventListener("message", handleMessage);
