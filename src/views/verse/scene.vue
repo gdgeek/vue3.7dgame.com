@@ -260,7 +260,6 @@ const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
-const openUnityPreview = unityPreview.open;
 
 // 监听语言变化
 watch(

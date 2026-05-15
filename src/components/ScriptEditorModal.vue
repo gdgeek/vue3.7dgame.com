@@ -254,11 +254,7 @@ import {
   buildScriptRuntime,
   type ScenePlayerLike,
 } from "@/composables/useScriptRuntime";
-import {
-  CopyDocument,
-  FullScreen,
-  Aim,
-} from "@element-plus/icons-vue";
+import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
 import {
@@ -603,7 +599,6 @@ const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
-const openUnityPreview = unityPreview.open;
 
 const run = async () => {
   const wasFullscreen = isFullscreen.value;

@@ -658,7 +658,6 @@ const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
-const openUnityPreview = unityPreview.open;
 
 // ---------- Verse 专有：run ----------
 const _run = async () => {
