@@ -33,13 +33,6 @@
           ></ResourceScopeFilter>
         </template>
         <template #actions>
-          <el-button type="primary" @click="goToModelOptimizer">
-            <font-awesome-icon
-              :icon="['fas', 'bolt']"
-              style="margin-right: 4px; font-size: 18px"
-            ></font-awesome-icon>
-            {{ $t("polygen.optimizePolygen") }}
-          </el-button>
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon
               :icon="['fas', 'upload']"
@@ -246,7 +239,6 @@ import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
 } from "@/utils/resourceGrid";
-import { buildModelOptimizerRoute } from "./modelOptimizerRoute";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -409,10 +401,6 @@ const detailProperties = computed(() => {
 
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
-};
-
-const goToModelOptimizer = () => {
-  void router.push(buildModelOptimizerRoute(route.query));
 };
 
 const getQueryResourceId = () => {
