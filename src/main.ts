@@ -49,6 +49,7 @@ import {
   faVideo,
   faCube,
   faCubes,
+  faHand,
   faCircleDot,
   // 状态/权限
   faLock,
@@ -133,6 +134,7 @@ library.add(
   faVideo,
   faCube,
   faCubes,
+  faHand,
   faCircleDot,
   faLock,
   faGlobe,
