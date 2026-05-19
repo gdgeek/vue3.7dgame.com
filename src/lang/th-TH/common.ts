@@ -128,6 +128,12 @@ export default {
     user: "ผู้ใช้",
     adminAccount: "บัญชีผู้ดูแลระบบ",
     normalAccount: "บัญชีทั่วไป",
+    accountRoles: {
+      user: "บัญชีทั่วไป",
+      root: "บัญชี Root",
+      admin: "ผู้ดูแลระบบสูงสุด",
+      manager: "ผู้ดูแลระบบ",
+    },
     search: "ค้นหา...",
     selected: "เลือกแล้ว {count} รายการ",
     cancelSelectAll: "ยกเลิกการเลือกทั้งหมด",

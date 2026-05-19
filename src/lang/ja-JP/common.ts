@@ -128,6 +128,12 @@ export default {
     user: "ユーザー",
     adminAccount: "管理者アカウント",
     normalAccount: "通常アカウント",
+    accountRoles: {
+      user: "通常アカウント",
+      root: "ルートアカウント",
+      admin: "スーパー管理者",
+      manager: "管理者",
+    },
     search: "検索...",
     selected: "{count} 件選択中",
     cancelSelectAll: "全選択を解除",
