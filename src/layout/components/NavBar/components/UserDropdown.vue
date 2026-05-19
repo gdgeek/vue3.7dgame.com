@@ -76,13 +76,22 @@ const userName = computed(() => {
   return t("ui.user");
 });
 
-// 账户类型 - 可根据 roles 判断
+// 账户类型 - 使用用户最高等级角色显示
 const accountType = computed(() => {
-  const roles = userStore.userInfo?.roles || [];
-  if (roles.includes("root") || roles.includes("admin")) {
-    return t("ui.adminAccount");
+  const role = userStore.getRole();
+
+  switch (role) {
+    case userStore.RoleEnum.Root:
+      return t("ui.accountRoles.root");
+    case userStore.RoleEnum.Admin:
+      return t("ui.accountRoles.admin");
+    case userStore.RoleEnum.Manager:
+      return t("ui.accountRoles.manager");
+    case userStore.RoleEnum.User:
+      return t("ui.accountRoles.user");
+    default:
+      return t("ui.accountRoles.user");
   }
-  return t("ui.normalAccount");
 });
 
 // 从用户数据中获取头像URL
