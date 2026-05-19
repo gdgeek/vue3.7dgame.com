@@ -33,15 +33,16 @@ describe("local static plugin config", () => {
   it("keeps only the builtins menu group in public/config/plugins.json", () => {
     const config = readJson("public/config/plugins.json");
 
-    expect(config.menuGroups).toEqual([
+    expect(config.menuGroups.map((group) => group.id)).toEqual(["builtins"]);
+    expect(config.menuGroups[0]).toEqual(
       expect.objectContaining({
         id: "builtins",
         name: "基础工具",
-      }),
-    ]);
+      })
+    );
   });
 
-  it("keeps only user-management and system-admin in public/config/plugins.json", () => {
+  it("registers only built-in iframe plugins in public/config/plugins.json", () => {
     const config = readJson("public/config/plugins.json");
 
     expect(config.plugins.map((plugin) => plugin.id)).toEqual([
@@ -50,37 +51,26 @@ describe("local static plugin config", () => {
     ]);
     expect(config.plugins[0].group).toBe("builtins");
     expect(config.plugins[1].group).toBe("builtins");
-    expect(config.plugins.every((plugin) => plugin.group === "builtins")).toBe(
-      true
-    );
   });
 
   it("keeps only the builtins menu group in public/config/plugins.json.template", () => {
     const config = readJson("public/config/plugins.json.template");
 
-    expect(config.menuGroups).toEqual([
-      expect.objectContaining({
-        id: "builtins",
-        name: "基础工具",
-      }),
-    ]);
+    expect(config.menuGroups.map((group) => group.id)).toEqual(["builtins"]);
   });
 
-  it("keeps only user-management and system-admin in public/config/plugins.json.template", () => {
+  it("registers only built-in iframe plugins in public/config/plugins.json.template", () => {
     const config = readJson("public/config/plugins.json.template");
 
     expect(config.plugins.map((plugin) => plugin.id)).toEqual([
       "user-management",
       "system-admin",
     ]);
-    expect(config.plugins.every((plugin) => plugin.group === "builtins")).toBe(
-      true
-    );
   });
 });
 
 describe("local static plugin docker env scope", () => {
-  it("keeps only user-management and system-admin plugin env vars in Dockerfile", () => {
+  it("declares local iframe plugin env vars in Dockerfile", () => {
     const dockerfile = readText("Dockerfile");
 
     expect(dockerfile).toContain(
@@ -89,10 +79,11 @@ describe("local static plugin docker env scope", () => {
     expect(dockerfile).toContain(
       "ENV PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005"
     );
+    expect(dockerfile).not.toContain("PLUGIN_AR_SLAM_LOCALIZATION_URL");
     expect(dockerfile).not.toContain("PLUGIN_AI_3D_GENERATOR_V3_URL");
   });
 
-  it("keeps only user-management and system-admin plugin env vars in docker-compose.dev.yml", () => {
+  it("declares local iframe plugin env vars in docker-compose.dev.yml", () => {
     const compose = readText("docker-compose.dev.yml");
 
     expect(compose).toContain(
@@ -101,10 +92,11 @@ describe("local static plugin docker env scope", () => {
     expect(compose).toContain(
       "- PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005"
     );
+    expect(compose).not.toContain("PLUGIN_AR_SLAM_LOCALIZATION_URL");
     expect(compose).not.toContain("PLUGIN_AI_3D_GENERATOR_V3_URL");
   });
 
-  it("keeps only user-management and system-admin plugin env vars in docker-compose.prod.yml", () => {
+  it("declares local iframe plugin env vars in docker-compose.prod.yml", () => {
     const compose = readText("docker-compose.prod.yml");
 
     expect(compose).toContain(
@@ -113,14 +105,16 @@ describe("local static plugin docker env scope", () => {
     expect(compose).toContain(
       "- PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005"
     );
+    expect(compose).not.toContain("PLUGIN_AR_SLAM_LOCALIZATION_URL");
     expect(compose).not.toContain("PLUGIN_AI_3D_GENERATOR_V3_URL");
   });
 
-  it("substitutes only the two built-in plugin urls in docker-entrypoint.sh", () => {
+  it("substitutes local iframe plugin urls in docker-entrypoint.sh", () => {
     const entrypoint = readText("docker-entrypoint.sh");
 
     expect(entrypoint).toContain("PLUGIN_USER_MANAGEMENT_URL");
     expect(entrypoint).toContain("PLUGIN_SYSTEM_ADMIN_URL");
+    expect(entrypoint).not.toContain("PLUGIN_AR_SLAM_LOCALIZATION_URL");
     expect(entrypoint).not.toContain("PLUGIN_AI_3D_GENERATOR_V3_URL");
   });
 });

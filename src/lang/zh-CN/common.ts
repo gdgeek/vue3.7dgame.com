@@ -150,6 +150,12 @@ export default {
     user: "用户",
     adminAccount: "管理员账户",
     normalAccount: "普通账户",
+    accountRoles: {
+      user: "普通账户",
+      root: "根账户",
+      admin: "超级管理员",
+      manager: "管理员",
+    },
     fullscreen: "全屏",
     switchTheme: "切换主题",
     language: "语言",

@@ -138,6 +138,12 @@ export default {
     user: "User",
     adminAccount: "Admin Account",
     normalAccount: "Normal Account",
+    accountRoles: {
+      user: "Normal Account",
+      root: "Root Account",
+      admin: "Super Administrator",
+      manager: "Administrator",
+    },
     search: "Search...",
     selected: "{count} selected",
     cancelSelectAll: "Clear Selection",

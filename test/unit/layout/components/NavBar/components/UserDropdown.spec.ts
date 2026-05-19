@@ -5,7 +5,19 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { createApp, defineComponent, nextTick } from "vue";
 
 // ─── Mock stores ───────────────────────────────────────────────────────────────
-const mockUserStore = { userInfo: null };
+const RoleEnum = {
+  None: null,
+  Root: "root",
+  Admin: "admin",
+  Manager: "manager",
+  User: "user",
+} as const;
+
+const mockUserStore = {
+  userInfo: null,
+  getRole: vi.fn(() => RoleEnum.User),
+  RoleEnum,
+};
 
 vi.mock("@/store", () => ({
   useUserStore: vi.fn(() => mockUserStore),
@@ -59,6 +71,8 @@ const cleanups: (() => void)[] = [];
 afterEach(() => {
   cleanups.forEach((fn) => fn());
   cleanups.length = 0;
+  mockUserStore.userInfo = null;
+  mockUserStore.getRole.mockReturnValue(RoleEnum.User);
   vi.resetModules();
 });
 

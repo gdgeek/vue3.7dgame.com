@@ -136,6 +136,12 @@ export default {
     user: "用戶",
     adminAccount: "管理員帳戶",
     normalAccount: "普通帳戶",
+    accountRoles: {
+      user: "普通帳戶",
+      root: "根帳戶",
+      admin: "超級管理員",
+      manager: "管理員",
+    },
     search: "搜尋...",
     selected: "已選擇 {count} 個",
     cancelSelectAll: "取消全選",
