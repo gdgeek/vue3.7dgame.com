@@ -42,7 +42,11 @@ vi.mock("@/utils/logger", () => ({
 }));
 
 vi.mock("@/environment", () => ({
-  default: { blockly: "https://blockly.test", buildVersion: "test-v1" },
+  default: {
+    blockly: "https://blockly.test",
+    buildVersion: "test-v1",
+    deploymentMode: () => "cloud",
+  },
 }));
 
 vi.mock("pako", () => ({

@@ -73,7 +73,10 @@ vi.mock("@/utils/logger", () => ({
 }));
 
 vi.mock("@/environment", () => ({
-  default: { blockly: "https://blockly.test" },
+  default: {
+    blockly: "https://blockly.test",
+    deploymentMode: () => "cloud",
+  },
 }));
 
 vi.mock("pako", () => ({

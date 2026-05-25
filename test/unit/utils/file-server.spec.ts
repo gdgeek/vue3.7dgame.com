@@ -15,6 +15,7 @@ vi.mock("@/utils/logger", () => ({
 vi.mock("@/environment", () => ({
   default: {
     api: "https://api.example.com",
+    deploymentMode: () => "cloud",
   },
 }));
 vi.mock("axios", () => ({
@@ -101,16 +102,16 @@ describe("server.ts", () => {
   });
 
   // -------------------------------------------------------------------------
-  // getUrl() — stub that returns empty string
+  // getUrl()
   // -------------------------------------------------------------------------
   describe("getUrl()", () => {
-    it("returns empty string (stub)", () => {
+    it("returns local storage URL", () => {
       const result = serverFile.getUrl(
         { bucket: "store" },
         { md5: "abc", ext: ".glb" },
         { bucket: "store" }
       );
-      expect(result).toBe("");
+      expect(result).toBe("https://api.example.com/storage/store/abc.glb");
     });
   });
 
