@@ -1,5 +1,9 @@
 <template>
-  <div class="wechat-container" :class="{ 'dark-theme': isDark }">
+  <div
+    v-if="wechatLoginEnabled"
+    class="wechat-container"
+    :class="{ 'dark-theme': isDark }"
+  >
     <el-button class="wechat-login-button" @click="login">
       <el-icon class="wechat-icon">
         <ChatRound></ChatRound>
@@ -59,6 +63,7 @@ import { useDomainStore } from "@/store/modules/domain";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
+import env from "@/environment";
 
 const { t } = useI18n();
 
@@ -69,6 +74,7 @@ const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const domainStore = useDomainStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
+const wechatLoginEnabled = computed(() => env.deploymentMode() !== "local");
 const dialogVisible = ref(false);
 const isScanning = ref(false);
 const scanProgress = ref(0);
@@ -160,6 +166,9 @@ onUnmounted(() => {
 let token: string | null = null;
 
 const login = async function () {
+  if (!wechatLoginEnabled.value) {
+    return;
+  }
   try {
     const ret = await getQrcode();
     url.value = ret.data.qrcode.url;

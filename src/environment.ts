@@ -41,6 +41,39 @@ const developUnityPreviewUrl = "/webgl-preview/embed.html";
 const getRuntimeEnv = () =>
   (window as unknown as Record<string, Record<string, string>>).__ENV__ || {};
 
+type DeploymentMode = "cloud" | "local";
+type FileStorageDriver = "cos" | "local";
+
+const normalizeDeploymentMode = (
+  value: string | undefined
+): DeploymentMode | null => {
+  const mode = value?.trim().toLowerCase();
+  if (mode === "local" || mode === "private") return "local";
+  if (mode === "cloud") return "cloud";
+  return null;
+};
+
+const normalizeFileStorageDriver = (
+  value: string | undefined
+): FileStorageDriver | null => {
+  const driver = value?.trim().toLowerCase();
+  if (driver === "local") return "local";
+  if (driver === "cos" || driver === "cloud") return "cos";
+  return null;
+};
+
+const resolveDeploymentMode = (): DeploymentMode =>
+  normalizeDeploymentMode(getRuntimeEnv().DEPLOYMENT_MODE) ||
+  normalizeDeploymentMode(getRuntimeEnv().VITE_APP_DEPLOYMENT_MODE) ||
+  normalizeDeploymentMode(import.meta.env.VITE_APP_DEPLOYMENT_MODE) ||
+  (import.meta.env.VITE_APP_BASE_MODE === "local" ? "local" : "cloud");
+
+const resolveFileStorageDriver = (): FileStorageDriver =>
+  normalizeFileStorageDriver(getRuntimeEnv().FILE_STORAGE_DRIVER) ||
+  normalizeFileStorageDriver(getRuntimeEnv().VITE_APP_FILE_STORAGE_DRIVER) ||
+  normalizeFileStorageDriver(import.meta.env.VITE_APP_FILE_STORAGE_DRIVER) ||
+  (resolveDeploymentMode() === "local" ? "local" : "cos");
+
 const isDevelopHost = () => {
   const hostname = window.location.hostname.toLowerCase();
   return (
@@ -91,8 +124,10 @@ const environment = {
   version: 1,
   buildVersion: import.meta.env.VITE_DEV_DATE || Date.now().toString(),
   subtitle: () => "支持Rokid设备",
-  useCloud: () => import.meta.env.VITE_APP_BASE_MODE !== "local",
-  local: () => import.meta.env.VITE_APP_BASE_MODE === "local",
+  deploymentMode: resolveDeploymentMode,
+  fileStorageDriver: resolveFileStorageDriver,
+  useCloud: () => resolveFileStorageDriver() !== "local",
+  local: () => resolveDeploymentMode() === "local",
   /** 替换 API URL 中的 IP（兼容旧代码，目前直接返回原 URL） */
   replaceIP: (url: string) => url,
 };

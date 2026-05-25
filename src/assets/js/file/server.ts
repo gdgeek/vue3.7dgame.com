@@ -17,6 +17,8 @@ export type FileHandler = {
 // 文件信息类型
 type FileInfo = {
   bucket: string;
+  path?: string;
+  root?: string;
 }
 
 // 进度回调函数类型
@@ -26,7 +28,8 @@ type ProgressCallback = (percent: number) => void;
 const fileUrl = (name: string, extension: string, handler: FileHandler | null = null, dir: string = ""): string => {
   const ext = extension.startsWith('.') ? extension : `.${extension}`;
   const filename = name + ext;
-  const url = `${env.api}/${path.join('storage', handler?.bucket || '', dir, filename)}`;
+  const storagePath = path.join('storage', handler?.bucket || 'store', dir, filename);
+  const url = `${env.api}/${storagePath}`;
   return url;
 };
 
@@ -101,7 +104,8 @@ const fileUpload = (
 
 
 const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: FileHandler): string => {
-  return '';
+  const dir = [info.path, info.root].filter(Boolean).join('/');
+  return fileUrl(file.md5, file.ext, handler || { bucket: info.bucket }, dir);
 };
 
 // 文件下载

@@ -17,6 +17,8 @@ import { Message } from "@/components/Dialog";
 import { logger } from "@/utils/logger";
 import { safeAtob } from "@/utils/base64";
 import env from "@/environment";
+import a11yDarkStyleUrl from "highlight.js/styles/a11y-dark.css?url";
+import a11yLightStyleUrl from "highlight.js/styles/a11y-light.css?url";
 
 // ---------- 共享类型 ----------
 
@@ -530,9 +532,14 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       "#highlight-style"
     ) as HTMLLinkElement;
     logger.log("existingLink", existingLink);
-    const href = dark
-      ? "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-dark.css"
-      : "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-light.css";
+    const href =
+      env.deploymentMode() === "local"
+        ? dark
+          ? a11yDarkStyleUrl
+          : a11yLightStyleUrl
+        : dark
+          ? "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-dark.css"
+          : "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-light.css";
     if (existingLink) {
       existingLink.href = href;
     } else {

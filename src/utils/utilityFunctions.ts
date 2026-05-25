@@ -1,3 +1,5 @@
+import env from "@/environment";
+
 /**
  * 防抖函数：延迟执行 fn，在 delay 毫秒内重复调用时重置计时
  */
@@ -107,6 +109,7 @@ export const getResourceFormat = (file?: {
  */
 export const getVideoCover = (url?: string) => {
   if (!url) return "";
+  if (!env.useCloud()) return url;
   // Check if it already has snapshot params
   if (url.includes("ci-process=snapshot")) return url;
 

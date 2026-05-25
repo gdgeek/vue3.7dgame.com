@@ -86,6 +86,7 @@ import {
   faClockRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { getVueAppleLoginConfig } from "@/utils/helper";
+import env from "@/environment";
 import "element-plus/dist/index.css";
 import { ability } from "@/ability";
 
@@ -228,7 +229,9 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 //const time = new Date().getTime();
-app.use(VueAppleLogin, getVueAppleLoginConfig());
+if (env.deploymentMode() !== "local") {
+  app.use(VueAppleLogin, getVueAppleLoginConfig());
+}
 
 app.use(abilitiesPlugin, ability, {
   useGlobalProperties: true,

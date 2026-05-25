@@ -22,6 +22,7 @@ import { computed, ref } from "vue";
 import { LazyImg } from "vue-waterfall-plugin-next";
 import { toHttps } from "@/utils/helper";
 import { getDefaultAvatarUrl } from "@/utils/avatar";
+import env from "@/environment";
 const props = withDefaults(
   defineProps<{
     id?: number | string;
@@ -49,7 +50,7 @@ const url = computed(() => {
   }
 
   // Check if it's a Tencent Cloud COS URL
-  if (imageUrl && imageUrl.includes("myqcloud.com")) {
+  if (env.useCloud() && imageUrl && imageUrl.includes("myqcloud.com")) {
     const isVideo = /\.(mp4|mov|avi|webm)$/i.test(imageUrl.split("?")[0]);
 
     if (isVideo) {
