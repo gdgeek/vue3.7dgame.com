@@ -86,7 +86,7 @@ import {
   faClockRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { getVueAppleLoginConfig } from "@/utils/helper";
-import env from "@/environment";
+import env, { initializeDeploymentConfig } from "@/environment";
 import "element-plus/dist/index.css";
 import { ability } from "@/ability";
 
@@ -228,35 +228,39 @@ window.addEventListener("unhandledrejection", (event) => {
   logger.error("[Unhandled Promise]", event.reason);
 });
 
-//const time = new Date().getTime();
-if (env.deploymentMode() !== "local") {
-  app.use(VueAppleLogin, getVueAppleLoginConfig());
-}
-
-app.use(abilitiesPlugin, ability, {
-  useGlobalProperties: true,
-});
-app.component("FontAwesomeIcon", FontAwesomeIcon);
-
-// 全局注册 Element Plus 图标，使 PluginMenu 中的 <component :is="iconName"> 动态渲染生效
-import * as ElementPlusIconsVue from "@element-plus/icons-vue";
-for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  app.component(key, component as any);
-}
-
-app.directive("highlight", highlightDirective);
-app.use(setupPlugins);
-//app.use(ElementPlus);
 import { loadLanguageAsync } from "@/lang";
 import {
   initUrlSettings,
   watchUrlSettings,
   installRouterGuard,
 } from "@/composables/useUrlSettings";
+// 全局注册 Element Plus 图标，使 PluginMenu 中的 <component :is="iconName"> 动态渲染生效
+import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 
-// 从 URL 参数初始化语言和主题设置，然后加载语言包
-initUrlSettings().then(() => {
+async function bootstrapApp() {
+  await initializeDeploymentConfig();
+
+  //const time = new Date().getTime();
+  if (env.featureEnabled("appleLogin", env.deploymentMode() !== "local")) {
+    app.use(VueAppleLogin, getVueAppleLoginConfig());
+  }
+
+  app.use(abilitiesPlugin, ability, {
+    useGlobalProperties: true,
+  });
+  app.component("FontAwesomeIcon", FontAwesomeIcon);
+
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    app.component(key, component as any);
+  }
+
+  app.directive("highlight", highlightDirective);
+  app.use(setupPlugins);
+  //app.use(ElementPlus);
+
+  // 从 URL 参数初始化语言和主题设置，然后加载语言包
+  await initUrlSettings();
   loadLanguageAsync(appStore.language).then(() => {
     app.mount("#app");
     // 启动 URL 参数同步 watcher + 路由守卫
@@ -270,4 +274,6 @@ initUrlSettings().then(() => {
       }
     });
   });
-});
+}
+
+void bootstrapApp();

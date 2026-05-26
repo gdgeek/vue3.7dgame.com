@@ -39,10 +39,26 @@ const productionUnityPreviewUrl = "/webgl-preview/embed.html";
 const developUnityPreviewUrl = "/webgl-preview/embed.html";
 
 const getRuntimeEnv = () =>
-  (window as unknown as Record<string, Record<string, string>>).__ENV__ || {};
+  (window as unknown as { __ENV__?: Record<string, string | undefined> })
+    .__ENV__ || {};
 
 type DeploymentMode = "cloud" | "local";
 type FileStorageDriver = "cos" | "local";
+
+export interface RuntimeDeploymentConfig {
+  deploymentMode?: string;
+  storageDriver?: string;
+  storage?: {
+    publicBaseUrl?: string;
+    publicBucket?: string;
+    privateBucket?: string;
+    tempBucket?: string;
+  };
+  features?: Record<string, boolean | undefined>;
+}
+
+let runtimeDeploymentConfig: RuntimeDeploymentConfig | null = null;
+let runtimeDeploymentConfigFailed = false;
 
 const normalizeDeploymentMode = (
   value: string | undefined
@@ -62,17 +78,89 @@ const normalizeFileStorageDriver = (
   return null;
 };
 
+const resolveApiBase = () =>
+  import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api";
+
+const deploymentConfigEndpoint = () => {
+  const apiBase = resolveApiBase().replace(/\/+$/, "");
+  return `${apiBase}/v1/system/deployment`;
+};
+
+const hasExplicitStorageDriver = () =>
+  Boolean(
+    normalizeFileStorageDriver(getRuntimeEnv().FILE_STORAGE_DRIVER) ||
+      normalizeFileStorageDriver(getRuntimeEnv().VITE_APP_FILE_STORAGE_DRIVER) ||
+      normalizeFileStorageDriver(import.meta.env.VITE_APP_FILE_STORAGE_DRIVER)
+  );
+
+const hasExplicitDeploymentMode = () =>
+  Boolean(
+    normalizeDeploymentMode(getRuntimeEnv().DEPLOYMENT_MODE) ||
+      normalizeDeploymentMode(getRuntimeEnv().VITE_APP_DEPLOYMENT_MODE) ||
+      normalizeDeploymentMode(import.meta.env.VITE_APP_DEPLOYMENT_MODE)
+  );
+
 const resolveDeploymentMode = (): DeploymentMode =>
+  normalizeDeploymentMode(runtimeDeploymentConfig?.deploymentMode) ||
   normalizeDeploymentMode(getRuntimeEnv().DEPLOYMENT_MODE) ||
   normalizeDeploymentMode(getRuntimeEnv().VITE_APP_DEPLOYMENT_MODE) ||
   normalizeDeploymentMode(import.meta.env.VITE_APP_DEPLOYMENT_MODE) ||
+  (runtimeDeploymentConfigFailed && !hasExplicitDeploymentMode()
+    ? "local"
+    : null) ||
   (import.meta.env.VITE_APP_BASE_MODE === "local" ? "local" : "cloud");
 
 const resolveFileStorageDriver = (): FileStorageDriver =>
+  normalizeFileStorageDriver(runtimeDeploymentConfig?.storageDriver) ||
   normalizeFileStorageDriver(getRuntimeEnv().FILE_STORAGE_DRIVER) ||
   normalizeFileStorageDriver(getRuntimeEnv().VITE_APP_FILE_STORAGE_DRIVER) ||
   normalizeFileStorageDriver(import.meta.env.VITE_APP_FILE_STORAGE_DRIVER) ||
   (resolveDeploymentMode() === "local" ? "local" : "cos");
+
+export const setRuntimeDeploymentConfig = (
+  config: RuntimeDeploymentConfig | null
+) => {
+  runtimeDeploymentConfig = config;
+  runtimeDeploymentConfigFailed = false;
+};
+
+export const clearRuntimeDeploymentConfig = () => {
+  runtimeDeploymentConfig = null;
+  runtimeDeploymentConfigFailed = false;
+};
+
+export const deploymentConfigLoadFailed = () => runtimeDeploymentConfigFailed;
+
+export async function initializeDeploymentConfig(
+  fetcher: typeof fetch = window.fetch.bind(window)
+): Promise<RuntimeDeploymentConfig | null> {
+  try {
+    const response = await fetcher(deploymentConfigEndpoint(), {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Deployment config request failed: ${response.status}`);
+    }
+
+    const config = (await response.json()) as RuntimeDeploymentConfig;
+    setRuntimeDeploymentConfig(config);
+    return config;
+  } catch (error) {
+    runtimeDeploymentConfig = null;
+    runtimeDeploymentConfigFailed = true;
+    console.warn("[deployment] Failed to load runtime deployment config", error);
+    return null;
+  }
+}
+
+const featureEnabled = (name: string, defaultValue: boolean) => {
+  const value = runtimeDeploymentConfig?.features?.[name];
+  return typeof value === "boolean" ? value : defaultValue;
+};
 
 const isDevelopHost = () => {
   const hostname = window.location.hostname.toLowerCase();
@@ -102,7 +190,7 @@ const resolveUnityPreviewUrl = () => {
 };
 
 const environment = {
-  api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api",
+  api: resolveApiBase(),
   config_api: "/api-config/api",
   doc: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOC_API || ""
@@ -126,7 +214,11 @@ const environment = {
   subtitle: () => "支持Rokid设备",
   deploymentMode: resolveDeploymentMode,
   fileStorageDriver: resolveFileStorageDriver,
-  useCloud: () => resolveFileStorageDriver() !== "local",
+  featureEnabled,
+  useCloud: () =>
+    runtimeDeploymentConfigFailed && !hasExplicitStorageDriver()
+      ? false
+      : resolveFileStorageDriver() !== "local",
   local: () => resolveDeploymentMode() === "local",
   /** 替换 API URL 中的 IP（兼容旧代码，目前直接返回原 URL） */
   replaceIP: (url: string) => url,

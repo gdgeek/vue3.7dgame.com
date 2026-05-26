@@ -74,7 +74,9 @@ const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const domainStore = useDomainStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
-const wechatLoginEnabled = computed(() => env.deploymentMode() !== "local");
+const wechatLoginEnabled = computed(() =>
+  env.featureEnabled("wechatLogin", env.deploymentMode() !== "local")
+);
 const dialogVisible = ref(false);
 const isScanning = ref(false);
 const scanProgress = ref(0);
