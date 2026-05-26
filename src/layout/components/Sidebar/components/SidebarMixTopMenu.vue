@@ -38,6 +38,8 @@ import variables from "@/styles/variables.module.scss";
 import { RouteVO } from "@/api/menu/model";
 import { routerData } from "@/router";
 
+type TopMenuRoute = RouteVO & { path: string };
+
 const appStore = useAppStore();
 const permissionStore = usePermissionStore();
 const router = useRouter();
@@ -50,7 +52,7 @@ appStore.activeTopMenu(activeTopMenuPath);
 const activePath = computed(() => appStore.activeTopMenuPath);
 
 // 混合模式顶部菜单集合
-const mixTopMenus = ref<RouteVO[]>([]);
+const mixTopMenus = ref<TopMenuRoute[]>([]);
 
 /**
  * 菜单选择事件
@@ -83,7 +85,8 @@ const goToFirstMenu = (menus: RouteVO[]) => {
 // 初始化顶部菜单
 onMounted(() => {
   mixTopMenus.value = routerData.value.filter(
-    (item) => !item.meta || !item.meta.hidden
+    (item): item is TopMenuRoute =>
+      Boolean(item.path) && (!item.meta || !item.meta.hidden)
   );
 });
 </script>
