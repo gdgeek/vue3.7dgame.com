@@ -67,8 +67,11 @@ describe("runtime deployment environment", () => {
   it("blocks implicit cloud behavior when runtime config loading fails", async () => {
     const fetcher = vi.fn().mockRejectedValue(new Error("network down"));
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { default: env, deploymentConfigLoadFailed, initializeDeploymentConfig } =
-      await import("@/environment");
+    const {
+      default: env,
+      deploymentConfigLoadFailed,
+      initializeDeploymentConfig,
+    } = await import("@/environment");
 
     await initializeDeploymentConfig(fetcher as unknown as typeof fetch);
 

@@ -89,7 +89,9 @@ const deploymentConfigEndpoint = () => {
 const hasExplicitStorageDriver = () =>
   Boolean(
     normalizeFileStorageDriver(getRuntimeEnv().FILE_STORAGE_DRIVER) ||
-      normalizeFileStorageDriver(getRuntimeEnv().VITE_APP_FILE_STORAGE_DRIVER) ||
+      normalizeFileStorageDriver(
+        getRuntimeEnv().VITE_APP_FILE_STORAGE_DRIVER
+      ) ||
       normalizeFileStorageDriver(import.meta.env.VITE_APP_FILE_STORAGE_DRIVER)
   );
 
@@ -152,7 +154,10 @@ export async function initializeDeploymentConfig(
   } catch (error) {
     runtimeDeploymentConfig = null;
     runtimeDeploymentConfigFailed = true;
-    console.warn("[deployment] Failed to load runtime deployment config", error);
+    console.warn(
+      "[deployment] Failed to load runtime deployment config",
+      error
+    );
     return null;
   }
 }
