@@ -2,11 +2,11 @@ FROM node:24-alpine AS build
 WORKDIR /app
 
 # 复制依赖文件
-COPY package.json ./
+COPY package.json pnpm-lock.yaml ./
 
 # 安装 pnpm 并安装依赖
-RUN npm install pnpm -g
-RUN pnpm install
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN pnpm install --frozen-lockfile
 
 # 复制源代码
 COPY . .

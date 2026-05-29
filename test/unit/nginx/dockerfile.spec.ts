@@ -61,3 +61,18 @@ describe.each(dockerfiles)("$name", ({ get }) => {
     expect(get()).not.toContain("docker-envsubst.sh");
   });
 });
+
+describe("Docker production dependency install", () => {
+  const buildDockerfiles = [
+    { name: "Dockerfile (root)", get: () => rootDockerfile },
+    { name: "docker/production/Dockerfile", get: () => productionDockerfile },
+  ];
+
+  describe.each(buildDockerfiles)("$name", ({ get }) => {
+    it("uses pnpm-lock.yaml for reproducible image builds", () => {
+      expect(get()).toContain("COPY package.json pnpm-lock.yaml ./");
+      expect(get()).toContain("corepack prepare pnpm@9.15.0 --activate");
+      expect(get()).toContain("pnpm install --frozen-lockfile");
+    });
+  });
+});

@@ -2,11 +2,11 @@ FROM node:24-alpine AS build
 WORKDIR /app
 
 # 复制依赖文件
-COPY package.json ./
+COPY package.json pnpm-lock.yaml ./
 
 # 安装 pnpm 并安装依赖
-RUN npm install pnpm -g
-RUN pnpm install
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN pnpm install --frozen-lockfile
 
 # 复制源代码
 COPY . .
@@ -17,9 +17,9 @@ RUN pnpm run build
 # 开发阶段
 FROM node:24-alpine AS dev
 WORKDIR /app
-COPY package.json ./
-RUN npm install pnpm -g
-RUN pnpm install
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN pnpm install --frozen-lockfile
 
 # 暴露 Vite 默认端口
 EXPOSE 5173
