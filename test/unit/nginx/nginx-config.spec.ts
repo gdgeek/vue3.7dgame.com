@@ -300,7 +300,7 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
 
   it("cache-busts __env.js in index.html at container startup", () => {
     expect(entrypointScript).toContain("ENV_JS_VERSION=$(date +%s)");
-    expect(entrypointScript).toContain('/__env.js?v=${ENV_JS_VERSION}');
+    expect(entrypointScript).toContain("/__env.js?v=${ENV_JS_VERSION}");
   });
 
   it("uses proxy_connect_timeout 5s for fast failover", () => {
