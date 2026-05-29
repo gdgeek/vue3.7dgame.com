@@ -134,6 +134,15 @@ server {
     }
 
     # ============ 缓存策略 ============
+    # Runtime environment is generated at container startup and must never be
+    # cached like hashed build assets.
+    location = /__env.js {
+        add_header Cache-Control "no-store, no-cache, must-revalidate, max-age=0" always;
+        add_header Pragma "no-cache" always;
+        add_header Expires "0" always;
+        try_files $uri =404;
+    }
+
     # JS/CSS 文件带 hash，长期缓存
     location ~* \.(?:js|css)$ {
         expires 1y;

@@ -402,5 +402,12 @@ EOF
 echo "[entrypoint] Runtime env: BLOCKLY_URL=${APP_BLOCKLY_URL:-<not set>}, EDITOR_URL=${APP_EDITOR_URL:-<not set>}, UNITY_PREVIEW_URL=${APP_UNITY_PREVIEW_URL:-<not set>}"
 echo "[entrypoint] Unity preview upstream: APP_UNITY_PREVIEW_UPSTREAM=${APP_UNITY_PREVIEW_UPSTREAM:-<not set>}"
 
+INDEX_HTML="/usr/share/nginx/html/index.html"
+ENV_JS_VERSION=$(date +%s)
+if [ -f "$INDEX_HTML" ]; then
+  echo "[entrypoint] Updating runtime env cache-busting query in $INDEX_HTML (v=$ENV_JS_VERSION)"
+  sed -i "s#src=\"/__env\\.js[^\"]*\"#src=\"/__env.js?v=${ENV_JS_VERSION}\"#g" "$INDEX_HTML"
+fi
+
 # --- 9. 启动 nginx ---
 exec nginx -g 'daemon off;'

@@ -91,6 +91,15 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("${APP_UNITY_PREVIEW_UPSTREAM}");
   });
 
+  it("serves runtime env without immutable caching", () => {
+    const block = extractLocationBlock(nginxConfig, "= /__env.js");
+
+    expect(block).toContain("no-store, no-cache");
+    expect(block).toContain("must-revalidate");
+    expect(block).toContain("try_files $uri =404");
+    expect(block).not.toContain("public, immutable");
+  });
+
   it("caches proxied WebGL preview assets on the web server", () => {
     const block = extractLocationBlock(nginxConfig, "^~ /webgl-preview/");
 
@@ -287,6 +296,11 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain(
       'generate_lb_config "APP_CONFIG" "/api-config/" "config" "yes" "401 502 503 504"'
     );
+  });
+
+  it("cache-busts __env.js in index.html at container startup", () => {
+    expect(entrypointScript).toContain("ENV_JS_VERSION=$(date +%s)");
+    expect(entrypointScript).toContain('/__env.js?v=${ENV_JS_VERSION}');
   });
 
   it("uses proxy_connect_timeout 5s for fast failover", () => {
