@@ -128,10 +128,7 @@ describe("domain-static-config", () => {
       })
     );
 
-    const result = await getStaticDomainLanguage(
-      "child.example.com",
-      "en-US"
-    );
+    const result = await getStaticDomainLanguage("child.example.com", "en-US");
 
     expect(result).toMatchObject({
       domain: "child.example.com",
