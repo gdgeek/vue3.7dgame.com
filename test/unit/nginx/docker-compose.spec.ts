@@ -38,12 +38,12 @@ describe("docker-compose.prod.yml — environment variables", () => {
     );
   });
 
-  it("contains APP_DOMAIN_1_URL (primary domain backend)", () => {
-    expect(composeConfig).toContain("APP_DOMAIN_1_URL=");
+  it("does NOT contain APP_DOMAIN_1_URL because domain config is static JSON", () => {
+    expect(composeConfig).not.toContain("APP_DOMAIN_1_URL=");
   });
 
-  it("contains APP_DOMAIN_2_URL (backup domain backend)", () => {
-    expect(composeConfig).toContain("APP_DOMAIN_2_URL=");
+  it("does NOT contain APP_DOMAIN_2_URL because domain config is static JSON", () => {
+    expect(composeConfig).not.toContain("APP_DOMAIN_2_URL=");
   });
 
   it("does NOT contain old APP_DOMAIN_INFO_API_URL format", () => {

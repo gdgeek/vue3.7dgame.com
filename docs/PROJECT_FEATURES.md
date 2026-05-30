@@ -35,7 +35,7 @@ MRPP（Mixed Reality Programming Platform）是一个面向 **3D 场景创作与
 
 | 能力 | 说明 |
 |------|------|
-| 运行时动态配置 | 通过 API (`/api/query/default`) 查询域名配置，非编译时写死 |
+| 运行时动态配置 | 通过 `/config/domains/*.json` 静态文件查询域名配置，非编译时写死 |
 | Cookie 缓存 | 域名配置 7 天本地缓存，减少网络请求 |
 | 域名级语言锁定 | `isLanguageLocked` 强制使用指定语言，隐藏语言选择 |
 | 域名级样式锁定 | `isStyleLocked` 锁定主题风格 |

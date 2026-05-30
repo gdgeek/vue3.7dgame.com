@@ -6,6 +6,7 @@ import {
   normalizeStaticDomainName,
 } from "@/api/domain-static-config";
 import bujiabanConfig from "../../../public/config/domains/bujiaban.com.json";
+import devXrugcConfig from "../../../public/config/domains/dev.xrugc.com.json";
 
 function makeFetch(configs: Record<string, unknown>) {
   return vi.fn(async (input: RequestInfo | URL) => {
@@ -287,6 +288,45 @@ describe("domain-static-config", () => {
       expect(result?.data.author).toBeTruthy();
       expect(result?.data.links).toHaveLength(2);
     }
+  });
+
+  it("loads dev.xrugc.com with xrugc.com business content", async () => {
+    vi.stubGlobal(
+      "fetch",
+      makeFetch({
+        "/config/domains/dev.xrugc.com.json": devXrugcConfig,
+      })
+    );
+
+    const defaultResult = await getStaticDomainDefault("d.dev.xrugc.com");
+
+    expect(defaultResult).toMatchObject({
+      domain: "d.dev.xrugc.com",
+      actual_domain: "dev.xrugc.com",
+      language: "default",
+      is_domain_fallback: true,
+      data: {
+        homepage: "https://xrugc.com/",
+      },
+    });
+
+    const languageResult = await getStaticDomainLanguage(
+      "d.dev.xrugc.com",
+      "en-US"
+    );
+
+    expect(languageResult).toMatchObject({
+      domain: "d.dev.xrugc.com",
+      actual_domain: "dev.xrugc.com",
+      language: "zh-CN",
+      requested_language: "en-US",
+      is_fallback: true,
+      is_domain_fallback: true,
+      data: {
+        domain: "dev.xrugc.com",
+        title: "XR UGC",
+      },
+    });
   });
 
   it("uses VITE_APP_DEV_DOMAIN_FALLBACK for local domains", () => {

@@ -14,8 +14,6 @@ set -e
 #   APP_API_3_WEIGHT=10
 #   APP_CONFIG_1_URL=https://system-admin.plugins.xrugc.com/backend/api
 #   APP_CONFIG_2_URL=https://system-admin-backup.plugins.xrugc.com/backend/api
-#   APP_DOMAIN_1_URL=https://domain.xrteeth.com
-#   APP_DOMAIN_2_URL=https://domain.tmrpp.com
 #   APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
 #   APP_RESOLVER=8.8.8.8 223.5.5.5             （可选，DNS 解析服务器）
 #
@@ -23,7 +21,6 @@ set -e
 #   split_clients 按权重分流 → map 映射后端 URL/Host
 #   /api/        → 加权分流到 APP_API_N → failover 到环形下一个
 #   /api-config/ → 加权分流到 APP_CONFIG_N → failover 到环形下一个
-#   /api-domain/ → 加权分流到 APP_DOMAIN_N → failover 到环形下一个
 # ============================================================
 
 TEMPLATE="/etc/nginx/templates/default.conf.template"
@@ -37,8 +34,8 @@ LB_HTTP_BLOCK=""
 #   通用函数：为指定前缀生成负载均衡配置
 #
 # 参数：
-#   $1 = ENV_PREFIX   环境变量前缀（如 APP_API 或 APP_CONFIG 或 APP_DOMAIN）
-#   $2 = LOC_PATH     location 路径（如 /api/ 或 /api-config/ 或 /api-domain/）
+#   $1 = ENV_PREFIX   环境变量前缀（如 APP_API 或 APP_CONFIG）
+#   $2 = LOC_PATH     location 路径（如 /api/ 或 /api-config/）
 #   $3 = PREFIX_NAME  Nginx 变量名前缀（如 api 或 domain）
 #   $4 = WITH_GEEK    是否包含 GEEK 自定义头和 WebSocket（yes/no）
 #   $5 = FAILOVER_STATUS_CODES  触发 failover 的状态码（可选，默认 502 503 504）
@@ -329,26 +326,22 @@ API_LOCATIONS="$CHAIN_RESULT"
 generate_lb_config "APP_CONFIG" "/api-config/" "config" "yes" "401 502 503 504"
 CONFIG_LOCATIONS="$CHAIN_RESULT"
 
-# --- 3. 生成域名信息 API 负载均衡配置 ---
-generate_lb_config "APP_DOMAIN" "/api-domain/" "domain" "no"
-DOMAIN_LOCATIONS="$CHAIN_RESULT"
-
-# --- 4. 生成 resolver 配置 ---
+# --- 3. 生成 resolver 配置 ---
 RESOLVER_SERVERS="${APP_RESOLVER:-8.8.8.8 223.5.5.5}"
 RESOLVER_BLOCK="resolver ${RESOLVER_SERVERS} valid=30s ipv6=off;
 resolver_timeout 5s;"
 echo "[entrypoint] DNS resolver: ${RESOLVER_SERVERS} (valid=30s)"
 
-# --- 5. 用 envsubst 处理其他 APP_ 变量（文档 API 等）---
-# 排除编号变量（APP_API_N_*、APP_CONFIG_N_*、APP_DOMAIN_N_*）和 APP_RESOLVER，只替换其余 APP_ 变量
-VARS=$(env | grep '^APP_' | grep -v '^APP_API_[0-9]' | grep -v '^APP_CONFIG_[0-9]' | grep -v '^APP_DOMAIN_[0-9]' | grep -v '^APP_RESOLVER' | sed 's/=.*//' | sed 's/^/\$/' | tr '\n' ' ')
+# --- 4. 用 envsubst 处理其他 APP_ 变量（文档 API 等）---
+# 排除编号变量（APP_API_N_*、APP_CONFIG_N_*）和 APP_RESOLVER，只替换其余 APP_ 变量
+VARS=$(env | grep '^APP_' | grep -v '^APP_API_[0-9]' | grep -v '^APP_CONFIG_[0-9]' | grep -v '^APP_RESOLVER' | sed 's/=.*//' | sed 's/^/\$/' | tr '\n' ' ')
 if [ -n "$VARS" ]; then
   envsubst "$VARS" < "$TEMPLATE" > "$OUTPUT"
 else
   cp "$TEMPLATE" "$OUTPUT"
 fi
 
-# --- 6. 注入动态生成的配置块 ---
+# --- 5. 注入动态生成的配置块 ---
 inject_locations() {
   PLACEHOLDER="$1"
   CONTENT="$2"
@@ -375,7 +368,6 @@ inject_locations "# __LB_HTTP_BLOCK__" "$LB_HTTP_BLOCK"
 # 注入 server 层级配置（location 块）
 inject_locations "# __API_LOCATIONS__" "$API_LOCATIONS"
 inject_locations "# __CONFIG_LOCATIONS__" "$CONFIG_LOCATIONS"
-inject_locations "# __DOMAIN_LOCATIONS__" "$DOMAIN_LOCATIONS"
 
 echo "[entrypoint] Nginx config generated at $OUTPUT"
 

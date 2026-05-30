@@ -1,37 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const mockService = vi.hoisted(() => ({
-  get: vi.fn(),
-  interceptors: {
-    response: { use: vi.fn() },
-  },
-}));
+const staticDefault = vi.hoisted(() => vi.fn());
+const staticLanguage = vi.hoisted(() => vi.fn());
 
-const stringifySpy = vi.hoisted(() =>
-  vi.fn((obj: Record<string, string>, prefix?: boolean) => {
-    const query = new URLSearchParams(obj).toString();
-    return prefix ? `?${query}` : query;
-  })
-);
-
-vi.mock("axios", () => ({
-  default: {
-    create: vi.fn(() => mockService),
-  },
-}));
-vi.mock("querystringify", () => ({
-  default: {
-    stringify: stringifySpy,
-  },
-}));
 vi.mock("@/api/domain-static-config", () => ({
-  getStaticDomainDefault: vi.fn(async () => null),
-  getStaticDomainLanguage: vi.fn(async () => null),
-}));
-vi.mock("@/environment", () => ({
-  default: {
-    domain_info: "https://domain.primary.example",
-  },
+  getStaticDomainDefault: staticDefault,
+  getStaticDomainLanguage: staticLanguage,
 }));
 
 describe("src/api/domain-query.ts round15", () => {
@@ -41,22 +15,34 @@ describe("src/api/domain-query.ts round15", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
-    mockService.get.mockResolvedValue({});
+    staticDefault.mockResolvedValue({
+      data: {
+        homepage: "https://foo.com",
+        lang: "",
+        style: 0,
+        blog: "",
+        icon: "",
+      },
+    });
+    staticLanguage.mockResolvedValue({
+      data: {
+        domain: "bar.com",
+        title: "Bar",
+        description: "",
+        keywords: "",
+        author: "",
+        links: [],
+      },
+    });
     ({ getDomainDefault, getDomainLanguage } = await import(
       "@/api/domain-query"
     ));
   });
 
-  it("registers response interceptor extracting response.data", () => {
-    const handler = mockService.interceptors.response.use.mock.calls[0][0];
-    expect(handler({ data: { ok: 1 } })).toEqual({ ok: 1 });
-  });
-
-  it("getDomainDefault uses provided domain", async () => {
+  it("getDomainDefault uses provided domain for static lookup", async () => {
     await getDomainDefault("foo.com");
-    expect(mockService.get).toHaveBeenCalledWith(
-      "/api/query/default?domain=foo.com"
-    );
+
+    expect(staticDefault).toHaveBeenCalledWith("foo.com");
   });
 
   it("getDomainDefault falls back to window.location.hostname", async () => {
@@ -65,28 +51,26 @@ describe("src/api/domain-query.ts round15", () => {
       value: { hostname: "fallback.com" },
       configurable: true,
     });
+
     await getDomainDefault();
-    expect(mockService.get).toHaveBeenCalledWith(
-      "/api/query/default?domain=fallback.com"
-    );
+
+    expect(staticDefault).toHaveBeenCalledWith("fallback.com");
     Object.defineProperty(window, "location", {
       value: oldLocation,
       configurable: true,
     });
   });
 
-  it("getDomainLanguage uses provided domain and lang", async () => {
+  it("getDomainLanguage uses provided domain and lang for static lookup", async () => {
     await getDomainLanguage("bar.com", "en-US");
-    expect(mockService.get).toHaveBeenCalledWith(
-      "/api/query/language?domain=bar.com&lang=en-US"
-    );
+
+    expect(staticLanguage).toHaveBeenCalledWith("bar.com", "en-US");
   });
 
   it("getDomainLanguage defaults lang to zh-CN", async () => {
     await getDomainLanguage("bar.com");
-    expect(mockService.get).toHaveBeenCalledWith(
-      "/api/query/language?domain=bar.com&lang=zh-CN"
-    );
+
+    expect(staticLanguage).toHaveBeenCalledWith("bar.com", "zh-CN");
   });
 
   it("getDomainLanguage falls back domain from window hostname", async () => {
@@ -95,18 +79,21 @@ describe("src/api/domain-query.ts round15", () => {
       value: { hostname: "host.local" },
       configurable: true,
     });
+
     await getDomainLanguage(undefined, "ja-JP");
-    expect(mockService.get).toHaveBeenCalledWith(
-      "/api/query/language?domain=host.local&lang=ja-JP"
-    );
+
+    expect(staticLanguage).toHaveBeenCalledWith("host.local", "ja-JP");
     Object.defineProperty(window, "location", {
       value: oldLocation,
       configurable: true,
     });
   });
 
-  it("delegates query formatting to stringify with prefix", async () => {
-    await getDomainDefault("x.com");
-    expect(stringifySpy).toHaveBeenCalledWith({ domain: "x.com" }, true);
+  it("does not import axios or querystringify fallback behavior", async () => {
+    staticDefault.mockResolvedValue(null);
+
+    await expect(getDomainDefault("x.com")).rejects.toThrow(
+      "Static domain default config not found: x.com"
+    );
   });
 });

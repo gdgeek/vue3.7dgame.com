@@ -1,32 +1,15 @@
 /**
- * Unit tests for src/api/domain-query.ts
- * Covers: getDomainDefault and getDomainLanguage URL/param construction.
- * Note: Failover is now handled by Nginx, so no createFailoverAxios tests.
+ * Unit tests for src/api/domain-query.ts.
+ * The domain query layer must stay static-only and never call /api-domain.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const mockAxiosInstance = vi.hoisted(() => ({
-  get: vi.fn(),
-  interceptors: {
-    request: { use: vi.fn() },
-    response: { use: vi.fn() },
-  },
-  defaults: { baseURL: "https://domain.xrteeth.com" },
-}));
+const staticDefault = vi.hoisted(() => vi.fn());
+const staticLanguage = vi.hoisted(() => vi.fn());
 
-vi.mock("axios", () => ({
-  default: {
-    create: vi.fn(() => mockAxiosInstance),
-  },
-}));
 vi.mock("@/api/domain-static-config", () => ({
-  getStaticDomainDefault: vi.fn(async () => null),
-  getStaticDomainLanguage: vi.fn(async () => null),
-}));
-vi.mock("@/environment", () => ({
-  default: {
-    domain_info: "https://domain.xrteeth.com",
-  },
+  getStaticDomainDefault: staticDefault,
+  getStaticDomainLanguage: staticLanguage,
 }));
 
 describe("getDomainDefault()", () => {
@@ -34,32 +17,44 @@ describe("getDomainDefault()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    mockAxiosInstance.get.mockResolvedValue({});
+    vi.resetModules();
+    staticDefault.mockResolvedValue({
+      data: {
+        homepage: "https://example.com",
+        lang: "zh-CN",
+        style: 1,
+        blog: "",
+        icon: "/icon.png",
+      },
+    });
     ({ getDomainDefault } = await import("@/api/domain-query"));
   });
 
-  it("calls GET /api/query/default with current hostname when domain not provided", async () => {
-    await getDomainDefault();
-    const url: string = mockAxiosInstance.get.mock.calls[0][0];
-    expect(url).toContain("/api/query/default");
-    expect(url).toContain("domain=");
+  it("returns static default_config data for the provided domain", async () => {
+    const response = await getDomainDefault("example.com");
+
+    expect(staticDefault).toHaveBeenCalledWith("example.com");
+    expect(response.data.homepage).toBe("https://example.com");
   });
 
-  it("calls GET with the provided domain in query string", async () => {
-    await getDomainDefault("example.com");
-    const url: string = mockAxiosInstance.get.mock.calls[0][0];
-    expect(url).toContain("domain=example.com");
-  });
-
-  it("uses window.location.hostname as fallback when domain is undefined", async () => {
+  it("uses window.location.hostname when domain is undefined", async () => {
     Object.defineProperty(window, "location", {
       value: { hostname: "mysite.com" },
       writable: true,
       configurable: true,
     });
+
     await getDomainDefault();
-    const url: string = mockAxiosInstance.get.mock.calls[0][0];
-    expect(url).toContain("domain=mysite.com");
+
+    expect(staticDefault).toHaveBeenCalledWith("mysite.com");
+  });
+
+  it("throws instead of falling back to /api-domain when static data is missing", async () => {
+    staticDefault.mockResolvedValue(null);
+
+    await expect(getDomainDefault("missing.com")).rejects.toThrow(
+      "Static domain default config not found: missing.com"
+    );
   });
 });
 
@@ -68,49 +63,50 @@ describe("getDomainLanguage()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    mockAxiosInstance.get.mockResolvedValue({});
+    vi.resetModules();
+    staticLanguage.mockResolvedValue({
+      data: {
+        domain: "example.com",
+        title: "Example",
+        description: "",
+        keywords: "",
+        author: "",
+        links: [],
+      },
+    });
     ({ getDomainLanguage } = await import("@/api/domain-query"));
   });
 
-  it("calls GET /api/query/language with domain and lang", async () => {
-    await getDomainLanguage("example.com", "en-US");
-    const url: string = mockAxiosInstance.get.mock.calls[0][0];
-    expect(url).toContain("/api/query/language");
-    expect(url).toContain("domain=example.com");
-    expect(url).toContain("lang=en-US");
+  it("returns static language config data for the provided domain and lang", async () => {
+    const response = await getDomainLanguage("example.com", "en-US");
+
+    expect(staticLanguage).toHaveBeenCalledWith("example.com", "en-US");
+    expect(response.data.title).toBe("Example");
   });
 
   it("defaults lang to zh-CN when not provided", async () => {
     await getDomainLanguage("example.com");
-    const url: string = mockAxiosInstance.get.mock.calls[0][0];
-    expect(url).toContain("lang=zh-CN");
+
+    expect(staticLanguage).toHaveBeenCalledWith("example.com", "zh-CN");
   });
 
-  it("defaults domain to window.location.hostname when not provided", async () => {
+  it("uses window.location.hostname when domain is undefined", async () => {
     Object.defineProperty(window, "location", {
       value: { hostname: "testhost.com" },
       writable: true,
       configurable: true,
     });
+
     await getDomainLanguage(undefined, "ja-JP");
-    const url: string = mockAxiosInstance.get.mock.calls[0][0];
-    expect(url).toContain("domain=testhost.com");
-    expect(url).toContain("lang=ja-JP");
-  });
-});
 
-describe("domain-query response interceptor", () => {
-  beforeEach(async () => {
-    vi.clearAllMocks();
-    vi.resetModules();
-    mockAxiosInstance.get.mockResolvedValue({});
-    await import("@/api/domain-query");
+    expect(staticLanguage).toHaveBeenCalledWith("testhost.com", "ja-JP");
   });
 
-  it("extracts response.data on success", () => {
-    const resInterceptor =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[0];
-    const response = { data: { domain: "example.com" } };
-    expect(resInterceptor(response)).toBe(response.data);
+  it("throws instead of falling back to /api-domain when static data is missing", async () => {
+    staticLanguage.mockResolvedValue(null);
+
+    await expect(getDomainLanguage("missing.com", "en-US")).rejects.toThrow(
+      "Static domain language config not found: missing.com (en-US)"
+    );
   });
 });

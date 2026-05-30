@@ -61,8 +61,8 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("# __CONFIG_LOCATIONS__");
   });
 
-  it("contains # __DOMAIN_LOCATIONS__ placeholder for dynamic domain API config", () => {
-    expect(nginxConfig).toContain("# __DOMAIN_LOCATIONS__");
+  it("does NOT contain # __DOMAIN_LOCATIONS__ because domain config is static JSON", () => {
+    expect(nginxConfig).not.toContain("# __DOMAIN_LOCATIONS__");
   });
 
   it("does NOT contain static /api/ location (now dynamic)", () => {
@@ -73,7 +73,7 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).not.toContain("location /api-backup/");
   });
 
-  it("does NOT contain static /api-domain/ location (now dynamic)", () => {
+  it("does NOT contain /api-domain/ location because domain config is static JSON", () => {
     expect(nginxConfig).not.toMatch(/location\s+\/api-domain\/\s*\{/);
   });
 
@@ -223,8 +223,8 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("APP_CONFIG");
   });
 
-  it("reads APP_DOMAIN_N_URL numbered environment variables", () => {
-    expect(entrypointScript).toContain("APP_DOMAIN");
+  it("does NOT read APP_DOMAIN_N_URL numbered environment variables", () => {
+    expect(entrypointScript).not.toContain("APP_DOMAIN");
   });
 
   it("uses generate_lb_config function for reusable load balancing generation", () => {
@@ -235,8 +235,8 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain('"/api/"');
   });
 
-  it("generates /api-domain/ failover chain", () => {
-    expect(entrypointScript).toContain('"/api-domain/"');
+  it("does NOT generate /api-domain/ failover chain", () => {
+    expect(entrypointScript).not.toContain('"/api-domain/"');
   });
 
   it("generates /api-config/ failover chain", () => {
@@ -251,8 +251,8 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("__CONFIG_LOCATIONS__");
   });
 
-  it("replaces # __DOMAIN_LOCATIONS__ placeholder", () => {
-    expect(entrypointScript).toContain("__DOMAIN_LOCATIONS__");
+  it("does NOT replace # __DOMAIN_LOCATIONS__ placeholder", () => {
+    expect(entrypointScript).not.toContain("__DOMAIN_LOCATIONS__");
   });
 
   it("sets proxy_ssl_server_name on for HTTPS upstream", () => {
@@ -432,7 +432,6 @@ describe("Property 5: Environment-aware URL selection", () => {
         );
         expect(envSource).toMatch(/:\s*["']\/api["']/);
         expect(envSource).toMatch(/:\s*["']\/api-config\/api["']/);
-        expect(envSource).toMatch(/:\s*["']\/api-domain["']/);
         expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
       }),
       { numRuns: 100 }
@@ -489,12 +488,7 @@ describe("Property 6: Static file fallback", () => {
       fc.property(
         fc
           .stringMatching(/^\/[a-z]{1,20}$/)
-          .filter(
-            (p) =>
-              !p.startsWith("/api") &&
-              !p.startsWith("/api-domain") &&
-              !p.startsWith("/api-doc")
-          ),
+          .filter((p) => !p.startsWith("/api") && !p.startsWith("/api-doc")),
         (_path) => {
           expect(nginxConfig).toContain("try_files $uri $uri/ /index.html");
           expect(nginxConfig).toMatch(/location\s+\/\s*\{/);

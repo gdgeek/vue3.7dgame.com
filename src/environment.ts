@@ -211,9 +211,6 @@ const environment = {
     import.meta.env.VITE_APP_EDITOR_URL ||
     "",
   unityPreview: resolveUnityPreviewUrl(),
-  domain_info: import.meta.env.DEV
-    ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
-    : "/api-domain",
   version: 1,
   buildVersion: import.meta.env.VITE_DEV_DATE || Date.now().toString(),
   subtitle: () => "支持Rokid设备",
