@@ -1,0 +1,8 @@
+{
+  "name": "dev.xiading.hxgxonline.com",
+  "description": "",
+  "is_active": true,
+  "fallback_domain": "xiading.hxgxonline.com",
+  "default_config": {},
+  "configs": {}
+}

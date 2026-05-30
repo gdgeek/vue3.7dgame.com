@@ -1,0 +1,25 @@
+{
+  "name": "mrpp.com",
+  "description": "混合现实实训平台",
+  "is_active": true,
+  "fallback_domain": null,
+  "default_config": {
+    "icon": "https://mrpp.com/logo/mrpp/logo.webp",
+    "homepage": "https://mrpp.com/"
+  },
+  "configs": {
+    "zh-CN": {
+      "domain": "mrpp.com",
+      "links": [
+        {
+          "url": "https://mrpp.com/",
+          "name": "求证科技"
+        }
+      ],
+      "title": "混合现实实训平台",
+      "author": "Mixed Reality Practical Platform",
+      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
+      "description": "零代码/低代码MR内容创作平台"
+    }
+  }
+}

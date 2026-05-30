@@ -1,0 +1,29 @@
+{
+  "name": "xingkou.net",
+  "description": "星扣网络",
+  "is_active": true,
+  "fallback_domain": null,
+  "default_config": {
+    "blog": "https://blog.xingkou.net/",
+    "icon": "https://xiading.hxgxonline.com/logo/xingkou/xingkou_logo.webp",
+    "lang": "zh-CN",
+    "style": 1,
+    "homepage": "https://xingkou.net/"
+  },
+  "configs": {
+    "zh-CN": {
+      "domain": "xingkou.net",
+      "links": [
+        {
+          "url": "https://xingkou.net/",
+          "name": "湖南星扣网络科技有限公司"
+        }
+      ],
+      "title": "星扣AR教育平台",
+      "author": "湖南星扣网络科技有限公司",
+      "homepage": "https://xingkou.net/",
+      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
+      "description": "让AR创作像搭积木一样简单"
+    }
+  }
+}

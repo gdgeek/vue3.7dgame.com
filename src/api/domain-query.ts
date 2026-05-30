@@ -1,6 +1,10 @@
 import env from "@/environment";
 import qs from "querystringify";
 import axios from "axios";
+import {
+  getStaticDomainDefault,
+  getStaticDomainLanguage,
+} from "@/api/domain-static-config";
 
 export interface DomainDefaultInfo {
   homepage: string;
@@ -22,6 +26,10 @@ export interface DomainLanguageInfo {
   }[];
 }
 
+function getRequestDomain(domain?: string): string {
+  return domain || window.location.hostname;
+}
+
 // Nginx 层已处理 /api-domain/ 的 failover，前端不再需要主备切换
 const service = axios.create({
   baseURL: env.domain_info,
@@ -35,9 +43,15 @@ service.interceptors.response.use((response) => response.data);
  * 获取域名配置信息
  * @param domain 域名 (默认当前域名)
  */
-export const getDomainDefault = (domain?: string) => {
+export const getDomainDefault = async (domain?: string) => {
+  const requestDomain = getRequestDomain(domain);
+  const staticResult = await getStaticDomainDefault(requestDomain);
+  if (staticResult) {
+    return { data: staticResult.data as unknown as DomainDefaultInfo };
+  }
+
   const query = {
-    domain: domain || window.location.hostname,
+    domain: requestDomain,
   };
   return service.get(`/api/query/default${qs.stringify(query, true)}`);
 };
@@ -47,10 +61,17 @@ export const getDomainDefault = (domain?: string) => {
  * @param domain 域名 (默认当前域名)
  * @param lang 语言代码
  */
-export const getDomainLanguage = (domain?: string, lang?: string) => {
+export const getDomainLanguage = async (domain?: string, lang?: string) => {
+  const requestDomain = getRequestDomain(domain);
+  const requestLang = lang || "zh-CN";
+  const staticResult = await getStaticDomainLanguage(requestDomain, requestLang);
+  if (staticResult) {
+    return { data: staticResult.data as unknown as DomainLanguageInfo };
+  }
+
   const query = {
-    domain: domain || window.location.hostname,
-    lang: lang || "zh-CN",
+    domain: requestDomain,
+    lang: requestLang,
   };
   return service.get(`/api/query/language${qs.stringify(query, true)}`);
 };

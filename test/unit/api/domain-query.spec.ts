@@ -19,6 +19,10 @@ vi.mock("axios", () => ({
     create: vi.fn(() => mockAxiosInstance),
   },
 }));
+vi.mock("@/api/domain-static-config", () => ({
+  getStaticDomainDefault: vi.fn(async () => null),
+  getStaticDomainLanguage: vi.fn(async () => null),
+}));
 vi.mock("@/environment", () => ({
   default: {
     domain_info: "https://domain.xrteeth.com",

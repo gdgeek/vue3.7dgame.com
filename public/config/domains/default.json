@@ -1,0 +1,32 @@
+{
+  "name": "default",
+  "description": "Default XRUGC domain config",
+  "is_active": true,
+  "fallback_domain": null,
+  "default_config": {
+    "homepage": "",
+    "lang": "",
+    "style": 0,
+    "blog": "",
+    "icon": ""
+  },
+  "configs": {
+    "zh-CN": {
+      "domain": "default",
+      "title": "XR UGC平台（XRUGC.com）",
+      "description": "让每个人都可以快乐的创造世界。",
+      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
+      "author": "上海不加班网络科技有限公司",
+      "links": [
+        {
+          "name": "沪ICP备15039333号",
+          "url": "https://beian.miit.gov.cn/"
+        },
+        {
+          "name": "上海不加班网络科技有限公司",
+          "url": "https://www.bujiaban.com"
+        }
+      ]
+    }
+  }
+}

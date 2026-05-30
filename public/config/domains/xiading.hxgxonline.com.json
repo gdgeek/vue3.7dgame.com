@@ -1,0 +1,44 @@
+{
+  "name": "xiading.hxgxonline.com",
+  "description": "夏鼎",
+  "is_active": true,
+  "fallback_domain": null,
+  "default_config": {
+    "blog": "https://blog.hxgxonline.com",
+    "icon": "https://xiading.hxgxonline.com/logo/xiading/logo.webp",
+    "lang": "zh-TW",
+    "style": 1,
+    "homepage": "https://xiading.hxgxonline.com"
+  },
+  "configs": {
+    "zh-CN": {
+      "domain": "xiading.hxgxonline.com",
+      "lang": "zh-TW",
+      "links": [
+        {
+          "url": "#",
+          "name": "夏鼎科技有限公司（澳门）"
+        }
+      ],
+      "title": "夏鼎AI/AR教育平台",
+      "author": "上海不加班网络科技有限公司",
+      "homepage": "https://xiading.hxgxonline.com/",
+      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
+      "description": "让每个人都可以快乐的创造世界。"
+    },
+    "zh-TW": {
+      "domain": "xiading.hxgxonline.com",
+      "links": [
+        {
+          "url": "#",
+          "name": "夏鼎科技有限公司（澳門）"
+        }
+      ],
+      "title": "夏鼎AI/AR教育平台",
+      "author": "上海不加班網絡科技有限公司",
+      "homepage": "https://xiading.hxgxonline.com/",
+      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
+      "description": "讓每個人都可以快樂的創造世界。"
+    }
+  }
+}

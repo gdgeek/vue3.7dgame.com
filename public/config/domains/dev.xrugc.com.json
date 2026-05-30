@@ -1,0 +1,12 @@
+{
+  "name": "dev.xrugc.com",
+  "description": "",
+  "is_active": true,
+  "fallback_domain": "xrugc.com",
+  "default_config": {
+    "logo": "",
+    "theme": "default",
+    "site_name": ""
+  },
+  "configs": {}
+}
