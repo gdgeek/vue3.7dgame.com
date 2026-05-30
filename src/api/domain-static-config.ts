@@ -120,8 +120,7 @@ function normalizeStaticConfig(
     name,
     description:
       typeof raw.description === "string" ? raw.description : undefined,
-    is_active:
-      typeof raw.is_active === "boolean" ? raw.is_active : undefined,
+    is_active: typeof raw.is_active === "boolean" ? raw.is_active : undefined,
     fallback_domain:
       typeof raw.fallback_domain === "string" && raw.fallback_domain.trim()
         ? raw.fallback_domain.trim().toLowerCase()

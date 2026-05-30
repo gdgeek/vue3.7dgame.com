@@ -64,7 +64,10 @@ export const getDomainDefault = async (domain?: string) => {
 export const getDomainLanguage = async (domain?: string, lang?: string) => {
   const requestDomain = getRequestDomain(domain);
   const requestLang = lang || "zh-CN";
-  const staticResult = await getStaticDomainLanguage(requestDomain, requestLang);
+  const staticResult = await getStaticDomainLanguage(
+    requestDomain,
+    requestLang
+  );
   if (staticResult) {
     return { data: staticResult.data as unknown as DomainLanguageInfo };
   }
