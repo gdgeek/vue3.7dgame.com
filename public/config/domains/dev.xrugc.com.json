@@ -1,8 +1,8 @@
 {
   "name": "dev.xrugc.com",
-  "description": "XR UGC",
+  "description": "XR UGC Dev",
   "is_active": true,
-  "fallback_domain": "xrugc.com",
+  "fallback_domain": "dev.xrugc.com",
   "default_config": {
     "icon": "https://xiading.hxgxonline.com/logo/xingkou/xingkou_logo.webp",
     "homepage": "https://xrugc.com/"
@@ -16,7 +16,7 @@
           "name": "XR UGC 开发工作室"
         }
       ],
-      "title": "XR UGC",
+      "title": "XR UGC Dev",
       "author": "XR UGC",
       "homepage": "https://dev.xrugc.com/",
       "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",

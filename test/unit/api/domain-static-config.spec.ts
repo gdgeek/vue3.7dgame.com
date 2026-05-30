@@ -324,7 +324,7 @@ describe("domain-static-config", () => {
       is_domain_fallback: true,
       data: {
         domain: "dev.xrugc.com",
-        title: "XR UGC",
+        title: "XR UGC Dev",
       },
     });
   });
