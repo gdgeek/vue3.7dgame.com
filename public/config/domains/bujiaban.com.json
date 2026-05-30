@@ -1,0 +1,100 @@
+{
+  "name": "bujiaban.com",
+  "description": "不加班AR创作平台",
+  "is_active": true,
+  "fallback_domain": "default",
+  "default_config": {
+    "homepage": "https://www.bujiaban.com/",
+    "lang": "",
+    "style": 0,
+    "blog": "",
+    "icon": "/icon.png"
+  },
+  "configs": {
+    "zh-CN": {
+      "domain": "bujiaban.com",
+      "title": "不加班AR创作平台",
+      "description": "面向教育、企业培训和内容团队的低代码AR创作平台，支持3D资源管理、场景搭建、可视化编程与多端发布，让每个人都能高效创造AR内容。",
+      "keywords": "不加班AR创作平台, AR创作, AR教育, 低代码, 可视化编程, 3D资源, MRPP, XRUGC",
+      "author": "上海不加班网络科技有限公司",
+      "links": [
+        {
+          "name": "上海不加班网络科技有限公司",
+          "url": "https://www.bujiaban.com/"
+        },
+        {
+          "name": "沪ICP备15039333号",
+          "url": "https://beian.miit.gov.cn/"
+        }
+      ]
+    },
+    "zh-TW": {
+      "domain": "bujiaban.com",
+      "title": "不加班AR創作平台",
+      "description": "面向教育、企業培訓與內容團隊的低程式碼AR創作平台，支援3D資源管理、場景搭建、視覺化編程與多端發布，讓每個人都能高效創造AR內容。",
+      "keywords": "不加班AR創作平台, AR創作, AR教育, 低程式碼, 視覺化編程, 3D資源, MRPP, XRUGC",
+      "author": "上海不加班網絡科技有限公司",
+      "links": [
+        {
+          "name": "上海不加班網絡科技有限公司",
+          "url": "https://www.bujiaban.com/"
+        },
+        {
+          "name": "滬ICP備15039333號",
+          "url": "https://beian.miit.gov.cn/"
+        }
+      ]
+    },
+    "en-US": {
+      "domain": "bujiaban.com",
+      "title": "Bujiaban AR Creation Platform",
+      "description": "A low-code AR creation platform for education, enterprise training, and content teams. Manage 3D assets, build scenes, program visually, and publish immersive AR experiences across devices.",
+      "keywords": "Bujiaban AR Creation Platform, AR creation, AR education, low-code, visual programming, 3D assets, MRPP, XRUGC",
+      "author": "Shanghai No Overwork Network Technology Co., Ltd.",
+      "links": [
+        {
+          "name": "Shanghai No Overwork Network Technology Co., Ltd.",
+          "url": "https://www.bujiaban.com/"
+        },
+        {
+          "name": "ICP License No. 15039333",
+          "url": "https://beian.miit.gov.cn/"
+        }
+      ]
+    },
+    "ja-JP": {
+      "domain": "bujiaban.com",
+      "title": "Bujiaban AR制作プラットフォーム",
+      "description": "教育、企業研修、コンテンツチーム向けのローコードAR制作プラットフォームです。3Dアセット管理、シーン構築、ビジュアルプログラミング、複数デバイスへの公開を支援します。",
+      "keywords": "Bujiaban AR制作プラットフォーム, AR制作, AR教育, ローコード, ビジュアルプログラミング, 3Dアセット, MRPP, XRUGC",
+      "author": "上海残業なしネットワーク技術有限公司",
+      "links": [
+        {
+          "name": "上海残業なしネットワーク技術有限公司",
+          "url": "https://www.bujiaban.com/"
+        },
+        {
+          "name": "ICP登録番号 15039333",
+          "url": "https://beian.miit.gov.cn/"
+        }
+      ]
+    },
+    "th-TH": {
+      "domain": "bujiaban.com",
+      "title": "แพลตฟอร์มสร้าง AR Bujiaban",
+      "description": "แพลตฟอร์มสร้าง AR แบบ low-code สำหรับการศึกษา การฝึกอบรมองค์กร และทีมคอนเทนต์ รองรับการจัดการทรัพยากร 3D การสร้างฉาก การเขียนโปรแกรมแบบภาพ และการเผยแพร่ประสบการณ์ AR ไปยังหลายอุปกรณ์",
+      "keywords": "แพลตฟอร์มสร้าง AR Bujiaban, การสร้าง AR, การศึกษา AR, low-code, การเขียนโปรแกรมแบบภาพ, ทรัพยากร 3D, MRPP, XRUGC",
+      "author": "Shanghai No Overwork Network Technology Co., Ltd.",
+      "links": [
+        {
+          "name": "Shanghai No Overwork Network Technology Co., Ltd.",
+          "url": "https://www.bujiaban.com/"
+        },
+        {
+          "name": "ICP License No. 15039333",
+          "url": "https://beian.miit.gov.cn/"
+        }
+      ]
+    }
+  }
+}

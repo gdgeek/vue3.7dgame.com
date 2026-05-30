@@ -5,6 +5,7 @@ import {
   getStaticDomainLanguage,
   normalizeStaticDomainName,
 } from "@/api/domain-static-config";
+import bujiabanConfig from "../../../public/config/domains/bujiaban.com.json";
 
 function makeFetch(configs: Record<string, unknown>) {
   return vi.fn(async (input: RequestInfo | URL) => {
@@ -237,6 +238,55 @@ describe("domain-static-config", () => {
         title: "XR UGC",
       },
     });
+  });
+
+  it("loads bujiaban.com default and all localized configs from static JSON", async () => {
+    vi.stubGlobal(
+      "fetch",
+      makeFetch({
+        "/config/domains/bujiaban.com.json": bujiabanConfig,
+      })
+    );
+
+    const defaultResult = await getStaticDomainDefault("www.bujiaban.com");
+
+    expect(defaultResult).toMatchObject({
+      domain: "www.bujiaban.com",
+      actual_domain: "bujiaban.com",
+      language: "default",
+      requested_language: null,
+      is_fallback: false,
+      is_domain_fallback: true,
+      data: {
+        homepage: "https://www.bujiaban.com/",
+        icon: "/icon.png",
+      },
+    });
+
+    for (const language of ["zh-CN", "zh-TW", "en-US", "ja-JP", "th-TH"]) {
+      const result = await getStaticDomainLanguage(
+        "studio.bujiaban.com",
+        language
+      );
+
+      expect(result).toMatchObject({
+        domain: "studio.bujiaban.com",
+        actual_domain: "bujiaban.com",
+        language,
+        requested_language: language,
+        is_fallback: false,
+        is_domain_fallback: true,
+        data: {
+          domain: "bujiaban.com",
+        },
+      });
+
+      expect(result?.data.title).toBeTruthy();
+      expect(result?.data.description).toContain("AR");
+      expect(result?.data.keywords).toContain("AR");
+      expect(result?.data.author).toBeTruthy();
+      expect(result?.data.links).toHaveLength(2);
+    }
   });
 
   it("uses VITE_APP_DEV_DOMAIN_FALLBACK for local domains", () => {
