@@ -26,9 +26,7 @@ describe("src/api/auth/wechat.ts round15", () => {
 
   it("getQrcode targets /v1/wechat/qrcode", async () => {
     await getQrcode();
-    expect(request.mock.calls[0][0].url).toBe(
-      "https://auth.round15.example/v1/wechat/qrcode"
-    );
+    expect(request.mock.calls[0][0].url).toBe("/v1/wechat/qrcode");
   });
 
   it("getQrcode returns request promise value", async () => {
@@ -44,7 +42,7 @@ describe("src/api/auth/wechat.ts round15", () => {
   it("refresh appends token query", async () => {
     await refresh("token-123");
     expect(request.mock.calls[0][0].url).toBe(
-      "https://auth.round15.example/v1/wechat/refresh?token=token-123"
+      "/v1/wechat/refresh?token=token-123"
     );
   });
 

@@ -92,11 +92,10 @@ describe("auth/wechat: getQrcode()", () => {
     ({ getQrcode } = await import("@/api/auth/wechat"));
   });
 
-  it("calls GET with URL containing auth_api + /v1/wechat/qrcode", async () => {
+  it("calls GET /v1/wechat/qrcode using the shared request baseURL", async () => {
     await getQrcode();
     const callUrl: string = request.mock.calls[0][0].url;
-    expect(callUrl).toContain("auth.example.com");
-    expect(callUrl).toContain("/v1/wechat/qrcode");
+    expect(callUrl).toBe("/v1/wechat/qrcode");
     expect(request.mock.calls[0][0].method).toBe("get");
   });
 });
@@ -114,18 +113,17 @@ describe("auth/wechat: refresh()", () => {
     ({ refresh } = await import("@/api/auth/wechat"));
   });
 
-  it("calls GET with auth_api + /v1/wechat/refresh?token=<value>", async () => {
+  it("calls GET /v1/wechat/refresh?token=<value> using the shared request baseURL", async () => {
     await refresh("my-token");
     const callUrl: string = request.mock.calls[0][0].url;
-    expect(callUrl).toContain("/v1/wechat/refresh");
-    expect(callUrl).toContain("token=my-token");
+    expect(callUrl).toBe("/v1/wechat/refresh?token=my-token");
     expect(request.mock.calls[0][0].method).toBe("get");
   });
 
   it("includes null token in URL when token is null", async () => {
     await refresh(null);
     const callUrl: string = request.mock.calls[0][0].url;
-    expect(callUrl).toContain("token=null");
+    expect(callUrl).toBe("/v1/wechat/refresh?token=null");
   });
 });
 
@@ -200,6 +198,6 @@ describe("auth/wechat: refresh() — empty token", () => {
   it("handles empty string token", async () => {
     await refresh("");
     const callUrl: string = request.mock.calls[0][0].url;
-    expect(callUrl).toContain("token=");
+    expect(callUrl).toBe("/v1/wechat/refresh?token=");
   });
 });
