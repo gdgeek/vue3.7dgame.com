@@ -50,6 +50,7 @@ export default {
     abandonRegisterCancelButton: "Continue registration",
     loginResponseMissingToken: "The login response is missing the access_token",
     qrcodeFetchFailed: "Failed to get WeChat QR code, please try again later",
+    wechatLoginLoading: "Signing in, please wait...",
     forgotPassword: "Forgot password?",
     forgotDialogTitle: "Reset Password",
     forgotTipBoundEmail:

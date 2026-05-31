@@ -52,6 +52,7 @@ export default {
     loginResponseMissingToken: "ログインレスポンスに access_token がありません",
     qrcodeFetchFailed:
       "WeChatのQRコード取得に失敗しました。しばらくしてからお試しください",
+    wechatLoginLoading: "ログイン中です。しばらくお待ちください...",
     forgotPassword: "パスワードをお忘れですか？",
     forgotDialogTitle: "パスワード再設定",
     forgotTipBoundEmail:

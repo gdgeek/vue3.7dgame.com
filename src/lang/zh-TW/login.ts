@@ -50,6 +50,7 @@ export default {
     abandonRegisterCancelButton: "繼續註冊",
     loginResponseMissingToken: "登錄響應缺少 access_token",
     qrcodeFetchFailed: "獲取微信二維碼失敗，請稍後再試",
+    wechatLoginLoading: "正在登錄，請稍候...",
     forgotPassword: "忘記密碼？",
     forgotDialogTitle: "找回密碼",
     forgotTipBoundEmail: "僅支援已綁定且已驗證郵箱的帳號找回密碼。",

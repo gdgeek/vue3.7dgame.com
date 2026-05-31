@@ -50,6 +50,7 @@ export default {
     abandonRegisterConfirmButton: "ยืนยัน",
     abandonRegisterCancelButton: "สมัครต่อ",
     qrcodeFetchFailed: "ไม่สามารถรับ QR code ได้ กรุณาลองใหม่อีกครั้ง",
+    wechatLoginLoading: "กำลังเข้าสู่ระบบ กรุณารอสักครู่...",
     forgotPassword: "ลืมรหัสผ่าน?",
     forgotDialogTitle: "กู้คืนรหัสผ่าน",
     forgotTipBoundEmail: "ใช้ได้เฉพาะบัญชีที่ผูกและยืนยันอีเมลแล้วเท่านั้น",

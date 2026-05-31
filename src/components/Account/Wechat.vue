@@ -4,7 +4,12 @@
     class="wechat-container"
     :class="{ 'dark-theme': isDark }"
   >
-    <el-button class="wechat-login-button" @click="login">
+    <el-button
+      class="wechat-login-button"
+      :loading="isFetchingQrcode"
+      :disabled="isFetchingQrcode || isLoginFinalizing"
+      @click="login"
+    >
       <el-icon class="wechat-icon">
         <ChatRound></ChatRound>
       </el-icon>
@@ -49,11 +54,28 @@
         </div>
       </div>
     </el-dialog>
+
+    <transition name="wechat-login-loading-fade">
+      <div
+        v-if="isLoginFinalizing"
+        class="wechat-login-loading-mask"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <div class="wechat-login-loading-panel">
+          <el-icon class="wechat-login-loading-icon" :size="32">
+            <Loading></Loading>
+          </el-icon>
+          <span>{{ t("login.wechatLoginLoading") }}</span>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ChatRound } from "@element-plus/icons-vue";
+import { ChatRound, Loading } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useUserStore } from "@/store";
 import Qrcode from "./Qrcode.vue";
@@ -80,6 +102,8 @@ const wechatLoginEnabled = computed(() =>
 const dialogVisible = ref(false);
 const isScanning = ref(false);
 const scanProgress = ref(0);
+const isFetchingQrcode = ref(false);
+const isLoginFinalizing = ref(false);
 let intervalId: NodeJS.Timeout | string | number | undefined = undefined;
 let progressInterval: NodeJS.Timeout | undefined = undefined;
 
@@ -110,7 +134,7 @@ const parseRedirect = (): {
   return { path, queryParams };
 };
 
-const close = () => {
+const clearPollingTimers = () => {
   if (intervalId) {
     clearInterval(intervalId);
     intervalId = undefined;
@@ -120,6 +144,10 @@ const close = () => {
     clearInterval(progressInterval);
     progressInterval = undefined;
   }
+};
+
+const close = () => {
+  clearPollingTimers();
 
   dialogVisible.value = false;
   isScanning.value = false;
@@ -127,26 +155,38 @@ const close = () => {
 };
 
 const fetchRefresh = async () => {
+  if (isLoginFinalizing.value) {
+    return;
+  }
+
   try {
     const response = await refresh(token);
     if (response.data.success) {
-      // 设置为扫描状态
+      clearPollingTimers();
       isScanning.value = true;
-      // 加速进度条
-      scanProgress.value = Math.min(scanProgress.value + 20, 90);
+      scanProgress.value = 100;
+      isLoginFinalizing.value = true;
 
-      close();
-      if (response.data.message === "signup") {
-        router.push({
-          path: "/site/register",
-          query: { token: response.data.token },
-        });
-      } else if (response.data.message === "signin") {
-        await userStore.loginByWechat({ token: response.data.token });
-        await userStore.getUserInfo();
+      try {
+        dialogVisible.value = false;
 
-        const { path, queryParams } = parseRedirect();
-        router.push({ path: path, query: queryParams });
+        if (response.data.message === "signup") {
+          await router.push({
+            path: "/site/register",
+            query: { token: response.data.token },
+          });
+        } else if (response.data.message === "signin") {
+          await userStore.loginByWechat({ token: response.data.token });
+          await userStore.getUserInfo();
+
+          const { path, queryParams } = parseRedirect();
+          await router.push({ path: path, query: queryParams });
+        }
+      } catch (error) {
+        logger.error("微信登录处理错误:", error);
+        ElMessage.error(t("login.loginFailed"));
+      } finally {
+        isLoginFinalizing.value = false;
       }
     }
   } catch (error) {
@@ -155,14 +195,8 @@ const fetchRefresh = async () => {
 };
 
 onUnmounted(() => {
-  if (intervalId) {
-    clearInterval(intervalId);
-    intervalId = undefined;
-  }
-  if (progressInterval) {
-    clearInterval(progressInterval);
-    progressInterval = undefined;
-  }
+  clearPollingTimers();
+  isLoginFinalizing.value = false;
 });
 
 let token: string | null = null;
@@ -172,6 +206,7 @@ const login = async function () {
     return;
   }
   try {
+    isFetchingQrcode.value = true;
     const ret = await getQrcode();
     url.value = ret.data.qrcode.url;
     token = ret.data.token;
@@ -193,6 +228,8 @@ const login = async function () {
   } catch (error) {
     logger.error("获取微信二维码失败:", error);
     ElMessage.error(t("login.qrcodeFetchFailed"));
+  } finally {
+    isFetchingQrcode.value = false;
   }
 };
 </script>
@@ -329,6 +366,58 @@ const login = async function () {
   .scanning-text {
     font-size: 14px;
     color: var(--text-secondary, #666);
+  }
+}
+
+.wechat-login-loading-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(2px);
+}
+
+.wechat-login-loading-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  min-width: 180px;
+  padding: 24px 28px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, rgb(255 255 255 / 45%));
+  border-radius: 8px;
+  box-shadow: var(--shadow-xl, 0 12px 32px rgb(0 0 0 / 18%));
+}
+
+.wechat-login-loading-icon {
+  color: #07c160;
+  animation: wechat-login-rotating 1.4s linear infinite;
+}
+
+.wechat-login-loading-fade-enter-active,
+.wechat-login-loading-fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.wechat-login-loading-fade-enter-from,
+.wechat-login-loading-fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes wechat-login-rotating {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>

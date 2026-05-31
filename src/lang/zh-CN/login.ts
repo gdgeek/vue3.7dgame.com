@@ -49,6 +49,7 @@ export default {
     abandonRegisterCancelButton: "继续注册",
     loginResponseMissingToken: "登录响应缺少 access_token",
     qrcodeFetchFailed: "获取微信二维码失败，请稍后再试",
+    wechatLoginLoading: "正在登录，请稍候...",
     forgotPassword: "忘记密码？",
     forgotDialogTitle: "找回密码",
     forgotTipBoundEmail: "仅支持已绑定且已验证邮箱的账号找回密码。",
