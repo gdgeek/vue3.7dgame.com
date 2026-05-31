@@ -19,12 +19,15 @@ import "@/assets/font/font.css";
 import { useRouter } from "vue-router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useAppStore } from "@/store/modules/app";
+import { buildHomepageRedirectUrl } from "@/utils/homepageRedirect";
 
 import { useUserStore, useDomainStore } from "@/store";
 
 const userStore = useUserStore();
 const router = useRouter();
 const settingsStore = useSettingsStore();
+const appStore = useAppStore();
 const { t } = useI18n();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
@@ -34,7 +37,10 @@ onMounted(async () => {
     const domainStore = useDomainStore();
     await domainStore.fetchDefaultInfo({ forceRefresh: true });
     if (domainStore.homepage) {
-      window.location.href = domainStore.homepage;
+      window.location.href = buildHomepageRedirectUrl(
+        domainStore.homepage,
+        appStore.language
+      );
     } else {
       router.push("/web/index");
     }

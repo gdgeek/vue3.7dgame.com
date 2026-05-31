@@ -140,9 +140,11 @@ import LoginDialog from "@/components/Account/LoginDialog.vue";
 import LangSelect from "@/components/LangSelect/index.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useAppStore } from "@/store/modules/app";
 import { useDomainStore } from "@/store/modules/domain";
 import { useAOS } from "@/composables/useAOS";
 import { debounce } from "@/utils/utilityFunctions";
+import { buildHomepageRedirectUrl } from "@/utils/homepageRedirect";
 
 useAOS();
 
@@ -150,6 +152,7 @@ const router = useRouter();
 const route = useRoute();
 const contentRef = ref<HTMLElement | null>(null);
 const settingsStore = useSettingsStore();
+const appStore = useAppStore();
 const domainStore = useDomainStore();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
@@ -306,7 +309,10 @@ const scrollToSection = (sectionId: string) => {
 onMounted(() => {
   // 如果设置了 homepage，自动跳转（本地开发环境跳过）
   if (domainStore.homepage && !import.meta.env.DEV) {
-    window.location.href = domainStore.homepage;
+    window.location.href = buildHomepageRedirectUrl(
+      domainStore.homepage,
+      appStore.language
+    );
     return;
   }
 
