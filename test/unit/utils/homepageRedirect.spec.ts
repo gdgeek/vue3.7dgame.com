@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildHomepageRedirectUrl,
   normalizeHomepageRedirectLanguage,
+  pointsToCurrentSiteRoot,
 } from "@/utils/homepageRedirect";
 
 describe("homepageRedirect", () => {
@@ -41,5 +42,27 @@ describe("homepageRedirect", () => {
       homepageUrl
     );
     expect(buildHomepageRedirectUrl(homepageUrl)).toBe(homepageUrl);
+  });
+
+  it("detects same-site root homepage redirects", () => {
+    expect(
+      pointsToCurrentSiteRoot(
+        "https://www.bujiaban.com/?lang=zh-CN",
+        "https://www.bujiaban.com/web/index?redirect=%2Fhome"
+      )
+    ).toBe(true);
+
+    expect(
+      pointsToCurrentSiteRoot(
+        "https://www.example.com/",
+        "https://www.bujiaban.com/web/index"
+      )
+    ).toBe(false);
+    expect(
+      pointsToCurrentSiteRoot(
+        "https://www.bujiaban.com/landing",
+        "https://www.bujiaban.com/web/index"
+      )
+    ).toBe(false);
   });
 });

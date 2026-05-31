@@ -144,7 +144,10 @@ import { useAppStore } from "@/store/modules/app";
 import { useDomainStore } from "@/store/modules/domain";
 import { useAOS } from "@/composables/useAOS";
 import { debounce } from "@/utils/utilityFunctions";
-import { buildHomepageRedirectUrl } from "@/utils/homepageRedirect";
+import {
+  buildHomepageRedirectUrl,
+  pointsToCurrentSiteRoot,
+} from "@/utils/homepageRedirect";
 
 useAOS();
 
@@ -309,11 +312,15 @@ const scrollToSection = (sectionId: string) => {
 onMounted(() => {
   // 如果设置了 homepage，自动跳转（本地开发环境跳过）
   if (domainStore.homepage && !import.meta.env.DEV) {
-    window.location.href = buildHomepageRedirectUrl(
+    const homepageUrl = buildHomepageRedirectUrl(
       domainStore.homepage,
       appStore.language
     );
-    return;
+
+    if (!pointsToCurrentSiteRoot(homepageUrl)) {
+      window.location.href = homepageUrl;
+      return;
+    }
   }
 
   //滚到news上

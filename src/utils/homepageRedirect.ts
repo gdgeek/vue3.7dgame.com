@@ -39,3 +39,20 @@ export function buildHomepageRedirectUrl(
 
   return url.toString();
 }
+
+export function pointsToCurrentSiteRoot(
+  homepageUrl: string,
+  currentHref?: string
+): boolean {
+  const current =
+    currentHref ??
+    (typeof window !== "undefined"
+      ? window.location.href
+      : "http://localhost/");
+
+  const currentUrl = new URL(current);
+  const targetUrl = new URL(homepageUrl, currentUrl.origin);
+  const normalizedPath = targetUrl.pathname.replace(/\/+$/, "") || "/";
+
+  return targetUrl.origin === currentUrl.origin && normalizedPath === "/";
+}
