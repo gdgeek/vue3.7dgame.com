@@ -1,7 +1,7 @@
 // login translations for th-TH
 export default {
   login: {
-    title: "XR UGC平台（XRUGC.com）",
+    title: "กำลังโหลด...",
     register: "ลงทะเบียน/เข้าสู่ระบบแพลตฟอร์ม",
     h1: "ยินดีต้อนรับ!",
     h4: "พร้อมที่จะเริ่มหรือยัง?",

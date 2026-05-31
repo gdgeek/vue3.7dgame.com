@@ -1,7 +1,7 @@
 // login translations for zh-TW
 export default {
   login: {
-    title: "XR UGC平台（XRUGC.com）",
+    title: "載入中...",
     register: "平台註冊/登錄",
     h1: "歡迎！",
     h4: "準備好出發了么？",

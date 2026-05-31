@@ -182,12 +182,13 @@ import { useRouter } from "@/router";
 import { translateRouteTitle } from "./utils/i18n";
 import { useAppStore, store } from "./store";
 import { useDomainStore } from "./store/modules/domain";
+import { getSiteTitle } from "@/composables/useSiteTitle";
 const router = useRouter();
 const domainStore = useDomainStore(store);
 
 // 更新页面标题
 const updateTitle = (title: string) => {
-  const siteName = domainStore.title || "XR UGC平台（XRUGC.com）";
+  const siteName = getSiteTitle(domainStore.title);
   document.title = title
     ? `${translateRouteTitle(title)} - ${siteName}`
     : siteName;

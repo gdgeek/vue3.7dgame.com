@@ -1,7 +1,7 @@
 // login translations for ja-JP
 export default {
   login: {
-    title: "XR UGC平台（XRUGC.com）",
+    title: "読み込み中...",
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",
     h4: "準備はできましたか？",

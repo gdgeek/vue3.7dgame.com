@@ -107,7 +107,7 @@
       <PlatformOverview></PlatformOverview>
 
       <el-tabs v-if="env.local()" type="border-card" class="home-local-tabs">
-        <el-tab-pane :label="domainStore.title">
+        <el-tab-pane :label="siteTitle">
           <LocalPage></LocalPage>
         </el-tab-pane>
       </el-tabs>
@@ -123,14 +123,14 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 
-import { useDomainStore } from "@/store/modules/domain";
+import { useSiteTitle } from "@/composables/useSiteTitle";
 import environment from "@/environment";
 import LocalPage from "@/components/Home/LocalPage.vue";
 import HomeHeader from "@/components/Home/HomeHeader.vue";
 import PlatformOverview from "@/components/Home/PlatformOverview.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
-const domainStore = useDomainStore();
+const siteTitle = useSiteTitle();
 const env = computed(() => environment);
 const { t } = useI18n();
 const router = useRouter();

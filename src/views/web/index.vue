@@ -17,9 +17,7 @@
           :fontSize="isMobile ? 16 : 20"
           :textColor="textColor"
         >
-          <span class="font-bold">{{
-            domainStore.title || "XR UGC平台（XRUGC.com）"
-          }}</span>
+          <span class="font-bold">{{ siteTitle }}</span>
         </RadiantText>
       </div>
       <div class="nav-middle" v-if="!isMobile">
@@ -83,7 +81,7 @@
           alt="Logo"
           class="sidebar-logo"
         />
-        <span class="sidebar-company-name">{{ domainStore.title }}</span>
+        <span class="sidebar-company-name">{{ siteTitle }}</span>
       </div>
       <div class="sidebar-items">
         <div class="theme-switch-mobile">
@@ -143,6 +141,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useAppStore } from "@/store/modules/app";
 import { useDomainStore } from "@/store/modules/domain";
 import { useAOS } from "@/composables/useAOS";
+import { useSiteTitle } from "@/composables/useSiteTitle";
 import { debounce } from "@/utils/utilityFunctions";
 import {
   buildHomepageRedirectUrl,
@@ -157,6 +156,7 @@ const contentRef = ref<HTMLElement | null>(null);
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 const domainStore = useDomainStore();
+const siteTitle = useSiteTitle();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 defineOptions({

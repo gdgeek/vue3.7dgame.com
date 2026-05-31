@@ -19,9 +19,7 @@
     <div class="hero-content">
       <div class="hero-text" data-aos="fade-up" data-aos-delay="200">
         <h1 class="hero-title">
-          <span class="gradient-text">{{
-            domainStore.title || $t("web.hero.loading")
-          }}</span>
+          <span class="gradient-text">{{ siteTitle }}</span>
         </h1>
         <p class="hero-subtitle">{{ domainStore.description }}</p>
         <div class="hero-cta">
@@ -56,7 +54,7 @@
           <img
             src="/media/bg/bujiaban.png"
             @click="openVideoDialog"
-            :alt="domainStore.title"
+            :alt="siteTitle"
             class="primary-image"
           />
 
@@ -145,7 +143,7 @@
   <!-- 视频弹窗 -->
   <el-dialog
     v-model="videoDialogVisible"
-    :title="domainStore.title + ' ' + $t('web.hero.introVideo')"
+    :title="siteTitle + ' ' + $t('web.hero.introVideo')"
     width="70%"
     :before-close="handleCloseVideo"
     destroy-on-close
@@ -159,6 +157,7 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
 import { useAOS } from "@/composables/useAOS";
+import { useSiteTitle } from "@/composables/useSiteTitle";
 import { VideoPlay, ArrowDown, ArrowRight } from "@element-plus/icons-vue";
 
 useAOS();
@@ -166,6 +165,7 @@ useAOS();
 // 获取主题设置
 const settingsStore = useSettingsStore();
 const domainStore = useDomainStore();
+const siteTitle = useSiteTitle();
 const isDark = computed(() => settingsStore.theme === "dark");
 
 const emit = defineEmits(["openLogin"]);

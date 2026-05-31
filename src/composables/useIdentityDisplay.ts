@@ -2,8 +2,9 @@ import { computed } from "vue";
 import type { OrganizationInfoType } from "@/api/user/model";
 import { useDomainStore } from "@/store/modules/domain";
 import { useUserStore } from "@/store/modules/user";
+import { getSiteTitle, LOADING_SITE_TITLE } from "@/composables/useSiteTitle";
 
-export const DEFAULT_SITE_TITLE = "XR UGC平台（XRUGC.com）";
+export const DEFAULT_SITE_TITLE = LOADING_SITE_TITLE;
 
 export type IdentityOrganization = OrganizationInfoType;
 
@@ -41,7 +42,7 @@ export function buildIdentityDisplay({
   organizations: OrganizationInfoType[] | null | undefined;
   maxVisibleOrganizations?: number;
 }): IdentityDisplayState {
-  const siteLabel = siteTitle?.trim() || DEFAULT_SITE_TITLE;
+  const siteLabel = getSiteTitle(siteTitle);
   const normalizedOrganizations = normalizeOrganizations(organizations);
   const visibleOrganizations = normalizedOrganizations.slice(
     0,

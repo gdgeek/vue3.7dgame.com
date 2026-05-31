@@ -5,9 +5,7 @@
       <div class="logo-icon">
         <img alt="Logo" :src="logoIcon" />
       </div>
-      <span class="logo-text">{{
-        domainStore.title || "XR UGC平台（XRUGC.com）"
-      }}</span>
+      <span class="logo-text">{{ siteTitle }}</span>
     </div>
 
     <!-- Navigation Section -->
@@ -570,6 +568,7 @@ import { AbilityRouter } from "@/utils/ability";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
 import { resolveI18nName } from "@/plugin-system/utils/i18n";
+import { useSiteTitle } from "@/composables/useSiteTitle";
 
 const { t } = useI18n();
 const appStore = useAppStoreHook();
@@ -584,6 +583,7 @@ defineProps({
 const router = useRouter();
 const userStore = useUserStore();
 const domainStore = useDomainStore();
+const siteTitle = useSiteTitle();
 const ability = useAbility();
 const pluginStore = usePluginSystemStore();
 

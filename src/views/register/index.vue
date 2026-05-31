@@ -4,7 +4,7 @@
       <div style="height: 30px" v-if="!isMobile">
         <RouterLink to="/" class="logo">
           <img :src="domainStore.icon || '/favicon.ico'" alt="" />
-          <span class="project_title">{{ domainStore.title }}</span>
+          <span class="project_title">{{ siteTitle }}</span>
         </RouterLink>
         <div class="link" style="margin-left: 250px">
           <!--   
@@ -49,7 +49,7 @@
               alt=""
               style="width: auto; margin-left: 10px"
             />
-            <span class="project_title">{{ domainStore.title }}</span>
+            <span class="project_title">{{ siteTitle }}</span>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
@@ -154,9 +154,11 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 //import { useInfomationStore } from "@/store/modules/information";
 import { useDomainStore } from "@/store/modules/domain";
+import { useSiteTitle } from "@/composables/useSiteTitle";
 import { useScreenStore } from "@/store";
 //const informationStore = useInfomationStore();
 const domainStore = useDomainStore();
+const siteTitle = useSiteTitle();
 const settingsStore = useSettingsStore();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 const loginFormRef = ref<InstanceType<typeof LoginForm>>();

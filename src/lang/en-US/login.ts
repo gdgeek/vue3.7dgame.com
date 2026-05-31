@@ -1,7 +1,7 @@
 // login translations for en-US
 export default {
   login: {
-    title: "XR UGC平台（XRUGC.com）",
+    title: "Loading...",
     register: "Platform Register/Login",
     h1: "Welcome!",
     h4: "Ready to get started?",

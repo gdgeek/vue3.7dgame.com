@@ -16,7 +16,7 @@
           alt="Logo"
           class="login-logo"
         />
-        <h2 class="login-title">{{ domainStore.title }}</h2>
+        <h2 class="login-title">{{ siteTitle }}</h2>
       </div>
 
       <!-- 内容区域 -->
@@ -54,12 +54,14 @@ import Wechat from "./Wechat.vue";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
+import { useSiteTitle } from "@/composables/useSiteTitle";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { Message } from "@/components/Dialog";
 
 const emit = defineEmits(["dialog-closed"]);
 const settingsStore = useSettingsStore();
 const domainStore = useDomainStore();
+const siteTitle = useSiteTitle();
 const { t } = useI18n();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 const dialogVisible = ref(false);
