@@ -8,17 +8,14 @@ import { createApp, nextTick } from "vue";
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
 const mockRouteQuery: Record<string, string> = {};
-const mockChangeLanguage = vi.fn();
+const mockLoadLanguageAsync = vi.fn().mockResolvedValue(undefined);
 const mockGetUserInfo = vi.fn().mockResolvedValue(undefined);
 const mockSetToken = vi.fn();
+const mockRefresh = vi.fn().mockResolvedValue({ data: { token: "new-token" } });
 
 vi.mock("vue-router", () => ({
   useRoute: vi.fn(() => ({ query: mockRouteQuery })),
   useRouter: vi.fn(() => ({ push: mockPush, replace: mockReplace })),
-}));
-
-vi.mock("@/store/modules/app", () => ({
-  useAppStore: vi.fn(() => ({ changeLanguage: mockChangeLanguage })),
 }));
 
 vi.mock("@/store/modules/user", () => ({
@@ -26,7 +23,12 @@ vi.mock("@/store/modules/user", () => ({
 }));
 
 vi.mock("@/api/v1/auth", () => ({
-  refresh: vi.fn().mockResolvedValue({ data: { token: "new-token" } }),
+  refresh: mockRefresh,
+}));
+
+vi.mock("@/lang", () => ({
+  default: {},
+  loadLanguageAsync: mockLoadLanguageAsync,
 }));
 
 vi.mock("@/store/modules/token", () => ({
@@ -42,9 +44,14 @@ afterEach(() => {
   cleanups.forEach((fn) => fn());
   cleanups.length = 0;
   vi.resetModules();
+  window.history.replaceState(null, "", "/sso");
+  mockPush.mockClear();
   mockReplace.mockClear();
-  mockChangeLanguage.mockClear();
+  mockLoadLanguageAsync.mockClear();
+  mockGetUserInfo.mockClear();
   mockSetToken.mockClear();
+  mockRefresh.mockReset();
+  mockRefresh.mockResolvedValue({ data: { token: "new-token" } });
   // Reset query
   for (const k of Object.keys(mockRouteQuery)) delete mockRouteQuery[k];
 });
@@ -88,10 +95,54 @@ describe("views/sso/index.vue", () => {
     expect(mockReplace).toHaveBeenCalledWith("/verse/index");
   });
 
-  it("calls changeLanguage when lang param is provided", async () => {
+  it("loads language when a supported lang param is provided", async () => {
     mockRouteQuery.lang = "en";
     await mount();
     await nextTick();
-    expect(mockChangeLanguage).toHaveBeenCalledWith("en");
+    expect(mockLoadLanguageAsync).toHaveBeenCalledWith("en-US");
+  });
+
+  it("ignores unsupported lang params", async () => {
+    mockRouteQuery.lang = "javascript:alert(1)";
+    await mount();
+    await nextTick();
+    expect(mockLoadLanguageAsync).not.toHaveBeenCalled();
+  });
+
+  it("reads refresh token from URL fragment and clears it from the address bar", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/sso#refreshToken=fragment-token&lang=zh-TW"
+    );
+
+    await mount();
+    await nextTick();
+
+    const { refresh } = await import("@/api/v1/auth");
+    expect(refresh).toHaveBeenCalledWith("fragment-token");
+    expect(mockSetToken).toHaveBeenCalledWith("new-token");
+    expect(window.location.hash).toBe("");
+  });
+
+  it("falls back to default redirect for external redirect params", async () => {
+    mockRouteQuery.redirect = "https://evil.example";
+    await mount();
+    await nextTick();
+    expect(mockReplace).toHaveBeenCalledWith("/home/index");
+  });
+
+  it("stops redirect flow when refresh fails", async () => {
+    mockRouteQuery.refreshToken = "bad-token";
+    mockRouteQuery.redirect = "/verse/index";
+    mockRefresh.mockRejectedValueOnce(new Error("invalid refresh token"));
+
+    await mount();
+    await nextTick();
+
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith("/login");
+    expect(mockReplace).not.toHaveBeenCalledWith("/verse/index");
+    expect(mockLoadLanguageAsync).not.toHaveBeenCalled();
   });
 });

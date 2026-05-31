@@ -6,23 +6,29 @@
 import { logger } from "@/utils/logger";
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useAppStore } from "@/store/modules/app";
-
 import { refresh as authRefresh } from "@/api/v1/auth";
 import Token from "@/store/modules/token";
 import { useUserStore } from "@/store/modules/user";
+import { loadLanguageAsync } from "@/lang";
+import {
+  clearSsoCallbackUrl,
+  normalizeSsoLanguage,
+  readSsoCallbackParams,
+  sanitizeSsoRedirect,
+} from "./ssoCallback";
 
 const route = useRoute();
 const router = useRouter();
-const appStore = useAppStore();
 const userStore = useUserStore();
 
 onMounted(async () => {
-  const { refreshToken, lang, redirect } = route.query;
+  const { refreshToken, lang, redirect } = readSsoCallbackParams(route.query);
+
+  clearSsoCallbackUrl();
 
   if (refreshToken) {
     try {
-      const response = await authRefresh(refreshToken as string);
+      const response = await authRefresh(refreshToken);
       Token.setToken(response.data.token);
 
       // 拉取并设置用户信息（使用 store 提供的方法）
@@ -33,15 +39,18 @@ onMounted(async () => {
       }
     } catch (err) {
       logger.error("Refresh token failed in SSO callback:", err);
+      router.replace("/login");
+      return;
     }
   }
 
-  if (lang) {
-    appStore.changeLanguage(lang as string);
+  const normalizedLang = normalizeSsoLanguage(lang);
+  if (normalizedLang) {
+    await loadLanguageAsync(normalizedLang);
   }
 
   // Redirect
-  const redirectPath = (redirect as string) || "/home/index";
+  const redirectPath = sanitizeSsoRedirect(redirect);
   router.replace(redirectPath);
 });
 </script>
