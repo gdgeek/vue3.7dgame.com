@@ -247,15 +247,17 @@ describe("domain-static-config", () => {
   });
 
   it("loads bujiaban.com default and all localized configs from static JSON", async () => {
-    vi.stubGlobal(
-      "fetch",
-      makeFetch({
-        "/config/domains/bujiaban.com.json": bujiabanConfig,
-      })
-    );
+    const fetchMock = makeFetch({
+      "/config/domains/bujiaban.com.json": bujiabanConfig,
+    });
+    vi.stubGlobal("fetch", fetchMock);
 
     const defaultResult = await getStaticDomainDefault("www.bujiaban.com");
 
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/config/domains/www.bujiaban.com.json",
+      expect.anything()
+    );
     expect(defaultResult).toMatchObject({
       domain: "www.bujiaban.com",
       actual_domain: "bujiaban.com",

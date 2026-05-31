@@ -47,24 +47,33 @@ function isLocalDomain(domain: string): boolean {
 }
 
 function getStaticDomainCandidates(domain: string): string[] {
-  const candidates = [];
-  let candidate = domain;
+  const candidates: string[] = [];
 
-  while (candidate) {
-    candidates.push(candidate);
+  const addDomainAndParents = (domainName: string) => {
+    let candidate = domainName;
 
-    const nextDot = candidate.indexOf(".");
-    if (nextDot < 0) {
-      break;
+    while (candidate) {
+      candidates.push(candidate);
+
+      const nextDot = candidate.indexOf(".");
+      if (nextDot < 0) {
+        break;
+      }
+
+      const nextCandidate = candidate.slice(nextDot + 1);
+      if (!nextCandidate.includes(".")) {
+        break;
+      }
+
+      candidate = nextCandidate;
     }
+  };
 
-    const nextCandidate = candidate.slice(nextDot + 1);
-    if (!nextCandidate.includes(".")) {
-      break;
-    }
-
-    candidate = nextCandidate;
+  if (domain.startsWith("www.")) {
+    addDomainAndParents(domain.slice(4));
   }
+
+  addDomainAndParents(domain);
 
   return [...new Set(candidates.filter(Boolean))];
 }
