@@ -5,7 +5,7 @@
   "fallback_domain": "dev.xrugc.com",
   "default_config": {
     "icon": "https://xiading.hxgxonline.com/logo/xingkou/xingkou_logo.webp",
-    "homepage": "https://xrugc.com/"
+    "homepage": "https://dev.xrugc.com/"
   },
   "configs": {
     "zh-CN": {

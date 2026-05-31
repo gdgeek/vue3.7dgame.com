@@ -306,7 +306,7 @@ describe("domain-static-config", () => {
       language: "default",
       is_domain_fallback: true,
       data: {
-        homepage: "https://xrugc.com/",
+        homepage: "https://dev.xrugc.com/",
       },
     });
 
