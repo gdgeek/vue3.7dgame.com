@@ -205,3 +205,18 @@ docker compose -f docker-compose.dev.yml up
 # 查看容器日志
 docker logs vue3-prod -f
 ```
+
+---
+
+## 6. 发布后验证与常见误判
+
+发布主前端时，CI/CD 全绿只代表代码通过检查并且 Docker 镜像构建推送成功，不代表 `www.bujiaban.com` 已经切换到新容器。生产站点是否已更新，必须以线上 HTML 的 `Last-Modified` 和入口 JS hash 为准。
+
+```bash
+curl -I 'https://www.bujiaban.com/?lang=zh-CN'
+curl -L 'https://www.bujiaban.com/?lang=zh-CN' | rg 'index\.|__env'
+```
+
+如果 `Last-Modified` 仍是旧时间，或入口 JS hash 没变化，需要在生产环境拉取新镜像并重启 web 容器后再验证。
+
+涉及 `homepage`、白牌域名配置、未登录跳转、公开首页挂载跳转时，必须参考 [首页自刷新问题复盘与防回归清单](./homepage-redirect-loop-runbook.md)。尤其注意：`default_config.homepage` 指向当前站点根路径时，可能和权限守卫形成循环；代码侧必须保留同站根路径防护，不能只依赖配置修正。
