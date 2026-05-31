@@ -6,6 +6,7 @@ import {
   type DomainDefaultInfo,
   type DomainLanguageInfo,
 } from "@/api/domain-query";
+import { clearStaticDomainConfigCache } from "@/api/domain-static-config";
 import { store } from "@/store";
 
 // 支持的语言列表（与 LanguageEnum 保持一致）
@@ -20,6 +21,10 @@ const SUPPORTED_LANGUAGES = new Set([
 const DOMAIN_COOKIE_KEY_PREFIX = "domain_info_";
 const DOMAIN_DEFAULT_COOKIE_KEY = "domain_default_info";
 const COOKIE_EXPIRY_DAYS = 7;
+
+interface FetchDefaultInfoOptions {
+  forceRefresh?: boolean;
+}
 
 // Cookie helper functions
 function setCookie(name: string, value: string, days: number) {
@@ -108,9 +113,11 @@ export const useDomainStore = defineStore("domain", {
     /**
      * 启动时调用一次，获取基础信息（homepage, lang）
      */
-    async fetchDefaultInfo() {
+    async fetchDefaultInfo(options: FetchDefaultInfoOptions = {}) {
       // Try cookie cache first
-      const cachedData = getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
+      const cachedData = options.forceRefresh
+        ? null
+        : getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
       if (cachedData) {
         try {
           this.defaultInfo = JSON.parse(cachedData);
@@ -120,6 +127,10 @@ export const useDomainStore = defineStore("domain", {
       }
 
       try {
+        if (options.forceRefresh) {
+          clearStaticDomainConfigCache();
+        }
+
         const domain = getDomainForQuery();
         const response: { data: DomainDefaultInfo } =
           await getDomainDefault(domain);

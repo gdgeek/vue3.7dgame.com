@@ -30,8 +30,9 @@ const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 onMounted(async () => {
   await userStore.logout();
-  setTimeout(() => {
+  setTimeout(async () => {
     const domainStore = useDomainStore();
+    await domainStore.fetchDefaultInfo({ forceRefresh: true });
     if (domainStore.homepage) {
       window.location.href = domainStore.homepage;
     } else {

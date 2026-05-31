@@ -140,6 +140,15 @@ server {
         try_files $uri =404;
     }
 
+    # White-label domain JSON is runtime configuration, not build output.
+    location ^~ /config/domains/ {
+        default_type application/json;
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+        add_header Expires "0" always;
+        try_files $uri =404;
+    }
+
     # JS/CSS 文件带 hash，长期缓存
     location ~* \.(?:js|css)$ {
         expires 1y;

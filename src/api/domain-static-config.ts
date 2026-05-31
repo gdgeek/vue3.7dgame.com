@@ -152,7 +152,7 @@ async function loadStaticConfigByExactName(
       try {
         const response = await fetch(
           `${STATIC_DOMAIN_CONFIG_BASE}/${encodeURIComponent(normalized)}.json`,
-          { headers: { Accept: "application/json" } }
+          { cache: "no-store", headers: { Accept: "application/json" } }
         );
 
         if (!response.ok) {

@@ -100,6 +100,19 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(block).not.toContain("public, immutable");
   });
 
+  it("serves white-label domain JSON without caching", () => {
+    const block = extractLocationBlock(nginxConfig, "^~ /config/domains/");
+
+    expect(block).toContain("default_type application/json");
+    expect(block).toContain(
+      'add_header Cache-Control "no-cache, no-store, must-revalidate" always'
+    );
+    expect(block).toContain('add_header Pragma "no-cache" always');
+    expect(block).toContain('add_header Expires "0" always');
+    expect(block).toContain("try_files $uri =404");
+    expect(block).not.toContain("public, immutable");
+  });
+
   it("caches proxied WebGL preview assets on the web server", () => {
     const block = extractLocationBlock(nginxConfig, "^~ /webgl-preview/");
 

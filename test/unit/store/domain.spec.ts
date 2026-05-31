@@ -15,6 +15,10 @@ vi.mock("@/api/domain-query", () => ({
   getDomainLanguage: vi.fn(),
 }));
 
+vi.mock("@/api/domain-static-config", () => ({
+  clearStaticDomainConfigCache: vi.fn(),
+}));
+
 vi.mock("@/store", async () => {
   const { createPinia: cp } = await import("pinia");
   return { store: cp() };
@@ -65,6 +69,7 @@ function makeDefaultInfo(overrides = {}) {
 describe("useDomainStore", () => {
   let getDomainDefault: ReturnType<typeof vi.fn>;
   let getDomainLanguage: ReturnType<typeof vi.fn>;
+  let clearStaticDomainConfigCache: ReturnType<typeof vi.fn>;
   let useAppStore: ReturnType<typeof vi.fn>;
   let useDomainStore: typeof import("@/store/modules/domain").useDomainStore;
 
@@ -81,6 +86,9 @@ describe("useDomainStore", () => {
 
     ({ getDomainDefault, getDomainLanguage } = await import(
       "@/api/domain-query"
+    ));
+    ({ clearStaticDomainConfigCache } = await import(
+      "@/api/domain-static-config"
     ));
     ({ useAppStore } = await import("@/store/modules/app"));
     ({ useDomainStore } = await import("@/store/modules/domain"));
@@ -347,6 +355,21 @@ describe("useDomainStore", () => {
       expect(iconLink?.getAttribute("href")).toBe(
         "https://example.com/icon.png"
       );
+    });
+
+    it("forceRefresh 时清理静态配置缓存并跳过 cookie 旧值", async () => {
+      const cachedInfo = makeDefaultInfo({ homepage: "https://cached.com" });
+      const freshInfo = makeDefaultInfo({ homepage: "https://fresh.com" });
+      document.cookie = `domain_default_info=${encodeURIComponent(
+        JSON.stringify(cachedInfo)
+      )};path=/`;
+      getDomainDefault.mockResolvedValue({ data: freshInfo });
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo({ forceRefresh: true });
+
+      expect(clearStaticDomainConfigCache).toHaveBeenCalledTimes(1);
+      expect(store.defaultInfo).toEqual(freshInfo);
     });
   });
 

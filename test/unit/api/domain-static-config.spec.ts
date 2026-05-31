@@ -36,25 +36,30 @@ describe("domain-static-config", () => {
   });
 
   it("loads current domain default_config", async () => {
-    vi.stubGlobal(
-      "fetch",
-      makeFetch({
-        "/config/domains/example.com.json": {
-          name: "example.com",
-          is_active: true,
-          fallback_domain: "default",
-          default_config: {
-            homepage: "https://example.com",
-            lang: "zh-CN",
-            style: 1,
-          },
-          configs: {},
+    const fetchMock = makeFetch({
+      "/config/domains/example.com.json": {
+        name: "example.com",
+        is_active: true,
+        fallback_domain: "default",
+        default_config: {
+          homepage: "https://example.com",
+          lang: "zh-CN",
+          style: 1,
         },
-      })
-    );
+        configs: {},
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
 
     const result = await getStaticDomainDefault("example.com");
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/config/domains/example.com.json",
+      expect.objectContaining({
+        cache: "no-store",
+        headers: { Accept: "application/json" },
+      })
+    );
     expect(result).toMatchObject({
       domain: "example.com",
       actual_domain: "example.com",
