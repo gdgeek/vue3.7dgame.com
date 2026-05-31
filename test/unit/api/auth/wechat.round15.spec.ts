@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 vi.mock("@/environment", () => ({
-  default: { api: "https://auth.round15.example" },
+  default: {
+    api: "https://api.round15.example",
+    authApi: "https://auth.round15.example/",
+  },
 }));
 
 describe("src/api/auth/wechat.ts round15", () => {
@@ -29,6 +32,13 @@ describe("src/api/auth/wechat.ts round15", () => {
     expect(request.mock.calls[0][0].url).toBe("/v1/wechat/qrcode");
   });
 
+  it("getQrcode uses the auth service base URL", async () => {
+    await getQrcode();
+    expect(request.mock.calls[0][0].baseURL).toBe(
+      "https://auth.round15.example"
+    );
+  });
+
   it("getQrcode returns request promise value", async () => {
     request.mockResolvedValue({ data: { ticket: "abc" } });
     await expect(getQrcode()).resolves.toEqual({ data: { ticket: "abc" } });
@@ -43,6 +53,13 @@ describe("src/api/auth/wechat.ts round15", () => {
     await refresh("token-123");
     expect(request.mock.calls[0][0].url).toBe(
       "/v1/wechat/refresh?token=token-123"
+    );
+  });
+
+  it("refresh uses the auth service base URL", async () => {
+    await refresh("token-123");
+    expect(request.mock.calls[0][0].baseURL).toBe(
+      "https://auth.round15.example"
     );
   });
 

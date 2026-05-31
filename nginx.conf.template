@@ -105,6 +105,9 @@ server {
     # ============ 反向代理 - API (由 docker-entrypoint.sh 动态生成) ============
     # __API_LOCATIONS__
 
+    # ============ 反向代理 - 统一认证 API (由 docker-entrypoint.sh 动态生成) ============
+    # __AUTH_LOCATIONS__
+
     # ============ 反向代理 - 配置 API (由 docker-entrypoint.sh 动态生成) ============
     # __CONFIG_LOCATIONS__
 

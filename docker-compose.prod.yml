@@ -10,6 +10,8 @@ services:
       # API 后端（编号格式，第一个为主，后续为备用）
       - APP_API_1_URL=https://api.xrteeth.com
       - APP_API_2_URL=https://api.tmrpp.com
+      # 统一认证服务（微信扫码登录二维码与轮询）
+      - APP_AUTH_1_URL=https://auth.bujiaban.com
       # 配置 API（system-admin 后端，必须是 host-only backend origin，不能带 /api 路径）
       - APP_CONFIG_1_URL=http://system-admin-backend:8088
       - APP_CONFIG_2_URL=http://system-admin-backup:8088

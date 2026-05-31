@@ -81,6 +81,14 @@ const normalizeFileStorageDriver = (
 const resolveApiBase = () =>
   import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api";
 
+const resolveAuthApiBase = () =>
+  (
+    getRuntimeEnv().AUTH_API ||
+    getRuntimeEnv().VITE_APP_AUTH_API ||
+    import.meta.env.VITE_APP_AUTH_API ||
+    (import.meta.env.DEV ? "" : "/api-auth")
+  ).replace(/\/+$/, "");
+
 const deploymentConfigEndpoint = () => {
   const apiBase = resolveApiBase().replace(/\/+$/, "");
   return `${apiBase}/v1/system/deployment`;
@@ -196,6 +204,7 @@ const resolveUnityPreviewUrl = () => {
 
 const environment = {
   api: resolveApiBase(),
+  authApi: resolveAuthApiBase(),
   config_api: "/api-config/api",
   doc: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOC_API || ""

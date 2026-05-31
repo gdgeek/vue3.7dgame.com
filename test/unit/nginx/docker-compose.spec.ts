@@ -24,6 +24,10 @@ describe("docker-compose.prod.yml — environment variables", () => {
     expect(composeConfig).toContain("APP_API_2_URL=");
   });
 
+  it("contains APP_AUTH_1_URL (auth service backend)", () => {
+    expect(composeConfig).toContain("APP_AUTH_1_URL=");
+  });
+
   it("contains APP_CONFIG_1_URL (primary config backend)", () => {
     expect(composeConfig).toContain("APP_CONFIG_1_URL=");
   });

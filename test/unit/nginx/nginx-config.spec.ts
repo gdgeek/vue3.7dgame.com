@@ -61,12 +61,20 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("# __CONFIG_LOCATIONS__");
   });
 
+  it("contains # __AUTH_LOCATIONS__ placeholder for dynamic auth API", () => {
+    expect(nginxConfig).toContain("# __AUTH_LOCATIONS__");
+  });
+
   it("does NOT contain # __DOMAIN_LOCATIONS__ because domain config is static JSON", () => {
     expect(nginxConfig).not.toContain("# __DOMAIN_LOCATIONS__");
   });
 
   it("does NOT contain static /api/ location (now dynamic)", () => {
     expect(nginxConfig).not.toMatch(/location\s+\/api\/\s*\{/);
+  });
+
+  it("does NOT contain static /api-auth/ location (now dynamic)", () => {
+    expect(nginxConfig).not.toMatch(/location\s+\/api-auth\/\s*\{/);
   });
 
   it("does NOT contain static /api-backup/ location (now dynamic)", () => {
@@ -236,6 +244,10 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("APP_CONFIG");
   });
 
+  it("reads APP_AUTH_N_URL numbered environment variables", () => {
+    expect(entrypointScript).toContain("APP_AUTH");
+  });
+
   it("does NOT read APP_DOMAIN_N_URL numbered environment variables", () => {
     expect(entrypointScript).not.toContain("APP_DOMAIN");
   });
@@ -246,6 +258,10 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
 
   it("generates /api/ failover chain", () => {
     expect(entrypointScript).toContain('"/api/"');
+  });
+
+  it("generates /api-auth/ failover chain", () => {
+    expect(entrypointScript).toContain('"/api-auth/"');
   });
 
   it("does NOT generate /api-domain/ failover chain", () => {
@@ -262,6 +278,10 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
 
   it("replaces # __CONFIG_LOCATIONS__ placeholder", () => {
     expect(entrypointScript).toContain("__CONFIG_LOCATIONS__");
+  });
+
+  it("replaces # __AUTH_LOCATIONS__ placeholder", () => {
+    expect(entrypointScript).toContain("__AUTH_LOCATIONS__");
   });
 
   it("does NOT replace # __DOMAIN_LOCATIONS__ placeholder", () => {
@@ -444,6 +464,7 @@ describe("Property 5: Environment-aware URL selection", () => {
           "utf-8"
         );
         expect(envSource).toMatch(/:\s*["']\/api["']/);
+        expect(envSource).toContain("/api-auth");
         expect(envSource).toMatch(/:\s*["']\/api-config\/api["']/);
         expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
       }),
@@ -459,6 +480,7 @@ describe("Property 5: Environment-aware URL selection", () => {
           "utf-8"
         );
         expect(envSource).toContain("VITE_APP_API_URL");
+        expect(envSource).toContain("VITE_APP_AUTH_API");
         expect(envSource).toContain("import.meta.env.DEV");
       }),
       { numRuns: 100 }

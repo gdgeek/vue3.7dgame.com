@@ -12,6 +12,7 @@ set -e
 #   APP_API_2_WEIGHT=30
 #   APP_API_3_URL=https://api.third.com
 #   APP_API_3_WEIGHT=10
+#   APP_AUTH_1_URL=https://auth.bujiaban.com
 #   APP_CONFIG_1_URL=https://system-admin.plugins.xrugc.com/backend/api
 #   APP_CONFIG_2_URL=https://system-admin-backup.plugins.xrugc.com/backend/api
 #   APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
@@ -20,6 +21,7 @@ set -e
 # 生成负载均衡 + failover：
 #   split_clients 按权重分流 → map 映射后端 URL/Host
 #   /api/        → 加权分流到 APP_API_N → failover 到环形下一个
+#   /api-auth/   → 加权分流到 APP_AUTH_N → failover 到环形下一个
 #   /api-config/ → 加权分流到 APP_CONFIG_N → failover 到环形下一个
 # ============================================================
 
@@ -320,28 +322,32 @@ ${GEEK_BLOCK}
 generate_lb_config "APP_API" "/api/" "api" "yes"
 API_LOCATIONS="$CHAIN_RESULT"
 
-# --- 2. 生成配置 API 负载均衡配置 ---
+# --- 2. 生成统一认证 API 负载均衡配置 ---
+generate_lb_config "APP_AUTH" "/api-auth/" "auth" "yes"
+AUTH_LOCATIONS="$CHAIN_RESULT"
+
+# --- 3. 生成配置 API 负载均衡配置 ---
 # api-config 鉴权依赖 system-admin 版本和主站 Host 上下文；线上双后端滚动期间，
 # 旧实例可能误判有效 token 为 401，因此这里对 401 做一次环形 failover。
 generate_lb_config "APP_CONFIG" "/api-config/" "config" "yes" "401 502 503 504"
 CONFIG_LOCATIONS="$CHAIN_RESULT"
 
-# --- 3. 生成 resolver 配置 ---
+# --- 4. 生成 resolver 配置 ---
 RESOLVER_SERVERS="${APP_RESOLVER:-8.8.8.8 223.5.5.5}"
 RESOLVER_BLOCK="resolver ${RESOLVER_SERVERS} valid=30s ipv6=off;
 resolver_timeout 5s;"
 echo "[entrypoint] DNS resolver: ${RESOLVER_SERVERS} (valid=30s)"
 
-# --- 4. 用 envsubst 处理其他 APP_ 变量（文档 API 等）---
-# 排除编号变量（APP_API_N_*、APP_CONFIG_N_*）和 APP_RESOLVER，只替换其余 APP_ 变量
-VARS=$(env | grep '^APP_' | grep -v '^APP_API_[0-9]' | grep -v '^APP_CONFIG_[0-9]' | grep -v '^APP_RESOLVER' | sed 's/=.*//' | sed 's/^/\$/' | tr '\n' ' ')
+# --- 5. 用 envsubst 处理其他 APP_ 变量（文档 API 等）---
+# 排除编号变量（APP_API_N_*、APP_AUTH_N_*、APP_CONFIG_N_*）和 APP_RESOLVER，只替换其余 APP_ 变量
+VARS=$(env | grep '^APP_' | grep -v '^APP_API_[0-9]' | grep -v '^APP_AUTH_[0-9]' | grep -v '^APP_CONFIG_[0-9]' | grep -v '^APP_RESOLVER' | sed 's/=.*//' | sed 's/^/\$/' | tr '\n' ' ')
 if [ -n "$VARS" ]; then
   envsubst "$VARS" < "$TEMPLATE" > "$OUTPUT"
 else
   cp "$TEMPLATE" "$OUTPUT"
 fi
 
-# --- 5. 注入动态生成的配置块 ---
+# --- 6. 注入动态生成的配置块 ---
 inject_locations() {
   PLACEHOLDER="$1"
   CONTENT="$2"
@@ -367,6 +373,7 @@ inject_locations "# __LB_HTTP_BLOCK__" "$LB_HTTP_BLOCK"
 
 # 注入 server 层级配置（location 块）
 inject_locations "# __API_LOCATIONS__" "$API_LOCATIONS"
+inject_locations "# __AUTH_LOCATIONS__" "$AUTH_LOCATIONS"
 inject_locations "# __CONFIG_LOCATIONS__" "$CONFIG_LOCATIONS"
 
 echo "[entrypoint] Nginx config generated at $OUTPUT"
