@@ -5,7 +5,8 @@ export default {
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",
     h4: "準備はできましたか？",
-    username: "email",
+    username: "ユーザー名",
+    email: "メールアドレス",
     password: "パスワード",
     login: "ログイン",
     loginCode: "ログインコード",
@@ -14,6 +15,10 @@ export default {
       username: {
         message1: "ユーザー名を入力してください",
         email: "有効な電子メールアドレスを入力してください",
+      },
+      email: {
+        message1: "メールアドレスを入力してください",
+        invalid: "有効な電子メールアドレスを入力してください",
       },
       password: {
         message1: "パスワードを入力してください",

@@ -5,7 +5,8 @@ export default {
     register: "Platform Register/Login",
     h1: "Welcome!",
     h4: "Ready to get started?",
-    username: "Email",
+    username: "Username",
+    email: "Email",
     password: "Password",
     login: "Login",
     loginCode: "Login Code",
@@ -14,6 +15,10 @@ export default {
       username: {
         message1: "Please enter your username",
         email: "Please enter a valid email address",
+      },
+      email: {
+        message1: "Please enter your email",
+        invalid: "Please enter a valid email address",
       },
       password: {
         message1: "Please enter your password",

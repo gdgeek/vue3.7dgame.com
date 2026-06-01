@@ -5,7 +5,8 @@ export default {
     register: "平台註冊/登錄",
     h1: "歡迎！",
     h4: "準備好出發了么？",
-    username: "電子信箱",
+    username: "用戶名",
+    email: "電子信箱",
     password: "密碼",
     login: "登錄",
     loginCode: "登錄碼",
@@ -14,6 +15,10 @@ export default {
       username: {
         message1: "請輸入用戶名",
         email: "請輸入有效的電子郵箱地址",
+      },
+      email: {
+        message1: "請輸入電子信箱",
+        invalid: "請輸入有效的電子郵箱地址",
       },
       password: {
         message1: "請輸入密碼",

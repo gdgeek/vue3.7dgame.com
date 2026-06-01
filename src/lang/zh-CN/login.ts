@@ -4,7 +4,8 @@ export default {
     register: "平台注册/登录",
     h1: "欢迎！",
     h4: "准备好出发了么？",
-    username: "电子信箱",
+    username: "用户名",
+    email: "邮箱",
     password: "设置密码",
     login: "登录",
     loginCode: "登录码",
@@ -13,6 +14,10 @@ export default {
       username: {
         message1: "请输入用户名",
         email: "请输入有效的电子邮箱地址",
+      },
+      email: {
+        message1: "请输入邮箱",
+        invalid: "请输入有效的电子邮箱地址",
       },
       password: {
         message1: "请输入密码",

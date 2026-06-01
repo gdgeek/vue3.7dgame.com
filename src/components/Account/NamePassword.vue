@@ -79,10 +79,10 @@
         :rules="forgotRules"
         label-position="top"
       >
-        <el-form-item :label="t('login.username')" prop="email">
+        <el-form-item :label="t('login.email')" prop="email">
           <el-input
             v-model="forgotForm.email"
-            :placeholder="t('login.username')"
+            :placeholder="t('login.email')"
             type="email"
           >
             <template #append>
@@ -247,12 +247,12 @@ const forgotRules = computed<Record<string, FormItemRule[]>>(() => {
     email: [
       {
         required: true,
-        message: t("login.rules.username.message1"),
+        message: t("login.rules.email.message1"),
         trigger: "blur",
       },
       {
         type: "email",
-        message: t("login.rules.username.email"),
+        message: t("login.rules.email.invalid"),
         trigger: ["blur", "change"],
       },
     ],
