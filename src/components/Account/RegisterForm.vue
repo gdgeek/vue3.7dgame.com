@@ -147,11 +147,6 @@ const registerRules = computed<Record<string, Arrayable<FormItemRule>>>(() => {
         message: t("login.rules.username.message1"),
         trigger: "blur",
       },
-      {
-        type: "email",
-        message: t("login.rules.username.email"),
-        trigger: "blur",
-      },
     ],
     password: createPasswordFormRules(t),
     repassword: [

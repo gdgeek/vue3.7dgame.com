@@ -7,6 +7,8 @@ export default {
     username: "用户名",
     email: "邮箱",
     password: "设置密码",
+    showPassword: "显示密码",
+    hidePassword: "隐藏密码",
     login: "登录",
     loginCode: "登录码",
     scanTip: "请使用手机扫描二维码登录",

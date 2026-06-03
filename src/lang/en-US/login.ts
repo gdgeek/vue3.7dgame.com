@@ -8,6 +8,8 @@ export default {
     username: "Username",
     email: "Email",
     password: "Password",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
     login: "Login",
     loginCode: "Login Code",
     scanTip: "Please scan the QR code with your phone to log in",

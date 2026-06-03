@@ -17,16 +17,39 @@
               <el-form-item :label="$t('login.username')" prop="username">
                 <el-input
                   v-model="registerForm.username"
-                  suffix-icon="Message"
+                  :suffix-icon="User"
                 ></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.password')" prop="password">
                 <el-input
                   v-model="registerForm.password"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
+                  :type="passwordVisible ? 'text' : 'password'"
+                >
+                  <template #suffix>
+                    <button
+                      type="button"
+                      class="password-visibility-toggle"
+                      :aria-label="
+                        passwordVisible
+                          ? $t('login.hidePassword')
+                          : $t('login.showPassword')
+                      "
+                      :title="
+                        passwordVisible
+                          ? $t('login.hidePassword')
+                          : $t('login.showPassword')
+                      "
+                      @mousedown.prevent
+                      @click="togglePasswordVisibility"
+                    >
+                      <el-icon>
+                        <Hide v-if="passwordVisible"></Hide>
+                        <View v-else></View>
+                      </el-icon>
+                    </button>
+                  </template>
+                </el-input>
                 <PasswordStrength
                   :password="registerForm.password"
                 ></PasswordStrength>
@@ -61,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { Back } from "@element-plus/icons-vue";
+import { Back, Hide, User, View } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
@@ -107,6 +130,11 @@ const registerForm = ref<RegisterData>({
   password: "",
   repassword: "",
 });
+const passwordVisible = ref(false);
+
+const togglePasswordVisibility = () => {
+  passwordVisible.value = !passwordVisible.value;
+};
 
 const validatePass2: FormItemRule["validator"] = (_rule, value, callback) => {
   if (value === "") {
@@ -122,11 +150,6 @@ const registerRules = computed(() => ({
     {
       required: true,
       message: t("login.rules.username.message1"),
-      trigger: "blur",
-    },
-    {
-      type: "email" as const,
-      message: t("login.rules.username.email"),
       trigger: "blur",
     },
   ],
@@ -310,6 +333,17 @@ body {
     font-family: KaiTi, sans-serif;
     color: red;
     text-align: center;
+  }
+
+  .password-visibility-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: inherit;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
   }
 }
 </style>

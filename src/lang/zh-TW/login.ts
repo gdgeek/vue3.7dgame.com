@@ -8,6 +8,8 @@ export default {
     username: "用戶名",
     email: "電子信箱",
     password: "密碼",
+    showPassword: "顯示密碼",
+    hidePassword: "隱藏密碼",
     login: "登錄",
     loginCode: "登錄碼",
     scanTip: "請使用手機掃描二維碼登錄",

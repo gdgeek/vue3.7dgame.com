@@ -8,6 +8,8 @@ export default {
     username: "ユーザー名",
     email: "メールアドレス",
     password: "パスワード",
+    showPassword: "パスワードを表示",
+    hidePassword: "パスワードを非表示",
     login: "ログイン",
     loginCode: "ログインコード",
     scanTip: "携帯電話でQRコードをスキャンしてログインしてください",
