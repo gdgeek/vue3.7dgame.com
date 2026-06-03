@@ -30,7 +30,10 @@
           label-position="top"
         >
           <el-form-item :label="$t('login.username')" prop="username">
-            <el-input v-model="registerForm.username" :suffix-icon="User" />
+            <el-input
+              v-model="registerForm.username"
+              :suffix-icon="User"
+            ></el-input>
           </el-form-item>
 
           <el-form-item :label="$t('login.password')" prop="password">
@@ -56,8 +59,8 @@
                   @click="togglePasswordVisibility"
                 >
                   <el-icon>
-                    <Hide v-if="passwordVisible" />
-                    <View v-else />
+                    <Hide v-if="passwordVisible"></Hide>
+                    <View v-else></View>
                   </el-icon>
                 </button>
               </template>
@@ -65,7 +68,7 @@
             <PasswordStrength
               :password="registerForm.password"
               :account-identifiers="[registerForm.username]"
-            />
+            ></PasswordStrength>
           </el-form-item>
 
           <el-form-item :label="$t('login.repassword')" prop="repassword">
@@ -73,7 +76,7 @@
               v-model="registerForm.repassword"
               type="password"
               :suffix-icon="Lock"
-            />
+            ></el-input>
           </el-form-item>
 
           <div class="register-actions">
@@ -87,7 +90,7 @@
             </el-button>
             <el-button class="back-action" native-type="button" @click="back">
               <el-icon>
-                <Back />
+                <Back></Back>
               </el-icon>
               {{ $t("login.back") }}
             </el-button>
@@ -404,8 +407,11 @@ watch(isDark, (newValue) => {
   flex-direction: column;
   justify-content: center;
   padding: clamp(36px, 4.5vw, 58px);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 96%), rgb(249 252 255 / 96%));
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 96%),
+    rgb(249 252 255 / 96%)
+  );
 }
 
 .register-heading {
@@ -555,8 +561,11 @@ watch(isDark, (newValue) => {
   box-shadow: 0 24px 70px rgb(0 0 0 / 32%);
 
   .register-panel {
-    background:
-      linear-gradient(180deg, rgb(34 39 49 / 98%), rgb(28 33 42 / 98%));
+    background: linear-gradient(
+      180deg,
+      rgb(34 39 49 / 98%),
+      rgb(28 33 42 / 98%)
+    );
   }
 
   .register-heading h2 {
