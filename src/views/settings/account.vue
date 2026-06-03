@@ -201,11 +201,6 @@ const passwordRules = {
       trigger: "blur",
     },
     {
-      min: 6,
-      message: t("homepage.account.rules2.old.message2"),
-      trigger: "blur",
-    },
-    {
       validator: (
         _rule: unknown,
         value: string,

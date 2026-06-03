@@ -2,7 +2,7 @@
  * 密码验证工具 - 属性测试 (Property-Based Testing)
  * 使用 vitest + fast-check
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import * as fc from "fast-check";
 
 import {
@@ -11,6 +11,7 @@ import {
   getPasswordStrength,
   PASSWORD_POLICY,
   createPasswordFormRules,
+  getCharacterCategoryCount,
 } from "@/utils/password-validator";
 import type { PasswordRuleResult } from "@/utils/password-validator";
 
@@ -29,14 +30,14 @@ describe("password-validator property-based tests", () => {
    * P1: 长度规则正确性
    * **Validates: Requirements 1.3, 3.4, 3.5**
    *
-   * - s.length < 12 → minLength rule passed === false
-   * - 12 <= s.length <= 128 → minLength rule passed === true
-   * - s.length > 128 → maxLength rule passed === false
+   * - s.length < 8 → minLength rule passed === false
+   * - 8 <= s.length <= 64 → minLength rule passed === true
+   * - s.length > 64 → maxLength rule passed === false
    */
   describe("P1: 长度规则正确性", () => {
-    it("strings shorter than 12 chars → minLength failed", () => {
+    it("strings shorter than 8 chars → minLength failed", () => {
       fc.assert(
-        fc.property(fc.string({ minLength: 0, maxLength: 11 }), (s) => {
+        fc.property(fc.string({ minLength: 0, maxLength: 7 }), (s) => {
           const result = validatePassword(s);
           const minLengthRule = findRule(result.rules, "minLength");
           expect(minLengthRule.passed).toBe(false);
@@ -44,9 +45,9 @@ describe("password-validator property-based tests", () => {
       );
     });
 
-    it("strings with length 12-128 → minLength passed", () => {
+    it("strings with length 8-64 → minLength passed", () => {
       fc.assert(
-        fc.property(fc.string({ minLength: 12, maxLength: 128 }), (s) => {
+        fc.property(fc.string({ minLength: 8, maxLength: 64 }), (s) => {
           const result = validatePassword(s);
           const minLengthRule = findRule(result.rules, "minLength");
           expect(minLengthRule.passed).toBe(true);
@@ -54,9 +55,9 @@ describe("password-validator property-based tests", () => {
       );
     });
 
-    it("strings longer than 128 chars → maxLength failed", () => {
+    it("strings longer than 64 chars → maxLength failed", () => {
       fc.assert(
-        fc.property(fc.string({ minLength: 129, maxLength: 300 }), (s) => {
+        fc.property(fc.string({ minLength: 65, maxLength: 300 }), (s) => {
           const result = validatePassword(s);
           const maxLengthRule = findRule(result.rules, "maxLength");
           expect(maxLengthRule.passed).toBe(false);
@@ -66,55 +67,51 @@ describe("password-validator property-based tests", () => {
   });
 
   /**
-   * P2: 字符类别规则正确性
+   * P2: 字符类别组合规则正确性
    * **Validates: Requirements 1.3, 3.6**
    *
-   * - uppercase rule passed === /[A-Z]/.test(s)
-   * - lowercase rule passed === /[a-z]/.test(s)
-   * - digit rule passed === /\d/.test(s)
-   * - specialChar rule matches special char regex
+   * - characterVariety rule passed === 至少包含 3 类字符
+   * - getCharacterCategoryCount 与四类 regex 结果一致
    */
-  describe("P2: 字符类别规则正确性", () => {
-    it("uppercase rule matches /[A-Z]/ test result", () => {
+  describe("P2: 字符类别组合规则正确性", () => {
+    it("characterVariety rule matches category count >= 3", () => {
       fc.assert(
         fc.property(fc.string({ minLength: 0, maxLength: 200 }), (s) => {
           const result = validatePassword(s);
-          const uppercaseRule = findRule(result.rules, "uppercase");
-          expect(uppercaseRule.passed).toBe(/[A-Z]/.test(s));
-        })
-      );
-    });
-
-    it("lowercase rule matches /[a-z]/ test result", () => {
-      fc.assert(
-        fc.property(fc.string({ minLength: 0, maxLength: 200 }), (s) => {
-          const result = validatePassword(s);
-          const lowercaseRule = findRule(result.rules, "lowercase");
-          expect(lowercaseRule.passed).toBe(/[a-z]/.test(s));
-        })
-      );
-    });
-
-    it("digit rule matches /\\d/ test result", () => {
-      fc.assert(
-        fc.property(fc.string({ minLength: 0, maxLength: 200 }), (s) => {
-          const result = validatePassword(s);
-          const digitRule = findRule(result.rules, "digit");
-          expect(digitRule.passed).toBe(/\d/.test(s));
-        })
-      );
-    });
-
-    it("specialChar rule matches SPECIAL_CHAR_REGEX test result", () => {
-      fc.assert(
-        fc.property(fc.string({ minLength: 0, maxLength: 200 }), (s) => {
-          const result = validatePassword(s);
-          const specialCharRule = findRule(result.rules, "specialChar");
-          expect(specialCharRule.passed).toBe(
-            PASSWORD_POLICY.SPECIAL_CHAR_REGEX.test(s)
+          const characterVarietyRule = findRule(
+            result.rules,
+            "characterVariety"
+          );
+          expect(characterVarietyRule.passed).toBe(
+            getCharacterCategoryCount(s) >=
+              PASSWORD_POLICY.MIN_CHARACTER_CATEGORIES
           );
         })
       );
+    });
+
+    it("getCharacterCategoryCount matches all category regexes", () => {
+      fc.assert(
+        fc.property(fc.string({ minLength: 0, maxLength: 200 }), (s) => {
+          const expected = [
+            /[A-Z]/,
+            /[a-z]/,
+            /\d/,
+            PASSWORD_POLICY.SPECIAL_CHAR_REGEX,
+          ].filter((regex) => regex.test(s)).length;
+          expect(getCharacterCategoryCount(s)).toBe(expected);
+        })
+      );
+    });
+
+    it("passwords with 3 categories pass character variety", () => {
+      const result = validatePassword("Validpass1");
+      expect(findRule(result.rules, "characterVariety").passed).toBe(true);
+    });
+
+    it("passwords with only 2 categories fail character variety", () => {
+      const result = validatePassword("lowercase1");
+      expect(findRule(result.rules, "characterVariety").passed).toBe(false);
     });
   });
 
@@ -140,24 +137,20 @@ describe("password-validator property-based tests", () => {
    * P4: 强度等级单调性
    * **Validates: Requirements 1.5**
    *
-   * passCount 0-3 → 'weak', 4-5 → 'medium', 6 → 'strong'
+   * invalid → 'weak', valid with 3 classes → 'medium',
+   * valid with length >= 12 and 4 classes → 'strong'
    */
   describe("P4: 强度等级单调性", () => {
-    it("strength maps correctly based on passCount", () => {
-      fc.assert(
-        fc.property(fc.string({ minLength: 0, maxLength: 200 }), (s) => {
-          const result = validatePassword(s);
-          const passCount = result.rules.filter((r) => r.passed).length;
+    it("invalid passwords are weak", () => {
+      expect(validatePassword("short1").strength).toBe("weak");
+    });
 
-          if (passCount <= 3) {
-            expect(result.strength).toBe("weak");
-          } else if (passCount <= 5) {
-            expect(result.strength).toBe("medium");
-          } else {
-            expect(result.strength).toBe("strong");
-          }
-        })
-      );
+    it("valid passwords with 3 categories are medium", () => {
+      expect(validatePassword("Validpass1").strength).toBe("medium");
+    });
+
+    it("valid passwords with length >= 12 and 4 categories are strong", () => {
+      expect(validatePassword("Validpass1!x").strength).toBe("strong");
     });
 
     it("getPasswordStrength returns same as validatePassword().strength", () => {
@@ -173,24 +166,22 @@ describe("password-validator property-based tests", () => {
    * P5: 验证结果结构完整性
    * **Validates: Requirements 1.2**
    *
-   * - Always 6 rules, each with key/passed/message fields
-   * - All 6 keys present: minLength, maxLength, uppercase, lowercase, digit, specialChar
+   * - Always includes base hard rules with key/passed/message fields
+   * - Account info rule appears only when account identifiers are supplied
    */
   describe("P5: 验证结果结构完整性", () => {
     const EXPECTED_KEYS = [
       "minLength",
       "maxLength",
-      "uppercase",
-      "lowercase",
-      "digit",
-      "specialChar",
+      "characterVariety",
+      "weakPassword",
     ];
 
-    it("always returns exactly 6 rules", () => {
+    it("always returns base hard rules", () => {
       fc.assert(
         fc.property(fc.string({ minLength: 0, maxLength: 200 }), (s) => {
           const result = validatePassword(s);
-          expect(result.rules).toHaveLength(6);
+          expect(result.rules).toHaveLength(EXPECTED_KEYS.length);
         })
       );
     });
@@ -210,7 +201,7 @@ describe("password-validator property-based tests", () => {
       );
     });
 
-    it("contains all 6 expected rule keys", () => {
+    it("contains all expected rule keys", () => {
       fc.assert(
         fc.property(fc.string({ minLength: 0, maxLength: 200 }), (s) => {
           const result = validatePassword(s);
@@ -220,6 +211,29 @@ describe("password-validator property-based tests", () => {
           }
         })
       );
+    });
+
+    it("includes accountInfo rule when account identifiers are supplied", () => {
+      const result = validatePassword("Validpass1", {
+        accountIdentifiers: ["valid"],
+      });
+      expect(result.rules.map((r) => r.key)).toContain("accountInfo");
+    });
+  });
+
+  describe("P6: 弱密码和账号信息", () => {
+    it("rejects common weak passwords", () => {
+      const result = validatePassword("Password123!");
+      expect(findRule(result.rules, "weakPassword").passed).toBe(false);
+      expect(result.isValid).toBe(false);
+    });
+
+    it("rejects passwords containing account identifiers", () => {
+      const result = validatePassword("Dirui2026!", {
+        accountIdentifiers: ["dirui"],
+      });
+      expect(findRule(result.rules, "accountInfo").passed).toBe(false);
+      expect(result.isValid).toBe(false);
     });
   });
 });
@@ -255,7 +269,7 @@ describe("createPasswordFormRules()", () => {
       callback: (err?: Error) => void
     ) => void;
     const callback = vi.fn();
-    validator({}, "ValidPass1!@#ValidPass", callback);
+    validator({}, "Validpass1", callback);
     expect(callback).toHaveBeenCalledWith();
   });
 

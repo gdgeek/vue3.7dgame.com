@@ -24,7 +24,7 @@ export default {
       },
       password: {
         message1: "Please enter your password",
-        message2: "Between 12 and 128 characters",
+        message2: "Between 8 and 64 characters",
       },
       repassword: {
         message1: "Please enter the password again",
@@ -80,12 +80,16 @@ export default {
     cancel: "Cancel",
   },
   passwordPolicy: {
-    minLength: "At least 12 characters",
-    maxLength: "No more than 128 characters",
+    minLength: "At least 8 characters",
+    maxLength: "No more than 64 characters",
+    characterVariety:
+      "Use at least 3 of: uppercase, lowercase, digits, special characters",
+    weakPassword: "Do not use a common weak password",
+    accountInfo: "Do not include your username or email",
     uppercase: "Contains uppercase letter (A-Z)",
     lowercase: "Contains lowercase letter (a-z)",
     digit: "Contains digit (0-9)",
-    specialChar: "Contains special character (!@#$%^&* etc.)",
+    specialChar: "Contains special character (! # $ % ^ & * etc.)",
     strength: {
       weak: "Weak",
       medium: "Medium",

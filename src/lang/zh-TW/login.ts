@@ -24,7 +24,7 @@ export default {
       },
       password: {
         message1: "請輸入密碼",
-        message2: "密碼長度應為12~128個字元",
+        message2: "密碼長度應為8~64個字元",
       },
       repassword: {
         message1: "請再次輸入密碼",
@@ -79,12 +79,15 @@ export default {
     cancel: "取消",
   },
   passwordPolicy: {
-    minLength: "至少 12 個字元",
-    maxLength: "不超過 128 個字元",
+    minLength: "至少 8 個字元",
+    maxLength: "不超過 64 個字元",
+    characterVariety: "大寫字母、小寫字母、數字、特殊字元中至少包含 3 類",
+    weakPassword: "不能使用常見弱密碼",
+    accountInfo: "不能包含使用者名稱或信箱資訊",
     uppercase: "包含大寫字母 (A-Z)",
     lowercase: "包含小寫字母 (a-z)",
     digit: "包含數字 (0-9)",
-    specialChar: "包含特殊字元 (!@#$%^&* 等)",
+    specialChar: "包含特殊字元（如 ! # $ % ^ & *）",
     strength: {
       weak: "弱",
       medium: "中",

@@ -47,7 +47,10 @@
             </el-icon>
           </template>
         </el-input>
-        <PasswordStrength :password="registerForm.password"></PasswordStrength>
+        <PasswordStrength
+          :password="registerForm.password"
+          :account-identifiers="[registerForm.username]"
+        ></PasswordStrength>
       </el-form-item>
 
       <el-form-item
@@ -148,7 +151,9 @@ const registerRules = computed<Record<string, Arrayable<FormItemRule>>>(() => {
         trigger: "blur",
       },
     ],
-    password: createPasswordFormRules(t),
+    password: createPasswordFormRules(t, () => ({
+      accountIdentifiers: [registerForm.value.username],
+    })),
     repassword: [
       {
         required: true,
