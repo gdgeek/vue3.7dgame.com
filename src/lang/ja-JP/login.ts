@@ -8,6 +8,8 @@ export default {
     username: "ユーザー名",
     email: "メールアドレス",
     password: "パスワード",
+    showPassword: "パスワードを表示",
+    hidePassword: "パスワードを非表示",
     login: "ログイン",
     loginCode: "ログインコード",
     scanTip: "携帯電話でQRコードをスキャンしてログインしてください",
@@ -22,7 +24,7 @@ export default {
       },
       password: {
         message1: "パスワードを入力してください",
-        message2: "パスワードは12〜128文字で入力してください",
+        message2: "パスワードは8〜64文字で入力してください",
       },
       repassword: {
         message1: "もう一度パスワードを入力してください",
@@ -83,12 +85,16 @@ export default {
     cancel: "キャンセル",
   },
   passwordPolicy: {
-    minLength: "12文字以上",
-    maxLength: "128文字以下",
+    minLength: "8文字以上",
+    maxLength: "64文字以下",
+    characterVariety:
+      "大文字・小文字・数字・特殊文字のうち少なくとも3種類を含む",
+    weakPassword: "よく使われる弱いパスワードは使用できません",
+    accountInfo: "ユーザー名またはメール情報を含めないでください",
     uppercase: "大文字を含む (A-Z)",
     lowercase: "小文字を含む (a-z)",
     digit: "数字を含む (0-9)",
-    specialChar: "特殊文字を含む (!@#$%^&* など)",
+    specialChar: "特殊文字を含む (! # $ % ^ & * など)",
     strength: {
       weak: "弱い",
       medium: "普通",

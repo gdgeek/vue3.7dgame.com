@@ -42,12 +42,17 @@ import { validatePassword } from "@/utils/password-validator";
 
 const props = defineProps<{
   password: string;
+  accountIdentifiers?: Array<string | null | undefined>;
 }>();
 
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
-const validationResult = computed(() => validatePassword(props.password));
+const validationResult = computed(() =>
+  validatePassword(props.password, {
+    accountIdentifiers: props.accountIdentifiers ?? [],
+  })
+);
 
 const strengthBarWidth = computed(() => {
   if (props.password.length === 0) return "0%";

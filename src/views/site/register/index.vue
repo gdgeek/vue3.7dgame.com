@@ -1,67 +1,108 @@
 <template>
   <div class="content">
-    <div :class="['box1', { 'dark-theme': isDark }]">
-      <div :class="['box2', { 'dark-theme': isDark }]">
-        <h1>{{ $t("login.h1") }}</h1>
-        <h4>{{ $t("login.h4") }}</h4>
-        <br />
-        <el-tabs style="width: 100%" type="border-card" :stretch="true">
-          <el-tab-pane :label="$t('login.createAccount')">
-            <el-form
-              ref="registerFormRef"
-              class="login-form"
-              :rules="registerRules"
-              :model="registerForm"
-              label-width="auto"
+    <section :class="['register-shell', { 'dark-theme': isDark }]">
+      <aside class="register-visual" aria-hidden="true">
+        <div class="visual-copy">
+          <h1>{{ $t("login.h1") }}</h1>
+          <p>{{ $t("login.h4") }}</p>
+        </div>
+        <div class="visual-panel">
+          <div class="visual-panel__grid"></div>
+          <div class="visual-panel__track visual-panel__track--one"></div>
+          <div class="visual-panel__track visual-panel__track--two"></div>
+          <div class="visual-panel__node visual-panel__node--one"></div>
+          <div class="visual-panel__node visual-panel__node--two"></div>
+          <div class="visual-panel__node visual-panel__node--three"></div>
+        </div>
+      </aside>
+
+      <div class="register-panel">
+        <div class="register-heading">
+          <span class="register-eyebrow">{{ $t("login.register") }}</span>
+          <h2>{{ $t("login.createAccount") }}</h2>
+        </div>
+
+        <el-form
+          ref="registerFormRef"
+          class="register-form"
+          :rules="registerRules"
+          :model="registerForm"
+          label-position="top"
+        >
+          <el-form-item :label="$t('login.username')" prop="username">
+            <el-input
+              v-model="registerForm.username"
+              :suffix-icon="User"
+            ></el-input>
+          </el-form-item>
+
+          <el-form-item :label="$t('login.password')" prop="password">
+            <el-input
+              v-model="registerForm.password"
+              :type="passwordVisible ? 'text' : 'password'"
             >
-              <el-form-item :label="$t('login.username')" prop="username">
-                <el-input
-                  v-model="registerForm.username"
-                  suffix-icon="Message"
-                ></el-input>
-              </el-form-item>
+              <template #suffix>
+                <button
+                  type="button"
+                  class="password-visibility-toggle"
+                  :aria-label="
+                    passwordVisible
+                      ? $t('login.hidePassword')
+                      : $t('login.showPassword')
+                  "
+                  :title="
+                    passwordVisible
+                      ? $t('login.hidePassword')
+                      : $t('login.showPassword')
+                  "
+                  @mousedown.prevent
+                  @click="togglePasswordVisibility"
+                >
+                  <el-icon>
+                    <Hide v-if="passwordVisible"></Hide>
+                    <View v-else></View>
+                  </el-icon>
+                </button>
+              </template>
+            </el-input>
+            <PasswordStrength
+              :password="registerForm.password"
+              :account-identifiers="[registerForm.username]"
+            ></PasswordStrength>
+          </el-form-item>
 
-              <el-form-item :label="$t('login.password')" prop="password">
-                <el-input
-                  v-model="registerForm.password"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
-                <PasswordStrength
-                  :password="registerForm.password"
-                ></PasswordStrength>
-              </el-form-item>
+          <el-form-item :label="$t('login.repassword')" prop="repassword">
+            <el-input
+              v-model="registerForm.repassword"
+              type="password"
+              :suffix-icon="Lock"
+            ></el-input>
+          </el-form-item>
 
-              <el-form-item :label="$t('login.repassword')" prop="repassword">
-                <el-input
-                  v-model="registerForm.repassword"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
-              </el-form-item>
-
-              <el-form-item class="login-button">
-                <el-button style="width: 100%" type="primary" @click="register">
-                  {{ $t("login.create") }}
-                </el-button>
-              </el-form-item>
-            </el-form>
-          </el-tab-pane>
-        </el-tabs>
-        <br />
-        <el-button style="width: 100%" @click="back">
-          <el-icon>
-            <Back></Back>
-          </el-icon>
-          &nbsp;&nbsp; {{ $t("login.back") }}
-        </el-button>
+          <div class="register-actions">
+            <el-button
+              class="create-action"
+              type="primary"
+              native-type="button"
+              @click="register"
+            >
+              {{ $t("login.create") }}
+            </el-button>
+            <el-button class="back-action" native-type="button" @click="back">
+              <el-icon>
+                <Back></Back>
+              </el-icon>
+              {{ $t("login.back") }}
+            </el-button>
+          </div>
+        </el-form>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Back } from "@element-plus/icons-vue";
+import { Back, Hide, Lock, User, View } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
@@ -107,6 +148,11 @@ const registerForm = ref<RegisterData>({
   password: "",
   repassword: "",
 });
+const passwordVisible = ref(false);
+
+const togglePasswordVisibility = () => {
+  passwordVisible.value = !passwordVisible.value;
+};
 
 const validatePass2: FormItemRule["validator"] = (_rule, value, callback) => {
   if (value === "") {
@@ -124,13 +170,10 @@ const registerRules = computed(() => ({
       message: t("login.rules.username.message1"),
       trigger: "blur",
     },
-    {
-      type: "email" as const,
-      message: t("login.rules.username.email"),
-      trigger: "blur",
-    },
   ],
-  password: createPasswordFormRules(t),
+  password: createPasswordFormRules(t, () => ({
+    accountIdentifiers: [registerForm.value.username],
+  })),
   repassword: [
     {
       required: true,
@@ -208,108 +251,465 @@ watch(isDark, (newValue) => {
 </script>
 
 <style scoped lang="scss">
-body {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  margin: 0;
-  background-image: url("/media/bg/02.jpg");
-  background-size: 100% auto;
-  // transition:  0.3s ease;
-
-  &.dark-theme {
-    background-image: url("/media/bg/02.jpg");
-    filter: brightness(80%);
-  }
-}
-
 .content {
   display: flex;
   flex: 1;
   align-items: center;
   justify-content: center;
+  min-height: 0;
+  padding: clamp(18px, 4vw, 48px);
+  overflow: auto;
+  background:
+    linear-gradient(135deg, rgb(236 246 255 / 92%), rgb(246 251 248 / 88%)),
+    url("/media/bg/02.jpg") center / cover no-repeat;
+}
 
-  .box1 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 450px;
-    height: 600px;
-    background-color: #fff;
-    transition: all 0.3s ease;
+.register-shell {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.05fr) minmax(390px, 0.95fr);
+  width: min(1080px, 100%);
+  min-height: 620px;
+  overflow: hidden;
+  color: #172033;
+  background: rgb(255 255 255 / 94%);
+  border: 1px solid rgb(177 194 219 / 45%);
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgb(27 56 94 / 18%);
+}
 
-    &.dark-theme {
-      color: white;
-      background-color: rgb(63 63 63);
-      border-color: #494949;
+.register-visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100%;
+  padding: clamp(34px, 4vw, 54px);
+  overflow: hidden;
+  color: #fff;
+  isolation: isolate;
+
+  &::before,
+  &::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+  }
+
+  &::before {
+    z-index: -2;
+    background: url("/media/bg/02.jpg") center / cover no-repeat;
+    transform: scale(1.04);
+  }
+
+  &::after {
+    z-index: -1;
+    background:
+      linear-gradient(135deg, rgb(18 45 84 / 92%), rgb(28 116 145 / 70%)),
+      linear-gradient(180deg, transparent, rgb(6 18 34 / 38%));
+  }
+}
+
+.visual-copy {
+  max-width: 420px;
+
+  h1 {
+    margin: 0 0 14px;
+    font-size: clamp(38px, 5vw, 58px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: 0;
+  }
+
+  p {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.6;
+    color: rgb(238 248 255 / 86%);
+  }
+}
+
+.visual-panel {
+  position: relative;
+  width: min(360px, 100%);
+  aspect-ratio: 1.55;
+  overflow: hidden;
+  background: rgb(255 255 255 / 10%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
+  backdrop-filter: blur(8px);
+}
+
+.visual-panel__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 12%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 12%) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.visual-panel__track,
+.visual-panel__node {
+  position: absolute;
+}
+
+.visual-panel__track {
+  height: 2px;
+  background: linear-gradient(90deg, #a8f0d3, #90c7ff, #ffd166);
+  border-radius: 2px;
+  transform-origin: left center;
+}
+
+.visual-panel__track--one {
+  top: 42%;
+  left: 18%;
+  width: 58%;
+  transform: rotate(-18deg);
+}
+
+.visual-panel__track--two {
+  top: 58%;
+  left: 27%;
+  width: 48%;
+  transform: rotate(22deg);
+}
+
+.visual-panel__node {
+  width: 34px;
+  height: 34px;
+  background: rgb(255 255 255 / 18%);
+  border: 1px solid rgb(255 255 255 / 32%);
+  border-radius: 6px;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 16%);
+}
+
+.visual-panel__node--one {
+  top: 24%;
+  left: 15%;
+  background: rgb(168 240 211 / 32%);
+}
+
+.visual-panel__node--two {
+  top: 46%;
+  right: 18%;
+  background: rgb(144 199 255 / 30%);
+}
+
+.visual-panel__node--three {
+  right: 30%;
+  bottom: 16%;
+  background: rgb(255 209 102 / 32%);
+}
+
+.register-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(36px, 4.5vw, 58px);
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 96%),
+    rgb(249 252 255 / 96%)
+  );
+}
+
+.register-heading {
+  margin-bottom: 28px;
+
+  h2 {
+    margin: 10px 0 0;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #172033;
+    letter-spacing: 0;
+  }
+}
+
+.register-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: #116d7f;
+  background: #e7f7f5;
+  border: 1px solid #cdecea;
+  border-radius: 6px;
+}
+
+.register-form {
+  width: 100%;
+
+  :deep(.el-form-item) {
+    margin-bottom: 18px;
+  }
+
+  :deep(.el-form-item__label) {
+    padding: 0 0 8px;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 20px;
+    color: #4a5a72;
+    letter-spacing: 0;
+  }
+
+  :deep(.el-input__wrapper) {
+    min-height: 48px;
+    padding: 0 14px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px #dbe5f0;
+    transition:
+      box-shadow 0.18s ease,
+      background-color 0.18s ease;
+  }
+
+  :deep(.el-input__wrapper.is-focus) {
+    background: #fbfdff;
+    box-shadow:
+      inset 0 0 0 1px #2474e8,
+      0 0 0 3px rgb(36 116 232 / 12%);
+  }
+
+  :deep(.el-input__inner) {
+    color: #172033;
+  }
+
+  :deep(.password-strength) {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 10px;
+    background: #f6f9fc;
+    border: 1px solid #e2eaf3;
+    border-radius: 6px;
+  }
+
+  :deep(.password-strength__text) {
+    line-height: 1.35;
+  }
+}
+
+.register-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.create-action,
+.back-action {
+  width: 100%;
+  height: 46px;
+  border-radius: 6px;
+}
+
+.create-action {
+  font-weight: 700;
+  background: #2474e8;
+  border-color: #2474e8;
+  box-shadow: 0 12px 26px rgb(36 116 232 / 22%);
+
+  &:hover,
+  &:focus {
+    background: #1f66cc;
+    border-color: #1f66cc;
+  }
+}
+
+.back-action {
+  margin-left: 0 !important;
+  color: #58677d;
+  background: #fff;
+  border-color: #dbe5f0;
+
+  &:hover,
+  &:focus {
+    color: #2474e8;
+    background: #f7fbff;
+    border-color: #bcd4f5;
+  }
+}
+
+.password-visibility-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: #7c8aa0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+
+  &:hover,
+  &:focus-visible {
+    color: #2474e8;
+    background: #eef6ff;
+    outline: none;
+  }
+}
+
+.register-shell.dark-theme {
+  color: #f6f8fb;
+  background: rgb(26 30 38 / 94%);
+  border-color: rgb(255 255 255 / 12%);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 32%);
+
+  .register-panel {
+    background: linear-gradient(
+      180deg,
+      rgb(34 39 49 / 98%),
+      rgb(28 33 42 / 98%)
+    );
+  }
+
+  .register-heading h2 {
+    color: #f6f8fb;
+  }
+
+  .register-eyebrow {
+    color: #a9f5df;
+    background: rgb(32 126 145 / 16%);
+    border-color: rgb(169 245 223 / 24%);
+  }
+
+  .register-form {
+    :deep(.el-form-item__label) {
+      color: #c4cfdd;
     }
 
-    .box2 {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      width: 90%;
-      padding: 25px;
-      border: 1px solid #ebeefe;
-      border-radius: 4px;
-      transition: all 0.3s ease;
+    :deep(.el-input__wrapper) {
+      background: #232936;
+      box-shadow: inset 0 0 0 1px #3b4658;
+    }
 
-      &.dark-theme {
-        color: white;
-        background-color: rgb(52 52 52);
-        border-color: #494949;
-      }
+    :deep(.el-input__wrapper.is-focus) {
+      background: #252d3b;
+      box-shadow:
+        inset 0 0 0 1px #68a7ff,
+        0 0 0 3px rgb(104 167 255 / 14%);
+    }
 
-      &:hover {
-        box-shadow: 0 0 10px rgb(0 0 0 / 10%);
-        transition: all 0.4s;
-      }
+    :deep(.el-input__inner) {
+      color: #f6f8fb;
+    }
 
-      h1 {
-        margin-top: 0;
-        font-family: KaiTi, sans-serif;
-        font-size: 36px;
-        font-weight: 400;
-      }
-
-      h4 {
-        margin-top: 0;
-        font-family: KaiTi, sans-serif;
-        font-size: 18px;
-        font-weight: 400;
-      }
-
-      el-button {
-        align-self: center;
-        margin-top: 2px;
-      }
+    :deep(.password-strength) {
+      background: #202735;
+      border-color: #364254;
     }
   }
 
-  .login-title {
-    margin: 20px 0;
-    font-family: KaiTi, sans-serif;
-    font-weight: bold;
-    text-align: center;
+  .back-action {
+    color: #d1d9e6;
+    background: #232936;
+    border-color: #3b4658;
+
+    &:hover,
+    &:focus {
+      color: #8fc3ff;
+      background: #263246;
+      border-color: #577aa9;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .content {
+    align-items: flex-start;
+    padding: 18px;
   }
 
-  .login-form {
-    max-width: 100%;
-    height: 100%;
-    padding: 0;
-    margin-top: 10px;
+  .register-shell {
+    grid-template-columns: 1fr;
+    min-height: 0;
   }
 
-  .login-button {
-    text-align: right;
+  .register-visual {
+    min-height: 108px;
+    padding: 18px 28px;
   }
 
-  .error-message {
-    margin-top: 10px;
-    font-family: KaiTi, sans-serif;
-    color: red;
-    text-align: center;
+  .visual-copy h1 {
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+
+  .visual-copy p {
+    font-size: 14px;
+  }
+
+  .visual-panel {
+    display: none;
+  }
+
+  .register-panel {
+    padding: 22px 28px 24px;
+  }
+
+  .register-heading {
+    margin-bottom: 14px;
+
+    h2 {
+      font-size: 26px;
+    }
+  }
+
+  .register-form {
+    :deep(.el-form-item) {
+      margin-bottom: 12px;
+    }
+
+    :deep(.el-input__wrapper) {
+      min-height: 42px;
+    }
+
+    :deep(.password-strength) {
+      padding: 7px 10px;
+      margin-top: 7px;
+    }
+  }
+
+  .register-actions {
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .create-action,
+  .back-action {
+    height: 42px;
+  }
+}
+
+@media (max-width: 520px) {
+  .content {
+    padding: 12px;
+  }
+
+  .register-shell {
+    width: 100%;
+  }
+
+  .register-visual {
+    min-height: 108px;
+    padding: 18px 22px;
+  }
+
+  .register-panel {
+    padding: 22px;
+  }
+
+  .register-heading {
+    margin-bottom: 22px;
+
+    h2 {
+      font-size: 24px;
+    }
   }
 }
 </style>
