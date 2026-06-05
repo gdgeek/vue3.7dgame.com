@@ -106,9 +106,9 @@ import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { register as wechatRegister } from "@/api/v1/wechat";
-import Token from "@/store/modules/token";
 import { createPasswordFormRules } from "@/utils/password-validator";
 import PasswordStrength from "@/components/PasswordStrength/index.vue";
+import authClient from "@/services/auth/authClient";
 
 const registerFormRef = ref<FormInstance>();
 const settingsStore = useSettingsStore();
@@ -196,7 +196,7 @@ const register = async () => {
         const data = response?.data;
         if (data?.success) {
           Message.success(t("login.success"));
-          Token.setToken(data.token);
+          authClient.acceptToken(data.token, "register");
           emit("register-success");
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });

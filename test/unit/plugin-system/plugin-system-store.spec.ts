@@ -6,6 +6,12 @@ const mockGetConfig = vi.fn();
 const mockGetAllPlugins = vi.fn();
 const mockLoadPlugin = vi.fn();
 const mockVerifyPluginHostSession = vi.fn();
+const authState = vi.hoisted(() => ({
+  accessToken: "token-visible-001",
+}));
+const mockAuthClient = vi.hoisted(() => ({
+  getAccessToken: vi.fn(() => authState.accessToken),
+}));
 
 vi.mock("@/plugin-system", () => ({
   pluginSystem: {
@@ -24,13 +30,8 @@ vi.mock("@/plugin-system/services/hostSessionApi", () => ({
     mockVerifyPluginHostSession(...args),
 }));
 
-vi.mock("@/store/modules/token", () => ({
-  default: {
-    getToken: vi.fn(() => ({
-      accessToken: "token-visible-001",
-      refreshToken: "refresh-visible-001",
-    })),
-  },
+vi.mock("@/services/auth/authClient", () => ({
+  default: mockAuthClient,
 }));
 
 describe("plugin-system store access-scope visibility", () => {
@@ -42,6 +43,10 @@ describe("plugin-system store access-scope visibility", () => {
     mockGetAllPlugins.mockReset();
     mockLoadPlugin.mockReset();
     mockVerifyPluginHostSession.mockReset();
+    authState.accessToken = "token-visible-001";
+    mockAuthClient.getAccessToken
+      .mockReset()
+      .mockImplementation(() => authState.accessToken);
     mockGetConfig.mockReturnValue({
       version: "1.0.0",
       menuGroups: [{ id: "admin", name: "Admin", order: 1 }],
@@ -166,29 +171,6 @@ describe("plugin-system store access-scope visibility", () => {
   });
 
   it("reloads host visibility after the token fingerprint changes", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    (Token.getToken as ReturnType<typeof vi.fn>)
-      .mockReturnValueOnce({
-        accessToken: "token-visible-001",
-        refreshToken: "refresh-visible-001",
-      })
-      .mockReturnValueOnce({
-        accessToken: "token-visible-001",
-        refreshToken: "refresh-visible-001",
-      })
-      .mockReturnValueOnce({
-        accessToken: "token-visible-001",
-        refreshToken: "refresh-visible-001",
-      })
-      .mockReturnValueOnce({
-        accessToken: "token-visible-002",
-        refreshToken: "refresh-visible-002",
-      })
-      .mockReturnValue({
-        accessToken: "token-visible-002",
-        refreshToken: "refresh-visible-002",
-      });
-
     mockVerifyPluginHostSession
       .mockResolvedValueOnce({
         data: {
@@ -218,6 +200,7 @@ describe("plugin-system store access-scope visibility", () => {
 
     await store.init();
     await store.ensurePluginAccess("system-admin");
+    authState.accessToken = "token-visible-002";
     await store.ensurePluginAccess("system-admin");
     await store.ensurePluginAccess("system-admin");
 
@@ -226,11 +209,7 @@ describe("plugin-system store access-scope visibility", () => {
   });
 
   it("hides stale cached visibility from current-token getters until re-evaluated", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue({
-      accessToken: "token-current",
-      refreshToken: "refresh-current",
-    });
+    authState.accessToken = "token-current";
 
     const { usePluginSystemStore } = await import(
       "@/store/modules/plugin-system"
@@ -332,11 +311,7 @@ describe("plugin-system store access-scope visibility", () => {
   });
 
   it("does not let stale session responses overwrite newer token state", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    let currentToken = { accessToken: "token-old", refreshToken: "r-old" };
-    (Token.getToken as ReturnType<typeof vi.fn>).mockImplementation(
-      () => currentToken
-    );
+    authState.accessToken = "token-old";
 
     let resolveOldRequest:
       | ((value: { data: { code: number; data: { roles: string[] } } }) => void)
@@ -368,7 +343,7 @@ describe("plugin-system store access-scope visibility", () => {
     await store.init();
 
     const oldRequest = store.ensurePluginAccess("system-admin");
-    currentToken = { accessToken: "token-new", refreshToken: "r-new" };
+    authState.accessToken = "token-new";
     const newRequest = store.ensurePluginAccess("system-admin", {
       force: true,
     });

@@ -10,8 +10,7 @@ const mockReplace = vi.fn();
 const mockRouteQuery: Record<string, string> = {};
 const mockLoadLanguageAsync = vi.fn().mockResolvedValue(undefined);
 const mockGetUserInfo = vi.fn().mockResolvedValue(undefined);
-const mockSetToken = vi.fn();
-const mockRefresh = vi.fn().mockResolvedValue({ data: { token: "new-token" } });
+const mockRefresh = vi.fn().mockResolvedValue({ token: "new-token" });
 
 vi.mock("vue-router", () => ({
   useRoute: vi.fn(() => ({ query: mockRouteQuery })),
@@ -22,17 +21,13 @@ vi.mock("@/store/modules/user", () => ({
   useUserStore: vi.fn(() => ({ getUserInfo: mockGetUserInfo })),
 }));
 
-vi.mock("@/api/v1/auth", () => ({
-  refresh: mockRefresh,
+vi.mock("@/services/auth/authClient", () => ({
+  default: { refresh: mockRefresh },
 }));
 
 vi.mock("@/lang", () => ({
   default: {},
   loadLanguageAsync: mockLoadLanguageAsync,
-}));
-
-vi.mock("@/store/modules/token", () => ({
-  default: { setToken: mockSetToken },
 }));
 
 vi.mock("@/utils/logger", () => ({
@@ -49,9 +44,8 @@ afterEach(() => {
   mockReplace.mockClear();
   mockLoadLanguageAsync.mockClear();
   mockGetUserInfo.mockClear();
-  mockSetToken.mockClear();
   mockRefresh.mockReset();
-  mockRefresh.mockResolvedValue({ data: { token: "new-token" } });
+  mockRefresh.mockResolvedValue({ token: "new-token" });
   // Reset query
   for (const k of Object.keys(mockRouteQuery)) delete mockRouteQuery[k];
 });
@@ -119,9 +113,8 @@ describe("views/sso/index.vue", () => {
     await mount();
     await nextTick();
 
-    const { refresh } = await import("@/api/v1/auth");
-    expect(refresh).toHaveBeenCalledWith("fragment-token");
-    expect(mockSetToken).toHaveBeenCalledWith("new-token");
+    expect(mockRefresh).toHaveBeenCalledWith("fragment-token");
+    expect(mockGetUserInfo).toHaveBeenCalled();
     expect(window.location.hash).toBe("");
   });
 

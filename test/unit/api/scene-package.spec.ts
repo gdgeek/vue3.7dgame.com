@@ -5,8 +5,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 vi.mock("axios", () => ({ default: { get: vi.fn() } }));
-vi.mock("@/store/modules/token", () => ({
-  default: { getToken: vi.fn() },
+const mockGetAccessToken = vi.hoisted(() => vi.fn(() => null as string | null));
+vi.mock("@/services/auth/authClient", () => ({
+  default: { getAccessToken: mockGetAccessToken },
 }));
 vi.mock("@/environment", () => ({
   default: { api: "https://api.example.com" },
@@ -59,19 +60,17 @@ describe("getVerseExportJson()", () => {
 
 describe("getVerseExportZip()", () => {
   let axiosGet: ReturnType<typeof vi.fn>;
-  let token: { getToken: ReturnType<typeof vi.fn> };
   let getVerseExportZip: typeof import("@/api/v1/scene-package").getVerseExportZip;
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockGetAccessToken.mockReturnValue(null);
     axiosGet = (await import("axios")).default.get as ReturnType<typeof vi.fn>;
     axiosGet.mockResolvedValue({ data: new Blob() });
-    token = (await import("@/store/modules/token")).default as never;
     ({ getVerseExportZip } = await import("@/api/v1/scene-package"));
   });
 
   it("calls axios.get with the export-zip URL", async () => {
-    token.getToken.mockReturnValue(null);
     await getVerseExportZip(5);
     const url: string = axiosGet.mock.calls[0][0];
     expect(url).toContain("/v1/scene-package/verses/5/export-zip");
@@ -79,13 +78,12 @@ describe("getVerseExportZip()", () => {
   });
 
   it("sets responseType to 'blob'", async () => {
-    token.getToken.mockReturnValue(null);
     await getVerseExportZip(5);
     expect(axiosGet.mock.calls[0][1].responseType).toBe("blob");
   });
 
   it("sets Authorization header with Bearer token when token is present", async () => {
-    token.getToken.mockReturnValue({ accessToken: "my-access-token" });
+    mockGetAccessToken.mockReturnValue("my-access-token");
     await getVerseExportZip(5);
     expect(axiosGet.mock.calls[0][1].headers.Authorization).toBe(
       "Bearer my-access-token"
@@ -93,25 +91,21 @@ describe("getVerseExportZip()", () => {
   });
 
   it("sets empty Authorization when token is null", async () => {
-    token.getToken.mockReturnValue(null);
     await getVerseExportZip(5);
     expect(axiosGet.mock.calls[0][1].headers.Authorization).toBe("");
   });
 
   it("sets Accept header to application/zip", async () => {
-    token.getToken.mockReturnValue(null);
     await getVerseExportZip(5);
     expect(axiosGet.mock.calls[0][1].headers.Accept).toBe("application/zip");
   });
 
   it("sets timeout to 120000", async () => {
-    token.getToken.mockReturnValue(null);
     await getVerseExportZip(7);
     expect(axiosGet.mock.calls[0][1].timeout).toBe(120000);
   });
 
   it("includes verseId in the URL for a different ID", async () => {
-    token.getToken.mockReturnValue(null);
     await getVerseExportZip(123);
     const url: string = axiosGet.mock.calls[0][0];
     expect(url).toContain("/123/export-zip");

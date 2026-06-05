@@ -6,10 +6,9 @@
 import { logger } from "@/utils/logger";
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { refresh as authRefresh } from "@/api/v1/auth";
-import Token from "@/store/modules/token";
 import { useUserStore } from "@/store/modules/user";
 import { loadLanguageAsync } from "@/lang";
+import authClient from "@/services/auth/authClient";
 import {
   clearSsoCallbackUrl,
   normalizeSsoLanguage,
@@ -28,8 +27,7 @@ onMounted(async () => {
 
   if (refreshToken) {
     try {
-      const response = await authRefresh(refreshToken);
-      Token.setToken(response.data.token);
+      await authClient.refresh(refreshToken);
 
       // 拉取并设置用户信息（使用 store 提供的方法）
       try {
