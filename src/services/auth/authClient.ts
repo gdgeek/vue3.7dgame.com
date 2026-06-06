@@ -1,7 +1,4 @@
-import axios, {
-  type AxiosRequestConfig,
-  type AxiosResponse,
-} from "axios";
+import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 
 import type { UserInfoReturnType } from "@/api/user/model";
 import type {
