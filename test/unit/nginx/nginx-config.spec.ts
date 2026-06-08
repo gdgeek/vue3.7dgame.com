@@ -348,6 +348,19 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("/__env.js?v=${ENV_JS_VERSION}");
   });
 
+  it("injects auth runtime env into __env.js", () => {
+    expect(entrypointScript).toContain("AUTH_PROVIDER_JSON=");
+    expect(entrypointScript).toContain("VITE_AUTH_PROVIDER_JSON=");
+    expect(entrypointScript).toContain("VITE_APP_AUTH_API_JSON=");
+    expect(entrypointScript).toContain("AUTH_PROVIDER: ${AUTH_PROVIDER_JSON}");
+    expect(entrypointScript).toContain(
+      "VITE_AUTH_PROVIDER: ${VITE_AUTH_PROVIDER_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "VITE_APP_AUTH_API: ${VITE_APP_AUTH_API_JSON}"
+    );
+  });
+
   it("uses proxy_connect_timeout 5s for fast failover", () => {
     expect(entrypointScript).toContain("proxy_connect_timeout 5s");
   });
