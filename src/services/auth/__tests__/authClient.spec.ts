@@ -167,4 +167,59 @@ describe("authClient", () => {
       headers: { Authorization: "Bearer current-user-token" },
     });
   });
+
+  it("routes identity auth calls to the auth API while keeping current user on the main API", async () => {
+    const loginToken = createToken({
+      accessToken: "identity-login-token",
+      refreshToken: "identity-refresh",
+    });
+    const refreshToken = createToken({
+      accessToken: "identity-refresh-token",
+      refreshToken: "identity-refresh-next",
+    });
+    const tokenStore = createTokenStore(loginToken);
+    const mainHttp = {
+      get: vi.fn().mockResolvedValue({
+        data: { id: 24, username: "guanfei", roles: ["admin"] },
+      }),
+      post: vi.fn(),
+    };
+    const authHttp = {
+      get: vi.fn(),
+      post: vi
+        .fn()
+        .mockResolvedValueOnce({ data: { success: true, token: loginToken } })
+        .mockResolvedValueOnce({ data: { token: refreshToken } })
+        .mockResolvedValueOnce({ data: { success: true, message: "logout" } }),
+    };
+    const client = createAuthClient({
+      authHttp,
+      mainHttp,
+      tokenStore,
+      provider: "identity",
+    });
+
+    await client.login({ username: "guanfei", password: "123456" });
+    await client.refresh();
+    await client.getCurrentUser();
+    await client.logout();
+
+    expect(authHttp.post).toHaveBeenNthCalledWith(1, "/v1/auth/login", {
+      username: "guanfei",
+      password: "123456",
+    });
+    expect(authHttp.post).toHaveBeenNthCalledWith(2, "/v1/auth/refresh", {
+      refreshToken: "identity-refresh",
+    });
+    expect(authHttp.post).toHaveBeenNthCalledWith(
+      3,
+      "/v1/auth/logout",
+      { refreshToken: "identity-refresh-next" },
+      { headers: { Authorization: "Bearer identity-refresh-token" } }
+    );
+    expect(mainHttp.get).toHaveBeenCalledWith("/v1/user/info", {
+      headers: { Authorization: "Bearer identity-refresh-token" },
+    });
+    expect(mainHttp.post).not.toHaveBeenCalled();
+  });
 });

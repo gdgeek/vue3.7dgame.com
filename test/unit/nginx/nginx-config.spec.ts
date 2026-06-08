@@ -264,6 +264,18 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain('"/api-auth/"');
   });
 
+  it("keeps /api/ and /api-auth/ prefixes non-overlapping", () => {
+    expect(entrypointScript).toContain(
+      'generate_lb_config "APP_API" "/api/" "api" "yes"'
+    );
+    expect(entrypointScript).toContain(
+      'generate_lb_config "APP_AUTH" "/api-auth/" "auth" "yes"'
+    );
+    expect(entrypointScript).not.toContain(
+      'generate_lb_config "APP_API" "/api" "api" "yes"'
+    );
+  });
+
   it("does NOT generate /api-domain/ failover chain", () => {
     expect(entrypointScript).not.toContain('"/api-domain/"');
   });

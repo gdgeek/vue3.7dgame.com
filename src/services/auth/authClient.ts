@@ -41,13 +41,15 @@ type AuthHttpClient = {
 
 export interface AuthClientOptions {
   http?: AuthHttpClient;
+  authHttp?: AuthHttpClient;
+  mainHttp?: AuthHttpClient;
   tokenStore?: AuthTokenStore;
   provider?: AuthProvider;
 }
 
-function createDefaultHttpClient(): AuthHttpClient {
+function createDefaultHttpClient(baseURL: string): AuthHttpClient {
   return axios.create({
-    baseURL: env.api,
+    baseURL,
     timeout: 50000,
     headers: { "Content-Type": "application/json;charset=utf-8" },
   });
@@ -64,7 +66,11 @@ function buildAuthHeaders(token: TokenInfo | null) {
 
 export function createAuthClient(options: AuthClientOptions = {}) {
   const provider = options.provider ?? resolveAuthProvider();
-  const http: AuthHttpClient = options.http ?? createDefaultHttpClient();
+  const mainHttp: AuthHttpClient =
+    options.mainHttp ?? options.http ?? createDefaultHttpClient(env.api);
+  const authHttp: AuthHttpClient =
+    options.authHttp ??
+    (provider === "identity" ? createDefaultHttpClient(env.authApi) : mainHttp);
   const tokenStore = options.tokenStore ?? Token;
   const subscribers = new Set<TokenChangedListener>();
   let refreshPromise: Promise<RefreshTokenResponse> | null = null;
@@ -90,7 +96,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
   }
 
   async function login(data: LoginRequest): Promise<LoginResponse> {
-    const response = await http.post<LoginResponse>("/v1/auth/login", data);
+    const response = await authHttp.post<LoginResponse>("/v1/auth/login", data);
     if (response.data?.token) {
       acceptToken(response.data.token, "login");
     }
@@ -107,7 +113,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
       throw new Error("No refresh token available");
     }
 
-    const request = http
+    const request = authHttp
       .post<RefreshTokenResponse>("/v1/auth/refresh", {
         refreshToken: tokenToRefresh,
       })
@@ -144,7 +150,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
 
     if (token) {
       try {
-        await http.post(
+        await authHttp.post(
           "/v1/auth/logout",
           { refreshToken: token.refreshToken },
           { headers: buildAuthHeaders(token) }
@@ -162,7 +168,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
   }
 
   async function getCurrentUser(): Promise<UserInfoReturnType> {
-    const response = await http.get<UserInfoReturnType>("/v1/user/info", {
+    const response = await mainHttp.get<UserInfoReturnType>("/v1/user/info", {
       headers: buildAuthHeaders(tokenStore.getToken()),
     });
     return response.data;
