@@ -15,6 +15,8 @@ interface ImportMetaEnv {
   VITE_APP_API_URL: string;
   /** 微信登录认证服务地址 */
   VITE_APP_AUTH_API?: string;
+  /** 认证服务选择 */
+  VITE_AUTH_PROVIDER?: string;
   /** Unity WebGL 场景预览地址 */
   VITE_APP_UNITY_PREVIEW_URL?: string;
   /** 是否开启 Mock 服务 */

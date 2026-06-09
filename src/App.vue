@@ -32,8 +32,8 @@ import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { useDomainStore } from "@/store/modules/domain";
 import { UpdateRoutes } from "@/router";
-import Token from "@/store/modules/token";
 import { disposeKTX2Loader } from "@/lib/three/loaders";
+import authClient from "@/services/auth/authClient";
 
 /** @type {string} */
 const appVersion = __APP_VERSION__;
@@ -83,7 +83,7 @@ onMounted(async () => {
   // Fetch domain SEO info on app startup
   await domainStore.fetchDomainInfo();
 
-  const hasToken = Token.getToken();
+  const hasToken = authClient.getAccessToken();
   if (hasToken) {
     userStore.getUserInfo();
   }

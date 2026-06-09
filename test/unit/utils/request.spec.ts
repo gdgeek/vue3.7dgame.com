@@ -19,6 +19,19 @@ const mockService = vi.hoisted(() => {
 });
 
 const mockRouterPush = vi.hoisted(() => vi.fn());
+const mockAuthClient = vi.hoisted(() => ({
+  clearToken: vi.fn(),
+  getAccessToken: vi.fn(() => null),
+  getTokenInfo: vi.fn(() => null),
+  refresh: vi.fn(),
+}));
+
+function resetAuthClientMock() {
+  mockAuthClient.clearToken.mockReset();
+  mockAuthClient.getAccessToken.mockReset().mockReturnValue(null);
+  mockAuthClient.getTokenInfo.mockReset().mockReturnValue(null);
+  mockAuthClient.refresh.mockReset();
+}
 
 vi.mock("axios", () => ({
   default: {
@@ -49,8 +62,8 @@ vi.mock("element-plus", () => ({
   },
 }));
 
-vi.mock("@/api/v1/auth", () => ({
-  refresh: vi.fn(),
+vi.mock("@/services/auth/authClient", () => ({
+  default: mockAuthClient,
 }));
 
 vi.mock("@/environment", () => ({
@@ -69,14 +82,6 @@ vi.mock("vue", async (importOriginal) => {
   };
 });
 
-vi.mock("@/store/modules/token", () => ({
-  default: {
-    getToken: vi.fn(() => null),
-    setToken: vi.fn(),
-    removeToken: vi.fn(),
-  },
-}));
-
 vi.mock("@/utils/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() },
 }));
@@ -86,6 +91,7 @@ vi.mock("@/utils/logger", () => ({
 describe("request.ts module", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
   });
 
@@ -108,12 +114,12 @@ describe("request.ts module", () => {
 describe("request interceptor logic", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
   });
 
   it("passes config through when no token", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(null);
+    mockAuthClient.getTokenInfo.mockReturnValue(null);
     await import("@/utils/request");
 
     const reqInterceptor =
@@ -125,12 +131,12 @@ describe("request interceptor logic", () => {
   });
 
   it("sets Authorization header when token exists", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue({
+    mockAuthClient.getTokenInfo.mockReturnValue({
       accessToken: "my-access-token",
       refreshToken: "my-refresh-token",
       expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
     });
+    mockAuthClient.getAccessToken.mockReturnValue("my-access-token");
     await import("@/utils/request");
 
     const reqInterceptor =
@@ -142,8 +148,7 @@ describe("request interceptor logic", () => {
 
   // TODO: Move to failover.spec.ts — baseURL is set by createFailoverAxios interceptor (now in failover.ts)
   it.skip("sets baseURL from currentApi when config.baseURL does not start with http", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(null);
+    mockAuthClient.getTokenInfo.mockReturnValue(null);
     await import("@/utils/request");
 
     const reqInterceptor =
@@ -155,8 +160,6 @@ describe("request interceptor logic", () => {
   });
 
   it("refreshes token when token is expiring soon (within 5 minutes)", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    const AuthAPI = await import("@/api/v1/auth");
     // Token expiring in 2 minutes (< 5 minutes → expiring soon)
     const expiringToken = {
       accessToken: "old-token",
@@ -168,16 +171,11 @@ describe("request interceptor logic", () => {
       refreshToken: "new-refresh",
       expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     };
-    // 1st call: request interceptor reads the expiring token
-    // 2nd call: refreshToken() internal function reads the token to get refreshToken
-    // 3rd call: after refresh, new token is read to update Authorization header
-    (Token.getToken as ReturnType<typeof vi.fn>)
-      .mockReturnValueOnce(expiringToken) // request interceptor
-      .mockReturnValueOnce(expiringToken) // inside refreshToken()
-      .mockReturnValue(newToken); // after refresh
-    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockResolvedValue({
-      data: { token: newToken },
-    });
+    mockAuthClient.getTokenInfo.mockReturnValue(expiringToken);
+    mockAuthClient.getAccessToken
+      .mockReturnValueOnce("old-token")
+      .mockReturnValue("new-token");
+    mockAuthClient.refresh.mockResolvedValue({ token: newToken });
 
     await import("@/utils/request");
     const reqInterceptor =
@@ -185,23 +183,20 @@ describe("request interceptor logic", () => {
     const config = { url: "/v1/data", headers: {}, baseURL: "" };
     await reqInterceptor(config);
 
-    expect(AuthAPI.refresh).toHaveBeenCalledWith("refresh-token");
+    expect(mockAuthClient.refresh).toHaveBeenCalledOnce();
     // After refresh, headers should use the new token
     expect(config.headers.Authorization).toBe("Bearer new-token");
   });
 
   it("handles token refresh failure by calling handleUnauthorized", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    const AuthAPI = await import("@/api/v1/auth");
     const expiringToken = {
       accessToken: "old-token",
       refreshToken: "refresh-token",
       expires: new Date(Date.now() + 1 * 60 * 1000).toISOString(),
     };
-    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(expiringToken);
-    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error("refresh failed")
-    );
+    mockAuthClient.getTokenInfo.mockReturnValue(expiringToken);
+    mockAuthClient.getAccessToken.mockReturnValue("old-token");
+    mockAuthClient.refresh.mockRejectedValue(new Error("refresh failed"));
 
     await import("@/utils/request");
     const reqInterceptor =
@@ -209,22 +204,19 @@ describe("request interceptor logic", () => {
     const config = { url: "/v1/data", headers: {}, baseURL: "" };
     // Should reject (handleUnauthorized returns Promise.reject(""))
     await expect(reqInterceptor(config)).rejects.toBeDefined();
-    expect(Token.removeToken).toHaveBeenCalled();
+    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
   });
 
   it("does not log out the host when plugin-scoped refresh fails proactively", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    const AuthAPI = await import("@/api/v1/auth");
     const expiringToken = {
       accessToken: "old-token",
       refreshToken: "refresh-token",
       expires: new Date(Date.now() + 1 * 60 * 1000).toISOString(),
     };
     const refreshError = new Error("refresh failed");
-    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(expiringToken);
-    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockRejectedValue(
-      refreshError
-    );
+    mockAuthClient.getTokenInfo.mockReturnValue(expiringToken);
+    mockAuthClient.getAccessToken.mockReturnValue("old-token");
+    mockAuthClient.refresh.mockRejectedValue(refreshError);
 
     await import("@/utils/request");
     const reqInterceptor =
@@ -237,19 +229,18 @@ describe("request interceptor logic", () => {
     };
 
     await expect(reqInterceptor(config)).rejects.toBe(refreshError);
-    expect(Token.removeToken).not.toHaveBeenCalled();
+    expect(mockAuthClient.clearToken).not.toHaveBeenCalled();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
   it("skips token refresh for whitelisted URLs", async () => {
-    const Token = (await import("@/store/modules/token")).default;
-    const AuthAPI = await import("@/api/v1/auth");
     const expiringToken = {
       accessToken: "old-token",
       refreshToken: "refresh-token",
       expires: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
     };
-    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(expiringToken);
+    mockAuthClient.getTokenInfo.mockReturnValue(expiringToken);
+    mockAuthClient.getAccessToken.mockReturnValue("old-token");
 
     await import("@/utils/request");
     const reqInterceptor =
@@ -259,13 +250,14 @@ describe("request interceptor logic", () => {
     await reqInterceptor(config);
 
     // Refresh should NOT be called for whitelisted URLs
-    expect(AuthAPI.refresh).not.toHaveBeenCalled();
+    expect(mockAuthClient.refresh).not.toHaveBeenCalled();
   });
 });
 
 describe("response interceptor logic", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
   });
 
@@ -297,7 +289,6 @@ describe("response interceptor logic", () => {
   });
 
   it("does not logout for plugin-scoped 401 responses", async () => {
-    const Token = (await import("@/store/modules/token")).default;
     await import("@/utils/request");
 
     const errInterceptor =
@@ -309,12 +300,11 @@ describe("response interceptor logic", () => {
     };
 
     await expect(errInterceptor(error)).rejects.toBe(error);
-    expect(Token.removeToken).not.toHaveBeenCalled();
+    expect(mockAuthClient.clearToken).not.toHaveBeenCalled();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
   it("still logs out for host-scoped 401 responses", async () => {
-    const Token = (await import("@/store/modules/token")).default;
     await import("@/utils/request");
 
     const errInterceptor =
@@ -326,12 +316,11 @@ describe("response interceptor logic", () => {
     };
 
     await expect(errInterceptor(error)).rejects.toBeDefined();
-    expect(Token.removeToken).toHaveBeenCalledOnce();
+    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
     expect(mockRouterPush).toHaveBeenCalledWith({ path: "/site/logout" });
   });
 
   it("defaults to host-scoped logout when authScope is omitted", async () => {
-    const Token = (await import("@/store/modules/token")).default;
     await import("@/utils/request");
 
     const errInterceptor =
@@ -343,7 +332,7 @@ describe("response interceptor logic", () => {
     };
 
     await expect(errInterceptor(error)).rejects.toBeDefined();
-    expect(Token.removeToken).toHaveBeenCalledOnce();
+    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
     expect(mockRouterPush).toHaveBeenCalledWith({ path: "/site/logout" });
   });
 
@@ -445,6 +434,7 @@ describe("response interceptor logic", () => {
 describe("API failover response interceptor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
   });
 
@@ -520,11 +510,11 @@ describe("API failover response interceptor", () => {
 describe("handleUnauthorized deduplication", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
   });
 
   it("rejects silently on second concurrent 401 while first is still processing", async () => {
-    const Token = (await import("@/store/modules/token")).default;
     const { ElMessage } = await import("element-plus");
     await import("@/utils/request");
 
@@ -547,8 +537,8 @@ describe("handleUnauthorized deduplication", () => {
     expect(r1.status).toBe("rejected");
     expect(r2.status).toBe("rejected");
 
-    // removeToken should be called by the first handler; the second is a no-op
-    expect(Token.removeToken).toHaveBeenCalled();
+    // clearToken should be called by the first handler; the second is a no-op
+    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
     // ElMessage.error should be called (at least once) for the login-expired notice
     expect(
       (ElMessage as { error: ReturnType<typeof vi.fn> }).error
@@ -562,6 +552,7 @@ describe("handleUnauthorized deduplication", () => {
 describe("request interceptor error handler (line 148-149)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
   });
 
@@ -600,6 +591,7 @@ describe("request interceptor error handler (line 148-149)", () => {
 describe("handleUnauthorized setTimeout callback (line 177)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
     vi.useFakeTimers();
   });
@@ -609,7 +601,6 @@ describe("handleUnauthorized setTimeout callback (line 177)", () => {
   });
 
   it("isHandlingUnauthorized resets to false after 1000ms (allows next 401 through)", async () => {
-    const Token = (await import("@/store/modules/token")).default;
     const { ElMessage } = await import("element-plus");
     await import("@/utils/request");
 
@@ -625,8 +616,8 @@ describe("handleUnauthorized setTimeout callback (line 177)", () => {
     // First 401 — triggers handleUnauthorized, sets isHandlingUnauthorized=true
     await errInterceptor(make401()).catch(() => {});
 
-    // removeToken called once
-    expect(Token.removeToken).toHaveBeenCalledTimes(1);
+    // clearToken called once
+    expect(mockAuthClient.clearToken).toHaveBeenCalledTimes(1);
 
     // Advance clock by 1000ms → setTimeout callback fires (line 177)
     vi.advanceTimersByTime(1000);
@@ -634,8 +625,8 @@ describe("handleUnauthorized setTimeout callback (line 177)", () => {
     // Now isHandlingUnauthorized should be false again.
     // Fire another 401 — it should be handled again (not silently rejected)
     await errInterceptor(make401()).catch(() => {});
-    // removeToken should now have been called a second time
-    expect(Token.removeToken).toHaveBeenCalledTimes(2);
+    // clearToken should now have been called a second time
+    expect(mockAuthClient.clearToken).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -645,21 +636,21 @@ describe("handleUnauthorized setTimeout callback (line 177)", () => {
 describe("refreshToken guard (lines 87-88) — token without refreshToken", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
   });
 
-  it("throws 'No refresh token available' when Token.getToken() returns null inside refreshToken", async () => {
-    const Token = (await import("@/store/modules/token")).default;
+  it("handles authClient refresh rejection when no refresh token is available", async () => {
     const expiringToken = {
       accessToken: "old-token",
       refreshToken: "refresh-token",
       expires: new Date(Date.now() + 2 * 60 * 1000).toISOString(), // expires in 2 min
     };
-    // First call (request interceptor check): returns expiring token → triggers refresh
-    // Second call (inside refreshToken()): returns null → throws
-    (Token.getToken as ReturnType<typeof vi.fn>)
-      .mockReturnValueOnce(expiringToken)
-      .mockReturnValueOnce(null);
+    mockAuthClient.getTokenInfo.mockReturnValue(expiringToken);
+    mockAuthClient.getAccessToken.mockReturnValue("old-token");
+    mockAuthClient.refresh.mockRejectedValue(
+      new Error("No refresh token available")
+    );
 
     await import("@/utils/request");
     const reqInterceptor =
@@ -668,25 +659,19 @@ describe("refreshToken guard (lines 87-88) — token without refreshToken", () =
 
     // Should reject because refreshToken() throws when token is null
     await expect(reqInterceptor(config)).rejects.toBeDefined();
-    // removeToken should be called via handleUnauthorized
-    expect(Token.removeToken).toHaveBeenCalled();
+    // clearToken should be called via handleUnauthorized
+    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
   });
 
-  it("throws when token exists but has no refreshToken field", async () => {
-    const Token = (await import("@/store/modules/token")).default;
+  it("handles authClient refresh rejection when token has no refreshToken field", async () => {
     const expiringToken = {
       accessToken: "old-token",
       refreshToken: "refresh-token",
       expires: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
     };
-    const tokenWithoutRefresh = {
-      accessToken: "some-token",
-      // no refreshToken
-      expires: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
-    };
-    (Token.getToken as ReturnType<typeof vi.fn>)
-      .mockReturnValueOnce(expiringToken) // request interceptor
-      .mockReturnValueOnce(tokenWithoutRefresh); // inside refreshToken()
+    mockAuthClient.getTokenInfo.mockReturnValue(expiringToken);
+    mockAuthClient.getAccessToken.mockReturnValue("old-token");
+    mockAuthClient.refresh.mockRejectedValue(new Error("refresh failed"));
 
     await import("@/utils/request");
     const reqInterceptor =
@@ -694,7 +679,7 @@ describe("refreshToken guard (lines 87-88) — token without refreshToken", () =
     const config = { url: "/v1/other", headers: {}, baseURL: "" };
 
     await expect(reqInterceptor(config)).rejects.toBeDefined();
-    expect(Token.removeToken).toHaveBeenCalled();
+    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
   });
 });
 
@@ -704,6 +689,7 @@ describe("refreshToken guard (lines 87-88) — token without refreshToken", () =
 describe("startHealthCheck interval body (lines 29-39)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
     vi.useFakeTimers();
   });
@@ -799,6 +785,7 @@ describe("lang watcher callback (lines 15-16)", () => {
 describe("request interceptor error handler — extra edge cases (lines 148-149)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
   });
 
@@ -837,6 +824,7 @@ describe("request interceptor error handler — extra edge cases (lines 148-149)
 describe("handleUnauthorized setTimeout — extra edge cases (line 177)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAuthClientMock();
     vi.resetModules();
     vi.useFakeTimers();
   });
@@ -846,7 +834,6 @@ describe("handleUnauthorized setTimeout — extra edge cases (line 177)", () => 
   });
 
   it("不足 1000ms 时第二个 401 被静默拒绝（flag 未重置）", async () => {
-    const Token = (await import("@/store/modules/token")).default;
     await import("@/utils/request");
 
     const errInterceptor =
@@ -860,25 +847,24 @@ describe("handleUnauthorized setTimeout — extra edge cases (line 177)", () => 
 
     // 第一个 401：isHandlingUnauthorized = true
     await errInterceptor(make401()).catch(() => {});
-    expect(Token.removeToken).toHaveBeenCalledTimes(1);
+    expect(mockAuthClient.clearToken).toHaveBeenCalledTimes(1);
 
     // 仅推进 500ms（< 1000ms）：flag 还未重置
     vi.advanceTimersByTime(500);
 
     // 第二个 401：被静默拒绝，removeToken 不会再被调用
     await errInterceptor(make401()).catch(() => {});
-    expect(Token.removeToken).toHaveBeenCalledTimes(1); // 仍然是 1
+    expect(mockAuthClient.clearToken).toHaveBeenCalledTimes(1); // 仍然是 1
 
     // 再推进到 1000ms → flag 重置
     vi.advanceTimersByTime(500);
 
     // 第三个 401：flag 已重置，正常处理
     await errInterceptor(make401()).catch(() => {});
-    expect(Token.removeToken).toHaveBeenCalledTimes(2);
+    expect(mockAuthClient.clearToken).toHaveBeenCalledTimes(2);
   });
 
   it("setTimeout 精确在 1000ms 时触发（line 177 回调执行）", async () => {
-    const Token = (await import("@/store/modules/token")).default;
     await import("@/utils/request");
 
     const errInterceptor =
@@ -891,13 +877,13 @@ describe("handleUnauthorized setTimeout — extra edge cases (line 177)", () => 
     });
 
     await errInterceptor(make401()).catch(() => {});
-    expect(Token.removeToken).toHaveBeenCalledTimes(1);
+    expect(mockAuthClient.clearToken).toHaveBeenCalledTimes(1);
 
     // 精确推进到 1000ms
     vi.advanceTimersByTime(1000);
 
     // 确认 flag 已重置 — 第二个 401 被正常处理
     await errInterceptor(make401()).catch(() => {});
-    expect(Token.removeToken).toHaveBeenCalledTimes(2);
+    expect(mockAuthClient.clearToken).toHaveBeenCalledTimes(2);
   });
 });

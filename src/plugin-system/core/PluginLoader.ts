@@ -1,5 +1,6 @@
 import { createLogger } from "@/utils/logger";
 import { buildPluginIframeUrl } from "@/plugin-system/utils/pluginUrl";
+import authClient from "@/services/auth/authClient";
 
 import type { PluginManifest, PluginState } from "@/plugin-system/types";
 
@@ -163,16 +164,7 @@ export class PluginLoader {
    * Retrieve the current access token from the Token store.
    */
   public getToken(): string {
-    try {
-      // Dynamic import to avoid circular dependency at module level
-      const tokenStore =
-        require("@/store/modules/token").default ??
-        require("@/store/modules/token");
-      const tokenInfo = tokenStore.getToken?.();
-      return tokenInfo?.accessToken || tokenInfo?.token || "";
-    } catch {
-      return "";
-    }
+    return authClient.getAccessToken() || "";
   }
 
   /** Get the loaded iframe element for a plugin */

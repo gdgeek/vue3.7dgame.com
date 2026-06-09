@@ -23,8 +23,8 @@ import type {
   PluginAccessState,
 } from "@/plugin-system/services/pluginAccess";
 import { verifyPluginHostSession } from "@/plugin-system/services/hostSessionApi";
-import Token from "@/store/modules/token";
 import { useUserStore } from "@/store/modules/user";
+import authClient from "@/services/auth/authClient";
 
 const inFlightPluginAccessRequests = new Map<
   string,
@@ -36,7 +36,7 @@ const inFlightHostSessionRequests = new Map<
 >();
 
 function getCurrentTokenFingerprint() {
-  return buildTokenFingerprint(Token.getToken()?.accessToken);
+  return buildTokenFingerprint(authClient.getAccessToken() ?? undefined);
 }
 
 function getKnownHostRoles(): string[] | null {
@@ -241,8 +241,8 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         }
       }
 
-      const token = Token.getToken();
-      if (!token?.accessToken) {
+      const accessToken = authClient.getAccessToken();
+      if (!accessToken) {
         const guestSession = { authenticated: false, roles: [] as string[] };
         this.hostSessionFingerprint = fingerprint;
         this.hostSessionRoles = guestSession.roles;
@@ -342,7 +342,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const knownRoles = getKnownHostRoles();
       if (knownRoles !== null) {
         const knownSession = {
-          authenticated: Boolean(Token.getToken()?.accessToken),
+          authenticated: Boolean(authClient.getAccessToken()),
           roles: knownRoles,
         };
 

@@ -2,11 +2,10 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
 import { ElMessage } from "element-plus";
-import { refresh as authRefresh } from "@/api/v1/auth";
 import env from "@/environment";
 import { ref, watch } from "vue";
-import Token from "@/store/modules/token";
 import { logger } from "@/utils/logger";
+import authClient from "@/services/auth/authClient";
 
 const lang = ref(i18n.global.locale.value);
 watch(
@@ -24,10 +23,6 @@ const getMessageArray = () => {
     i18n.global.t("request.serverError"),
   ];
 };
-
-// 所有并发请求共享同一个刷新 Promise：刷新完成后延迟一个微任务再清空，
-// 确保所有 await refreshPromise 的调用者都拿到结果后再允许下次刷新。
-let refreshPromise: Promise<unknown> | null = null;
 
 // 刷新token的API白名单
 const refreshTokenWhitelist = [
@@ -56,26 +51,17 @@ const service = axios.create({
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
 
-const refreshToken = async () => {
-  const token = Token.getToken();
-  if (!token || !token.refreshToken) {
-    throw new Error("No refresh token available");
-  }
-  const response = await authRefresh(token.refreshToken);
-  if (response.data) {
-    Token.setToken(response.data.token);
-  }
-  return response.data;
-};
-
 // 请求拦截器（Token 刷新）
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const token = Token.getToken();
+    const token = authClient.getTokenInfo();
 
     // 设置token
     if (token != null) {
-      config.headers.Authorization = `Bearer ${token.accessToken}`;
+      const accessToken = authClient.getAccessToken();
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
 
       // 检查请求URL是否在白名单中
       const isWhitelisted = refreshTokenWhitelist.some((url) =>
@@ -83,27 +69,10 @@ service.interceptors.request.use(
       );
       if (!isWhitelisted && isTokenExpiringSoon(token)) {
         try {
-          if (!refreshPromise) {
-            // 启动刷新，用 .then 在微任务中清空，保证所有并发 await 都已消费结果
-            refreshPromise = refreshToken().then(
-              (result) => {
-                Promise.resolve().then(() => {
-                  refreshPromise = null;
-                });
-                return result;
-              },
-              (err) => {
-                Promise.resolve().then(() => {
-                  refreshPromise = null;
-                });
-                throw err;
-              }
-            );
-          }
-          await refreshPromise;
-          const newToken = Token.getToken();
-          if (newToken) {
-            config.headers.Authorization = `Bearer ${newToken.accessToken}`;
+          await authClient.refresh();
+          const newAccessToken = authClient.getAccessToken();
+          if (newAccessToken) {
+            config.headers.Authorization = `Bearer ${newAccessToken}`;
           }
         } catch (err) {
           if (getAuthScope(config) === "plugin") {
@@ -148,7 +117,7 @@ function handleUnauthorized(
   showErrorMessage(messages[0]);
 
   // 只清除本地 token 防止后续请求再触发 401，完整 logout 交给 logout 页面处理
-  Token.removeToken();
+  authClient.clearToken("unauthorized");
 
   router.push({ path: "/site/logout" });
 

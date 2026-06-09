@@ -2,7 +2,7 @@ import { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
 
 import NProgress from "@/utils/nprogress";
 import { useRouter } from "@/router";
-import Token from "@/store/modules/token";
+import authClient from "@/services/auth/authClient";
 const router = useRouter();
 import { useUserStore } from "@/store";
 
@@ -37,7 +37,7 @@ export function setupPermission() {
     NProgress.start(); //开始进度条
 
     // next({ path: "/404" });
-    if (Token.hasToken()) {
+    if (authClient.getAccessToken()) {
       // 判断是否有token
       if (to.path === "/site/login") {
         // 如果已登录，跳转到首页
@@ -68,7 +68,7 @@ export function setupPermission() {
             next({ ...to, replace: true });
           } catch (error) {
             // 移除 token 并重定向到登录页，携带当前页面路由作为跳转参数
-            Token.removeToken();
+            authClient.clearToken("unauthorized");
             // await userStore.resetToken();
             redirectToLogin(to, next);
             NProgress.done();

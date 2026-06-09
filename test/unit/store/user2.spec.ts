@@ -28,13 +28,14 @@ vi.mock("@/api/v1/user", () => ({
   info: vi.fn(),
 }));
 
-vi.mock("@/store/modules/token", () => ({
-  default: {
-    setToken: vi.fn(),
-    getToken: vi.fn(() => "some-token"),
-    removeToken: vi.fn(),
-    hasToken: vi.fn(() => false),
-  },
+const mockAuthClient = vi.hoisted(() => ({
+  acceptToken: vi.fn(),
+  getCurrentUser: vi.fn(),
+  login: vi.fn(),
+  logout: vi.fn(),
+}));
+vi.mock("@/services/auth/authClient", () => ({
+  default: mockAuthClient,
 }));
 
 vi.mock("@/store", async () => {
@@ -52,6 +53,7 @@ describe("useUserStore — loginByWechat null token (supplemental)", () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     vi.resetModules();
+    mockAuthClient.acceptToken.mockReset();
 
     wechatApi = (await import("@/api/v1/wechat")) as never;
     ({ useUserStore } = await import("@/store/modules/user"));
@@ -121,13 +123,10 @@ describe("useUserStore — loginByWechat null token (supplemental)", () => {
     );
   });
 
-  it("loginByWechat() does not call Token.setToken when token is null", async () => {
-    const Token = (await import("@/store/modules/token")).default as never as {
-      setToken: ReturnType<typeof vi.fn>;
-    };
+  it("loginByWechat() does not call authClient.acceptToken when token is null", async () => {
     wechatApi.login.mockResolvedValue({ data: { success: true, token: null } });
     const store = useUserStore();
     await expect(store.loginByWechat({ code: "c" } as never)).rejects.toThrow();
-    expect(Token.setToken).not.toHaveBeenCalled();
+    expect(mockAuthClient.acceptToken).not.toHaveBeenCalled();
   });
 });

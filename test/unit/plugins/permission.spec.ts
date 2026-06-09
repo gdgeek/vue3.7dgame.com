@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ── vi.hoisted 变量（在 vi.mock 工厂函数中引用，必须提前 hoist）──────────
-const mockHasToken = vi.hoisted(() => vi.fn(() => false));
+const mockGetAccessToken = vi.hoisted(() => vi.fn(() => null as string | null));
 
 // ── 捕获 router 钩子 ────────────────────────────────────────────────────────
 let capturedBeforeEach:
@@ -28,8 +28,8 @@ vi.mock("@/utils/nprogress", () => ({
   default: { start: vi.fn(), done: vi.fn() },
 }));
 
-vi.mock("@/store/modules/token", () => ({
-  default: { hasToken: mockHasToken },
+vi.mock("@/services/auth/authClient", () => ({
+  default: { getAccessToken: mockGetAccessToken },
 }));
 
 // mockUserInfo 由各 describe 块在 beforeEach 中赋值
@@ -64,7 +64,7 @@ beforeEach(() => {
   capturedBeforeEach = null;
   capturedAfterEach = null;
   mockUserInfo = null;
-  mockHasToken.mockReturnValue(false);
+  mockGetAccessToken.mockReturnValue(null);
 
   // 设置 mock 实现以捕获注册的回调
   mockRouter.beforeEach.mockImplementation((cb: any) => {
@@ -108,7 +108,7 @@ describe("afterEach 守卫", () => {
 // ── 前置守卫：有 token ──────────────────────────────────────────────────────
 describe("beforeEach 守卫 — 有 token 时", () => {
   beforeEach(() => {
-    mockHasToken.mockReturnValue(true);
+    mockGetAccessToken.mockReturnValue("access-token");
   });
 
   it("访问 /site/login 时重定向到 /home/index", async () => {
