@@ -264,6 +264,18 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain('"/api-auth/"');
   });
 
+  it("keeps /api/ and /api-auth/ prefixes non-overlapping", () => {
+    expect(entrypointScript).toContain(
+      'generate_lb_config "APP_API" "/api/" "api" "yes"'
+    );
+    expect(entrypointScript).toContain(
+      'generate_lb_config "APP_AUTH" "/api-auth/" "auth" "yes"'
+    );
+    expect(entrypointScript).not.toContain(
+      'generate_lb_config "APP_API" "/api" "api" "yes"'
+    );
+  });
+
   it("does NOT generate /api-domain/ failover chain", () => {
     expect(entrypointScript).not.toContain('"/api-domain/"');
   });
@@ -334,6 +346,19 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
   it("cache-busts __env.js in index.html at container startup", () => {
     expect(entrypointScript).toContain("ENV_JS_VERSION=$(date +%s)");
     expect(entrypointScript).toContain("/__env.js?v=${ENV_JS_VERSION}");
+  });
+
+  it("injects auth runtime env into __env.js", () => {
+    expect(entrypointScript).toContain("AUTH_PROVIDER_JSON=");
+    expect(entrypointScript).toContain("VITE_AUTH_PROVIDER_JSON=");
+    expect(entrypointScript).toContain("VITE_APP_AUTH_API_JSON=");
+    expect(entrypointScript).toContain("AUTH_PROVIDER: ${AUTH_PROVIDER_JSON}");
+    expect(entrypointScript).toContain(
+      "VITE_AUTH_PROVIDER: ${VITE_AUTH_PROVIDER_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "VITE_APP_AUTH_API: ${VITE_APP_AUTH_API_JSON}"
+    );
   });
 
   it("uses proxy_connect_timeout 5s for fast failover", () => {

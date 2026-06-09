@@ -1,13 +1,12 @@
 import { logger } from "@/utils/logger";
-import { login as authLogin, logout as authLogout } from "@/api/v1/auth";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData } from "@/api/auth/model";
-import { UserInfoType, _UserDataType } from "@/api/user/model";
+import { UserInfoType } from "@/api/user/model";
 import { login as wechatLogin } from "@/api/v1/wechat";
 import type { WechatLoginRequest } from "@/api/v1/types/wechat";
-import Token from "@/store/modules/token";
-import { putUserData, info as fetchUserInfo } from "@/api/v1/user";
+import { putUserData } from "@/api/v1/user";
+import authClient from "@/services/auth/authClient";
 
 export const useUserStore = defineStore(
   "user",
@@ -23,7 +22,7 @@ export const useUserStore = defineStore(
       const token = response.data.token;
 
       if (token) {
-        Token.setToken(token);
+        authClient.acceptToken(token, "wechat");
       } else {
         throw new Error("The login response is missing the access_token");
       }
@@ -92,19 +91,17 @@ export const useUserStore = defineStore(
      */
     async function login(loginData: LoginData) {
       try {
-        const response = await authLogin(loginData);
-        if (!response.data.success) {
+        const response = await authClient.login(loginData);
+        if (!response.success) {
           // Extract error message from API response
-          const errorData = response.data as unknown as { message?: string };
+          const errorData = response as unknown as { message?: string };
           const errorMessage =
             errorData.message || "Login failed, please try again later.";
           throw new Error(errorMessage);
         }
-        const token = response.data.token;
+        const token = response.token;
 
-        if (token) {
-          Token.setToken(token);
-        } else {
+        if (!token) {
           throw new Error("The login response is missing the access_token");
         }
         return true;
@@ -163,13 +160,13 @@ export const useUserStore = defineStore(
     /** 从服务端拉取并更新当前用户信息。 */
     const getUserInfo = async () => {
       try {
-        const response = await fetchUserInfo();
+        const response = await authClient.getCurrentUser();
         // 确保数据存在
-        if (!response.data || !response.data.success) {
+        if (!response || !response.success) {
           logger.error("Verification failed, please Login again.");
           return;
         }
-        const user = response.data.data;
+        const user = response.data;
         if (!user.roles) {
           logger.error("getUserInfo: roles must be a non-null array!");
           return;
@@ -198,17 +195,12 @@ export const useUserStore = defineStore(
       // 调用后端注销 API（忽略失败，确保本地清理总是执行）
       let logoutError: Error | null = null;
       try {
-        if (Token.hasToken()) {
-          await authLogout();
-        }
+        await authClient.logout();
       } catch (error) {
         logger.error("Backend logout failed:", error);
         logoutError =
           error instanceof Error ? error : new Error("Backend logout failed");
       }
-
-      // 正确清除 token
-      Token.removeToken();
 
       // 用户数据清空
       userInfo.value = {

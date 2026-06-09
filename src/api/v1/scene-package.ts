@@ -6,7 +6,7 @@ import axios from "axios";
 
 import request from "@/utils/request";
 import env from "@/environment";
-import Token from "@/store/modules/token";
+import authClient from "@/services/auth/authClient";
 
 // ---- 类型定义 ----
 
@@ -147,11 +147,11 @@ export const getVerseExportJson = (verseId: number) => {
 
 /** ZIP 格式导出（返回 Blob），使用原生 axios 以支持 blob 响应 */
 export const getVerseExportZip = (verseId: number) => {
-  const token = Token.getToken();
+  const accessToken = authClient.getAccessToken();
   return axios.get(`${env.api}/v1/scene-package/verses/${verseId}/export-zip`, {
     headers: {
       Accept: "application/zip",
-      Authorization: token ? `Bearer ${token.accessToken}` : "",
+      Authorization: accessToken ? `Bearer ${accessToken}` : "",
     },
     responseType: "blob",
     timeout: 120000,

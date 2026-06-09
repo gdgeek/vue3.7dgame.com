@@ -145,7 +145,7 @@ export class PluginSystem {
       this.messageBus.broadcast({
         type: "TOKEN_UPDATE",
         id: `token-update-${Date.now()}`,
-        payload: { token },
+        payload: { token: token ?? "" },
       });
     });
 

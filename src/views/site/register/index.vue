@@ -115,9 +115,9 @@ import { useI18n } from "vue-i18n"; // Ensure you have this import
 
 import { register as wechatRegister } from "@/api/v1/wechat";
 import { RegisterData } from "@/api/auth/model";
-import Token from "@/store/modules/token";
 import { createPasswordFormRules } from "@/utils/password-validator";
 import PasswordStrength from "@/components/PasswordStrength/index.vue";
+import authClient from "@/services/auth/authClient";
 const { t } = useI18n(); // I18n for translations
 const token = computed(() => route.query.token as string);
 const settingsStore = useSettingsStore();
@@ -214,7 +214,7 @@ const register = async () => {
         const data = response.data;
         if (data.success) {
           Message.success(t("login.success"));
-          Token.setToken(data.token);
+          authClient.acceptToken(data.token, "register");
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });
         } else {
