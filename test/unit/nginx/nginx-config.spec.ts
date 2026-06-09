@@ -278,7 +278,7 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
 
   it("normalizes proxy prefixes with relative redirects", () => {
     expect(entrypointScript).toContain(
-      'EXACT_LOC_PATH=$(printf \'%s\' "$LOC_PATH" | sed \'s|/*$||\')'
+      "EXACT_LOC_PATH=$(printf '%s' \"$LOC_PATH\" | sed 's|/*$||')"
     );
     expect(entrypointScript).toContain("location = ${EXACT_LOC_PATH}");
     expect(entrypointScript).toContain(
