@@ -276,6 +276,17 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     );
   });
 
+  it("normalizes proxy prefixes with relative redirects", () => {
+    expect(entrypointScript).toContain(
+      'EXACT_LOC_PATH=$(printf \'%s\' "$LOC_PATH" | sed \'s|/*$||\')'
+    );
+    expect(entrypointScript).toContain("location = ${EXACT_LOC_PATH}");
+    expect(entrypointScript).toContain(
+      "return 308 ${LOC_PATH}\\$is_args\\$args;"
+    );
+    expect(entrypointScript).not.toContain("return 308 http");
+  });
+
   it("does NOT generate /api-domain/ failover chain", () => {
     expect(entrypointScript).not.toContain('"/api-domain/"');
   });
