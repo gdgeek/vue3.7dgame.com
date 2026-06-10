@@ -55,6 +55,7 @@ generate_lb_config() {
   PREFIX_NAME="$3"
   WITH_GEEK="$4"
   FAILOVER_STATUS_CODES="${5:-502 503 504}"
+  EXACT_LOC_PATH=$(printf '%s' "$LOC_PATH" | sed 's|/*$||')
 
   CHAIN_RESULT=""
 
@@ -128,6 +129,11 @@ generate_lb_config() {
     echo "[entrypoint] Mode: single backend (resolver-enabled)"
 
     CHAIN_RESULT="
+    # ============ 反向代理 - ${EXACT_LOC_PATH} 规范化 ============
+    location = ${EXACT_LOC_PATH} {
+        return 308 ${LOC_PATH}\$is_args\$args;
+    }
+
     # ============ 反向代理 - ${LOC_PATH} (单后端 + DNS 动态解析) ============
     location ${LOC_PATH} {
         set \$${PREFIX_NAME}_single_backend \"${url}\";
@@ -276,6 +282,11 @@ map \$${PREFIX_NAME}_pool \$${PREFIX_NAME}_fb_host {"
 
   # --- 6. 生成 location 块（server 层级）---
   CHAIN_RESULT="
+    # ============ 反向代理 - ${EXACT_LOC_PATH} 规范化 ============
+    location = ${EXACT_LOC_PATH} {
+        return 308 ${LOC_PATH}\$is_args\$args;
+    }
+
     # ============ 反向代理 - ${LOC_PATH} (负载均衡 + Failover) ============
     location ${LOC_PATH} {
         rewrite ^${LOC_PATH}(.*)\$ /\$1 break;
