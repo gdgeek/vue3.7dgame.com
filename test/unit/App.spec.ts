@@ -58,9 +58,24 @@ const mockUpdateRoutes = vi.fn();
 const mockFetchDomainInfo = vi.fn(async () => {});
 const mockGetUserInfo = vi.fn(async () => {});
 const mockDisposeKTX2Loader = vi.fn();
+const mockLoggerWarn = vi.fn();
+const mockLoggerError = vi.fn();
+const mockAuthClient = {
+  clearToken: vi.fn(),
+  getAccessToken: vi.fn(() => null),
+  getTokenInfo: vi.fn(() => null),
+  refresh: vi.fn(async () => ({})),
+};
 
 vi.mock("@/utils/ability", () => ({
   UpdateAbility: mockUpdateAbility,
+}));
+
+vi.mock("@/utils/logger", () => ({
+  logger: {
+    error: mockLoggerError,
+    warn: mockLoggerWarn,
+  },
 }));
 
 vi.mock("@casl/vue", () => ({
@@ -99,6 +114,10 @@ vi.mock("@/store/modules/domain", () => ({
   }),
 }));
 
+vi.mock("@/services/auth/authClient", () => ({
+  default: mockAuthClient,
+}));
+
 vi.mock("@/router", () => ({
   UpdateRoutes: mockUpdateRoutes,
 }));
@@ -125,6 +144,15 @@ describe("App.vue route transition key", () => {
     mockFetchDomainInfo.mockClear();
     mockGetUserInfo.mockClear();
     mockDisposeKTX2Loader.mockReset();
+    mockLoggerWarn.mockReset();
+    mockLoggerError.mockReset();
+    mockAuthClient.clearToken.mockReset();
+    mockAuthClient.getAccessToken.mockReset();
+    mockAuthClient.getAccessToken.mockReturnValue(null);
+    mockAuthClient.getTokenInfo.mockReset();
+    mockAuthClient.getTokenInfo.mockReturnValue(null);
+    mockAuthClient.refresh.mockReset();
+    mockAuthClient.refresh.mockResolvedValue({});
     mockRoute.fullPath =
       "/resource/polygen/index?lang=zh-CN&theme=edu-friendly&resourceId=5391&open=1";
     mockRoute.path = "/resource/polygen/index";
@@ -141,6 +169,13 @@ describe("App.vue route transition key", () => {
     vi.resetModules();
   });
 
+  async function flushAll() {
+    await nextTick();
+    await Promise.resolve();
+    await Promise.resolve();
+    await nextTick();
+  }
+
   async function mountApp() {
     const { default: App } = await import("@/App.vue");
     const el = document.createElement("div");
@@ -156,8 +191,7 @@ describe("App.vue route transition key", () => {
       el.remove();
     });
 
-    await nextTick();
-    await nextTick();
+    await flushAll();
   }
 
   it("does not remount opted-in pages when only the query string changes", async () => {
@@ -190,5 +224,49 @@ describe("App.vue route transition key", () => {
 
     expect(probeStats.mounted).toBe(2);
     expect(probeStats.unmounted).toBe(1);
+  });
+
+  it("does not request user info when startup has no access token", async () => {
+    await mountApp();
+
+    expect(mockFetchDomainInfo).toHaveBeenCalledTimes(1);
+    expect(mockGetUserInfo).not.toHaveBeenCalled();
+    expect(mockAuthClient.refresh).not.toHaveBeenCalled();
+  });
+
+  it("refreshes an expired access token before requesting user info", async () => {
+    mockAuthClient.getAccessToken.mockReturnValue("access-token");
+    mockAuthClient.getTokenInfo.mockReturnValue({
+      accessToken: "access-token",
+      expires: "2000-01-01T00:00:00.000Z",
+      refreshToken: "refresh-token",
+      token: "access-token",
+    });
+
+    await mountApp();
+
+    expect(mockAuthClient.refresh).toHaveBeenCalledTimes(1);
+    expect(mockGetUserInfo).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears stale auth when startup user info is unauthorized", async () => {
+    mockAuthClient.getAccessToken.mockReturnValue("access-token");
+    mockAuthClient.getTokenInfo.mockReturnValue({
+      accessToken: "access-token",
+      expires: "2999-01-01T00:00:00.000Z",
+      refreshToken: "refresh-token",
+      token: "access-token",
+    });
+    mockGetUserInfo.mockRejectedValueOnce({
+      response: { status: 401 },
+    });
+
+    await mountApp();
+
+    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
+    expect(mockLoggerError).not.toHaveBeenCalledWith(
+      "Failed to bootstrap user info:",
+      expect.anything()
+    );
   });
 });
