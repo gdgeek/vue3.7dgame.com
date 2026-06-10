@@ -69,6 +69,11 @@ function getStaticDomainCandidates(domain: string): string[] {
     }
   };
 
+  const publicDomain = domain.startsWith("www.") ? domain.slice(4) : domain;
+  if (publicDomain.startsWith("d.")) {
+    addDomainAndParents(publicDomain.slice(2));
+  }
+
   if (domain.startsWith("www.")) {
     addDomainAndParents(domain.slice(4));
   }

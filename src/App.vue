@@ -34,6 +34,7 @@ import { useDomainStore } from "@/store/modules/domain";
 import { UpdateRoutes } from "@/router";
 import { disposeKTX2Loader } from "@/lib/three/loaders";
 import authClient from "@/services/auth/authClient";
+import { logger } from "@/utils/logger";
 
 /** @type {string} */
 const appVersion = __APP_VERSION__;
@@ -63,6 +64,42 @@ function getPageTransitionKey(route) {
   return route.fullPath;
 }
 
+function getHttpStatus(error) {
+  return error?.response?.status;
+}
+
+function isExpired(expires) {
+  if (!expires) {
+    return false;
+  }
+
+  const expiresAt = new Date(expires).getTime();
+  return Number.isFinite(expiresAt) && expiresAt <= Date.now();
+}
+
+async function ensureBootToken() {
+  if (!authClient.getAccessToken()) {
+    return false;
+  }
+
+  const tokenInfo = authClient.getTokenInfo();
+  if (!isExpired(tokenInfo?.expires)) {
+    return true;
+  }
+
+  try {
+    await authClient.refresh();
+    return Boolean(authClient.getAccessToken());
+  } catch (error) {
+    if (getHttpStatus(error) === 401) {
+      authClient.clearToken("unauthorized");
+    } else {
+      logger.warn("Failed to refresh auth token during app bootstrap:", error);
+    }
+    return false;
+  }
+}
+
 watch(
   () => userStore.userInfo,
   (newUserInfo) => {
@@ -83,9 +120,16 @@ onMounted(async () => {
   // Fetch domain SEO info on app startup
   await domainStore.fetchDomainInfo();
 
-  const hasToken = authClient.getAccessToken();
-  if (hasToken) {
-    userStore.getUserInfo();
+  if (await ensureBootToken()) {
+    try {
+      await userStore.getUserInfo();
+    } catch (error) {
+      if (getHttpStatus(error) === 401) {
+        authClient.clearToken("unauthorized");
+      } else {
+        logger.error("Failed to bootstrap user info:", error);
+      }
+    }
   }
 });
 
