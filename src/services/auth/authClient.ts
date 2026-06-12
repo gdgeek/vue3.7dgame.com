@@ -194,7 +194,10 @@ export function createAuthClient(options: AuthClientOptions = {}) {
         tokenType: token.data.token_type,
       };
     } catch (error) {
-      console.warn("[auth] OIDC bridge failed; keeping identity login token", error);
+      console.warn(
+        "[auth] OIDC bridge failed; keeping identity login token",
+        error
+      );
       return null;
     }
   }
