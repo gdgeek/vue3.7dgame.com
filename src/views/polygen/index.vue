@@ -140,6 +140,8 @@
         :file-type="fileType"
         :max-size="30"
         :title="$t('polygen.uploadPolygen')"
+        :compatibility-title="t('polygen.uploadCompatibility.title')"
+        :compatibility-notes="modelCompatibilityNotes"
         @save-resource="savePolygen"
         @success="handleUploadSuccess"
       >
@@ -347,6 +349,11 @@ const handleCancelSelectAllPage = () => {
 // Dialog state
 const uploadDialogVisible = ref(false);
 const fileType = ref(".glb");
+const modelCompatibilityNotes = computed(() => [
+  t("polygen.uploadCompatibility.textureFormats"),
+  t("polygen.uploadCompatibility.noDraco"),
+  t("polygen.uploadCompatibility.recommendation"),
+]);
 const viewDialogVisible = ref(false);
 
 // Detail panel state

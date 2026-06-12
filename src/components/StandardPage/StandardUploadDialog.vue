@@ -63,6 +63,16 @@
         <div class="footer-col">最大 {{ maxSize }}MB</div>
       </div>
     </div>
+
+    <div v-if="compatibilityNotes.length" class="compatibility-notes">
+      <div class="compatibility-title">
+        <font-awesome-icon :icon="['fas', 'circle-info']"></font-awesome-icon>
+        {{ compatibilityTitle }}
+      </div>
+      <ul>
+        <li v-for="note in compatibilityNotes" :key="note">{{ note }}</li>
+      </ul>
+    </div>
   </el-dialog>
 </template>
 
@@ -70,6 +80,7 @@
 import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { ElMessageBox } from "element-plus";
 import { Message } from "@/components/Dialog";
 import { useFileStore } from "@/store/modules/config";
 import { UploadFileType } from "@/api/user/model";
@@ -90,6 +101,8 @@ const props = withDefaults(
     maxSize?: number; // MB
     multiple?: boolean;
     showEffectTypeSelect?: boolean;
+    compatibilityTitle?: string;
+    compatibilityNotes?: string[];
   }>(),
   {
     title: "上传资源",
@@ -99,6 +112,8 @@ const props = withDefaults(
     maxSize: 0,
     multiple: true,
     showEffectTypeSelect: false,
+    compatibilityTitle: "兼容说明",
+    compatibilityNotes: () => [],
   }
 );
 
@@ -115,6 +130,9 @@ const selectedFiles = ref<File[]>([]);
 const uploadedCount = ref(0);
 const totalFilesCount = ref(0);
 const uploadedIds = ref<number[]>([]);
+const rejectedModelFiles = ref<{ name: string; reasons: string[] }[]>([]);
+const uploadedModelFiles = ref<string[]>([]);
+const modelSummaryShown = ref(false);
 
 // Progress tracking
 const currentStage = ref(0); // 0: Idle, 1: Hashing, 2: Uploading, 3: Saving
@@ -158,6 +176,266 @@ const supportedFormats = computed(() => {
     .join(", ");
 });
 
+type GlbJsonChunk = {
+  extensionsRequired?: string[];
+  extensionsUsed?: string[];
+  images?: Array<{
+    mimeType?: string;
+    uri?: string;
+  }>;
+  meshes?: Array<{
+    primitives?: Array<{
+      extensions?: Record<string, unknown>;
+    }>;
+  }>;
+};
+
+const SUPPORTED_MODEL_TEXTURE_MIME_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/ktx",
+  "image/ktx2",
+]);
+
+const getUriTextureMimeType = (uri: string): string | null => {
+  const normalizedUri = uri.toLowerCase();
+  if (normalizedUri.startsWith("data:")) {
+    const match = normalizedUri.match(/^data:([^;,]+)/);
+    return match?.[1] ?? null;
+  }
+  const pathWithoutQuery = normalizedUri.split(/[?#]/)[0];
+  if (pathWithoutQuery.endsWith(".png")) return "image/png";
+  if (
+    pathWithoutQuery.endsWith(".jpg") ||
+    pathWithoutQuery.endsWith(".jpeg")
+  ) {
+    return "image/jpeg";
+  }
+  if (pathWithoutQuery.endsWith(".ktx")) return "image/ktx";
+  if (pathWithoutQuery.endsWith(".ktx2")) return "image/ktx2";
+  if (pathWithoutQuery.endsWith(".webp")) return "image/webp";
+  return null;
+};
+
+const parseGlbJson = async (file: File): Promise<GlbJsonChunk> => {
+  const buffer = await file.arrayBuffer();
+  const view = new DataView(buffer);
+  const decoder = new TextDecoder();
+
+  if (buffer.byteLength < 20 || decoder.decode(buffer.slice(0, 4)) !== "glTF") {
+    throw new Error(t("upload.invalidGlb"));
+  }
+
+  const version = view.getUint32(4, true);
+  if (version !== 2) {
+    throw new Error(t("upload.unsupportedGlbVersion", { version }));
+  }
+
+  let offset = 12;
+  while (offset + 8 <= buffer.byteLength) {
+    const chunkLength = view.getUint32(offset, true);
+    const chunkType = decoder.decode(buffer.slice(offset + 4, offset + 8));
+    offset += 8;
+
+    if (offset + chunkLength > buffer.byteLength) break;
+
+    if (chunkType === "JSON") {
+      const jsonText = decoder.decode(buffer.slice(offset, offset + chunkLength));
+      return JSON.parse(jsonText.trim()) as GlbJsonChunk;
+    }
+
+    offset += chunkLength;
+  }
+
+  throw new Error(t("upload.missingGlbJson"));
+};
+
+const getUnsupportedModelReasons = async (file: File): Promise<string[]> => {
+  if (props.dir !== "polygen" || !file.name.toLowerCase().endsWith(".glb")) {
+    return [];
+  }
+
+  let gltf: GlbJsonChunk;
+  try {
+    gltf = await parseGlbJson(file);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : t("upload.invalidGlb");
+    return [message];
+  }
+
+  const reasons: string[] = [];
+  const extensionNames = new Set([
+    ...(gltf.extensionsRequired ?? []),
+    ...(gltf.extensionsUsed ?? []),
+  ]);
+  const hasDracoExtension =
+    extensionNames.has("KHR_draco_mesh_compression") ||
+    Boolean(
+      gltf.meshes?.some((mesh) =>
+        mesh.primitives?.some(
+          (primitive) => primitive.extensions?.KHR_draco_mesh_compression
+        )
+      )
+    );
+
+  if (hasDracoExtension) {
+    reasons.push(t("upload.unsupportedDraco"));
+  }
+
+  const unsupportedTextureTypes = new Set<string>();
+  for (const image of gltf.images ?? []) {
+    const mimeType = (
+      image.mimeType ||
+      (image.uri ? getUriTextureMimeType(image.uri) : "") ||
+      ""
+    ).toLowerCase();
+
+    if (!mimeType) continue;
+    if (mimeType === "image/webp") {
+      unsupportedTextureTypes.add("WebP");
+      continue;
+    }
+    if (!SUPPORTED_MODEL_TEXTURE_MIME_TYPES.has(mimeType)) {
+      unsupportedTextureTypes.add(mimeType.replace(/^image\//, "").toUpperCase());
+    }
+  }
+
+  if (unsupportedTextureTypes.size > 0) {
+    reasons.push(
+      t("upload.unsupportedTextureFormats", {
+        formats: Array.from(unsupportedTextureTypes).join(", "),
+      })
+    );
+  }
+
+  return reasons;
+};
+
+const filterUnsupportedModelFiles = async (files: File[]): Promise<File[]> => {
+  const checkedFiles: File[] = [];
+
+  for (const file of files) {
+    const reasons = await getUnsupportedModelReasons(file);
+    if (reasons.length > 0) {
+      rejectedModelFiles.value.push({ name: file.name, reasons });
+      continue;
+    }
+    checkedFiles.push(file);
+  }
+
+  return checkedFiles;
+};
+
+const escapeHtml = (value: string): string =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const renderModelUploadList = (
+  items: string[],
+  emptyText: string
+): string => {
+  if (items.length === 0) {
+    return `<div class="model-upload-summary-empty">${escapeHtml(emptyText)}</div>`;
+  }
+
+  return `<ul>${items
+    .map((name) => `<li>${escapeHtml(name)}</li>`)
+    .join("")}</ul>`;
+};
+
+const renderRejectedModelUploadList = (
+  items: { name: string; reasons: string[] }[],
+  emptyText: string
+): string => {
+  if (items.length === 0) {
+    return `<div class="model-upload-summary-empty">${escapeHtml(emptyText)}</div>`;
+  }
+
+  return `<ul>${items
+    .map(
+      (item) =>
+        `<li><strong>${escapeHtml(item.name)}</strong><div>${escapeHtml(
+          item.reasons.join("；")
+        )}</div></li>`
+    )
+    .join("")}</ul>`;
+};
+
+const showModelUploadSummary = async (): Promise<void> => {
+  if (
+    props.dir !== "polygen" ||
+    modelSummaryShown.value ||
+    rejectedModelFiles.value.length === 0
+  ) {
+    return;
+  }
+
+  modelSummaryShown.value = true;
+
+  const html = `
+    <div class="model-upload-summary">
+      <section>
+        <h4>${escapeHtml(t("upload.uploadedModels"))}</h4>
+        ${renderModelUploadList(
+          uploadedModelFiles.value,
+          t("upload.noUploadedModels")
+        )}
+      </section>
+      <section>
+        <h4>${escapeHtml(t("upload.rejectedModels"))}</h4>
+        ${renderRejectedModelUploadList(
+          rejectedModelFiles.value,
+          t("upload.noRejectedModels")
+        )}
+      </section>
+    </div>
+    <style>
+      .model-upload-summary { display: grid; gap: 14px; text-align: left; }
+      .model-upload-summary h4 { margin: 0 0 8px; font-size: 14px; color: #1e293b; }
+      .model-upload-summary ul { margin: 0; padding-left: 18px; }
+      .model-upload-summary li { margin: 6px 0; line-height: 1.45; }
+      .model-upload-summary li div { margin-top: 2px; color: #ef4444; font-size: 13px; }
+      .model-upload-summary-empty { color: #94a3b8; font-size: 13px; }
+    </style>
+  `;
+
+  try {
+    await ElMessageBox.alert(html, t("upload.modelUploadSummaryTitle"), {
+      confirmButtonText: t("common.confirm"),
+      dangerouslyUseHTMLString: true,
+      customClass: "model-upload-summary-dialog",
+    });
+  } catch {
+    // Alert may reject if closed; no follow-up needed.
+  }
+};
+
+const finishUploadFile = (file: File, id: number): void => {
+  uploadedCount.value++;
+  uploadedIds.value.push(id);
+
+  if (props.dir === "polygen") {
+    if (id > 0) {
+      uploadedModelFiles.value.push(file.name);
+    } else {
+      rejectedModelFiles.value.push({
+        name: file.name,
+        reasons: [t("upload.saveResourceFailed")],
+      });
+    }
+  }
+
+  if (uploadedCount.value === totalFilesCount.value) {
+    void showModelUploadSummary();
+    emit("success", uploadedIds.value);
+  }
+};
+
 // Drag & Drop Handlers
 const onDragOver = (_e: DragEvent) => {
   isDragOver.value = true;
@@ -196,20 +474,40 @@ const triggerFileSelect = async () => {
 };
 
 const processFiles = async (files: File[]) => {
+  if (props.dir === "polygen") {
+    rejectedModelFiles.value = [];
+    uploadedModelFiles.value = [];
+    modelSummaryShown.value = false;
+  }
+
   // 1. Validate Size
   if (props.maxSize > 0) {
     const maxBytes = props.maxSize * 1024 * 1024;
     const oversized = files.filter((f) => f.size > maxBytes);
     if (oversized.length > 0) {
       const names = oversized.map((f) => f.name).join(", ");
-      Message.error(
-        `${t("upload.fileTooLarge", { size: props.maxSize })}: ${names}`
-      );
+      if (props.dir === "polygen") {
+        oversized.forEach((file) => {
+          rejectedModelFiles.value.push({
+            name: file.name,
+            reasons: [t("upload.fileTooLarge", { size: props.maxSize })],
+          });
+        });
+      } else {
+        Message.error(
+          `${t("upload.fileTooLarge", { size: props.maxSize })}: ${names}`
+        );
+      }
       files = files.filter((f) => f.size <= maxBytes);
     }
   }
 
-  if (files.length === 0) return;
+  files = await filterUnsupportedModelFiles(files);
+
+  if (files.length === 0) {
+    await showModelUploadSummary();
+    return;
+  }
 
   selectedFiles.value = files;
   isDisabled.value = true;
@@ -350,7 +648,11 @@ const uploadSingleFile = async (file: File) => {
     stageProgress.value[2] = 100;
   } catch (err) {
     logger.error(`Error uploading ${file.name}`, err);
-    Message.error(`Upload failed: ${file.name}`);
+    if (props.dir === "polygen") {
+      finishUploadFile(file, -1);
+    } else {
+      Message.error(`Upload failed: ${file.name}`);
+    }
   } finally {
     if (uploadedCount.value === totalFilesCount.value) {
       setTimeout(() => {
@@ -387,11 +689,7 @@ const saveFileRecord = async (
       response.data.id,
       totalFilesCount.value,
       (id: number) => {
-        uploadedCount.value++;
-        uploadedIds.value.push(id);
-        if (uploadedCount.value === totalFilesCount.value) {
-          emit("success", uploadedIds.value);
-        }
+        finishUploadFile(file, id);
       },
       undefined, // effectType
       info,
@@ -608,6 +906,40 @@ const handleDialogClose = () => {
 .footer-col {
   flex: 1;
   text-align: center;
+}
+
+.compatibility-notes {
+  padding: 14px 16px;
+  margin-top: 14px;
+  color: var(--text-secondary, #64748b);
+  background: var(--bg-secondary, #f8fafc);
+  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+}
+
+.compatibility-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+
+  .svg-inline--fa {
+    color: var(--primary-color, #0ea5e9);
+  }
+}
+
+.compatibility-notes ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.compatibility-notes li {
+  margin: 4px 0;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 // Override Dialog styles
