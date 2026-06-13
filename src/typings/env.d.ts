@@ -17,6 +17,14 @@ interface ImportMetaEnv {
   VITE_APP_AUTH_API?: string;
   /** 认证服务选择 */
   VITE_AUTH_PROVIDER?: string;
+  /** 是否启用阶段 8 OIDC bridge */
+  VITE_IDENTITY_OIDC_BRIDGE_ENABLED?: string;
+  /** OIDC bridge client id */
+  VITE_IDENTITY_OIDC_CLIENT_ID?: string;
+  /** OIDC bridge redirect URI */
+  VITE_IDENTITY_OIDC_REDIRECT_URI?: string;
+  /** OIDC bridge scopes */
+  VITE_IDENTITY_OIDC_SCOPE?: string;
   /** Unity WebGL 场景预览地址 */
   VITE_APP_UNITY_PREVIEW_URL?: string;
   /** 是否开启 Mock 服务 */
