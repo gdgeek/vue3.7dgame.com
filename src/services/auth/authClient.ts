@@ -45,6 +45,29 @@ export interface AuthClientOptions {
   mainHttp?: AuthHttpClient;
   tokenStore?: AuthTokenStore;
   provider?: AuthProvider;
+  oidcBridge?: Partial<OidcBridgeConfig>;
+}
+
+export interface OidcBridgeConfig {
+  enabled: boolean;
+  clientId: string;
+  redirectUri: string;
+  scope: string;
+}
+
+interface OidcAuthorizationResponse {
+  code: string;
+  state?: string | null;
+  redirect_uri?: string;
+}
+
+interface OidcTokenResponse {
+  access_token: string;
+  token_type: "Bearer" | string;
+  expires_in: number;
+  refresh_token?: string;
+  id_token?: string;
+  scope?: string;
 }
 
 function createDefaultHttpClient(baseURL: string): AuthHttpClient {
@@ -72,6 +95,10 @@ export function createAuthClient(options: AuthClientOptions = {}) {
     options.authHttp ??
     (provider === "identity" ? createDefaultHttpClient(env.authApi) : mainHttp);
   const tokenStore = options.tokenStore ?? Token;
+  const oidcBridge: OidcBridgeConfig = {
+    ...env.oidcBridge,
+    ...options.oidcBridge,
+  };
   const subscribers = new Set<TokenChangedListener>();
   let refreshPromise: Promise<RefreshTokenResponse> | null = null;
 
@@ -99,8 +126,80 @@ export function createAuthClient(options: AuthClientOptions = {}) {
     const response = await authHttp.post<LoginResponse>("/v1/auth/login", data);
     if (response.data?.token) {
       acceptToken(response.data.token, "login");
+      const oidcToken = await exchangeOidcBridgeToken(response.data.token);
+      if (oidcToken) {
+        response.data.token = oidcToken;
+        acceptToken(oidcToken, "login");
+      }
     }
     return response.data;
+  }
+
+  async function exchangeOidcBridgeToken(
+    identityToken: TokenInfo
+  ): Promise<TokenInfo | null> {
+    if (
+      provider !== "identity" ||
+      !oidcBridge.enabled ||
+      !oidcBridge.clientId ||
+      !oidcBridge.redirectUri
+    ) {
+      return null;
+    }
+
+    try {
+      const codeVerifier = generatePkceVerifier();
+      const codeChallenge = await generatePkceChallenge(codeVerifier);
+      const state = generatePkceVerifier().slice(0, 32);
+      const authorization = await authHttp.get<OidcAuthorizationResponse>(
+        "/authorize",
+        {
+          headers: buildAuthHeaders(identityToken),
+          params: {
+            response_type: "code",
+            response_mode: "json",
+            client_id: oidcBridge.clientId,
+            redirect_uri: oidcBridge.redirectUri,
+            scope: oidcBridge.scope,
+            state,
+            code_challenge: codeChallenge,
+            code_challenge_method: "S256",
+          },
+        }
+      );
+
+      if (!authorization.data?.code) {
+        return null;
+      }
+
+      const token = await authHttp.post<OidcTokenResponse>("/token", {
+        grant_type: "authorization_code",
+        client_id: oidcBridge.clientId,
+        redirect_uri: oidcBridge.redirectUri,
+        code: authorization.data.code,
+        code_verifier: codeVerifier,
+      });
+
+      if (!token.data?.access_token) {
+        return null;
+      }
+
+      return {
+        token: token.data.access_token,
+        accessToken: token.data.access_token,
+        refreshToken: token.data.refresh_token ?? identityToken.refreshToken,
+        expires: new Date(
+          Date.now() + Math.max(0, token.data.expires_in ?? 0) * 1000
+        ).toISOString(),
+        tokenType: token.data.token_type,
+      };
+    } catch (error) {
+      console.warn(
+        "[auth] OIDC bridge failed; keeping identity login token",
+        error
+      );
+      return null;
+    }
   }
 
   async function refresh(refreshToken?: string): Promise<RefreshTokenResponse> {
@@ -206,6 +305,32 @@ export function createAuthClient(options: AuthClientOptions = {}) {
     provider,
     refresh,
   };
+}
+
+function generatePkceVerifier(): string {
+  const bytes = new Uint8Array(32);
+  globalThis.crypto.getRandomValues(bytes);
+  return base64Url(bytes);
+}
+
+async function generatePkceChallenge(verifier: string): Promise<string> {
+  const digest = await globalThis.crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(verifier)
+  );
+  return base64Url(new Uint8Array(digest));
+}
+
+function base64Url(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
 }
 
 const authClient = createAuthClient();
