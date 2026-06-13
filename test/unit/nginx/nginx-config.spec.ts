@@ -363,12 +363,28 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("AUTH_PROVIDER_JSON=");
     expect(entrypointScript).toContain("VITE_AUTH_PROVIDER_JSON=");
     expect(entrypointScript).toContain("VITE_APP_AUTH_API_JSON=");
+    expect(entrypointScript).toContain("IDENTITY_OIDC_BRIDGE_ENABLED_JSON=");
+    expect(entrypointScript).toContain("IDENTITY_OIDC_CLIENT_ID_JSON=");
+    expect(entrypointScript).toContain("IDENTITY_OIDC_REDIRECT_URI_JSON=");
+    expect(entrypointScript).toContain("IDENTITY_OIDC_SCOPE_JSON=");
     expect(entrypointScript).toContain("AUTH_PROVIDER: ${AUTH_PROVIDER_JSON}");
     expect(entrypointScript).toContain(
       "VITE_AUTH_PROVIDER: ${VITE_AUTH_PROVIDER_JSON}"
     );
     expect(entrypointScript).toContain(
       "VITE_APP_AUTH_API: ${VITE_APP_AUTH_API_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "IDENTITY_OIDC_BRIDGE_ENABLED: ${IDENTITY_OIDC_BRIDGE_ENABLED_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "IDENTITY_OIDC_CLIENT_ID: ${IDENTITY_OIDC_CLIENT_ID_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "IDENTITY_OIDC_REDIRECT_URI: ${IDENTITY_OIDC_REDIRECT_URI_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "IDENTITY_OIDC_SCOPE: ${IDENTITY_OIDC_SCOPE_JSON}"
     );
   });
 
