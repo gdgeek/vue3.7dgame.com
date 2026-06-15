@@ -292,7 +292,7 @@
               <div class="visibility-group">
                 <button
                   class="vis-btn"
-                  :class="{ active: !currentVerse?.public }"
+                  :class="{ active: !currentVerseIsPublic }"
                   @click="handleVisibilityChange(false)"
                 >
                   <font-awesome-icon
@@ -302,7 +302,7 @@
                 </button>
                 <button
                   class="vis-btn"
-                  :class="{ active: currentVerse?.public }"
+                  :class="{ active: currentVerseIsPublic }"
                   @click="handleVisibilityChange(true)"
                 >
                   <font-awesome-icon
@@ -489,6 +489,28 @@ const detailVisible = ref(false);
 const detailLoading = ref(false);
 const currentVerse = ref<VerseData | null>(null);
 const ability = useAbility();
+
+const isPublicValue = (value: unknown) => {
+  return value === true || value === 1 || value === "1" || value === "true";
+};
+
+const currentVerseIsPublic = computed(() =>
+  isPublicValue(currentVerse.value?.public)
+);
+
+const syncVerseVisibility = (verseId: number, isPublic: boolean) => {
+  if (currentVerse.value?.id === verseId) {
+    currentVerse.value = {
+      ...currentVerse.value,
+      public: isPublic,
+    };
+  }
+
+  const item = (items.value ?? []).find((verse) => verse.id === verseId);
+  if (item) {
+    item.public = isPublic;
+  }
+};
 
 const canManage = computed(() => {
   return (
@@ -819,15 +841,16 @@ const handleRemoveTag = async (tagId: number) => {
 };
 
 const handleVisibilityChange = async (isPublic: boolean) => {
-  if (!currentVerse.value || currentVerse.value.public === isPublic) return;
+  if (!currentVerse.value || currentVerseIsPublic.value === isPublic) return;
 
   try {
+    const verseId = currentVerse.value.id;
     if (isPublic) {
-      await addPublic(currentVerse.value.id);
+      await addPublic(verseId);
     } else {
-      await removePublic(currentVerse.value.id);
+      await removePublic(verseId);
     }
-    currentVerse.value.public = isPublic;
+    syncVerseVisibility(verseId, isPublic);
     Message.success(
       isPublic
         ? t("verse.view.public.addSuccess")

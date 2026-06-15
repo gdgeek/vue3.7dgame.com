@@ -715,6 +715,7 @@ const handleDelete = async () => {
       }
     );
     await deletePolygen(String(currentPolygen.value.id));
+    scopeFilter.removeResourcesByIds([currentPolygen.value.id]);
     viewDialogVisible.value = false;
     clearDetailQuery();
     refresh();
@@ -792,6 +793,7 @@ const deletedWindow = async (
       }
     );
     await deletePolygen(String(item.id));
+    scopeFilter.removeResourcesByIds([item.id]);
     refresh();
     Message.success(t("polygen.confirm.success"));
   } catch {
@@ -830,6 +832,7 @@ const handleBatchDelete = async () => {
       await deletePolygen(String(item.id));
     }
 
+    scopeFilter.removeResourcesByIds(selected.map((item) => item.id));
     clearSelection();
     refresh();
     Message.success(
