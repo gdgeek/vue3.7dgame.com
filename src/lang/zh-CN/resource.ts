@@ -110,7 +110,8 @@ export default {
     uploadFile: "选择模型（.glb文件），并上传",
     uploadCompatibility: {
       title: "GLB 兼容说明",
-      textureFormats: "贴图建议使用 PNG、JPEG/JPG、KTX/KTX2 格式；客户端暂不支持 WebP 贴图。",
+      textureFormats:
+        "贴图建议使用 PNG、JPEG/JPG、KTX/KTX2 格式；客户端暂不支持 WebP 贴图。",
       recommendation: "上传前请将 WebP 贴图转换为 PNG、JPEG/JPG 或 KTX/KTX2。",
     },
     view: {

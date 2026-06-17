@@ -318,9 +318,7 @@ export function useResourceScopeFilter(resourceType: string, pageSize = 24) {
 
   const removeResourcesByIds = (ids: Array<number | string>) => {
     const deletedIds = new Set(
-      ids
-        .map((id) => Number(id))
-        .filter((id) => Number.isFinite(id))
+      ids.map((id) => Number(id)).filter((id) => Number.isFinite(id))
     );
 
     if (deletedIds.size === 0) return;

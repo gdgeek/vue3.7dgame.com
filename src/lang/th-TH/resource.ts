@@ -424,12 +424,10 @@ export default {
     fileSizeExceededList:
       "The following files exceed the {size}MB limit: {names}",
     modelCompatibilityRejected: "ไม่สามารถอัปโหลด {name}: {reasons}",
-    unsupportedTextureFormats:
-      "มีรูปแบบเท็กซ์เจอร์ที่ยังไม่รองรับ: {formats}",
+    unsupportedTextureFormats: "มีรูปแบบเท็กซ์เจอร์ที่ยังไม่รองรับ: {formats}",
     invalidGlb: "ไม่ใช่ไฟล์ GLB ที่ถูกต้อง",
     missingGlbJson: "ไฟล์ GLB ไม่มีข้อมูล JSON",
-    unsupportedGlbVersion:
-      "ยังไม่รองรับ GLB v{version}; โปรดใช้ glTF 2.0",
+    unsupportedGlbVersion: "ยังไม่รองรับ GLB v{version}; โปรดใช้ glTF 2.0",
     modelUploadSummaryTitle: "ผลการอัปโหลดโมเดล",
     uploadedModels: "โมเดลที่อัปโหลดสำเร็จ",
     rejectedModels: "โมเดลที่ไม่สามารถอัปโหลดได้",

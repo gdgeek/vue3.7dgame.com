@@ -191,10 +191,7 @@ const getUriTextureMimeType = (uri: string): string | null => {
   }
   const pathWithoutQuery = normalizedUri.split(/[?#]/)[0];
   if (pathWithoutQuery.endsWith(".png")) return "image/png";
-  if (
-    pathWithoutQuery.endsWith(".jpg") ||
-    pathWithoutQuery.endsWith(".jpeg")
-  ) {
+  if (pathWithoutQuery.endsWith(".jpg") || pathWithoutQuery.endsWith(".jpeg")) {
     return "image/jpeg";
   }
   if (pathWithoutQuery.endsWith(".ktx")) return "image/ktx";
@@ -226,7 +223,9 @@ const parseGlbJson = async (file: File): Promise<GlbJsonChunk> => {
     if (offset + chunkLength > buffer.byteLength) break;
 
     if (chunkType === "JSON") {
-      const jsonText = decoder.decode(buffer.slice(offset, offset + chunkLength));
+      const jsonText = decoder.decode(
+        buffer.slice(offset, offset + chunkLength)
+      );
       return JSON.parse(jsonText.trim()) as GlbJsonChunk;
     }
 
@@ -288,10 +287,7 @@ const escapeHtml = (value: string): string =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
-const renderModelUploadList = (
-  items: string[],
-  emptyText: string
-): string => {
+const renderModelUploadList = (items: string[], emptyText: string): string => {
   if (items.length === 0) {
     return `<div class="model-upload-summary-empty">${escapeHtml(emptyText)}</div>`;
   }

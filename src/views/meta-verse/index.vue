@@ -192,7 +192,10 @@
             @click="handlePublishSnapshot"
           >
             <font-awesome-icon
-              :icon="['fas', isPublishingSnapshot ? 'spinner' : 'cloud-arrow-up']"
+              :icon="[
+                'fas',
+                isPublishingSnapshot ? 'spinner' : 'cloud-arrow-up',
+              ]"
               :spin="isPublishingSnapshot"
             ></font-awesome-icon>
             {{ t("verse.view.sceneEditor.publishScene") }}

@@ -420,8 +420,7 @@ export default {
     fileTooLarge: "File exceeds {size}MB limit",
     fileSizeExceededList:
       "The following files exceed the {size}MB limit: {names}",
-    modelCompatibilityRejected:
-      "{name} はアップロードできません: {reasons}",
+    modelCompatibilityRejected: "{name} はアップロードできません: {reasons}",
     unsupportedTextureFormats:
       "未対応のテクスチャ形式が含まれています: {formats}",
     invalidGlb: "有効な GLB ファイルではありません",
