@@ -186,6 +186,17 @@
             ></font-awesome-icon>
             {{ t("route.project.sceneEditor") }}
           </button>
+          <button
+            class="btn-pill-primary enter-edit-btn publish-scene-btn"
+            :disabled="isPublishingSnapshot"
+            @click="handlePublishSnapshot"
+          >
+            <font-awesome-icon
+              :icon="['fas', isPublishingSnapshot ? 'spinner' : 'cloud-arrow-up']"
+              :spin="isPublishingSnapshot"
+            ></font-awesome-icon>
+            {{ t("verse.view.sceneEditor.publishScene") }}
+          </button>
           <div class="actions-row">
             <button class="btn-pill-secondary" @click="handleExport">
               <font-awesome-icon
@@ -281,7 +292,7 @@
               <div class="visibility-group">
                 <button
                   class="vis-btn"
-                  :class="{ active: !currentVerse?.public }"
+                  :class="{ active: !currentVerseIsPublic }"
                   @click="handleVisibilityChange(false)"
                 >
                   <font-awesome-icon
@@ -291,7 +302,7 @@
                 </button>
                 <button
                   class="vis-btn"
-                  :class="{ active: currentVerse?.public }"
+                  :class="{ active: currentVerseIsPublic }"
                   @click="handleVisibilityChange(true)"
                 >
                   <font-awesome-icon
@@ -426,6 +437,7 @@ import {
   removePublic,
   addTag,
   removeTag,
+  takePhoto,
 } from "@/api/v1/verse";
 import { exportScene } from "@/services/scene-package/export-service";
 import { getPicture } from "@/api/v1/resources/index";
@@ -446,6 +458,7 @@ import {
 const { t } = useI18n();
 const router = useRouter();
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
+const isPublishingSnapshot = ref(false);
 
 const {
   items,
@@ -476,6 +489,28 @@ const detailVisible = ref(false);
 const detailLoading = ref(false);
 const currentVerse = ref<VerseData | null>(null);
 const ability = useAbility();
+
+const isPublicValue = (value: unknown) => {
+  return value === true || value === 1 || value === "1" || value === "true";
+};
+
+const currentVerseIsPublic = computed(() =>
+  isPublicValue(currentVerse.value?.public)
+);
+
+const syncVerseVisibility = (verseId: number, isPublic: boolean) => {
+  if (currentVerse.value?.id === verseId) {
+    currentVerse.value = {
+      ...currentVerse.value,
+      public: isPublic,
+    };
+  }
+
+  const item = (items.value ?? []).find((verse) => verse.id === verseId);
+  if (item) {
+    item.public = isPublic;
+  }
+};
 
 const canManage = computed(() => {
   return (
@@ -806,15 +841,16 @@ const handleRemoveTag = async (tagId: number) => {
 };
 
 const handleVisibilityChange = async (isPublic: boolean) => {
-  if (!currentVerse.value || currentVerse.value.public === isPublic) return;
+  if (!currentVerse.value || currentVerseIsPublic.value === isPublic) return;
 
   try {
+    const verseId = currentVerse.value.id;
     if (isPublic) {
-      await addPublic(currentVerse.value.id);
+      await addPublic(verseId);
     } else {
-      await removePublic(currentVerse.value.id);
+      await removePublic(verseId);
     }
-    currentVerse.value.public = isPublic;
+    syncVerseVisibility(verseId, isPublic);
     Message.success(
       isPublic
         ? t("verse.view.public.addSuccess")
@@ -912,6 +948,27 @@ const handleExport = async () => {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : t("ui.unknownError");
     Message.error(t("ui.exportFailed", { message }));
+  }
+};
+
+const handlePublishSnapshot = async () => {
+  if (!currentVerse.value || isPublishingSnapshot.value) return;
+
+  isPublishingSnapshot.value = true;
+  try {
+    await takePhoto(currentVerse.value.id);
+    const response = await getVerse(
+      currentVerse.value.id,
+      "image,author,verseTags,metas"
+    );
+    currentVerse.value = response.data;
+    await refresh();
+    Message.success(t("verse.view.sceneEditor.publishSuccess"));
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    Message.error(message || t("verse.view.sceneEditor.error1"));
+  } finally {
+    isPublishingSnapshot.value = false;
   }
 };
 
@@ -1520,6 +1577,16 @@ const formatItemDate = (dateStr?: string) => {
     --standard-page-max-radius,
     calc(var(--radius-lg, 24px) / 3)
   ) !important;
+}
+
+.publish-scene-btn {
+  margin-top: 10px;
+}
+
+.publish-scene-btn:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.65;
+  transform: none !important;
 }
 
 :deep(.panel-actions .dual-primary-btn) {

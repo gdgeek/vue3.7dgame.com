@@ -308,6 +308,53 @@ export function useResourceScopeFilter(resourceType: string, pageSize = 24) {
     return true;
   };
 
+  const filterDeletedResources = (
+    resources: ResourceInfo[] | undefined,
+    deletedIds: Set<number>
+  ): ResourceInfo[] => {
+    if (!Array.isArray(resources)) return [];
+    return resources.filter((resource) => !deletedIds.has(resource.id));
+  };
+
+  const removeResourcesByIds = (ids: Array<number | string>) => {
+    const deletedIds = new Set(
+      ids
+        .map((id) => Number(id))
+        .filter((id) => Number.isFinite(id))
+    );
+
+    if (deletedIds.size === 0) return;
+
+    scopedSceneResources.value = filterDeletedResources(
+      scopedSceneResources.value,
+      deletedIds
+    );
+    scopedEntityResources.value = filterDeletedResources(
+      scopedEntityResources.value,
+      deletedIds
+    );
+
+    entities.value = entities.value.map((entity) => ({
+      ...entity,
+      resources: filterDeletedResources(entity.resources, deletedIds),
+    }));
+
+    sceneCache.forEach((detail) => {
+      detail.resources = filterDeletedResources(detail.resources, deletedIds);
+      detail.metas = detail.metas?.map((meta) => ({
+        ...meta,
+        resources: filterDeletedResources(meta.resources, deletedIds),
+      }));
+    });
+
+    entityResourcesCache.forEach((resources, entityId) => {
+      entityResourcesCache.set(
+        entityId,
+        filterDeletedResources(resources, deletedIds)
+      );
+    });
+  };
+
   watch(
     showSceneSelect,
     async (visible) => {
@@ -338,6 +385,7 @@ export function useResourceScopeFilter(resourceType: string, pageSize = 24) {
     handleScopedSearch,
     handleScopedSort,
     handleScopedPageChange,
+    removeResourcesByIds,
     loadScenes,
   };
 }

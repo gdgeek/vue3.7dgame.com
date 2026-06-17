@@ -108,6 +108,11 @@ export default {
       info: "已取消删除",
     },
     uploadFile: "选择模型（.glb文件），并上传",
+    uploadCompatibility: {
+      title: "GLB 兼容说明",
+      textureFormats: "贴图建议使用 PNG、JPEG/JPG、KTX/KTX2 格式；客户端暂不支持 WebP 贴图。",
+      recommendation: "上传前请将 WebP 贴图转换为 PNG、JPEG/JPG 或 KTX/KTX2。",
+    },
     view: {
       title: "模型名称：",
       info: {
@@ -421,6 +426,17 @@ export default {
     maxSizeLimit: "单个文件最大 {size}MB",
     fileTooLarge: "文件超过 {size}MB 限制",
     fileSizeExceededList: "以下文件超过 {size}MB 限制: {names}",
+    modelCompatibilityRejected: "{name} 无法上传：{reasons}",
+    unsupportedTextureFormats: "包含不支持的贴图格式：{formats}",
+    invalidGlb: "不是有效的 GLB 文件",
+    missingGlbJson: "GLB 文件缺少 JSON 数据",
+    unsupportedGlbVersion: "不支持 GLB v{version}，请使用 glTF 2.0",
+    modelUploadSummaryTitle: "模型上传结果",
+    uploadedModels: "正常上传的模型",
+    rejectedModels: "无法上传的模型",
+    noUploadedModels: "暂无正常上传的模型",
+    noRejectedModels: "暂无无法上传的模型",
+    saveResourceFailed: "资源保存失败",
   },
   resource: {
     type: {
