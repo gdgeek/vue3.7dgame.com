@@ -722,6 +722,22 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         ready = true;
         options.onReady();
       } else if (msg.type === "RESPONSE") {
+        if (payload.action === "save-error") {
+          const message =
+            typeof payload.message === "string"
+              ? payload.message
+              : t(options.i18nKeys.error1);
+          Message.error(message);
+          isSaving.value = false;
+          if (saveReject) {
+            saveReject(new Error(message));
+            saveReject = null;
+          }
+          saveResolve = null;
+          pendingSavePromise = null;
+          return;
+        }
+
         if (payload.action === "save" && !payload.noChange) {
           // --- 有变更的保存响应 ---
           if (!isEditorPostPayload(payload)) {

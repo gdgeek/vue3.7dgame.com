@@ -140,6 +140,8 @@
         :file-type="fileType"
         :max-size="30"
         :title="$t('polygen.uploadPolygen')"
+        :compatibility-title="t('polygen.uploadCompatibility.title')"
+        :compatibility-notes="modelCompatibilityNotes"
         @save-resource="savePolygen"
         @success="handleUploadSuccess"
       >
@@ -347,6 +349,10 @@ const handleCancelSelectAllPage = () => {
 // Dialog state
 const uploadDialogVisible = ref(false);
 const fileType = ref(".glb");
+const modelCompatibilityNotes = computed(() => [
+  t("polygen.uploadCompatibility.textureFormats"),
+  t("polygen.uploadCompatibility.recommendation"),
+]);
 const viewDialogVisible = ref(false);
 
 // Detail panel state
@@ -708,6 +714,7 @@ const handleDelete = async () => {
       }
     );
     await deletePolygen(String(currentPolygen.value.id));
+    scopeFilter.removeResourcesByIds([currentPolygen.value.id]);
     viewDialogVisible.value = false;
     clearDetailQuery();
     refresh();
@@ -785,6 +792,7 @@ const deletedWindow = async (
       }
     );
     await deletePolygen(String(item.id));
+    scopeFilter.removeResourcesByIds([item.id]);
     refresh();
     Message.success(t("polygen.confirm.success"));
   } catch {
@@ -823,6 +831,7 @@ const handleBatchDelete = async () => {
       await deletePolygen(String(item.id));
     }
 
+    scopeFilter.removeResourcesByIds(selected.map((item) => item.id));
     clearSelection();
     refresh();
     Message.success(
