@@ -106,6 +106,13 @@ export default {
       info: "削除がキャンセルされました",
     },
     uploadFile: "モデル(.glbファイル)を選択してアップロード",
+    uploadCompatibility: {
+      title: "GLB 互換性メモ",
+      textureFormats:
+        "テクスチャは PNG、JPEG/JPG、KTX/KTX2 形式を使用してください。クライアントでは WebP テクスチャは未対応です。",
+      recommendation:
+        "アップロード前に WebP テクスチャを PNG、JPEG/JPG、または KTX/KTX2 に変換してください。",
+    },
     view: {
       title: "モデル名：",
       info: {
@@ -413,6 +420,19 @@ export default {
     fileTooLarge: "File exceeds {size}MB limit",
     fileSizeExceededList:
       "The following files exceed the {size}MB limit: {names}",
+    modelCompatibilityRejected: "{name} はアップロードできません: {reasons}",
+    unsupportedTextureFormats:
+      "未対応のテクスチャ形式が含まれています: {formats}",
+    invalidGlb: "有効な GLB ファイルではありません",
+    missingGlbJson: "GLB ファイルに JSON データがありません",
+    unsupportedGlbVersion:
+      "GLB v{version} は対応していません。glTF 2.0 を使用してください",
+    modelUploadSummaryTitle: "モデルアップロード結果",
+    uploadedModels: "正常にアップロードされたモデル",
+    rejectedModels: "アップロードできなかったモデル",
+    noUploadedModels: "正常にアップロードされたモデルはありません",
+    noRejectedModels: "アップロードできなかったモデルはありません",
+    saveResourceFailed: "リソースの保存に失敗しました",
   },
   resource: {
     type: {

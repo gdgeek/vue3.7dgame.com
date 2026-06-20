@@ -109,6 +109,13 @@ export default {
       info: "Deletion canceled",
     },
     uploadFile: "Select a polygen (.glb file) and upload it",
+    uploadCompatibility: {
+      title: "GLB compatibility notes",
+      textureFormats:
+        "Use PNG, JPEG/JPG, or KTX/KTX2 textures. WebP textures are not supported by the client.",
+      recommendation:
+        "Before uploading, convert WebP textures to PNG, JPEG/JPG, or KTX/KTX2.",
+    },
     view: {
       title: "Ploygen Name: ",
       info: {
@@ -427,6 +434,18 @@ export default {
     fileTooLarge: "File exceeds {size}MB limit",
     fileSizeExceededList:
       "The following files exceed the {size}MB limit: {names}",
+    modelCompatibilityRejected: "{name} cannot be uploaded: {reasons}",
+    unsupportedTextureFormats:
+      "contains unsupported texture format(s): {formats}",
+    invalidGlb: "not a valid GLB file",
+    missingGlbJson: "GLB file is missing JSON data",
+    unsupportedGlbVersion: "GLB v{version} is not supported; use glTF 2.0",
+    modelUploadSummaryTitle: "Model upload results",
+    uploadedModels: "Uploaded models",
+    rejectedModels: "Models that could not be uploaded",
+    noUploadedModels: "No models were uploaded",
+    noRejectedModels: "No rejected models",
+    saveResourceFailed: "Failed to save resource",
   },
   resource: {
     type: {

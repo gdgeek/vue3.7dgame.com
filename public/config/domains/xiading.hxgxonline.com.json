@@ -6,14 +6,12 @@
   "default_config": {
     "blog": "https://blog.hxgxonline.com",
     "icon": "https://xiading.hxgxonline.com/logo/xiading/logo.webp",
-    "lang": "zh-TW",
     "style": 1,
     "homepage": "https://xiading.hxgxonline.com"
   },
   "configs": {
     "zh-CN": {
       "domain": "xiading.hxgxonline.com",
-      "lang": "zh-TW",
       "links": [
         {
           "url": "#",
