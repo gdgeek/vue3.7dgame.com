@@ -127,6 +127,32 @@ describe("PluginLoader", () => {
       expect(postMessageSpy).not.toHaveBeenCalled();
     });
 
+    it("should expose the iframe before assigning src so the host can register message handling first", async () => {
+      const manifest = createManifest({
+        url: "https://plugin.example.com/app",
+      });
+      const seenByHost: Array<{ inDom: boolean; src: string | null }> = [];
+
+      await loader.load(
+        manifest.id,
+        manifest,
+        container,
+        undefined,
+        (iframe) => {
+          seenByHost.push({
+            inDom: container.contains(iframe),
+            src: iframe.getAttribute("src"),
+          });
+        }
+      );
+
+      expect(seenByHost).toEqual([{ inDom: false, src: null }]);
+      const iframe = container.querySelector("iframe");
+      expect(iframe?.src).toMatch(
+        /^https:\/\/plugin\.example\.com\/app\?v=1\.0\.0&cb=\d+$/
+      );
+    });
+
     it("should return existing record if plugin is already loaded", async () => {
       const manifest = createManifest();
       const first = await loadMountedPlugin(loader, manifest, container);
@@ -143,6 +169,51 @@ describe("PluginLoader", () => {
       const manifest = createManifest();
       const result = await loader.load(manifest.id, manifest, container);
       expect(result.pluginId).toBe(manifest.id);
+    });
+  });
+
+  describe("sendInitMessage", () => {
+    it("should include plugin host context together with extra config", () => {
+      const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1713196923000);
+      const manifest = createManifest({
+        id: "campus",
+        group: "org:test",
+        allowedOrigin: "https://campus.example.com",
+        extraConfig: {
+          organizationId: 1,
+          organizationName: "test",
+          organizationTitle: "测试大学",
+        },
+      });
+      const iframe = document.createElement("iframe");
+      const postMessageSpy = vi.fn();
+      Object.defineProperty(iframe, "contentWindow", {
+        value: { postMessage: postMessageSpy },
+        writable: true,
+      });
+
+      loader.sendInitMessage(iframe, manifest, "jwt-token");
+
+      expect(postMessageSpy).toHaveBeenCalledWith(
+        {
+          type: "INIT",
+          id: "init-campus-1713196923000",
+          payload: {
+            token: "jwt-token",
+            config: {
+              organizationId: 1,
+              organizationName: "test",
+              organizationTitle: "测试大学",
+              hostContext: {
+                pluginId: "campus",
+                group: "org:test",
+              },
+            },
+          },
+        },
+        "https://campus.example.com"
+      );
+      nowSpy.mockRestore();
     });
   });
 

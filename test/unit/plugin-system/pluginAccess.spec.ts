@@ -22,16 +22,43 @@ describe("plugin access helpers", () => {
 
   it("checks visibility for auth-only scopes", () => {
     expect(
-      isVisibleForScope("auth-only", { authenticated: true, roles: [] })
+      isVisibleForScope("auth-only", { authenticated: true, roles: ["user"] })
     ).toBe(true);
     expect(
       isVisibleForScope("auth-only", { authenticated: false, roles: [] })
+    ).toBe(false);
+    expect(
+      isVisibleForScope("auth-only", { authenticated: true, roles: [] })
     ).toBe(false);
   });
 
   it("checks visibility for role-scoped plugins", () => {
     expect(
       isVisibleForScope("admin-only", {
+        authenticated: true,
+        roles: ["root"],
+      })
+    ).toBe(true);
+    expect(
+      isVisibleForScope("admin-only", {
+        authenticated: true,
+        roles: ["admin"],
+      })
+    ).toBe(true);
+    expect(
+      isVisibleForScope("admin-only", {
+        authenticated: true,
+        roles: ["manager"],
+      })
+    ).toBe(false);
+    expect(
+      isVisibleForScope("manager-only", {
+        authenticated: true,
+        roles: ["root"],
+      })
+    ).toBe(true);
+    expect(
+      isVisibleForScope("manager-only", {
         authenticated: true,
         roles: ["admin"],
       })
@@ -42,6 +69,12 @@ describe("plugin access helpers", () => {
         roles: ["manager"],
       })
     ).toBe(true);
+    expect(
+      isVisibleForScope("manager-only", {
+        authenticated: true,
+        roles: ["user"],
+      })
+    ).toBe(false);
     expect(
       isVisibleForScope("root-only", {
         authenticated: true,
