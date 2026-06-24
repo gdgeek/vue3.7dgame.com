@@ -152,7 +152,15 @@ export class PluginLoader {
       id: `init-${manifest.id}-${Date.now()}`,
       payload: {
         token: jwt,
-        config: JSON.parse(JSON.stringify(manifest.extraConfig ?? {})),
+        config: JSON.parse(
+          JSON.stringify({
+            ...(manifest.extraConfig ?? {}),
+            hostContext: {
+              pluginId: manifest.id,
+              group: manifest.group,
+            },
+          })
+        ),
       },
     };
 

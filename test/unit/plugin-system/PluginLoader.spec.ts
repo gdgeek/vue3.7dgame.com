@@ -146,6 +146,51 @@ describe("PluginLoader", () => {
     });
   });
 
+  describe("sendInitMessage", () => {
+    it("should include plugin host context together with extra config", () => {
+      const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1713196923000);
+      const manifest = createManifest({
+        id: "campus",
+        group: "org:test",
+        allowedOrigin: "https://campus.example.com",
+        extraConfig: {
+          organizationId: 1,
+          organizationName: "test",
+          organizationTitle: "测试大学",
+        },
+      });
+      const iframe = document.createElement("iframe");
+      const postMessageSpy = vi.fn();
+      Object.defineProperty(iframe, "contentWindow", {
+        value: { postMessage: postMessageSpy },
+        writable: true,
+      });
+
+      loader.sendInitMessage(iframe, manifest, "jwt-token");
+
+      expect(postMessageSpy).toHaveBeenCalledWith(
+        {
+          type: "INIT",
+          id: "init-campus-1713196923000",
+          payload: {
+            token: "jwt-token",
+            config: {
+              organizationId: 1,
+              organizationName: "test",
+              organizationTitle: "测试大学",
+              hostContext: {
+                pluginId: "campus",
+                group: "org:test",
+              },
+            },
+          },
+        },
+        "https://campus.example.com"
+      );
+      nowSpy.mockRestore();
+    });
+  });
+
   describe("unload", () => {
     it("should remove iframe from DOM", async () => {
       const manifest = createManifest();
