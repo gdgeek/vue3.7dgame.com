@@ -86,18 +86,18 @@ export class PluginLoader {
     iframe.setAttribute("sandbox", manifest.sandbox ?? DEFAULT_SANDBOX);
     iframe.setAttribute("allow", "clipboard-write; clipboard-read");
     iframe.title = manifest.name;
-    iframe.src = iframeUrl;
 
     // Style: fill container
     iframe.style.width = "100%";
     iframe.style.height = "100%";
     iframe.style.border = "0";
 
-    container.appendChild(iframe);
-
-    // PluginSystem waits for PLUGIN_READY before sending INIT. The loader only
-    // records that the iframe has been mounted into the host DOM.
+    // Register before navigation starts so an eagerly cached plugin cannot send
+    // PLUGIN_READY before the host MessageBus knows this iframe.
     onIframeCreated?.(iframe);
+
+    iframe.src = iframeUrl;
+    container.appendChild(iframe);
 
     const record: LoadedPlugin = {
       pluginId,
