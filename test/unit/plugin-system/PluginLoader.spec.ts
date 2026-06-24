@@ -128,15 +128,23 @@ describe("PluginLoader", () => {
     });
 
     it("should expose the iframe before assigning src so the host can register message handling first", async () => {
-      const manifest = createManifest({ url: "https://plugin.example.com/app" });
+      const manifest = createManifest({
+        url: "https://plugin.example.com/app",
+      });
       const seenByHost: Array<{ inDom: boolean; src: string | null }> = [];
 
-      await loader.load(manifest.id, manifest, container, undefined, (iframe) => {
-        seenByHost.push({
-          inDom: container.contains(iframe),
-          src: iframe.getAttribute("src"),
-        });
-      });
+      await loader.load(
+        manifest.id,
+        manifest,
+        container,
+        undefined,
+        (iframe) => {
+          seenByHost.push({
+            inDom: container.contains(iframe),
+            src: iframe.getAttribute("src"),
+          });
+        }
+      );
 
       expect(seenByHost).toEqual([{ inDom: false, src: null }]);
       const iframe = container.querySelector("iframe");
