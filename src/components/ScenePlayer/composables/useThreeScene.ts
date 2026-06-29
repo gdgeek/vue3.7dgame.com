@@ -2,16 +2,21 @@
  * Three.js scene setup composable for ScenePlayer.
  *
  * Encapsulates renderer creation, camera setup, lighting, OrbitControls,
- * Stats overlay (verse mode only), the animation loop, and ResizeObserver.
+ * the animation loop, and ResizeObserver.
  *
  * Call useThreeScene() at component setup() level so threeScene is available
  * immediately. Then call setupScene(container, options) inside onMounted.
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import Stats from "stats.js";
 import type { Ref } from "vue";
 import { logger } from "@/utils/logger";
+
+const SCENE_BACKGROUND_COLOR = 0x1f2937;
+const GROUND_GRID_SIZE = 8;
+const GROUND_GRID_DIVISIONS = 16;
+const GROUND_GRID_CENTER_COLOR = 0x8f9aa6;
+const GROUND_GRID_COLOR = 0x5f6f7d;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,7 +27,7 @@ type AnimateCallback = (delta: number) => void;
 type ThreeSceneOptions = {
   /** Whether the dark theme background colour should be used. */
   isDark: boolean;
-  /** Rendering mode: 'meta' uses smaller camera range; 'verse' enables Stats overlay. */
+  /** Rendering mode: 'meta' uses smaller camera range; 'verse' supports larger scenes. */
   mode: "meta" | "verse";
   /**
    * External ref for OrbitControls.
@@ -72,7 +77,7 @@ export function useThreeScene() {
 
   /**
    * Initialises the full Three.js stack: renderer, camera, lights, OrbitControls,
-   * optional Stats overlay, animation loop, and ResizeObserver.
+   * animation loop, and ResizeObserver.
    *
    * Must be called inside onMounted after the container element is available.
    *
@@ -92,7 +97,7 @@ export function useThreeScene() {
     // ── Renderer ──────────────────────────────────────────────────────────────
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
-    renderer.setClearColor(isDark ? 0x242424 : 0xeeeeee, 1);
+    renderer.setClearColor(SCENE_BACKGROUND_COLOR, 1);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
@@ -101,7 +106,7 @@ export function useThreeScene() {
     // Verse mode uses a larger camera range to accommodate bigger scenes
     const maxDistance = mode === "verse" ? 1000 : 500;
     camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1800);
-    camera.position.set(0, 7, 20);
+    camera.position.set(0, 1, 3.5);
 
     // ── Lights ────────────────────────────────────────────────────────────────
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
@@ -117,6 +122,26 @@ export function useThreeScene() {
     fillLight.position.set(0, 0, 0);
     threeScene.add(fillLight);
 
+    // Ground reference grid for scene preview orientation.
+    const groundGrid = new THREE.GridHelper(
+      GROUND_GRID_SIZE,
+      GROUND_GRID_DIVISIONS,
+      GROUND_GRID_CENTER_COLOR,
+      GROUND_GRID_COLOR
+    );
+    groundGrid.position.y = 0;
+    const groundGridMaterial = groundGrid.material;
+    if (Array.isArray(groundGridMaterial)) {
+      groundGridMaterial.forEach((material) => {
+        material.transparent = true;
+        material.opacity = 0.35;
+      });
+    } else {
+      groundGridMaterial.transparent = true;
+      groundGridMaterial.opacity = 0.35;
+    }
+    threeScene.add(groundGrid);
+
     // ── OrbitControls ─────────────────────────────────────────────────────────
     _controls = new OrbitControls(camera, renderer.domElement);
     _controls.enableDamping = true;
@@ -127,26 +152,13 @@ export function useThreeScene() {
     // Publish the controls instance to the external ref
     controls.value = _controls;
 
-    // ── Stats overlay (verse mode only) ───────────────────────────────────────
-    let stats: Stats | null = null;
-    if (mode === "verse") {
-      stats = new Stats();
-      stats.showPanel(0); // 0: FPS
-      stats.dom.style.position = "absolute";
-      stats.dom.style.top = "0px";
-      stats.dom.style.left = "0px";
-      container.appendChild(stats.dom);
-    }
-
     // ── Animation loop ────────────────────────────────────────────────────────
     const animate = () => {
       if (isDestroyed) return;
-      stats?.begin();
       const delta = clock.getDelta();
       onFrame(delta);
       _controls!.update();
       renderer!.render(threeScene, camera!);
-      stats?.end();
       rafId = requestAnimationFrame(animate);
     };
     rafId = requestAnimationFrame(animate);
@@ -169,11 +181,11 @@ export function useThreeScene() {
   /**
    * Updates the renderer background colour when the theme changes.
    *
-   * @param isDark - True for dark background (0x242424), false for light (0xeeeeee)
+   * @param isDark - Kept for the existing theme watcher signature.
    */
-  const updateTheme = (isDark: boolean): void => {
+  const updateTheme = (_isDark: boolean): void => {
     if (renderer) {
-      renderer.setClearColor(isDark ? 0x242424 : 0xeeeeee, 1);
+      renderer.setClearColor(SCENE_BACKGROUND_COLOR, 1);
     }
   };
 

@@ -147,6 +147,7 @@ describe("useResourceLoaders", () => {
     collisionObjects: { value: [] },
     rotatingObjects: { value: [] },
     moveableObjects: { value: [] },
+    resourceLoadErrors: { value: [] },
     dragState: {
       isDragging: false,
       draggedObject: null,
@@ -267,6 +268,13 @@ describe("useResourceLoaders", () => {
 
       // Should not throw, just skip
       await expect(processEntities(entities as never)).resolves.toBeUndefined();
+      expect(ctx.resourceLoadErrors.value).toEqual([
+        {
+          uuid: "model-xyz",
+          resource: "999",
+          message: "Resource not found: 999",
+        },
+      ]);
     });
   });
 

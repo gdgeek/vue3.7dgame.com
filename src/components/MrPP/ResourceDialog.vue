@@ -787,7 +787,7 @@ async function doBatchSelect() {
     for (const id of selectedIds.value) {
       const obj = active.value.items.find((item) => item.id == id);
       if (obj) {
-        emit("selected", obj, false);
+        doSelect(obj);
       }
     }
 

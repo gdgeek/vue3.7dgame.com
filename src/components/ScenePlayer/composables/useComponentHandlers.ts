@@ -16,6 +16,7 @@ type ComponentHandlerOptions = {
   uuid: string;
   components: EntityComponent[];
   ctx: LoaderContext;
+  sourceData?: SourceRecord;
 };
 
 /**
@@ -43,18 +44,20 @@ export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
   const rotateComponent = components.find((c) => c.type === "Rotate");
   const movedComponent = components.find((c) => c.type === "Moved");
 
-  const sourceData: SourceRecord = {
-    type: "model",
-    data: {
-      mesh,
-      setVisibility: (isVisible: boolean) => {
-        mesh.visible = isVisible;
+  const sourceData: SourceRecord =
+    opts.sourceData ??
+    ({
+      type: "model",
+      data: {
+        mesh,
+        setVisibility: (isVisible: boolean) => {
+          mesh.visible = isVisible;
+        },
+        cleanup: undefined,
+        updateBoundingBox: undefined,
+        setRotating: undefined,
       },
-      cleanup: undefined,
-      updateBoundingBox: undefined,
-      setRotating: undefined,
-    },
-  };
+    } as SourceRecord);
 
   // ── Action component: click-to-trigger ─────────────────────────────────────
   if (actionComponent) {
@@ -91,7 +94,9 @@ export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
     };
 
     renderer!.domElement.addEventListener("click", handleClick);
+    const prevCleanup = (sourceData.data as SourceModelData).cleanup;
     (sourceData.data as SourceModelData).cleanup = () => {
+      prevCleanup?.();
       renderer!.domElement.removeEventListener("click", handleClick);
     };
   }

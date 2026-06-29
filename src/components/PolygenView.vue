@@ -463,9 +463,20 @@ onMounted(() => {
             animations.value[selectedAnimationIndex.value];
           if (selectedAnimation && selectedAnimation.duration > 0) {
             const duration = selectedAnimation.duration;
-            const actionTime = currentAction.time % duration;
-            currentAnimationTime.value = actionTime;
-            animationProgress.value = (actionTime / duration) * 100;
+            if (duration < 0.1) {
+              currentAnimationTime.value = Math.min(
+                currentAnimationTime.value + delta,
+                duration
+              );
+              animationProgress.value =
+                currentAnimationTime.value >= duration
+                  ? 100
+                  : (currentAnimationTime.value / duration) * 100;
+            } else {
+              const actionTime = currentAction.time % duration;
+              currentAnimationTime.value = actionTime;
+              animationProgress.value = (actionTime / duration) * 100;
+            }
           }
         }
       }
