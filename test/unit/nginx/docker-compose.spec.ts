@@ -24,8 +24,14 @@ describe("docker-compose.prod.yml — environment variables", () => {
     expect(composeConfig).toContain("APP_API_2_URL=");
   });
 
-  it("contains APP_AUTH_1_URL (auth service backend)", () => {
+  it("contains APP_AUTH_1_URL (identity auth backend)", () => {
     expect(composeConfig).toContain("APP_AUTH_1_URL=");
+  });
+
+  it("contains VITE_APP_WECHAT_AUTH_API (WeChat login backend)", () => {
+    expect(composeConfig).toContain(
+      "VITE_APP_WECHAT_AUTH_API=https://auth.bujiaban.com"
+    );
   });
 
   it("contains APP_CONFIG_1_URL (primary config backend)", () => {

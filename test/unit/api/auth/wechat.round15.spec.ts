@@ -5,6 +5,7 @@ vi.mock("@/environment", () => ({
   default: {
     api: "https://api.round15.example",
     authApi: "https://auth.round15.example/",
+    wechatAuthApi: "https://wechat-auth.round15.example/",
   },
 }));
 
@@ -32,10 +33,10 @@ describe("src/api/auth/wechat.ts round15", () => {
     expect(request.mock.calls[0][0].url).toBe("/v1/wechat/qrcode");
   });
 
-  it("getQrcode uses the auth service base URL", async () => {
+  it("getQrcode uses the WeChat auth service base URL", async () => {
     await getQrcode();
     expect(request.mock.calls[0][0].baseURL).toBe(
-      "https://auth.round15.example"
+      "https://wechat-auth.round15.example"
     );
   });
 
@@ -56,10 +57,10 @@ describe("src/api/auth/wechat.ts round15", () => {
     );
   });
 
-  it("refresh uses the auth service base URL", async () => {
+  it("refresh uses the WeChat auth service base URL", async () => {
     await refresh("token-123");
     expect(request.mock.calls[0][0].baseURL).toBe(
-      "https://auth.round15.example"
+      "https://wechat-auth.round15.example"
     );
   });
 
