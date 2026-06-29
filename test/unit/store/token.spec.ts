@@ -20,12 +20,12 @@ vi.mock("@/utils/logger", () => ({
 vi.mock("secure-ls", () => {
   const SecureLS = vi.fn().mockImplementation(() => ({
     set: vi.fn((key: string, data: unknown) => {
-      localStorage.setItem(key, JSON.stringify(data));
+      localStorage.setItem(key, btoa(JSON.stringify(data)));
     }),
     get: vi.fn((key: string) => {
       const raw = localStorage.getItem(key);
       if (raw === null || raw === undefined) return null;
-      return JSON.parse(raw); // 非法 JSON 会 throw，token.ts 的 catch 负责处理
+      return JSON.parse(atob(raw)); // 非法内容会 throw，token.ts 的 catch 负责处理
     }),
     remove: vi.fn((key: string) => {
       localStorage.removeItem(key);
@@ -99,18 +99,10 @@ describe("Token store module", () => {
     });
 
     it("localStorage 存储了非法 JSON 时返回 null 并记录错误", async () => {
-      const { AES } = await import("crypto-js");
       const { logger } = await import("@/utils/logger");
       const Token = (await import("@/store/modules/token")).default;
 
-      // Encrypt a non-JSON string using the same default SECRET_KEY so that
-      // decryption succeeds but JSON.parse throws, triggering logger.error
-      const SECRET_KEY = "mrpp-default-token-secret-2024";
-      const encryptedNonJson = AES.encrypt(
-        "not-valid-json-content",
-        SECRET_KEY
-      ).toString();
-      localStorage.setItem(TOKEN_KEY, encryptedNonJson);
+      localStorage.setItem(TOKEN_KEY, btoa("not-valid-json-content"));
 
       const result = Token.getToken();
 
