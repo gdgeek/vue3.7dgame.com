@@ -7,4 +7,5 @@ window.__ENV__ = {
   AUTH_PROVIDER: null,
   VITE_AUTH_PROVIDER: null,
   VITE_APP_AUTH_API: null,
+  VITE_APP_WECHAT_AUTH_API: null,
 };
