@@ -53,6 +53,9 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const configApiProxyTarget = normalizeDevProxyTarget(
     env.VITE_APP_CONFIG_API_URL || "http://localhost:8088"
   );
+  const wechatAuthProxyTarget = normalizeDevProxyTarget(
+    env.VITE_APP_WECHAT_AUTH_PROXY_TARGET || "https://auth.bujiaban.com"
+  );
   const configApiProxyKeepsPrefix =
     /^https?:\/\/d\.dev\.xrugc\.com(?:\/|$)/.test(configApiProxyTarget);
 
@@ -103,6 +106,11 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             configApiProxyKeepsPrefix
               ? path
               : path.replace(/^\/api-config/, ""),
+        },
+        "/wechat-auth": {
+          changeOrigin: true,
+          target: wechatAuthProxyTarget,
+          rewrite: (path) => path.replace(/^\/wechat-auth/, ""),
         },
         "/webgl-preview": {
           changeOrigin: true,

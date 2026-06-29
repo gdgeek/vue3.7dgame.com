@@ -363,6 +363,7 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain("AUTH_PROVIDER_JSON=");
     expect(entrypointScript).toContain("VITE_AUTH_PROVIDER_JSON=");
     expect(entrypointScript).toContain("VITE_APP_AUTH_API_JSON=");
+    expect(entrypointScript).toContain("VITE_APP_WECHAT_AUTH_API_JSON=");
     expect(entrypointScript).toContain("IDENTITY_OIDC_BRIDGE_ENABLED_JSON=");
     expect(entrypointScript).toContain("IDENTITY_OIDC_CLIENT_ID_JSON=");
     expect(entrypointScript).toContain("IDENTITY_OIDC_REDIRECT_URI_JSON=");
@@ -373,6 +374,9 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     );
     expect(entrypointScript).toContain(
       "VITE_APP_AUTH_API: ${VITE_APP_AUTH_API_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "VITE_APP_WECHAT_AUTH_API: ${VITE_APP_WECHAT_AUTH_API_JSON}"
     );
     expect(entrypointScript).toContain(
       "IDENTITY_OIDC_BRIDGE_ENABLED: ${IDENTITY_OIDC_BRIDGE_ENABLED_JSON}"
@@ -517,6 +521,7 @@ describe("Property 5: Environment-aware URL selection", () => {
         );
         expect(envSource).toMatch(/:\s*["']\/api["']/);
         expect(envSource).toContain("/api-auth");
+        expect(envSource).toContain("https://auth.bujiaban.com");
         expect(envSource).toMatch(/:\s*["']\/api-config\/api["']/);
         expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
       }),
@@ -533,6 +538,7 @@ describe("Property 5: Environment-aware URL selection", () => {
         );
         expect(envSource).toContain("VITE_APP_API_URL");
         expect(envSource).toContain("VITE_APP_AUTH_API");
+        expect(envSource).toContain("VITE_APP_WECHAT_AUTH_API");
         expect(envSource).toContain("import.meta.env.DEV");
       }),
       { numRuns: 100 }

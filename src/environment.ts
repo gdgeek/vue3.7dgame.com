@@ -81,12 +81,22 @@ const normalizeFileStorageDriver = (
 const resolveApiBase = () =>
   import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api";
 
+const productionWechatAuthApiBase = "https://auth.bujiaban.com";
+
 const resolveAuthApiBase = () =>
   (
     getRuntimeEnv().AUTH_API ||
     getRuntimeEnv().VITE_APP_AUTH_API ||
     import.meta.env.VITE_APP_AUTH_API ||
     (import.meta.env.DEV ? "" : "/api-auth")
+  ).replace(/\/+$/, "");
+
+const resolveWechatAuthApiBase = () =>
+  (
+    getRuntimeEnv().WECHAT_AUTH_API ||
+    getRuntimeEnv().VITE_APP_WECHAT_AUTH_API ||
+    import.meta.env.VITE_APP_WECHAT_AUTH_API ||
+    (import.meta.env.DEV ? "" : productionWechatAuthApiBase)
   ).replace(/\/+$/, "");
 
 const boolFromRuntimeEnv = (
@@ -242,6 +252,7 @@ const resolveUnityPreviewUrl = () => {
 const environment = {
   api: resolveApiBase(),
   authApi: resolveAuthApiBase(),
+  wechatAuthApi: resolveWechatAuthApiBase(),
   oidcBridge: resolveOidcBridgeConfig(),
   config_api: "/api-config/api",
   doc: import.meta.env.DEV

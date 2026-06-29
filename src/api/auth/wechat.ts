@@ -2,7 +2,7 @@ import request from "@/utils/request";
 import env from "@/environment";
 
 const authBaseConfig = () => {
-  const baseURL = env.authApi?.replace(/\/+$/, "");
+  const baseURL = env.wechatAuthApi?.replace(/\/+$/, "");
   return baseURL ? { baseURL } : {};
 };
 
