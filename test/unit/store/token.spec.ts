@@ -20,12 +20,12 @@ vi.mock("@/utils/logger", () => ({
 vi.mock("secure-ls", () => {
   const SecureLS = vi.fn().mockImplementation(() => ({
     set: vi.fn((key: string, data: unknown) => {
-      localStorage.setItem(key, JSON.stringify(data));
+      localStorage.setItem(key, btoa(JSON.stringify(data)));
     }),
     get: vi.fn((key: string) => {
       const raw = localStorage.getItem(key);
       if (raw === null || raw === undefined) return null;
-      return JSON.parse(raw); // 非法 JSON 会 throw，token.ts 的 catch 负责处理
+      return JSON.parse(atob(raw)); // 非法内容会 throw，token.ts 的 catch 负责处理
     }),
     remove: vi.fn((key: string) => {
       localStorage.removeItem(key);
@@ -60,7 +60,10 @@ describe("Token store module", () => {
 
       const stored = localStorage.getItem(TOKEN_KEY);
       expect(stored).not.toBeNull();
-      expect(JSON.parse(stored!)).toEqual(token);
+      // stored is AES-encrypted, not plaintext JSON
+      expect(stored).not.toContain(token.accessToken);
+      // but round-trip via getToken() returns original value
+      expect(Token.getToken()).toEqual(token);
     });
 
     it("覆盖已有的 token", async () => {
@@ -85,7 +88,8 @@ describe("Token store module", () => {
       const Token = (await import("@/store/modules/token")).default;
       const token = makeToken();
 
-      localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+      // Use setToken so the data is properly AES-encrypted before storing
+      Token.setToken(token);
 
       const result = Token.getToken();
       expect(result).toEqual(token);
@@ -98,7 +102,7 @@ describe("Token store module", () => {
       const { logger } = await import("@/utils/logger");
       const Token = (await import("@/store/modules/token")).default;
 
-      localStorage.setItem(TOKEN_KEY, "{ invalid json }");
+      localStorage.setItem(TOKEN_KEY, btoa("not-valid-json-content"));
 
       const result = Token.getToken();
 
@@ -213,7 +217,11 @@ describe("Token store module", () => {
       const token = makeToken({ accessToken: "abc-xyz" });
       Token.setToken(token);
       const raw = localStorage.getItem("access_token");
-      expect(raw).toContain("abc-xyz");
+      // raw is AES-encrypted, so it must not contain the plaintext token
+      expect(raw).not.toBeNull();
+      expect(raw).not.toContain("abc-xyz");
+      // but getToken() correctly decrypts and returns the original value
+      expect(Token.getToken()?.accessToken).toBe("abc-xyz");
     });
   });
 });
