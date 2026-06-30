@@ -31,6 +31,10 @@ export default {
         message2: "兩次輸入的密碼不一致",
       },
     },
+    registerErrors: {
+      usernameTaken: "該用戶名已被占用，請換一個",
+      usernameEmailFormat: "用戶名無需使用電子郵箱格式，請直接填寫用戶名",
+    },
     success: "登錄成功",
     error: "表單檢驗未通過",
     loginFailed: "登錄失敗，請稍後重試",
