@@ -116,6 +116,7 @@ import { useI18n } from "vue-i18n"; // Ensure you have this import
 import { register as wechatRegister } from "@/api/v1/wechat";
 import { RegisterData } from "@/api/auth/model";
 import { createPasswordFormRules } from "@/utils/password-validator";
+import { getWechatRegisterErrorMessages } from "@/utils/wechatRegisterError";
 import PasswordStrength from "@/components/PasswordStrength/index.vue";
 import authClient from "@/services/auth/authClient";
 const { t } = useI18n(); // I18n for translations
@@ -177,7 +178,7 @@ const registerRules = computed(() => ({
   repassword: [
     {
       required: true,
-      message: t("login.rules.password.message1"),
+      message: t("login.rules.repassword.message1"),
       trigger: "blur",
     },
     { validator: validatePass2, trigger: "blur" },
@@ -221,17 +222,9 @@ const register = async () => {
           Message.error(t("login.error"));
         }
       } catch (error: unknown) {
-        const axiosError = error as {
-          response?: { data?: { password?: string[]; message?: string } };
-        };
-        const passwordErrors = axiosError?.response?.data?.password;
-        if (Array.isArray(passwordErrors)) {
-          passwordErrors.forEach((msg: string) => Message.error(msg));
-        } else {
-          Message.error(
-            axiosError?.response?.data?.message || t("login.error")
-          );
-        }
+        getWechatRegisterErrorMessages(error, t).forEach((msg) =>
+          Message.error(msg)
+        );
       }
     } else {
       Message.error(t("login.error"));

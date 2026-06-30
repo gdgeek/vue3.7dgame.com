@@ -31,6 +31,11 @@ export default {
         message2: "The two passwords do not match",
       },
     },
+    registerErrors: {
+      usernameTaken: "This username is already taken. Please choose another.",
+      usernameEmailFormat:
+        "The username does not need to be an email address.",
+    },
     success: "Login Successful",
     error: "Form Validation Failed",
     loginFailed: "Login failed, please try again later",
