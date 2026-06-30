@@ -30,6 +30,10 @@ export default {
         message2: "两次输入的密码不一致",
       },
     },
+    registerErrors: {
+      usernameTaken: "该用户名已被占用，请换一个",
+      usernameEmailFormat: "用户名无需使用邮箱格式，请直接填写用户名",
+    },
     success: "登录成功",
     error: "表单检验未通过",
     loginFailed: "登录失败，请稍后重试",

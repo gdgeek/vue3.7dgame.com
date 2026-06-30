@@ -28,5 +28,6 @@ export const register = (data: WechatRegisterRequest) => {
     url: `/v1/wechat/register`,
     method: "post",
     data,
+    skipErrorMessage: true,
   });
 };

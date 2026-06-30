@@ -31,6 +31,12 @@ export default {
         message2: "2回入力したパスワードが一致しません",
       },
     },
+    registerErrors: {
+      usernameTaken:
+        "このユーザー名はすでに使用されています。別の名前を入力してください。",
+      usernameEmailFormat:
+        "ユーザー名をメールアドレス形式にする必要はありません。",
+    },
     success: "ログイン成功",
     error: "フォーム検証に失敗しました",
     loginFailed: "ログインに失敗しました。しばらくしてから再試行してください",

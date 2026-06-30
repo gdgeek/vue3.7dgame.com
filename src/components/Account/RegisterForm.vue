@@ -107,6 +107,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { register as wechatRegister } from "@/api/v1/wechat";
 import { createPasswordFormRules } from "@/utils/password-validator";
+import { getWechatRegisterErrorMessages } from "@/utils/wechatRegisterError";
 import PasswordStrength from "@/components/PasswordStrength/index.vue";
 import authClient from "@/services/auth/authClient";
 
@@ -204,17 +205,9 @@ const register = async () => {
           Message.error(t("login.error"));
         }
       } catch (error: unknown) {
-        const axiosError = error as {
-          response?: { data?: { password?: string[]; message?: string } };
-        };
-        const passwordErrors = axiosError?.response?.data?.password;
-        if (Array.isArray(passwordErrors)) {
-          passwordErrors.forEach((msg: string) => Message.error(msg));
-        } else {
-          Message.error(
-            axiosError?.response?.data?.message || t("login.error")
-          );
-        }
+        getWechatRegisterErrorMessages(error, t).forEach((msg) =>
+          Message.error(msg)
+        );
       } finally {
         loading.value = false;
       }
