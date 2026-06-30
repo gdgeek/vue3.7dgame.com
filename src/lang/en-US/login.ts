@@ -33,8 +33,7 @@ export default {
     },
     registerErrors: {
       usernameTaken: "This username is already taken. Please choose another.",
-      usernameEmailFormat:
-        "The username does not need to be an email address.",
+      usernameEmailFormat: "The username does not need to be an email address.",
     },
     success: "Login Successful",
     error: "Form Validation Failed",
