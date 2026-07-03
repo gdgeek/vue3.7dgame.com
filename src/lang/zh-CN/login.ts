@@ -12,7 +12,8 @@ export default {
     registerFeatureAssets: "3D 构建",
     registerFeaturePlugins: "实时协作",
     registerFormHint: "填写以下信息，开启你的创作之旅",
-    registerSecurityHint: "我们会对你的账号进行加密保护，并严格保护你的隐私安全。",
+    registerSecurityHint:
+      "我们会对你的账号进行加密保护，并严格保护你的隐私安全。",
     username: "用户名",
     email: "邮箱",
     password: "设置密码",

@@ -13,7 +13,8 @@ export default {
     registerFeatureAssets: "3D 構建",
     registerFeaturePlugins: "即時協作",
     registerFormHint: "填寫以下資訊，開啟你的創作之旅",
-    registerSecurityHint: "我們會對你的帳號進行加密保護，並嚴格保護你的隱私安全。",
+    registerSecurityHint:
+      "我們會對你的帳號進行加密保護，並嚴格保護你的隱私安全。",
     username: "用戶名",
     email: "電子信箱",
     password: "密碼",
