@@ -111,6 +111,7 @@ export default {
         cancel: "取消",
         success: "删除成功!",
         info: "已取消删除",
+        deleteSelfNotAllowed: "不能删除当前登录用户",
       },
       success: "权限更新成功！",
       error: "权限更新失败！",

@@ -5,6 +5,16 @@ export default {
     register: "ลงทะเบียน/เข้าสู่ระบบแพลตฟอร์ม",
     h1: "ยินดีต้อนรับ!",
     h4: "พร้อมที่จะเริ่มหรือยัง?",
+    registerHeroTitle: "เริ่มสร้าง Mixed Reality",
+    registerHeroSubtitle:
+      "เขียนโปรแกรม สร้าง และทำงานร่วมกันในพื้นที่ เพื่อเปลี่ยนไอเดียให้เป็นประสบการณ์แบบอินเทอร์แอกทีฟ",
+    registerBadge: "สมัคร / เข้าสู่ระบบ",
+    registerFeatureWorkspace: "Spatial Coding",
+    registerFeatureAssets: "สร้าง 3D",
+    registerFeaturePlugins: "ร่วมมือแบบสด",
+    registerFormHint: "กรอกข้อมูลด้านล่างเพื่อเริ่มสร้างสรรค์",
+    registerSecurityHint:
+      "บัญชีของคุณจะได้รับการเข้ารหัสและปกป้องความเป็นส่วนตัวอย่างเข้มงวด",
     username: "ชื่อผู้ใช้",
     email: "อีเมล",
     password: "รหัสผ่าน",

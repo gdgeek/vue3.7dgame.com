@@ -5,6 +5,16 @@ export default {
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",
     h4: "準備はできましたか？",
+    registerHeroTitle: "複合現実の制作を始める",
+    registerHeroSubtitle:
+      "空間の中でプログラミング、構築、共同作業を行い、アイデアをインタラクティブな体験に変えましょう。",
+    registerBadge: "登録 / ログイン",
+    registerFeatureWorkspace: "空間プログラミング",
+    registerFeatureAssets: "3D 構築",
+    registerFeaturePlugins: "リアルタイム共同作業",
+    registerFormHint: "以下の情報を入力して制作を始めましょう。",
+    registerSecurityHint:
+      "アカウントは暗号化され、プライバシーは厳重に保護されます。",
     username: "ユーザー名",
     email: "メールアドレス",
     password: "パスワード",

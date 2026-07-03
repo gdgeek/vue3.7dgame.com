@@ -144,6 +144,7 @@ export default {
         cancel: "取消",
         success: "刪除成功!",
         info: "已取消刪除",
+        deleteSelfNotAllowed: "不能刪除目前登入使用者",
       },
       success: "權限更新成功！",
       error: "權限更新失敗！",
