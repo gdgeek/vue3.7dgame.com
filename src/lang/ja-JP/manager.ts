@@ -145,6 +145,7 @@ export default {
         cancel: "キャンセル",
         success: "削除成功！",
         info: "削除がキャンセルされました",
+        deleteSelfNotAllowed: "現在ログイン中のユーザーは削除できません",
       },
       success: "権限の更新に成功しました！",
       error: "権限の更新に失敗しました！",
