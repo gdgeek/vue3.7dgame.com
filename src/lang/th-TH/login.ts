@@ -23,6 +23,10 @@ export default {
     login: "เข้าสู่ระบบ",
     loginCode: "รหัสเข้าสู่ระบบ",
     scanTip: "กรุณาสแกนรหัส QR ด้วยโทรศัพท์มือถือเพื่อเข้าสู่ระบบ",
+    loginCodeUsed: "รหัสเข้าสู่ระบบนี้ถูกใช้แล้ว กรุณารีเฟรชรหัส QR",
+    loginCodeExpired: "รหัสเข้าสู่ระบบนี้หมดอายุแล้ว กรุณารีเฟรชรหัส QR",
+    loginCodeExpiresIn: "หมดอายุใน {seconds} วินาที",
+    refreshLoginCode: "รีเฟรชรหัส QR",
     rules: {
       username: {
         message1: "กรุณากรอกชื่อผู้ใช้",

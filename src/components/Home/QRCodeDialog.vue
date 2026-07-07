@@ -18,7 +18,11 @@
       </template>
       <div class="qrcode-container">
         <div class="qrcode-wrapper">
-          <div v-loading="code === ''" class="qrcode-box">
+          <div
+            v-loading="isLoadingCode"
+            class="qrcode-box"
+            :class="{ 'qrcode-box--disabled': isLoginCodeInactive }"
+          >
             <qrcode-vue
               v-if="code !== ''"
               :value="code"
@@ -28,7 +32,27 @@
             ></qrcode-vue>
           </div>
         </div>
-        <p class="qrcode-tip">{{ t("login.scanTip") }}</p>
+        <p
+          class="qrcode-tip"
+          :class="{ 'qrcode-tip--inactive': isLoginCodeInactive }"
+        >
+          {{ loginCodeTip }}
+        </p>
+        <p
+          v-if="!isLoginCodeInactive && remainingSeconds > 0"
+          class="qrcode-subtip"
+        >
+          {{ t("login.loginCodeExpiresIn", { seconds: remainingSeconds }) }}
+        </p>
+        <el-button
+          v-if="isLoginCodeInactive"
+          type="primary"
+          class="qrcode-refresh"
+          :loading="isRefreshing"
+          @click="refreshLoginCode"
+        >
+          {{ t("login.refreshLoginCode") }}
+        </el-button>
       </div>
     </el-dialog>
   </div>
@@ -36,28 +60,237 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, onMounted } from "vue";
-import { getUserLinked } from "@/api/v1/tools";
+import { computed, ref, onMounted, onUnmounted, watch } from "vue";
+import { getUserLinked, getUserLinkedStatus } from "@/api/v1/tools";
 import { useI18n } from "vue-i18n";
 import QrcodeVue from "qrcode.vue";
 
 const { t } = useI18n();
+const POLLING_INTERVAL = 2000;
+const LOGIN_CODE_TTL_SECONDS = 60;
+
+type LoginCodeState = "active" | "used" | "expired";
+type ExpiringResponse = {
+  expires_at?: number | string | null;
+  expiresAt?: number | string | null;
+  expires_in?: number | string | null;
+  expiresIn?: number | string | null;
+};
+
 const dialogVisible = ref(false);
 const code = ref<string>("");
+const currentKey = ref<string>("");
+const loginCodeState = ref<LoginCodeState>("active");
+const isLoadingCode = ref(false);
+const isRefreshing = ref(false);
+const isCheckingStatus = ref(false);
+const expiresAtMs = ref<number | null>(null);
+const remainingSeconds = ref(0);
+let statusTimer: ReturnType<typeof setInterval> | null = null;
+let expiryTimer: ReturnType<typeof setTimeout> | null = null;
+let countdownTimer: ReturnType<typeof setInterval> | null = null;
+
+const isLoginCodeInactive = computed(() => loginCodeState.value !== "active");
+const loginCodeTip = computed(() => {
+  if (loginCodeState.value === "expired") {
+    return t("login.loginCodeExpired");
+  }
+
+  if (loginCodeState.value === "used") {
+    return t("login.loginCodeUsed");
+  }
+
+  return t("login.scanTip");
+});
 
 const openDialog = () => {
   dialogVisible.value = true;
+  if (!currentKey.value) {
+    void refreshLoginCode();
+    return;
+  }
+
+  if (isLoginCodeInactive.value) return;
+
+  void checkLoginCodeStatus();
+  startStatusPolling();
 };
 
-onMounted(async () => {
+const stopStatusPolling = () => {
+  if (statusTimer !== null) {
+    clearInterval(statusTimer);
+    statusTimer = null;
+  }
+};
+
+const clearExpiryTimer = () => {
+  if (expiryTimer !== null) {
+    clearTimeout(expiryTimer);
+    expiryTimer = null;
+  }
+};
+
+const clearCountdownTimer = () => {
+  if (countdownTimer !== null) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+};
+
+const stopLoginCodeTimers = () => {
+  stopStatusPolling();
+  clearExpiryTimer();
+  clearCountdownTimer();
+};
+
+const markLoginCodeInactive = (state: Exclude<LoginCodeState, "active">) => {
+  loginCodeState.value = state;
+  remainingSeconds.value = 0;
+  stopLoginCodeTimers();
+};
+
+const startStatusPolling = () => {
+  stopStatusPolling();
+  if (!dialogVisible.value || !currentKey.value || isLoginCodeInactive.value)
+    return;
+
+  statusTimer = setInterval(() => {
+    void checkLoginCodeStatus();
+  }, POLLING_INTERVAL);
+};
+
+const parseExpiresAtMs = (value: ExpiringResponse): number => {
+  const rawExpiresAt = value.expires_at ?? value.expiresAt;
+  if (typeof rawExpiresAt === "number" && Number.isFinite(rawExpiresAt)) {
+    return rawExpiresAt > 1_000_000_000_000
+      ? rawExpiresAt
+      : rawExpiresAt * 1000;
+  }
+
+  if (typeof rawExpiresAt === "string" && rawExpiresAt.trim() !== "") {
+    const numericExpiresAt = Number(rawExpiresAt);
+    if (Number.isFinite(numericExpiresAt)) {
+      return numericExpiresAt > 1_000_000_000_000
+        ? numericExpiresAt
+        : numericExpiresAt * 1000;
+    }
+
+    const dateExpiresAt = Date.parse(rawExpiresAt);
+    if (Number.isFinite(dateExpiresAt)) {
+      return dateExpiresAt;
+    }
+  }
+
+  const rawExpiresIn = value.expires_in ?? value.expiresIn;
+  const expiresIn = Number(rawExpiresIn);
+  return (
+    Date.now() + (expiresIn > 0 ? expiresIn : LOGIN_CODE_TTL_SECONDS) * 1000
+  );
+};
+
+const hasExpiry = (value: ExpiringResponse): boolean => {
+  return (
+    value.expires_at != null ||
+    value.expiresAt != null ||
+    value.expires_in != null ||
+    value.expiresIn != null
+  );
+};
+
+const updateRemainingSeconds = () => {
+  if (expiresAtMs.value === null) {
+    remainingSeconds.value = 0;
+    return;
+  }
+
+  remainingSeconds.value = Math.max(
+    0,
+    Math.ceil((expiresAtMs.value - Date.now()) / 1000)
+  );
+};
+
+const scheduleLoginCodeExpiry = (nextExpiresAtMs: number) => {
+  clearExpiryTimer();
+  clearCountdownTimer();
+  expiresAtMs.value = nextExpiresAtMs;
+  updateRemainingSeconds();
+
+  const delay = nextExpiresAtMs - Date.now();
+  if (delay <= 0) {
+    markLoginCodeInactive("expired");
+    return;
+  }
+
+  expiryTimer = setTimeout(() => {
+    markLoginCodeInactive("expired");
+  }, delay);
+
+  countdownTimer = setInterval(updateRemainingSeconds, 1000);
+};
+
+const loadLoginCode = async () => {
+  isLoadingCode.value = true;
   try {
     const userLinked = await getUserLinked();
     if (userLinked?.data.key) {
+      currentKey.value = userLinked.data.key;
       code.value = "web_" + userLinked.data.key;
+      loginCodeState.value = "active";
+      scheduleLoginCodeExpiry(parseExpiresAtMs(userLinked.data));
+      startStatusPolling();
     }
   } catch (error) {
     logger.error("Failed to initialize QR code:", error);
+  } finally {
+    isLoadingCode.value = false;
   }
+};
+
+const refreshLoginCode = async () => {
+  if (isRefreshing.value) return;
+
+  isRefreshing.value = true;
+  stopLoginCodeTimers();
+  await loadLoginCode();
+  isRefreshing.value = false;
+};
+
+const checkLoginCodeStatus = async () => {
+  if (!dialogVisible.value || !currentKey.value || isCheckingStatus.value)
+    return;
+
+  isCheckingStatus.value = true;
+  try {
+    const status = await getUserLinkedStatus(currentKey.value);
+    if (status?.data.active === false) {
+      markLoginCodeInactive(status.data.reason === "used" ? "used" : "expired");
+      return;
+    }
+
+    if (status?.data.active === true && hasExpiry(status.data)) {
+      scheduleLoginCodeExpiry(parseExpiresAtMs(status.data));
+    }
+  } catch (error) {
+    logger.warn("Failed to check QR code status:", error);
+  } finally {
+    isCheckingStatus.value = false;
+  }
+};
+
+watch(dialogVisible, (visible) => {
+  if (visible) {
+    startStatusPolling();
+  } else {
+    stopStatusPolling();
+  }
+});
+
+onMounted(() => {
+  void loadLoginCode();
+});
+
+onUnmounted(() => {
+  stopLoginCodeTimers();
 });
 
 defineExpose({
@@ -80,6 +313,10 @@ defineExpose({
   border-radius: var(--radius-md, 8px);
 }
 
+.qrcode-box--disabled {
+  opacity: 0.35;
+}
+
 .qrcode-tip {
   margin-top: 28px;
   font-size: 18px;
@@ -87,6 +324,15 @@ defineExpose({
   color: var(--text-primary, #303133);
   text-align: center;
   letter-spacing: 0.5px;
+}
+
+.qrcode-tip--inactive {
+  color: var(--el-color-warning, #e6a23c);
+}
+
+.qrcode-refresh {
+  width: 180px;
+  margin-top: 16px;
 }
 
 .qrcode-subtip {

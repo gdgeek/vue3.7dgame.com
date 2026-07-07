@@ -23,6 +23,11 @@ export default {
     login: "Login",
     loginCode: "Login Code",
     scanTip: "Please scan the QR code with your phone to log in",
+    loginCodeUsed: "This login code has been used. Please refresh the QR code.",
+    loginCodeExpired:
+      "This login code has expired. Please refresh the QR code.",
+    loginCodeExpiresIn: "Expires in {seconds}s",
+    refreshLoginCode: "Refresh QR Code",
     rules: {
       username: {
         message1: "Please enter your username",
