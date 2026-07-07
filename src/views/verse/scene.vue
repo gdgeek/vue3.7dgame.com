@@ -370,6 +370,10 @@ type VerseEditorPayload = {
   verse?: VerseEditorData;
 };
 
+const hasVerseModules = (verseData?: VerseEditorData): boolean =>
+  Array.isArray(verseData?.children?.modules) &&
+  verseData.children.modules.length > 0;
+
 type CoverUploadPayload = {
   imageData: string;
 };
@@ -778,6 +782,11 @@ const saveVerse = async (
   }
 
   if (trigger === "manual") {
+    if (!hasVerseModules(verse)) {
+      ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
+      return;
+    }
+
     ElMessageBox.confirm(
       t("verse.view.sceneEditor.saveAndPublishConfirm"),
       t("verse.view.sceneEditor.publishScene"),
@@ -867,6 +876,11 @@ const releaseVerse = async (data: unknown) => {
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
     ElMessage.error(t("verse.view.sceneEditor.noProjectToPublish"));
+    return;
+  }
+
+  if (!hasVerseModules(payload.verse)) {
+    ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
     return;
   }
 

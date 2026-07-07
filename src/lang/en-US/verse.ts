@@ -300,6 +300,8 @@ export default {
         publishCanceled: "Publish canceled",
         noProjectToPublish: "No project available to publish",
         noPublishPermission: "No permission to publish",
+        emptySceneCannotPublish:
+          "The scene is empty. Add at least one entity before publishing.",
         saveCompleted: "Save completed",
         noChanges: "No changes in project",
         coverUploadError: "Cover upload error: Image data not found",

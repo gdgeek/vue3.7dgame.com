@@ -295,6 +295,7 @@ export default {
         publishCanceled: "取消發布",
         noProjectToPublish: "沒有可發布的項目",
         noPublishPermission: "沒有發布權限",
+        emptySceneCannotPublish: "場景為空，請先新增實體後再發布。",
         saveCompleted: "儲存完成",
         noChanges: "項目沒有改變",
         coverUploadError: "上傳封面圖片錯誤：未找到圖片數據",
