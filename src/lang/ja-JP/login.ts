@@ -23,6 +23,12 @@ export default {
     login: "ログイン",
     loginCode: "ログインコード",
     scanTip: "携帯電話でQRコードをスキャンしてログインしてください",
+    loginCodeUsed:
+      "このログインコードは使用済みです。QRコードを更新してください。",
+    loginCodeExpired:
+      "このログインコードは期限切れです。QRコードを更新してください。",
+    loginCodeExpiresIn: "{seconds} 秒後に期限切れ",
+    refreshLoginCode: "QRコードを更新",
     rules: {
       username: {
         message1: "ユーザー名を入力してください",
