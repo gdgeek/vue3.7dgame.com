@@ -13,6 +13,11 @@ export type userCreationData = {
   verseCount: number;
 };
 
+type ProfileWriteErrorBody = {
+  code?: string;
+  message?: string;
+};
+
 export const getUserCreation = () => {
   const query = {
     expand:
@@ -74,8 +79,9 @@ function shouldFallbackToLegacyProfileWrite(error: unknown): boolean {
     return false;
   }
 
-  const data = response.data as any;
-  const code = data?.code;
+  const data = response.data;
+  const body: ProfileWriteErrorBody = isProfileWriteErrorBody(data) ? data : {};
+  const code = body.code;
   if (
     code === "PROFILE_WRITE_DISABLED" ||
     code === "PROFILE_WRITE_UNSUPPORTED_MODE"
@@ -87,12 +93,18 @@ function shouldFallbackToLegacyProfileWrite(error: unknown): boolean {
     return false;
   }
 
-  const message = typeof data?.message === "string" ? data.message : "";
+  const message = body.message ?? "";
   if (message.startsWith("Cannot PUT /v1/user/update")) {
     return true;
   }
 
   return typeof data === "string" || data == null;
+}
+
+function isProfileWriteErrorBody(
+  value: unknown
+): value is ProfileWriteErrorBody {
+  return typeof value === "object" && value !== null;
 }
 
 export const info = () => {
