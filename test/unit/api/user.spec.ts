@@ -4,6 +4,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
+vi.mock("@/environment", () => ({
+  default: {
+    authApi: "/api-auth",
+  },
+}));
 vi.mock("@/utils/logger", () => ({
   logger: {
     error: vi.fn(),
@@ -63,24 +68,59 @@ describe("User API", () => {
   // putUserData
   // -----------------------------------------------------------------------
   describe("putUserData()", () => {
-    it("calls PUT /v1/user/update with provided data", async () => {
+    it("calls identity PUT /v1/user/update with provided data", async () => {
       request.mockResolvedValue({ data: {} });
       const payload = { nickname: "Alice" };
       await putUserData(payload);
       expect(request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseURL: "/api-auth",
+          url: "/v1/user/update",
+          method: "put",
+          data: payload,
+          skipErrorMessage: true,
+        })
+      );
+    });
+
+    it("does not log profile payloads", async () => {
+      const { logger } = await import("@/utils/logger");
+      request.mockResolvedValue({ data: {} });
+      await putUserData({ name: "test" });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it("falls back to legacy API when identity profile write is disabled", async () => {
+      const payload = { nickname: "Fallback Alice" };
+      request
+        .mockRejectedValueOnce({
+          response: {
+            status: 404,
+            data: { code: "PROFILE_WRITE_DISABLED" },
+          },
+        })
+        .mockResolvedValueOnce({ data: { id: 1 } });
+
+      await putUserData(payload);
+
+      expect(request).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          baseURL: "/api-auth",
+          url: "/v1/user/update",
+          method: "put",
+          data: payload,
+          skipErrorMessage: true,
+        })
+      );
+      expect(request).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           url: "/v1/user/update",
           method: "put",
           data: payload,
         })
       );
-    });
-
-    it("calls logger.error with the data (side-effect behavior)", async () => {
-      const { logger } = await import("@/utils/logger");
-      request.mockResolvedValue({ data: {} });
-      await putUserData({ name: "test" });
-      expect(logger.error).toHaveBeenCalledWith({ name: "test" });
     });
   });
 
