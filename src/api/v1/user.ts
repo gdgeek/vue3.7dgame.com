@@ -1,4 +1,5 @@
-import { logger } from "@/utils/logger";
+import type { AxiosError } from "axios";
+import env from "@/environment";
 import request from "@/utils/request";
 import qs from "querystringify";
 import { UserInfoReturnType } from "../user/model";
@@ -23,14 +24,76 @@ export const getUserCreation = () => {
   });
 };
 
-export const putUserData = (data: unknown) => {
-  logger.error(data);
+const legacyPutUserData = (data: unknown) => {
   return request<UserInfoReturnType>({
     url: `/v1/user/update`,
     method: "put",
     data,
   });
 };
+
+const identityPutUserData = (data: unknown) => {
+  return request<UserInfoReturnType>({
+    baseURL: env.authApi,
+    url: `/v1/user/update`,
+    method: "put",
+    data,
+    skipErrorMessage: true,
+  });
+};
+
+export const putUserData = async (data: unknown) => {
+  if (!env.authApi) {
+    return legacyPutUserData(data);
+  }
+
+  try {
+    return await identityPutUserData(data);
+  } catch (error) {
+    if (shouldFallbackToLegacyProfileWrite(error)) {
+      return legacyPutUserData(data);
+    }
+
+    throw error;
+  }
+};
+
+function shouldFallbackToLegacyProfileWrite(error: unknown): boolean {
+  const axiosError = error as AxiosError;
+  const response = axiosError.response;
+
+  if (!response) {
+    return true;
+  }
+
+  if ([502, 503, 504].includes(response.status)) {
+    return true;
+  }
+
+  if (response.status !== 404) {
+    return false;
+  }
+
+  const data = response.data as any;
+  const code = data?.code;
+  if (
+    code === "PROFILE_WRITE_DISABLED" ||
+    code === "PROFILE_WRITE_UNSUPPORTED_MODE"
+  ) {
+    return true;
+  }
+
+  if (code) {
+    return false;
+  }
+
+  const message = typeof data?.message === "string" ? data.message : "";
+  if (message.startsWith("Cannot PUT /v1/user/update")) {
+    return true;
+  }
+
+  return typeof data === "string" || data == null;
+}
 
 export const info = () => {
   return request<UserInfoReturnType>({
