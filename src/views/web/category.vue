@@ -79,9 +79,14 @@ const checkMobile = () => {
 
 // 创建各部分的引用
 const newsRef = ref<HTMLElement | null>(null);
+let sectionScrollTimer: ReturnType<typeof setTimeout> | undefined;
 
 // 滚动到指定部分的函数
 const scrollToSection = (sectionId: string) => {
+  if (typeof document === "undefined" || typeof window === "undefined") {
+    return;
+  }
+
   // 计算导航栏高度（加点额外的间距）
   const navHeight = 80;
 
@@ -107,7 +112,7 @@ onMounted(() => {
   //滚到news上
   const section = route.query.section;
   if (section) {
-    setTimeout(() => {
+    sectionScrollTimer = setTimeout(() => {
       scrollToSection("news");
     }, 100);
   }
@@ -128,6 +133,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  if (sectionScrollTimer) {
+    clearTimeout(sectionScrollTimer);
+  }
+
   window.removeEventListener("resize", checkMobile);
   window.removeEventListener("scroll", handleScroll);
   // 页面卸载前保存滚动位置
