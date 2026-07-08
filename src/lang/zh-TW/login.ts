@@ -23,6 +23,10 @@ export default {
     login: "登錄",
     loginCode: "登錄碼",
     scanTip: "請使用手機掃描二維碼登錄",
+    loginCodeUsed: "登錄碼已使用，請刷新二維碼",
+    loginCodeExpired: "登錄碼已失效，請刷新二維碼",
+    loginCodeExpiresIn: "{seconds} 秒後失效",
+    refreshLoginCode: "刷新二維碼",
     rules: {
       username: {
         message1: "請輸入用戶名",
