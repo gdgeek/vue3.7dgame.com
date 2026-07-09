@@ -22,7 +22,7 @@ export default {
     hidePassword: "パスワードを非表示",
     login: "ログイン",
     loginCode: "ログインコード",
-    scanTip: "携帯電話でQRコードをスキャンしてログインしてください",
+    scanTip: "タブレットでQRコードをスキャンしてログインしてください",
     loginCodeUsed:
       "このログインコードは使用済みです。QRコードを更新してください。",
     loginCodeExpired:
