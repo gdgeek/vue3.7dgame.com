@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, onUnmounted } from "vue";
 import { getUserLinked } from "@/api/v1/tools";
 import { useI18n } from "vue-i18n";
 import QrcodeVue from "qrcode.vue";
@@ -88,7 +88,6 @@ type ExpiringResponse = {
 
 const dialogVisible = ref(false);
 const code = ref<string>("");
-const currentKey = ref<string>("");
 const loginCodeState = ref<LoginCodeState>("active");
 const isLoadingCode = ref(false);
 const isRefreshing = ref(false);
@@ -112,14 +111,7 @@ const loginCodeTip = computed(() => {
 
 const openDialog = () => {
   dialogVisible.value = true;
-  if (!currentKey.value) {
-    void refreshLoginCode();
-    return;
-  }
-
-  if (isLoginCodeInactive.value) return;
-
-  updateRemainingSeconds();
+  void refreshLoginCode();
 };
 
 const clearExpiryTimer = () => {
@@ -207,12 +199,18 @@ const scheduleLoginCodeExpiry = (nextExpiresAtMs: number) => {
   countdownTimer = setInterval(updateRemainingSeconds, 1000);
 };
 
+const clearLoginCode = () => {
+  code.value = "";
+  expiresAtMs.value = null;
+  remainingSeconds.value = 0;
+  loginCodeState.value = "active";
+};
+
 const loadLoginCode = async () => {
   isLoadingCode.value = true;
   try {
     const userLinked = await getUserLinked();
     if (userLinked?.data.key) {
-      currentKey.value = userLinked.data.key;
       code.value = "web_" + userLinked.data.key;
       loginCodeState.value = "active";
       scheduleLoginCodeExpiry(parseExpiresAtMs(userLinked.data));
@@ -229,13 +227,10 @@ const refreshLoginCode = async () => {
 
   isRefreshing.value = true;
   stopLoginCodeTimers();
+  clearLoginCode();
   await loadLoginCode();
   isRefreshing.value = false;
 };
-
-onMounted(() => {
-  void loadLoginCode();
-});
 
 onUnmounted(() => {
   stopLoginCodeTimers();
