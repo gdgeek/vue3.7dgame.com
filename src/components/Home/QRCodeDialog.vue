@@ -6,6 +6,7 @@
       align-center
       class="qrcode-dialog"
       :show-close="true"
+      @close="handleDialogClose"
     >
       <template #header>
         <div class="dialog-header-custom">
@@ -95,6 +96,7 @@ const expiresAtMs = ref<number | null>(null);
 const remainingSeconds = ref(0);
 let expiryTimer: ReturnType<typeof setTimeout> | null = null;
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
+let loginCodeRequestId = 0;
 
 const isLoginCodeInactive = computed(() => loginCodeState.value !== "active");
 const loginCodeTip = computed(() => {
@@ -206,10 +208,12 @@ const clearLoginCode = () => {
   loginCodeState.value = "active";
 };
 
-const loadLoginCode = async () => {
+const loadLoginCode = async (requestId: number) => {
   isLoadingCode.value = true;
   try {
     const userLinked = await getUserLinked();
+    if (requestId !== loginCodeRequestId || !dialogVisible.value) return;
+
     if (userLinked?.data.key) {
       code.value = "web_" + userLinked.data.key;
       loginCodeState.value = "active";
@@ -218,18 +222,31 @@ const loadLoginCode = async () => {
   } catch (error) {
     logger.error("Failed to initialize QR code:", error);
   } finally {
-    isLoadingCode.value = false;
+    if (requestId === loginCodeRequestId) {
+      isLoadingCode.value = false;
+    }
   }
 };
 
 const refreshLoginCode = async () => {
   if (isRefreshing.value) return;
 
+  const requestId = ++loginCodeRequestId;
   isRefreshing.value = true;
   stopLoginCodeTimers();
   clearLoginCode();
-  await loadLoginCode();
+  await loadLoginCode(requestId);
+  if (requestId === loginCodeRequestId) {
+    isRefreshing.value = false;
+  }
+};
+
+const handleDialogClose = () => {
+  loginCodeRequestId += 1;
   isRefreshing.value = false;
+  isLoadingCode.value = false;
+  stopLoginCodeTimers();
+  clearLoginCode();
 };
 
 onUnmounted(() => {
