@@ -21,7 +21,7 @@ export default {
     hidePassword: "隐藏密码",
     login: "登录",
     loginCode: "登录码",
-    scanTip: "请使用手机扫描二维码登录",
+    scanTip: "请使用平板扫描二维码登录",
     loginCodeUsed: "登录码已使用，请刷新二维码",
     loginCodeExpired: "登录码已失效，请刷新二维码",
     loginCodeExpiresIn: "{seconds} 秒后失效",

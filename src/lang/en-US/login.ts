@@ -22,7 +22,7 @@ export default {
     hidePassword: "Hide password",
     login: "Login",
     loginCode: "Login Code",
-    scanTip: "Please scan the QR code with your phone to log in",
+    scanTip: "Please scan the QR code with your tablet to log in",
     loginCodeUsed: "This login code has been used. Please refresh the QR code.",
     loginCodeExpired:
       "This login code has expired. Please refresh the QR code.",
