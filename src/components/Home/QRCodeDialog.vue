@@ -60,13 +60,12 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { computed, ref, onMounted, onUnmounted, watch } from "vue";
-import { getUserLinked, getUserLinkedStatus } from "@/api/v1/tools";
+import { computed, ref, onMounted, onUnmounted } from "vue";
+import { getUserLinked } from "@/api/v1/tools";
 import { useI18n } from "vue-i18n";
 import QrcodeVue from "qrcode.vue";
 
 const { t } = useI18n();
-const POLLING_INTERVAL = 2000;
 const LOGIN_CODE_TTL_SECONDS = 60;
 
 type LoginCodeState = "active" | "used" | "expired";
@@ -83,10 +82,8 @@ const currentKey = ref<string>("");
 const loginCodeState = ref<LoginCodeState>("active");
 const isLoadingCode = ref(false);
 const isRefreshing = ref(false);
-const isCheckingStatus = ref(false);
 const expiresAtMs = ref<number | null>(null);
 const remainingSeconds = ref(0);
-let statusTimer: ReturnType<typeof setInterval> | null = null;
 let expiryTimer: ReturnType<typeof setTimeout> | null = null;
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -112,15 +109,7 @@ const openDialog = () => {
 
   if (isLoginCodeInactive.value) return;
 
-  void checkLoginCodeStatus();
-  startStatusPolling();
-};
-
-const stopStatusPolling = () => {
-  if (statusTimer !== null) {
-    clearInterval(statusTimer);
-    statusTimer = null;
-  }
+  updateRemainingSeconds();
 };
 
 const clearExpiryTimer = () => {
@@ -138,7 +127,6 @@ const clearCountdownTimer = () => {
 };
 
 const stopLoginCodeTimers = () => {
-  stopStatusPolling();
   clearExpiryTimer();
   clearCountdownTimer();
 };
@@ -147,16 +135,6 @@ const markLoginCodeInactive = (state: Exclude<LoginCodeState, "active">) => {
   loginCodeState.value = state;
   remainingSeconds.value = 0;
   stopLoginCodeTimers();
-};
-
-const startStatusPolling = () => {
-  stopStatusPolling();
-  if (!dialogVisible.value || !currentKey.value || isLoginCodeInactive.value)
-    return;
-
-  statusTimer = setInterval(() => {
-    void checkLoginCodeStatus();
-  }, POLLING_INTERVAL);
 };
 
 const parseExpiresAtMs = (value: ExpiringResponse): number => {
@@ -185,15 +163,6 @@ const parseExpiresAtMs = (value: ExpiringResponse): number => {
   const expiresIn = Number(rawExpiresIn);
   return (
     Date.now() + (expiresIn > 0 ? expiresIn : LOGIN_CODE_TTL_SECONDS) * 1000
-  );
-};
-
-const hasExpiry = (value: ExpiringResponse): boolean => {
-  return (
-    value.expires_at != null ||
-    value.expiresAt != null ||
-    value.expires_in != null ||
-    value.expiresIn != null
   );
 };
 
@@ -237,7 +206,6 @@ const loadLoginCode = async () => {
       code.value = "web_" + userLinked.data.key;
       loginCodeState.value = "active";
       scheduleLoginCodeExpiry(parseExpiresAtMs(userLinked.data));
-      startStatusPolling();
     }
   } catch (error) {
     logger.error("Failed to initialize QR code:", error);
@@ -254,36 +222,6 @@ const refreshLoginCode = async () => {
   await loadLoginCode();
   isRefreshing.value = false;
 };
-
-const checkLoginCodeStatus = async () => {
-  if (!dialogVisible.value || !currentKey.value || isCheckingStatus.value)
-    return;
-
-  isCheckingStatus.value = true;
-  try {
-    const status = await getUserLinkedStatus(currentKey.value);
-    if (status?.data.active === false) {
-      markLoginCodeInactive(status.data.reason === "used" ? "used" : "expired");
-      return;
-    }
-
-    if (status?.data.active === true && hasExpiry(status.data)) {
-      scheduleLoginCodeExpiry(parseExpiresAtMs(status.data));
-    }
-  } catch (error) {
-    logger.warn("Failed to check QR code status:", error);
-  } finally {
-    isCheckingStatus.value = false;
-  }
-};
-
-watch(dialogVisible, (visible) => {
-  if (visible) {
-    startStatusPolling();
-  } else {
-    stopStatusPolling();
-  }
-});
 
 onMounted(() => {
   void loadLoginCode();
