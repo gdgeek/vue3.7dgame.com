@@ -412,6 +412,7 @@
 <script setup lang="ts">
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
+import { hasPublishableSceneContent } from "@/utils/versePublish";
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -956,6 +957,11 @@ const handleExport = async () => {
 
 const handlePublishSnapshot = async () => {
   if (!currentVerse.value || isPublishingSnapshot.value) return;
+
+  if (!hasPublishableSceneContent(currentVerse.value)) {
+    Message.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
+    return;
+  }
 
   isPublishingSnapshot.value = true;
   try {

@@ -221,6 +221,7 @@ export default {
         publishCanceled: "取消发布",
         noProjectToPublish: "没有可发布的项目",
         noPublishPermission: "没有发布权限",
+        emptySceneCannotPublish: "场景为空，请先添加实体后再发布。",
         saveCompleted: "储存完成",
         noChanges: "项目没有改变",
         coverUploadError: "上传封面图片错误：未找到图片数据",
