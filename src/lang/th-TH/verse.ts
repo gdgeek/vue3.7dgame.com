@@ -292,6 +292,8 @@ export default {
         publishCanceled: "ยกเลิกการเผยแพร่",
         noProjectToPublish: "ไม่มีโครงการที่สามารถเผยแพร่ได้",
         noPublishPermission: "ไม่มีสิทธิ์เผยแพร่",
+        emptySceneCannotPublish:
+          "ฉากว่างอยู่ โปรดเพิ่มเอนทิตีอย่างน้อยหนึ่งรายการก่อนเผยแพร่",
         saveCompleted: "บันทึกเสร็จสิ้น",
         noChanges: "โครงการไม่มีการเปลี่ยนแปลง",
         coverUploadError: "ข้อผิดพลาดในการอัปโหลดรูปปก: ไม่พบข้อมูลรูปภาพ",

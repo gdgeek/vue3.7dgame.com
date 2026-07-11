@@ -604,6 +604,29 @@ const loadedEntityOptions = computed<LoadedEntityOption[]>(() => {
   return options;
 });
 
+const parseVerseData = (
+  data: VerseData["data"] | string | null | undefined
+) => {
+  if (typeof data !== "string") return data;
+  try {
+    return JSON.parse(data) as VerseData["data"];
+  } catch {
+    return null;
+  }
+};
+
+const hasPublishableSceneContent = (verseData: VerseData | null): boolean => {
+  if (!verseData) return false;
+  if (loadedEntityOptions.value.length > 0) return true;
+
+  const data = parseVerseData(verseData.data) as {
+    children?: { modules?: unknown[] };
+  } | null;
+  return (
+    Array.isArray(data?.children?.modules) && data.children.modules.length > 0
+  );
+};
+
 watch(
   () => loadedEntityOptions.value,
   (options) => {
@@ -956,6 +979,11 @@ const handleExport = async () => {
 
 const handlePublishSnapshot = async () => {
   if (!currentVerse.value || isPublishingSnapshot.value) return;
+
+  if (!hasPublishableSceneContent(currentVerse.value)) {
+    Message.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
+    return;
+  }
 
   isPublishingSnapshot.value = true;
   try {

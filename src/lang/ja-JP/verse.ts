@@ -291,6 +291,8 @@ export default {
         publishCanceled: "公開をキャンセルしました",
         noProjectToPublish: "公開可能なプロジェクトがありません",
         noPublishPermission: "公開権限がありません",
+        emptySceneCannotPublish:
+          "シーンが空です。公開する前に少なくとも1つのエンティティを追加してください。",
         saveCompleted: "保存完了",
         noChanges: "プロジェクトに変更はありません",
         coverUploadError:
