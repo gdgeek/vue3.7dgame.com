@@ -192,7 +192,10 @@
             @click="handlePublishSnapshot"
           >
             <font-awesome-icon
-              :icon="['fas', isPublishingSnapshot ? 'spinner' : 'cloud-arrow-up']"
+              :icon="[
+                'fas',
+                isPublishingSnapshot ? 'spinner' : 'cloud-arrow-up',
+              ]"
               :spin="isPublishingSnapshot"
             ></font-awesome-icon>
             {{ t("verse.view.sceneEditor.publishScene") }}
@@ -601,7 +604,9 @@ const loadedEntityOptions = computed<LoadedEntityOption[]>(() => {
   return options;
 });
 
-const parseVerseData = (data: VerseData["data"] | string | null | undefined) => {
+const parseVerseData = (
+  data: VerseData["data"] | string | null | undefined
+) => {
   if (typeof data !== "string") return data;
   try {
     return JSON.parse(data) as VerseData["data"];
@@ -614,10 +619,12 @@ const hasPublishableSceneContent = (verseData: VerseData | null): boolean => {
   if (!verseData) return false;
   if (loadedEntityOptions.value.length > 0) return true;
 
-  const data = parseVerseData(verseData.data) as
-    | { children?: { modules?: unknown[] } }
-    | null;
-  return Array.isArray(data?.children?.modules) && data.children.modules.length > 0;
+  const data = parseVerseData(verseData.data) as {
+    children?: { modules?: unknown[] };
+  } | null;
+  return (
+    Array.isArray(data?.children?.modules) && data.children.modules.length > 0
+  );
 };
 
 watch(
