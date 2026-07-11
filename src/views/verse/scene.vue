@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
+import { hasPublishableSceneContent } from "@/utils/versePublish";
 import { takePhoto } from "@/api/v1/verse";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
@@ -369,10 +370,6 @@ type VerseEditorData = {
 type VerseEditorPayload = {
   verse?: VerseEditorData;
 };
-
-const hasVerseModules = (verseData?: VerseEditorData): boolean =>
-  Array.isArray(verseData?.children?.modules) &&
-  verseData.children.modules.length > 0;
 
 type CoverUploadPayload = {
   imageData: string;
@@ -782,7 +779,7 @@ const saveVerse = async (
   }
 
   if (trigger === "manual") {
-    if (!hasVerseModules(verse)) {
+    if (!hasPublishableSceneContent(verse)) {
       ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
       return;
     }
@@ -879,7 +876,7 @@ const releaseVerse = async (data: unknown) => {
     return;
   }
 
-  if (!hasVerseModules(payload.verse)) {
+  if (!hasPublishableSceneContent(payload.verse)) {
     ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
     return;
   }
