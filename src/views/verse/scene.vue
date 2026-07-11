@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
+import { hasPublishableSceneContent } from "@/utils/versePublish";
 import { takePhoto } from "@/api/v1/verse";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
@@ -778,6 +779,11 @@ const saveVerse = async (
   }
 
   if (trigger === "manual") {
+    if (!hasPublishableSceneContent(verse)) {
+      ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
+      return;
+    }
+
     ElMessageBox.confirm(
       t("verse.view.sceneEditor.saveAndPublishConfirm"),
       t("verse.view.sceneEditor.publishScene"),
@@ -867,6 +873,11 @@ const releaseVerse = async (data: unknown) => {
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
     ElMessage.error(t("verse.view.sceneEditor.noProjectToPublish"));
+    return;
+  }
+
+  if (!hasPublishableSceneContent(payload.verse)) {
+    ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
     return;
   }
 

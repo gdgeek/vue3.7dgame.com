@@ -231,6 +231,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
+import { hasPublishableSceneContent } from "@/utils/versePublish";
 import { ref, computed, watch, nextTick } from "vue";
 import {
   getVerse,
@@ -393,6 +394,11 @@ const postScript = async (message: EditorPostPayload) => {
 
   Message.success(t("verse.view.script.success"));
   emit("saved");
+
+  if (!hasPublishableSceneContent(verse.value)) {
+    Message.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
+    return;
+  }
 
   MessageBox.confirm(
     t("verse.view.sceneEditor.saveAndPublishConfirm"),
