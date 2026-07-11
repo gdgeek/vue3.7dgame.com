@@ -208,6 +208,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { logger } from "@/utils/logger";
+import { hasPublishableSceneContent } from "@/utils/versePublish";
 import {
   ref,
   computed,
@@ -494,6 +495,11 @@ const postScript = async (
 
   if (context.trigger === "manual") {
     Message.success(t("verse.view.script.success"));
+    if (!hasPublishableSceneContent(verse.value)) {
+      ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
+      return;
+    }
+
     ElMessageBox.confirm(
       t("verse.view.sceneEditor.saveAndPublishConfirm"),
       t("verse.view.sceneEditor.publishScene"),
