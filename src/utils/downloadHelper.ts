@@ -8,8 +8,22 @@ export interface DownloadableResource {
   name: string;
   file: {
     url: string;
+    filename?: string;
   };
 }
+
+const fileExtension = (
+  resource: DownloadableResource,
+  fallbackExtension: string
+): string => {
+  const source = resource.file.filename || resource.file.url;
+  const cleanSource = source.split(/[?#]/, 1)[0];
+  const dotIndex = cleanSource.lastIndexOf(".");
+  const extension = dotIndex >= 0 ? cleanSource.slice(dotIndex) : "";
+  return /^\.[a-z0-9]+$/i.test(extension)
+    ? extension.toLowerCase()
+    : fallbackExtension;
+};
 
 /**
  * 下载资源文件到本地
@@ -24,6 +38,8 @@ export async function downloadResource(
   t: (key: string, ...args: unknown[]) => string,
   translationPrefix: string
 ): Promise<void> {
+  let blobUrl: string | null = null;
+
   try {
     if (!resource || !resource.file) {
       ElMessage.error(t(`${translationPrefix}.error`));
@@ -40,8 +56,11 @@ export async function downloadResource(
 
     // 使用fetch获取文件内容，然后使用blob创建下载
     const response = await fetch(fileUrl);
+    if (!response.ok) {
+      throw new Error(`Download request failed with status ${response.status}`);
+    }
     const blob = await response.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
+    blobUrl = window.URL.createObjectURL(blob);
 
     // 创建一个a标签用于下载
     const link = document.createElement("a");
@@ -53,12 +72,29 @@ export async function downloadResource(
     link.click();
     document.body.removeChild(link);
 
-    // 释放blob URL
-    window.URL.revokeObjectURL(blobUrl);
-
     ElMessage.success(t(`${translationPrefix}.success`));
   } catch (error) {
     logger.error(error);
     ElMessage.error(t(`${translationPrefix}.error`) + error);
+  } finally {
+    if (blobUrl) {
+      window.URL.revokeObjectURL(blobUrl);
+    }
+  }
+}
+
+export async function downloadResources(
+  resources: DownloadableResource[],
+  fallbackExtension: string,
+  t: (key: string, ...args: unknown[]) => string,
+  translationPrefix: string
+): Promise<void> {
+  for (const resource of resources) {
+    await downloadResource(
+      resource,
+      fileExtension(resource, fallbackExtension),
+      t,
+      translationPrefix
+    );
   }
 }

@@ -366,7 +366,10 @@ const showModelUploadSummary = async (): Promise<void> => {
 
 const finishUploadFile = (file: File, id: number): void => {
   uploadedCount.value++;
-  uploadedIds.value.push(id);
+
+  if (id > 0) {
+    uploadedIds.value.push(id);
+  }
 
   if (props.dir === "polygen") {
     if (id > 0) {
@@ -377,11 +380,18 @@ const finishUploadFile = (file: File, id: number): void => {
         reasons: [t("upload.saveResourceFailed")],
       });
     }
+  } else if (id <= 0) {
+    Message.error(`Upload failed: ${file.name}`);
   }
 
   if (uploadedCount.value === totalFilesCount.value) {
     void showModelUploadSummary();
-    emit("success", uploadedIds.value);
+    if (uploadedIds.value.length > 0) {
+      emit("success", uploadedIds.value);
+    }
+    setTimeout(() => {
+      isDisabled.value = false;
+    }, 500);
   }
 };
 
@@ -597,18 +607,7 @@ const uploadSingleFile = async (file: File) => {
     stageProgress.value[2] = 100;
   } catch (err) {
     logger.error(`Error uploading ${file.name}`, err);
-    if (props.dir === "polygen") {
-      finishUploadFile(file, -1);
-    } else {
-      Message.error(`Upload failed: ${file.name}`);
-    }
-  } finally {
-    if (uploadedCount.value === totalFilesCount.value) {
-      setTimeout(() => {
-        isDisabled.value = false;
-        // Optionally auto-close or just enable buttons
-      }, 500);
-    }
+    finishUploadFile(file, -1);
   }
 };
 
@@ -628,25 +627,21 @@ const saveFileRecord = async (
     // particleType logic if needed, but rarely used now
   };
 
-  try {
-    const response = await postFile(data);
+  const response = await postFile(data);
 
-    // Now trigger the parent's save logic (postAudio, postVideo, etc.)
-    emit(
-      "saveResource",
-      data.filename,
-      response.data.id,
-      totalFilesCount.value,
-      (id: number) => {
-        finishUploadFile(file, id);
-      },
-      undefined, // effectType
-      info,
-      image_id
-    );
-  } catch (err) {
-    logger.error(err);
-  }
+  // Now trigger the parent's save logic (postAudio, postVideo, etc.)
+  emit(
+    "saveResource",
+    data.filename,
+    response.data.id,
+    totalFilesCount.value,
+    (id: number) => {
+      finishUploadFile(file, id);
+    },
+    undefined, // effectType
+    info,
+    image_id
+  );
 };
 
 // Utils (Copied from MrPPUploadDialog)

@@ -176,15 +176,15 @@ const handleCancelSelectAllPage = () => {
 };
 
 const url = (id: number) => {
-  return `/meta-verse/prefab?id=${id}`;
+  return `/meta/prefab-edit?id=${id}`;
 };
 
 const addPrefab = () => {
-  router.push("/meta-verse/prefab");
+  router.push({ name: "PrefabEdit" });
 };
 
 const editor = (id: number) => {
-  router.push({ path: "/meta-verse/prefab", query: { id } });
+  router.push({ name: "PrefabEdit", query: { id } });
 };
 
 const del = async (id: number) => {
