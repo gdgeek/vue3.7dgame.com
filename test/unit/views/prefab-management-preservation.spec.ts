@@ -62,8 +62,10 @@ describe("Preservation: phototype/list.vue business logic", () => {
 describe("Preservation: meta/prefabs.vue business logic", () => {
   const source = readSource("views/meta/prefabs.vue");
 
-  it("should have addPrefab navigating to PrefabEdit", () => {
-    expect(source).toContain('router.push({ name: "PrefabEdit" })');
+  it("should create a prefab before navigating to PrefabEdit", () => {
+    expect(source).toContain("await postPrefab({");
+    expect(source).toContain('name: "PrefabEdit"');
+    expect(source).toContain("query: { id: response.data.id }");
   });
 
   it("should have editor(id) navigating to PrefabEdit with query id", () => {

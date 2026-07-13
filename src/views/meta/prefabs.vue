@@ -117,12 +117,13 @@ import {
   StandardCard,
 } from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { getPrefabs, deletePrefab } from "@/api/v1/prefab";
+import { getPrefabs, deletePrefab, postPrefab } from "@/api/v1/prefab";
 import { useUserStore } from "@/store/modules/user";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
 import { toHttps } from "@/utils/helper";
 import type { PrefabData } from "@/api/v1/types/prefab";
+import { v4 as uuidv4 } from "uuid";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -179,8 +180,35 @@ const url = (id: number) => {
   return `/meta/prefab-edit?id=${id}`;
 };
 
-const addPrefab = () => {
-  router.push({ name: "PrefabEdit" });
+const addPrefab = async () => {
+  try {
+    const now = new Date();
+    const defaultName = `Entity_${now.toISOString().slice(0, 10)}_${now
+      .toTimeString()
+      .slice(0, 8)
+      .replace(/:/g, "-")}`;
+    const { value } = (await MessageBox.prompt(
+      t("meta.create.namePlaceholder"),
+      t("meta.create.title"),
+      {
+        confirmButtonText: t("common.confirm"),
+        cancelButtonText: t("common.cancel"),
+        defaultValue: defaultName,
+        inputValidator: (name) =>
+          !name || !name.trim() ? t("meta.create.nameRequired") : true,
+      }
+    )) as { value: string };
+    const response = await postPrefab({
+      title: value.trim(),
+      uuid: uuidv4(),
+    });
+    await router.push({
+      name: "PrefabEdit",
+      query: { id: response.data.id },
+    });
+  } catch {
+    // User cancelled or creation failed; the request layer shows API errors.
+  }
 };
 
 const editor = (id: number) => {
