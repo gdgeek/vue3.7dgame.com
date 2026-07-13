@@ -12,15 +12,11 @@ vi.mock("@/api/v1/verse", () => ({
   postVerse: vi.fn(),
   putVerse: vi.fn(),
 }));
-vi.mock("@/api/v1/meta-resource", () => ({
-  postMetaResource: vi.fn(),
-}));
 vi.mock("uuid", () => ({ v4: () => "uuid-test-1234" }));
 
 describe("createVerseFromResource()", () => {
   let metaApi: typeof import("@/api/v1/meta");
   let verseApi: typeof import("@/api/v1/verse");
-  let metaResourceApi: typeof import("@/api/v1/meta-resource");
   let metaVerseApi: typeof import("@/api/v1/meta-verse");
 
   const mockResource = {
@@ -37,7 +33,6 @@ describe("createVerseFromResource()", () => {
     vi.clearAllMocks();
     metaApi = await import("@/api/v1/meta");
     verseApi = await import("@/api/v1/verse");
-    metaResourceApi = await import("@/api/v1/meta-resource");
     metaVerseApi = await import("@/api/v1/meta-verse");
 
     (verseApi.postVerse as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -46,9 +41,6 @@ describe("createVerseFromResource()", () => {
     (metaApi.postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { id: 200 },
     });
-    (
-      metaResourceApi.postMetaResource as ReturnType<typeof vi.fn>
-    ).mockResolvedValue({ data: {} });
     (verseApi.putVerse as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { id: 100, updated: true },
     });
@@ -111,19 +103,6 @@ describe("createVerseFromResource()", () => {
     );
     const arg = (metaApi.postMeta as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(arg.title).toBe("Polygen:my-model");
-  });
-
-  it("calls postMetaResource with meta_id, resource_id, type='model'", async () => {
-    await metaVerseApi.createVerseFromResource(
-      "Polygen",
-      "Test Scene",
-      mockResource
-    );
-    const arg = (metaResourceApi.postMetaResource as ReturnType<typeof vi.fn>)
-      .mock.calls[0][0];
-    expect(arg.meta_id).toBe(200);
-    expect(arg.resource_id).toBe(10);
-    expect(arg.type).toBe("model");
   });
 
   it("calls putVerse with verse id and stringified JSON data", async () => {
@@ -293,7 +272,7 @@ describe("createVerseFromResource()", () => {
     expect(metaApi.postMeta).toHaveBeenCalledTimes(1);
   });
 
-  it("all API calls are made in sequence (total 5 calls)", async () => {
+  it("all supported API calls are made in sequence", async () => {
     const order: string[] = [];
     (verseApi.postVerse as ReturnType<typeof vi.fn>).mockImplementation(() => {
       order.push("postVerse");
@@ -302,12 +281,6 @@ describe("createVerseFromResource()", () => {
     (metaApi.postMeta as ReturnType<typeof vi.fn>).mockImplementation(() => {
       order.push("postMeta");
       return Promise.resolve({ data: { id: 200 } });
-    });
-    (
-      metaResourceApi.postMetaResource as ReturnType<typeof vi.fn>
-    ).mockImplementation(() => {
-      order.push("postMetaResource");
-      return Promise.resolve({ data: {} });
     });
     (verseApi.putVerse as ReturnType<typeof vi.fn>).mockImplementation(() => {
       order.push("putVerse");
@@ -324,12 +297,6 @@ describe("createVerseFromResource()", () => {
       mockResource
     );
 
-    expect(order).toEqual([
-      "postVerse",
-      "postMeta",
-      "postMetaResource",
-      "putVerse",
-      "putMeta",
-    ]);
+    expect(order).toEqual(["postVerse", "postMeta", "putVerse", "putMeta"]);
   });
 });

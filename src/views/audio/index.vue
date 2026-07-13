@@ -203,7 +203,7 @@ import {
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
-import { downloadResource } from "@/utils/downloadHelper";
+import { downloadResource, downloadResources } from "@/utils/downloadHelper";
 import {
   convertToLocalTime,
   formatFileSize as formatSize,
@@ -485,13 +485,16 @@ const deletedWindow = async (
   }
 };
 
-const handleBatchDownload = () => {
-  const selected = getSelectedItems(displayItems.value || []);
-  Message.info(
-    t("ui.batchDownloadDev", {
-      count: selected.length,
-      resource: t("route.resourceManagement.audioManagement.title"),
-    })
+const handleBatchDownload = async () => {
+  const selected = getSelectedItems(displayItems.value || []) as ResourceInfo[];
+  await downloadResources(
+    selected.map((item) => ({
+      name: item.name || "audio",
+      file: item.file,
+    })),
+    ".mp3",
+    t,
+    "audio.view.download"
   );
 };
 

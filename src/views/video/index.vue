@@ -201,7 +201,7 @@ import {
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
-import { downloadResource } from "@/utils/downloadHelper";
+import { downloadResource, downloadResources } from "@/utils/downloadHelper";
 import {
   convertToLocalTime,
   formatFileSize as formatSize,
@@ -503,13 +503,16 @@ const deletedWindow = async (
   }
 };
 
-const handleBatchDownload = () => {
-  const selected = getSelectedItems(displayItems.value || []);
-  Message.info(
-    t("ui.batchDownloadDev", {
-      count: selected.length,
-      resource: t("video.resourceName"),
-    })
+const handleBatchDownload = async () => {
+  const selected = getSelectedItems(displayItems.value || []) as ResourceInfo[];
+  await downloadResources(
+    selected.map((item) => ({
+      name: item.name || "video",
+      file: item.file,
+    })),
+    ".mp4",
+    t,
+    "video.view.download"
   );
 };
 

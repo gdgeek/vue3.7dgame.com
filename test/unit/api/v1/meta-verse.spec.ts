@@ -2,13 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/api/v1/meta", () => ({ postMeta: vi.fn(), putMeta: vi.fn() }));
 vi.mock("@/api/v1/verse", () => ({ postVerse: vi.fn(), putVerse: vi.fn() }));
-vi.mock("@/api/v1/meta-resource", () => ({ postMetaResource: vi.fn() }));
 vi.mock("uuid", () => ({ v4: vi.fn(() => "uuid-fixed") }));
 
 describe("api/v1/meta-verse", () => {
   let metaApi: typeof import("@/api/v1/meta");
   let verseApi: typeof import("@/api/v1/verse");
-  let metaResourceApi: typeof import("@/api/v1/meta-resource");
   let api: typeof import("@/api/v1/meta-verse");
 
   const resource = {
@@ -25,12 +23,10 @@ describe("api/v1/meta-verse", () => {
     vi.clearAllMocks();
     metaApi = await import("@/api/v1/meta");
     verseApi = await import("@/api/v1/verse");
-    metaResourceApi = await import("@/api/v1/meta-resource");
     api = await import("@/api/v1/meta-verse");
 
     (verseApi.postVerse as any).mockResolvedValue({ data: { id: 100 } });
     (metaApi.postMeta as any).mockResolvedValue({ data: { id: 200 } });
-    (metaResourceApi.postMetaResource as any).mockResolvedValue({ data: {} });
     (verseApi.putVerse as any).mockResolvedValue({
       data: { id: 100, updated: true },
     });
@@ -65,15 +61,6 @@ describe("api/v1/meta-verse", () => {
       title: "Polygen:tree-model",
       verse_id: 100,
       image_id: 10,
-    });
-  });
-
-  it("links meta-resource relation", async () => {
-    await api.createVerseFromResource("Polygen", "Demo", resource as any);
-    expect(metaResourceApi.postMetaResource).toHaveBeenCalledWith({
-      meta_id: 200,
-      resource_id: 2,
-      type: "model",
     });
   });
 

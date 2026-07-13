@@ -1,6 +1,5 @@
 import { postMeta, putMeta } from "./meta";
 import { postVerse, putVerse } from "./verse";
-import { postMetaResource } from "./meta-resource";
 import { v4 as uuidv4 } from "uuid";
 
 interface Resource {
@@ -128,13 +127,10 @@ export const createVerseFromResource = (
     try {
       const verse = await initVerse(type, name, resource);
       const meta = await initMeta(type, verse, resource);
-      await postMetaResource({
-        meta_id: meta.id,
-        resource_id: resource.id,
-        type: "model",
-      });
-
       const verse2 = await updateVerse(type, verse, meta);
+      // Updating the entity data is the source of truth for resource
+      // associations. Meta::afterSave refreshes meta_resource from this data,
+      // so the removed /v1/meta-resources endpoint must not be called here.
       const meta2 = await updateMeta(type, meta, resource);
       resolve({ verse: verse2, meta: meta2 });
     } catch (e) {
