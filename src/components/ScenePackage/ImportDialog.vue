@@ -158,7 +158,10 @@ const handleFileChange = async (uploadFile: UploadFile) => {
 const handleNavigate = () => {
   dialogVisible.value = false;
   if (newVerseId.value) {
-    router.push({ name: "verse-edit", params: { id: newVerseId.value } });
+    router.push({
+      name: "VerseSceneEditor",
+      query: { id: String(newVerseId.value) },
+    });
   }
 };
 

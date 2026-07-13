@@ -62,19 +62,17 @@ describe("Preservation: phototype/list.vue business logic", () => {
 describe("Preservation: meta/prefabs.vue business logic", () => {
   const source = readSource("views/meta/prefabs.vue");
 
-  it("should have addPrefab navigating to /meta-verse/prefab", () => {
-    expect(source).toContain('router.push("/meta-verse/prefab")');
+  it("should have addPrefab navigating to PrefabEdit", () => {
+    expect(source).toContain('router.push({ name: "PrefabEdit" })');
   });
 
-  it("should have editor(id) navigating to /meta-verse/prefab with query id", () => {
-    expect(source).toMatch(
-      /router\.push\(\{.*path:\s*["']\/meta-verse\/prefab["']/s
-    );
+  it("should have editor(id) navigating to PrefabEdit with query id", () => {
+    expect(source).toMatch(/router\.push\(\{.*name:\s*["']PrefabEdit["']/s);
     expect(source).toMatch(/query:\s*\{.*id/s);
   });
 
-  it("should have url(id) returning /meta-verse/prefab?id=", () => {
-    expect(source).toContain("/meta-verse/prefab?id=");
+  it("should have url(id) returning /meta/prefab-edit?id=", () => {
+    expect(source).toContain("/meta/prefab-edit?id=");
   });
 
   it("should import and call deletePrefab for deletion", () => {

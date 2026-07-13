@@ -227,7 +227,7 @@ import type { ResourceInfo } from "@/api/v1/resources/model";
 import type { FileType, UploadFileType } from "@/api/user/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
-import { downloadResource } from "@/utils/downloadHelper";
+import { downloadResource, downloadResources } from "@/utils/downloadHelper";
 import {
   convertToLocalTime,
   formatFileSize as formatSize,
@@ -801,13 +801,16 @@ const deletedWindow = async (
   }
 };
 
-const handleBatchDownload = () => {
-  const selected = getSelectedItems(displayItems.value || []);
-  Message.info(
-    t("ui.batchDownloadDev", {
-      count: selected.length,
-      resource: t("polygen.resourceName"),
-    })
+const handleBatchDownload = async () => {
+  const selected = getSelectedItems(displayItems.value || []) as ResourceInfo[];
+  await downloadResources(
+    selected.map((item) => ({
+      name: item.name || "model",
+      file: item.file,
+    })),
+    ".glb",
+    t,
+    "polygen.view.download"
   );
 };
 
