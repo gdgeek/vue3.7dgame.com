@@ -552,12 +552,54 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   };
 
   // ---- 复制代码 ----
-  const copyCode = async (code: string) => {
+  const resolveCopyText = (code: unknown) => {
+    if (typeof code === "string") return code;
+    if (isRecord(code) && "value" in code) {
+      const value = code.value;
+      return typeof value === "string" ? value : String(value ?? "");
+    }
+    return String(code ?? "");
+  };
+
+  const copyTextWithFallback = (text: string) => {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "readonly");
+    textarea.style.position = "fixed";
+    textarea.style.top = "0";
+    textarea.style.left = "-9999px";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
     try {
-      await navigator.clipboard.writeText(code);
+      return document.execCommand("copy");
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  };
+
+  const copyCode = async (code: unknown) => {
+    const text = resolveCopyText(code);
+
+    try {
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else if (!copyTextWithFallback(text)) {
+        throw new Error("Fallback copy failed");
+      }
       Message.success(t("copy.success"));
     } catch (_error) {
-      Message.error(t("copy.error"));
+      try {
+        if (!copyTextWithFallback(text)) {
+          throw new Error("Fallback copy failed");
+        }
+        Message.success(t("copy.success"));
+      } catch (_fallbackError) {
+        Message.error(t("copy.error"));
+      }
     }
   };
 

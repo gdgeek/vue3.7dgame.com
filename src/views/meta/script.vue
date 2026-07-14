@@ -359,6 +359,7 @@ const {
   reloadEditorFrame,
   decompressBlockly,
   isReady,
+  copyCode,
 } = useScriptEditorBase({
   luaLocalVar: "meta",
   i18nKeys: {

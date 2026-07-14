@@ -302,6 +302,8 @@ export default {
         noPublishPermission: "No permission to publish",
         emptySceneCannotPublish:
           "The scene is empty. Add at least one entity before publishing.",
+        unsavedSaveAndPublishConfirm:
+          "The current scene has unsaved changes. Save and publish this scene?",
         saveCompleted: "Save completed",
         noChanges: "No changes in project",
         coverUploadError: "Cover upload error: Image data not found",

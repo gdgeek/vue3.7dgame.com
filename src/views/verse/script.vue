@@ -480,6 +480,7 @@ const {
   reloadEditorFrame,
   decompressBlockly,
   isReady,
+  copyCode,
 } = useScriptEditorBase({
   luaLocalVar: "verse",
   i18nKeys: {

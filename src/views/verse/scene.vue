@@ -368,6 +368,7 @@ type VerseEditorData = {
 
 type VerseEditorPayload = {
   verse?: VerseEditorData;
+  saveBeforePublish?: boolean;
 };
 
 const hasVerseModules = (verseData?: VerseEditorData): boolean =>
@@ -886,6 +887,29 @@ const releaseVerse = async (data: unknown) => {
 
   if (!saveable.value) {
     ElMessage.info(t("verse.view.sceneEditor.noPublishPermission"));
+    return;
+  }
+
+  if (payload.saveBeforePublish) {
+    try {
+      await ElMessageBox.confirm(
+        t("verse.view.sceneEditor.unsavedSaveAndPublishConfirm"),
+        t("verse.view.sceneEditor.publishScene"),
+        {
+          confirmButtonText: t("verse.view.sceneEditor.confirm"),
+          cancelButtonText: t("verse.view.sceneEditor.cancel"),
+          type: "warning",
+        }
+      );
+    } catch {
+      ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
+      return;
+    }
+
+    const saved = await saveVerseBeforeLeave(payload, "manual");
+    if (!saved) return;
+    await takePhoto(id.value);
+    ElMessage.success(t("verse.page.list.releaseConfirm.success"));
     return;
   }
 
