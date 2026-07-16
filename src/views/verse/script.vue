@@ -249,10 +249,7 @@ import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
-import {
-  normalizeUnityPreviewVerseLua,
-  readUnityPreviewMetaJavaScriptCode,
-} from "@/utils/unityPreviewLua";
+import { normalizeUnityPreviewVerseLua } from "@/utils/unityPreviewLua";
 import {
   cloneForUnityPreview,
   normalizeUnityPreviewData,

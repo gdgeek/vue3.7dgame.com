@@ -302,8 +302,7 @@ export default {
         noPublishPermission: "No permission to publish",
         emptySceneCannotPublish:
           "The scene is empty. Add at least one entity before publishing.",
-        saveCurrentAndPublishConfirm:
-          "Save the current scene and publish it?",
+        saveCurrentAndPublishConfirm: "Save the current scene and publish it?",
         publishFailed: "Failed to publish the scene. Please try again.",
         saveCompleted: "Save completed",
         noChanges: "No changes in project",
