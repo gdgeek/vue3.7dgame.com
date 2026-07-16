@@ -822,6 +822,78 @@ describe("useScriptEditorBase", () => {
   });
 });
 
+describe("useScriptEditorBase copyCode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    Object.defineProperty(window, "isSecureContext", {
+      value: true,
+      configurable: true,
+    });
+  });
+
+  it("copies code with the Clipboard API in a secure context", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+
+    await result.copyCode({ value: "print('hello')" });
+
+    expect(writeText).toHaveBeenCalledWith("print('hello')");
+    expect(mockMessage.success).toHaveBeenCalledWith("copy.success");
+    unmount();
+  });
+
+  it("falls back to a temporary textarea when Clipboard API is unavailable", async () => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: undefined,
+      configurable: true,
+    });
+    const execCommand = vi.fn().mockReturnValue(true);
+    Object.defineProperty(document, "execCommand", {
+      value: execCommand,
+      configurable: true,
+    });
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+
+    await result.copyCode("const answer = 42;");
+
+    expect(execCommand).toHaveBeenCalledWith("copy");
+    expect(document.querySelector('textarea[readonly="readonly"]')).toBeNull();
+    expect(mockMessage.success).toHaveBeenCalledWith("copy.success");
+    unmount();
+  });
+
+  it("reports an error when both copy strategies fail", async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error("denied"));
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+    Object.defineProperty(document, "execCommand", {
+      value: vi.fn().mockReturnValue(false),
+      configurable: true,
+    });
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+
+    await result.copyCode("print('blocked')");
+
+    expect(mockMessage.error).toHaveBeenCalledWith("copy.error");
+    unmount();
+  });
+});
+
 // ---------------------------------------------------------------------------
 // onBeforeUnmount 匿名回调 — 覆盖 lines 417-419, 422, 425
 //

@@ -43,6 +43,7 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import { hasPublishableSceneContent } from "@/utils/versePublish";
+import { saveThenPublishScene } from "@/utils/scenePublish";
 import { takePhoto } from "@/api/v1/verse";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
@@ -113,6 +114,7 @@ const DEFAULT_AUTO_SAVE_INTERVAL_SECONDS = 300;
 const DRAFT_SETTINGS_VERSION = 2;
 const autoSaveIntervalSeconds = ref(DEFAULT_AUTO_SAVE_INTERVAL_SECONDS);
 const isSavingVersion = ref(false);
+const isPublishingVerse = ref(false);
 const lastSaveTrigger = ref<ScriptSaveTrigger | null>(null);
 const lastSavedAt = ref<string | null>(null);
 const pendingRestorePayload = ref<VerseEditorPayload | null>(null);
@@ -811,7 +813,8 @@ const saveVerse = async (
 
 const saveVerseBeforeLeave = async (
   data: unknown,
-  trigger: ScriptSaveTrigger = currentSaveTrigger
+  trigger: ScriptSaveTrigger = currentSaveTrigger,
+  showSuccess = true
 ): Promise<boolean> => {
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
@@ -858,7 +861,7 @@ const saveVerseBeforeLeave = async (
         data: safeClone(verse),
       };
     }
-    if (trigger === "manual") {
+    if (trigger === "manual" && showSuccess) {
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
     }
     return true;
@@ -870,6 +873,8 @@ const saveVerseBeforeLeave = async (
 
 //发布场景
 const releaseVerse = async (data: unknown) => {
+  if (isPublishingVerse.value) return;
+
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
     ElMessage.error(t("verse.view.sceneEditor.noProjectToPublish"));
@@ -886,22 +891,35 @@ const releaseVerse = async (data: unknown) => {
     return;
   }
 
+  isPublishingVerse.value = true;
   try {
     await ElMessageBox.confirm(
-      t("verse.page.list.releaseConfirm.message1"),
-      t("verse.page.list.releaseConfirm.message2"),
+      t("verse.view.sceneEditor.saveCurrentAndPublishConfirm"),
+      t("verse.view.sceneEditor.publishScene"),
       {
-        confirmButtonText: t("verse.page.list.releaseConfirm.confirm"),
-        cancelButtonText: t("verse.page.list.releaseConfirm.cancel"),
+        confirmButtonText: t("verse.view.sceneEditor.confirm"),
+        cancelButtonText: t("verse.view.sceneEditor.cancel"),
         type: "warning",
       }
     );
 
-    await takePhoto(id.value);
+    const published = await saveThenPublishScene(
+      payload,
+      (currentPayload) => saveVerseBeforeLeave(currentPayload, "manual", false),
+      () => takePhoto(id.value)
+    );
+    if (!published) return;
 
     ElMessage.success(t("verse.page.list.releaseConfirm.success"));
-  } catch {
-    ElMessage.info(t("verse.page.list.releaseConfirm.info"));
+  } catch (error) {
+    if (error === "cancel" || error === "close") {
+      ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
+    } else {
+      logger.error("Failed to save and publish scene:", error);
+      ElMessage.error(t("verse.view.sceneEditor.publishFailed"));
+    }
+  } finally {
+    isPublishingVerse.value = false;
   }
 };
 
