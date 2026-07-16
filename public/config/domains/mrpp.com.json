@@ -1,6 +1,6 @@
 {
   "name": "mrpp.com",
-  "description": "混合现实实训平台",
+  "description": "Rokid AR 创作平台",
   "is_active": true,
   "fallback_domain": null,
   "default_config": {
@@ -13,11 +13,11 @@
       "links": [
         {
           "url": "https://mrpp.com/",
-          "name": "求证科技"
+          "name": "灵伴科技"
         }
       ],
-      "title": "混合现实实训平台",
-      "author": "Mixed Reality Practical Platform",
+      "title": "Rokid AR 创作平台",
+      "author": "Rokid AR Creation Platform",
       "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
       "description": "零代码/低代码MR内容创作平台"
     }
