@@ -113,10 +113,8 @@ export default {
       title: "GLB compatibility notes",
       textureFormats:
         "Use PNG, JPEG/JPG, or KTX/KTX2 textures. WebP textures are not supported by the client.",
-      noDraco:
-        "KHR_draco_mesh_compression / Draco mesh compression is not supported.",
       recommendation:
-        "Before uploading, disable Draco compression and convert WebP textures to PNG, JPEG/JPG, or KTX/KTX2.",
+        "Before uploading, convert WebP textures to PNG, JPEG/JPG, or KTX/KTX2.",
     },
     view: {
       title: "Ploygen Name: ",
@@ -437,7 +435,6 @@ export default {
     fileSizeExceededList:
       "The following files exceed the {size}MB limit: {names}",
     modelCompatibilityRejected: "{name} cannot be uploaded: {reasons}",
-    unsupportedDraco: "contains unsupported Draco mesh compression",
     unsupportedTextureFormats:
       "contains unsupported texture format(s): {formats}",
     invalidGlb: "not a valid GLB file",

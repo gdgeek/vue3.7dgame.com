@@ -7,6 +7,7 @@ import {
 } from "@/api/domain-static-config";
 import bujiabanConfig from "../../../public/config/domains/bujiaban.com.json";
 import devXrugcConfig from "../../../public/config/domains/dev.xrugc.com.json";
+import xiadingConfig from "../../../public/config/domains/xiading.hxgxonline.com.json";
 
 function makeFetch(configs: Record<string, unknown>) {
   return vi.fn(async (input: RequestInfo | URL) => {
@@ -332,6 +333,57 @@ describe("domain-static-config", () => {
       data: {
         domain: "dev.xrugc.com",
         title: "XR UGC Dev",
+      },
+    });
+  });
+
+  it("loads d.xiading.hxgxonline.com from the parent xiading domain config", async () => {
+    const fetchMock = makeFetch({
+      "/config/domains/xiading.hxgxonline.com.json": xiadingConfig,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const defaultResult = await getStaticDomainDefault(
+      "d.xiading.hxgxonline.com"
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/config/domains/xiading.hxgxonline.com.json",
+      expect.anything()
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/config/domains/d.xiading.hxgxonline.com.json",
+      expect.anything()
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/config/domains/default.json",
+      expect.anything()
+    );
+    expect(defaultResult).toMatchObject({
+      domain: "d.xiading.hxgxonline.com",
+      actual_domain: "xiading.hxgxonline.com",
+      language: "default",
+      is_domain_fallback: true,
+      data: {
+        homepage: "https://xiading.hxgxonline.com",
+      },
+    });
+
+    const languageResult = await getStaticDomainLanguage(
+      "d.xiading.hxgxonline.com",
+      "zh-TW"
+    );
+
+    expect(languageResult).toMatchObject({
+      domain: "d.xiading.hxgxonline.com",
+      actual_domain: "xiading.hxgxonline.com",
+      language: "zh-TW",
+      requested_language: "zh-TW",
+      is_fallback: false,
+      is_domain_fallback: true,
+      data: {
+        domain: "xiading.hxgxonline.com",
+        title: "夏鼎AI/AR教育平台",
       },
     });
   });

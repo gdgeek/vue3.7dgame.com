@@ -293,8 +293,8 @@ export default {
         noPublishPermission: "公開権限がありません",
         emptySceneCannotPublish:
           "シーンが空です。公開する前に少なくとも1つのエンティティを追加してください。",
-        unsavedSaveAndPublishConfirm:
-          "現在のシーンには未保存の変更があります。保存して公開しますか？",
+        saveCurrentAndPublishConfirm: "現在のシーンを保存して公開しますか？",
+        publishFailed: "シーンの公開に失敗しました。もう一度お試しください。",
         saveCompleted: "保存完了",
         noChanges: "プロジェクトに変更はありません",
         coverUploadError:

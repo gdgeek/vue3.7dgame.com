@@ -276,6 +276,17 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     );
   });
 
+  it("normalizes proxy prefixes with relative redirects", () => {
+    expect(entrypointScript).toContain(
+      "EXACT_LOC_PATH=$(printf '%s' \"$LOC_PATH\" | sed 's|/*$||')"
+    );
+    expect(entrypointScript).toContain("location = ${EXACT_LOC_PATH}");
+    expect(entrypointScript).toContain(
+      "return 308 ${LOC_PATH}\\$is_args\\$args;"
+    );
+    expect(entrypointScript).not.toContain("return 308 http");
+  });
+
   it("does NOT generate /api-domain/ failover chain", () => {
     expect(entrypointScript).not.toContain('"/api-domain/"');
   });
@@ -346,6 +357,39 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
   it("cache-busts __env.js in index.html at container startup", () => {
     expect(entrypointScript).toContain("ENV_JS_VERSION=$(date +%s)");
     expect(entrypointScript).toContain("/__env.js?v=${ENV_JS_VERSION}");
+  });
+
+  it("injects auth runtime env into __env.js", () => {
+    expect(entrypointScript).toContain("AUTH_PROVIDER_JSON=");
+    expect(entrypointScript).toContain("VITE_AUTH_PROVIDER_JSON=");
+    expect(entrypointScript).toContain("VITE_APP_AUTH_API_JSON=");
+    expect(entrypointScript).toContain("VITE_APP_WECHAT_AUTH_API_JSON=");
+    expect(entrypointScript).toContain("IDENTITY_OIDC_BRIDGE_ENABLED_JSON=");
+    expect(entrypointScript).toContain("IDENTITY_OIDC_CLIENT_ID_JSON=");
+    expect(entrypointScript).toContain("IDENTITY_OIDC_REDIRECT_URI_JSON=");
+    expect(entrypointScript).toContain("IDENTITY_OIDC_SCOPE_JSON=");
+    expect(entrypointScript).toContain("AUTH_PROVIDER: ${AUTH_PROVIDER_JSON}");
+    expect(entrypointScript).toContain(
+      "VITE_AUTH_PROVIDER: ${VITE_AUTH_PROVIDER_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "VITE_APP_AUTH_API: ${VITE_APP_AUTH_API_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "VITE_APP_WECHAT_AUTH_API: ${VITE_APP_WECHAT_AUTH_API_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "IDENTITY_OIDC_BRIDGE_ENABLED: ${IDENTITY_OIDC_BRIDGE_ENABLED_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "IDENTITY_OIDC_CLIENT_ID: ${IDENTITY_OIDC_CLIENT_ID_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "IDENTITY_OIDC_REDIRECT_URI: ${IDENTITY_OIDC_REDIRECT_URI_JSON}"
+    );
+    expect(entrypointScript).toContain(
+      "IDENTITY_OIDC_SCOPE: ${IDENTITY_OIDC_SCOPE_JSON}"
+    );
   });
 
   it("uses proxy_connect_timeout 5s for fast failover", () => {
@@ -477,6 +521,7 @@ describe("Property 5: Environment-aware URL selection", () => {
         );
         expect(envSource).toMatch(/:\s*["']\/api["']/);
         expect(envSource).toContain("/api-auth");
+        expect(envSource).toContain("https://auth.bujiaban.com");
         expect(envSource).toMatch(/:\s*["']\/api-config\/api["']/);
         expect(envSource).toMatch(/:\s*["']\/api-doc["']/);
       }),
@@ -493,6 +538,7 @@ describe("Property 5: Environment-aware URL selection", () => {
         );
         expect(envSource).toContain("VITE_APP_API_URL");
         expect(envSource).toContain("VITE_APP_AUTH_API");
+        expect(envSource).toContain("VITE_APP_WECHAT_AUTH_API");
         expect(envSource).toContain("import.meta.env.DEV");
       }),
       { numRuns: 100 }

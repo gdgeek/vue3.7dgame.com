@@ -5,6 +5,16 @@ export default {
     register: "Platform Register/Login",
     h1: "Welcome!",
     h4: "Ready to get started?",
+    registerHeroTitle: "Start Mixed Reality Creation",
+    registerHeroSubtitle:
+      "Program, build, and collaborate in space to turn ideas into interactive immersive experiences.",
+    registerBadge: "Sign Up / Log In",
+    registerFeatureWorkspace: "Spatial Coding",
+    registerFeatureAssets: "3D Building",
+    registerFeaturePlugins: "Live Collaboration",
+    registerFormHint: "Fill in the details below to start creating.",
+    registerSecurityHint:
+      "Your account is encrypted and your privacy is protected carefully.",
     username: "Username",
     email: "Email",
     password: "Password",
@@ -12,7 +22,12 @@ export default {
     hidePassword: "Hide password",
     login: "Login",
     loginCode: "Login Code",
-    scanTip: "Please scan the QR code with your phone to log in",
+    scanTip: "Please scan the QR code with your tablet to log in",
+    loginCodeUsed: "This login code has been used. Please refresh the QR code.",
+    loginCodeExpired:
+      "This login code has expired. Please refresh the QR code.",
+    loginCodeExpiresIn: "Expires in {seconds}s",
+    refreshLoginCode: "Refresh QR Code",
     rules: {
       username: {
         message1: "Please enter your username",
@@ -30,6 +45,10 @@ export default {
         message1: "Please enter the password again",
         message2: "The two passwords do not match",
       },
+    },
+    registerErrors: {
+      usernameTaken: "This username is already taken. Please choose another.",
+      usernameEmailFormat: "The username does not need to be an email address.",
     },
     success: "Login Successful",
     error: "Form Validation Failed",

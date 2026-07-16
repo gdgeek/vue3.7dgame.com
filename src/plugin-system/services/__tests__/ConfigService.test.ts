@@ -99,4 +99,104 @@ describe("ConfigService", () => {
       }),
     ]);
   });
+
+  it("merges plugins by id so display names and i18n labels can repeat", async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        version: "1.0.0",
+        menuGroups: [],
+        plugins: [
+          {
+            id: "campus-dev",
+            name: "Campus",
+            nameI18n: { "zh-CN": "校园管理" },
+            description: "Development campus plugin",
+            url: "https://campus-dev.plugins.xrugc.com/",
+            icon: "OfficeBuilding",
+            group: "org:test",
+            enabled: true,
+            order: 1,
+            allowedOrigin: "https://campus-dev.plugins.xrugc.com",
+            accessScope: "manager-only",
+            version: "1.0.0",
+          },
+          {
+            id: "campus-prod",
+            name: "Campus",
+            nameI18n: { "zh-CN": "校园管理" },
+            description: "Production campus plugin",
+            url: "https://campus.plugins.xrugc.com/",
+            icon: "OfficeBuilding",
+            group: "org:test",
+            enabled: true,
+            order: 2,
+            allowedOrigin: "https://campus.plugins.xrugc.com",
+            accessScope: "manager-only",
+            version: "1.0.0",
+          },
+        ],
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          version: "1.0.1",
+          menuGroups: [],
+          plugins: [
+            {
+              id: "campus-dev",
+              name: "Campus",
+              nameI18n: { "zh-CN": "校园管理" },
+              description: "Local override keeps the same display label",
+              url: "http://localhost:3009/",
+              icon: "OfficeBuilding",
+              group: "org:test",
+              enabled: true,
+              order: 1,
+              allowedOrigin: "http://localhost:3009",
+              accessScope: "manager-only",
+              version: "1.0.1",
+            },
+            {
+              id: "campus-local",
+              name: "Campus",
+              nameI18n: { "zh-CN": "校园管理" },
+              description: "Local-only campus plugin",
+              url: "http://localhost:3010/",
+              icon: "OfficeBuilding",
+              group: "org:test",
+              enabled: true,
+              order: 3,
+              allowedOrigin: "http://localhost:3010",
+              accessScope: "manager-only",
+              version: "1.0.0",
+            },
+          ],
+        }),
+      })
+    );
+
+    const service = new ConfigService();
+    const config = await service.loadConfig();
+
+    expect(config.plugins.map((plugin) => plugin.id)).toEqual([
+      "campus-dev",
+      "campus-prod",
+      "campus-local",
+    ]);
+    expect(config.plugins.map((plugin) => plugin.name)).toEqual([
+      "Campus",
+      "Campus",
+      "Campus",
+    ]);
+    expect(config.plugins[0]).toEqual(
+      expect.objectContaining({
+        id: "campus-dev",
+        url: "http://localhost:3009/",
+        version: "1.0.1",
+      })
+    );
+  });
 });

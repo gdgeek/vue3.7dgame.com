@@ -158,6 +158,7 @@ export default {
         cancel: "Cancel",
         success: "Deleted successfully!",
         info: "Deletion canceled",
+        deleteSelfNotAllowed: "You cannot delete your own account",
       },
       success: "Permissions updated successfully!",
       error: "Permissions update failed!",

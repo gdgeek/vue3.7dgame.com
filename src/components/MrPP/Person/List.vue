@@ -77,7 +77,7 @@
               {{ t("common.edit") }}
             </el-button>
             <el-button
-              v-if="people(item.roles)"
+              v-if="people(item.roles) && !isCurrentUser(item)"
               type="danger"
               size="small"
               class="button"
@@ -85,6 +85,17 @@
             >
               {{ $t("manager.list.cancel") }}
             </el-button>
+            <el-tooltip
+              v-else-if="people(item.roles)"
+              :content="t('manager.list.confirm.deleteSelfNotAllowed')"
+              placement="top"
+            >
+              <span>
+                <el-button type="danger" size="small" class="button" disabled>
+                  {{ $t("manager.list.cancel") }}
+                </el-button>
+              </span>
+            </el-tooltip>
           </div>
         </div>
       </el-card>
@@ -208,7 +219,22 @@ const openEditor = (item: ViewCard) => {
   });
 };
 
+const isCurrentUser = (item: ViewCard): boolean => {
+  const currentUserId = Number(userStore.userInfo?.id);
+  const targetUserId = Number(item.id);
+  return (
+    Number.isInteger(currentUserId) &&
+    Number.isInteger(targetUserId) &&
+    currentUserId === targetUserId
+  );
+};
+
 const deleted = async (item: ViewCard) => {
+  if (isCurrentUser(item)) {
+    ElMessage.error(t("manager.list.confirm.deleteSelfNotAllowed"));
+    return;
+  }
+
   try {
     await ElMessageBox.confirm(
       t("manager.list.confirm.message1"),

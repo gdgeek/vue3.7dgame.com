@@ -222,4 +222,117 @@ describe("authClient", () => {
     });
     expect(mainHttp.post).not.toHaveBeenCalled();
   });
+
+  it("can upgrade an identity login through the OIDC bridge when explicitly enabled", async () => {
+    const loginToken = createToken({
+      accessToken: "identity-login-token",
+      refreshToken: "identity-refresh",
+    });
+    const tokenStore = createTokenStore();
+    const mainHttp = {
+      get: vi.fn(),
+      post: vi.fn(),
+    };
+    const authHttp = {
+      get: vi.fn().mockResolvedValue({
+        data: { code: "oidc-code", state: "state-1" },
+      }),
+      post: vi
+        .fn()
+        .mockResolvedValueOnce({ data: { success: true, token: loginToken } })
+        .mockResolvedValueOnce({
+          data: {
+            access_token: "oidc-access-token",
+            token_type: "Bearer",
+            expires_in: 3600,
+            refresh_token: "oidc-refresh-token",
+            id_token: "oidc-id-token",
+          },
+        }),
+    };
+    const client = createAuthClient({
+      authHttp,
+      mainHttp,
+      tokenStore,
+      provider: "identity",
+      oidcBridge: {
+        enabled: true,
+        clientId: "xrugc-web",
+        redirectUri: "https://xrugc.com/oidc/callback",
+        scope: "openid profile offline_access",
+      },
+    });
+
+    const response = await client.login({
+      username: "guanfei",
+      password: "123456",
+    });
+
+    expect(authHttp.get).toHaveBeenCalledWith(
+      "/authorize",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer identity-login-token" },
+        params: expect.objectContaining({
+          response_type: "code",
+          response_mode: "json",
+          client_id: "xrugc-web",
+          redirect_uri: "https://xrugc.com/oidc/callback",
+          scope: "openid profile offline_access",
+          code_challenge_method: "S256",
+          code_challenge: expect.any(String),
+        }),
+      })
+    );
+    expect(authHttp.post).toHaveBeenNthCalledWith(2, "/token", {
+      grant_type: "authorization_code",
+      client_id: "xrugc-web",
+      redirect_uri: "https://xrugc.com/oidc/callback",
+      code: "oidc-code",
+      code_verifier: expect.any(String),
+    });
+    expect(response.token.accessToken).toBe("oidc-access-token");
+    expect(response.token.refreshToken).toBe("oidc-refresh-token");
+    expect(client.getAccessToken()).toBe("oidc-access-token");
+    expect(tokenStore.setToken).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the identity login token when the OIDC bridge is unavailable", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const loginToken = createToken({
+      accessToken: "identity-login-token",
+      refreshToken: "identity-refresh",
+    });
+    const tokenStore = createTokenStore();
+    const authHttp = {
+      get: vi.fn().mockRejectedValue(new Error("oidc unavailable")),
+      post: vi.fn().mockResolvedValueOnce({
+        data: { success: true, token: loginToken },
+      }),
+    };
+    const client = createAuthClient({
+      authHttp,
+      tokenStore,
+      provider: "identity",
+      oidcBridge: {
+        enabled: true,
+        clientId: "xrugc-web",
+        redirectUri: "https://xrugc.com/oidc/callback",
+        scope: "openid profile",
+      },
+    });
+
+    const response = await client.login({
+      username: "guanfei",
+      password: "123456",
+    });
+
+    expect(response.token.accessToken).toBe("identity-login-token");
+    expect(client.getAccessToken()).toBe("identity-login-token");
+    expect(tokenStore.setToken).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(
+      "[auth] OIDC bridge failed; keeping identity login token",
+      expect.any(Error)
+    );
+    warn.mockRestore();
+  });
 });

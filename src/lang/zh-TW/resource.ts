@@ -108,9 +108,9 @@ export default {
     uploadFile: "選擇模型（.glb文件），並上傳",
     uploadCompatibility: {
       title: "GLB 相容說明",
-      textureFormats: "貼圖建議使用 PNG、JPEG/JPG、KTX/KTX2 格式；客戶端暫不支援 WebP 貼圖。",
-      noDraco: "暫不支援 KHR_draco_mesh_compression / Draco 網格壓縮。",
-      recommendation: "上傳前請關閉 Draco 壓縮，並將 WebP 等貼圖轉換為 PNG、JPEG/JPG 或 KTX/KTX2。",
+      textureFormats:
+        "貼圖建議使用 PNG、JPEG/JPG、KTX/KTX2 格式；客戶端暫不支援 WebP 貼圖。",
+      recommendation: "上傳前請將 WebP 貼圖轉換為 PNG、JPEG/JPG 或 KTX/KTX2。",
     },
     view: {
       title: "模型名稱：",
@@ -417,7 +417,6 @@ export default {
     fileTooLarge: "文件超過 {size}MB 限制",
     fileSizeExceededList: "以下文件超過 {size}MB 限制: {names}",
     modelCompatibilityRejected: "{name} 無法上傳：{reasons}",
-    unsupportedDraco: "包含不支援的 Draco 網格壓縮",
     unsupportedTextureFormats: "包含不支援的貼圖格式：{formats}",
     invalidGlb: "不是有效的 GLB 文件",
     missingGlbJson: "GLB 文件缺少 JSON 數據",

@@ -81,6 +81,8 @@ const normalizeFileStorageDriver = (
 const resolveApiBase = () =>
   import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api";
 
+const productionWechatAuthApiBase = "https://auth.bujiaban.com";
+
 const resolveAuthApiBase = () =>
   (
     getRuntimeEnv().AUTH_API ||
@@ -88,6 +90,51 @@ const resolveAuthApiBase = () =>
     import.meta.env.VITE_APP_AUTH_API ||
     (import.meta.env.DEV ? "" : "/api-auth")
   ).replace(/\/+$/, "");
+
+const resolveWechatAuthApiBase = () =>
+  (
+    getRuntimeEnv().WECHAT_AUTH_API ||
+    getRuntimeEnv().VITE_APP_WECHAT_AUTH_API ||
+    import.meta.env.VITE_APP_WECHAT_AUTH_API ||
+    (import.meta.env.DEV ? "" : productionWechatAuthApiBase)
+  ).replace(/\/+$/, "");
+
+const boolFromRuntimeEnv = (
+  value: string | undefined,
+  defaultValue = false
+): boolean => {
+  if (value === undefined) return defaultValue;
+  return ["1", "true", "yes", "on"].includes(value.trim().toLowerCase());
+};
+
+const resolveOidcBridgeConfig = () => {
+  const runtimeEnv = getRuntimeEnv();
+  const redirectUri =
+    runtimeEnv.IDENTITY_OIDC_REDIRECT_URI ||
+    runtimeEnv.VITE_IDENTITY_OIDC_REDIRECT_URI ||
+    import.meta.env.VITE_IDENTITY_OIDC_REDIRECT_URI ||
+    `${window.location.origin}/oidc/callback`;
+
+  return {
+    enabled: boolFromRuntimeEnv(
+      runtimeEnv.IDENTITY_OIDC_BRIDGE_ENABLED ||
+        runtimeEnv.VITE_IDENTITY_OIDC_BRIDGE_ENABLED ||
+        import.meta.env.VITE_IDENTITY_OIDC_BRIDGE_ENABLED,
+      false
+    ),
+    clientId:
+      runtimeEnv.IDENTITY_OIDC_CLIENT_ID ||
+      runtimeEnv.VITE_IDENTITY_OIDC_CLIENT_ID ||
+      import.meta.env.VITE_IDENTITY_OIDC_CLIENT_ID ||
+      "xrugc-web",
+    redirectUri,
+    scope:
+      runtimeEnv.IDENTITY_OIDC_SCOPE ||
+      runtimeEnv.VITE_IDENTITY_OIDC_SCOPE ||
+      import.meta.env.VITE_IDENTITY_OIDC_SCOPE ||
+      "openid profile email offline_access",
+  };
+};
 
 const deploymentConfigEndpoint = () => {
   const apiBase = resolveApiBase().replace(/\/+$/, "");
@@ -205,6 +252,8 @@ const resolveUnityPreviewUrl = () => {
 const environment = {
   api: resolveApiBase(),
   authApi: resolveAuthApiBase(),
+  wechatAuthApi: resolveWechatAuthApiBase(),
+  oidcBridge: resolveOidcBridgeConfig(),
   config_api: "/api-config/api",
   doc: import.meta.env.DEV
     ? import.meta.env.VITE_APP_DOC_API || ""

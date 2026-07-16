@@ -20,6 +20,17 @@ describe("runtime deployment environment", () => {
     expect(env.useCloud()).toBe(true);
   });
 
+  it("keeps identity auth and WeChat login auth as separate endpoints", async () => {
+    window.__ENV__ = {
+      VITE_APP_AUTH_API: "/api-auth",
+      VITE_APP_WECHAT_AUTH_API: "https://auth.bujiaban.com",
+    };
+    const env = (await import("@/environment")).default;
+
+    expect(env.authApi).toBe("/api-auth");
+    expect(env.wechatAuthApi).toBe("https://auth.bujiaban.com");
+  });
+
   it("uses backend runtime config before frontend env values", async () => {
     window.__ENV__ = {
       DEPLOYMENT_MODE: "cloud",

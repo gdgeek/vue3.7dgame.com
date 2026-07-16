@@ -585,7 +585,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     const text = resolveCopyText(code);
 
     try {
-      if (navigator.clipboard?.writeText && window.isSecureContext) {
+      if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
       } else if (!copyTextWithFallback(text)) {
         throw new Error("Fallback copy failed");

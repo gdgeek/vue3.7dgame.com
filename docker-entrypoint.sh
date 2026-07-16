@@ -12,7 +12,12 @@ set -e
 #   APP_API_2_WEIGHT=30
 #   APP_API_3_URL=https://api.third.com
 #   APP_API_3_WEIGHT=10
-#   APP_AUTH_1_URL=https://auth.bujiaban.com
+#   APP_AUTH_1_URL=https://identity.d.xrteeth.com
+#   APP_AUTH_2_URL=https://identity.d.tmrpp.com
+#   AUTH_PROVIDER=identity
+#   VITE_AUTH_PROVIDER=identity
+#   VITE_APP_AUTH_API=/api-auth
+#   VITE_APP_WECHAT_AUTH_API=https://auth.bujiaban.com
 #   APP_CONFIG_1_URL=https://system-admin.plugins.xrugc.com/backend/api
 #   APP_CONFIG_2_URL=https://system-admin-backup.plugins.xrugc.com/backend/api
 #   APP_DOC_API_URL=https://hololens2.cn/wp-json/wp/v2
@@ -52,6 +57,7 @@ generate_lb_config() {
   PREFIX_NAME="$3"
   WITH_GEEK="$4"
   FAILOVER_STATUS_CODES="${5:-502 503 504}"
+  EXACT_LOC_PATH=$(printf '%s' "$LOC_PATH" | sed 's|/*$||')
 
   CHAIN_RESULT=""
 
@@ -125,6 +131,11 @@ generate_lb_config() {
     echo "[entrypoint] Mode: single backend (resolver-enabled)"
 
     CHAIN_RESULT="
+    # ============ 反向代理 - ${EXACT_LOC_PATH} 规范化 ============
+    location = ${EXACT_LOC_PATH} {
+        return 308 ${LOC_PATH}\$is_args\$args;
+    }
+
     # ============ 反向代理 - ${LOC_PATH} (单后端 + DNS 动态解析) ============
     location ${LOC_PATH} {
         set \$${PREFIX_NAME}_single_backend \"${url}\";
@@ -273,6 +284,11 @@ map \$${PREFIX_NAME}_pool \$${PREFIX_NAME}_fb_host {"
 
   # --- 6. 生成 location 块（server 层级）---
   CHAIN_RESULT="
+    # ============ 反向代理 - ${EXACT_LOC_PATH} 规范化 ============
+    location = ${EXACT_LOC_PATH} {
+        return 308 ${LOC_PATH}\$is_args\$args;
+    }
+
     # ============ 反向代理 - ${LOC_PATH} (负载均衡 + Failover) ============
     location ${LOC_PATH} {
         rewrite ^${LOC_PATH}(.*)\$ /\$1 break;
@@ -316,6 +332,16 @@ ${GEEK_BLOCK}
         proxy_read_timeout 120s;
         proxy_send_timeout 120s;
     }"
+}
+
+# JSON 编码函数（不依赖 Python）
+# 如果输入为空，返回 null；否则返回 JSON 字符串
+json_encode() {
+  if [ -z "$1" ]; then
+    echo "null"
+  else
+    echo "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "\"%s\"", $0}'
+  fi
 }
 
 # --- 1. 生成 API 负载均衡配置 ---
@@ -391,14 +417,33 @@ fi
 # --- 8. 生成运行时环境变量注入文件 ---
 ENV_JS="/usr/share/nginx/html/__env.js"
 echo "[entrypoint] Generating runtime env injection at $ENV_JS"
+BLOCKLY_URL_JSON=$(json_encode "${APP_BLOCKLY_URL:-}")
+EDITOR_URL_JSON=$(json_encode "${APP_EDITOR_URL:-}")
+UNITY_PREVIEW_URL_JSON=$(json_encode "${APP_UNITY_PREVIEW_URL:-}")
+AUTH_PROVIDER_JSON=$(json_encode "${AUTH_PROVIDER:-}")
+VITE_AUTH_PROVIDER_JSON=$(json_encode "${VITE_AUTH_PROVIDER:-${AUTH_PROVIDER:-}}")
+VITE_APP_AUTH_API_JSON=$(json_encode "${VITE_APP_AUTH_API:-}")
+VITE_APP_WECHAT_AUTH_API_JSON=$(json_encode "${VITE_APP_WECHAT_AUTH_API:-${WECHAT_AUTH_API:-}}")
+IDENTITY_OIDC_BRIDGE_ENABLED_JSON=$(json_encode "${IDENTITY_OIDC_BRIDGE_ENABLED:-${VITE_IDENTITY_OIDC_BRIDGE_ENABLED:-}}")
+IDENTITY_OIDC_CLIENT_ID_JSON=$(json_encode "${IDENTITY_OIDC_CLIENT_ID:-${VITE_IDENTITY_OIDC_CLIENT_ID:-}}")
+IDENTITY_OIDC_REDIRECT_URI_JSON=$(json_encode "${IDENTITY_OIDC_REDIRECT_URI:-${VITE_IDENTITY_OIDC_REDIRECT_URI:-}}")
+IDENTITY_OIDC_SCOPE_JSON=$(json_encode "${IDENTITY_OIDC_SCOPE:-${VITE_IDENTITY_OIDC_SCOPE:-}}")
 cat > "$ENV_JS" <<EOF
 window.__ENV__ = {
-  BLOCKLY_URL: "${APP_BLOCKLY_URL:-}",
-  EDITOR_URL: "${APP_EDITOR_URL:-}",
-  UNITY_PREVIEW_URL: "${APP_UNITY_PREVIEW_URL:-}"
+  BLOCKLY_URL: ${BLOCKLY_URL_JSON},
+  EDITOR_URL: ${EDITOR_URL_JSON},
+  UNITY_PREVIEW_URL: ${UNITY_PREVIEW_URL_JSON},
+  AUTH_PROVIDER: ${AUTH_PROVIDER_JSON},
+  VITE_AUTH_PROVIDER: ${VITE_AUTH_PROVIDER_JSON},
+  VITE_APP_AUTH_API: ${VITE_APP_AUTH_API_JSON},
+  VITE_APP_WECHAT_AUTH_API: ${VITE_APP_WECHAT_AUTH_API_JSON},
+  IDENTITY_OIDC_BRIDGE_ENABLED: ${IDENTITY_OIDC_BRIDGE_ENABLED_JSON},
+  IDENTITY_OIDC_CLIENT_ID: ${IDENTITY_OIDC_CLIENT_ID_JSON},
+  IDENTITY_OIDC_REDIRECT_URI: ${IDENTITY_OIDC_REDIRECT_URI_JSON},
+  IDENTITY_OIDC_SCOPE: ${IDENTITY_OIDC_SCOPE_JSON}
 };
 EOF
-echo "[entrypoint] Runtime env: BLOCKLY_URL=${APP_BLOCKLY_URL:-<not set>}, EDITOR_URL=${APP_EDITOR_URL:-<not set>}, UNITY_PREVIEW_URL=${APP_UNITY_PREVIEW_URL:-<not set>}"
+echo "[entrypoint] Runtime env: BLOCKLY_URL=${APP_BLOCKLY_URL:-<not set>}, EDITOR_URL=${APP_EDITOR_URL:-<not set>}, UNITY_PREVIEW_URL=${APP_UNITY_PREVIEW_URL:-<not set>}, AUTH_PROVIDER=${AUTH_PROVIDER:-<not set>}, VITE_AUTH_PROVIDER=${VITE_AUTH_PROVIDER:-<not set>}, VITE_APP_AUTH_API=${VITE_APP_AUTH_API:-<not set>}, VITE_APP_WECHAT_AUTH_API=${VITE_APP_WECHAT_AUTH_API:-${WECHAT_AUTH_API:-<not set>}}, IDENTITY_OIDC_BRIDGE_ENABLED=${IDENTITY_OIDC_BRIDGE_ENABLED:-${VITE_IDENTITY_OIDC_BRIDGE_ENABLED:-<not set>}}"
 echo "[entrypoint] Unity preview upstream: APP_UNITY_PREVIEW_UPSTREAM=${APP_UNITY_PREVIEW_UPSTREAM:-<not set>}"
 
 INDEX_HTML="/usr/share/nginx/html/index.html"

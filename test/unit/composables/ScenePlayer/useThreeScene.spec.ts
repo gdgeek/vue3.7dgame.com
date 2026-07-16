@@ -176,7 +176,7 @@ describe("useThreeScene", () => {
       controls,
       onFrame: vi.fn(),
     });
-    expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0xeeeeee, 1);
+    expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0x1f2937, 1);
   });
 
   it("setupScene creates renderer with dark background for dark theme", () => {
@@ -189,7 +189,7 @@ describe("useThreeScene", () => {
       controls,
       onFrame: vi.fn(),
     });
-    expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0x242424, 1);
+    expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0x1f2937, 1);
   });
 
   it("setupScene sets up OrbitControls and assigns to controls ref", async () => {
@@ -219,8 +219,8 @@ describe("useThreeScene", () => {
       controls,
       onFrame: vi.fn(),
     });
-    // AmbientLight + DirectionalLight + PointLight = 3 adds
-    expect(mockScene.add).toHaveBeenCalledTimes(3);
+    // AmbientLight + DirectionalLight + PointLight + GridHelper = 4 adds
+    expect(mockScene.add).toHaveBeenCalledTimes(4);
   });
 
   it("setupScene installs ResizeObserver on container", () => {
@@ -311,7 +311,7 @@ describe("useThreeScene", () => {
     });
     mockRenderer.setClearColor.mockClear();
     updateTheme(true);
-    expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0x242424, 1);
+    expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0x1f2937, 1);
   });
 
   it("updateTheme sets light clear color", () => {
@@ -326,7 +326,7 @@ describe("useThreeScene", () => {
     });
     mockRenderer.setClearColor.mockClear();
     updateTheme(false);
-    expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0xeeeeee, 1);
+    expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0x1f2937, 1);
   });
 
   it("updateTheme does nothing when renderer is null", () => {

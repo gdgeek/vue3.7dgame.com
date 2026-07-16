@@ -5,6 +5,16 @@ export default {
     register: "ลงทะเบียน/เข้าสู่ระบบแพลตฟอร์ม",
     h1: "ยินดีต้อนรับ!",
     h4: "พร้อมที่จะเริ่มหรือยัง?",
+    registerHeroTitle: "เริ่มสร้าง Mixed Reality",
+    registerHeroSubtitle:
+      "เขียนโปรแกรม สร้าง และทำงานร่วมกันในพื้นที่ เพื่อเปลี่ยนไอเดียให้เป็นประสบการณ์แบบอินเทอร์แอกทีฟ",
+    registerBadge: "สมัคร / เข้าสู่ระบบ",
+    registerFeatureWorkspace: "Spatial Coding",
+    registerFeatureAssets: "สร้าง 3D",
+    registerFeaturePlugins: "ร่วมมือแบบสด",
+    registerFormHint: "กรอกข้อมูลด้านล่างเพื่อเริ่มสร้างสรรค์",
+    registerSecurityHint:
+      "บัญชีของคุณจะได้รับการเข้ารหัสและปกป้องความเป็นส่วนตัวอย่างเข้มงวด",
     username: "ชื่อผู้ใช้",
     email: "อีเมล",
     password: "รหัสผ่าน",
@@ -12,7 +22,11 @@ export default {
     hidePassword: "ซ่อนรหัสผ่าน",
     login: "เข้าสู่ระบบ",
     loginCode: "รหัสเข้าสู่ระบบ",
-    scanTip: "กรุณาสแกนรหัส QR ด้วยโทรศัพท์มือถือเพื่อเข้าสู่ระบบ",
+    scanTip: "กรุณาสแกนรหัส QR ด้วยแท็บเล็ตเพื่อเข้าสู่ระบบ",
+    loginCodeUsed: "รหัสเข้าสู่ระบบนี้ถูกใช้แล้ว กรุณารีเฟรชรหัส QR",
+    loginCodeExpired: "รหัสเข้าสู่ระบบนี้หมดอายุแล้ว กรุณารีเฟรชรหัส QR",
+    loginCodeExpiresIn: "หมดอายุใน {seconds} วินาที",
+    refreshLoginCode: "รีเฟรชรหัส QR",
     rules: {
       username: {
         message1: "กรุณากรอกชื่อผู้ใช้",
@@ -30,6 +44,10 @@ export default {
         message1: "กรุณากรอกรหัสผ่านอีกครั้ง",
         message2: "รหัสผ่านที่ป้อนสองครั้งไม่ตรงกัน",
       },
+    },
+    registerErrors: {
+      usernameTaken: "ชื่อผู้ใช้นี้ถูกใช้แล้ว กรุณาเลือกชื่ออื่น",
+      usernameEmailFormat: "ชื่อผู้ใช้ไม่จำเป็นต้องเป็นรูปแบบอีเมล",
     },
     success: "เข้าสู่ระบบสำเร็จ",
     error: "การตรวจสอบแบบฟอร์มไม่ผ่าน",

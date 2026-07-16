@@ -294,8 +294,9 @@ export default {
         noPublishPermission: "ไม่มีสิทธิ์เผยแพร่",
         emptySceneCannotPublish:
           "ฉากว่างอยู่ โปรดเพิ่มเอนทิตีอย่างน้อยหนึ่งรายการก่อนเผยแพร่",
-        unsavedSaveAndPublishConfirm:
-          "ฉากปัจจุบันยังไม่ได้บันทึก ต้องการบันทึกและเผยแพร่ฉากนี้หรือไม่?",
+        saveCurrentAndPublishConfirm:
+          "ต้องการบันทึกฉากปัจจุบันและเผยแพร่หรือไม่?",
+        publishFailed: "เผยแพร่ฉากไม่สำเร็จ โปรดลองอีกครั้ง",
         saveCompleted: "บันทึกเสร็จสิ้น",
         noChanges: "โครงการไม่มีการเปลี่ยนแปลง",
         coverUploadError: "ข้อผิดพลาดในการอัปโหลดรูปปก: ไม่พบข้อมูลรูปภาพ",

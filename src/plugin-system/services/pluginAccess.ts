@@ -25,6 +25,20 @@ export type PluginAccessCacheSnapshot = {
 
 export const DEFAULT_ACCESS_SCOPE: PluginAccessScope = "auth-only";
 
+const ROLE_LEVELS: Record<string, number> = {
+  root: 4,
+  admin: 3,
+  manager: 2,
+  user: 1,
+};
+
+const REQUIRED_ACCESS_LEVELS: Record<PluginAccessScope, number> = {
+  "root-only": ROLE_LEVELS.root,
+  "admin-only": ROLE_LEVELS.admin,
+  "manager-only": ROLE_LEVELS.manager,
+  "auth-only": ROLE_LEVELS.user,
+};
+
 export function buildTokenFingerprint(accessToken?: string): string {
   if (!accessToken) return "anonymous";
   let hash = 5381;
@@ -60,17 +74,11 @@ export function isVisibleForScope(
   session: HostSessionSnapshot
 ): boolean {
   if (!session.authenticated) return false;
-  const roles = session.roles;
-  switch (accessScope) {
-    case "root-only":
-      return roles.includes("root");
-    case "manager-only":
-      return roles.includes("root") || roles.includes("manager");
-    case "admin-only":
-      return roles.includes("root") || roles.includes("admin");
-    default:
-      return true;
-  }
+  const currentLevel = session.roles.reduce(
+    (highestLevel, role) => Math.max(highestLevel, ROLE_LEVELS[role] ?? 0),
+    0
+  );
+  return currentLevel >= REQUIRED_ACCESS_LEVELS[accessScope];
 }
 
 export function getTokenAwarePluginAccess(

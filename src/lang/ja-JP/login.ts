@@ -5,6 +5,16 @@ export default {
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",
     h4: "準備はできましたか？",
+    registerHeroTitle: "複合現実の制作を始める",
+    registerHeroSubtitle:
+      "空間の中でプログラミング、構築、共同作業を行い、アイデアをインタラクティブな体験に変えましょう。",
+    registerBadge: "登録 / ログイン",
+    registerFeatureWorkspace: "空間プログラミング",
+    registerFeatureAssets: "3D 構築",
+    registerFeaturePlugins: "リアルタイム共同作業",
+    registerFormHint: "以下の情報を入力して制作を始めましょう。",
+    registerSecurityHint:
+      "アカウントは暗号化され、プライバシーは厳重に保護されます。",
     username: "ユーザー名",
     email: "メールアドレス",
     password: "パスワード",
@@ -12,7 +22,13 @@ export default {
     hidePassword: "パスワードを非表示",
     login: "ログイン",
     loginCode: "ログインコード",
-    scanTip: "携帯電話でQRコードをスキャンしてログインしてください",
+    scanTip: "タブレットでQRコードをスキャンしてログインしてください",
+    loginCodeUsed:
+      "このログインコードは使用済みです。QRコードを更新してください。",
+    loginCodeExpired:
+      "このログインコードは期限切れです。QRコードを更新してください。",
+    loginCodeExpiresIn: "{seconds} 秒後に期限切れ",
+    refreshLoginCode: "QRコードを更新",
     rules: {
       username: {
         message1: "ユーザー名を入力してください",
@@ -30,6 +46,12 @@ export default {
         message1: "もう一度パスワードを入力してください",
         message2: "2回入力したパスワードが一致しません",
       },
+    },
+    registerErrors: {
+      usernameTaken:
+        "このユーザー名はすでに使用されています。別の名前を入力してください。",
+      usernameEmailFormat:
+        "ユーザー名をメールアドレス形式にする必要はありません。",
     },
     success: "ログイン成功",
     error: "フォーム検証に失敗しました",

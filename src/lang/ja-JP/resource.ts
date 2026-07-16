@@ -110,10 +110,8 @@ export default {
       title: "GLB 互換性メモ",
       textureFormats:
         "テクスチャは PNG、JPEG/JPG、KTX/KTX2 形式を使用してください。クライアントでは WebP テクスチャは未対応です。",
-      noDraco:
-        "KHR_draco_mesh_compression / Draco メッシュ圧縮には対応していません。",
       recommendation:
-        "アップロード前に Draco 圧縮を無効にし、WebP などのテクスチャを PNG、JPEG/JPG、または KTX/KTX2 に変換してください。",
+        "アップロード前に WebP テクスチャを PNG、JPEG/JPG、または KTX/KTX2 に変換してください。",
     },
     view: {
       title: "モデル名：",
@@ -422,9 +420,7 @@ export default {
     fileTooLarge: "File exceeds {size}MB limit",
     fileSizeExceededList:
       "The following files exceed the {size}MB limit: {names}",
-    modelCompatibilityRejected:
-      "{name} はアップロードできません: {reasons}",
-    unsupportedDraco: "未対応の Draco メッシュ圧縮が含まれています",
+    modelCompatibilityRejected: "{name} はアップロードできません: {reasons}",
     unsupportedTextureFormats:
       "未対応のテクスチャ形式が含まれています: {formats}",
     invalidGlb: "有効な GLB ファイルではありません",

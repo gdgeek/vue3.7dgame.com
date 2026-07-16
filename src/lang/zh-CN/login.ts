@@ -4,6 +4,16 @@ export default {
     register: "平台注册/登录",
     h1: "欢迎！",
     h4: "准备好出发了么？",
+    registerHeroTitle: "开启混合现实创作",
+    registerHeroSubtitle:
+      "在空间中编程、构建与协作，把想法变成可交互的沉浸式体验。",
+    registerBadge: "注册 / 登录",
+    registerFeatureWorkspace: "空间编程",
+    registerFeatureAssets: "3D 构建",
+    registerFeaturePlugins: "实时协作",
+    registerFormHint: "填写以下信息，开启你的创作之旅",
+    registerSecurityHint:
+      "我们会对你的账号进行加密保护，并严格保护你的隐私安全。",
     username: "用户名",
     email: "邮箱",
     password: "设置密码",
@@ -11,7 +21,11 @@ export default {
     hidePassword: "隐藏密码",
     login: "登录",
     loginCode: "登录码",
-    scanTip: "请使用手机扫描二维码登录",
+    scanTip: "请使用平板扫描二维码登录",
+    loginCodeUsed: "登录码已使用，请刷新二维码",
+    loginCodeExpired: "登录码已失效，请刷新二维码",
+    loginCodeExpiresIn: "{seconds} 秒后失效",
+    refreshLoginCode: "刷新二维码",
     rules: {
       username: {
         message1: "请输入用户名",
@@ -29,6 +43,10 @@ export default {
         message1: "请再次输入密码",
         message2: "两次输入的密码不一致",
       },
+    },
+    registerErrors: {
+      usernameTaken: "该用户名已被占用，请换一个",
+      usernameEmailFormat: "用户名无需使用邮箱格式，请直接填写用户名",
     },
     success: "登录成功",
     error: "表单检验未通过",

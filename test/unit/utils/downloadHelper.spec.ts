@@ -17,6 +17,7 @@ describe("downloadResource()", () => {
   };
   let loggerMod: { logger: { error: ReturnType<typeof vi.fn> } };
   let downloadResource: typeof import("@/utils/downloadHelper").downloadResource;
+  let downloadResources: typeof import("@/utils/downloadHelper").downloadResources;
 
   const mockT = (key: string) => `[${key}]`;
   const PREFIX = "test.download";
@@ -29,10 +30,14 @@ describe("downloadResource()", () => {
     };
     elMessage = epModule.ElMessage;
     loggerMod = await import("@/utils/logger");
-    ({ downloadResource } = await import("@/utils/downloadHelper"));
+    ({ downloadResource, downloadResources } = await import(
+      "@/utils/downloadHelper"
+    ));
 
     // Mock global fetch
     global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
       blob: vi
         .fn()
         .mockResolvedValue(new Blob(["data"], { type: "model/gltf-binary" })),
@@ -76,6 +81,8 @@ describe("downloadResource()", () => {
   it("calls URL.createObjectURL with the blob from fetch", async () => {
     const mockBlob = new Blob(["data"]);
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      status: 200,
       blob: vi.fn().mockResolvedValue(mockBlob),
     });
     const resource = {
@@ -154,6 +161,25 @@ describe("downloadResource()", () => {
     expect(elMessage.error).toHaveBeenCalled();
   });
 
+  it("does not download an HTTP error response body", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: false,
+      status: 404,
+      blob: vi.fn().mockResolvedValue(new Blob(["not found"])),
+    });
+    const resource = {
+      name: "missing-model",
+      file: { url: "https://cdn.example.com/missing.glb" },
+    };
+
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+    expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled();
+    expect(elMessage.success).not.toHaveBeenCalled();
+    expect(elMessage.error).toHaveBeenCalled();
+  });
+
   it("sets link href to the blob URL", async () => {
     const appendSpy = vi.spyOn(document.body, "appendChild");
     const resource = {
@@ -216,5 +242,31 @@ describe("downloadResource()", () => {
     };
     await downloadResource(resource, ".glb", mockT, PREFIX);
     expect(elMessage.success).not.toHaveBeenCalled();
+  });
+
+  it("downloads every selected resource using its stored filename extension", async () => {
+    await downloadResources(
+      [
+        {
+          name: "photo",
+          file: {
+            url: "https://cdn.example.com/a",
+            filename: "original.PNG",
+          },
+        },
+        {
+          name: "photo-2",
+          file: { url: "https://cdn.example.com/b.jpeg?token=abc" },
+        },
+      ],
+      ".jpg",
+      mockT,
+      PREFIX
+    );
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(HTMLAnchorElement.prototype.click)).toHaveBeenCalledTimes(
+      2
+    );
   });
 });

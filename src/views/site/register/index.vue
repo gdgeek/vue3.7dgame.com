@@ -1,25 +1,45 @@
 <template>
-  <div class="content">
-    <section :class="['register-shell', { 'dark-theme': isDark }]">
-      <aside class="register-visual" aria-hidden="true">
-        <div class="visual-copy">
-          <h1>{{ $t("login.h1") }}</h1>
-          <p>{{ $t("login.h4") }}</p>
+  <div class="register-page" :class="{ 'dark-theme': isDark }">
+    <img
+      class="page-backdrop"
+      src="/media/bg/register-spatial-bg.png"
+      alt=""
+      aria-hidden="true"
+    />
+    <div class="page-wash"></div>
+
+    <section class="register-shell">
+      <aside class="register-story">
+        <div class="story-copy">
+          <span class="story-kicker">{{ $t("login.registerBadge") }}</span>
+          <h1>{{ $t("login.registerHeroTitle") }}</h1>
+          <p>{{ $t("login.registerHeroSubtitle") }}</p>
         </div>
-        <div class="visual-panel">
-          <div class="visual-panel__grid"></div>
-          <div class="visual-panel__track visual-panel__track--one"></div>
-          <div class="visual-panel__track visual-panel__track--two"></div>
-          <div class="visual-panel__node visual-panel__node--one"></div>
-          <div class="visual-panel__node visual-panel__node--two"></div>
-          <div class="visual-panel__node visual-panel__node--three"></div>
+
+        <div class="story-features" aria-label="platform features">
+          <span>
+            <el-icon><Platform></Platform></el-icon>
+            {{ $t("login.registerFeatureWorkspace") }}
+          </span>
+          <span>
+            <el-icon><Box></Box></el-icon>
+            {{ $t("login.registerFeatureAssets") }}
+          </span>
+          <span>
+            <el-icon><Connection></Connection></el-icon>
+            {{ $t("login.registerFeaturePlugins") }}
+          </span>
         </div>
       </aside>
 
       <div class="register-panel">
         <div class="register-heading">
-          <span class="register-eyebrow">{{ $t("login.register") }}</span>
+          <span class="register-eyebrow">
+            <el-icon><Cpu></Cpu></el-icon>
+            {{ $t("login.registerBadge") }}
+          </span>
           <h2>{{ $t("login.createAccount") }}</h2>
+          <p>{{ $t("login.registerFormHint") }}</p>
         </div>
 
         <el-form
@@ -32,13 +52,16 @@
           <el-form-item :label="$t('login.username')" prop="username">
             <el-input
               v-model="registerForm.username"
+              :placeholder="$t('login.username')"
               :suffix-icon="User"
+              clearable
             ></el-input>
           </el-form-item>
 
           <el-form-item :label="$t('login.password')" prop="password">
             <el-input
               v-model="registerForm.password"
+              :placeholder="$t('login.password')"
               :type="passwordVisible ? 'text' : 'password'"
             >
               <template #suffix>
@@ -74,16 +97,25 @@
           <el-form-item :label="$t('login.repassword')" prop="repassword">
             <el-input
               v-model="registerForm.repassword"
+              :placeholder="$t('login.repassword')"
               type="password"
               :suffix-icon="Lock"
+              show-password
             ></el-input>
           </el-form-item>
+
+          <div class="security-note">
+            <el-icon><DataAnalysis></DataAnalysis></el-icon>
+            <span>{{ $t("login.registerSecurityHint") }}</span>
+          </div>
 
           <div class="register-actions">
             <el-button
               class="create-action"
               type="primary"
               native-type="button"
+              :loading="loading"
+              :disabled="loading"
               @click="register"
             >
               {{ $t("login.create") }}
@@ -102,7 +134,18 @@
 </template>
 
 <script setup lang="ts">
-import { Back, Hide, Lock, User, View } from "@element-plus/icons-vue";
+import {
+  Back,
+  Box,
+  Connection,
+  Cpu,
+  DataAnalysis,
+  Hide,
+  Lock,
+  Platform,
+  User,
+  View,
+} from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
@@ -110,12 +153,13 @@ import { Message, MessageBox } from "@/components/Dialog";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance, type FormItemRule } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import { onMounted, watch, ref } from "vue";
+import { computed, onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
 
 import { register as wechatRegister } from "@/api/v1/wechat";
 import { RegisterData } from "@/api/auth/model";
 import { createPasswordFormRules } from "@/utils/password-validator";
+import { getWechatRegisterErrorMessages } from "@/utils/wechatRegisterError";
 import PasswordStrength from "@/components/PasswordStrength/index.vue";
 import authClient from "@/services/auth/authClient";
 const { t } = useI18n(); // I18n for translations
@@ -126,6 +170,7 @@ const router = useRouter();
 const registerFormRef = ref<FormInstance>(); // Separate formRef for register
 
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
+const loading = ref(false);
 
 const back = async () => {
   try {
@@ -177,7 +222,7 @@ const registerRules = computed(() => ({
   repassword: [
     {
       required: true,
-      message: t("login.rules.password.message1"),
+      message: t("login.rules.repassword.message1"),
       trigger: "blur",
     },
     { validator: validatePass2, trigger: "blur" },
@@ -205,6 +250,7 @@ function parseRedirect(): {
 const register = async () => {
   registerFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
+      loading.value = true;
       try {
         const response = await wechatRegister({
           username: registerForm.value.username,
@@ -221,17 +267,11 @@ const register = async () => {
           Message.error(t("login.error"));
         }
       } catch (error: unknown) {
-        const axiosError = error as {
-          response?: { data?: { password?: string[]; message?: string } };
-        };
-        const passwordErrors = axiosError?.response?.data?.password;
-        if (Array.isArray(passwordErrors)) {
-          passwordErrors.forEach((msg: string) => Message.error(msg));
-        } else {
-          Message.error(
-            axiosError?.response?.data?.message || t("login.error")
-          );
-        }
+        getWechatRegisterErrorMessages(error, t).forEach((msg) =>
+          Message.error(msg)
+        );
+      } finally {
+        loading.value = false;
       }
     } else {
       Message.error(t("login.error"));
@@ -251,218 +291,200 @@ watch(isDark, (newValue) => {
 </script>
 
 <style scoped lang="scss">
-.content {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  min-height: 0;
-  padding: clamp(18px, 4vw, 48px);
+.register-page {
+  position: relative;
+  display: grid;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  padding: clamp(16px, 3vw, 40px);
   overflow: auto;
+  font-family:
+    "SourceHanSansSC-VF", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #172033;
+  background: #edf6f8;
+  place-items: center;
+  isolation: isolate;
+}
+
+.page-backdrop,
+.page-wash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.page-backdrop {
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.page-wash {
+  z-index: -2;
   background:
-    linear-gradient(135deg, rgb(236 246 255 / 92%), rgb(246 251 248 / 88%)),
-    url("/media/bg/02.jpg") center / cover no-repeat;
+    linear-gradient(90deg, rgb(255 255 255 / 20%) 0%, transparent 42%),
+    linear-gradient(180deg, rgb(255 255 255 / 24%), rgb(239 248 250 / 38%));
 }
 
 .register-shell {
   display: grid;
-  grid-template-columns: minmax(360px, 1.05fr) minmax(390px, 0.95fr);
-  width: min(1080px, 100%);
-  min-height: 620px;
-  overflow: hidden;
+  grid-template-columns: minmax(420px, 1fr) minmax(440px, 0.82fr);
+  gap: clamp(28px, 5vw, 84px);
+  align-items: center;
+  width: min(1280px, 100%);
+  min-height: min(780px, calc(100vh - 80px));
   color: #172033;
-  background: rgb(255 255 255 / 94%);
-  border: 1px solid rgb(177 194 219 / 45%);
-  border-radius: 8px;
-  box-shadow: 0 24px 70px rgb(27 56 94 / 18%);
 }
 
-.register-visual {
+.register-story {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 100%;
-  padding: clamp(34px, 4vw, 54px);
-  overflow: hidden;
-  color: #fff;
-  isolation: isolate;
-
-  &::before,
-  &::after {
-    position: absolute;
-    inset: 0;
-    content: "";
-  }
-
-  &::before {
-    z-index: -2;
-    background: url("/media/bg/02.jpg") center / cover no-repeat;
-    transform: scale(1.04);
-  }
-
-  &::after {
-    z-index: -1;
-    background:
-      linear-gradient(135deg, rgb(18 45 84 / 92%), rgb(28 116 145 / 70%)),
-      linear-gradient(180deg, transparent, rgb(6 18 34 / 38%));
-  }
+  justify-content: center;
+  min-height: 560px;
+  padding: clamp(18px, 3vw, 36px) 0;
+  color: #172033;
 }
 
-.visual-copy {
-  max-width: 420px;
+.story-copy {
+  max-width: 620px;
 
   h1 {
-    margin: 0 0 14px;
-    font-size: clamp(38px, 5vw, 58px);
-    font-weight: 700;
-    line-height: 1.05;
+    margin: 18px 0 18px;
+    font-size: clamp(44px, 5.2vw, 68px);
+    font-weight: 750;
+    line-height: 1.08;
     letter-spacing: 0;
   }
 
   p {
     margin: 0;
-    font-size: 20px;
-    line-height: 1.6;
-    color: rgb(238 248 255 / 86%);
+    font-size: clamp(16px, 1.7vw, 20px);
+    line-height: 1.75;
+    color: #536276;
   }
 }
 
-.visual-panel {
-  position: relative;
-  width: min(360px, 100%);
-  aspect-ratio: 1.55;
-  overflow: hidden;
-  background: rgb(255 255 255 / 10%);
-  border: 1px solid rgb(255 255 255 / 20%);
+.story-kicker {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #087f7a;
+  background: rgb(225 249 246 / 74%);
+  border: 1px solid rgb(173 222 218 / 72%);
   border-radius: 8px;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgb(20 88 102 / 8%);
+  backdrop-filter: blur(14px);
 }
 
-.visual-panel__grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgb(255 255 255 / 12%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 12%) 1px, transparent 1px);
-  background-size: 34px 34px;
-}
+.story-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
 
-.visual-panel__track,
-.visual-panel__node {
-  position: absolute;
-}
+  span {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #28384e;
+    background: rgb(255 255 255 / 66%);
+    border: 1px solid rgb(214 227 235 / 78%);
+    border-radius: 28px;
+    box-shadow: 0 12px 32px rgb(39 76 92 / 10%);
+    backdrop-filter: blur(18px);
+  }
 
-.visual-panel__track {
-  height: 2px;
-  background: linear-gradient(90deg, #a8f0d3, #90c7ff, #ffd166);
-  border-radius: 2px;
-  transform-origin: left center;
-}
-
-.visual-panel__track--one {
-  top: 42%;
-  left: 18%;
-  width: 58%;
-  transform: rotate(-18deg);
-}
-
-.visual-panel__track--two {
-  top: 58%;
-  left: 27%;
-  width: 48%;
-  transform: rotate(22deg);
-}
-
-.visual-panel__node {
-  width: 34px;
-  height: 34px;
-  background: rgb(255 255 255 / 18%);
-  border: 1px solid rgb(255 255 255 / 32%);
-  border-radius: 6px;
-  box-shadow: 0 12px 28px rgb(0 0 0 / 16%);
-}
-
-.visual-panel__node--one {
-  top: 24%;
-  left: 15%;
-  background: rgb(168 240 211 / 32%);
-}
-
-.visual-panel__node--two {
-  top: 46%;
-  right: 18%;
-  background: rgb(144 199 255 / 30%);
-}
-
-.visual-panel__node--three {
-  right: 30%;
-  bottom: 16%;
-  background: rgb(255 209 102 / 32%);
+  .el-icon {
+    font-size: 21px;
+    color: #12938d;
+  }
 }
 
 .register-panel {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(36px, 4.5vw, 58px);
-  background: linear-gradient(
-    180deg,
-    rgb(255 255 255 / 96%),
-    rgb(249 252 255 / 96%)
-  );
+  padding: clamp(28px, 3.4vw, 44px);
+  background: rgb(255 255 255 / 72%);
+  border: 1px solid rgb(255 255 255 / 78%);
+  border-radius: 8px;
+  box-shadow:
+    0 24px 70px rgb(48 83 107 / 18%),
+    inset 0 1px 0 rgb(255 255 255 / 76%);
+  backdrop-filter: blur(22px);
 }
 
 .register-heading {
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 
   h2 {
-    margin: 10px 0 0;
-    font-size: 30px;
-    font-weight: 700;
+    margin: 12px 0 10px;
+    font-size: clamp(30px, 3vw, 38px);
+    font-weight: 760;
     line-height: 1.2;
     color: #172033;
     letter-spacing: 0;
+  }
+
+  p {
+    max-width: 420px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.65;
+    color: #66758b;
   }
 }
 
 .register-eyebrow {
   display: inline-flex;
+  gap: 6px;
   align-items: center;
-  height: 26px;
-  padding: 0 9px;
+  height: 30px;
+  padding: 0 12px;
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
-  color: #116d7f;
-  background: #e7f7f5;
-  border: 1px solid #cdecea;
-  border-radius: 6px;
+  color: #087a75;
+  background: #e6f7f3;
+  border: 1px solid #c8ebe3;
+  border-radius: 8px;
 }
 
 .register-form {
   width: 100%;
 
   :deep(.el-form-item) {
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
 
   :deep(.el-form-item__label) {
-    padding: 0 0 8px;
+    padding: 0 0 9px;
     font-size: 14px;
-    font-weight: 650;
+    font-weight: 700;
     line-height: 20px;
-    color: #4a5a72;
+    color: #40516a;
     letter-spacing: 0;
   }
 
   :deep(.el-input__wrapper) {
     min-height: 48px;
-    padding: 0 14px;
-    background: #fff;
-    border-radius: 6px;
-    box-shadow: inset 0 0 0 1px #dbe5f0;
+    padding: 0 16px;
+    background: rgb(255 255 255 / 78%);
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px #d5e0eb;
     transition:
       box-shadow 0.18s ease,
       background-color 0.18s ease;
@@ -471,21 +493,32 @@ watch(isDark, (newValue) => {
   :deep(.el-input__wrapper.is-focus) {
     background: #fbfdff;
     box-shadow:
-      inset 0 0 0 1px #2474e8,
-      0 0 0 3px rgb(36 116 232 / 12%);
+      inset 0 0 0 1px #149a91,
+      0 0 0 3px rgb(20 154 145 / 13%);
   }
 
   :deep(.el-input__inner) {
     color: #172033;
+
+    &::placeholder {
+      color: #a1adbd;
+    }
   }
 
   :deep(.password-strength) {
     width: 100%;
-    padding: 10px 12px;
+    padding: 12px 14px;
     margin-top: 10px;
-    background: #f6f9fc;
-    border: 1px solid #e2eaf3;
-    border-radius: 6px;
+    background: rgb(255 255 255 / 52%);
+    border: 1px solid #dce6ef;
+    border-radius: 8px;
+  }
+
+  :deep(.password-strength__rules) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+    gap: 6px;
   }
 
   :deep(.password-strength__text) {
@@ -493,29 +526,55 @@ watch(isDark, (newValue) => {
   }
 }
 
+.security-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 0 2px;
+  margin-top: -4px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #65778b;
+
+  .el-icon {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: #149a91;
+  }
+}
+
 .register-actions {
   display: grid;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 18px;
 }
 
 .create-action,
 .back-action {
   width: 100%;
-  height: 46px;
-  border-radius: 6px;
+  height: 48px;
+  border-radius: 8px;
 }
 
 .create-action {
+  --el-button-bg-color: #109c96;
+  --el-button-border-color: #109c96;
+  --el-button-hover-bg-color: #0f817b;
+  --el-button-hover-border-color: #0f817b;
+  --el-button-active-bg-color: #0c736e;
+  --el-button-active-border-color: #0c736e;
+  --el-button-disabled-bg-color: #89c9c5;
+  --el-button-disabled-border-color: #89c9c5;
+
   font-weight: 700;
-  background: #2474e8;
-  border-color: #2474e8;
-  box-shadow: 0 12px 26px rgb(36 116 232 / 22%);
+  background: #109c96 !important;
+  border-color: #109c96 !important;
+  box-shadow: 0 14px 28px rgb(16 156 150 / 22%);
 
   &:hover,
   &:focus {
-    background: #1f66cc;
-    border-color: #1f66cc;
+    background: #0f817b !important;
+    border-color: #0f817b !important;
   }
 }
 
@@ -527,9 +586,9 @@ watch(isDark, (newValue) => {
 
   &:hover,
   &:focus {
-    color: #2474e8;
-    background: #f7fbff;
-    border-color: #bcd4f5;
+    color: #149a91;
+    background: #f7fcfb;
+    border-color: #b9ddd8;
   }
 }
 
@@ -544,32 +603,55 @@ watch(isDark, (newValue) => {
   cursor: pointer;
   background: transparent;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
 
   &:hover,
   &:focus-visible {
-    color: #2474e8;
-    background: #eef6ff;
+    color: #149a91;
+    background: #eaf7f5;
     outline: none;
   }
 }
 
-.register-shell.dark-theme {
+.register-page.dark-theme {
   color: #f6f8fb;
-  background: rgb(26 30 38 / 94%);
-  border-color: rgb(255 255 255 / 12%);
-  box-shadow: 0 24px 70px rgb(0 0 0 / 32%);
+  background: #101822;
+
+  .page-backdrop {
+    filter: brightness(55%) saturate(92%);
+  }
+
+  .page-wash {
+    background:
+      linear-gradient(90deg, rgb(7 11 20 / 22%) 0%, transparent 42%),
+      linear-gradient(180deg, rgb(7 11 20 / 24%), rgb(7 11 20 / 58%));
+  }
+
+  .story-copy h1 {
+    color: #f7fbff;
+  }
+
+  .story-copy p {
+    color: #d8e2ed;
+  }
+
+  .story-features span {
+    color: #eef6ff;
+    background: rgb(20 29 40 / 54%);
+    border-color: rgb(255 255 255 / 14%);
+  }
 
   .register-panel {
-    background: linear-gradient(
-      180deg,
-      rgb(34 39 49 / 98%),
-      rgb(28 33 42 / 98%)
-    );
+    background: rgb(30 36 47 / 76%);
+    border-color: rgb(255 255 255 / 14%);
   }
 
   .register-heading h2 {
     color: #f6f8fb;
+  }
+
+  .register-heading p {
+    color: #aab6c8;
   }
 
   .register-eyebrow {
@@ -605,6 +687,10 @@ watch(isDark, (newValue) => {
     }
   }
 
+  .security-note {
+    color: #b7c5d7;
+  }
+
   .back-action {
     color: #d1d9e6;
     background: #232936;
@@ -612,44 +698,55 @@ watch(isDark, (newValue) => {
 
     &:hover,
     &:focus {
-      color: #8fc3ff;
-      background: #263246;
-      border-color: #577aa9;
+      color: #a9f5df;
+      background: #26353f;
+      border-color: #4d827c;
     }
   }
 }
 
 @media (max-width: 900px) {
-  .content {
+  .register-page {
     align-items: flex-start;
-    padding: 18px;
+    padding: 16px 16px 56px;
   }
 
   .register-shell {
     grid-template-columns: 1fr;
+    gap: 16px;
     min-height: 0;
   }
 
-  .register-visual {
-    min-height: 108px;
-    padding: 18px 28px;
+  .register-story {
+    min-height: auto;
+    padding: 24px 6px 6px;
   }
 
-  .visual-copy h1 {
-    margin-bottom: 8px;
-    font-size: 28px;
+  .story-copy {
+    max-width: 560px;
+
+    h1 {
+      margin: 12px 0 10px;
+      font-size: 34px;
+    }
+
+    p {
+      font-size: 15px;
+    }
   }
 
-  .visual-copy p {
-    font-size: 14px;
-  }
+  .story-features {
+    gap: 8px;
+    margin-top: 18px;
 
-  .visual-panel {
-    display: none;
+    span {
+      min-height: 42px;
+      padding: 0 12px;
+    }
   }
 
   .register-panel {
-    padding: 22px 28px 24px;
+    padding: 24px 28px 26px;
   }
 
   .register-heading {
@@ -666,12 +763,16 @@ watch(isDark, (newValue) => {
     }
 
     :deep(.el-input__wrapper) {
-      min-height: 42px;
+      min-height: 44px;
     }
 
     :deep(.password-strength) {
       padding: 7px 10px;
       margin-top: 7px;
+    }
+
+    :deep(.password-strength__rules) {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -682,26 +783,29 @@ watch(isDark, (newValue) => {
 
   .create-action,
   .back-action {
-    height: 42px;
+    height: 44px;
   }
 }
 
 @media (max-width: 520px) {
-  .content {
-    padding: 12px;
+  .register-page {
+    padding: 12px 12px 56px;
   }
 
   .register-shell {
     width: 100%;
   }
 
-  .register-visual {
-    min-height: 108px;
-    padding: 18px 22px;
+  .register-story {
+    padding: 18px 2px 4px;
+  }
+
+  .story-copy h1 {
+    font-size: 30px;
   }
 
   .register-panel {
-    padding: 22px;
+    padding: 22px 18px;
   }
 
   .register-heading {

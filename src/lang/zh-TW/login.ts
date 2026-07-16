@@ -5,6 +5,16 @@ export default {
     register: "平台註冊/登錄",
     h1: "歡迎！",
     h4: "準備好出發了么？",
+    registerHeroTitle: "開啟混合現實創作",
+    registerHeroSubtitle:
+      "在空間中編程、構建與協作，把想法變成可互動的沉浸式體驗。",
+    registerBadge: "註冊 / 登錄",
+    registerFeatureWorkspace: "空間編程",
+    registerFeatureAssets: "3D 構建",
+    registerFeaturePlugins: "即時協作",
+    registerFormHint: "填寫以下資訊，開啟你的創作之旅",
+    registerSecurityHint:
+      "我們會對你的帳號進行加密保護，並嚴格保護你的隱私安全。",
     username: "用戶名",
     email: "電子信箱",
     password: "密碼",
@@ -12,7 +22,11 @@ export default {
     hidePassword: "隱藏密碼",
     login: "登錄",
     loginCode: "登錄碼",
-    scanTip: "請使用手機掃描二維碼登錄",
+    scanTip: "請使用平板掃描二維碼登錄",
+    loginCodeUsed: "登錄碼已使用，請刷新二維碼",
+    loginCodeExpired: "登錄碼已失效，請刷新二維碼",
+    loginCodeExpiresIn: "{seconds} 秒後失效",
+    refreshLoginCode: "刷新二維碼",
     rules: {
       username: {
         message1: "請輸入用戶名",
@@ -30,6 +44,10 @@ export default {
         message1: "請再次輸入密碼",
         message2: "兩次輸入的密碼不一致",
       },
+    },
+    registerErrors: {
+      usernameTaken: "該用戶名已被占用，請換一個",
+      usernameEmailFormat: "用戶名無需使用電子郵箱格式，請直接填寫用戶名",
     },
     success: "登錄成功",
     error: "表單檢驗未通過",

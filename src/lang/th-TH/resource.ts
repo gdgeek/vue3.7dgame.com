@@ -111,10 +111,8 @@ export default {
       title: "หมายเหตุความเข้ากันได้ของ GLB",
       textureFormats:
         "แนะนำให้ใช้เท็กซ์เจอร์ PNG, JPEG/JPG หรือ KTX/KTX2 ส่วนไคลเอนต์ยังไม่รองรับเท็กซ์เจอร์ WebP",
-      noDraco:
-        "ยังไม่รองรับ KHR_draco_mesh_compression / การบีบอัดเมชแบบ Draco",
       recommendation:
-        "ก่อนอัปโหลด โปรดปิดการบีบอัด Draco และแปลงเท็กซ์เจอร์ WebP เป็น PNG, JPEG/JPG หรือ KTX/KTX2",
+        "ก่อนอัปโหลด โปรดแปลงเท็กซ์เจอร์ WebP เป็น PNG, JPEG/JPG หรือ KTX/KTX2",
     },
     view: {
       title: "ชื่อโมเดล: ",
@@ -426,13 +424,10 @@ export default {
     fileSizeExceededList:
       "The following files exceed the {size}MB limit: {names}",
     modelCompatibilityRejected: "ไม่สามารถอัปโหลด {name}: {reasons}",
-    unsupportedDraco: "มีการบีบอัดเมช Draco ที่ยังไม่รองรับ",
-    unsupportedTextureFormats:
-      "มีรูปแบบเท็กซ์เจอร์ที่ยังไม่รองรับ: {formats}",
+    unsupportedTextureFormats: "มีรูปแบบเท็กซ์เจอร์ที่ยังไม่รองรับ: {formats}",
     invalidGlb: "ไม่ใช่ไฟล์ GLB ที่ถูกต้อง",
     missingGlbJson: "ไฟล์ GLB ไม่มีข้อมูล JSON",
-    unsupportedGlbVersion:
-      "ยังไม่รองรับ GLB v{version}; โปรดใช้ glTF 2.0",
+    unsupportedGlbVersion: "ยังไม่รองรับ GLB v{version}; โปรดใช้ glTF 2.0",
     modelUploadSummaryTitle: "ผลการอัปโหลดโมเดล",
     uploadedModels: "โมเดลที่อัปโหลดสำเร็จ",
     rejectedModels: "โมเดลที่ไม่สามารถอัปโหลดได้",

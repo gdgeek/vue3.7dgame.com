@@ -11,6 +11,7 @@ vi.mock("@/environment", () => ({
   default: {
     api: "https://auth.example.com",
     authApi: "/api-auth/",
+    wechatAuthApi: "https://auth.bujiaban.com/",
   },
 }));
 
@@ -93,13 +94,13 @@ describe("auth/wechat: getQrcode()", () => {
     ({ getQrcode } = await import("@/api/auth/wechat"));
   });
 
-  it("calls GET /v1/wechat/qrcode using the auth service baseURL", async () => {
+  it("calls GET /v1/wechat/qrcode using the WeChat auth service baseURL", async () => {
     await getQrcode();
     const call = request.mock.calls[0][0];
     const callUrl: string = call.url;
     expect(callUrl).toBe("/v1/wechat/qrcode");
     expect(call.method).toBe("get");
-    expect(call.baseURL).toBe("/api-auth");
+    expect(call.baseURL).toBe("https://auth.bujiaban.com");
   });
 });
 
@@ -116,13 +117,13 @@ describe("auth/wechat: refresh()", () => {
     ({ refresh } = await import("@/api/auth/wechat"));
   });
 
-  it("calls GET /v1/wechat/refresh?token=<value> using the auth service baseURL", async () => {
+  it("calls GET /v1/wechat/refresh?token=<value> using the WeChat auth service baseURL", async () => {
     await refresh("my-token");
     const call = request.mock.calls[0][0];
     const callUrl: string = call.url;
     expect(callUrl).toBe("/v1/wechat/refresh?token=my-token");
     expect(call.method).toBe("get");
-    expect(call.baseURL).toBe("/api-auth");
+    expect(call.baseURL).toBe("https://auth.bujiaban.com");
   });
 
   it("includes null token in URL when token is null", async () => {
