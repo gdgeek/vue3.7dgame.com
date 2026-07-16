@@ -34,6 +34,14 @@ const parseApiError = (err: unknown): ApiError => {
   }
 
   const raw = err as {
+    response?: {
+      data?: {
+        error?: ApiError;
+        code?: string;
+        message?: string;
+        retry_after?: number;
+      };
+    };
     data?: {
       error?: ApiError;
       code?: string;
@@ -44,19 +52,21 @@ const parseApiError = (err: unknown): ApiError => {
     message?: string;
   };
 
-  if (raw.data?.error) {
-    return raw.data.error;
+  const data = raw.response?.data || raw.data;
+
+  if (data?.error) {
+    return data.error;
   }
 
   if (raw.error) {
     return raw.error;
   }
 
-  if (raw.data?.code || raw.data?.message) {
+  if (data?.code || data?.message) {
     return {
-      code: raw.data.code || "UNKNOWN",
-      message: raw.data.message || fallback.message,
-      retry_after: raw.data.retry_after,
+      code: data.code || "UNKNOWN",
+      message: data.message || fallback.message,
+      retry_after: data.retry_after,
     };
   }
 
@@ -312,7 +322,8 @@ export function useEmailVerification() {
     try {
       const response = await sendVerificationCode(email);
       if (!response.success) {
-        error.value = response.message || "发送验证码失败";
+        error.value =
+          response.error?.message || response.message || "发送验证码失败";
         return false;
       }
 
@@ -356,7 +367,8 @@ export function useEmailVerification() {
       const response = await verifyEmailCode(payload);
 
       if (!response.success) {
-        error.value = response.message || "邮箱验证失败";
+        error.value =
+          response.error?.message || response.message || "邮箱验证失败";
         return false;
       }
 
@@ -403,7 +415,10 @@ export function useEmailVerification() {
     try {
       const response = await sendChangeConfirmation();
       if (!response.success) {
-        error.value = response.message || "发送旧邮箱确认验证码失败";
+        error.value =
+          response.error?.message ||
+          response.message ||
+          "发送旧邮箱确认验证码失败";
         return false;
       }
 
@@ -436,7 +451,8 @@ export function useEmailVerification() {
     try {
       const response = await verifyChangeConfirmation(code);
       if (!response.success || !response.data) {
-        error.value = response.message || "旧邮箱验证失败";
+        error.value =
+          response.error?.message || response.message || "旧邮箱验证失败";
         return false;
       }
 
@@ -477,7 +493,8 @@ export function useEmailVerification() {
     try {
       const response = await unbindEmail(normalizedCode);
       if (!response.success) {
-        error.value = response.message || "解绑邮箱失败";
+        error.value =
+          response.error?.message || response.message || "解绑邮箱失败";
         return false;
       }
 
