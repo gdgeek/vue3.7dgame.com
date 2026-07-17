@@ -79,6 +79,7 @@ export const sendVerificationCode = async (
     url: "/v1/email/send-verification",
     method: "post",
     data: { email },
+    skipErrorMessage: true,
   });
   return response.data;
 };
