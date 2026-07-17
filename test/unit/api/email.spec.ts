@@ -37,6 +37,7 @@ describe("Email API", () => {
         url: "/v1/email/send-verification",
         method: "post",
         data: { email: "test@example.com" },
+        skipErrorMessage: true,
       });
 
       expect(result).toEqual(mockResponse.data);

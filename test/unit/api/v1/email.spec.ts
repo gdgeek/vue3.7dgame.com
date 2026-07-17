@@ -32,6 +32,7 @@ describe("api/v1/email", () => {
         url: "/v1/email/send-verification",
         method: "post",
         data: { email: "u@test.com" },
+        skipErrorMessage: true,
       })
     );
   });

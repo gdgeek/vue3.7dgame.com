@@ -154,6 +154,31 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
       expect(error.value).toBe("Unauthorized");
     });
 
+    it("prefers the field validation detail from an Axios error response", async () => {
+      mockedSendVerificationCode.mockRejectedValue({
+        response: {
+          data: {
+            error: {
+              code: "EMAIL_ALREADY_BOUND",
+              message: "请求参数验证失败",
+              details: {
+                email: ["该邮箱已被其他账号绑定"],
+              },
+            },
+          },
+        },
+      });
+
+      const { sendCodeForNewEmail, newEmailForm, error } =
+        useEmailVerification();
+      newEmailForm.email = "bound@example.com";
+
+      const result = await sendCodeForNewEmail();
+
+      expect(result).toBe(false);
+      expect(error.value).toBe("该邮箱已被其他账号绑定");
+    });
+
     it("verifyOldEmail catch with { data: { error: { code, message } } } → uses error message", async () => {
       mockedVerifyChangeConfirmation.mockRejectedValue({
         data: { error: { code: "INVALID_CODE", message: "Code is wrong" } },
