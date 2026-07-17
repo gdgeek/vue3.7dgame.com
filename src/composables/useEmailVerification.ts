@@ -1,6 +1,7 @@
 import { computed, reactive, ref } from "vue";
 import {
   ApiError,
+  ApiResponse,
   EmailStatus,
   getEmailCooldown,
   getEmailStatus,
@@ -22,6 +23,30 @@ export type EmailFlowStep =
   | "unbind_direct";
 
 const DEFAULT_SEND_COOLDOWN_SECONDS = 60;
+
+const getApiErrorMessage = (apiError: ApiError, fallback: string): string => {
+  for (const messages of Object.values(apiError.details || {})) {
+    const detail = messages.find(
+      (message) => typeof message === "string" && message.trim().length > 0
+    );
+    if (detail) {
+      return detail;
+    }
+  }
+
+  return apiError.message || fallback;
+};
+
+const getResponseErrorMessage = (
+  response: ApiResponse,
+  fallback: string
+): string => {
+  if (response.error) {
+    return getApiErrorMessage(response.error, response.message || fallback);
+  }
+
+  return response.message || fallback;
+};
 
 const parseApiError = (err: unknown): ApiError => {
   const fallback: ApiError = {
@@ -248,7 +273,7 @@ export function useEmailVerification() {
 
   const normalizeAndRecordError = (err: unknown) => {
     const apiError = parseApiError(err);
-    error.value = apiError.message;
+    error.value = getApiErrorMessage(apiError, "请求失败");
 
     if (apiError.code === "ACCOUNT_LOCKED" && apiError.retry_after) {
       startCountdown(lockTime, apiError.retry_after, "lock");
@@ -322,8 +347,7 @@ export function useEmailVerification() {
     try {
       const response = await sendVerificationCode(email);
       if (!response.success) {
-        error.value =
-          response.error?.message || response.message || "发送验证码失败";
+        error.value = getResponseErrorMessage(response, "发送验证码失败");
         return false;
       }
 
@@ -367,8 +391,7 @@ export function useEmailVerification() {
       const response = await verifyEmailCode(payload);
 
       if (!response.success) {
-        error.value =
-          response.error?.message || response.message || "邮箱验证失败";
+        error.value = getResponseErrorMessage(response, "邮箱验证失败");
         return false;
       }
 
@@ -415,10 +438,10 @@ export function useEmailVerification() {
     try {
       const response = await sendChangeConfirmation();
       if (!response.success) {
-        error.value =
-          response.error?.message ||
-          response.message ||
-          "发送旧邮箱确认验证码失败";
+        error.value = getResponseErrorMessage(
+          response,
+          "发送旧邮箱确认验证码失败"
+        );
         return false;
       }
 
@@ -451,8 +474,7 @@ export function useEmailVerification() {
     try {
       const response = await verifyChangeConfirmation(code);
       if (!response.success || !response.data) {
-        error.value =
-          response.error?.message || response.message || "旧邮箱验证失败";
+        error.value = getResponseErrorMessage(response, "旧邮箱验证失败");
         return false;
       }
 
@@ -493,8 +515,7 @@ export function useEmailVerification() {
     try {
       const response = await unbindEmail(normalizedCode);
       if (!response.success) {
-        error.value =
-          response.error?.message || response.message || "解绑邮箱失败";
+        error.value = getResponseErrorMessage(response, "解绑邮箱失败");
         return false;
       }
 
