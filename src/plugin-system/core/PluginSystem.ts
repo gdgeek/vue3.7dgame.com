@@ -142,6 +142,7 @@ export class PluginSystem {
   /** Role-write handoff message unsubscribe handles */
   private roleWriteArmUnsubscribe: (() => void) | null = null;
   private roleWriteCancelUnsubscribe: (() => void) | null = null;
+  private roleWriteHandoffRequestUnsubscribe: (() => void) | null = null;
   private roleWriteClaimUnsubscribe: (() => void) | null = null;
 
   /** Short-lived, non-secret handoffs survive only inside this host session. */
@@ -266,6 +267,13 @@ export class PluginSystem {
       "ROLE_WRITE_CANARY_ARM_CANCEL",
       (pluginId, message) => {
         this.handleRoleWriteArmCancel(pluginId, message.payload);
+      }
+    );
+
+    this.roleWriteHandoffRequestUnsubscribe = this.messageBus.onMessageType(
+      "ROLE_WRITE_CANARY_HANDOFF_REQUEST",
+      (pluginId, message) => {
+        this.handleRoleWriteHandoffRequest(pluginId, message.payload);
       }
     );
 
@@ -450,6 +458,10 @@ export class PluginSystem {
       this.roleWriteCancelUnsubscribe();
       this.roleWriteCancelUnsubscribe = null;
     }
+    if (this.roleWriteHandoffRequestUnsubscribe) {
+      this.roleWriteHandoffRequestUnsubscribe();
+      this.roleWriteHandoffRequestUnsubscribe = null;
+    }
     if (this.roleWriteClaimUnsubscribe) {
       this.roleWriteClaimUnsubscribe();
       this.roleWriteClaimUnsubscribe = null;
@@ -617,6 +629,19 @@ export class PluginSystem {
       return;
     }
     this.pendingRoleWriteHandoffs.delete(pluginId);
+  }
+
+  private handleRoleWriteHandoffRequest(
+    pluginId: string,
+    payload: Record<string, unknown> | undefined
+  ): void {
+    if (
+      pluginId !== ROLE_WRITE_HANDOFF_PLUGIN_ID ||
+      payload?.targetPath !== ROLE_WRITE_HANDOFF_TARGET_PATH
+    ) {
+      return;
+    }
+    this.sendPendingRoleWriteHandoff(pluginId);
   }
 
   private sendPendingRoleWriteHandoff(pluginId: string): void {
