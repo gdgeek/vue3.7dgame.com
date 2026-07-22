@@ -18,6 +18,74 @@ import type {
 
 const logger = createLogger("PluginSystem");
 
+const ROLE_WRITE_HANDOFF_PLUGIN_ID = "user-management";
+const ROLE_WRITE_HANDOFF_TARGET_PATH = "/users";
+const ROLE_WRITE_HANDOFF_TTL_MS = 5 * 60 * 1000;
+const ROLE_WRITE_HANDOFF_CLOCK_SKEW_MS = 30 * 1000;
+
+interface PendingRoleWriteHandoff {
+  correlationId: string;
+  actorFingerprint: string;
+  matchedSelectorKind: "uid";
+  armedAt: string;
+  expiresAt: string;
+  handoffClaimed: false;
+  targetPath: "/users";
+  delivered: boolean;
+}
+
+function parseRoleWriteHandoff(
+  payload: Record<string, unknown> | undefined
+): PendingRoleWriteHandoff | null {
+  const correlationId = payload?.correlationId;
+  const actorFingerprint = payload?.actorFingerprint;
+  const matchedSelectorKind = payload?.matchedSelectorKind;
+  const armedAt = payload?.armedAt;
+  const expiresAt = payload?.expiresAt;
+  const handoffClaimed = payload?.handoffClaimed;
+  const targetPath = payload?.targetPath;
+
+  if (
+    typeof correlationId !== "string" ||
+    !/^[A-Za-z0-9._:-]{8,128}$/.test(correlationId) ||
+    typeof actorFingerprint !== "string" ||
+    !/^[a-f0-9]{16}$/.test(actorFingerprint) ||
+    matchedSelectorKind !== "uid" ||
+    typeof armedAt !== "string" ||
+    typeof expiresAt !== "string" ||
+    handoffClaimed !== false ||
+    targetPath !== ROLE_WRITE_HANDOFF_TARGET_PATH
+  ) {
+    return null;
+  }
+
+  const now = Date.now();
+  const armedAtMs = Date.parse(armedAt);
+  const expiresAtMs = Date.parse(expiresAt);
+  if (
+    !Number.isFinite(armedAtMs) ||
+    !Number.isFinite(expiresAtMs) ||
+    armedAtMs > now + ROLE_WRITE_HANDOFF_CLOCK_SKEW_MS ||
+    expiresAtMs <= now ||
+    expiresAtMs - armedAtMs > ROLE_WRITE_HANDOFF_TTL_MS ||
+    expiresAtMs >
+      now + ROLE_WRITE_HANDOFF_TTL_MS + ROLE_WRITE_HANDOFF_CLOCK_SKEW_MS
+  ) {
+    return null;
+  }
+
+  return {
+    correlationId,
+    actorFingerprint,
+    matchedSelectorKind,
+    armedAt,
+    expiresAt,
+    handoffClaimed: false,
+    targetPath,
+    delivered: false,
+  };
+}
+
 /** Valid state transitions: Map<fromState, Set<toState>> */
 const VALID_TRANSITIONS: ReadonlyMap<
   PluginState,
@@ -70,6 +138,15 @@ export class PluginSystem {
 
   /** TOKEN_REFRESH_REQUEST message unsubscribe handle */
   private tokenRefreshUnsubscribe: (() => void) | null = null;
+
+  /** Role-write handoff message unsubscribe handles */
+  private roleWriteArmUnsubscribe: (() => void) | null = null;
+  private roleWriteCancelUnsubscribe: (() => void) | null = null;
+  private roleWriteClaimUnsubscribe: (() => void) | null = null;
+
+  /** Short-lived, non-secret handoffs survive only inside this host session. */
+  private pendingRoleWriteHandoffs: Map<string, PendingRoleWriteHandoff> =
+    new Map();
 
   /** Whether initialize() has been called */
   private initialized = false;
@@ -141,6 +218,7 @@ export class PluginSystem {
 
     // Listen for token changes and broadcast to all active plugins
     this.tokenUnsubscribe = this.authService.onTokenChange((token) => {
+      this.pendingRoleWriteHandoffs.clear();
       logger.info("Token changed, broadcasting TOKEN_UPDATE to active plugins");
       this.messageBus.broadcast({
         type: "TOKEN_UPDATE",
@@ -174,6 +252,27 @@ export class PluginSystem {
             `TOKEN_REFRESH_REQUEST from "${pluginId}" but no token available`
           );
         }
+      }
+    );
+
+    this.roleWriteArmUnsubscribe = this.messageBus.onMessageType(
+      "ROLE_WRITE_CANARY_ARM_REQUEST",
+      (pluginId, message) => {
+        this.handleRoleWriteArmRequest(pluginId, message.payload);
+      }
+    );
+
+    this.roleWriteCancelUnsubscribe = this.messageBus.onMessageType(
+      "ROLE_WRITE_CANARY_ARM_CANCEL",
+      (pluginId, message) => {
+        this.handleRoleWriteArmCancel(pluginId, message.payload);
+      }
+    );
+
+    this.roleWriteClaimUnsubscribe = this.messageBus.onMessageType(
+      "ROLE_WRITE_CANARY_HANDOFF_CLAIMED",
+      (pluginId, message) => {
+        this.handleRoleWriteHandoffClaim(pluginId, message.payload);
       }
     );
 
@@ -343,12 +442,25 @@ export class PluginSystem {
       this.tokenRefreshUnsubscribe();
       this.tokenRefreshUnsubscribe = null;
     }
+    if (this.roleWriteArmUnsubscribe) {
+      this.roleWriteArmUnsubscribe();
+      this.roleWriteArmUnsubscribe = null;
+    }
+    if (this.roleWriteCancelUnsubscribe) {
+      this.roleWriteCancelUnsubscribe();
+      this.roleWriteCancelUnsubscribe = null;
+    }
+    if (this.roleWriteClaimUnsubscribe) {
+      this.roleWriteClaimUnsubscribe();
+      this.roleWriteClaimUnsubscribe = null;
+    }
 
     // Destroy sub-modules
     this.messageBus.destroy();
     this.authService.destroy();
 
     this.plugins.clear();
+    this.pendingRoleWriteHandoffs.clear();
     this.initialized = false;
 
     logger.info("PluginSystem destroyed");
@@ -436,6 +548,104 @@ export class PluginSystem {
 
     this.initSentPlugins.add(pluginId);
     this.sendInitToPlugin(pluginId);
+    this.sendPendingRoleWriteHandoff(pluginId);
+  }
+
+  private handleRoleWriteArmRequest(
+    pluginId: string,
+    payload: Record<string, unknown> | undefined
+  ): void {
+    if (pluginId !== ROLE_WRITE_HANDOFF_PLUGIN_ID) {
+      return;
+    }
+
+    const handoff = parseRoleWriteHandoff(payload);
+    if (!handoff) {
+      this.messageBus.sendToPlugin(pluginId, {
+        type: "ROLE_WRITE_CANARY_ARM_ACK",
+        id: `role-write-arm-rejected-${Date.now()}`,
+        payload: { accepted: false },
+      });
+      return;
+    }
+
+    this.pendingRoleWriteHandoffs.set(pluginId, handoff);
+    this.messageBus.sendToPlugin(pluginId, {
+      type: "ROLE_WRITE_CANARY_ARM_ACK",
+      id: `role-write-arm-accepted-${Date.now()}`,
+      payload: {
+        accepted: true,
+        correlationId: handoff.correlationId,
+        actorFingerprint: handoff.actorFingerprint,
+      },
+    });
+  }
+
+  private handleRoleWriteArmCancel(
+    pluginId: string,
+    payload: Record<string, unknown> | undefined
+  ): void {
+    if (pluginId !== ROLE_WRITE_HANDOFF_PLUGIN_ID) {
+      return;
+    }
+    const pending = this.pendingRoleWriteHandoffs.get(pluginId);
+    const correlationId = payload?.correlationId;
+    if (
+      !pending ||
+      (typeof correlationId === "string" &&
+        correlationId !== pending.correlationId)
+    ) {
+      return;
+    }
+    this.pendingRoleWriteHandoffs.delete(pluginId);
+  }
+
+  private handleRoleWriteHandoffClaim(
+    pluginId: string,
+    payload: Record<string, unknown> | undefined
+  ): void {
+    if (pluginId !== ROLE_WRITE_HANDOFF_PLUGIN_ID) {
+      return;
+    }
+    const pending = this.pendingRoleWriteHandoffs.get(pluginId);
+    if (
+      !pending ||
+      !pending.delivered ||
+      payload?.correlationId !== pending.correlationId ||
+      payload?.actorFingerprint !== pending.actorFingerprint
+    ) {
+      return;
+    }
+    this.pendingRoleWriteHandoffs.delete(pluginId);
+  }
+
+  private sendPendingRoleWriteHandoff(pluginId: string): void {
+    if (pluginId !== ROLE_WRITE_HANDOFF_PLUGIN_ID) {
+      return;
+    }
+    const pending = this.pendingRoleWriteHandoffs.get(pluginId);
+    if (!pending || pending.delivered) {
+      return;
+    }
+    if (Date.parse(pending.expiresAt) <= Date.now()) {
+      this.pendingRoleWriteHandoffs.delete(pluginId);
+      return;
+    }
+
+    pending.delivered = true;
+    this.messageBus.sendToPlugin(pluginId, {
+      type: "ROLE_WRITE_CANARY_HANDOFF",
+      id: `role-write-handoff-${Date.now()}`,
+      payload: {
+        correlationId: pending.correlationId,
+        actorFingerprint: pending.actorFingerprint,
+        matchedSelectorKind: pending.matchedSelectorKind,
+        armedAt: pending.armedAt,
+        expiresAt: pending.expiresAt,
+        handoffClaimed: false,
+        targetPath: pending.targetPath,
+      },
+    });
   }
 
   /**
