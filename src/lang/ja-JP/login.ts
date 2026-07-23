@@ -55,6 +55,7 @@ export default {
     },
     success: "ログイン成功",
     error: "フォーム検証に失敗しました",
+    invalidCredentials: "ユーザー名またはパスワードが正しくありません",
     loginFailed: "ログインに失敗しました。しばらくしてから再試行してください",
     createAccount: "アカウントを作成",
     repassword: "パスワードを確認",

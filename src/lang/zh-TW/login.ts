@@ -51,6 +51,7 @@ export default {
     },
     success: "登錄成功",
     error: "表單檢驗未通過",
+    invalidCredentials: "用戶名或密碼錯誤",
     loginFailed: "登錄失敗，請稍後重試",
     createAccount: "創建新賬號",
     repassword: "確認密碼",
