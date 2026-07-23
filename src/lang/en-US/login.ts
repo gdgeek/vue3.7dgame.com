@@ -52,6 +52,7 @@ export default {
     },
     success: "Login Successful",
     error: "Form Validation Failed",
+    invalidCredentials: "Incorrect username or password",
     loginFailed: "Login failed, please try again later",
     createAccount: "Create Account",
     repassword: "Confirm Password",

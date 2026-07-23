@@ -173,6 +173,7 @@ import {
   type PasswordApiResponse,
 } from "@/api/v1/password";
 import { createPasswordFormRules } from "@/utils/password-validator";
+import { isInvalidCredentialsError } from "@/services/auth/loginError";
 
 const formRef = ref<FormInstance>();
 const userStore = useUserStore();
@@ -307,9 +308,11 @@ const submit = () => {
         router.push({ path: path, query: queryParams });
       } catch (e) {
         loading.value = false;
-        // Display specific error message from API
-        const errorMessage =
-          e instanceof Error ? e.message : t("login.loginFailed");
+        const errorMessage = isInvalidCredentialsError(e)
+          ? t("login.invalidCredentials")
+          : e instanceof Error
+            ? e.message
+            : t("login.loginFailed");
         Message.error(errorMessage);
       }
     } else {

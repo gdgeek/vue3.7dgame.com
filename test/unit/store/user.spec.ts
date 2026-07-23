@@ -196,6 +196,33 @@ describe("useUserStore", () => {
     ).rejects.toThrow();
   });
 
+  it("login() preserves structured invalid-credentials details from Axios errors", async () => {
+    const axiosError = Object.assign(
+      new Error("Request failed with status code 401"),
+      {
+        response: {
+          status: 401,
+          data: {
+            code: "INVALID_CREDENTIALS",
+            message: "Username or password is invalid.",
+          },
+        },
+      }
+    );
+    mockAuthClient.login.mockRejectedValue(axiosError);
+
+    const store = useUserStore();
+
+    await expect(
+      store.login({ username: "u", password: "wrong" })
+    ).rejects.toMatchObject({
+      name: "LoginRequestError",
+      code: "INVALID_CREDENTIALS",
+      status: 401,
+      message: "Username or password is invalid.",
+    });
+  });
+
   // -----------------------------------------------------------------------
   // loginByWechat()
   // -----------------------------------------------------------------------
