@@ -25,6 +25,7 @@ import { AuthService } from "@/plugin-system/services/AuthService";
 import { ConfigService } from "@/plugin-system/services/ConfigService";
 
 import type {
+  PluginMessage,
   PluginManifest,
   PluginsConfig,
   PluginInfo,
@@ -147,6 +148,19 @@ function createMockAuthService(): AuthService {
   auth.isAuthenticated = vi.fn(() => true);
   auth.destroy = vi.fn();
   return auth;
+}
+
+function getMessageTypeHandler(
+  bus: MessageBus,
+  type: PluginMessage["type"]
+): (pluginId: string, message: PluginMessage) => void {
+  const call = (bus.onMessageType as ReturnType<typeof vi.fn>).mock.calls.find(
+    ([registeredType]) => registeredType === type
+  );
+  if (!call) {
+    throw new Error(`Missing message handler for ${type}`);
+  }
+  return call[1] as (pluginId: string, message: PluginMessage) => void;
 }
 
 function createMockConfigService(
@@ -274,6 +288,27 @@ describe("PluginSystem", () => {
       );
     });
 
+    it("should set up the role-write handoff message listeners", async () => {
+      await system.initialize();
+
+      expect(messageBus.onMessageType).toHaveBeenCalledWith(
+        "ROLE_WRITE_CANARY_ARM_REQUEST",
+        expect.any(Function)
+      );
+      expect(messageBus.onMessageType).toHaveBeenCalledWith(
+        "ROLE_WRITE_CANARY_ARM_CANCEL",
+        expect.any(Function)
+      );
+      expect(messageBus.onMessageType).toHaveBeenCalledWith(
+        "ROLE_WRITE_CANARY_HANDOFF_REQUEST",
+        expect.any(Function)
+      );
+      expect(messageBus.onMessageType).toHaveBeenCalledWith(
+        "ROLE_WRITE_CANARY_HANDOFF_CLAIMED",
+        expect.any(Function)
+      );
+    });
+
     it("should expose plugin EVENT subscriptions through MessageBus", () => {
       const handler = vi.fn();
 
@@ -308,6 +343,264 @@ describe("PluginSystem", () => {
       const allPlugins = system.getAllPlugins();
       expect(allPlugins).toHaveLength(1);
       expect(allPlugins[0].pluginId).toBe("plugin-b");
+    });
+  });
+
+  describe("role-write iframe handoff", () => {
+    const userManagementManifest = createManifest({
+      id: "user-management",
+      name: "User Management",
+    });
+
+    function validHandoffPayload() {
+      const armedAt = new Date();
+      return {
+        correlationId: "phase4-host-handoff-correlation",
+        actorFingerprint: "0123456789abcdef",
+        matchedSelectorKind: "uid",
+        armedAt: armedAt.toISOString(),
+        expiresAt: new Date(armedAt.getTime() + 5 * 60 * 1000).toISOString(),
+        handoffClaimed: false,
+        targetPath: "/users",
+      };
+    }
+
+    beforeEach(() => {
+      configService = createMockConfigService(
+        createConfig([userManagementManifest, manifest1])
+      );
+      system = new PluginSystem(
+        registry,
+        loader,
+        messageBus,
+        authService,
+        configService
+      );
+    });
+
+    it("accepts a valid arm only from user-management and hands it to the next iframe once", async () => {
+      await system.initialize();
+      const armHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_ARM_REQUEST"
+      );
+      const readyHandler = getMessageTypeHandler(messageBus, "PLUGIN_READY");
+      const claimHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_HANDOFF_CLAIMED"
+      );
+      const payload = validHandoffPayload();
+
+      await system.loadPlugin("user-management", createContainer());
+      readyHandler("user-management", { type: "PLUGIN_READY", id: "ready-1" });
+      armHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_ARM_REQUEST",
+        id: "arm-1",
+        payload,
+      });
+
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "user-management",
+        expect.objectContaining({
+          type: "ROLE_WRITE_CANARY_ARM_ACK",
+          payload: expect.objectContaining({
+            accepted: true,
+            correlationId: payload.correlationId,
+          }),
+        })
+      );
+
+      await system.unloadPlugin("user-management");
+      await system.loadPlugin("user-management", createContainer());
+      readyHandler("user-management", { type: "PLUGIN_READY", id: "ready-2" });
+
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "user-management",
+        expect.objectContaining({
+          type: "ROLE_WRITE_CANARY_HANDOFF",
+          payload: expect.objectContaining({
+            correlationId: payload.correlationId,
+            targetPath: "/users",
+          }),
+        })
+      );
+
+      claimHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_HANDOFF_CLAIMED",
+        id: "claim-1",
+        payload: {
+          correlationId: payload.correlationId,
+          actorFingerprint: payload.actorFingerprint,
+        },
+      });
+      await system.unloadPlugin("user-management");
+      await system.loadPlugin("user-management", createContainer());
+      readyHandler("user-management", { type: "PLUGIN_READY", id: "ready-3" });
+
+      const handoffCalls = (
+        messageBus.sendToPlugin as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(
+        ([, message]) => message.type === "ROLE_WRITE_CANARY_HANDOFF"
+      );
+      expect(handoffCalls).toHaveLength(1);
+    });
+
+    it("hands a pending arm to the same iframe after it enters the target route", async () => {
+      await system.initialize();
+      const armHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_ARM_REQUEST"
+      );
+      const readyHandler = getMessageTypeHandler(messageBus, "PLUGIN_READY");
+      const handoffRequestHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_HANDOFF_REQUEST"
+      );
+      const claimHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_HANDOFF_CLAIMED"
+      );
+      const payload = validHandoffPayload();
+
+      await system.loadPlugin("user-management", createContainer());
+      readyHandler("user-management", { type: "PLUGIN_READY", id: "ready-1" });
+      armHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_ARM_REQUEST",
+        id: "arm-1",
+        payload,
+      });
+
+      handoffRequestHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_HANDOFF_REQUEST",
+        id: "handoff-request-1",
+        payload: { targetPath: "/users" },
+      });
+
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "user-management",
+        expect.objectContaining({
+          type: "ROLE_WRITE_CANARY_HANDOFF",
+          payload: expect.objectContaining({
+            correlationId: payload.correlationId,
+            targetPath: "/users",
+          }),
+        })
+      );
+
+      claimHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_HANDOFF_CLAIMED",
+        id: "claim-1",
+        payload: {
+          correlationId: payload.correlationId,
+          actorFingerprint: payload.actorFingerprint,
+        },
+      });
+      handoffRequestHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_HANDOFF_REQUEST",
+        id: "handoff-request-after-claim",
+        payload: { targetPath: "/users" },
+      });
+
+      const handoffCalls = (
+        messageBus.sendToPlugin as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(
+        ([, message]) => message.type === "ROLE_WRITE_CANARY_HANDOFF"
+      );
+      expect(handoffCalls).toHaveLength(1);
+    });
+
+    it("ignores handoff pulls from another plugin or route", async () => {
+      await system.initialize();
+      const armHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_ARM_REQUEST"
+      );
+      const handoffRequestHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_HANDOFF_REQUEST"
+      );
+
+      armHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_ARM_REQUEST",
+        id: "arm-1",
+        payload: validHandoffPayload(),
+      });
+      handoffRequestHandler("plugin-a", {
+        type: "ROLE_WRITE_CANARY_HANDOFF_REQUEST",
+        id: "wrong-plugin",
+        payload: { targetPath: "/users" },
+      });
+      handoffRequestHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_HANDOFF_REQUEST",
+        id: "wrong-route",
+        payload: { targetPath: "/organizations" },
+      });
+
+      const handoffCalls = (
+        messageBus.sendToPlugin as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(
+        ([, message]) => message.type === "ROLE_WRITE_CANARY_HANDOFF"
+      );
+      expect(handoffCalls).toHaveLength(0);
+    });
+
+    it("rejects malformed or non-user-management arm requests", async () => {
+      await system.initialize();
+      const armHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_ARM_REQUEST"
+      );
+
+      armHandler("plugin-a", {
+        type: "ROLE_WRITE_CANARY_ARM_REQUEST",
+        id: "wrong-plugin",
+        payload: validHandoffPayload(),
+      });
+      expect(messageBus.sendToPlugin).not.toHaveBeenCalled();
+
+      armHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_ARM_REQUEST",
+        id: "malformed",
+        payload: { ...validHandoffPayload(), actorFingerprint: "invalid" },
+      });
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "user-management",
+        expect.objectContaining({
+          type: "ROLE_WRITE_CANARY_ARM_ACK",
+          payload: { accepted: false },
+        })
+      );
+    });
+
+    it("clears a pending handoff when the login token changes", async () => {
+      await system.initialize();
+      const armHandler = getMessageTypeHandler(
+        messageBus,
+        "ROLE_WRITE_CANARY_ARM_REQUEST"
+      );
+      const readyHandler = getMessageTypeHandler(messageBus, "PLUGIN_READY");
+      const tokenHandler = (
+        authService.onTokenChange as ReturnType<typeof vi.fn>
+      ).mock.calls[0][0] as (token: string) => void;
+
+      armHandler("user-management", {
+        type: "ROLE_WRITE_CANARY_ARM_REQUEST",
+        id: "arm-before-token-change",
+        payload: validHandoffPayload(),
+      });
+      tokenHandler("new-token");
+      await system.loadPlugin("user-management", createContainer());
+      readyHandler("user-management", {
+        type: "PLUGIN_READY",
+        id: "ready-after-token",
+      });
+
+      const handoffCalls = (
+        messageBus.sendToPlugin as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(
+        ([, message]) => message.type === "ROLE_WRITE_CANARY_HANDOFF"
+      );
+      expect(handoffCalls).toHaveLength(0);
     });
   });
 

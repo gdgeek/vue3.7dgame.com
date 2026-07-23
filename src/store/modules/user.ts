@@ -7,6 +7,7 @@ import { login as wechatLogin } from "@/api/v1/wechat";
 import type { WechatLoginRequest } from "@/api/v1/types/wechat";
 import { putUserData } from "@/api/v1/user";
 import authClient from "@/services/auth/authClient";
+import { normalizeLoginError } from "@/services/auth/loginError";
 
 export const useUserStore = defineStore(
   "user",
@@ -106,19 +107,7 @@ export const useUserStore = defineStore(
         }
         return true;
       } catch (error) {
-        // Re-throw with preserved error message from API
-        if (error instanceof Error) {
-          throw error;
-        }
-        // Handle axios errors
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-        };
-        const apiMessage = axiosError.response?.data?.message;
-        if (apiMessage) {
-          throw new Error(apiMessage);
-        }
-        throw new Error("Login failed, please try again later.");
+        throw normalizeLoginError(error);
       }
     }
 
