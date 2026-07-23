@@ -445,7 +445,7 @@ describe("PluginSystem", () => {
       expect(handoffCalls).toHaveLength(1);
     });
 
-    it("hands a pending arm to the same iframe after it enters the target route", async () => {
+    it("retries a handoff after an early iframe delivery was ignored before the target route", async () => {
       await system.initialize();
       const armHandler = getMessageTypeHandler(
         messageBus,
@@ -470,13 +470,32 @@ describe("PluginSystem", () => {
         payload,
       });
 
+      // A replacement iframe can become ready before its SPA router reaches
+      // /users. That initial delivery is intentionally ignored by the plugin.
+      await system.unloadPlugin("user-management");
+      await system.loadPlugin("user-management", createContainer());
+      readyHandler("user-management", { type: "PLUGIN_READY", id: "ready-2" });
+
+      let handoffCalls = (
+        messageBus.sendToPlugin as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(
+        ([, message]) => message.type === "ROLE_WRITE_CANARY_HANDOFF"
+      );
+      expect(handoffCalls).toHaveLength(1);
+
       handoffRequestHandler("user-management", {
         type: "ROLE_WRITE_CANARY_HANDOFF_REQUEST",
         id: "handoff-request-1",
         payload: { targetPath: "/users" },
       });
 
-      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+      handoffCalls = (
+        messageBus.sendToPlugin as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(
+        ([, message]) => message.type === "ROLE_WRITE_CANARY_HANDOFF"
+      );
+      expect(handoffCalls).toHaveLength(2);
+      expect(handoffCalls[1]).toEqual([
         "user-management",
         expect.objectContaining({
           type: "ROLE_WRITE_CANARY_HANDOFF",
@@ -484,8 +503,8 @@ describe("PluginSystem", () => {
             correlationId: payload.correlationId,
             targetPath: "/users",
           }),
-        })
-      );
+        }),
+      ]);
 
       claimHandler("user-management", {
         type: "ROLE_WRITE_CANARY_HANDOFF_CLAIMED",
@@ -501,12 +520,12 @@ describe("PluginSystem", () => {
         payload: { targetPath: "/users" },
       });
 
-      const handoffCalls = (
+      handoffCalls = (
         messageBus.sendToPlugin as ReturnType<typeof vi.fn>
       ).mock.calls.filter(
         ([, message]) => message.type === "ROLE_WRITE_CANARY_HANDOFF"
       );
-      expect(handoffCalls).toHaveLength(1);
+      expect(handoffCalls).toHaveLength(2);
     });
 
     it("ignores handoff pulls from another plugin or route", async () => {
