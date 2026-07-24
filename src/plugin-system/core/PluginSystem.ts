@@ -641,15 +641,22 @@ export class PluginSystem {
     ) {
       return;
     }
-    this.sendPendingRoleWriteHandoff(pluginId);
+    // A replacement iframe can report ready before its SPA router reaches
+    // /users. In that case the initial handoff is intentionally ignored by
+    // the plugin, so its explicit target-route request must be allowed one
+    // retry until the plugin claims the short-lived handoff.
+    this.sendPendingRoleWriteHandoff(pluginId, true);
   }
 
-  private sendPendingRoleWriteHandoff(pluginId: string): void {
+  private sendPendingRoleWriteHandoff(
+    pluginId: string,
+    forceTargetRouteRetry = false
+  ): void {
     if (pluginId !== ROLE_WRITE_HANDOFF_PLUGIN_ID) {
       return;
     }
     const pending = this.pendingRoleWriteHandoffs.get(pluginId);
-    if (!pending || pending.delivered) {
+    if (!pending || (pending.delivered && !forceTargetRouteRetry)) {
       return;
     }
     if (Date.parse(pending.expiresAt) <= Date.now()) {
