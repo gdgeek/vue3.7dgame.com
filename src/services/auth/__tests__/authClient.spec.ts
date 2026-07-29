@@ -93,6 +93,8 @@ describe("authClient", () => {
       tokenStore,
       provider: "legacy",
     });
+    const listener = vi.fn();
+    client.onTokenChanged(listener);
 
     const first = client.refresh();
     const second = client.refresh();
@@ -110,6 +112,11 @@ describe("authClient", () => {
     ]);
     expect(tokenStore.setToken).toHaveBeenCalledTimes(1);
     expect(client.getAccessToken()).toBe("new-token");
+    expect(listener).toHaveBeenCalledOnce();
+    expect(listener).toHaveBeenCalledWith(newToken, {
+      reason: "refresh",
+      provider: "legacy",
+    });
   });
 
   it("clears local token on logout even when backend revoke fails", async () => {
