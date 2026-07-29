@@ -236,23 +236,12 @@ export class PluginSystem {
       }
     );
 
-    // Listen for TOKEN_REFRESH_REQUEST from plugins and respond with current token
+    // Refresh through authClient. A successful refresh synchronously emits a
+    // token change, and the listener above broadcasts only the fresh token.
     this.tokenRefreshUnsubscribe = this.messageBus.onMessageType(
       "TOKEN_REFRESH_REQUEST",
       (pluginId) => {
-        const token = this.authService.getAccessToken() || "";
-        if (token) {
-          logger.info(`Responding to TOKEN_REFRESH_REQUEST from "${pluginId}"`);
-          this.messageBus.sendToPlugin(pluginId, {
-            type: "TOKEN_UPDATE",
-            id: `token-refresh-response-${Date.now()}`,
-            payload: { token },
-          });
-        } else {
-          logger.warn(
-            `TOKEN_REFRESH_REQUEST from "${pluginId}" but no token available`
-          );
-        }
+        void this.handleTokenRefreshRequest(pluginId);
       }
     );
 
@@ -481,6 +470,24 @@ export class PluginSystem {
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
+
+  /**
+   * Ask the canonical auth client to refresh the host session.
+   *
+   * Never answer from getAccessToken(): the currently stored token is the one
+   * that just failed. authClient deduplicates concurrent refresh calls and its
+   * token-change notification drives the TOKEN_UPDATE broadcast. A rejected
+   * refresh therefore sends no stale token back to any plugin.
+   */
+  private async handleTokenRefreshRequest(pluginId: string): Promise<void> {
+    logger.info(`Refreshing access token for plugin "${pluginId}"`);
+    try {
+      await this.authService.refreshAccessToken();
+      logger.info(`Access token refreshed for plugin "${pluginId}"`);
+    } catch {
+      logger.warn(`Access token refresh failed for plugin "${pluginId}"`);
+    }
+  }
 
   /** Create initial PluginInfo from a manifest (state = unloaded) */
   private createPluginInfo(manifest: PluginManifest): PluginInfo {

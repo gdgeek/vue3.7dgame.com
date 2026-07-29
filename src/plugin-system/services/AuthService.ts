@@ -3,22 +3,11 @@ import authClient from "@/services/auth/authClient";
 
 const logger = createLogger("AuthService");
 
-/** Pattern matching JWT token prefixes — used to redact tokens from logs */
-const JWT_PATTERN = /eyJ[A-Za-z0-9_-]+/g;
-
 /** Function that removes a subscription when called */
 type Unsubscribe = () => void;
 
 /** Callback invoked when the access token changes */
 type TokenChangeCallback = (token: string | null) => void;
-
-/**
- * Sanitize a value for safe logging by redacting JWT tokens.
- * Replaces any `eyJ…` base64 sequences with `[REDACTED]`.
- */
-function sanitizeForLog(value: string): string {
-  return value.replace(JWT_PATTERN, "[REDACTED]");
-}
 
 /**
  * AuthService — Token 管理服务
@@ -42,6 +31,17 @@ export class AuthService {
   }
 
   /**
+   * Refresh the host access token through the canonical auth client.
+   *
+   * authClient owns refresh-token access, concurrent-request deduplication,
+   * token persistence, and token-change notification. Keeping those concerns
+   * here avoids exposing refresh tokens to the plugin system.
+   */
+  async refreshAccessToken(): Promise<void> {
+    await authClient.refresh();
+  }
+
+  /**
    * 监听 Token 变化
    *
    * 当 accessToken 发生变化时，回调会收到新的 token 值。
@@ -52,8 +52,7 @@ export class AuthService {
     const unsubscribe = authClient.onTokenChanged((token) => {
       const accessToken = token?.accessToken ?? token?.token ?? null;
       if (accessToken) {
-        const safeToken = sanitizeForLog(accessToken);
-        logger.info(`Token changed: ${safeToken}`);
+        logger.info("Token changed");
       } else {
         logger.info("Token removed");
       }
