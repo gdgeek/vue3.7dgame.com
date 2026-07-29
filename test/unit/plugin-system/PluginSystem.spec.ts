@@ -144,6 +144,7 @@ function createMockMessageBus(): MessageBus {
 function createMockAuthService(): AuthService {
   const auth = Object.create(AuthService.prototype) as AuthService;
   auth.getAccessToken = vi.fn(() => "mock-token");
+  auth.refreshAccessToken = vi.fn(async () => undefined);
   auth.onTokenChange = vi.fn(() => vi.fn());
   auth.isAuthenticated = vi.fn(() => true);
   auth.destroy = vi.fn();
@@ -286,6 +287,114 @@ describe("PluginSystem", () => {
         "TOKEN_REFRESH_REQUEST",
         expect.any(Function)
       );
+    });
+
+    it("refreshes host auth and broadcasts only the fresh token", async () => {
+      (authService.getAccessToken as ReturnType<typeof vi.fn>).mockReturnValue(
+        "expired-access-token"
+      );
+      await system.initialize();
+      const tokenChangeHandler = (
+        authService.onTokenChange as ReturnType<typeof vi.fn>
+      ).mock.calls[0][0] as (token: string) => void;
+      (
+        authService.refreshAccessToken as ReturnType<typeof vi.fn>
+      ).mockImplementation(async () => {
+        tokenChangeHandler("fresh-access-token");
+      });
+      const refreshHandler = getMessageTypeHandler(
+        messageBus,
+        "TOKEN_REFRESH_REQUEST"
+      );
+
+      refreshHandler("plugin-a", {
+        type: "TOKEN_REFRESH_REQUEST",
+        id: "refresh-success",
+      });
+
+      await vi.waitFor(() => {
+        expect(authService.refreshAccessToken).toHaveBeenCalledOnce();
+      });
+      expect(authService.getAccessToken).not.toHaveBeenCalled();
+      expect(messageBus.broadcast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "TOKEN_UPDATE",
+          payload: { token: "fresh-access-token" },
+        })
+      );
+      expect(messageBus.sendToPlugin).not.toHaveBeenCalled();
+      expect(
+        JSON.stringify(
+          (messageBus.broadcast as ReturnType<typeof vi.fn>).mock.calls
+        )
+      ).not.toContain("expired-access-token");
+    });
+
+    it("does not send the stored token when host refresh fails", async () => {
+      (authService.getAccessToken as ReturnType<typeof vi.fn>).mockReturnValue(
+        "expired-access-token"
+      );
+      (
+        authService.refreshAccessToken as ReturnType<typeof vi.fn>
+      ).mockRejectedValue(new Error("refresh failed"));
+      await system.initialize();
+      const refreshHandler = getMessageTypeHandler(
+        messageBus,
+        "TOKEN_REFRESH_REQUEST"
+      );
+
+      refreshHandler("plugin-a", {
+        type: "TOKEN_REFRESH_REQUEST",
+        id: "refresh-failure",
+      });
+
+      await vi.waitFor(() => {
+        expect(authService.refreshAccessToken).toHaveBeenCalledOnce();
+      });
+      expect(authService.getAccessToken).not.toHaveBeenCalled();
+      expect(messageBus.broadcast).not.toHaveBeenCalled();
+      expect(messageBus.sendToPlugin).not.toHaveBeenCalled();
+    });
+
+    it("lets concurrent plugin requests share the auth client refresh", async () => {
+      let resolveRefresh: (() => void) | undefined;
+      const sharedRefresh = new Promise<void>((resolve) => {
+        resolveRefresh = resolve;
+      });
+      (
+        authService.refreshAccessToken as ReturnType<typeof vi.fn>
+      ).mockReturnValue(sharedRefresh);
+      await system.initialize();
+      const tokenChangeHandler = (
+        authService.onTokenChange as ReturnType<typeof vi.fn>
+      ).mock.calls[0][0] as (token: string) => void;
+      const refreshHandler = getMessageTypeHandler(
+        messageBus,
+        "TOKEN_REFRESH_REQUEST"
+      );
+
+      refreshHandler("plugin-a", {
+        type: "TOKEN_REFRESH_REQUEST",
+        id: "refresh-concurrent-a",
+      });
+      refreshHandler("plugin-b", {
+        type: "TOKEN_REFRESH_REQUEST",
+        id: "refresh-concurrent-b",
+      });
+
+      expect(authService.refreshAccessToken).toHaveBeenCalledTimes(2);
+      tokenChangeHandler("shared-fresh-access-token");
+      resolveRefresh?.();
+      await sharedRefresh;
+
+      expect(messageBus.broadcast).toHaveBeenCalledTimes(1);
+      expect(messageBus.broadcast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "TOKEN_UPDATE",
+          payload: { token: "shared-fresh-access-token" },
+        })
+      );
+      expect(messageBus.sendToPlugin).not.toHaveBeenCalled();
     });
 
     it("should set up the role-write handoff message listeners", async () => {
