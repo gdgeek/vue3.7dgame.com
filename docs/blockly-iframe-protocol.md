@@ -29,6 +29,8 @@ interface Message {
 | `PLUGIN_READY` | Blockly → 主系统 | 编辑器加载完成 |
 | `REQUEST` | 主系统 → Blockly | 请求执行操作（如保存） |
 | `RESPONSE` | Blockly → 主系统 | 对 REQUEST 的响应 |
+| `SAVE_ACK` | 主系统 → Blockly | 确认保存载荷已完成服务端持久化 |
+| `SAVE_NACK` | 主系统 → Blockly | 保存载荷持久化失败，保留待保存状态以便重试 |
 | `EVENT` | Blockly → 主系统 | 主动通知（工作区更新、错误） |
 | `THEME_CHANGE` | 主系统 → Blockly | 主题切换通知 |
 | `DESTROY` | 主系统 → Blockly | 即将销毁，执行清理 |
@@ -41,7 +43,7 @@ interface Message {
 3. 主系统收到 PLUGIN_READY，调用 onReady → 发送 INIT
 4. Blockly 收到 INIT，初始化工作区
 5. 运行时：Blockly 通过 EVENT 实时推送工作区变更
-6. 保存时：主系统发送 REQUEST { action: 'save' }，Blockly 回复 RESPONSE
+6. 保存时：主系统发送 REQUEST，Blockly 回复 RESPONSE；持久化成功后主系统发送 SAVE_ACK，失败则发送 SAVE_NACK
 7. 主题切换时：主系统发送 THEME_CHANGE
 8. 页面卸载前：主系统发送 DESTROY
 ```
@@ -65,6 +67,10 @@ interface Message {
         resource?: object
       },
       data: object,                       // Blockly 工作区 JSON 数据
+      code?: {                            // 可选；当前已保存的原始生成代码
+        js: string,
+        lua: string
+      },
       userInfo: {                         // 用户信息（控制权限）
         id: number | null,
         role: string
@@ -113,9 +119,19 @@ Blockly 侧也可以通过 Ctrl+S 快捷键触发保存，此时内部直接调�
   id: "1711234567891-resp456",
   payload: {
     action: "save",
+    saveId: "save-1711234567891-1",      // 用于持久化成功确认
     js: "// generated JavaScript code...",
     lua: "-- generated Lua code...",
-    data: { /* Blockly workspace JSON */ }
+    data: { /* Blockly workspace JSON */ },
+    warnings: [                           // 可选；不会阻止保存
+      {
+        code: "invalid-generated-javascript",
+        message: "生成的 JavaScript 存在语法错误",
+        language: "javascript",
+        line: 12,
+        column: 8
+      }
+    ]
   },
   requestId: "1711234567890-save123"
 }
@@ -126,11 +142,40 @@ Blockly 侧也可以通过 Ctrl+S 快捷键触发保存，此时内部直接调�
   id: "1711234567891-resp789",
   payload: {
     action: "save",
-    noChange: true
+    noChange: true,
+    warnings: ["存在未连接到流程的积木"] // 同样可选
   },
   requestId: "1711234567890-save123"
 }
 ```
+
+`warnings` 是向后兼容的可选字段，推荐使用带 `message` 的对象；主系统也兼容字符串。主系统只读取非空字符串或对象中的非空 `message`，忽略其他内容。警告不会改变 `action: "save"` 的成功语义：有变更时先完成服务端保存，无变更时完成正常响应，然后显示一条简洁的警告汇总。
+
+`action: "save-error"` 仅保留给无法构造保存载荷的技术故障，例如工作区序列化失败。脚本结构问题及已经生成出的 JavaScript/Lua 语法问题应放入 `warnings`，不能用于阻断保存。某一种语言的代码生成器执行失败时，Blockly 应使用 INIT 中的 `config.code` 回退并附带警告，避免以空字符串覆盖当前已保存代码。
+
+主系统完成服务端持久化后，会把 `saveId` 原样回传。Blockly 只有收到该确认后才推进“已保存”快照；若服务端保存失败则不确认，下一次保存仍会发送完整数据：
+
+```js
+{
+  type: "SAVE_ACK",
+  id: "1711234567999-ack123",
+  payload: { saveId: "save-1711234567891-1" }
+}
+```
+
+`SAVE_ACK` 同样向后兼容：旧版 Blockly 会忽略它；新版 Blockly 面对不会回执的旧宿主时会重复发送完整保存载荷，以数据安全优先。
+
+如果主系统未能完成服务端持久化（包括脚本在响应到达前变为不可保存），不得发送 `SAVE_ACK`。当响应携带 `saveId` 时，主系统发送失败确认，Blockly 保留对应保存载荷和 dirty 状态，允许用户再次保存：
+
+```js
+{
+  type: "SAVE_NACK",
+  id: "1711234568000-nack123",
+  payload: { saveId: "save-1711234567891-1" }
+}
+```
+
+`SAVE_ACK` 是服务端已持久化的唯一成功证明；仅显示成功提示、提前返回或本地处理完成都不能视为保存成功。
 
 ### EVENT（Blockly → 主系统）
 
@@ -207,7 +252,7 @@ Blockly 侧通过 `useTheme().setDark(payload.dark)` 处理。
 |------|------------------------|---------------|
 | 注册方式 | plugins.json + MessageBus | 无注册，直接 iframe |
 | 管理者 | PluginSystem.ts | useScriptEditorBase.ts |
-| INIT payload | `{ token, config }` | `{ token: null, config: { style, parameters, data, userInfo } }` |
+| INIT payload | `{ token, config }` | `{ token: null, config: { style, parameters, data, code, userInfo } }` |
 | 消息过滤 | origin 校验 | `event.source === window.parent` |
 | TOKEN_UPDATE | 支持 | 接收但不使用（token 在 INIT 时为 null） |
 | 自定义 REQUEST | 通用 | 仅 `{ action: 'save' }` |

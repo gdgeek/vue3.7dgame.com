@@ -6,7 +6,12 @@ const { mockInflate, mockJsBeautify, mockMessage, mockMessageBox } = vi.hoisted(
   () => ({
     mockInflate: vi.fn(() => "decompressed-content"),
     mockJsBeautify: vi.fn((code: string) => `formatted:${code}`),
-    mockMessage: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
+    mockMessage: {
+      success: vi.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
+      warning: vi.fn(),
+    },
     mockMessageBox: { confirm: vi.fn() },
   })
 );
@@ -430,8 +435,9 @@ describe("useScriptEditorBase", () => {
       );
 
       // Set up editor so save() can send postMessage
+      const mockPost = vi.fn();
       result.editor.value = {
-        contentWindow: { postMessage: vi.fn() },
+        contentWindow: { postMessage: mockPost },
       } as MockIframe as HTMLIFrameElement;
 
       // Trigger save() first to set up saveResolve
@@ -445,6 +451,7 @@ describe("useScriptEditorBase", () => {
             lua: "local x=1",
             js: "var x=1;",
             data: {},
+            saveId: "save-123",
           },
         },
       } as MockMessageEvent as MessageEvent);
@@ -453,6 +460,246 @@ describe("useScriptEditorBase", () => {
         expect.objectContaining({ lua: "local x=1", js: "var x=1;" }),
         expect.objectContaining({ trigger: "manual" })
       );
+      expect(mockPost).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          type: "SAVE_ACK",
+          payload: { saveId: "save-123" },
+        }),
+        "*"
+      );
+      unmount();
+    });
+
+    it("保存 API 等待期间继续编辑：只推进旧载荷快照，最新内容仍保持待保存", async () => {
+      let completePost!: () => void;
+      const onPost = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            completePost = resolve;
+          })
+      );
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      const mockPost = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPost },
+      } as MockIframe as HTMLIFrameElement;
+      result.initializeSavedSnapshot(
+        { lua: "saved", js: "saved", blocklyData: { version: 0 } },
+        "meta:1"
+      );
+      await result.handleMessage({
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            lua: "version 1",
+            js: "version 1",
+            blocklyData: { version: 1 },
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      const savePromise = result.save();
+      const responsePromise = result.handleMessage({
+        data: {
+          type: "RESPONSE",
+          payload: {
+            action: "save",
+            saveId: "save-version-1",
+            lua: "version 1",
+            js: "version 1",
+            data: { version: 1 },
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+      expect(onPost).toHaveBeenCalledOnce();
+
+      await result.handleMessage({
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            lua: "version 2",
+            js: "version 2",
+            blocklyData: { version: 2 },
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+      completePost();
+
+      await responsePromise;
+      await expect(savePromise).resolves.toBeUndefined();
+      expect(result.unsavedBlocklyData.value).toStrictEqual({ version: 2 });
+      expect(result.hasUnsavedChanges.value).toBe(true);
+      expect(mockPost).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "SAVE_ACK",
+          payload: { saveId: "save-version-1" },
+        }),
+        "*"
+      );
+      unmount();
+    });
+
+    it("RESPONSE save（带 warnings）：保存成功并显示过滤后的警告汇总", async () => {
+      const onPost = vi.fn().mockResolvedValue(undefined);
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      result.editor.value = {
+        contentWindow: { postMessage: vi.fn() },
+      } as MockIframe as HTMLIFrameElement;
+
+      const savePromise = result.save();
+      await result.handleMessage({
+        data: {
+          type: "RESPONSE",
+          payload: {
+            action: "save",
+            lua: "local x=1",
+            js: "var x=1;",
+            data: {},
+            warnings: [
+              { message: " 缺少输入 " },
+              null,
+              "资源未选择",
+              { message: "缺少输入" },
+              { message: 42 },
+            ],
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      await expect(savePromise).resolves.toBeUndefined();
+      expect(onPost).toHaveBeenCalledOnce();
+      expect(mockMessage.warning).toHaveBeenCalledWith(
+        "脚本已保留，但存在 2 项警告：缺少输入（另有 1 项）"
+      );
+      expect(mockMessage.error).not.toHaveBeenCalled();
+      unmount();
+    });
+
+    it("RESPONSE save（服务端失败）：不发送 SAVE_ACK，允许后续重试", async () => {
+      const onPost = vi.fn().mockRejectedValue(new Error("network failed"));
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      const mockPost = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPost },
+      } as MockIframe as HTMLIFrameElement;
+
+      const savePromise = result.save();
+      const saveExpectation =
+        expect(savePromise).rejects.toThrow("network failed");
+      await result.handleMessage({
+        data: {
+          type: "RESPONSE",
+          payload: {
+            action: "save",
+            saveId: "save-failed",
+            lua: "local x=1",
+            js: "var x=1;",
+            data: {},
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      await saveExpectation;
+      expect(
+        mockPost.mock.calls.some(
+          ([message]) =>
+            (message as { type?: string } | undefined)?.type === "SAVE_ACK"
+        )
+      ).toBe(false);
+      expect(mockPost).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "SAVE_NACK",
+          payload: { saveId: "save-failed" },
+        }),
+        "*"
+      );
+      expect(result.hasUnsavedChanges.value).toBe(true);
+      unmount();
+    });
+
+    it("RESPONSE save 前变为不可保存：不持久化、不 ACK，并发送 NACK", async () => {
+      let allowed = true;
+      const onPost = vi.fn().mockResolvedValue(undefined);
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost, canSave: () => allowed }))
+      );
+      const mockPost = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPost },
+      } as MockIframe as HTMLIFrameElement;
+
+      const savePromise = result.save();
+      const saveExpectation = expect(savePromise).rejects.toThrow(
+        "current script cannot be saved"
+      );
+      allowed = false;
+      await result.handleMessage({
+        data: {
+          type: "RESPONSE",
+          payload: {
+            action: "save",
+            saveId: "save-not-allowed",
+            lua: "lua",
+            js: "js",
+            data: { script: 1 },
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      await saveExpectation;
+      expect(onPost).not.toHaveBeenCalled();
+      expect(
+        mockPost.mock.calls.some(
+          ([message]) =>
+            (message as { type?: string } | undefined)?.type === "SAVE_ACK"
+        )
+      ).toBe(false);
+      expect(mockPost).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "SAVE_NACK",
+          payload: { saveId: "save-not-allowed" },
+        }),
+        "*"
+      );
+      expect(result.hasUnsavedChanges.value).toBe(true);
+      unmount();
+    });
+
+    it("RESPONSE save（warnings 不是数组）：忽略警告且不影响保存", async () => {
+      const onPost = vi.fn().mockResolvedValue(undefined);
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      result.editor.value = {
+        contentWindow: { postMessage: vi.fn() },
+      } as MockIframe as HTMLIFrameElement;
+
+      const savePromise = result.save();
+      await result.handleMessage({
+        data: {
+          type: "RESPONSE",
+          payload: {
+            action: "save",
+            lua: "local x=1",
+            js: "var x=1;",
+            data: {},
+            warnings: { message: "不应显示" },
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      await expect(savePromise).resolves.toBeUndefined();
+      expect(onPost).toHaveBeenCalledOnce();
+      expect(mockMessage.warning).not.toHaveBeenCalled();
+      expect(mockMessage.error).not.toHaveBeenCalled();
       unmount();
     });
 
@@ -510,6 +757,35 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
 
+    it("RESPONSE save noChange（带 warnings）：显示警告且不叠加无变化提示", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+      result.editor.value = {
+        contentWindow: { postMessage: vi.fn() },
+      } as MockIframe as HTMLIFrameElement;
+
+      const savePromise = result.save();
+      await result.handleMessage({
+        data: {
+          type: "RESPONSE",
+          payload: {
+            action: "save",
+            noChange: true,
+            warnings: [{ message: "生成的 JavaScript 存在语法错误" }],
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      await expect(savePromise).resolves.toBeUndefined();
+      expect(mockMessage.warning).toHaveBeenCalledWith(
+        "脚本已保留，但存在 1 项警告：生成的 JavaScript 存在语法错误"
+      );
+      expect(mockMessage.info).not.toHaveBeenCalled();
+      expect(mockMessage.error).not.toHaveBeenCalled();
+      unmount();
+    });
+
     it("EVENT update：更新 LuaCode 和 JavaScriptCode", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
@@ -531,6 +807,118 @@ describe("useScriptEditorBase", () => {
         "local meta = {}\nlocal index = ''\nx = 1"
       );
       expect(result.JavaScriptCode.value).toBe("formatted:var x=1;");
+      unmount();
+    });
+
+    it("EVENT update：Blockly 数据不变但生成代码升级时标记为待保存", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+      const blocklyData = { blocks: { blocks: [] } };
+      result.initializeSavedSnapshot({
+        lua: "old lua",
+        js: "old js",
+        blocklyData,
+      });
+
+      await result.handleMessage({
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            lua: "new lua",
+            js: "new js",
+            blocklyData,
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      expect(result.hasUnsavedChanges.value).toBe(true);
+      unmount();
+    });
+
+    it("snapshotKey 切换原子清理旧脚本会话，同 key 重载保留当前编辑", async () => {
+      const onPost = vi.fn().mockResolvedValue(undefined);
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      const mockPost = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPost },
+      } as MockIframe as HTMLIFrameElement;
+      result.initializeSavedSnapshot(
+        { lua: "a saved", js: "a saved", blocklyData: { script: "A" } },
+        "meta:A"
+      );
+      await result.handleMessage({
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            lua: "a edited",
+            js: "a edited",
+            blocklyData: { script: "A edited" },
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      const pendingSave = result.save();
+      const pendingRequest = mockPost.mock.calls.find(
+        ([message]) =>
+          (message as { type?: string } | undefined)?.type === "REQUEST"
+      )?.[0] as { id: string };
+      const pendingExpectation = expect(pendingSave).rejects.toThrow(
+        "script changed while save was pending"
+      );
+      result.initializeSavedSnapshot(
+        { lua: "b saved", js: "b saved", blocklyData: { script: "B" } },
+        "meta:B"
+      );
+
+      await pendingExpectation;
+      expect(result.unsavedBlocklyData.value).toBeNull();
+      expect(result.hasUnsavedChanges.value).toBe(false);
+      expect(result.isSaving.value).toBe(false);
+
+      await result.handleMessage({
+        data: {
+          type: "RESPONSE",
+          requestId: pendingRequest.id,
+          payload: {
+            action: "save",
+            saveId: "stale-a-save",
+            lua: "a edited",
+            js: "a edited",
+            data: { script: "A edited" },
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+      expect(onPost).not.toHaveBeenCalled();
+
+      await result.handleMessage({
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            lua: "b edited",
+            js: "b edited",
+            blocklyData: { script: "B edited" },
+          },
+        },
+      } as MockMessageEvent as MessageEvent);
+      result.initializeSavedSnapshot(
+        {
+          lua: "b reloaded",
+          js: "b reloaded",
+          blocklyData: { script: "B reloaded" },
+        },
+        "meta:B"
+      );
+
+      expect(result.unsavedBlocklyData.value).toStrictEqual({
+        script: "B edited",
+      });
+      expect(result.hasUnsavedChanges.value).toBe(true);
       unmount();
     });
 
@@ -717,6 +1105,23 @@ describe("useScriptEditorBase", () => {
 
   // ---- save ----
   describe("save()", () => {
+    it("当前脚本不可保存时立即拒绝且不发送 REQUEST", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ canSave: () => false }))
+      );
+      const mockPostMessage = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage: mockPostMessage },
+      } as MockIframe as HTMLIFrameElement;
+
+      await expect(result.save()).rejects.toThrow(
+        "current script cannot be saved"
+      );
+      expect(mockPostMessage).not.toHaveBeenCalled();
+      expect(result.isSaving.value).toBe(false);
+      unmount();
+    });
+
     it("preserves hasUnsavedChanges and sends save postMessage", () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
