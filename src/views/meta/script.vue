@@ -268,8 +268,20 @@ const initEditor = (overrideData?: unknown) => {
   let blocklyData = meta.value.metaCode?.blockly || "{}";
   try {
     blocklyData = decompressBlockly(blocklyData);
-    const data =
-      overrideData ?? unsavedBlocklyData.value ?? JSON.parse(blocklyData);
+    const savedData = JSON.parse(blocklyData);
+    const savedCode = {
+      js: meta.value.metaCode?.js || "",
+      lua: meta.value.metaCode?.lua || "",
+    };
+    initializeSavedSnapshot(
+      {
+        js: savedCode.js,
+        lua: savedCode.lua,
+        blocklyData: savedData,
+      },
+      `meta:${meta.value.id}`
+    );
+    const data = overrideData ?? unsavedBlocklyData.value ?? savedData;
     test.value = getResource(meta.value);
     postMessage("INIT", {
       token: null,
@@ -280,6 +292,7 @@ const initEditor = (overrideData?: unknown) => {
           resource: getResource(meta.value),
         },
         data,
+        code: savedCode,
         userInfo: {
           id: userStore.userInfo?.id || null,
           role: userStore.getRole(),
@@ -297,12 +310,14 @@ const postScript = async (
   context: { trigger: ScriptSaveTrigger }
 ) => {
   if (meta.value === null) {
-    ElMessage.error(t("meta.script.error1"));
-    return;
+    const errorMessage = t("meta.script.error1");
+    ElMessage.error(errorMessage);
+    throw new Error(errorMessage);
   }
   if (!meta.value.editable) {
-    ElMessage.error(t("meta.script.error2"));
-    return;
+    const errorMessage = t("meta.script.error2");
+    ElMessage.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
   let blocklyData = JSON.stringify(message.data);
@@ -352,6 +367,7 @@ const {
   isDark,
   toggleSceneFullscreen,
   postMessage,
+  initializeSavedSnapshot,
   save,
   openVersionDialog,
   clearDraftHistory,

@@ -348,7 +348,20 @@ const initEditor = () => {
   try {
     let blocklyData = verse.value.verseCode?.blockly || "{}";
     blocklyData = decompressBlockly(blocklyData);
-    const data = unsavedBlocklyData.value ?? JSON.parse(blocklyData);
+    const savedData = JSON.parse(blocklyData);
+    const savedCode = {
+      js: verse.value.verseCode?.js || "",
+      lua: verse.value.verseCode?.lua || "",
+    };
+    initializeSavedSnapshot(
+      {
+        js: savedCode.js,
+        lua: savedCode.lua,
+        blocklyData: savedData,
+      },
+      `verse:${verse.value.id}`
+    );
+    const data = unsavedBlocklyData.value ?? savedData;
     postMessage("INIT", {
       token: null,
       config: {
@@ -358,6 +371,7 @@ const initEditor = () => {
           resource: resource.value,
         },
         data,
+        code: savedCode,
         userInfo: {
           id: userStore.userInfo?.id || null,
           role: userStore.getRole(),
@@ -371,12 +385,14 @@ const initEditor = () => {
 
 const postScript = async (message: EditorPostPayload) => {
   if (verse.value === null) {
-    Message.error(t("verse.view.script.error1"));
-    return;
+    const errorMessage = t("verse.view.script.error1");
+    Message.error(errorMessage);
+    throw new Error(errorMessage);
   }
   if (!verse.value!.editable) {
-    Message.error(t("verse.view.script.error2"));
-    return;
+    const errorMessage = t("verse.view.script.error2");
+    Message.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
   let blocklyData = JSON.stringify(message.data);
@@ -445,6 +461,7 @@ const {
   toggleSceneFullscreen,
   copyCode,
   postMessage,
+  initializeSavedSnapshot,
   save,
   decompressBlockly,
   isReady,
@@ -463,6 +480,7 @@ const {
   },
   onPost: postScript,
   onReady: initEditor,
+  canSave: () => Boolean(verse.value?.editable),
 });
 
 const resource = computed(() => {
