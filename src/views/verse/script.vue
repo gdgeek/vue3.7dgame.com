@@ -441,8 +441,20 @@ const initEditor = (overrideData?: unknown) => {
   try {
     let blocklyData = verse.value.verseCode?.blockly || "{}";
     blocklyData = decompressBlockly(blocklyData);
-    const data =
-      overrideData ?? unsavedBlocklyData.value ?? JSON.parse(blocklyData);
+    const savedData = JSON.parse(blocklyData);
+    const savedCode = {
+      js: verse.value.verseCode?.js || "",
+      lua: verse.value.verseCode?.lua || "",
+    };
+    initializeSavedSnapshot(
+      {
+        js: savedCode.js,
+        lua: savedCode.lua,
+        blocklyData: savedData,
+      },
+      `verse:${verse.value.id}`
+    );
+    const data = overrideData ?? unsavedBlocklyData.value ?? savedData;
     postMessage("INIT", {
       token: null,
       config: {
@@ -452,6 +464,7 @@ const initEditor = (overrideData?: unknown) => {
           resource: resource.value,
         },
         data,
+        code: savedCode,
         userInfo: {
           id: userStore.userInfo?.id || null,
           role: userStore.getRole(),
@@ -469,12 +482,14 @@ const postScript = async (
   context: { trigger: ScriptSaveTrigger }
 ) => {
   if (verse.value === null) {
-    ElMessage.error(t("verse.view.script.error1"));
-    return;
+    const errorMessage = t("verse.view.script.error1");
+    ElMessage.error(errorMessage);
+    throw new Error(errorMessage);
   }
   if (!verse.value!.editable) {
-    ElMessage.error(t("verse.view.script.error2"));
-    return;
+    const errorMessage = t("verse.view.script.error2");
+    ElMessage.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
   let blocklyData = JSON.stringify(message.data);
@@ -548,6 +563,7 @@ const {
   editorContentReady,
   toggleSceneFullscreen,
   postMessage,
+  initializeSavedSnapshot,
   save,
   openVersionDialog,
   clearDraftHistory,
