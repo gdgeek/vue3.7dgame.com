@@ -45,6 +45,13 @@ declare module "vue-router" {
     keepAlive?: boolean;
 
     /**
+     * 查询参数变化时是否保留当前页面组件实例
+     * true 保留, false 重新挂载
+     * @default false
+     */
+    preserveComponentOnQueryChange?: boolean;
+
+    /**
      * 是否在面包屑导航中隐藏
      * true 隐藏, false 显示
      * @default false
