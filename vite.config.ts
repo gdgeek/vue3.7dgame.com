@@ -16,6 +16,7 @@ import viteCompression from "vite-plugin-compression";
 import UnoCSS from "unocss/vite";
 import { resolve } from "path";
 import { normalizeDevProxyTarget } from "./build/dev-proxy-target";
+import { domainManifestJson } from "./build/vite-plugin-domain-manifest";
 import { pluginEnvJson } from "./build/vite-plugin-env-json";
 import {
   name,
@@ -204,6 +205,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         algorithm: "gzip",
         ext: ".gz",
       }),
+      domainManifestJson(),
       pluginEnvJson(),
     ],
     // 预加载项目必需的组件
