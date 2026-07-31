@@ -204,7 +204,12 @@ import {
   type EditorPostPayload,
   type ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
-import { buildScriptRuntime } from "@/composables/useScriptRuntime";
+import {
+  buildScriptRuntime,
+  getScriptRuntimeBindingValues,
+  resolveWithRetry,
+  SCRIPT_RUNTIME_BINDING_NAMES,
+} from "@/composables/useScriptRuntime";
 import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
 import {
   useEditorVersionToolbar,
@@ -543,20 +548,44 @@ const handlePolygen = (uuid: string) => {
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModel = (uuid: string, retries = 3) => {
+  type PolygenModelData = { mesh: THREE.Object3D } & Record<string, unknown>;
+  const getModel = (uuid: string): PolygenModelData | null => {
     const source = scenePlayer.value?.sources.get(uuid) as
-      | { type: string; data: { mesh?: THREE.Object3D } }
+      | { type: string; data: unknown }
       | undefined;
-    if (source && source.type === "model" && source.data.mesh) {
-      return source.data.mesh;
-    }
-    if (retries > 0) {
-      logger.log(`模型未找到，剩余重试次数: ${retries}`);
-      setTimeout(() => getModel(uuid, retries - 1), 100);
+    if (source?.type === "model") {
+      if (source.data instanceof THREE.Object3D) {
+        return { mesh: source.data };
+      }
+      if (
+        source.data &&
+        typeof source.data === "object" &&
+        "mesh" in source.data &&
+        source.data.mesh instanceof THREE.Object3D
+      ) {
+        return source.data as PolygenModelData;
+      }
     }
     return null;
   };
-  const model = getModel(modelUuid);
+  let delayedModelData: PolygenModelData | null = null;
+  const modelData = resolveWithRetry(
+    () => getModel(modelUuid),
+    (resolvedModelData) => {
+      delayedModelData = resolvedModelData;
+      logger.log("模型重试成功:", { uuid: modelUuid });
+    }
+  );
+  const model = modelData?.mesh;
+  const playAnimation = (animationName: string) => {
+    const resolvedModel = modelData?.mesh ?? delayedModelData?.mesh;
+    logger.log("播放动画:", {
+      uuid: modelUuid,
+      animationName,
+      model: resolvedModel,
+    });
+    scenePlayer.value?.playAnimation(modelUuid, animationName);
+  };
   logger.log("查找模型:", {
     requestedUuid: modelUuid,
     availableModels: Array.from(scenePlayer.value.sources.keys()),
@@ -565,14 +594,17 @@ const handlePolygen = (uuid: string) => {
   });
   if (!model) {
     logger.error(`找不到UUID为 ${modelUuid} 的模型`);
-    return null;
+    return {
+      get mesh() {
+        return delayedModelData?.mesh;
+      },
+      playAnimation,
+    };
   }
   return {
+    ...modelData,
     mesh: model,
-    playAnimation: (animationName: string) => {
-      logger.log("播放动画:", { uuid: modelUuid, animationName, model });
-      scenePlayer.value?.playAnimation(modelUuid, animationName);
-    },
+    playAnimation,
   };
 };
 
@@ -635,26 +667,12 @@ const run = async () => {
   if (!JavaScriptCode.value) return;
 
   window.meta = {};
-  const {
-    Vector3,
-    polygen,
-    sound,
-    helper,
-    handleText,
-    handleEntity,
-    tween,
-    task,
-    animation,
-    event,
-    text,
-    point,
-    transform,
-    argument,
-  } = buildScriptRuntime(scenePlayer);
+  const runtime = buildScriptRuntime(scenePlayer);
+  const runtimeParameterNames = SCRIPT_RUNTIME_BINDING_NAMES.join(", ");
 
   try {
     const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
+        return async function(handlePolygen, THREE, ${runtimeParameterNames}) {
           const meta = window.meta;
           const index = ${meta.value?.id};
 
@@ -670,22 +688,8 @@ const run = async () => {
     const executableFunction = createFunction();
     await executableFunction(
       handlePolygen,
-      polygen,
-      buildScriptRuntime(scenePlayer).handleSound,
-      sound,
       THREE,
-      task,
-      tween,
-      helper,
-      animation,
-      event,
-      text,
-      point,
-      transform,
-      Vector3,
-      argument,
-      handleText,
-      handleEntity
+      ...getScriptRuntimeBindingValues(runtime)
     );
   } catch (e) {
     logger.error("执行代码出错:", e);
