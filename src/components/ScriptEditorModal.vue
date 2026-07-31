@@ -253,6 +253,8 @@ import {
 import { useUserStore } from "@/store/modules/user";
 import {
   buildScriptRuntime,
+  getScriptRuntimeBindingValues,
+  SCRIPT_RUNTIME_BINDING_NAMES,
   type ScenePlayerLike,
 } from "@/composables/useScriptRuntime";
 import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
@@ -521,36 +523,32 @@ const resource = computed(() => {
   return { events: { inputs, outputs } };
 });
 
-const handlePolygen = async (uuid: string) => {
+const handlePolygen = (uuid: string) => {
   if (!scenePlayer.value) {
     logger.error("ScenePlayer未初始化");
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModelAsync = (
-    uuid: string,
-    retries = 3
-  ): Promise<THREE.Object3D | null> => {
-    return new Promise((resolve) => {
-      const attempt = (remaining: number) => {
-        const source = scenePlayer.value?.sources?.get(uuid) as
-          | { type: string; data: unknown }
-          | undefined;
-        if (source?.type === "model" && source.data) {
-          resolve(source.data as THREE.Object3D);
-          return;
-        }
-        if (remaining > 0) {
-          logger.log(`模型未找到，剩余重试次数: ${remaining}`);
-          setTimeout(() => attempt(remaining - 1), 100);
-        } else {
-          resolve(null);
-        }
-      };
-      attempt(retries);
-    });
+  const getModel = () => {
+    const source = scenePlayer.value?.sources?.get(modelUuid) as
+      | { type: string; data: unknown }
+      | undefined;
+    if (source?.type !== "model") return null;
+    if (source.data instanceof THREE.Object3D) {
+      return { mesh: source.data };
+    }
+    if (
+      source.data &&
+      typeof source.data === "object" &&
+      "mesh" in source.data &&
+      source.data.mesh instanceof THREE.Object3D
+    ) {
+      return source.data;
+    }
+    return null;
   };
-  const model = await getModelAsync(modelUuid);
+  const modelData = getModel();
+  const model = modelData?.mesh;
   logger.log("查找模型:", {
     requestedUuid: modelUuid,
     availableModels: Array.from(scenePlayer.value?.sources?.keys() ?? []),
@@ -562,6 +560,8 @@ const handlePolygen = async (uuid: string) => {
     return null;
   }
   return {
+    ...modelData,
+    mesh: model,
     playAnimation: (animationName: string) => {
       logger.log("播放动画:", { uuid: modelUuid, animationName, model });
       scenePlayer.value?.playAnimation(modelUuid, animationName);
@@ -686,21 +686,7 @@ const run = async () => {
     const instanceId = scenePlayer.value!.sceneInstanceId;
     window.__sceneCallbacks = window.__sceneCallbacks ?? {};
     window.__sceneCallbacks[instanceId] = {};
-    const {
-      Vector3,
-      polygen,
-      sound,
-      helper,
-      handleText,
-      handleEntity,
-      tween,
-      task,
-      animation,
-      text,
-      point,
-      transform,
-      argument,
-    } = buildScriptRuntime(
+    const runtime = buildScriptRuntime(
       scenePlayer as { value: ScenePlayerLike | null | undefined },
       {
         signal: (
@@ -712,23 +698,11 @@ const run = async () => {
         },
       }
     );
-
-    const event = {
-      trigger: (index: unknown, eventId: string) => {
-        logger.log("触发事件:", index, eventId);
-      },
-      signal: (moduleUuid: string, eventUuid: string, parameter?: unknown) => {
-        logger.log("触发事件:", moduleUuid, eventUuid, parameter);
-      },
-    };
-
-    const handleSound = buildScriptRuntime(
-      scenePlayer as { value: ScenePlayerLike | null | undefined }
-    ).handleSound;
+    const runtimeParameterNames = SCRIPT_RUNTIME_BINDING_NAMES.join(", ");
 
     try {
       const wrappedCode = `
-            return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
+            return async function(handlePolygen, THREE, ${runtimeParameterNames}) {
               const meta = window.__sceneCallbacks['${instanceId}'];
               const verse = window.__sceneCallbacks['${instanceId}'];
               const index = ${verse.value?.id};
@@ -747,22 +721,8 @@ const run = async () => {
       const executableFunction = wrappedFunction();
       await executableFunction(
         handlePolygen,
-        polygen,
-        handleSound,
-        sound,
         THREE,
-        task,
-        tween,
-        helper,
-        animation,
-        event,
-        text,
-        point,
-        transform,
-        Vector3,
-        argument,
-        handleText,
-        handleEntity
+        ...getScriptRuntimeBindingValues(runtime)
       );
     } catch (e) {
       logger.error("执行代码出错:", e);

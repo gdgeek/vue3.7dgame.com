@@ -1,10 +1,46 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { buildScriptRuntime } from "@/composables/useScriptRuntime";
+import {
+  buildScriptRuntime,
+  getScriptRuntimeBindingValues,
+  resolveWithRetry,
+  SCRIPT_RUNTIME_BINDING_NAMES,
+} from "@/composables/useScriptRuntime";
 import * as THREE from "three";
 
 vi.mock("@/utils/logger", () => ({
   logger: { log: vi.fn(), error: vi.fn(), warn: vi.fn() },
 }));
+
+describe("resolveWithRetry", () => {
+  it("首次未命中时将稍后重试成功值回传且仅回传一次", async () => {
+    vi.useFakeTimers();
+    try {
+      const resolvedValue = { id: "model-ready" };
+      const lookup = vi
+        .fn<() => typeof resolvedValue | null>()
+        .mockReturnValueOnce(null)
+        .mockReturnValueOnce(null)
+        .mockReturnValue(resolvedValue);
+      const onResolved = vi.fn();
+
+      expect(resolveWithRetry(lookup, onResolved, 3, 50)).toBeNull();
+      expect(lookup).toHaveBeenCalledOnce();
+
+      await vi.advanceTimersByTimeAsync(99);
+      expect(onResolved).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(onResolved).toHaveBeenCalledOnce();
+      expect(onResolved).toHaveBeenCalledWith(resolvedValue);
+      expect(lookup).toHaveBeenCalledTimes(3);
+
+      await vi.runAllTimersAsync();
+      expect(onResolved).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
 
 // --- 工具函数：创建 mock ScenePlayer ---
 function makeMockPlayer(
@@ -24,6 +60,69 @@ function makeMockPlayer(
     getAudioUrl: vi.fn(),
     playQueuedAudio: vi.fn().mockResolvedValue(undefined),
     ...overrides,
+  };
+}
+
+function makePendingAudioPlayer() {
+  const playQueuedAudio = vi.fn(
+    (audio: HTMLAudioElement, _skipQueue: boolean = false) =>
+      new Promise<void>((resolve) => {
+        audio.onended = () => resolve();
+        audio.onerror = () => resolve();
+        Promise.resolve(audio.play()).catch(() => resolve());
+      })
+  );
+
+  return {
+    player: makeMockPlayer({ playQueuedAudio }),
+    playQueuedAudio,
+  };
+}
+
+function makeQueuedAudioPlayer() {
+  type QueueItem = {
+    audio: HTMLAudioElement;
+    resolve: () => void;
+  };
+
+  const queue: QueueItem[] = [];
+  let isPlaying = false;
+
+  const playOne = (audio: HTMLAudioElement) =>
+    new Promise<void>((resolve) => {
+      audio.onended = () => resolve();
+      audio.onerror = () => resolve();
+      Promise.resolve(audio.play()).catch(() => resolve());
+    });
+
+  const processQueue = async () => {
+    if (isPlaying) return;
+    isPlaying = true;
+    try {
+      while (queue.length > 0) {
+        const current = queue[0];
+        await playOne(current.audio);
+        current.resolve();
+        queue.shift();
+      }
+    } finally {
+      isPlaying = false;
+    }
+  };
+
+  const playQueuedAudio = vi.fn(
+    (audio: HTMLAudioElement, skipQueue: boolean = false) => {
+      if (skipQueue) return playOne(audio);
+      return new Promise<void>((resolve) => {
+        queue.push({ audio, resolve });
+        void processQueue();
+      });
+    }
+  );
+
+  return {
+    player: makeMockPlayer({ playQueuedAudio }),
+    playQueuedAudio,
   };
 }
 
@@ -84,6 +183,18 @@ describe("buildScriptRuntime", () => {
     it("源不存在时返回 null", () => {
       const { handleEntity } = buildScriptRuntime({ value: makeMockPlayer() });
       expect(handleEntity("missing")).toBeNull();
+    });
+  });
+
+  describe("handleVoxel", () => {
+    it("返回 ScenePlayer 以 model source 登记的体素 data", () => {
+      const player = makeMockPlayer();
+      const voxelData = { mesh: new THREE.Object3D() };
+      player.sources.set("voxel-1", { type: "model", data: voxelData });
+      const { handleVoxel } = buildScriptRuntime({ value: player });
+
+      expect(handleVoxel("voxel-1")).toBe(voxelData);
+      expect(handleVoxel("missing-voxel")).toBeNull();
     });
   });
 
@@ -148,7 +259,11 @@ describe("buildScriptRuntime", () => {
 
       await sound.play(audio, false);
 
-      expect(player.playQueuedAudio).toHaveBeenCalledWith(audio, false);
+      expect(player.playQueuedAudio).toHaveBeenCalledWith(
+        expect.any(HTMLAudioElement),
+        false
+      );
+      expect(player.playQueuedAudio.mock.calls[0][0]).not.toBe(audio);
     });
 
     it("audio 为 undefined 时不调用 playQueuedAudio", async () => {
@@ -179,7 +294,7 @@ describe("buildScriptRuntime", () => {
   });
 
   describe("sound.playTask", () => {
-    it("创建并立即执行 audio task", async () => {
+    it("兼容别名返回惰性 audio task", async () => {
       const player = makeMockPlayer();
       const { sound } = buildScriptRuntime({ value: player });
       const audio = new Audio();
@@ -188,8 +303,12 @@ describe("buildScriptRuntime", () => {
 
       expect(task).not.toBeNull();
       expect(task!.type).toBe("audio");
-      // playQueuedAudio should have been called
-      expect(player.playQueuedAudio).toHaveBeenCalledWith(audio);
+      expect(player.playQueuedAudio).not.toHaveBeenCalled();
+      await task!.execute!();
+      expect(player.playQueuedAudio).toHaveBeenCalledWith(
+        expect.any(HTMLAudioElement),
+        false
+      );
     });
 
     it("audio 为 undefined 时返回 null", () => {
@@ -307,6 +426,52 @@ describe("buildScriptRuntime", () => {
       const result = task.array("UNKNOWN", [1, 2]);
       expect(result).toEqual([1, 2]);
     });
+
+    it("LIST 任务按顺序等待前一项完成", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const calls: string[] = [];
+      let releaseFirst!: () => void;
+      const first = () =>
+        new Promise<void>((resolve) => {
+          calls.push("first:start");
+          releaseFirst = () => {
+            calls.push("first:end");
+            resolve();
+          };
+        });
+      const second = () => {
+        calls.push("second");
+      };
+
+      const execution = task.execute(task.array("LIST", [first, second]));
+      await Promise.resolve();
+      expect(calls).toEqual(["first:start"]);
+
+      releaseFirst();
+      await execution;
+      expect(calls).toEqual(["first:start", "first:end", "second"]);
+    });
+
+    it("SET 任务并行启动并等待全部完成", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const calls: string[] = [];
+      let releaseFirst!: () => void;
+      const first = () =>
+        new Promise<void>((resolve) => {
+          calls.push("first:start");
+          releaseFirst = resolve;
+        });
+      const second = () => {
+        calls.push("second");
+      };
+
+      const execution = task.execute(task.array("SET", [first, second]));
+      await Promise.resolve();
+      expect(calls).toEqual(["first:start", "second"]);
+
+      releaseFirst();
+      await execution;
+    });
   });
 
   describe("task.sleep", () => {
@@ -412,12 +577,14 @@ describe("buildScriptRuntime", () => {
   });
 
   describe("animation.playTask", () => {
-    it("创建并立即执行 animation task", () => {
+    it("兼容别名返回惰性 animation task", async () => {
       const { animation } = buildScriptRuntime({ value: makeMockPlayer() });
       const instance = makeMeshWrapper();
       const task = animation.playTask(instance, "idle");
 
       expect(task).not.toBeNull();
+      expect(instance.playAnimation).not.toHaveBeenCalled();
+      await task!.execute!();
       expect(instance.playAnimation).toHaveBeenCalledWith("idle");
     });
 
@@ -617,8 +784,10 @@ describe("buildScriptRuntime", () => {
 
       await task.circle(1, audioTask);
 
-      // sound.play 内部调用 playQueuedAudio(audio, false)
-      expect(player.playQueuedAudio).toHaveBeenCalledWith(audio, false);
+      expect(player.playQueuedAudio).toHaveBeenCalledWith(
+        expect.any(HTMLAudioElement),
+        false
+      );
     });
 
     it("resolvedTask 为 animation 类型时调用其 execute", async () => {
@@ -701,7 +870,7 @@ describe("buildScriptRuntime", () => {
       from.mesh.position.set(0, 0, 0);
       to.mesh.position.set(10, 0, 0);
 
-      // duration=0 → elapsed/0 = Infinity or NaN → progress = NaN → !NaN<1 → resolve
+      // duration=0 会直接应用最终状态并 resolve
       const tweenData = tween.to_object(from, to, 0, "LINEAR");
       await expect(task.execute(tweenData)).resolves.toBeUndefined();
     });
@@ -748,7 +917,10 @@ describe("buildScriptRuntime", () => {
 
       await taskObj!.execute!();
 
-      expect(player.playQueuedAudio).toHaveBeenCalledWith(audio);
+      expect(player.playQueuedAudio).toHaveBeenCalledWith(
+        expect.any(HTMLAudioElement),
+        false
+      );
     });
   });
 
@@ -782,7 +954,7 @@ describe("buildScriptRuntime", () => {
   // requestAnimationFrame loop (line 362)
   // ----------------------------------------------------------------
   describe("BOUNCE_IN_OUT easing + requestAnimationFrame 循环", () => {
-    it("BOUNCE_IN_OUT duration=0 不抛异常（NaN 进度 → else 分支）", async () => {
+    it("BOUNCE_IN_OUT duration=0 直接应用最终状态", async () => {
       const { task, tween } = buildScriptRuntime({ value: makeMockPlayer() });
       const from = makeMeshWrapper();
       const to = makeMeshWrapper();
@@ -820,6 +992,723 @@ describe("buildScriptRuntime", () => {
 
       vi.unstubAllGlobals();
       vi.useRealTimers();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // picture / video runtime
+  // ----------------------------------------------------------------
+  describe("handlePicture", () => {
+    it("只返回 picture source data", () => {
+      const player = makeMockPlayer();
+      const pictureData = { mesh: new THREE.Object3D() };
+      player.sources.set("picture-1", { type: "picture", data: pictureData });
+      player.sources.set("model-1", { type: "model", data: pictureData });
+      const { handlePicture } = buildScriptRuntime({ value: player });
+
+      expect(handlePicture("picture-1")).toBe(pictureData);
+      expect(handlePicture("model-1")).toBeNull();
+      expect(handlePicture("missing")).toBeNull();
+    });
+  });
+
+  describe("video runtime", () => {
+    it("handleVideo 返回 ScenePlayer 中的视频 data", () => {
+      const player = makeMockPlayer();
+      const data = { video: document.createElement("video") };
+      player.sources.set("video-1", { type: "video", data });
+      const { handleVideo } = buildScriptRuntime({ value: player });
+
+      expect(handleVideo("video-1")).toBe(data);
+      expect(handleVideo("missing")).toBeNull();
+    });
+
+    it("URL-only source 复用同一视频实例，pause 可取消当前及排队播放", async () => {
+      const playSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "play")
+        .mockResolvedValue(undefined);
+      vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(
+        () => {}
+      );
+      const sourceData = { url: "https://example.com/video.mp4" };
+      const { video } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      const first = video.play(sourceData);
+      const queued = video.play(sourceData);
+      await video.pause(sourceData);
+
+      await expect(Promise.all([first, queued])).resolves.toEqual([
+        undefined,
+        undefined,
+      ]);
+      expect(playSpy).toHaveBeenCalledOnce();
+    });
+
+    it("play 等待 ended，pause/stop 会释放等待且 stop 重置进度", async () => {
+      const videoElement = document.createElement("video");
+      const playSpy = vi
+        .spyOn(videoElement, "play")
+        .mockResolvedValue(undefined);
+      const pauseSpy = vi
+        .spyOn(videoElement, "pause")
+        .mockImplementation(() => {});
+      const { video } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      const firstPlayback = video.play(videoElement, true);
+      expect(playSpy).toHaveBeenCalledOnce();
+      videoElement.dispatchEvent(new Event("ended"));
+      await firstPlayback;
+
+      videoElement.currentTime = 8;
+      const secondPlayback = video.play(videoElement, true);
+      await video.stop(videoElement);
+      await secondPlayback;
+      expect(pauseSpy).toHaveBeenCalled();
+      expect(videoElement.currentTime).toBe(0);
+    });
+
+    it("auto_play 在播放中暂停，在暂停中恢复", async () => {
+      const videoElement = document.createElement("video");
+      const pauseSpy = vi
+        .spyOn(videoElement, "pause")
+        .mockImplementation(() => {});
+      const playSpy = vi
+        .spyOn(videoElement, "play")
+        .mockResolvedValue(undefined);
+      let paused = false;
+      vi.spyOn(videoElement, "paused", "get").mockImplementation(() => paused);
+      const { video } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      await video.auto_play(videoElement, true);
+      expect(pauseSpy).toHaveBeenCalledOnce();
+      expect(playSpy).not.toHaveBeenCalled();
+
+      paused = true;
+      videoElement.currentTime = 3;
+      await video.auto_play(videoElement, true);
+      expect(playSpy).toHaveBeenCalledOnce();
+    });
+
+    it("auto_play 对排队视频再次触发时取消队列且不会播放", async () => {
+      const activeVideo = document.createElement("video");
+      const queuedVideo = document.createElement("video");
+      const activePlay = vi
+        .spyOn(activeVideo, "play")
+        .mockResolvedValue(undefined);
+      const queuedPlay = vi
+        .spyOn(queuedVideo, "play")
+        .mockResolvedValue(undefined);
+      const { video } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      const activePlayback = video.play(activeVideo);
+      const firstToggle = video.auto_play(queuedVideo);
+      const secondToggle = video.auto_play(queuedVideo);
+
+      await Promise.all([firstToggle, secondToggle]);
+      expect(activePlay).toHaveBeenCalledOnce();
+      expect(queuedPlay).not.toHaveBeenCalled();
+
+      activeVideo.dispatchEvent(new Event("ended"));
+      await activePlayback;
+      expect(queuedPlay).not.toHaveBeenCalled();
+    });
+
+    it("原生 pause 事件会释放当前等待并推进视频队列", async () => {
+      const firstVideo = document.createElement("video");
+      const secondVideo = document.createElement("video");
+      const firstPlay = vi
+        .spyOn(firstVideo, "play")
+        .mockResolvedValue(undefined);
+      const secondPlay = vi
+        .spyOn(secondVideo, "play")
+        .mockResolvedValue(undefined);
+      const { video } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      const firstPlayback = video.play(firstVideo);
+      const secondPlayback = video.play(secondVideo);
+      expect(firstPlay).toHaveBeenCalledOnce();
+      expect(secondPlay).not.toHaveBeenCalled();
+
+      firstVideo.dispatchEvent(new Event("pause"));
+      await firstPlayback;
+      await vi.waitFor(() => expect(secondPlay).toHaveBeenCalledOnce());
+
+      secondVideo.dispatchEvent(new Event("ended"));
+      await secondPlayback;
+    });
+
+    it("兼容旧版 handleVideo 复合参数并在播放完成后回调", async () => {
+      const videoElement = document.createElement("video");
+      vi.spyOn(videoElement, "play").mockResolvedValue(undefined);
+      const player = makeMockPlayer();
+      player.sources.set("legacy-video", {
+        type: "video",
+        data: { video: videoElement },
+      });
+      const callback = vi.fn();
+      const { handleVideo } = buildScriptRuntime({ value: player });
+
+      expect(
+        handleVideo('handleVideo("legacy-video"), true', callback)
+      ).toEqual({ video: videoElement });
+      videoElement.dispatchEvent(new Event("ended"));
+
+      await vi.waitFor(() => expect(callback).toHaveBeenCalledOnce());
+    });
+
+    it("createTask/playTask 提供通用 task.execute 契约", async () => {
+      const videoElement = document.createElement("video");
+      vi.spyOn(videoElement, "play").mockResolvedValue(undefined);
+      const { video } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      const taskObject = video.createTask(videoElement);
+      expect(taskObject).toMatchObject({ type: "video", data: videoElement });
+      const execution = taskObject!.execute!();
+      videoElement.dispatchEvent(new Event("ended"));
+      await execution;
+      expect(video.createTask(undefined)).toBeNull();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // sound toggle/stop compatibility
+  // ----------------------------------------------------------------
+  describe("sound auto_play / stop", () => {
+    it("handleSound 按 UUID 缓存控制句柄，历史 pause 会取消实际播放副本", async () => {
+      vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+      const playSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "play")
+        .mockResolvedValue(undefined);
+      const pauseSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "pause")
+        .mockImplementation(() => {});
+      const { player, playQueuedAudio } = makePendingAudioPlayer();
+      (player.getAudioUrl as ReturnType<typeof vi.fn>).mockReturnValue(
+        "https://example.com/cached.mp3"
+      );
+      const { handleSound, sound } = buildScriptRuntime({ value: player });
+      const handle = handleSound("sound-cached")!;
+
+      const playback = sound.play(handle, true);
+      const playbackAudio = playQueuedAudio.mock.calls[0][0];
+
+      expect(handleSound("sound-cached")).toBe(handle);
+      expect(playbackAudio).not.toBe(handle);
+      handle.pause();
+      await playback;
+
+      expect(playSpy).toHaveBeenCalledOnce();
+      expect(pauseSpy).toHaveBeenCalledOnce();
+      expect(pauseSpy.mock.instances[0]).toBe(playbackAudio);
+      expect(playbackAudio.getAttribute("src")).toBeNull();
+    });
+
+    it("auto_play 再次触发时取消当前播放副本并释放等待", async () => {
+      vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+      vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+      const pauseSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "pause")
+        .mockImplementation(() => {});
+      const { player, playQueuedAudio } = makePendingAudioPlayer();
+      const audioHandle = new Audio("https://example.com/toggle.mp3");
+      const { sound } = buildScriptRuntime({ value: player });
+
+      const playback = sound.auto_play(audioHandle, true);
+      const playbackAudio = playQueuedAudio.mock.calls[0][0];
+      const toggleOff = sound.auto_play(audioHandle, true);
+
+      await Promise.all([playback, toggleOff]);
+
+      expect(playQueuedAudio).toHaveBeenCalledOnce();
+      expect(pauseSpy).toHaveBeenCalledOnce();
+      expect(pauseSpy.mock.instances[0]).toBe(playbackAudio);
+      expect(playbackAudio.getAttribute("src")).toBeNull();
+    });
+
+    it("stop 取消播放副本并归零，且兼容历史 handleSound(...).stop()", async () => {
+      vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+      vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+      const pauseSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "pause")
+        .mockImplementation(() => {});
+      const { player, playQueuedAudio } = makePendingAudioPlayer();
+      (player.getAudioUrl as ReturnType<typeof vi.fn>).mockReturnValue(
+        "https://example.com/sound.mp3"
+      );
+      const { handleSound, sound } = buildScriptRuntime({ value: player });
+      const audioHandle = handleSound("sound-1") as HTMLAudioElement & {
+        stop: () => void;
+      };
+
+      const firstPlayback = sound.play(audioHandle, true);
+      const firstPlaybackAudio = playQueuedAudio.mock.calls[0][0];
+      firstPlaybackAudio.currentTime = 5;
+      await sound.stop(audioHandle);
+      await firstPlayback;
+      expect(audioHandle.currentTime).toBe(0);
+
+      const secondPlayback = sound.play(audioHandle, true);
+      const secondPlaybackAudio = playQueuedAudio.mock.calls[1][0];
+      secondPlaybackAudio.currentTime = 3;
+      audioHandle.stop();
+      await secondPlayback;
+
+      expect(secondPlaybackAudio).not.toBe(firstPlaybackAudio);
+      expect(audioHandle.currentTime).toBe(0);
+      expect(pauseSpy).toHaveBeenCalledTimes(2);
+      expect(pauseSpy.mock.instances).toEqual([
+        firstPlaybackAudio,
+        secondPlaybackAudio,
+      ]);
+    });
+
+    it("同一控制句柄的普通播放和 skipQueue 播放使用独立副本并发完成", async () => {
+      const playSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "play")
+        .mockResolvedValue(undefined);
+      const { player, playQueuedAudio } = makePendingAudioPlayer();
+      (player.getAudioUrl as ReturnType<typeof vi.fn>).mockReturnValue(
+        "https://example.com/concurrent.mp3"
+      );
+      const { handleSound, sound } = buildScriptRuntime({ value: player });
+      const audioHandle = handleSound("sound-concurrent")!;
+
+      const normalPlayback = sound.play(audioHandle, false);
+      const immediatePlayback = sound.play(audioHandle, true);
+      const normalAudio = playQueuedAudio.mock.calls[0][0];
+      const immediateAudio = playQueuedAudio.mock.calls[1][0];
+
+      expect(normalAudio).not.toBe(audioHandle);
+      expect(immediateAudio).not.toBe(audioHandle);
+      expect(immediateAudio).not.toBe(normalAudio);
+      expect(playQueuedAudio.mock.calls.map((call) => call[1])).toEqual([
+        false,
+        true,
+      ]);
+      expect(playSpy).toHaveBeenCalledTimes(2);
+
+      immediateAudio.dispatchEvent(new Event("ended"));
+      normalAudio.dispatchEvent(new Event("ended"));
+      await Promise.all([normalPlayback, immediatePlayback]);
+    });
+
+    it("stop 会预取消尚在队列中的副本，队列推进后不会真正出声", async () => {
+      vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+      const playSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "play")
+        .mockResolvedValue(undefined);
+      const pauseSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "pause")
+        .mockImplementation(() => {});
+      const { player, playQueuedAudio } = makeQueuedAudioPlayer();
+      (player.getAudioUrl as ReturnType<typeof vi.fn>).mockReturnValue(
+        "https://example.com/queued.mp3"
+      );
+      const { handleSound, sound } = buildScriptRuntime({ value: player });
+      const audioHandle = handleSound("sound-queued")!;
+
+      const activePlayback = sound.play(audioHandle, false);
+      const queuedPlayback = sound.play(audioHandle, false);
+      const activeAudio = playQueuedAudio.mock.calls[0][0];
+      const queuedAudio = playQueuedAudio.mock.calls[1][0];
+
+      expect(playSpy).toHaveBeenCalledOnce();
+      await sound.stop(audioHandle);
+      await Promise.all([activePlayback, queuedPlayback]);
+      await vi.waitFor(() => expect(playSpy).toHaveBeenCalledOnce());
+
+      expect(activeAudio).not.toBe(queuedAudio);
+      expect(queuedAudio.getAttribute("src")).toBeNull();
+      expect(pauseSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("pause 后立即 resume，旧播放 finally 不会误删新会话，随后 stop 仍可取消", async () => {
+      vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+      const playSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "play")
+        .mockResolvedValue(undefined);
+      const pauseSpy = vi
+        .spyOn(HTMLMediaElement.prototype, "pause")
+        .mockImplementation(() => {});
+      const { player, playQueuedAudio } = makePendingAudioPlayer();
+      const audioHandle = new Audio("https://example.com/resume.mp3");
+      const { sound } = buildScriptRuntime({ value: player });
+
+      const initialPlayback = sound.auto_play(audioHandle, true);
+      const initialAudio = playQueuedAudio.mock.calls[0][0];
+      initialAudio.currentTime = 4;
+
+      const pauseToggle = sound.auto_play(audioHandle, true);
+      const resumedPlayback = sound.auto_play(audioHandle, true);
+      const resumedAudio = playQueuedAudio.mock.calls[1][0];
+
+      expect(resumedAudio.currentTime).toBe(4);
+      await Promise.all([initialPlayback, pauseToggle]);
+      await sound.stop(audioHandle);
+      await resumedPlayback;
+
+      expect(playSpy).toHaveBeenCalledTimes(2);
+      expect(pauseSpy).toHaveBeenCalledTimes(2);
+      expect(pauseSpy.mock.instances).toEqual([initialAudio, resumedAudio]);
+      expect(resumedAudio.getAttribute("src")).toBeNull();
+      expect(audioHandle.currentTime).toBe(0);
+    });
+
+    it("sound.pause 不重置当前播放位置", async () => {
+      const audio = new Audio();
+      vi.spyOn(audio, "pause").mockImplementation(() => {});
+      audio.currentTime = 4;
+      const { sound } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      await sound.pause(audio);
+
+      expect(audio.currentTime).toBe(4);
+    });
+  });
+
+  describe("task media array contract", () => {
+    it("circle 按序执行 audio/video/animation task，每轮各一次且创建时不预播", async () => {
+      const player = makeMockPlayer();
+      const runtime = buildScriptRuntime({ value: player });
+      const audio = new Audio();
+      const videoElement = document.createElement("video");
+      const videoPlay = vi
+        .spyOn(videoElement, "play")
+        .mockImplementation(() => {
+          queueMicrotask(() => videoElement.dispatchEvent(new Event("ended")));
+          return Promise.resolve();
+        });
+      const polygenInstance = makeMeshWrapper();
+      const tasks = [
+        runtime.sound.createTask(audio),
+        runtime.video.createTask(videoElement),
+        runtime.animation.createTask(polygenInstance, "wave"),
+      ];
+
+      expect(player.playQueuedAudio).not.toHaveBeenCalled();
+      expect(videoPlay).not.toHaveBeenCalled();
+      expect(polygenInstance.playAnimation).not.toHaveBeenCalled();
+
+      await runtime.task.circle(2, tasks);
+
+      expect(player.playQueuedAudio).toHaveBeenCalledTimes(2);
+      expect(videoPlay).toHaveBeenCalledTimes(2);
+      expect(polygenInstance.playAnimation).toHaveBeenCalledTimes(2);
+    });
+
+    it("task.execute 递归执行 Promise 和嵌套数组", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const first = vi.fn();
+      const second = vi.fn();
+
+      await task.execute([
+        Promise.resolve({ execute: first }),
+        [{ execute: second }],
+      ]);
+
+      expect(first).toHaveBeenCalledOnce();
+      expect(second).toHaveBeenCalledOnce();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // point extended API
+  // ----------------------------------------------------------------
+  describe("point extended API", () => {
+    it("复用实体控制能力并提供 Web 安全 fallback", () => {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.MeshBasicMaterial()
+      );
+      const scene = new THREE.Scene();
+      scene.add(mesh);
+      const setRotating = vi.fn();
+      const object = { mesh, setRotating };
+      const { point } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      point.setHighlight(object, true, "red");
+      point.setMoveable(object, true);
+      point.setRotatable(object, false);
+      point.setTooltipVisual(object, true);
+
+      expect(
+        scene.children.some((child) => child instanceof THREE.BoxHelper)
+      ).toBe(true);
+      expect(mesh.userData.xrugcMoveable).toBe(true);
+      expect(mesh.userData.xrugcTooltipVisible).toBe(true);
+      expect(setRotating).toHaveBeenCalledWith(false);
+    });
+
+    it("toTransformData 返回独立的 position/degree rotation/scale", () => {
+      const mesh = new THREE.Object3D();
+      mesh.position.set(1, 2, 3);
+      mesh.rotation.set(0, Math.PI / 2, 0);
+      mesh.scale.set(2, 3, 4);
+      const { point } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      const result = point.toTransformData({ mesh });
+
+      expect(result).toEqual({
+        position: new THREE.Vector3(1, 2, 3),
+        rotation: new THREE.Vector3(0, 90, 0),
+        scale: new THREE.Vector3(2, 3, 4),
+      });
+      expect(result!.position).not.toBe(mesh.position);
+      expect(result!.scale).not.toBe(mesh.scale);
+    });
+
+    it("explode/unexplode 展开并恢复子物体位置", () => {
+      const root = new THREE.Group();
+      const first = new THREE.Object3D();
+      const second = new THREE.Object3D();
+      first.position.set(-1, 0, 0);
+      second.position.set(1, 0, 0);
+      root.add(first, second);
+      const originalFirst = first.position.clone();
+      const originalSecond = second.position.clone();
+      const { point } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      point.explode({ mesh: root }, 2);
+      expect(first.position).not.toEqual(originalFirst);
+      expect(second.position).not.toEqual(originalSecond);
+
+      point.unexplode({ mesh: root });
+      expect(first.position).toEqual(originalFirst);
+      expect(second.position).toEqual(originalSecond);
+    });
+
+    it("line 在共同父节点下创建 THREE.Line", () => {
+      const scene = new THREE.Scene();
+      const from = new THREE.Object3D();
+      const to = new THREE.Object3D();
+      from.position.set(1, 0, 0);
+      to.position.set(2, 0, 0);
+      scene.add(from, to);
+      const { point } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      const line = point.line({ mesh: from }, { mesh: to });
+
+      expect(line).toBeInstanceOf(THREE.Line);
+      expect(scene.children).toContain(line);
+    });
+
+    it("tween 将普通 transform 数据转换后交给 task.execute", async () => {
+      const object = makeMeshWrapper();
+      const runtime = buildScriptRuntime({ value: makeMockPlayer() });
+      const executeSpy = vi
+        .spyOn(runtime.task, "execute")
+        .mockResolvedValue(undefined);
+
+      await runtime.point.tween(
+        object,
+        {
+          position: { x: 1, y: 2, z: 3 },
+          rotate: { x: 0, y: 90, z: 0 },
+          scale: { x: 2, y: 2, z: 2 },
+        },
+        0.5,
+        true
+      );
+
+      expect(executeSpy).toHaveBeenCalledOnce();
+      expect(executeSpy.mock.calls[0][0]).toMatchObject({
+        type: "data",
+        duration: 0.5,
+        easing: "LINEAR",
+      });
+    });
+
+    it("优先调用实体已有的原生方法", async () => {
+      const entity = {
+        explode: vi.fn(),
+        unexplode: vi.fn(),
+        lineTo: vi.fn(),
+        tweenTo: vi.fn().mockResolvedValue(undefined),
+      };
+      const { point } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      point.explode(entity, 1);
+      point.unexplode(entity);
+      point.line(entity, {});
+      await point.tween(entity, {}, 2, true);
+
+      expect(entity.explode).toHaveBeenCalledWith(1);
+      expect(entity.unexplode).toHaveBeenCalledOnce();
+      expect(entity.lineTo).toHaveBeenCalledOnce();
+      expect(entity.tweenTo).toHaveBeenCalledWith({}, 2, true);
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // managers + deterministic injection contract
+  // ----------------------------------------------------------------
+  describe("managers", () => {
+    it("Web 预览维护安全的分数/倒计时状态并派发事件", () => {
+      const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+      const { managers } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      expect(managers.game_add_score(5)).toMatchObject({ score: 5 });
+      expect(managers.game_countdown(30)).toMatchObject({
+        score: 5,
+        countdownSeconds: 30,
+      });
+      expect(managers.game_reset()).toMatchObject({
+        score: 0,
+        countdownSeconds: 0,
+      });
+      expect(dispatchSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it("正式宿主在 parameter 上提供方法时优先委托", () => {
+      const gameAddScore = vi.fn().mockReturnValue("delegated");
+      const { managers } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      expect(managers.game_add_score(2, { game_add_score: gameAddScore })).toBe(
+        "delegated"
+      );
+      expect(gameAddScore).toHaveBeenCalledWith(2);
+    });
+  });
+
+  describe("remaining Blockly compatibility APIs", () => {
+    it("polygen 控制方法优先委托，并可用 emote 回退动画", () => {
+      const setHighlight = vi.fn();
+      const setMoveable = vi.fn();
+      const setRotating = vi.fn();
+      const playAnimation = vi.fn();
+      const instance = {
+        mesh: new THREE.Object3D(),
+        setHighlight,
+        setMoveable,
+        setRotating,
+        playAnimation,
+      };
+      const { polygen } = buildScriptRuntime({ value: makeMockPlayer() });
+
+      polygen.setHighlight(instance, true, "blue");
+      polygen.setMoveable(instance, true);
+      polygen.setRotatable(instance, false);
+      polygen.setEmote(instance, "smile");
+
+      expect(setHighlight).toHaveBeenCalledWith(true, "blue");
+      expect(setMoveable).toHaveBeenCalledWith(true);
+      expect(setRotating).toHaveBeenCalledWith(false);
+      expect(playAnimation).toHaveBeenCalledWith("smile");
+    });
+
+    it("event.signal_array 规范化对象/数组并调用宿主 signal", () => {
+      const signal = vi.fn();
+      const { event } = buildScriptRuntime(
+        { value: makeMockPlayer() },
+        { signal }
+      );
+
+      event.signal_array([
+        { index: "module-1", uuid: "event-1", parameter: 3 },
+        ["module-2", "event-2"],
+        {},
+      ]);
+
+      expect(signal).toHaveBeenNthCalledWith(1, "module-1", "event-1", 3);
+      expect(signal).toHaveBeenNthCalledWith(
+        2,
+        "module-2",
+        "event-2",
+        undefined
+      );
+    });
+
+    it("helper/system/argument/log 提供无 ReferenceError 的稳定返回", () => {
+      const player = makeMockPlayer();
+      const mesh = new THREE.Object3D();
+      mesh.position.set(4, 5, 6);
+      player.sources.set("anchor-1", { type: "model", data: { mesh } });
+      const runtime = buildScriptRuntime({ value: player });
+
+      expect(runtime.helper.parameters([1, 2])).toEqual([1, 2]);
+      expect(runtime.system.parameter("value")).toBe("value");
+      expect(runtime.argument.indexPlayer(2)).toBe(2);
+      expect(runtime.argument.serverPlayer()).toBe("server");
+      expect(runtime.argument.randomPlayer()).toBe("random_client");
+      expect(runtime.argument.anchor("anchor-1")).toEqual(
+        new THREE.Vector3(4, 5, 6)
+      );
+      expect(runtime.log.post("string", "key", "value")).toMatchObject({
+        dataType: "string",
+        key: "key",
+        value: "value",
+      });
+      expect(runtime.log.resetUuid()).toEqual(expect.any(String));
+    });
+
+    it("helper.sync_sleep 提供可等待且不阻塞主线程的兼容入口", async () => {
+      vi.useFakeTimers();
+      try {
+        const { helper } = buildScriptRuntime({ value: makeMockPlayer() });
+        const sleep = helper.sync_sleep(0.1);
+        let completed = false;
+        void sleep.then(() => {
+          completed = true;
+        });
+
+        await vi.advanceTimersByTimeAsync(99);
+        expect(completed).toBe(false);
+        await vi.advanceTimersByTimeAsync(1);
+        await sleep;
+        expect(completed).toBe(true);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("system.task 返回惰性任务并通过 Web 事件桥执行", async () => {
+      const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+      const { system, task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const systemTask = system.task("open-panel", { tab: "resource" });
+
+      expect(systemTask).toMatchObject({
+        type: "system",
+        data: {
+          method: "open-panel",
+          parameter: { tab: "resource" },
+        },
+      });
+      expect(dispatchSpy).not.toHaveBeenCalled();
+
+      await task.execute(systemTask);
+
+      expect(dispatchSpy).toHaveBeenCalledOnce();
+      expect(dispatchSpy.mock.calls[0][0]).toMatchObject({
+        type: "xrugc:system-task",
+        detail: {
+          method: "open-panel",
+          parameter: { tab: "resource" },
+        },
+      });
+    });
+  });
+
+  describe("script runtime binding contract", () => {
+    it("参数名和实参数组同序注入所有 Blockly 运行时能力", () => {
+      const runtime = buildScriptRuntime({ value: makeMockPlayer() });
+      const values = getScriptRuntimeBindingValues(runtime);
+      const executable = new Function(
+        ...SCRIPT_RUNTIME_BINDING_NAMES,
+        "return { handleVoxel, handlePicture, handleVideo, video, sound, point, managers, system, log };"
+      );
+
+      expect(values).toHaveLength(SCRIPT_RUNTIME_BINDING_NAMES.length);
+      expect(executable(...values)).toEqual({
+        handleVoxel: runtime.handleVoxel,
+        handlePicture: runtime.handlePicture,
+        handleVideo: runtime.handleVideo,
+        video: runtime.video,
+        sound: runtime.sound,
+        point: runtime.point,
+        managers: runtime.managers,
+        system: runtime.system,
+        log: runtime.log,
+      });
     });
   });
 });
