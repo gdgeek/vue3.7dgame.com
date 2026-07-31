@@ -83,23 +83,7 @@ server {
     }
 
     location = /__xrugc_proxy__ {
-        proxy_pass ${APP_UNITY_PREVIEW_UPSTREAM}/__xrugc_proxy__?$args;
-
-        proxy_ssl_server_name on;
-        proxy_http_version 1.1;
-        proxy_set_header Host $proxy_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Connection "";
-        proxy_set_header Range $http_range;
-        proxy_set_header If-Range $http_if_range;
-        proxy_buffering off;
-        proxy_intercept_errors off;
-
-        proxy_connect_timeout 60s;
-        proxy_read_timeout 300s;
-        proxy_send_timeout 300s;
+        return 404;
     }
 
     # ============ 反向代理 - API (由 docker-entrypoint.sh 动态生成) ============

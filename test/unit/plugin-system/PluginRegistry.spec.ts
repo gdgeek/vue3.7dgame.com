@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 
 import { PluginRegistry } from "@/plugin-system/core/PluginRegistry";
 
-import type { PluginManifest, ValidationResult } from "@/plugin-system/types";
+import type { PluginManifest } from "@/plugin-system/types";
 
 /** Helper to create a valid manifest */
 function createValidManifest(
@@ -125,6 +125,36 @@ describe("PluginRegistry", () => {
       expect(
         result.errors.some((e: string) => e.includes("allowedHostOrigins"))
       ).toBe(true);
+    });
+
+    it("should reject wildcard or non-origin message targets", () => {
+      for (const allowedOrigin of [
+        "*",
+        "https://test.example.com/path",
+        "https://test.example.com/",
+        "javascript:alert(1)",
+      ]) {
+        const result = registry.validateManifest(
+          createValidManifest({ allowedOrigin })
+        );
+        expect(result.valid).toBe(false);
+        expect(result.errors).toContain(
+          'Field "allowedOrigin" must be an exact HTTP(S) origin'
+        );
+      }
+    });
+
+    it("should require exact origins in the host allowlist", () => {
+      const result = registry.validateManifest(
+        createValidManifest({
+          allowedHostOrigins: ["https://main.example.com/path"],
+        })
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'Field "allowedHostOrigins[0]" must be an exact HTTP(S) origin'
+      );
     });
 
     it("should reject manifest with missing required field", () => {

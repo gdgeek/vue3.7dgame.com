@@ -21,6 +21,18 @@ const REQUIRED_FIELDS: ReadonlyArray<{
   { key: "order", type: "number" },
 ];
 
+function isExactHttpOrigin(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    return (
+      (parsed.protocol === "http:" || parsed.protocol === "https:") &&
+      parsed.origin === value
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
  * 插件元数据注册表
  *
@@ -95,9 +107,21 @@ export class PluginRegistry {
             errors.push(
               `Field "allowedHostOrigins[${index}]" must be a non-empty string`
             );
+          } else if (!isExactHttpOrigin(origin)) {
+            errors.push(
+              `Field "allowedHostOrigins[${index}]" must be an exact HTTP(S) origin`
+            );
           }
         });
       }
+    }
+
+    if (
+      typeof manifest.allowedOrigin === "string" &&
+      manifest.allowedOrigin.trim() !== "" &&
+      !isExactHttpOrigin(manifest.allowedOrigin)
+    ) {
+      errors.push('Field "allowedOrigin" must be an exact HTTP(S) origin');
     }
 
     return { valid: errors.length === 0, errors };

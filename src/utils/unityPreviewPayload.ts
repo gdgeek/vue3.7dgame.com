@@ -1,4 +1,3 @@
-import { logger } from "@/utils/logger";
 import {
   extractUnityPreviewLuaActions,
   normalizeUnityPreviewMetaLua,
@@ -13,6 +12,10 @@ const UNITY_PREVIEW_ASSET_PATH_RE =
 const UNITY_PREVIEW_LEGACY_COS_HOST =
   "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com";
 const UNITY_PREVIEW_CDN_HOST = "data.7dgame.com";
+const UNITY_PREVIEW_ASSET_ORIGINS = new Set([
+  `https://${UNITY_PREVIEW_LEGACY_COS_HOST}`,
+  `https://${UNITY_PREVIEW_CDN_HOST}`,
+]);
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -41,97 +44,110 @@ export const normalizeUnityPreviewData = (value: unknown): unknown => {
   }
 };
 
-const normalizeUnityPreviewRemoteAssetUrl = (value: string): string => {
+const isUnityPreviewLoopback = (hostname: string): boolean =>
+  hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+
+const isUnityPreviewLocalDevelopment = (): boolean =>
+  isUnityPreviewLoopback(window.location.hostname);
+
+const readUnityPreviewOrigin = (value: string): string => {
   try {
-    const url = new URL(value.replace(/\\\//g, "/"));
-    const originalUrl = url.toString();
-    let changed = false;
+    return new URL(value).origin;
+  } catch {
+    return "";
+  }
+};
 
-    if (url.protocol === "http:") {
-      url.protocol = "https:";
-      changed = true;
-    }
-
-    if (url.hostname === UNITY_PREVIEW_LEGACY_COS_HOST) {
-      url.protocol = "https:";
-      url.hostname = UNITY_PREVIEW_CDN_HOST;
-      changed = true;
-    }
-
-    const normalizedUrl = url.toString();
-    if (changed) {
-      logger.log("[WebPreview][Payload] normalize asset url", {
-        url: originalUrl,
-        normalizedUrl,
-      });
-    }
-
-    return normalizedUrl;
+const unwrapLegacyUnityPreviewProxyUrl = (
+  value: string,
+  legacyProxyOrigin: string
+): string => {
+  try {
+    const url = new URL(value, legacyProxyOrigin);
+    if (url.pathname !== "/__xrugc_proxy__") return value;
+    return url.searchParams.get("url") || value;
   } catch {
     return value;
   }
 };
 
-const toUnityPreviewProxyUrl = (
-  value: string,
-  proxyOrigin: string,
-  assetBaseOrigin: string
-): string => {
-  const normalizedValue = value.replace(/\\\//g, "/");
-  if (!/^https?:\/\//i.test(normalizedValue)) {
-    if (normalizedValue.startsWith("//")) {
-      const absoluteUrl = normalizeUnityPreviewRemoteAssetUrl(
-        `${window.location.protocol}${normalizedValue}`
-      );
-      return `${proxyOrigin}/__xrugc_proxy__?url=${encodeURIComponent(
-        absoluteUrl
-      )}`;
-    }
+const normalizeLegacyUnityPreviewAssetUrl = (value: string): string => {
+  if (!/^(?:https?:)?\/\//i.test(value)) return value;
 
+  try {
+    const parsed = value.startsWith("//")
+      ? new URL(`${window.location.protocol}${value}`)
+      : new URL(value);
     if (
-      normalizedValue.startsWith("/__xrugc_proxy__") ||
-      normalizedValue.startsWith("\\/__xrugc_proxy__")
-    ) {
-      return `${proxyOrigin}${normalizedValue.replace(/^\\\//, "/")}`;
-    }
-
-    if (
-      !normalizedValue.startsWith("/") ||
-      !UNITY_PREVIEW_ASSET_PATH_RE.test(normalizedValue)
+      parsed.hostname !== UNITY_PREVIEW_LEGACY_COS_HOST ||
+      parsed.username ||
+      parsed.password
     ) {
       return value;
     }
 
-    const absoluteUrl = new URL(normalizedValue, assetBaseOrigin).toString();
-    const normalizedAssetUrl = normalizeUnityPreviewRemoteAssetUrl(absoluteUrl);
-    logger.log("[WebPreview][Payload] proxy relative asset url", {
-      url: normalizedValue,
-      absoluteUrl: normalizedAssetUrl,
-    });
+    // Replace only the scheme/authority. Keeping the remainder byte-for-byte
+    // preserves signed query ordering, repeated parameters and percent escapes.
+    const remainder = value.replace(/^(?:https?:)?\/\/[^/?#]*/i, "");
+    return `https://${UNITY_PREVIEW_CDN_HOST}${remainder}`;
+  } catch {
+    return value;
+  }
+};
 
-    return `${proxyOrigin}/__xrugc_proxy__?url=${encodeURIComponent(
-      normalizedAssetUrl
-    )}`;
+const toUnityPreviewDirectAssetUrl = (
+  value: string,
+  legacyProxyOrigin: string,
+  assetBaseOrigin: string
+): string => {
+  const normalizedValue = value.replace(/\\\//g, "/");
+  const candidate = normalizeLegacyUnityPreviewAssetUrl(
+    unwrapLegacyUnityPreviewProxyUrl(normalizedValue, legacyProxyOrigin)
+  );
+  const explicitScheme = /^[a-z][a-z0-9+.-]*:/i.test(candidate);
+  if (explicitScheme && !/^https?:\/\//i.test(candidate)) {
+    throw new Error("WGP-ASSET-DENIED");
+  }
+  const absoluteUrl = /^(?:https?:)?\/\//i.test(candidate);
+  if (!absoluteUrl && !candidate.startsWith("/")) {
+    return value;
+  }
+  // Relative strings need an asset-shaped path before being interpreted as a
+  // URL. Absolute URLs are always origin-checked, regardless of extension.
+  if (!absoluteUrl && !UNITY_PREVIEW_ASSET_PATH_RE.test(candidate)) {
+    return value;
   }
 
+  let url: URL;
   try {
-    const url = new URL(normalizedValue);
-    if (url.pathname === "/__xrugc_proxy__") {
-      return `${proxyOrigin}${url.pathname}${url.search}`;
-    }
-
-    if (url.origin === proxyOrigin) {
-      return normalizedValue;
-    }
+    url = candidate.startsWith("//")
+      ? new URL(`${window.location.protocol}${candidate}`)
+      : new URL(candidate, assetBaseOrigin);
   } catch {
     return value;
   }
 
-  const normalizedAssetUrl =
-    normalizeUnityPreviewRemoteAssetUrl(normalizedValue);
-  return `${proxyOrigin}/__xrugc_proxy__?url=${encodeURIComponent(
-    normalizedAssetUrl
-  )}`;
+  const assetBase = readUnityPreviewOrigin(assetBaseOrigin);
+  const allowedOrigins = new Set(UNITY_PREVIEW_ASSET_ORIGINS);
+  if (assetBase) allowedOrigins.add(assetBase);
+  const localDevelopment =
+    isUnityPreviewLocalDevelopment() &&
+    url.protocol === "http:" &&
+    isUnityPreviewLoopback(url.hostname);
+  if (
+    (url.protocol !== "https:" && !localDevelopment) ||
+    (!allowedOrigins.has(url.origin) && !localDevelopment) ||
+    url.username ||
+    url.password
+  ) {
+    throw new Error("WGP-ASSET-DENIED");
+  }
+
+  // Preserve validated absolute URLs byte-for-byte so signed query ordering
+  // and percent-encoding are not changed by URL serialization.
+  if (/^https?:\/\//i.test(candidate)) return candidate;
+  if (candidate.startsWith("//")) return `${url.protocol}${candidate}`;
+  return url.toString();
 };
 
 const rewriteUnityPreviewStringUrls = (
@@ -144,22 +160,31 @@ const rewriteUnityPreviewStringUrls = (
     (trimmed.startsWith("{") || trimmed.startsWith("[")) &&
     trimmed.length >= 2
   ) {
+    let parsed: unknown;
     try {
-      const parsed = JSON.parse(value);
-      rewriteUnityPreviewUrls(parsed, proxyOrigin, assetBaseOrigin);
-      return JSON.stringify(parsed);
+      parsed = JSON.parse(value);
     } catch {
       // Fall through to plain text URL replacement.
     }
+    if (parsed !== undefined) {
+      // Keep recursive validation outside the JSON parse catch. A denied URL
+      // must propagate instead of falling back to the original encoded text.
+      rewriteUnityPreviewUrls(parsed, proxyOrigin, assetBaseOrigin);
+      return JSON.stringify(parsed);
+    }
   }
 
-  const proxied = toUnityPreviewProxyUrl(value, proxyOrigin, assetBaseOrigin);
-  if (proxied !== value) {
-    return proxied;
+  const direct = toUnityPreviewDirectAssetUrl(
+    value,
+    proxyOrigin,
+    assetBaseOrigin
+  );
+  if (direct !== value) {
+    return direct;
   }
 
   return value.replace(/https?:\\?\/\\?\/[^\s"'<>]+/gi, (url) =>
-    toUnityPreviewProxyUrl(url, proxyOrigin, assetBaseOrigin)
+    toUnityPreviewDirectAssetUrl(url, proxyOrigin, assetBaseOrigin)
   );
 };
 

@@ -15,7 +15,7 @@ function createMessage(overrides: Partial<PluginMessage> = {}): PluginMessage {
 }
 
 /** Helper to create a mock iframe with a postMessage spy */
-function createMockIframe(origin: string): HTMLIFrameElement {
+function createMockIframe(_origin: string): HTMLIFrameElement {
   const postMessageSpy = vi.fn();
   const frameWindow = { postMessage: postMessageSpy };
   return {
@@ -73,6 +73,17 @@ describe("MessageBus", () => {
 
       bus.sendToPlugin("pluginA", createMessage());
       expect(iframe.contentWindow?.postMessage).not.toHaveBeenCalled();
+    });
+
+    it("should reject wildcard and URL-shaped target origins", () => {
+      const iframe = createMockIframe("https://a.example.com");
+
+      expect(() => bus.registerPlugin("wildcard", iframe, "*")).toThrow(
+        "must register an exact HTTP(S) origin"
+      );
+      expect(() =>
+        bus.registerPlugin("path", iframe, "https://a.example.com/plugin")
+      ).toThrow("must register an exact HTTP(S) origin");
     });
   });
 

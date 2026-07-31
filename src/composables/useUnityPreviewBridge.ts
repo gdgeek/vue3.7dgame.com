@@ -21,6 +21,19 @@ type UseUnityPreviewBridgeOptions = {
 
 const initialStatus = "正在加载 Unity 运行器...";
 
+const createUnityPreviewSession = (): string => {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return `unity-preview-${globalThis.crypto.randomUUID()}`;
+  }
+
+  const entropy = new Uint32Array(4);
+  globalThis.crypto?.getRandomValues?.(entropy);
+  const suffix = [...entropy]
+    .map((value) => value.toString(16).padStart(8, "0"))
+    .join("");
+  return `unity-preview-${Date.now()}-${suffix}`;
+};
+
 const resolveUnityPreviewUrl = () => {
   try {
     return new URL(env.unityPreview, window.location.href);
@@ -33,7 +46,7 @@ const resolveUnityPreviewUrl = () => {
   }
 };
 
-const resolveUnityPreviewProxyOrigin = (): string => {
+const resolveUnityPreviewRunnerOrigin = (): string => {
   try {
     const url = resolveUnityPreviewUrl();
     if (url.hostname === "localhost" && url.port === "3006") {
@@ -70,14 +83,20 @@ export const useUnityPreviewBridge = ({
   const ready = ref(false);
   const status = ref(initialStatus);
   const frameKey = ref(0);
+  const runSession = ref("");
   const panMode = ref(false);
   const pendingPayload = ref<unknown>(null);
   let runningFallbackTimer: number | undefined;
+  let runGeneration = 0;
+  let hasPendingPayload = false;
 
   const src = computed(() => {
     const url = resolveUnityPreviewUrl();
     url.searchParams.set("embed", "1");
     url.searchParams.set("v", String(frameKey.value));
+    if (runSession.value) {
+      url.searchParams.set("session", runSession.value);
+    }
     return url.toString();
   });
 
@@ -85,7 +104,7 @@ export const useUnityPreviewBridge = ({
     return resolveUnityPreviewUrl().origin;
   });
 
-  const proxyOrigin = computed(resolveUnityPreviewProxyOrigin);
+  const runnerOrigin = computed(resolveUnityPreviewRunnerOrigin);
   const assetBaseOrigin = computed(resolveUnityPreviewAssetBaseOrigin);
 
   const clearRunningFallbackTimer = () => {
@@ -95,7 +114,22 @@ export const useUnityPreviewBridge = ({
     }
   };
 
-  const postPayload = (payload: unknown) => {
+  const isCurrentGeneration = (generation: number): boolean =>
+    generation === runGeneration;
+
+  const isCurrentRun = (generation: number, session: string): boolean =>
+    isCurrentGeneration(generation) &&
+    session !== "" &&
+    runSession.value === session &&
+    frameVisible.value;
+
+  const postPayload = (
+    payload: unknown,
+    session: string,
+    generation: number
+  ) => {
+    if (!isCurrentRun(generation, session)) return;
+
     const dialog = dialogRef.value;
     if (!dialog) {
       notifyError("Unity 运行器尚未加载完成");
@@ -103,14 +137,21 @@ export const useUnityPreviewBridge = ({
     }
 
     const postablePayload = cloneForUnityPreview(payload);
-    rewriteUnityPreviewUrls(
-      postablePayload,
-      proxyOrigin.value,
-      assetBaseOrigin.value
-    );
+    try {
+      rewriteUnityPreviewUrls(
+        postablePayload,
+        runnerOrigin.value,
+        assetBaseOrigin.value
+      );
+    } catch {
+      logger.warn("[UnityPreview] scene asset origin denied");
+      notifyError("场景包含不受信任的资源地址，无法运行预览");
+      return;
+    }
     const sent = dialog.postMessage(
       {
         type: "xrugc-load-scene-json",
+        session,
         payload: postablePayload,
       },
       targetOrigin.value
@@ -123,7 +164,7 @@ export const useUnityPreviewBridge = ({
     status.value = "场景数据已发送到 Unity";
     clearRunningFallbackTimer();
     runningFallbackTimer = window.setTimeout(() => {
-      if (visible.value) {
+      if (visible.value && isCurrentRun(generation, session)) {
         status.value = "Unity 已接收场景数据，若画面为空请刷新运行器或重新打包";
       }
     }, 15000);
@@ -133,7 +174,9 @@ export const useUnityPreviewBridge = ({
     );
   };
 
-  const postCameraMode = () => {
+  const postCameraMode = (session: string, generation: number) => {
+    if (!isCurrentRun(generation, session)) return;
+
     const dialog = dialogRef.value;
     if (!dialog) return;
 
@@ -141,6 +184,7 @@ export const useUnityPreviewBridge = ({
     dialog.postMessage(
       {
         type: "unity-web-preview-camera-mode",
+        session,
         mode,
       },
       targetOrigin.value
@@ -149,21 +193,37 @@ export const useUnityPreviewBridge = ({
   };
 
   const send = async () => {
+    const generation = runGeneration;
+    const session = runSession.value;
+    if (!isCurrentRun(generation, session)) return;
+
     await ensureRuntimeData?.();
+    if (!isCurrentRun(generation, session)) return;
     const payload = await buildPayload();
+    if (!isCurrentRun(generation, session)) return;
     pendingPayload.value = payload;
-    postPayload(payload);
+    hasPendingPayload = true;
+    postPayload(payload, session, generation);
   };
 
   const handleMessage = (event: MessageEvent) => {
     if (!dialogRef.value?.isFrameSource(event.source)) return;
+    if (event.origin !== targetOrigin.value) return;
     if (!event.data || typeof event.data !== "object") return;
+    if (!runSession.value || event.data.session !== runSession.value) return;
+
+    const generation = runGeneration;
+    const session = runSession.value;
 
     if (event.data.type === "unity-web-preview-ready") {
       ready.value = true;
       status.value = "Unity 已就绪，正在发送场景...";
-      void send();
-      postCameraMode();
+      if (hasPendingPayload) {
+        postPayload(pendingPayload.value, session, generation);
+      } else {
+        void send();
+      }
+      postCameraMode(session, generation);
     }
 
     if (event.data.type === "unity-web-preview-scene-forwarded") {
@@ -187,22 +247,59 @@ export const useUnityPreviewBridge = ({
       return;
     }
 
+    if (runSession.value) {
+      dialogRef.value?.postMessage(
+        {
+          type: "webgl-preview-dispose",
+          session: runSession.value,
+        },
+        targetOrigin.value
+      );
+    }
+    const generation = ++runGeneration;
+    const session = createUnityPreviewSession();
+    clearRunningFallbackTimer();
+    ready.value = false;
+    frameVisible.value = false;
+    runSession.value = "";
+    pendingPayload.value = null;
+    hasPendingPayload = false;
     await ensureRuntimeData?.();
-    pendingPayload.value = await buildPayload();
+    if (!isCurrentGeneration(generation)) return;
+    const payload = await buildPayload();
+    if (!isCurrentGeneration(generation)) return;
+
+    pendingPayload.value = payload;
+    hasPendingPayload = true;
     ready.value = false;
     panMode.value = false;
     status.value = initialStatus;
+    runSession.value = session;
     frameKey.value += 1;
     frameVisible.value = true;
     visible.value = true;
   };
 
   const handleClosed = () => {
+    if (runSession.value) {
+      dialogRef.value?.postMessage(
+        {
+          type: "webgl-preview-dispose",
+          session: runSession.value,
+        },
+        targetOrigin.value
+      );
+    }
+    runGeneration += 1;
     clearRunningFallbackTimer();
+    visible.value = false;
     ready.value = false;
     frameVisible.value = false;
     panMode.value = false;
     status.value = initialStatus;
+    runSession.value = "";
+    pendingPayload.value = null;
+    hasPendingPayload = false;
   };
 
   onMounted(() => {
@@ -210,6 +307,19 @@ export const useUnityPreviewBridge = ({
   });
 
   onBeforeUnmount(() => {
+    if (runSession.value) {
+      dialogRef.value?.postMessage(
+        {
+          type: "webgl-preview-dispose",
+          session: runSession.value,
+        },
+        targetOrigin.value
+      );
+    }
+    runGeneration += 1;
+    runSession.value = "";
+    pendingPayload.value = null;
+    hasPendingPayload = false;
     window.removeEventListener("message", handleMessage);
     clearRunningFallbackTimer();
   });
