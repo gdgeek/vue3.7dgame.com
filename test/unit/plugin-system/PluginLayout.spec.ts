@@ -435,6 +435,59 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     });
   });
 
+  it("keeps the iframe mounted when pluginUrl is echoed from that iframe", async () => {
+    mockRouterReplace.mockImplementation(
+      async ({ query }: { query: Record<string, string> }) => {
+        mockRoute.query = query;
+        await nextTick();
+      }
+    );
+    await mountView();
+    mockActivatePlugin.mockClear();
+    mockDeactivatePlugin.mockClear();
+
+    pluginEventHandler?.("ai-3d-generator-v3", {
+      type: "EVENT",
+      id: "event-plugin-url-echo",
+      payload: {
+        event: "plugin-url-changed",
+        pluginUrl: "/sample?tab=detail#top",
+      },
+    });
+
+    await nextTick();
+    await Promise.resolve();
+    await nextTick();
+
+    expect(mockDeactivatePlugin).not.toHaveBeenCalled();
+    expect(mockActivatePlugin).not.toHaveBeenCalled();
+  });
+
+  it("reactivates the iframe when pluginUrl changes outside that iframe", async () => {
+    await mountView();
+    mockActivatePlugin.mockClear();
+    mockDeactivatePlugin.mockClear();
+
+    mockRoute.query = {
+      pluginUrl: "/external?view=details",
+    };
+    await nextTick();
+    await Promise.resolve();
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    await Promise.resolve();
+
+    expect(mockDeactivatePlugin).toHaveBeenCalledOnce();
+    expect(mockDeactivatePlugin).toHaveBeenCalledWith("ai-3d-generator-v3");
+    expect(mockActivatePlugin).toHaveBeenCalledOnce();
+    expect(mockActivatePlugin).toHaveBeenCalledWith(
+      "ai-3d-generator-v3",
+      expect.any(HTMLDivElement),
+      expect.objectContaining({
+        pluginUrl: "/external?view=details",
+      })
+    );
+  });
+
   it("unsubscribes plugin event handlers when unmounted", async () => {
     const { app } = await mountView();
 
