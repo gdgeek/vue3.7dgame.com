@@ -6,6 +6,7 @@
         class="icon-btn"
         @click="toggleFullscreen"
         :title="t('ui.fullscreen')"
+        :aria-label="t('ui.fullscreen')"
       >
         <font-awesome-icon
           :icon="['fas', isFullscreen ? 'compress' : 'expand']"
@@ -19,7 +20,11 @@
         trigger="click"
         class="theme-dropdown"
       >
-        <button class="icon-btn" :title="t('ui.switchTheme')">
+        <button
+          class="icon-btn"
+          :title="t('ui.switchTheme')"
+          :aria-label="t('ui.switchTheme')"
+        >
           <font-awesome-icon :icon="['fas', 'palette']"></font-awesome-icon>
         </button>
         <template #dropdown>
@@ -56,7 +61,11 @@
         trigger="click"
         class="language-dropdown"
       >
-        <button class="icon-btn" :title="t('ui.language')">
+        <button
+          class="icon-btn"
+          :title="t('ui.language')"
+          :aria-label="t('ui.language')"
+        >
           <font-awesome-icon :icon="['fas', 'language']"></font-awesome-icon>
         </button>
         <template #dropdown>
@@ -83,6 +92,67 @@
         </template>
       </el-dropdown>
     </div>
+
+    <el-dropdown
+      class="compact-actions-dropdown"
+      trigger="click"
+      @command="handleCompactCommand"
+    >
+      <button
+        class="icon-btn compact-actions-trigger"
+        :title="t('ui.moreActions')"
+        :aria-label="t('ui.moreActions')"
+      >
+        <font-awesome-icon :icon="['fas', 'ellipsis']"></font-awesome-icon>
+      </button>
+      <template #dropdown>
+        <el-dropdown-menu class="compact-actions-menu">
+          <el-dropdown-item command="fullscreen">
+            <font-awesome-icon
+              class="compact-menu-icon"
+              :icon="['fas', isFullscreen ? 'compress' : 'expand']"
+            ></font-awesome-icon>
+            {{ t("ui.fullscreen") }}
+          </el-dropdown-item>
+
+          <template v-if="!domainStore.isStyleLocked">
+            <el-dropdown-item class="compact-menu-heading" disabled divided>
+              {{ t("ui.switchTheme") }}
+            </el-dropdown-item>
+            <el-dropdown-item
+              v-for="theme in availableThemes"
+              :key="`compact-theme-${theme.name}`"
+              :command="`theme:${theme.name}`"
+            >
+              <span class="compact-menu-label">{{ theme.displayName }}</span>
+              <font-awesome-icon
+                v-if="currentThemeName === theme.name"
+                class="compact-menu-check"
+                :icon="['fas', 'check']"
+              ></font-awesome-icon>
+            </el-dropdown-item>
+          </template>
+
+          <template v-if="!domainStore.isLanguageLocked">
+            <el-dropdown-item class="compact-menu-heading" disabled divided>
+              {{ t("ui.language") }}
+            </el-dropdown-item>
+            <el-dropdown-item
+              v-for="lang in languages"
+              :key="`compact-language-${lang.value}`"
+              :command="`language:${lang.value}`"
+            >
+              <span class="compact-menu-label">{{ lang.label }}</span>
+              <font-awesome-icon
+                v-if="currentLocale === lang.value"
+                class="compact-menu-check"
+                :icon="['fas', 'check']"
+              ></font-awesome-icon>
+            </el-dropdown-item>
+          </template>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
   </div>
 </template>
 
@@ -116,6 +186,25 @@ const handleLanguageChange = async (lang: string) => {
   const { loadLanguageAsync } = await import("@/lang");
   await loadLanguageAsync(lang);
 };
+
+const handleCompactCommand = async (command: string) => {
+  if (command === "fullscreen") {
+    await toggleFullscreen();
+    return;
+  }
+
+  const [kind, value] = command.split(":", 2);
+  if (!value) return;
+
+  if (kind === "theme") {
+    handleThemeChange(value);
+    return;
+  }
+
+  if (kind === "language") {
+    await handleLanguageChange(value);
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -130,6 +219,53 @@ const handleLanguageChange = async (lang: string) => {
   align-items: center;
   padding-right: 16px;
   border-right: 1px solid var(--ar-divider);
+}
+
+.compact-actions-dropdown {
+  display: none;
+}
+
+.compact-actions-trigger {
+  min-width: 40px;
+  min-height: 40px;
+}
+
+:global(.compact-actions-menu) {
+  min-width: 220px;
+}
+
+:global(.compact-actions-menu .el-dropdown-menu__item) {
+  gap: 10px;
+}
+
+:global(.compact-actions-menu .compact-menu-heading) {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  cursor: default;
+}
+
+.compact-menu-icon {
+  width: 16px;
+}
+
+.compact-menu-label {
+  flex: 1;
+}
+
+.compact-menu-check {
+  margin-left: auto;
+  color: var(--primary-color);
+}
+
+@container app-navbar (width <= 1200px) {
+  .actions-group {
+    display: none;
+  }
+
+  .compact-actions-dropdown {
+    display: inline-flex;
+  }
 }
 
 // 主题下拉菜单

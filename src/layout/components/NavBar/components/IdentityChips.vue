@@ -41,8 +41,8 @@ defineProps<{
   display: inline-flex;
   gap: 8px;
   align-items: center;
-  max-width: min(36vw, 420px);
   min-width: 0;
+  max-width: min(36vw, 420px);
   overflow: hidden;
 }
 
@@ -74,5 +74,11 @@ defineProps<{
   color: var(--ar-text-muted);
   background: transparent;
   border: 1px dashed var(--ar-divider);
+}
+
+@container app-navbar (width <= 1320px) {
+  .identity-chips {
+    display: none;
+  }
 }
 </style>

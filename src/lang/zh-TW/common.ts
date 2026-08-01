@@ -132,6 +132,7 @@ export default {
     accountSecurity: "帳號安全",
   },
   ui: {
+    moreActions: "更多操作",
     personalSettings: "個人設定",
     user: "用戶",
     adminAccount: "管理員帳戶",

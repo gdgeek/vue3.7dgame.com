@@ -109,6 +109,9 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
     expect(crumbs).toContain("breadcrumb.workspace");
     expect(crumbs).toContain("sidebar.entity");
     expect(crumbs).toContain("测试实体");
+    expect(el.querySelector(".crumb-link.is-primary")?.textContent).toContain(
+      "测试实体"
+    );
   });
 
   it("handles unknown path — returns workspace breadcrumb key", async () => {
