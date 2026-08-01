@@ -5,37 +5,82 @@
         <el-card class="box-card" :class="{ 'is-running-preview': disabled }">
           <el-container v-if="!disabled">
             <div class="script-tabs-wrapper">
-              <div v-if="meta" class="script-tabs-actions">
-                <el-select
-                  v-model="selectedUsedSceneId"
-                  class="script-used-scenes-select"
-                  size="small"
-                  :placeholder="usedSceneSelectPlaceholder"
-                  :disabled="usedSceneOptions.length === 0"
-                  popper-class="script-used-scenes-popper"
-                  @change="handleUsedSceneChange"
+              <div class="script-editor-toolbar">
+                <div
+                  class="script-mode-tabs"
+                  role="tablist"
+                  :aria-label="$t('meta.script.title')"
                 >
-                  <el-option
-                    v-for="scene in usedSceneOptions"
-                    :key="scene.id"
-                    :label="scene.name"
-                    :value="scene.id"
-                  ></el-option>
-                </el-select>
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="goBackToSceneEditor"
-                >
-                  {{ $t("meta.script.entityEditor") }}
-                </el-button>
-                <el-button type="primary" size="small" @click="save">
-                  <font-awesome-icon
-                    class="icon"
-                    icon="save"
-                  ></font-awesome-icon>
-                  {{ $t("meta.script.save") }}
-                </el-button>
+                  <button
+                    type="button"
+                    class="script-mode-tab"
+                    :class="{ 'is-active': activeName === 'blockly' }"
+                    role="tab"
+                    :aria-selected="activeName === 'blockly'"
+                    @click="activeName = 'blockly'"
+                  >
+                    {{ $t("verse.view.script.edit") }}
+                  </button>
+                  <button
+                    type="button"
+                    class="script-mode-tab"
+                    :class="{ 'is-active': activeName === 'script' }"
+                    role="tab"
+                    :aria-selected="activeName === 'script'"
+                    @click="activeName = 'script'"
+                  >
+                    {{ $t("verse.view.script.code") }}
+                  </button>
+                </div>
+
+                <div v-if="meta" class="script-tabs-actions">
+                  <el-select
+                    v-model="selectedUsedSceneId"
+                    class="script-used-scenes-select"
+                    size="small"
+                    :placeholder="usedSceneSelectPlaceholder"
+                    :disabled="usedSceneOptions.length === 0"
+                    popper-class="script-used-scenes-popper"
+                    @change="handleUsedSceneChange"
+                  >
+                    <el-option
+                      v-for="scene in usedSceneOptions"
+                      :key="scene.id"
+                      :label="scene.name"
+                      :value="scene.id"
+                    ></el-option>
+                  </el-select>
+                  <el-button
+                    class="script-action-button"
+                    type="primary"
+                    size="small"
+                    :title="$t('meta.script.entityEditor')"
+                    :aria-label="$t('meta.script.entityEditor')"
+                    @click="goBackToSceneEditor"
+                  >
+                    <font-awesome-icon
+                      class="script-action-icon"
+                      :icon="['fas', 'cube']"
+                    ></font-awesome-icon>
+                    <span class="secondary-action-label">
+                      {{ $t("meta.script.entityEditor") }}
+                    </span>
+                  </el-button>
+                  <el-button
+                    class="script-action-button script-save-button"
+                    type="primary"
+                    size="small"
+                    :title="$t('meta.script.save')"
+                    :aria-label="$t('meta.script.save')"
+                    @click="save"
+                  >
+                    <font-awesome-icon
+                      class="script-action-icon"
+                      icon="save"
+                    ></font-awesome-icon>
+                    <span>{{ $t("meta.script.save") }}</span>
+                  </el-button>
+                </div>
               </div>
               <el-tabs
                 v-model="activeName"
@@ -809,20 +854,82 @@ defineExpose({ run });
 }
 
 .script-tabs-wrapper {
+  container-name: script-editor;
+  container-type: inline-size;
   position: relative;
   flex: 1;
   width: 100%;
   min-width: 0;
 }
 
+.script-editor-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  min-height: 40px;
+  margin-bottom: 8px;
+}
+
+.script-mode-tabs {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.script-mode-tab {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 1.1;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+  cursor: pointer;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #d6deea);
+  border-radius: 8px;
+}
+
+.script-mode-tab:hover,
+.script-mode-tab:focus-visible,
+.script-mode-tab.is-active {
+  color: var(--primary-color, #06a7ee);
+  border-color: var(--primary-color, #06a7ee);
+}
+
+.script-mode-tab:focus-visible {
+  outline: 2px solid
+    color-mix(in srgb, var(--primary-color, #06a7ee) 30%, transparent);
+  outline-offset: 2px;
+}
+
 .script-tabs-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 10;
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-self: end;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.script-action-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 32px;
+  margin-left: 0 !important;
+}
+
+.script-action-icon {
+  margin-right: 4px;
+  font-size: 14px;
+  color: inherit;
 }
 
 .script-used-scenes-select {
@@ -876,63 +983,7 @@ defineExpose({ run });
 }
 
 .script-tabs-wrapper :deep(.el-tabs__header) {
-  position: relative;
-  top: -8px;
-  padding-right: 460px;
-  margin: 0 !important;
-  overflow: visible !important;
-  border-bottom: none !important;
-}
-
-.script-tabs-wrapper :deep(.el-tabs__nav-wrap),
-.script-tabs-wrapper :deep(.el-tabs__nav-scroll),
-.script-tabs-wrapper :deep(.el-tabs__nav) {
-  overflow: visible !important;
-}
-
-.script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__nav) {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 30px !important;
-  min-height: 0 !important;
-  padding: 0 12px !important;
-  font-size: 12px;
-  line-height: 1.1;
-  color: var(--text-secondary, #64748b);
-  white-space: nowrap;
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-color, #d6deea) !important;
-  border-radius: 8px;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.script-tabs-wrapper
-  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item + .el-tabs__item) {
-  margin-left: 8px;
-}
-
-.script-tabs-wrapper
-  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item.is-active) {
-  color: var(--primary-color, #06a7ee);
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--primary-color, #06a7ee) !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.script-tabs-wrapper :deep(.el-tabs__nav-wrap::after) {
   display: none !important;
-  height: 0 !important;
-  content: none !important;
 }
 
 .script-tabs-wrapper :deep(.el-tabs__content) {
@@ -980,20 +1031,80 @@ defineExpose({ run });
   color: var(--primary-color, #06a7ee);
 }
 
-@media (width <= 768px) {
-  .script-tabs-actions {
-    position: static;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    margin-bottom: 8px;
+@container script-editor (width <= 1100px) {
+  .script-editor-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
   }
 
-  .script-tabs-wrapper :deep(.el-tabs__header) {
-    padding-right: 0;
+  .script-tabs-actions {
+    justify-content: flex-end;
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
   }
 
   .script-used-scenes-select {
+    flex: 1 1 220px;
+    width: auto;
+    min-width: 180px;
+  }
+
+  .blockly-editor-main {
+    height: calc(100dvh - 225px);
+  }
+}
+
+@container script-editor (width <= 620px) {
+  .script-mode-tabs {
     width: 100%;
+  }
+
+  .script-mode-tab {
+    flex: 1 1 50%;
+    min-width: 0;
+    min-height: 40px;
+  }
+
+  .script-tabs-actions {
+    display: grid;
+    grid-template-columns: 44px minmax(88px, auto);
+    justify-content: end;
+  }
+
+  .script-used-scenes-select {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .script-action-button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+  }
+
+  .script-tabs-actions
+    .script-action-button:not(.script-save-button)
+    .script-action-icon {
+    margin-right: 0;
+  }
+
+  .secondary-action-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .blockly-editor-main {
+    height: calc(100dvh - 285px);
+    min-height: 360px;
   }
 }
 
@@ -1018,12 +1129,12 @@ defineExpose({ run });
 .is-running-preview {
   --run-preview-gap: 20px;
 
-  overflow: hidden;
   height: calc(100dvh - 68px - (var(--run-preview-gap) * 2));
+  overflow: hidden;
   background: #1f2937;
   border: 0;
-  border-radius: 18px;
   border-color: #1f2937;
+  border-radius: 18px;
   box-shadow: none;
 }
 
@@ -1063,8 +1174,8 @@ defineExpose({ run });
   width: 100vw !important;
   max-width: none !important;
   height: 100vh !important;
-  padding: 0;
   aspect-ratio: auto;
+  padding: 0;
 }
 
 :fullscreen .scene-fullscreen-btn {

@@ -146,6 +146,7 @@ export default {
     accountSecurity: "账号安全",
   },
   ui: {
+    moreActions: "更多操作",
     personalSettings: "个人设置",
     user: "用户",
     adminAccount: "管理员账户",

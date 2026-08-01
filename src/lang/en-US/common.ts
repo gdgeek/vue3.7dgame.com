@@ -134,6 +134,7 @@ export default {
     accountSecurity: "Account Security",
   },
   ui: {
+    moreActions: "More actions",
     personalSettings: "Personal Settings",
     user: "User",
     adminAccount: "Admin Account",

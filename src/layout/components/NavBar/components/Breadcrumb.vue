@@ -11,14 +11,19 @@
         :class="{
           'is-clickable': item.clickable,
           'is-current': item.isCurrent,
+          'is-primary': item.isPrimary,
           'is-static': !item.clickable,
         }"
         @click="handleNavigate(item)"
       >
-        {{ item.label }}
+        <span class="crumb-label">{{ item.label }}</span>
         <span
           v-if="item.isCurrent && showUnsavedDot"
-          class="crumb-unsaved-dot"
+          class="crumb-unsaved-dot crumb-unsaved-dot--current"
+        ></span>
+        <span
+          v-if="item.isPrimary && !item.isCurrent && showUnsavedDot"
+          class="crumb-unsaved-dot crumb-unsaved-dot--compact"
         ></span>
       </component>
       <span v-if="index < breadcrumbItems.length - 1" class="crumb-separator">
@@ -109,6 +114,7 @@ interface BreadcrumbSegment {
   to?: RouteLocationRaw;
   clickable: boolean;
   isCurrent: boolean;
+  isPrimary: boolean;
 }
 
 const HOME_PATH: RouteLocationRaw = { path: "/home/index" };
@@ -223,9 +229,11 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       label: string;
       to?: RouteLocationRaw;
       clickable?: boolean;
+      primary?: boolean;
     }>
   ): BreadcrumbSegment[] => {
     const lastIndex = segments.length - 1;
+    const hasExplicitPrimary = segments.some((segment) => segment.primary);
     return segments.map((segment, index) => {
       const isCurrent = index === lastIndex;
       const canClick =
@@ -235,6 +243,8 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
         to: segment.to,
         clickable: canClick,
         isCurrent,
+        isPrimary:
+          Boolean(segment.primary) || (!hasExplicitPrimary && isCurrent),
       };
     });
   };
@@ -244,7 +254,7 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
     return buildSegments([
       { label: workspace, to: HOME_PATH, clickable: true },
       { label: entity, to: ENTITY_LIST_PATH, clickable: true },
-      { label: name },
+      { label: name, primary: true },
     ]);
   }
 
@@ -255,6 +265,7 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       { label: entity, to: ENTITY_LIST_PATH, clickable: true },
       {
         label: name,
+        primary: true,
         to: { path: "/meta/scene", query: route.query },
         clickable: true,
       },
@@ -267,7 +278,7 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
     return buildSegments([
       { label: workspace, to: HOME_PATH, clickable: true },
       { label: scene, to: SCENE_LIST_PATH, clickable: true },
-      { label: name },
+      { label: name, primary: true },
     ]);
   }
 
@@ -278,6 +289,7 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       { label: scene, to: SCENE_LIST_PATH, clickable: true },
       {
         label: name,
+        primary: true,
         to: { path: "/verse/scene", query: route.query },
         clickable: true,
       },
@@ -305,7 +317,7 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 .breadcrumb-nav {
   display: flex;
   flex: 1 1 auto;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
   align-items: center;
   min-width: 0;
@@ -314,6 +326,7 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 
 .crumb-link {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   padding: 0;
   margin: 0;
@@ -328,6 +341,12 @@ const handleNavigate = (item: BreadcrumbSegment) => {
   transition:
     color 0.2s ease,
     opacity 0.2s ease;
+
+  &.is-primary {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: min(34vw, 520px);
+  }
 
   &.is-clickable {
     color: #409eff !important;
@@ -346,6 +365,13 @@ const handleNavigate = (item: BreadcrumbSegment) => {
   }
 }
 
+.crumb-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .crumb-unsaved-dot {
   flex-shrink: 0;
   width: 7px;
@@ -355,9 +381,37 @@ const handleNavigate = (item: BreadcrumbSegment) => {
   border-radius: 50%;
 }
 
+.crumb-unsaved-dot--compact {
+  display: none;
+}
+
 .crumb-separator {
+  flex-shrink: 0;
   font-size: 13px;
   line-height: 20px;
   color: var(--ar-text-muted);
+}
+
+@container app-navbar (width <= 1120px) {
+  .breadcrumb-nav {
+    gap: 0;
+  }
+
+  .crumb-link:not(.is-primary),
+  .crumb-separator {
+    display: none;
+  }
+
+  .crumb-link.is-primary {
+    max-width: 100%;
+  }
+
+  .crumb-unsaved-dot--current {
+    display: none;
+  }
+
+  .crumb-unsaved-dot--compact {
+    display: inline-block;
+  }
 }
 </style>

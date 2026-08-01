@@ -10,18 +10,19 @@
         @toggle-click="toggleSideBar"
       ></Hamburger>
       <IdentityChips
+        class="navbar-identity"
         :site-label="identityDisplay.siteLabel"
         :visible-organizations="identityDisplay.visibleOrganizations"
         :overflow-count="identityDisplay.overflowCount"
       ></IdentityChips>
-      <Breadcrumb></Breadcrumb>
-      <EditorVersionToolbar></EditorVersionToolbar>
+      <Breadcrumb class="navbar-breadcrumb"></Breadcrumb>
+      <EditorVersionToolbar class="navbar-version"></EditorVersionToolbar>
     </div>
 
     <!-- 右侧 - 操作按钮和用户信息 -->
     <div class="navbar-right">
-      <HeaderActions></HeaderActions>
-      <UserDropdown></UserDropdown>
+      <HeaderActions class="navbar-actions"></HeaderActions>
+      <UserDropdown class="navbar-user"></UserDropdown>
     </div>
   </header>
 </template>
@@ -46,6 +47,8 @@ function toggleSideBar() {
 
 <style lang="scss" scoped>
 .navbar-container {
+  container-name: app-navbar;
+  container-type: inline-size;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -55,6 +58,13 @@ function toggleSideBar() {
   justify-content: space-between;
   height: $navbar-height;
   padding: 0 32px;
+}
+
+.hamburger-container,
+.navbar-version,
+.navbar-actions,
+.navbar-user {
+  flex-shrink: 0;
 }
 
 .navbar-left {
@@ -70,5 +80,29 @@ function toggleSideBar() {
   flex-shrink: 0;
   gap: 16px;
   align-items: center;
+}
+
+@container app-navbar (width <= 1320px) {
+  .navbar-left,
+  .navbar-right {
+    gap: 8px;
+  }
+
+  .navbar-identity {
+    display: none;
+  }
+}
+
+@media (width <= 1320px) {
+  .navbar-container {
+    gap: 8px;
+    padding: 0 20px;
+  }
+}
+
+@media (width <= 820px) {
+  .navbar-container {
+    padding: 0 12px;
+  }
 }
 </style>
