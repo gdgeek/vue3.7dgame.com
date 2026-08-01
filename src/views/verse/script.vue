@@ -1244,7 +1244,8 @@ onMounted(async () => {
 
   .script-tabs-actions {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+    grid-template-columns: 44px 44px minmax(88px, auto);
+    justify-content: end;
   }
 
   .script-loaded-metas-select {
