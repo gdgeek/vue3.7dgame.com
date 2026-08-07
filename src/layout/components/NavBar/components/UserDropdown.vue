@@ -183,4 +183,17 @@ onUnmounted(() => {
   height: 14px;
   margin-right: 8px;
 }
+
+@container app-navbar (width <= 1200px) {
+  .profile-trigger {
+    gap: 0;
+    min-width: 44px;
+    min-height: 44px;
+    padding-left: 0;
+  }
+
+  .profile-info {
+    display: none;
+  }
+}
 </style>
