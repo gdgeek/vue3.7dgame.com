@@ -173,7 +173,7 @@ MRPP（Mixed Reality Programming Platform）是一个面向 **3D 场景创作与
 ### 5. Docker 全链路部署
 
 **多阶段构建：**
-1. `node:20-alpine` — 安装依赖 + 构建
+1. `node:24-alpine` — 安装依赖 + 构建
 2. `nginx:alpine` — 静态托管
 
 **运行时环境注入：**

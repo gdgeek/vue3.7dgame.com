@@ -12,12 +12,17 @@ on:
         "feature/nginx-api-proxy",
       ]
   pull_request:
-    branches: [main, master, develop]
+    branches: [main, master, develop, publish]
   workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   REGISTRY: hkccr.ccs.tencentyun.com
   IMAGE_NAME: gdgeek/vue3
+  NODE_VERSION: "24"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -33,7 +38,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
           package-manager-cache: false
 
       - name: Enable Corepack
@@ -60,7 +65,7 @@ jobs:
       - name: Coverage check (lines ≥ 30%)
         run: pnpm run test:coverage
 
-  # 构建（仅 push 到 main/master）
+  # 发布分支 push 通过测试后构建并推送镜像
   build:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
@@ -68,6 +73,7 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/publish' || github.ref == 'refs/heads/openclaw/improvements' || github.ref == 'refs/heads/feature/nginx-api-proxy')
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
+      digest: ${{ steps.build.outputs.digest }}
 
     permissions:
       contents: read
@@ -94,9 +100,11 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
+            type=sha,format=long,prefix=sha-
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/publish' }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .

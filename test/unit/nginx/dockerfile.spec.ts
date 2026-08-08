@@ -66,6 +66,7 @@ describe("Docker production dependency install", () => {
   const buildDockerfiles = [
     { name: "Dockerfile (root)", get: () => rootDockerfile },
     { name: "docker/production/Dockerfile", get: () => productionDockerfile },
+    { name: "docker/staging/Dockerfile", get: () => stagingDockerfile },
   ];
 
   describe.each(buildDockerfiles)("$name", ({ get }) => {
@@ -73,6 +74,10 @@ describe("Docker production dependency install", () => {
       expect(get()).toContain("COPY package.json pnpm-lock.yaml ./");
       expect(get()).toContain("corepack prepare pnpm@9.15.0 --activate");
       expect(get()).toContain("pnpm install --frozen-lockfile");
+    });
+
+    it("uses the Node 24 build baseline", () => {
+      expect(get()).toMatch(/^FROM node:24-alpine AS build/m);
     });
   });
 });

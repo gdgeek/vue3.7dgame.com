@@ -1,9 +1,11 @@
-FROM node:21.1.0 AS build
+FROM node:24-alpine AS build
 WORKDIR /app
-COPY package.json ./
-RUN npm install pnpm -g
-RUN pnpm install vuex
-RUN pnpm install
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN pnpm install --frozen-lockfile
+
 COPY . .
 RUN pnpm run build:staging
 
