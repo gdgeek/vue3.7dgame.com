@@ -40,6 +40,9 @@ const mountedPluginId = ref<string | null>(null);
 const activeFlowId = ref(0);
 let unsubscribePluginEvents: (() => void) | null = null;
 const pluginUrlsSyncedFromIframe = new Set<string>();
+let pendingPluginUrlReactivationFor: string | null = null;
+let activePluginUrlReactivationFor: string | null = null;
+let pluginUrlReactivationRunning = false;
 
 function getErrorStatus(error: unknown) {
   return (error as { response?: { status?: number } })?.response?.status;
@@ -120,11 +123,11 @@ async function reactivatePluginForRoute(
   error.value = null;
 
   await store.deactivatePlugin(targetPluginId);
-  if (mountedPluginId.value === targetPluginId) {
-    mountedPluginId.value = null;
-  }
   if (!isFlowCurrent(flowId, targetPluginId)) {
     return;
+  }
+  if (mountedPluginId.value === targetPluginId) {
+    mountedPluginId.value = null;
   }
 
   try {
@@ -144,6 +147,41 @@ async function reactivatePluginForRoute(
       loading.value = false;
     }
   }
+}
+
+async function drainPluginUrlReactivations() {
+  if (pluginUrlReactivationRunning) {
+    return;
+  }
+
+  pluginUrlReactivationRunning = true;
+  try {
+    while (pendingPluginUrlReactivationFor) {
+      const targetPluginId = pendingPluginUrlReactivationFor;
+      pendingPluginUrlReactivationFor = null;
+      if (pluginId.value !== targetPluginId) {
+        continue;
+      }
+
+      activePluginUrlReactivationFor = targetPluginId;
+      try {
+        await reactivatePluginForRoute(targetPluginId, {
+          fallbackError: "加载插件失败",
+        });
+      } finally {
+        activePluginUrlReactivationFor = null;
+      }
+    }
+  } finally {
+    pluginUrlReactivationRunning = false;
+  }
+}
+
+function schedulePluginUrlReactivation(targetPluginId: string) {
+  pendingPluginUrlReactivationFor = targetPluginId;
+  // Supersede an in-flight activation immediately; the drain serializes teardown.
+  beginFlow();
+  void drainPluginUrlReactivations();
 }
 
 /**
@@ -213,13 +251,16 @@ watch(
     }
 
     const targetPluginId = pluginId.value;
-    if (!targetPluginId || mountedPluginId.value !== targetPluginId) {
+    if (
+      !targetPluginId ||
+      (mountedPluginId.value !== targetPluginId &&
+        activePluginUrlReactivationFor !== targetPluginId &&
+        pendingPluginUrlReactivationFor !== targetPluginId)
+    ) {
       return;
     }
 
-    void reactivatePluginForRoute(targetPluginId, {
-      fallbackError: "加载插件失败",
-    });
+    schedulePluginUrlReactivation(targetPluginId);
   }
 );
 
@@ -305,6 +346,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   activeFlowId.value += 1;
+  pendingPluginUrlReactivationFor = null;
   unsubscribePluginEvents?.();
   unsubscribePluginEvents = null;
   pluginUrlsSyncedFromIframe.clear();

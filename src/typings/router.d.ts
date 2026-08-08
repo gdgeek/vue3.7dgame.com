@@ -52,6 +52,13 @@ declare module "vue-router" {
     preserveComponentOnQueryChange?: boolean;
 
     /**
+     * 查询参数变化时，仅忽略指定 key 来计算页面组件实例 key
+     * 未列出的查询参数与 hash 仍会触发重新挂载
+     * @example ["pluginUrl"]
+     */
+    preserveComponentOnQueryKeys?: string[];
+
+    /**
      * 是否在面包屑导航中隐藏
      * true 隐藏, false 显示
      * @default false

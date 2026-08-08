@@ -32,6 +32,7 @@ import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { useDomainStore } from "@/store/modules/domain";
 import { UpdateRoutes } from "@/router";
+import { getPageTransitionKey } from "@/router/pageTransitionKey";
 import { disposeKTX2Loader } from "@/lib/three/loaders";
 import authClient from "@/services/auth/authClient";
 import { logger } from "@/utils/logger";
@@ -55,14 +56,6 @@ const elementLocaleMap = {
 const elementLocale = computed(
   () => elementLocaleMap[appStore.language] || zhCn
 );
-
-function getPageTransitionKey(route) {
-  if (route?.meta?.preserveComponentOnQueryChange) {
-    return `${route.path}:${JSON.stringify(route.params || {})}`;
-  }
-
-  return route.fullPath;
-}
 
 function getHttpStatus(error) {
   return error?.response?.status;
