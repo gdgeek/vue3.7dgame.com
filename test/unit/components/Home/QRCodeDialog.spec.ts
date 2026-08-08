@@ -90,13 +90,17 @@ const mountDialog = async () => {
   app.directive("loading", {});
 
   const vm = app.mount(el) as unknown as DialogExpose;
-  cleanups.push(() => {
+  let mounted = true;
+  const unmount = () => {
+    if (!mounted) return;
+    mounted = false;
     app.unmount();
     el.remove();
-  });
+  };
+  cleanups.push(unmount);
   await nextTick();
 
-  return { el, vm };
+  return { el, unmount, vm };
 };
 
 afterEach(() => {
@@ -201,5 +205,25 @@ describe("QRCodeDialog", () => {
     expect(el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value"))
       .toBe("web_next-open");
     expect(el.textContent).not.toContain("web_stale");
+  });
+
+  it("invalidates a pending response when the component unmounts", async () => {
+    vi.useFakeTimers();
+    let resolveRequest: ((value: unknown) => void) | undefined;
+    getUserLinkedMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        })
+    );
+    const { unmount, vm } = await mountDialog();
+
+    vm.openDialog();
+    await nextTick();
+    unmount();
+    resolveRequest?.({ data: { key: "stale", expires_in: 60 } });
+    await flushAsync();
+
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

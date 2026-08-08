@@ -249,9 +249,7 @@ const handleDialogClose = () => {
   clearLoginCode();
 };
 
-onUnmounted(() => {
-  stopLoginCodeTimers();
-});
+onUnmounted(handleDialogClose);
 
 defineExpose({
   openDialog,
