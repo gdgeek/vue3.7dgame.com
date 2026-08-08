@@ -71,6 +71,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/publish' || github.ref == 'refs/heads/openclaw/improvements' || github.ref == 'refs/heads/feature/nginx-api-proxy')
+    # Registry writers share one cross-ref queue so mutable tags never race.
+    concurrency:
+      group: image-push-${{ github.repository }}
+      cancel-in-progress: false
+      queue: max
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
       digest: ${{ steps.build.outputs.digest }}
