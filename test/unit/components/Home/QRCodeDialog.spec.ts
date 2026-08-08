@@ -33,8 +33,7 @@ vi.mock("qrcode.vue", async () => {
           required: true,
         },
       },
-      template:
-        '<div class="qrcode-vue-stub" :data-value="value"></div>',
+      template: '<div class="qrcode-vue-stub" :data-value="value"></div>',
     }),
   };
 });
@@ -123,8 +122,9 @@ describe("QRCodeDialog", () => {
 
     vm.openDialog();
     await flushAsync();
-    expect(el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value"))
-      .toBe("web_single-request");
+    expect(
+      el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value")
+    ).toBe("web_single-request");
     expect(getUserLinkedMock).toHaveBeenCalledTimes(1);
 
     await vi.advanceTimersByTimeAsync(10_000);
@@ -151,8 +151,9 @@ describe("QRCodeDialog", () => {
 
     (el.querySelector(".qrcode-refresh") as HTMLButtonElement).click();
     await flushAsync();
-    expect(el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value"))
-      .toBe("web_fresh");
+    expect(
+      el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value")
+    ).toBe("web_fresh");
     expect(el.querySelector(".qrcode-blocker")).toBeNull();
     expect(getUserLinkedMock).toHaveBeenCalledTimes(2);
   });
@@ -165,8 +166,9 @@ describe("QRCodeDialog", () => {
 
     vm.openDialog();
     await flushAsync();
-    expect(el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value"))
-      .toBe("web_first");
+    expect(
+      el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value")
+    ).toBe("web_first");
 
     (el.querySelector(".dialog-close-stub") as HTMLButtonElement).click();
     await nextTick();
@@ -174,8 +176,9 @@ describe("QRCodeDialog", () => {
 
     vm.openDialog();
     await flushAsync();
-    expect(el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value"))
-      .toBe("web_second");
+    expect(
+      el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value")
+    ).toBe("web_second");
     expect(getUserLinkedMock).toHaveBeenCalledTimes(2);
   });
 
@@ -202,8 +205,9 @@ describe("QRCodeDialog", () => {
 
     vm.openDialog();
     await flushAsync();
-    expect(el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value"))
-      .toBe("web_next-open");
+    expect(
+      el.querySelector(".qrcode-vue-stub")?.getAttribute("data-value")
+    ).toBe("web_next-open");
     expect(el.textContent).not.toContain("web_stale");
   });
 
