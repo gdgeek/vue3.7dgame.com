@@ -9,6 +9,50 @@ export const DOMAIN_MANIFEST_MAX_BYTES = 1024 * 1024;
 
 const DOMAIN_CONFIG_KEY_PATTERN =
   /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/;
+const SUPPORTED_LOCALES = new Set([
+  "zh-CN",
+  "zh-TW",
+  "en-US",
+  "ja-JP",
+  "th-TH",
+]);
+const TOP_LEVEL_KEYS = new Set([
+  "name",
+  "description",
+  "is_active",
+  "fallback_domain",
+  "default_config",
+  "configs",
+]);
+const DEFAULT_CONFIG_KEYS = new Set([
+  "blog",
+  "homepage",
+  "icon",
+  "lang",
+  "style",
+]);
+const LOCALIZED_CONFIG_KEYS = new Set([
+  "author",
+  "description",
+  "domain",
+  "homepage",
+  "keywords",
+  "links",
+  "title",
+]);
+const LOCALIZED_REQUIRED_STRING_KEYS = [
+  "author",
+  "description",
+  "domain",
+  "keywords",
+  "title",
+] as const;
+const LINK_KEYS = new Set(["name", "url"]);
+const SENSITIVE_VALUE_PATTERNS = [
+  /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/i,
+  /\b(?:password|passwd|secret|api[_-]?key|access[_-]?token|private[_-]?key)\s*[:=]\s*\S+/i,
+  /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/,
+];
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue =
@@ -17,13 +61,36 @@ export type JsonValue =
   | { [key: string]: JsonValue };
 export type JsonObject = { [key: string]: JsonValue };
 
-export interface StaticDomainConfig extends JsonObject {
+export interface StaticDomainDefaultConfig {
+  blog?: string;
+  homepage?: string;
+  icon?: string;
+  lang?: string;
+  style?: number;
+}
+
+export interface StaticDomainLink {
+  name: string;
+  url: string;
+}
+
+export interface StaticDomainLocalizedConfig {
+  author: string;
+  description: string;
+  domain: string;
+  homepage?: string;
+  keywords: string;
+  links: StaticDomainLink[];
+  title: string;
+}
+
+export interface StaticDomainConfig {
   name: string;
   description: string;
   is_active: boolean;
   fallback_domain: string | null;
-  default_config: JsonObject;
-  configs: Record<string, JsonObject>;
+  default_config: StaticDomainDefaultConfig;
+  configs: Record<string, StaticDomainLocalizedConfig>;
 }
 
 export interface DomainManifestEntry {
@@ -49,6 +116,95 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
 
 function validationError(fileName: string, message: string): never {
   throw new Error(`[domain-manifest] ${fileName}: ${message}`);
+}
+
+function validateAllowedKeys(
+  fileName: string,
+  path: string,
+  value: Record<string, unknown>,
+  allowedKeys: ReadonlySet<string>
+): void {
+  const unknownKey = Object.keys(value).find((key) => !allowedKeys.has(key));
+  if (unknownKey) {
+    validationError(fileName, `field "${path}.${unknownKey}" is not public`);
+  }
+}
+
+function validatePublicString(
+  fileName: string,
+  path: string,
+  value: unknown
+): asserts value is string {
+  if (typeof value !== "string") {
+    validationError(fileName, `field "${path}" must be a string`);
+  }
+  if (SENSITIVE_VALUE_PATTERNS.some((pattern) => pattern.test(value))) {
+    validationError(fileName, `field "${path}" contains a sensitive value`);
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    let url: URL | undefined;
+    try {
+      url = new URL(value);
+    } catch {
+      // URL syntax remains a runtime concern; only embedded credentials are
+      // rejected here so existing relative and hash links stay supported.
+    }
+    if (url && (url.username || url.password)) {
+      validationError(
+        fileName,
+        `field "${path}" must not contain URL credentials`
+      );
+    }
+  }
+}
+
+function validateDefaultConfig(
+  fileName: string,
+  value: Record<string, unknown>
+): asserts value is Record<string, unknown> & StaticDomainDefaultConfig {
+  validateAllowedKeys(fileName, "default_config", value, DEFAULT_CONFIG_KEYS);
+  for (const key of ["blog", "homepage", "icon", "lang"] as const) {
+    if (key in value) {
+      validatePublicString(fileName, `default_config.${key}`, value[key]);
+    }
+  }
+  if (
+    "style" in value &&
+    (typeof value.style !== "number" || !Number.isFinite(value.style))
+  ) {
+    validationError(fileName, 'field "default_config.style" must be a number');
+  }
+}
+
+function validateLocalizedConfig(
+  fileName: string,
+  locale: string,
+  value: Record<string, unknown>
+): asserts value is Record<string, unknown> & StaticDomainLocalizedConfig {
+  const path = `configs.${locale}`;
+  validateAllowedKeys(fileName, path, value, LOCALIZED_CONFIG_KEYS);
+
+  for (const key of LOCALIZED_REQUIRED_STRING_KEYS) {
+    validatePublicString(fileName, `${path}.${key}`, value[key]);
+  }
+  if ("homepage" in value) {
+    validatePublicString(fileName, `${path}.homepage`, value.homepage);
+  }
+  if (!Array.isArray(value.links)) {
+    validationError(fileName, `field "${path}.links" must be an array`);
+  }
+  value.links.forEach((link, index) => {
+    if (!isObjectRecord(link)) {
+      validationError(
+        fileName,
+        `field "${path}.links[${index}]" must be an object`
+      );
+    }
+    validateAllowedKeys(fileName, `${path}.links[${index}]`, link, LINK_KEYS);
+    validatePublicString(fileName, `${path}.links[${index}].name`, link.name);
+    validatePublicString(fileName, `${path}.links[${index}].url`, link.url);
+  });
 }
 
 function validateFiniteNumbers(fileName: string, value: unknown): void {
@@ -101,6 +257,7 @@ function parseStaticDomainConfig(
     return validationError(fileName, "top-level value must be an object");
   }
   validateFiniteNumbers(fileName, raw);
+  validateAllowedKeys(fileName, "$", raw, TOP_LEVEL_KEYS);
 
   const configKey = basename(fileName, extname(fileName));
   if (typeof raw.name !== "string") {
@@ -121,6 +278,7 @@ function parseStaticDomainConfig(
   if (typeof raw.description !== "string") {
     return validationError(fileName, 'field "description" must be a string');
   }
+  validatePublicString(fileName, "description", raw.description);
   if (typeof raw.is_active !== "boolean") {
     return validationError(fileName, 'field "is_active" must be a boolean');
   }
@@ -146,19 +304,36 @@ function parseStaticDomainConfig(
       'field "default_config" must be an object'
     );
   }
+  validateDefaultConfig(fileName, raw.default_config);
   if (!isObjectRecord(raw.configs)) {
     return validationError(fileName, 'field "configs" must be an object');
   }
+  const configs: Record<string, StaticDomainLocalizedConfig> = {};
   for (const [locale, localizedConfig] of Object.entries(raw.configs)) {
+    if (!SUPPORTED_LOCALES.has(locale)) {
+      return validationError(
+        fileName,
+        `field "configs.${locale}" uses an unsupported locale`
+      );
+    }
     if (!isObjectRecord(localizedConfig)) {
       return validationError(
         fileName,
         `field "configs.${locale}" must be an object`
       );
     }
+    validateLocalizedConfig(fileName, locale, localizedConfig);
+    configs[locale] = localizedConfig;
   }
 
-  return raw as StaticDomainConfig;
+  return {
+    name: raw.name,
+    description: raw.description,
+    is_active: raw.is_active,
+    fallback_domain: raw.fallback_domain,
+    default_config: raw.default_config,
+    configs,
+  };
 }
 
 /** Pure, deterministic manifest builder used by both Vite hooks and tests. */
@@ -193,6 +368,43 @@ export function createDomainManifest(
       config,
     } satisfies DomainManifestEntry;
   });
+
+  const configsByKey = new Map(
+    domains.map(({ config }) => [config.name, config] as const)
+  );
+  for (const { config } of domains) {
+    const fallback = config.fallback_domain;
+    if (!fallback) continue;
+    if (fallback === config.name) {
+      validationError(
+        `${config.name}.json`,
+        `fallback_domain must not reference itself`
+      );
+    }
+    if (!configsByKey.has(fallback)) {
+      validationError(
+        `${config.name}.json`,
+        `fallback_domain "${fallback}" does not reference a checked-in config`
+      );
+    }
+  }
+
+  for (const { config } of domains) {
+    const chain: string[] = [];
+    let current: StaticDomainConfig | undefined = config;
+    while (current?.fallback_domain) {
+      const repeatedAt = chain.indexOf(current.name);
+      if (repeatedAt >= 0) {
+        const cycle = [...chain.slice(repeatedAt), current.name].join(" -> ");
+        validationError(
+          `${config.name}.json`,
+          `fallback_domain cycle detected: ${cycle}`
+        );
+      }
+      chain.push(current.name);
+      current = configsByKey.get(current.fallback_domain);
+    }
+  }
 
   domains.sort((left, right) =>
     left.configKey < right.configKey
@@ -245,7 +457,14 @@ export function domainManifestJson(): Plugin {
 
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
-        if (request.url !== DOMAIN_MANIFEST_PUBLIC_PATH) {
+        let pathname: string;
+        try {
+          pathname = new URL(request.url || "/", "http://vite.local").pathname;
+        } catch {
+          next();
+          return;
+        }
+        if (pathname !== DOMAIN_MANIFEST_PUBLIC_PATH) {
           next();
           return;
         }

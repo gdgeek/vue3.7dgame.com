@@ -2,7 +2,7 @@
   "name": "dev.xrugc.com",
   "description": "XR UGC Dev",
   "is_active": true,
-  "fallback_domain": "dev.xrugc.com",
+  "fallback_domain": null,
   "default_config": {
     "icon": "https://xiading.hxgxonline.com/logo/xingkou/xingkou_logo.webp",
     "homepage": "https://dev.xrugc.com/"
