@@ -136,7 +136,7 @@
     "@types/color": "^3.0.6",
     "@types/element-resize-detector": "^1.1.6",
     "@types/js-beautify": "^1.14.3",
-    "@types/node": "^20.17.19",
+    "@types/node": "^24.13.3",
     "@types/nprogress": "^0.2.3",
     "@types/path-browserify": "^1.0.3",
     "@types/querystringify": "^2.0.2",
