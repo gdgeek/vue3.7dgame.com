@@ -14,6 +14,13 @@ const mockRoute = reactive({
     "/resource/polygen/index?lang=zh-CN&theme=edu-friendly&resourceId=5391&open=1",
   path: "/resource/polygen/index",
   params: {} as Record<string, string>,
+  query: {
+    lang: "zh-CN",
+    theme: "edu-friendly",
+    resourceId: "5391",
+    open: "1",
+  } as Record<string, string | string[] | null | undefined>,
+  hash: "",
   meta: {} as Record<string, unknown>,
 });
 
@@ -157,6 +164,13 @@ describe("App.vue route transition key", () => {
       "/resource/polygen/index?lang=zh-CN&theme=edu-friendly&resourceId=5391&open=1";
     mockRoute.path = "/resource/polygen/index";
     mockRoute.params = {};
+    mockRoute.query = {
+      lang: "zh-CN",
+      theme: "edu-friendly",
+      resourceId: "5391",
+      open: "1",
+    };
+    mockRoute.hash = "";
     mockRoute.meta = {};
   });
 
@@ -205,11 +219,88 @@ describe("App.vue route transition key", () => {
 
     mockRoute.fullPath =
       "/resource/polygen/index?lang=zh-CN&theme=edu-friendly";
+    mockRoute.query = {
+      lang: "zh-CN",
+      theme: "edu-friendly",
+    };
     await nextTick();
     await nextTick();
 
     expect(probeStats.mounted).toBe(1);
     expect(probeStats.unmounted).toBe(0);
+  });
+
+  it("keeps plugin pages mounted when only pluginUrl changes", async () => {
+    mockRoute.fullPath =
+      "/plugins/ai-3d-generator-v3?pluginUrl=%2Fsample%3Ftab%3Dlist&panel=wide";
+    mockRoute.path = "/plugins/ai-3d-generator-v3";
+    mockRoute.params = { pluginId: "ai-3d-generator-v3" };
+    mockRoute.query = {
+      pluginUrl: "/sample?tab=list",
+      panel: "wide",
+    };
+    mockRoute.meta = {
+      preserveComponentOnQueryKeys: ["pluginUrl"],
+    };
+
+    await mountApp();
+
+    mockRoute.fullPath =
+      "/plugins/ai-3d-generator-v3?pluginUrl=%2Fsample%3Ftab%3Ddetail&panel=wide";
+    mockRoute.query = {
+      pluginUrl: "/sample?tab=detail",
+      panel: "wide",
+    };
+    await nextTick();
+    await nextTick();
+
+    expect(probeStats.mounted).toBe(1);
+    expect(probeStats.unmounted).toBe(0);
+  });
+
+  it("remounts plugin pages for non-pluginUrl query changes", async () => {
+    mockRoute.fullPath =
+      "/plugins/ai-3d-generator-v3?pluginUrl=%2Fsample&panel=wide";
+    mockRoute.path = "/plugins/ai-3d-generator-v3";
+    mockRoute.params = { pluginId: "ai-3d-generator-v3" };
+    mockRoute.query = { pluginUrl: "/sample", panel: "wide" };
+    mockRoute.meta = {
+      preserveComponentOnQueryKeys: ["pluginUrl"],
+    };
+
+    await mountApp();
+
+    mockRoute.fullPath =
+      "/plugins/ai-3d-generator-v3?pluginUrl=%2Fsample&panel=compact";
+    mockRoute.query = { pluginUrl: "/sample", panel: "compact" };
+    await nextTick();
+    await nextTick();
+
+    expect(probeStats.mounted).toBe(2);
+    expect(probeStats.unmounted).toBe(1);
+  });
+
+  it("remounts plugin pages when the hash changes", async () => {
+    mockRoute.fullPath =
+      "/plugins/ai-3d-generator-v3?pluginUrl=%2Fsample#overview";
+    mockRoute.path = "/plugins/ai-3d-generator-v3";
+    mockRoute.params = { pluginId: "ai-3d-generator-v3" };
+    mockRoute.query = { pluginUrl: "/sample" };
+    mockRoute.hash = "#overview";
+    mockRoute.meta = {
+      preserveComponentOnQueryKeys: ["pluginUrl"],
+    };
+
+    await mountApp();
+
+    mockRoute.fullPath =
+      "/plugins/ai-3d-generator-v3?pluginUrl=%2Fsample#details";
+    mockRoute.hash = "#details";
+    await nextTick();
+    await nextTick();
+
+    expect(probeStats.mounted).toBe(2);
+    expect(probeStats.unmounted).toBe(1);
   });
 
   it("still remounts normal pages when the query string changes", async () => {
@@ -219,6 +310,10 @@ describe("App.vue route transition key", () => {
 
     mockRoute.fullPath =
       "/resource/polygen/index?lang=zh-CN&theme=edu-friendly";
+    mockRoute.query = {
+      lang: "zh-CN",
+      theme: "edu-friendly",
+    };
     await nextTick();
     await nextTick();
 

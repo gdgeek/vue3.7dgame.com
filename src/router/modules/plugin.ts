@@ -13,7 +13,7 @@ export const pluginRoutes: RouteRecordRaw = {
     icon: "el-icon-Menu",
     hidden: false,
     keepAlive: false,
-    preserveComponentOnQueryChange: true,
+    preserveComponentOnQueryKeys: ["pluginUrl"],
     alwaysShow: false,
     params: null,
   },
