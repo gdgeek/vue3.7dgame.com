@@ -45,7 +45,7 @@ describe("domain manifest Vite contract", () => {
     expect(expectedSource).not.toContain("generatedAt");
   });
 
-  it("serves only the exact development URL", () => {
+  it("serves the development pathname with or without a query", () => {
     const plugin = domainManifestJson();
     functionHook(plugin.configResolved)({ root: repositoryRoot } as never);
 
@@ -83,6 +83,12 @@ describe("domain manifest Vite contract", () => {
       response,
       queryNext
     );
-    expect(queryNext).toHaveBeenCalledOnce();
+    expect(queryNext).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(body)).toEqual(readDomainManifest(repositoryRoot));
+
+    const otherNext = vi.fn();
+    middleware({ url: "/config/domains/other.json" }, response, otherNext);
+    expect(otherNext).toHaveBeenCalledOnce();
   });
 });

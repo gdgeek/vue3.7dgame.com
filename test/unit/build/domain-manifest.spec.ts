@@ -27,12 +27,29 @@ function configSource(
   });
 }
 
+function localizedConfig(
+  domain: string,
+  overrides: Record<string, unknown> = {}
+): Record<string, unknown> {
+  return {
+    domain,
+    title: `${domain} title`,
+    description: `${domain} localized description`,
+    keywords: "AR, XR",
+    author: "XRUGC",
+    links: [],
+    ...overrides,
+  };
+}
+
 describe("domain manifest pure builder", () => {
-  it("sorts entries and inlines the complete original config deterministically", () => {
+  it("sorts entries and inlines the allowlisted config deterministically", () => {
     const manifest = createDomainManifest([
       {
         fileName: "z.example.json",
-        source: configSource("z.example", { future_field: { enabled: true } }),
+        source: configSource("z.example", {
+          default_config: { homepage: "https://z.example/" },
+        }),
       },
       {
         fileName: "a.example.json",
@@ -61,7 +78,7 @@ describe("domain manifest pure builder", () => {
           description: "z.example description",
           isActive: true,
           config: expect.objectContaining({
-            future_field: { enabled: true },
+            default_config: { homepage: "https://z.example/" },
           }),
         }),
       ],
@@ -102,6 +119,143 @@ describe("domain manifest pure builder", () => {
         },
       ])
     ).toThrow('field "configs.zh-CN" must be an object');
+  });
+
+  it("rejects fields outside the public manifest allowlist", () => {
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", { future_field: true }),
+        },
+      ])
+    ).toThrow('field "$.future_field" is not public');
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            default_config: { homepage: "", secret: "not-public" },
+          }),
+        },
+      ])
+    ).toThrow('field "default_config.secret" is not public');
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            configs: {
+              "zh-CN": localizedConfig("example.com", { internal: true }),
+            },
+          }),
+        },
+      ])
+    ).toThrow('field "configs.zh-CN.internal" is not public');
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            configs: {
+              "zh-CN": localizedConfig("example.com", {
+                links: [{ name: "Example", url: "#", token: "hidden" }],
+              }),
+            },
+          }),
+        },
+      ])
+    ).toThrow('field "configs.zh-CN.links[0].token" is not public');
+  });
+
+  it("rejects unsupported locales, incomplete localized configs, and sensitive values", () => {
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            configs: { "fr-FR": localizedConfig("example.com") },
+          }),
+        },
+      ])
+    ).toThrow('field "configs.fr-FR" uses an unsupported locale');
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            configs: { "zh-CN": { title: "Incomplete" } },
+          }),
+        },
+      ])
+    ).toThrow('field "configs.zh-CN.author" must be a string');
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            description: "api_key=should-not-be-public",
+          }),
+        },
+      ])
+    ).toThrow('field "description" contains a sensitive value');
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            default_config: {
+              homepage: "https://user:password@example.com/",
+            },
+          }),
+        },
+      ])
+    ).toThrow(
+      'field "default_config.homepage" must not contain URL credentials'
+    );
+  });
+
+  it("rejects missing, self-referential, and cyclic fallbacks", () => {
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            fallback_domain: "missing.example",
+          }),
+        },
+      ])
+    ).toThrow('fallback_domain "missing.example" does not reference');
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            fallback_domain: "example.com",
+          }),
+        },
+      ])
+    ).toThrow("fallback_domain must not reference itself");
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "a.example.json",
+          source: configSource("a.example", { fallback_domain: "b.example" }),
+        },
+        {
+          fileName: "b.example.json",
+          source: configSource("b.example", { fallback_domain: "a.example" }),
+        },
+      ])
+    ).toThrow("fallback_domain cycle detected");
   });
 
   it("rejects filename/config-name drift, duplicate keys, malformed JSON, and empty input", () => {
@@ -170,7 +324,9 @@ describe("domain manifest pure builder", () => {
       {
         fileName: "large.example.json",
         source: configSource("large.example", {
-          default_config: { payload: "x".repeat(DOMAIN_MANIFEST_MAX_BYTES) },
+          default_config: {
+            homepage: "x".repeat(DOMAIN_MANIFEST_MAX_BYTES),
+          },
         }),
       },
     ]);
