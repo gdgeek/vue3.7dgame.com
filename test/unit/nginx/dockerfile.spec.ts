@@ -13,6 +13,10 @@ let rootDockerfile: string;
 let productionDockerfile: string;
 let stagingDockerfile: string;
 
+const NODE_24_ALPINE_PATTERN =
+  /^FROM (node:24-alpine@sha256:[a-f0-9]{64}) AS build$/m;
+const NGINX_ALPINE_PATTERN = /^FROM (nginx:alpine@sha256:[a-f0-9]{64})$/m;
+
 beforeAll(() => {
   rootDockerfile = readFileSync(
     resolve(__dirname, "../../../Dockerfile"),
@@ -35,6 +39,17 @@ const dockerfiles = [
 ];
 
 describe.each(dockerfiles)("$name", ({ get }) => {
+  it("pins every base image to a digest", () => {
+    expect(get()).toMatch(NODE_24_ALPINE_PATTERN);
+    expect(get()).toMatch(NGINX_ALPINE_PATTERN);
+
+    const fromLines = get().match(/^FROM .+$/gm) ?? [];
+    expect(fromLines.length).toBeGreaterThan(0);
+    for (const fromLine of fromLines) {
+      expect(fromLine).toMatch(/@sha256:[a-f0-9]{64}(?:\s|$)/);
+    }
+  });
+
   it("copies nginx.conf.template to official templates directory", () => {
     expect(get()).toContain("nginx.conf.template");
     expect(get()).toContain("/etc/nginx/templates/");
@@ -77,7 +92,33 @@ describe("Docker production dependency install", () => {
     });
 
     it("uses the Node 24 build baseline", () => {
-      expect(get()).toMatch(/^FROM node:24-alpine AS build/m);
+      expect(get()).toMatch(NODE_24_ALPINE_PATTERN);
     });
+  });
+});
+
+describe("Docker development image", () => {
+  it("pins the root development stage to the Node 24 image index", () => {
+    const buildImage = rootDockerfile.match(NODE_24_ALPINE_PATTERN)?.[1];
+    expect(buildImage).toBeDefined();
+    expect(rootDockerfile).toContain(`FROM ${buildImage} AS dev`);
+  });
+});
+
+describe("Docker base image consistency", () => {
+  it("uses one Node image index across every build entrypoint", () => {
+    const nodeImages = dockerfiles.map(
+      ({ get }) => get().match(NODE_24_ALPINE_PATTERN)?.[1]
+    );
+    expect(nodeImages.every(Boolean)).toBe(true);
+    expect(new Set(nodeImages).size).toBe(1);
+  });
+
+  it("uses one nginx image index across every runtime entrypoint", () => {
+    const nginxImages = dockerfiles.map(
+      ({ get }) => get().match(NGINX_ALPINE_PATTERN)?.[1]
+    );
+    expect(nginxImages.every(Boolean)).toBe(true);
+    expect(new Set(nginxImages).size).toBe(1);
   });
 });
