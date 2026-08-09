@@ -48,6 +48,22 @@ const getJobBlocks = (source: string) => {
   );
 };
 
+const getInlineList = (source: string, name: string, indentation: number) => {
+  const pattern = new RegExp(
+    `^${" ".repeat(indentation)}${name}: \\[([^\\]]*)\\]$`,
+    "m"
+  );
+  const match = source.match(pattern);
+
+  if (!match) {
+    throw new Error(
+      `Missing inline ${name} list at indentation ${indentation}`
+    );
+  }
+
+  return match[1].split(",").map((item) => item.trim());
+};
+
 beforeAll(() => {
   workflow = readFileSync(
     resolve(__dirname, "../../../.github/workflows/ci-cd.yml"),
@@ -88,17 +104,54 @@ describe("CI/CD release workflow", () => {
     }
   });
 
-  it("tests publish pull requests without acquiring the image-push lock", () => {
+  it("limits registry-writing pushes to the three release branches", () => {
+    const onBlock = getIndentedBlock(workflow, "on", 0);
+    const pushTrigger = getIndentedBlock(onBlock, "push", 2);
     const buildJob = getJobBlocks(workflow).build;
+    const buildCondition = buildJob
+      .split(/\r?\n/)
+      .find((line) => line.trim().startsWith("if:"));
 
-    expect(workflow).toContain("branches: [main, master, develop, publish]");
+    expect(buildCondition).toBeDefined();
+    const buildRefs = Array.from(
+      buildCondition!.matchAll(/github\.ref == 'refs\/heads\/([^']+)'/g),
+      (match) => match[1]
+    );
+
+    expect(getInlineList(pushTrigger, "branches", 4)).toEqual([
+      "main",
+      "develop",
+      "publish",
+    ]);
+    expect(buildRefs).toEqual(["main", "develop", "publish"]);
     expect(buildJob).toContain("if: github.event_name == 'push'");
   });
 
-  it("emits an immutable full-SHA tag and exposes the pushed digest", () => {
+  it("tests release pull requests without granting them image writes", () => {
+    const onBlock = getIndentedBlock(workflow, "on", 0);
+    const pullRequestTrigger = getIndentedBlock(onBlock, "pull_request", 2);
     const buildJob = getJobBlocks(workflow).build;
 
-    expect(buildJob).toContain("type=sha,format=long,prefix=sha-");
+    expect(getInlineList(pullRequestTrigger, "branches", 4)).toEqual([
+      "main",
+      "master",
+      "develop",
+      "publish",
+    ]);
+    expect(buildJob).toContain("if: github.event_name == 'push'");
+  });
+
+  it("emits only a branch tag plus publish-only latest", () => {
+    const buildJob = getJobBlocks(workflow).build;
+    const metadataTags = buildJob
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith("type="));
+
+    expect(metadataTags).toEqual([
+      "type=ref,event=branch",
+      "type=raw,value=latest,enable=${{ github.ref == 'refs/heads/publish' }}",
+    ]);
     expect(buildJob).toContain("digest: ${{ steps.build.outputs.digest }}");
     expect(buildJob).toContain("id: build");
   });
