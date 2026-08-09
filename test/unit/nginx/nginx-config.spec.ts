@@ -93,19 +93,14 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("location /api-doc/");
   });
 
-  it("contains same-origin WebGL preview proxy locations", () => {
-    expect(nginxConfig).toContain("location ^~ /webgl-preview/");
-    expect(nginxConfig).toContain("location = /__xrugc_proxy__");
-    expect(nginxConfig).toContain("${APP_UNITY_PREVIEW_UPSTREAM}");
-  });
-
-  it("rejects slash and nested legacy arbitrary URL proxy paths", () => {
+  it("proxies the exact legacy route and rejects slash or nested variants", () => {
     const exactProxy = extractLocationBlock(nginxConfig, "= /__xrugc_proxy__");
     const nestedProxy = extractLocationBlock(
       nginxConfig,
       "^~ /__xrugc_proxy__/"
     );
 
+    expect(nginxConfig).toContain("location ^~ /webgl-preview/");
     expect(exactProxy).toContain(
       "proxy_pass ${APP_UNITY_PREVIEW_UPSTREAM}/__xrugc_proxy__?$args"
     );

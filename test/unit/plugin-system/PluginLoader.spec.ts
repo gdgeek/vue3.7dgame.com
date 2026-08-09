@@ -215,6 +215,37 @@ describe("PluginLoader", () => {
       );
       nowSpy.mockRestore();
     });
+
+    it("should echo handshakeSession only inside the INIT payload", () => {
+      const manifest = createManifest({ id: "preview" });
+      const iframe = document.createElement("iframe");
+      const postMessageSpy = vi.fn();
+      Object.defineProperty(iframe, "contentWindow", {
+        value: { postMessage: postMessageSpy },
+        writable: true,
+      });
+
+      loader.sendInitMessage(
+        iframe,
+        manifest,
+        "jwt-token",
+        "session_1234567890abcdef"
+      );
+
+      expect(postMessageSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "INIT",
+          payload: expect.objectContaining({
+            token: "jwt-token",
+            handshakeSession: "session_1234567890abcdef",
+          }),
+        }),
+        "https://plugin.example.com"
+      );
+      expect(postMessageSpy.mock.calls[0][0]).not.toHaveProperty(
+        "handshakeSession"
+      );
+    });
   });
 
   describe("unload", () => {

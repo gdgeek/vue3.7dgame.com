@@ -31,6 +31,7 @@ import type {
   PluginInfo,
 } from "@/plugin-system/types";
 import type { LoadedPlugin } from "@/plugin-system/core/PluginLoader";
+import type { MessageHandler } from "@/plugin-system/core/MessageBus";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -139,6 +140,29 @@ function createMockMessageBus(): MessageBus {
   bus.unregisterPlugin = vi.fn();
   bus.destroy = vi.fn();
   return bus;
+}
+
+function getRegisteredMessageHandler(
+  bus: MessageBus,
+  type: string
+): MessageHandler {
+  const calls = (bus.onMessageType as ReturnType<typeof vi.fn>).mock.calls;
+  const match = calls.find(([registeredType]) => registeredType === type);
+  if (!match) {
+    throw new Error(`No handler registered for ${type}`);
+  }
+  return match[1] as MessageHandler;
+}
+
+function createPluginMessage(
+  type: PluginMessage["type"],
+  payload?: Record<string, unknown>
+): PluginMessage {
+  return {
+    type,
+    id: `${type.toLowerCase()}-1`,
+    ...(payload ? { payload } : {}),
+  };
 }
 
 function createMockAuthService(): AuthService {
@@ -294,6 +318,11 @@ describe("PluginSystem", () => {
         "expired-access-token"
       );
       await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      getRegisteredMessageHandler(messageBus, "PLUGIN_READY")(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY")
+      );
       const tokenChangeHandler = (
         authService.onTokenChange as ReturnType<typeof vi.fn>
       ).mock.calls[0][0] as (token: string) => void;
@@ -306,6 +335,8 @@ describe("PluginSystem", () => {
         messageBus,
         "TOKEN_REFRESH_REQUEST"
       );
+      (authService.getAccessToken as ReturnType<typeof vi.fn>).mockClear();
+      (messageBus.sendToPlugin as ReturnType<typeof vi.fn>).mockClear();
 
       refreshHandler("plugin-a", {
         type: "TOKEN_REFRESH_REQUEST",
@@ -316,16 +347,16 @@ describe("PluginSystem", () => {
         expect(authService.refreshAccessToken).toHaveBeenCalledOnce();
       });
       expect(authService.getAccessToken).not.toHaveBeenCalled();
-      expect(messageBus.broadcast).toHaveBeenCalledWith(
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "plugin-a",
         expect.objectContaining({
           type: "TOKEN_UPDATE",
           payload: { token: "fresh-access-token" },
         })
       );
-      expect(messageBus.sendToPlugin).not.toHaveBeenCalled();
       expect(
         JSON.stringify(
-          (messageBus.broadcast as ReturnType<typeof vi.fn>).mock.calls
+          (messageBus.sendToPlugin as ReturnType<typeof vi.fn>).mock.calls
         )
       ).not.toContain("expired-access-token");
     });
@@ -338,10 +369,17 @@ describe("PluginSystem", () => {
         authService.refreshAccessToken as ReturnType<typeof vi.fn>
       ).mockRejectedValue(new Error("refresh failed"));
       await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      getRegisteredMessageHandler(messageBus, "PLUGIN_READY")(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY")
+      );
       const refreshHandler = getMessageTypeHandler(
         messageBus,
         "TOKEN_REFRESH_REQUEST"
       );
+      (authService.getAccessToken as ReturnType<typeof vi.fn>).mockClear();
+      (messageBus.sendToPlugin as ReturnType<typeof vi.fn>).mockClear();
 
       refreshHandler("plugin-a", {
         type: "TOKEN_REFRESH_REQUEST",
@@ -365,6 +403,14 @@ describe("PluginSystem", () => {
         authService.refreshAccessToken as ReturnType<typeof vi.fn>
       ).mockReturnValue(sharedRefresh);
       await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      await system.loadPlugin("plugin-b", createContainer());
+      const readyHandler = getRegisteredMessageHandler(
+        messageBus,
+        "PLUGIN_READY"
+      );
+      readyHandler("plugin-a", createPluginMessage("PLUGIN_READY"));
+      readyHandler("plugin-b", createPluginMessage("PLUGIN_READY"));
       const tokenChangeHandler = (
         authService.onTokenChange as ReturnType<typeof vi.fn>
       ).mock.calls[0][0] as (token: string) => void;
@@ -372,6 +418,7 @@ describe("PluginSystem", () => {
         messageBus,
         "TOKEN_REFRESH_REQUEST"
       );
+      (messageBus.sendToPlugin as ReturnType<typeof vi.fn>).mockClear();
 
       refreshHandler("plugin-a", {
         type: "TOKEN_REFRESH_REQUEST",
@@ -387,14 +434,21 @@ describe("PluginSystem", () => {
       resolveRefresh?.();
       await sharedRefresh;
 
-      expect(messageBus.broadcast).toHaveBeenCalledTimes(1);
-      expect(messageBus.broadcast).toHaveBeenCalledWith(
+      expect(messageBus.sendToPlugin).toHaveBeenCalledTimes(2);
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "plugin-a",
         expect.objectContaining({
           type: "TOKEN_UPDATE",
           payload: { token: "shared-fresh-access-token" },
         })
       );
-      expect(messageBus.sendToPlugin).not.toHaveBeenCalled();
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "plugin-b",
+        expect.objectContaining({
+          type: "TOKEN_UPDATE",
+          payload: { token: "shared-fresh-access-token" },
+        })
+      );
     });
 
     it("should set up the role-write handoff message listeners", async () => {
@@ -423,7 +477,10 @@ describe("PluginSystem", () => {
 
       system.onPluginEvent(handler);
 
-      expect(messageBus.onMessageType).toHaveBeenCalledWith("EVENT", handler);
+      expect(messageBus.onMessageType).toHaveBeenCalledWith(
+        "EVENT",
+        expect.any(Function)
+      );
     });
 
     it("should not re-initialize if already initialized", async () => {
@@ -639,6 +696,11 @@ describe("PluginSystem", () => {
 
     it("ignores handoff pulls from another plugin or route", async () => {
       await system.initialize();
+      await system.loadPlugin("user-management", createContainer());
+      getRegisteredMessageHandler(messageBus, "PLUGIN_READY")(
+        "user-management",
+        createPluginMessage("PLUGIN_READY")
+      );
       const armHandler = getMessageTypeHandler(
         messageBus,
         "ROLE_WRITE_CANARY_ARM_REQUEST"
@@ -674,6 +736,11 @@ describe("PluginSystem", () => {
 
     it("rejects malformed or non-user-management arm requests", async () => {
       await system.initialize();
+      await system.loadPlugin("user-management", createContainer());
+      getRegisteredMessageHandler(messageBus, "PLUGIN_READY")(
+        "user-management",
+        createPluginMessage("PLUGIN_READY")
+      );
       const armHandler = getMessageTypeHandler(
         messageBus,
         "ROLE_WRITE_CANARY_ARM_REQUEST"
@@ -702,6 +769,7 @@ describe("PluginSystem", () => {
 
     it("clears a pending handoff when the login token changes", async () => {
       await system.initialize();
+      await system.loadPlugin("user-management", createContainer());
       const armHandler = getMessageTypeHandler(
         messageBus,
         "ROLE_WRITE_CANARY_ARM_REQUEST"
@@ -711,12 +779,18 @@ describe("PluginSystem", () => {
         authService.onTokenChange as ReturnType<typeof vi.fn>
       ).mock.calls[0][0] as (token: string) => void;
 
+      readyHandler("user-management", {
+        type: "PLUGIN_READY",
+        id: "ready-before-token",
+      });
+
       armHandler("user-management", {
         type: "ROLE_WRITE_CANARY_ARM_REQUEST",
         id: "arm-before-token-change",
         payload: validHandoffPayload(),
       });
       tokenHandler("new-token");
+      await system.unloadPlugin("user-management");
       await system.loadPlugin("user-management", createContainer());
       readyHandler("user-management", {
         type: "PLUGIN_READY",
@@ -821,6 +895,65 @@ describe("PluginSystem", () => {
       expect(info?.lastError).toBe("Network timeout");
     });
 
+    it("should unregister an iframe if loading fails after registration", async () => {
+      (loader.load as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        async (
+          _pluginId: string,
+          _manifest: PluginManifest,
+          _container: HTMLElement,
+          _options?: unknown,
+          onIframeCreated?: (iframe: HTMLIFrameElement) => void
+        ) => {
+          onIframeCreated?.(createMockIframe());
+          throw new Error("navigation failed");
+        }
+      );
+
+      await system.initialize();
+
+      await expect(
+        system.loadPlugin("plugin-a", createContainer())
+      ).rejects.toThrow("navigation failed");
+      expect(messageBus.unregisterPlugin).toHaveBeenCalledWith("plugin-a");
+    });
+
+    it("should tolerate PLUGIN_READY arriving before loader.load resolves", async () => {
+      await system.initialize();
+      (loader.load as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        async (
+          pluginId: string,
+          manifest: PluginManifest,
+          _container: HTMLElement,
+          _options?: unknown,
+          onIframeCreated?: (iframe: HTMLIFrameElement) => void
+        ) => {
+          const iframe = createMockIframe();
+          onIframeCreated?.(iframe);
+          (loader.getIframe as ReturnType<typeof vi.fn>).mockReturnValue(
+            iframe
+          );
+          getRegisteredMessageHandler(messageBus, "PLUGIN_READY")(
+            pluginId,
+            createPluginMessage("PLUGIN_READY", {
+              handshakeSession: "preview-session-1234567890",
+            })
+          );
+          return {
+            pluginId,
+            iframe,
+            origin: manifest.allowedOrigin,
+            state: "active",
+            loadedAt: Date.now(),
+          };
+        }
+      );
+
+      await expect(
+        system.loadPlugin("plugin-a", createContainer())
+      ).resolves.toBeUndefined();
+      expect(system.getPluginState("plugin-a")).toBe("active");
+    });
+
     it("should throw when loading an unregistered plugin", async () => {
       await system.initialize();
       const container = createContainer();
@@ -873,6 +1006,254 @@ describe("PluginSystem", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Handshake session
+  // -------------------------------------------------------------------------
+
+  describe("handshake session", () => {
+    const session = "preview-session-1234567890";
+
+    async function loadAndReady(
+      readyPayload: Record<string, unknown> = { handshakeSession: session }
+    ) {
+      await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      const readyHandler = getRegisteredMessageHandler(
+        messageBus,
+        "PLUGIN_READY"
+      );
+      readyHandler(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY", readyPayload)
+      );
+    }
+
+    it("should echo payload.handshakeSession in INIT", async () => {
+      await loadAndReady();
+
+      expect(loader.sendInitMessage).toHaveBeenCalledWith(
+        expect.any(HTMLIFrameElement),
+        expect.objectContaining({ id: "plugin-a" }),
+        "mock-token",
+        session
+      );
+    });
+
+    it("should read a legacy top-level session but still pass it to payload-only INIT serialization", async () => {
+      await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      const readyHandler = getRegisteredMessageHandler(
+        messageBus,
+        "PLUGIN_READY"
+      );
+      const ready = {
+        ...createPluginMessage("PLUGIN_READY"),
+        handshakeSession: session,
+      } as PluginMessage;
+
+      readyHandler("plugin-a", ready);
+
+      expect(loader.sendInitMessage).toHaveBeenCalledWith(
+        expect.any(HTMLIFrameElement),
+        expect.objectContaining({ id: "plugin-a" }),
+        "mock-token",
+        session
+      );
+    });
+
+    it("should reject malformed handshake sessions", async () => {
+      await loadAndReady({ handshakeSession: "short" });
+
+      expect(loader.sendInitMessage).not.toHaveBeenCalled();
+    });
+
+    it("should accept only the first PLUGIN_READY in a load epoch", async () => {
+      await loadAndReady();
+      const readyHandler = getRegisteredMessageHandler(
+        messageBus,
+        "PLUGIN_READY"
+      );
+
+      readyHandler(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY", { handshakeSession: session })
+      );
+      readyHandler(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY", {
+          handshakeSession: "preview-session-abcdefghij",
+        })
+      );
+      readyHandler("plugin-a", createPluginMessage("PLUGIN_READY"));
+
+      expect(loader.sendInitMessage).toHaveBeenCalledTimes(1);
+      expect(loader.sendInitMessage).toHaveBeenLastCalledWith(
+        expect.any(HTMLIFrameElement),
+        expect.objectContaining({ id: "plugin-a" }),
+        "mock-token",
+        session
+      );
+    });
+
+    it("should reset the handshake gate after a failed load epoch", async () => {
+      await system.initialize();
+      const readyHandler = getRegisteredMessageHandler(
+        messageBus,
+        "PLUGIN_READY"
+      );
+      (loader.load as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        async (
+          pluginId: string,
+          _manifest: PluginManifest,
+          _container: HTMLElement,
+          _options?: unknown,
+          onIframeCreated?: (iframe: HTMLIFrameElement) => void
+        ) => {
+          const iframe = createMockIframe();
+          onIframeCreated?.(iframe);
+          (loader.getIframe as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+            iframe
+          );
+          readyHandler(
+            pluginId,
+            createPluginMessage("PLUGIN_READY", {
+              handshakeSession: session,
+            })
+          );
+          throw new Error("navigation failed after ready");
+        }
+      );
+
+      await expect(
+        system.loadPlugin("plugin-a", createContainer())
+      ).rejects.toThrow("navigation failed after ready");
+
+      await system.loadPlugin("plugin-a", createContainer());
+      readyHandler(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY", {
+          handshakeSession: "preview-session-next-epoch",
+        })
+      );
+
+      expect(loader.sendInitMessage).toHaveBeenCalledTimes(2);
+      expect(loader.sendInitMessage).toHaveBeenLastCalledWith(
+        expect.any(HTMLIFrameElement),
+        expect.objectContaining({ id: "plugin-a" }),
+        "mock-token",
+        "preview-session-next-epoch"
+      );
+    });
+
+    it("should require the current session for token refresh requests", async () => {
+      await loadAndReady();
+      const refreshHandler = getRegisteredMessageHandler(
+        messageBus,
+        "TOKEN_REFRESH_REQUEST"
+      );
+      const tokenChangeHandler = (
+        authService.onTokenChange as ReturnType<typeof vi.fn>
+      ).mock.calls[0][0] as (token: string) => void;
+      (
+        authService.refreshAccessToken as ReturnType<typeof vi.fn>
+      ).mockImplementation(async () => {
+        tokenChangeHandler("fresh-token");
+      });
+      (messageBus.sendToPlugin as ReturnType<typeof vi.fn>).mockClear();
+
+      refreshHandler(
+        "plugin-a",
+        createPluginMessage("TOKEN_REFRESH_REQUEST", {
+          handshakeSession: "preview-session-wrong000000",
+        })
+      );
+      expect(authService.refreshAccessToken).not.toHaveBeenCalled();
+      expect(messageBus.sendToPlugin).not.toHaveBeenCalled();
+
+      refreshHandler(
+        "plugin-a",
+        createPluginMessage("TOKEN_REFRESH_REQUEST", {
+          handshakeSession: session,
+        })
+      );
+      await vi.waitFor(() => {
+        expect(authService.refreshAccessToken).toHaveBeenCalledOnce();
+      });
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "plugin-a",
+        expect.objectContaining({
+          type: "TOKEN_UPDATE",
+          payload: { token: "fresh-token", handshakeSession: session },
+        })
+      );
+    });
+
+    it("should only forward EVENT messages for the current session", async () => {
+      await loadAndReady();
+      const eventHandler = vi.fn();
+      system.onPluginEvent(eventHandler);
+      const busHandler = getRegisteredMessageHandler(messageBus, "EVENT");
+
+      busHandler(
+        "plugin-a",
+        createPluginMessage("EVENT", {
+          handshakeSession: "preview-session-stale000000",
+        })
+      );
+      expect(eventHandler).not.toHaveBeenCalled();
+
+      const currentEvent = createPluginMessage("EVENT", {
+        handshakeSession: session,
+      });
+      busHandler("plugin-a", currentEvent);
+      expect(eventHandler).toHaveBeenCalledWith("plugin-a", currentEvent);
+    });
+
+    it("should bind theme and language control messages to the session", async () => {
+      await loadAndReady();
+
+      system.broadcastThemeChange("dark", true);
+      system.broadcastLangChange("zh-CN");
+
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "plugin-a",
+        expect.objectContaining({
+          type: "THEME_CHANGE",
+          payload: { theme: "dark", dark: true, handshakeSession: session },
+        })
+      );
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "plugin-a",
+        expect.objectContaining({
+          type: "LANG_CHANGE",
+          payload: { lang: "zh-CN", handshakeSession: session },
+        })
+      );
+    });
+
+    it("should keep legacy session-less plugins compatible", async () => {
+      await loadAndReady({});
+      const readyHandler = getRegisteredMessageHandler(
+        messageBus,
+        "PLUGIN_READY"
+      );
+
+      readyHandler("plugin-a", createPluginMessage("PLUGIN_READY"));
+      readyHandler(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY", { handshakeSession: session })
+      );
+
+      expect(loader.sendInitMessage).toHaveBeenCalledTimes(1);
+      expect(loader.sendInitMessage).toHaveBeenCalledWith(
+        expect.any(HTMLIFrameElement),
+        expect.objectContaining({ id: "plugin-a" }),
+        "mock-token",
+        undefined
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // unloadPlugin
   // -------------------------------------------------------------------------
 
@@ -891,13 +1272,57 @@ describe("PluginSystem", () => {
       await system.initialize();
       const container = createContainer();
       await system.loadPlugin("plugin-a", container);
+      getRegisteredMessageHandler(messageBus, "PLUGIN_READY")(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY", {
+          handshakeSession: "preview-session-1234567890",
+        })
+      );
 
       await system.unloadPlugin("plugin-a");
 
       expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
         "plugin-a",
-        expect.objectContaining({ type: "DESTROY" })
+        expect.objectContaining({
+          type: "DESTROY",
+          payload: {
+            handshakeSession: "preview-session-1234567890",
+          },
+        })
       );
+    });
+
+    it("should unregister the message source before removing its iframe", async () => {
+      await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+
+      await system.unloadPlugin("plugin-a");
+
+      expect(
+        (messageBus.unregisterPlugin as ReturnType<typeof vi.fn>).mock
+          .invocationCallOrder[0]
+      ).toBeLessThan(
+        (loader.unload as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0]
+      );
+    });
+
+    it("should clear handshake state so the same session can initialize after reload", async () => {
+      const ready = createPluginMessage("PLUGIN_READY", {
+        handshakeSession: "preview-session-1234567890",
+      });
+      await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      const readyHandler = getRegisteredMessageHandler(
+        messageBus,
+        "PLUGIN_READY"
+      );
+      readyHandler("plugin-a", ready);
+      await system.unloadPlugin("plugin-a");
+
+      await system.loadPlugin("plugin-a", createContainer());
+      readyHandler("plugin-a", ready);
+
+      expect(loader.sendInitMessage).toHaveBeenCalledTimes(2);
     });
 
     it("should call loader.unload", async () => {
@@ -1077,7 +1502,7 @@ describe("PluginSystem", () => {
   // -------------------------------------------------------------------------
 
   describe("token change broadcast", () => {
-    it("should broadcast TOKEN_UPDATE when token changes", async () => {
+    it("should send a session-bound TOKEN_UPDATE after handshake", async () => {
       let tokenCallback: ((token: string) => void) | undefined;
       (
         authService.onTokenChange as ReturnType<typeof vi.fn>
@@ -1087,16 +1512,43 @@ describe("PluginSystem", () => {
       });
 
       await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      getRegisteredMessageHandler(messageBus, "PLUGIN_READY")(
+        "plugin-a",
+        createPluginMessage("PLUGIN_READY", {
+          handshakeSession: "preview-session-1234567890",
+        })
+      );
 
       // Simulate token change
       tokenCallback?.("new-token-value");
 
-      expect(messageBus.broadcast).toHaveBeenCalledWith(
+      expect(messageBus.sendToPlugin).toHaveBeenCalledWith(
+        "plugin-a",
         expect.objectContaining({
           type: "TOKEN_UPDATE",
-          payload: { token: "new-token-value" },
+          payload: {
+            token: "new-token-value",
+            handshakeSession: "preview-session-1234567890",
+          },
         })
       );
+    });
+
+    it("should not send a token before PLUGIN_READY completes", async () => {
+      let tokenCallback: ((token: string) => void) | undefined;
+      (
+        authService.onTokenChange as ReturnType<typeof vi.fn>
+      ).mockImplementation((cb: (token: string) => void) => {
+        tokenCallback = cb;
+        return vi.fn();
+      });
+
+      await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      tokenCallback?.("new-token-value");
+
+      expect(messageBus.sendToPlugin).not.toHaveBeenCalled();
     });
   });
 

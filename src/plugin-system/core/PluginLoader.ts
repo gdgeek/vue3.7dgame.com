@@ -144,7 +144,8 @@ export class PluginLoader {
   public sendInitMessage(
     iframe: HTMLIFrameElement,
     manifest: PluginManifest,
-    token?: string
+    token?: string,
+    handshakeSession?: string
   ): void {
     const jwt = token ?? this.getToken();
     const message = {
@@ -152,6 +153,7 @@ export class PluginLoader {
       id: `init-${manifest.id}-${Date.now()}`,
       payload: {
         token: jwt,
+        ...(handshakeSession ? { handshakeSession } : {}),
         config: JSON.parse(
           JSON.stringify({
             ...(manifest.extraConfig ?? {}),
