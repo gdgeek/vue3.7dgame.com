@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
 import { useAppStoreHook } from "@/store/modules/app";
@@ -32,6 +39,10 @@ const accessState = ref<"idle" | "forbidden" | "degraded">("idle");
 const mountedPluginId = ref<string | null>(null);
 const activeFlowId = ref(0);
 let unsubscribePluginEvents: (() => void) | null = null;
+const pluginUrlsSyncedFromIframe = new Set<string>();
+let pendingPluginUrlReactivationFor: string | null = null;
+let activePluginUrlReactivationFor: string | null = null;
+let pluginUrlReactivationRunning = false;
 
 function getErrorStatus(error: unknown) {
   return (error as { response?: { status?: number } })?.response?.status;
@@ -99,6 +110,80 @@ async function activatePluginForRoute(
   }
 }
 
+async function reactivatePluginForRoute(
+  targetPluginId: string,
+  options: {
+    forceAccess?: boolean;
+    fallbackError: string;
+  }
+) {
+  const flowId = beginFlow();
+  loading.value = true;
+  accessState.value = "idle";
+  error.value = null;
+
+  await store.deactivatePlugin(targetPluginId);
+  if (!isFlowCurrent(flowId, targetPluginId)) {
+    return;
+  }
+  if (mountedPluginId.value === targetPluginId) {
+    mountedPluginId.value = null;
+  }
+
+  try {
+    await activatePluginForRoute(targetPluginId, flowId, {
+      forceAccess: options.forceAccess,
+    });
+  } catch (e: unknown) {
+    if (!isFlowCurrent(flowId, targetPluginId)) {
+      return;
+    }
+    if (getErrorStatus(e) === 401) {
+      return;
+    }
+    error.value = e instanceof Error ? e.message : options.fallbackError;
+  } finally {
+    if (isFlowCurrent(flowId, targetPluginId)) {
+      loading.value = false;
+    }
+  }
+}
+
+async function drainPluginUrlReactivations() {
+  if (pluginUrlReactivationRunning) {
+    return;
+  }
+
+  pluginUrlReactivationRunning = true;
+  try {
+    while (pendingPluginUrlReactivationFor) {
+      const targetPluginId = pendingPluginUrlReactivationFor;
+      pendingPluginUrlReactivationFor = null;
+      if (pluginId.value !== targetPluginId) {
+        continue;
+      }
+
+      activePluginUrlReactivationFor = targetPluginId;
+      try {
+        await reactivatePluginForRoute(targetPluginId, {
+          fallbackError: "加载插件失败",
+        });
+      } finally {
+        activePluginUrlReactivationFor = null;
+      }
+    }
+  } finally {
+    pluginUrlReactivationRunning = false;
+  }
+}
+
+function schedulePluginUrlReactivation(targetPluginId: string) {
+  pendingPluginUrlReactivationFor = targetPluginId;
+  // Supersede an in-flight activation immediately; the drain serializes teardown.
+  beginFlow();
+  void drainPluginUrlReactivations();
+}
+
 /**
  * 当 pluginId 变化时：卸载旧插件 → 初始化系统 → 激活新插件。
  * iframe 创建、PLUGIN_READY/INIT 握手、Token 注入全部由 PluginSystem core 层处理。
@@ -154,6 +239,31 @@ watch(
   }
 );
 
+watch(
+  () => normalizePluginUrlQuery(route.query.pluginUrl),
+  (newPluginUrl, oldPluginUrl) => {
+    if (newPluginUrl === oldPluginUrl) {
+      return;
+    }
+
+    if (newPluginUrl && pluginUrlsSyncedFromIframe.delete(newPluginUrl)) {
+      return;
+    }
+
+    const targetPluginId = pluginId.value;
+    if (
+      !targetPluginId ||
+      (mountedPluginId.value !== targetPluginId &&
+        activePluginUrlReactivationFor !== targetPluginId &&
+        pendingPluginUrlReactivationFor !== targetPluginId)
+    ) {
+      return;
+    }
+
+    schedulePluginUrlReactivation(targetPluginId);
+  }
+);
+
 /** 等待下一 tick 确保 containerRef 已挂载 */
 function nextTickContainer(): Promise<void> {
   return new Promise((resolve) => {
@@ -195,13 +305,24 @@ function handlePluginEvent(sourcePluginId: string, message: PluginMessage) {
       return;
     }
 
-    router.replace({
-      path: route.path,
-      query: {
-        ...route.query,
-        pluginUrl: action.pluginUrl,
+    pluginUrlsSyncedFromIframe.add(action.pluginUrl);
+    void Promise.resolve(
+      router.replace({
+        path: route.path,
+        query: {
+          ...route.query,
+          pluginUrl: action.pluginUrl,
+        },
+      })
+    ).then(
+      async () => {
+        await nextTick();
+        pluginUrlsSyncedFromIframe.delete(action.pluginUrl);
       },
-    });
+      () => {
+        pluginUrlsSyncedFromIframe.delete(action.pluginUrl);
+      }
+    );
     return;
   }
 
@@ -213,35 +334,10 @@ function handlePluginEvent(sourcePluginId: string, message: PluginMessage) {
 
 async function handleRetry() {
   if (!pluginId.value) return;
-  // 强制重新激活：先卸载再加载
-  const id = pluginId.value;
-  const flowId = beginFlow();
-  await store.deactivatePlugin(id);
-  if (mountedPluginId.value === id) {
-    mountedPluginId.value = null;
-  }
-  if (!isFlowCurrent(flowId, id)) {
-    return;
-  }
-
-  loading.value = true;
-  accessState.value = "idle";
-  error.value = null;
-  try {
-    await activatePluginForRoute(id, flowId, { forceAccess: true });
-  } catch (e: unknown) {
-    if (!isFlowCurrent(flowId, id)) {
-      return;
-    }
-    if (getErrorStatus(e) === 401) {
-      return;
-    }
-    error.value = e instanceof Error ? e.message : "重试失败";
-  } finally {
-    if (isFlowCurrent(flowId, id)) {
-      loading.value = false;
-    }
-  }
+  await reactivatePluginForRoute(pluginId.value, {
+    forceAccess: true,
+    fallbackError: "重试失败",
+  });
 }
 
 onMounted(() => {
@@ -250,8 +346,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   activeFlowId.value += 1;
+  pendingPluginUrlReactivationFor = null;
   unsubscribePluginEvents?.();
   unsubscribePluginEvents = null;
+  pluginUrlsSyncedFromIframe.clear();
   const idToDeactivate = mountedPluginId.value ?? pluginId.value;
   if (idToDeactivate) {
     store.deactivatePlugin(idToDeactivate);

@@ -1,14 +1,16 @@
-FROM node:21.1.0 AS build
+FROM node:24-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS build
 WORKDIR /app
-COPY package.json ./
-RUN npm install pnpm -g
-RUN pnpm install vuex
-RUN pnpm install
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN pnpm install --frozen-lockfile
+
 COPY . .
 RUN pnpm run build:staging
 
 # 使用 Nginx 作为生产阶段
-FROM nginx:alpine
+FROM nginx:alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752
 
 # Nginx 配置模板
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
