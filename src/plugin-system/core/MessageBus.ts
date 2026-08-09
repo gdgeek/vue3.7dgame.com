@@ -16,6 +16,18 @@ interface PluginConnection {
   origin: string;
 }
 
+function isExactHttpOrigin(origin: string): boolean {
+  try {
+    const parsed = new URL(origin);
+    return (
+      (parsed.protocol === "http:" || parsed.protocol === "https:") &&
+      parsed.origin === origin
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
  * PostMessage 双向通信总线
  *
@@ -99,6 +111,12 @@ export class MessageBus {
     iframe: HTMLIFrameElement,
     origin: string
   ): void {
+    if (!isExactHttpOrigin(origin)) {
+      throw new Error(
+        `Plugin "${pluginId}" must register an exact HTTP(S) origin`
+      );
+    }
+
     this.connections.set(pluginId, { iframe, origin });
     logger.info(
       `Plugin connection registered: ${pluginId} (origin: ${origin})`

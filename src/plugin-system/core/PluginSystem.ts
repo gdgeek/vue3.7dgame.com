@@ -14,6 +14,7 @@ import type {
   PluginState,
   PluginInfo,
   PluginManifest,
+  PluginMessage,
 } from "@/plugin-system/types";
 
 const logger = createLogger("PluginSystem");
@@ -110,6 +111,46 @@ function isCurrentHostAllowed(manifest: PluginManifest): boolean {
   return allowedHostOrigins.includes(window.location.origin);
 }
 
+const HANDSHAKE_SESSION_PATTERN = /^[A-Za-z0-9._~-]{16,256}$/;
+
+type HandshakeSessionCandidate =
+  | { present: false; value: null }
+  | { present: true; valid: false; value: null }
+  | { present: true; valid: true; value: string };
+
+function readHandshakeSession(
+  message: PluginMessage
+): HandshakeSessionCandidate {
+  const payload = message.payload;
+  const hasPayloadSession =
+    payload !== undefined &&
+    Object.prototype.hasOwnProperty.call(payload, "handshakeSession");
+  const legacyMessage = message as PluginMessage & {
+    handshakeSession?: unknown;
+  };
+  const hasLegacySession = Object.prototype.hasOwnProperty.call(
+    legacyMessage,
+    "handshakeSession"
+  );
+
+  if (!hasPayloadSession && !hasLegacySession) {
+    return { present: false, value: null };
+  }
+
+  const candidate = hasPayloadSession
+    ? payload?.handshakeSession
+    : legacyMessage.handshakeSession;
+
+  if (
+    typeof candidate !== "string" ||
+    !HANDSHAKE_SESSION_PATTERN.test(candidate)
+  ) {
+    return { present: true, valid: false, value: null };
+  }
+
+  return { present: true, valid: true, value: candidate };
+}
+
 /**
  * PluginSystem — 核心协调器
  *
@@ -148,6 +189,9 @@ export class PluginSystem {
   /** Short-lived, non-secret handoffs survive only inside this host session. */
   private pendingRoleWriteHandoffs: Map<string, PendingRoleWriteHandoff> =
     new Map();
+
+  /** First accepted handshake per load epoch; null marks a legacy handshake. */
+  private handshakeSessions: Map<string, string | null> = new Map();
 
   /** Whether initialize() has been called */
   private initialized = false;
@@ -221,7 +265,7 @@ export class PluginSystem {
     this.tokenUnsubscribe = this.authService.onTokenChange((token) => {
       this.pendingRoleWriteHandoffs.clear();
       logger.info("Token changed, broadcasting TOKEN_UPDATE to active plugins");
-      this.messageBus.broadcast({
+      this.broadcastAfterHandshake({
         type: "TOKEN_UPDATE",
         id: `token-update-${Date.now()}`,
         payload: { token: token ?? "" },
@@ -231,8 +275,8 @@ export class PluginSystem {
     // Listen for PLUGIN_READY messages from plugins
     this.readyUnsubscribe = this.messageBus.onMessageType(
       "PLUGIN_READY",
-      (pluginId) => {
-        this.handlePluginReady(pluginId);
+      (pluginId, message) => {
+        this.handlePluginReady(pluginId, message);
       }
     );
 
@@ -240,7 +284,13 @@ export class PluginSystem {
     // token change, and the listener above broadcasts only the fresh token.
     this.tokenRefreshUnsubscribe = this.messageBus.onMessageType(
       "TOKEN_REFRESH_REQUEST",
-      (pluginId) => {
+      (pluginId, message) => {
+        if (!this.matchesCurrentHandshake(pluginId, message)) {
+          logger.warn(
+            `Ignoring TOKEN_REFRESH_REQUEST with an invalid handshake session from "${pluginId}"`
+          );
+          return;
+        }
         void this.handleTokenRefreshRequest(pluginId);
       }
     );
@@ -248,6 +298,7 @@ export class PluginSystem {
     this.roleWriteArmUnsubscribe = this.messageBus.onMessageType(
       "ROLE_WRITE_CANARY_ARM_REQUEST",
       (pluginId, message) => {
+        if (!this.matchesCurrentHandshake(pluginId, message)) return;
         this.handleRoleWriteArmRequest(pluginId, message.payload);
       }
     );
@@ -255,6 +306,7 @@ export class PluginSystem {
     this.roleWriteCancelUnsubscribe = this.messageBus.onMessageType(
       "ROLE_WRITE_CANARY_ARM_CANCEL",
       (pluginId, message) => {
+        if (!this.matchesCurrentHandshake(pluginId, message)) return;
         this.handleRoleWriteArmCancel(pluginId, message.payload);
       }
     );
@@ -262,6 +314,7 @@ export class PluginSystem {
     this.roleWriteHandoffRequestUnsubscribe = this.messageBus.onMessageType(
       "ROLE_WRITE_CANARY_HANDOFF_REQUEST",
       (pluginId, message) => {
+        if (!this.matchesCurrentHandshake(pluginId, message)) return;
         this.handleRoleWriteHandoffRequest(pluginId, message.payload);
       }
     );
@@ -269,6 +322,7 @@ export class PluginSystem {
     this.roleWriteClaimUnsubscribe = this.messageBus.onMessageType(
       "ROLE_WRITE_CANARY_HANDOFF_CLAIMED",
       (pluginId, message) => {
+        if (!this.matchesCurrentHandshake(pluginId, message)) return;
         this.handleRoleWriteHandoffClaim(pluginId, message.payload);
       }
     );
@@ -308,6 +362,12 @@ export class PluginSystem {
     // Transition: current → loading
     this.transitionState(pluginId, "loading");
 
+    // A successful state transition starts a new load epoch. Only the first
+    // valid PLUGIN_READY observed during this epoch may establish trust.
+    this.handshakeSessions.delete(pluginId);
+
+    let registeredIframe: HTMLIFrameElement | undefined;
+
     try {
       if (!isCurrentHostAllowed(manifest)) {
         const errorMessage = `Current host origin "${window.location.origin}" is not allowed for plugin "${pluginId}"`;
@@ -324,6 +384,7 @@ export class PluginSystem {
         // Register in MessageBus as soon as the iframe is mounted into the host DOM,
         // so PLUGIN_READY from the plugin is not discarded.
         (iframe) => {
+          registeredIframe = iframe;
           this.messageBus.registerPlugin(
             pluginId,
             iframe,
@@ -336,14 +397,30 @@ export class PluginSystem {
         `loadPlugin("${pluginId}") iframe mounted, origin=${loaded.origin}`
       );
 
-      // Transition: loading → active
-      this.transitionState(pluginId, "active");
+      // PLUGIN_READY can arrive immediately after iframe navigation starts.
+      // Avoid a second loading → active transition if the handshake won that race.
+      if (pluginInfo.state === "loading") {
+        this.transitionState(pluginId, "active");
+      }
 
       // Do NOT proactively send INIT here — the iframe may not have finished
       // loading its JS bundle yet. Instead, wait for PLUGIN_READY from the plugin,
       // which is handled by handlePluginReady → sendInitToPlugin.
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
+
+      // A failed load ends the epoch even if PLUGIN_READY raced ahead of the
+      // loader promise and completed a handshake first.
+      this.handshakeSessions.delete(pluginId);
+
+      if (registeredIframe) {
+        this.messageBus.unregisterPlugin(pluginId);
+        if (this.loader.isLoaded(pluginId)) {
+          this.loader.unload(pluginId);
+        } else {
+          registeredIframe.remove();
+        }
+      }
 
       // Transition: loading → error
       const alreadyInErrorState = pluginInfo.state === "error";
@@ -375,20 +452,19 @@ export class PluginSystem {
 
     // Send DESTROY message before unloading
     if (pluginInfo.state === "active") {
-      this.messageBus.sendToPlugin(pluginId, {
+      this.sendAfterHandshake(pluginId, {
         type: "DESTROY",
         id: `destroy-${pluginId}-${Date.now()}`,
       });
     }
 
+    // Close the trust boundary before removing the iframe so late messages
+    // cannot be routed during teardown.
+    this.messageBus.unregisterPlugin(pluginId);
+    this.handshakeSessions.delete(pluginId);
+
     // Unload iframe
     this.loader.unload(pluginId);
-
-    // Unregister from MessageBus
-    this.messageBus.unregisterPlugin(pluginId);
-
-    // Reset handshake dedup so re-load can send INIT again
-    this.initSentPlugins.delete(pluginId);
 
     // Transition to unloaded
     this.transitionState(pluginId, "unloaded");
@@ -460,6 +536,7 @@ export class PluginSystem {
     this.messageBus.destroy();
     this.authService.destroy();
 
+    this.handshakeSessions.clear();
     this.plugins.clear();
     this.pendingRoleWriteHandoffs.clear();
     this.initialized = false;
@@ -543,30 +620,44 @@ export class PluginSystem {
     );
   }
 
-  /** Handle PLUGIN_READY message — transition loading → active if needed, then send INIT */
-  /** Track plugins that have already completed handshake to avoid duplicate INIT */
-  private initSentPlugins: Set<string> = new Set();
-
-  private handlePluginReady(pluginId: string): void {
+  /** Handle the first valid PLUGIN_READY in the current load epoch. */
+  private handlePluginReady(pluginId: string, message: PluginMessage): void {
     const info = this.plugins.get(pluginId);
     if (!info) {
       logger.warn(`Received PLUGIN_READY from unknown plugin: ${pluginId}`);
       return;
     }
 
-    // Deduplicate: ignore repeated PLUGIN_READY if we already sent INIT
-    if (this.initSentPlugins.has(pluginId)) {
-      logger.debug(`Ignoring duplicate PLUGIN_READY from "${pluginId}"`);
+    if (info.state !== "loading" && info.state !== "active") {
+      logger.warn(
+        `Ignoring PLUGIN_READY from plugin "${pluginId}" in state "${info.state}"`
+      );
       return;
     }
 
+    if (this.handshakeSessions.has(pluginId)) {
+      logger.debug(
+        `Ignoring repeated PLUGIN_READY in the current load epoch from "${pluginId}"`
+      );
+      return;
+    }
+
+    const candidate = readHandshakeSession(message);
+    if (candidate.present && !candidate.valid) {
+      logger.warn(
+        `Ignoring PLUGIN_READY with an invalid handshake session from "${pluginId}"`
+      );
+      return;
+    }
+
+    const handshakeSession = candidate.value;
     // Only transition if still loading (proactive path already sets active)
     if (info.state === "loading") {
       this.transitionState(pluginId, "active");
     }
 
-    this.initSentPlugins.add(pluginId);
-    this.sendInitToPlugin(pluginId);
+    this.handshakeSessions.set(pluginId, handshakeSession);
+    this.sendInitToPlugin(pluginId, handshakeSession ?? undefined);
     this.sendPendingRoleWriteHandoff(pluginId);
   }
 
@@ -580,7 +671,7 @@ export class PluginSystem {
 
     const handoff = parseRoleWriteHandoff(payload);
     if (!handoff) {
-      this.messageBus.sendToPlugin(pluginId, {
+      this.sendAfterHandshake(pluginId, {
         type: "ROLE_WRITE_CANARY_ARM_ACK",
         id: `role-write-arm-rejected-${Date.now()}`,
         payload: { accepted: false },
@@ -589,7 +680,7 @@ export class PluginSystem {
     }
 
     this.pendingRoleWriteHandoffs.set(pluginId, handoff);
-    this.messageBus.sendToPlugin(pluginId, {
+    this.sendAfterHandshake(pluginId, {
       type: "ROLE_WRITE_CANARY_ARM_ACK",
       id: `role-write-arm-accepted-${Date.now()}`,
       payload: {
@@ -672,7 +763,7 @@ export class PluginSystem {
     }
 
     pending.delivered = true;
-    this.messageBus.sendToPlugin(pluginId, {
+    this.sendAfterHandshake(pluginId, {
       type: "ROLE_WRITE_CANARY_HANDOFF",
       id: `role-write-handoff-${Date.now()}`,
       payload: {
@@ -691,7 +782,7 @@ export class PluginSystem {
    * Send INIT message to an already-registered plugin.
    * Safe to call regardless of plugin state — no state transition performed.
    */
-  private sendInitToPlugin(pluginId: string): void {
+  private sendInitToPlugin(pluginId: string, handshakeSession?: string): void {
     const manifest = this.registry.get(pluginId);
     if (!manifest) {
       logger.warn(`sendInit("${pluginId}") — no manifest found`);
@@ -708,7 +799,57 @@ export class PluginSystem {
     logger.debug(
       `sendInit("${pluginId}") token=${token ? "(present)" : "(empty)"}`
     );
-    this.loader.sendInitMessage(iframe, manifest, token);
+    this.loader.sendInitMessage(iframe, manifest, token, handshakeSession);
+  }
+
+  private bindHandshakeSession(
+    pluginId: string,
+    message: PluginMessage
+  ): PluginMessage {
+    const handshakeSession = this.handshakeSessions.get(pluginId);
+    if (!handshakeSession) {
+      return message;
+    }
+
+    return {
+      ...message,
+      payload: {
+        ...(message.payload ?? {}),
+        handshakeSession,
+      },
+    };
+  }
+
+  private sendAfterHandshake(pluginId: string, message: PluginMessage): void {
+    if (!this.handshakeSessions.has(pluginId)) {
+      return;
+    }
+    this.messageBus.sendToPlugin(
+      pluginId,
+      this.bindHandshakeSession(pluginId, message)
+    );
+  }
+
+  private broadcastAfterHandshake(message: PluginMessage): void {
+    for (const pluginId of this.handshakeSessions.keys()) {
+      this.sendAfterHandshake(pluginId, message);
+    }
+  }
+
+  private matchesCurrentHandshake(
+    pluginId: string,
+    message: PluginMessage
+  ): boolean {
+    if (!this.handshakeSessions.has(pluginId)) {
+      return false;
+    }
+
+    const expected = this.handshakeSessions.get(pluginId);
+    const candidate = readHandshakeSession(message);
+    if (expected === null) {
+      return !candidate.present;
+    }
+    return candidate.present && candidate.valid && candidate.value === expected;
   }
 
   /**
@@ -716,7 +857,7 @@ export class PluginSystem {
    * 供外部（如 PluginLayout）在主题切换时调用。
    */
   broadcastThemeChange(theme: string, dark: boolean): void {
-    this.messageBus.broadcast({
+    this.broadcastAfterHandshake({
       type: "THEME_CHANGE",
       id: `theme-change-${Date.now()}`,
       payload: { theme, dark },
@@ -728,7 +869,7 @@ export class PluginSystem {
    * 供外部（如 PluginLayout）在语言切换时调用。
    */
   broadcastLangChange(lang: string): void {
-    this.messageBus.broadcast({
+    this.broadcastAfterHandshake({
       type: "LANG_CHANGE",
       id: `lang-change-${Date.now()}`,
       payload: { lang },
@@ -741,7 +882,11 @@ export class PluginSystem {
    * the handler.
    */
   onPluginEvent(handler: MessageHandler): Unsubscribe {
-    return this.messageBus.onMessageType("EVENT", handler);
+    return this.messageBus.onMessageType("EVENT", (pluginId, message) => {
+      if (this.matchesCurrentHandshake(pluginId, message)) {
+        handler(pluginId, message);
+      }
+    });
   }
 
   /** 获取 PluginLoader 实例（供视图层获取 iframe 引用） */
