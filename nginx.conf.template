@@ -102,6 +102,10 @@ server {
         proxy_send_timeout 300s;
     }
 
+    location ^~ /__xrugc_proxy__/ {
+        return 404;
+    }
+
     # ============ 反向代理 - API (由 docker-entrypoint.sh 动态生成) ============
     # __API_LOCATIONS__
 

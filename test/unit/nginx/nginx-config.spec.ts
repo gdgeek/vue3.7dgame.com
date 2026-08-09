@@ -99,6 +99,20 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("${APP_UNITY_PREVIEW_UPSTREAM}");
   });
 
+  it("rejects slash and nested legacy arbitrary URL proxy paths", () => {
+    const exactProxy = extractLocationBlock(nginxConfig, "= /__xrugc_proxy__");
+    const nestedProxy = extractLocationBlock(
+      nginxConfig,
+      "^~ /__xrugc_proxy__/"
+    );
+
+    expect(exactProxy).toContain(
+      "proxy_pass ${APP_UNITY_PREVIEW_UPSTREAM}/__xrugc_proxy__?$args"
+    );
+    expect(nestedProxy).toContain("return 404");
+    expect(nestedProxy).not.toContain("proxy_pass");
+  });
+
   it("serves runtime env without immutable caching", () => {
     const block = extractLocationBlock(nginxConfig, "= /__env.js");
 
