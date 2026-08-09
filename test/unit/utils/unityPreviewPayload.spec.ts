@@ -41,6 +41,20 @@ describe("unityPreviewPayload", () => {
     expect(payload.resources[0].url).toBe(signedUrl);
   });
 
+  it("preserves the provider-approved MRPP COS origin byte-for-byte", () => {
+    const signedUrl =
+      "https://mrpp-1257979353.cos.ap-chengdu.myqcloud.com/resource?id=42&sign=a%26b%3Dc";
+    const payload = { model: signedUrl };
+
+    rewriteUnityPreviewUrls(
+      payload,
+      "https://xrugc.com",
+      "https://api.d.xrteeth.com"
+    );
+
+    expect(payload.model).toBe(signedUrl);
+  });
+
   it("rewrites relative asset paths against the api origin", () => {
     const payload = {
       audio: "/uploads/background.mp3",

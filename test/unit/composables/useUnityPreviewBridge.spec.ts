@@ -38,10 +38,11 @@ describe("useUnityPreviewBridge session boundary", () => {
 
   const dispatchRunnerMessage = (
     data: Record<string, unknown>,
-    origin: string
+    origin: string,
+    source: MessageEventSource | null = frameSource
   ) => {
     const event = new MessageEvent("message", { data, origin });
-    Object.defineProperty(event, "source", { value: frameSource });
+    Object.defineProperty(event, "source", { value: source });
     window.dispatchEvent(event);
   };
 
@@ -115,6 +116,7 @@ describe("useUnityPreviewBridge session boundary", () => {
     await flushBridgePromises();
 
     expect(bridge.ready.value).toBe(true);
+    expect(bridge.runnerProtocol.value).toBe("session-v1");
     expect(postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "xrugc-load-scene-json",
@@ -132,6 +134,106 @@ describe("useUnityPreviewBridge session boundary", () => {
       runnerUrl.origin
     );
     expect(buildPayload).toHaveBeenCalledTimes(1);
+
+    dispatchRunnerMessage(
+      { type: "unity-web-preview-scene-running" },
+      runnerUrl.origin
+    );
+    expect(bridge.status.value).toBe("场景数据已发送到 Unity");
+
+    dispatchRunnerMessage(
+      { type: "unity-web-preview-scene-running", session },
+      runnerUrl.origin
+    );
+    expect(bridge.status.value).toBe("场景已在 Unity 中运行");
+  });
+
+  it.each([
+    ["pre-session runner", {}],
+    ["empty-session runner", { session: "" }],
+  ])(
+    "locks %s to legacy-v0 while retaining exact source and origin checks",
+    async (_label, legacySession) => {
+      await bridge.open();
+      const runnerUrl = new URL(bridge.src.value);
+      const session = runnerUrl.searchParams.get("session");
+
+      dispatchRunnerMessage(
+        { type: "unity-web-preview-ready", ...legacySession },
+        "https://attacker.example"
+      );
+      dispatchRunnerMessage(
+        { type: "unity-web-preview-ready", ...legacySession },
+        runnerUrl.origin,
+        {} as Window
+      );
+      expect(bridge.runnerProtocol.value).toBe("pending");
+      expect(postMessage).not.toHaveBeenCalled();
+
+      dispatchRunnerMessage(
+        { type: "unity-web-preview-ready", ...legacySession },
+        runnerUrl.origin
+      );
+      await flushBridgePromises();
+
+      expect(bridge.ready.value).toBe(true);
+      expect(bridge.runnerProtocol.value).toBe("legacy-v0");
+      expect(postMessage).toHaveBeenCalledWith(
+        {
+          type: "xrugc-load-scene-json",
+          payload: { scene: { id: 42 } },
+        },
+        runnerUrl.origin
+      );
+      expect(postMessage).toHaveBeenCalledWith(
+        {
+          type: "unity-web-preview-camera-mode",
+          mode: "orbit",
+        },
+        runnerUrl.origin
+      );
+
+      dispatchRunnerMessage(
+        { type: "unity-web-preview-scene-running", session },
+        runnerUrl.origin
+      );
+      expect(bridge.status.value).toBe("场景数据已发送到 Unity");
+
+      dispatchRunnerMessage(
+        { type: "unity-web-preview-scene-running", ...legacySession },
+        runnerUrl.origin
+      );
+      expect(bridge.status.value).toBe("场景已在 Unity 中运行");
+
+      bridge.handleClosed();
+      expect(postMessage).toHaveBeenCalledWith(
+        { type: "webgl-preview-dispose" },
+        runnerUrl.origin
+      );
+      expect(bridge.runnerProtocol.value).toBe("pending");
+    }
+  );
+
+  it("does not let a non-ready legacy message select the protocol", async () => {
+    await bridge.open();
+    const runnerUrl = new URL(bridge.src.value);
+    const session = runnerUrl.searchParams.get("session");
+
+    dispatchRunnerMessage(
+      { type: "unity-web-preview-scene-running" },
+      runnerUrl.origin
+    );
+    expect(bridge.runnerProtocol.value).toBe("pending");
+    expect(bridge.ready.value).toBe(false);
+    expect(postMessage).not.toHaveBeenCalled();
+
+    dispatchRunnerMessage(
+      { type: "unity-web-preview-ready", session },
+      runnerUrl.origin
+    );
+    await flushBridgePromises();
+    expect(bridge.runnerProtocol.value).toBe("session-v1");
+    expect(bridge.ready.value).toBe(true);
   });
 
   it("disposes the current session and rejects its messages after reopening", async () => {

@@ -12,9 +12,12 @@ const UNITY_PREVIEW_ASSET_PATH_RE =
 const UNITY_PREVIEW_LEGACY_COS_HOST =
   "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com";
 const UNITY_PREVIEW_CDN_HOST = "data.7dgame.com";
+const UNITY_PREVIEW_MRPP_COS_HOST =
+  "mrpp-1257979353.cos.ap-chengdu.myqcloud.com";
 const UNITY_PREVIEW_ASSET_ORIGINS = new Set([
   `https://${UNITY_PREVIEW_LEGACY_COS_HOST}`,
   `https://${UNITY_PREVIEW_CDN_HOST}`,
+  `https://${UNITY_PREVIEW_MRPP_COS_HOST}`,
 ]);
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>

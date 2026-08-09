@@ -19,6 +19,8 @@ type UseUnityPreviewBridgeOptions = {
   notifyError: (message: string) => void;
 };
 
+type UnityPreviewProtocol = "pending" | "session-v1" | "legacy-v0";
+
 const initialStatus = "正在加载 Unity 运行器...";
 
 const createUnityPreviewSession = (): string => {
@@ -84,6 +86,7 @@ export const useUnityPreviewBridge = ({
   const status = ref(initialStatus);
   const frameKey = ref(0);
   const runSession = ref("");
+  const runnerProtocol = ref<UnityPreviewProtocol>("pending");
   const panMode = ref(false);
   const pendingPayload = ref<unknown>(null);
   let runningFallbackTimer: number | undefined;
@@ -123,6 +126,56 @@ export const useUnityPreviewBridge = ({
     runSession.value === session &&
     frameVisible.value;
 
+  const bindRunnerSession = (
+    message: Record<string, unknown>,
+    session: string
+  ): Record<string, unknown> =>
+    runnerProtocol.value === "legacy-v0" ? message : { ...message, session };
+
+  const postDispose = () => {
+    const session = runSession.value;
+    if (!session) return;
+
+    dialogRef.value?.postMessage(
+      bindRunnerSession({ type: "webgl-preview-dispose" }, session),
+      targetOrigin.value
+    );
+  };
+
+  const acceptsRunnerMessage = (
+    message: Record<string, unknown>,
+    session: string
+  ): boolean => {
+    const hasSession = Object.prototype.hasOwnProperty.call(message, "session");
+
+    if (runnerProtocol.value === "pending") {
+      // Only a READY from the current iframe and exact runner origin may select
+      // the protocol for this load epoch. Older runners either omit session or
+      // echo an empty session; current runners must echo the exact nonce.
+      if (message.type !== "unity-web-preview-ready") return false;
+      if (hasSession && message.session !== "" && message.session !== session) {
+        return false;
+      }
+
+      runnerProtocol.value =
+        hasSession && message.session === session ? "session-v1" : "legacy-v0";
+      if (runnerProtocol.value === "legacy-v0") {
+        logger.warn(
+          "[UnityPreview] trusted legacy runner selected for this load epoch"
+        );
+      }
+      return true;
+    }
+
+    if (runnerProtocol.value === "session-v1") {
+      return hasSession && message.session === session;
+    }
+
+    // Once legacy mode is selected, never accept a later session-bearing
+    // message. Protocol selection is immutable until the iframe is replaced.
+    return !hasSession || message.session === "";
+  };
+
   const postPayload = (
     payload: unknown,
     session: string,
@@ -149,11 +202,13 @@ export const useUnityPreviewBridge = ({
       return;
     }
     const sent = dialog.postMessage(
-      {
-        type: "xrugc-load-scene-json",
-        session,
-        payload: postablePayload,
-      },
+      bindRunnerSession(
+        {
+          type: "xrugc-load-scene-json",
+          payload: postablePayload,
+        },
+        session
+      ),
       targetOrigin.value
     );
     if (!sent) {
@@ -182,11 +237,13 @@ export const useUnityPreviewBridge = ({
 
     const mode = panMode.value ? "pan" : "orbit";
     dialog.postMessage(
-      {
-        type: "unity-web-preview-camera-mode",
-        session,
-        mode,
-      },
+      bindRunnerSession(
+        {
+          type: "unity-web-preview-camera-mode",
+          mode,
+        },
+        session
+      ),
       targetOrigin.value
     );
     logger.log("[UnityPreview] camera mode sent", mode);
@@ -210,10 +267,11 @@ export const useUnityPreviewBridge = ({
     if (!dialogRef.value?.isFrameSource(event.source)) return;
     if (event.origin !== targetOrigin.value) return;
     if (!event.data || typeof event.data !== "object") return;
-    if (!runSession.value || event.data.session !== runSession.value) return;
+    if (!runSession.value) return;
 
     const generation = runGeneration;
     const session = runSession.value;
+    if (!acceptsRunnerMessage(event.data, session)) return;
 
     if (event.data.type === "unity-web-preview-ready") {
       ready.value = true;
@@ -247,21 +305,14 @@ export const useUnityPreviewBridge = ({
       return;
     }
 
-    if (runSession.value) {
-      dialogRef.value?.postMessage(
-        {
-          type: "webgl-preview-dispose",
-          session: runSession.value,
-        },
-        targetOrigin.value
-      );
-    }
+    postDispose();
     const generation = ++runGeneration;
     const session = createUnityPreviewSession();
     clearRunningFallbackTimer();
     ready.value = false;
     frameVisible.value = false;
     runSession.value = "";
+    runnerProtocol.value = "pending";
     pendingPayload.value = null;
     hasPendingPayload = false;
     await ensureRuntimeData?.();
@@ -281,15 +332,7 @@ export const useUnityPreviewBridge = ({
   };
 
   const handleClosed = () => {
-    if (runSession.value) {
-      dialogRef.value?.postMessage(
-        {
-          type: "webgl-preview-dispose",
-          session: runSession.value,
-        },
-        targetOrigin.value
-      );
-    }
+    postDispose();
     runGeneration += 1;
     clearRunningFallbackTimer();
     visible.value = false;
@@ -298,6 +341,7 @@ export const useUnityPreviewBridge = ({
     panMode.value = false;
     status.value = initialStatus;
     runSession.value = "";
+    runnerProtocol.value = "pending";
     pendingPayload.value = null;
     hasPendingPayload = false;
   };
@@ -307,17 +351,10 @@ export const useUnityPreviewBridge = ({
   });
 
   onBeforeUnmount(() => {
-    if (runSession.value) {
-      dialogRef.value?.postMessage(
-        {
-          type: "webgl-preview-dispose",
-          session: runSession.value,
-        },
-        targetOrigin.value
-      );
-    }
+    postDispose();
     runGeneration += 1;
     runSession.value = "";
+    runnerProtocol.value = "pending";
     pendingPayload.value = null;
     hasPendingPayload = false;
     window.removeEventListener("message", handleMessage);
@@ -331,6 +368,7 @@ export const useUnityPreviewBridge = ({
     ready,
     status,
     frameKey,
+    runnerProtocol,
     panMode,
     pendingPayload,
     src,
