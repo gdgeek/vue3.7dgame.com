@@ -94,16 +94,23 @@ describe("nginx.conf.template — static proxy location blocks", () => {
   });
 
   it("proxies the fixed WebGL path and retires the arbitrary URL proxy", () => {
-    const removedProxy = extractLocationBlock(
+    const removedProxyExact = extractLocationBlock(
       nginxConfig,
       "= /__xrugc_proxy__"
+    );
+    const removedProxyPrefix = extractLocationBlock(
+      nginxConfig,
+      "^~ /__xrugc_proxy__/"
     );
 
     expect(nginxConfig).toContain("location ^~ /webgl-preview/");
     expect(nginxConfig).toContain("location = /__xrugc_proxy__");
+    expect(nginxConfig).toContain("location ^~ /__xrugc_proxy__/");
     expect(nginxConfig).toContain("${APP_UNITY_PREVIEW_UPSTREAM}");
-    expect(removedProxy).toContain("return 404");
-    expect(removedProxy).not.toContain("proxy_pass");
+    for (const removedProxy of [removedProxyExact, removedProxyPrefix]) {
+      expect(removedProxy).toContain("return 404");
+      expect(removedProxy).not.toContain("proxy_pass");
+    }
   });
 
   it("serves runtime env without immutable caching", () => {

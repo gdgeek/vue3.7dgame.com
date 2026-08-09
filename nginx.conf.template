@@ -86,6 +86,10 @@ server {
         return 404;
     }
 
+    location ^~ /__xrugc_proxy__/ {
+        return 404;
+    }
+
     # ============ 反向代理 - API (由 docker-entrypoint.sh 动态生成) ============
     # __API_LOCATIONS__
 

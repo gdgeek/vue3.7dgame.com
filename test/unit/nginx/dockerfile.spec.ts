@@ -60,6 +60,14 @@ describe.each(dockerfiles)("$name", ({ get }) => {
     expect(get()).toContain("ENTRYPOINT");
   });
 
+  it("uses the shared generated Nginx configuration chain", () => {
+    expect(get()).toContain(
+      "COPY nginx.conf.template /etc/nginx/templates/default.conf.template"
+    );
+    expect(get()).toContain("COPY docker-entrypoint.sh /docker-entrypoint.sh");
+    expect(get()).toContain('ENTRYPOINT ["/docker-entrypoint.sh"]');
+  });
+
   it("does not set NGINX_ENVSUBST_FILTER (handled by entrypoint)", () => {
     expect(get()).not.toContain("NGINX_ENVSUBST_FILTER");
   });
