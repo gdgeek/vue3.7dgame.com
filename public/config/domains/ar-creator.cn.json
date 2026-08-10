@@ -5,7 +5,7 @@
   "fallback_domain": null,
   "default_config": {
     "blog": "https://blog.ar-creator.cn/",
-    "icon": "https://ar-creator.cn/logo/xingkou/xingkou_logo.webp",
+    "icon": "/config/domains/xingkou-logo.webp",
     "lang": "zh-CN",
     "style": 1,
     "homepage": "https://ar-creator.cn/"

@@ -268,7 +268,7 @@ describe("domain-static-config", () => {
       is_domain_fallback: true,
       data: {
         homepage: "https://www.bujiaban.com/",
-        icon: "/icon.png",
+        icon: "/config/domains/bujiaban-icon.png",
       },
     });
 
