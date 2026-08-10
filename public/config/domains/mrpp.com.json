@@ -4,7 +4,7 @@
   "is_active": true,
   "fallback_domain": null,
   "default_config": {
-    "icon": "https://mrpp.com/logo/mrpp/logo.webp",
+    "icon": "/config/domains/mrpp-logo.webp",
     "homepage": "https://mrpp.com/"
   },
   "configs": {

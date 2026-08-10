@@ -4,7 +4,7 @@
   "is_active": true,
   "fallback_domain": null,
   "default_config": {
-    "icon": "https://xiading.hxgxonline.com/logo/xingkou/xingkou_logo.webp",
+    "icon": "/config/domains/xingkou-logo.webp",
     "homepage": "https://dev.xrugc.com/"
   },
   "configs": {

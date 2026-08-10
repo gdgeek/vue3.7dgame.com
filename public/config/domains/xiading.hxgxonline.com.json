@@ -5,7 +5,7 @@
   "fallback_domain": null,
   "default_config": {
     "blog": "https://blog.hxgxonline.com",
-    "icon": "https://xiading.hxgxonline.com/logo/xiading/logo.webp",
+    "icon": "/config/domains/xiading-logo.webp",
     "style": 1,
     "homepage": "https://xiading.hxgxonline.com"
   },
