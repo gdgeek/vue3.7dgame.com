@@ -13,6 +13,9 @@ describe("responsive editor header regression", () => {
   const headerActionsSource = readSource(
     "src/layout/components/NavBar/components/HeaderActions.vue"
   );
+  const userDropdownSource = readSource(
+    "src/layout/components/NavBar/components/UserDropdown.vue"
+  );
   const versionToolbarSource = readSource(
     "src/layout/components/NavBar/components/EditorVersionToolbar.vue"
   );
@@ -27,12 +30,23 @@ describe("responsive editor header regression", () => {
     expect(breadcrumbSource).toContain(".crumb-link:not(.is-primary)");
   });
 
-  it("keeps compact global actions and version controls accessible", () => {
+  it("uses viewport width for compact account actions while keeping both presentations accessible", () => {
     expect(headerActionsSource).toContain('class="compact-actions-dropdown"');
     expect(headerActionsSource).toContain("handleCompactCommand");
     expect(headerActionsSource).toContain(
       ":aria-label=\"t('ui.moreActions')\""
     );
+    expect(headerActionsSource).toContain("@media (width <= 1280px)");
+    expect(headerActionsSource).not.toContain(
+      "@container app-navbar (width <= 1200px)"
+    );
+    expect(userDropdownSource).toContain("@media (width <= 1280px)");
+    expect(userDropdownSource).not.toContain(
+      "@container app-navbar (width <= 1200px)"
+    );
+  });
+
+  it("continues to compact version controls by available navbar width", () => {
     expect(versionToolbarSource).toContain('class="entry-label"');
     expect(versionToolbarSource).toContain(
       "@container app-navbar (width <= 1200px)"
