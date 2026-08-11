@@ -258,7 +258,10 @@ const handleCompactCommand = async (command: string) => {
   color: var(--primary-color);
 }
 
-@container app-navbar (width <= 1200px) {
+// Use the viewport here so an expanded sidebar does not make a wide screen
+// look like a compact device. Other navbar content can still respond to the
+// space available inside app-navbar.
+@media (width <= 1280px) {
   .actions-group {
     display: none;
   }
