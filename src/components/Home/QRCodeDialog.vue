@@ -35,12 +35,7 @@
               v-if="isLoginCodeInactive"
               class="qrcode-blocker"
               aria-hidden="true"
-            >
-              <font-awesome-icon
-                :icon="['fas', 'lock']"
-                class="qrcode-blocker__icon"
-              ></font-awesome-icon>
-            </div>
+            ></div>
           </div>
         </div>
         <p
@@ -266,53 +261,21 @@ defineExpose({
 
 .qrcode-box {
   position: relative;
-  overflow: hidden;
   padding: 10px;
+  overflow: hidden;
   background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-md, 8px);
 }
 
-.qrcode-box--disabled {
-  border-color: var(--el-color-warning-light-5, #f3d19e);
-}
-
 .qrcode-blocker {
   position: absolute;
-  inset: 10px;
+  inset: 0;
   z-index: 2;
-  display: grid;
-  place-items: center;
   pointer-events: none;
-  background:
-    linear-gradient(
-      135deg,
-      var(--bg-card, #fff) 0%,
-      var(--bg-card, #fff) 48%,
-      var(--el-color-warning-light-7, #f8e3c5) 48%,
-      var(--el-color-warning-light-7, #f8e3c5) 52%,
-      var(--bg-card, #fff) 52%,
-      var(--bg-card, #fff) 100%
-    ),
-    repeating-linear-gradient(
-      45deg,
-      var(--el-color-warning-light-9, #fdf6ec) 0,
-      var(--el-color-warning-light-9, #fdf6ec) 8px,
-      var(--bg-card, #fff) 8px,
-      var(--bg-card, #fff) 16px
-    );
-  border-radius: 4px;
-}
-
-.qrcode-blocker__icon {
-  width: 72px;
-  height: 72px;
-  padding: 24px;
-  color: var(--el-color-warning, #e6a23c);
-  background: var(--bg-card, #fff);
-  border: 2px solid var(--el-color-warning, #e6a23c);
-  border-radius: 50%;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+  background: color-mix(in srgb, var(--bg-card, #fff) 62%, transparent);
+  backdrop-filter: blur(12px) saturate(75%);
+  border-radius: inherit;
 }
 
 .qrcode-tip {
