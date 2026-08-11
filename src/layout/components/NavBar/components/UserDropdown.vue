@@ -184,7 +184,7 @@ onUnmounted(() => {
   margin-right: 8px;
 }
 
-@container app-navbar (width <= 1200px) {
+@media (width <= 1280px) {
   .profile-trigger {
     gap: 0;
     min-width: 44px;
