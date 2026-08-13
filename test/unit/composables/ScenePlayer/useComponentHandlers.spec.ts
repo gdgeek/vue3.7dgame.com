@@ -278,6 +278,89 @@ describe("applyComponents", () => {
       });
       expect(ctx.rotatingObjects.value).toHaveLength(1);
       expect(ctx.rotatingObjects.value[0].mesh).toStrictEqual(mesh);
+      expect(ctx.rotatingObjects.value[0].speed).toEqual({
+        x: 0,
+        y: 45,
+        z: 0,
+      });
+    });
+
+    it("registers when isRotating is explicitly true", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [
+          {
+            type: "Rotate",
+            parameters: {
+              uuid: "r1",
+              speed: { x: 10, y: 20, z: 30 },
+              isRotating: true,
+            },
+          },
+        ],
+        ctx,
+      });
+
+      expect(ctx.rotatingObjects.value).toHaveLength(1);
+    });
+
+    it("does not initially register when isRotating is false", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      const result = applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [
+          {
+            type: "Rotate",
+            parameters: {
+              uuid: "r1",
+              speed: { x: 10, y: 20, z: 30 },
+              isRotating: false,
+            },
+          },
+        ],
+        ctx,
+      });
+
+      expect(ctx.rotatingObjects.value).toHaveLength(0);
+      expect(
+        typeof (result.data as { setRotating?: unknown }).setRotating
+      ).toBe("function");
+    });
+
+    it("keeps repeated setRotating calls idempotent", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      const result = applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [
+          {
+            type: "Rotate",
+            parameters: {
+              uuid: "r1",
+              speed: { x: 0, y: 90, z: 0 },
+              isRotating: false,
+            },
+          },
+        ],
+        ctx,
+      });
+      const { setRotating } = result.data as {
+        setRotating: (isRotating: boolean) => void;
+      };
+
+      setRotating(true);
+      setRotating(true);
+      expect(ctx.rotatingObjects.value).toHaveLength(1);
+
+      setRotating(false);
+      setRotating(false);
+      expect(ctx.rotatingObjects.value).toHaveLength(0);
     });
 
     it("logs warning when speed is missing", async () => {

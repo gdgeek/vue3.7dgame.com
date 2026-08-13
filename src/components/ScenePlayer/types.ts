@@ -28,6 +28,8 @@ export type ComponentParameters = {
   uuid: string;
   target?: string;
   speed?: TransformAxis;
+  /** Missing means enabled for compatibility with entities saved before this flag. */
+  isRotating?: boolean;
   magnetic?: boolean;
   scalable?: boolean;
   limit?: {
