@@ -4,14 +4,20 @@
     v-model="isModalOpen"
     :verse-id="currentVerseId"
     :title="currentTitle"
+    :switch-request-token="switchRequestToken"
     @saved="handleSaved"
+    @switch-accepted="acceptPendingScriptEditor"
+    @switch-rejected="rejectPendingScriptEditor"
   ></ScriptEditorModal>
   <MetaScriptEditorModal
     v-if="currentType === 'meta'"
     v-model="isModalOpen"
     :meta-id="currentMetaId"
     :title="currentTitle"
+    :switch-request-token="switchRequestToken"
     @saved="handleSaved"
+    @switch-accepted="acceptPendingScriptEditor"
+    @switch-rejected="rejectPendingScriptEditor"
   ></MetaScriptEditorModal>
 </template>
 
@@ -27,5 +33,8 @@ const {
   currentType,
   currentTitle,
   handleSaved,
+  switchRequestToken,
+  acceptPendingScriptEditor,
+  rejectPendingScriptEditor,
 } = useScriptEditorModal();
 </script>

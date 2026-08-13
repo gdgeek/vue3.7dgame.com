@@ -278,6 +278,13 @@ let autoSaveTimer: number | null = null;
 const toolbarOwner = "meta-scene-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
   useEditorVersionToolbar();
+
+const activateToolbar = () => {
+  registerToolbar(toolbarOwner, {
+    status: toolbarStatus.value,
+    onOpen: openVersionDialog,
+  });
+};
 const toolbarStatus = computed<EditorToolbarStatus>(() => {
   if (isSavingVersion.value) return "saving";
   if (pendingRestorePayload.value || hasUnsavedChangesBeforeUnload.value) {
@@ -1419,10 +1426,7 @@ watch(id, (newId, oldId) => {
 // 生命周期钩子
 onMounted(() => {
   loadSceneDraftState();
-  registerToolbar(toolbarOwner, {
-    status: toolbarStatus.value,
-    onOpen: openVersionDialog,
-  });
+  activateToolbar();
   restartAutoSaveTimer();
   window.addEventListener("message", handleMessage);
   window.addEventListener("beforeunload", handleBeforeUnload);
@@ -1431,6 +1435,9 @@ onMounted(() => {
     void syncUnsavedChangesForBeforeUnload();
   }, 2000);
 });
+
+onActivated(activateToolbar);
+onDeactivated(() => unregisterToolbar(toolbarOwner));
 
 onBeforeRouteLeave(async (_to, _from, next) => {
   const canLeave = await resolveUnsavedBeforeLeave();

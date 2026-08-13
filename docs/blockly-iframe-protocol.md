@@ -71,6 +71,11 @@ interface Message {
         js: string,
         lua: string
       },
+      persisted?: {                       // v2；服务端确认的保存基线
+        data: object,                     // 与 data 分离，data 可为未保存草稿
+        code: { js: string, lua: string }
+      },
+      hostSessionId?: string,             // v2；当前 iframe/脚本会话标识
       userInfo: {                         // 用户信息（控制权限）
         id: number | null,
         role: string
@@ -79,6 +84,8 @@ interface Message {
   }
 }
 ```
+
+`data` 表示本次 iframe 应加载的工作区，语言切换或 iframe 重建时可以是尚未保存的草稿；`persisted` 始终表示服务端最后确认的工作区和代码。新版 Blockly 必须用 `persisted` 建立 dirty/save 基线，并在 `EVENT`、`RESPONSE` 中原样回传 `hostSessionId`。旧版不识别这些字段时仍按 `data`、`code` 工作。
 
 ### PLUGIN_READY（Blockly → 主系统）
 
@@ -101,12 +108,14 @@ Blockly 在 `useMessageBridge` 的 `onMounted` 中自动发送，表示消息桥
   type: "REQUEST",
   id: "1711234567890-save123",
   payload: {
-    action: "save"
+    action: "save",
+    hostSessionId: "script-...",
+    workspaceRevision: 12
   }
 }
 ```
 
-Blockly 侧也可以通过 Ctrl+S 快捷键触发保存，此时内部直接调用 save handler，不经过 postMessage。
+新版 Blockly 通过 `EVENT { event: "save-request" }` 把 Ctrl/Cmd+S 交给宿主，再由宿主发送带会话和 revision 的标准 `REQUEST`。滚动发布期间，宿主仍兼容旧版 Blockly 直接返回的可信 `RESPONSE`，但 v2 会话一旦确认就只接受标准请求关联响应。
 
 ### RESPONSE（Blockly → 主系统）
 
@@ -143,11 +152,18 @@ Blockly 侧也可以通过 Ctrl+S 快捷键触发保存，此时内部直接调�
   payload: {
     action: "save",
     noChange: true,
+    hostSessionId: "script-...",
+    workspaceRevision: 12,
+    js: "// compared JavaScript code...",
+    lua: "-- compared Lua code...",
+    data: { /* compared Blockly workspace JSON */ },
     warnings: ["存在未连接到流程的积木"] // 同样可选
   },
   requestId: "1711234567890-save123"
 }
 ```
+
+`noChange` 必须返回本次比较使用的完整快照。宿主只把该快照推进为已保存基线；如果保存请求发出后又有编辑，更新后的内容继续保持 dirty，不会被迟到的 `noChange` 清除。
 
 `warnings` 是向后兼容的可选字段，推荐使用带 `message` 的对象；主系统也兼容字符串。主系统只读取非空字符串或对象中的非空 `message`，忽略其他内容。警告不会改变 `action: "save"` 的成功语义：有变更时先完成服务端保存，无变更时完成正常响应，然后显示一条简洁的警告汇总。
 
@@ -190,7 +206,20 @@ Blockly 主动推送的通知，通过 `payload.event` 区分事件类型。
     event: "update",
     lua: "-- current Lua code...",
     js: "// current JavaScript code...",
-    blocklyData: { /* current workspace JSON */ }
+    blocklyData: { /* current workspace JSON */ },
+    dirty: true,
+    workspaceRevision: 12,
+    hostSessionId: "script-..."
+  }
+}
+
+// Blockly 内部 Ctrl/Cmd+S 请求宿主发起标准保存握手
+{
+  type: "EVENT",
+  id: "1711234567892-save001",
+  payload: {
+    event: "save-request",
+    hostSessionId: "script-..."
   }
 }
 
@@ -204,6 +233,8 @@ Blockly 主动推送的通知，通过 `payload.event` 区分事件类型。
   }
 }
 ```
+
+宿主仅处理来自当前 iframe `contentWindow`、预期 Blockly origin 和当前 `hostSessionId` 的消息；旧 frame、旧会话及倒退的 `workspaceRevision` 会被忽略。Blockly 声明 `dirty` 时该值是权威状态，宿主仅对旧版 Blockly 使用快照签名回退。
 
 ### THEME_CHANGE（主系统 → Blockly）
 

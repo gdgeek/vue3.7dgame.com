@@ -109,6 +109,16 @@ function withSetup<T>(composable: () => T): { result: T; unmount: () => void } {
   return { result, unmount: () => app.unmount() };
 }
 
+function latestRequestId(postMessage: ReturnType<typeof vi.fn>): string {
+  const request = [...postMessage.mock.calls]
+    .reverse()
+    .find(([message]) => message?.type === "REQUEST")?.[0] as
+    | { id?: unknown }
+    | undefined;
+  if (typeof request?.id !== "string") throw new Error("REQUEST was not sent");
+  return request.id;
+}
+
 function makeOptions(
   overrides: Partial<UseScriptEditorBaseOptions> = {}
 ): UseScriptEditorBaseOptions {
@@ -211,6 +221,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         new MessageEvent("message", {
           data: {
             type: "RESPONSE",
+            requestId: latestRequestId(mockPostMessage),
             payload: {
               action: "save",
               lua: "return {}",
@@ -241,30 +252,34 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
       } as unknown as HTMLIFrameElement;
 
       result.save();
+      const requestId = latestRequestId(mockPostMessage);
 
       // First RESPONSE save → calls saveResolve(), sets it to null
       await result.handleMessage(
         new MessageEvent("message", {
           data: {
             type: "RESPONSE",
+            requestId,
             payload: { action: "save", lua: "x", js: "y", data: {} },
           },
         })
       );
 
       // Second RESPONSE save → saveResolve is null, so lines NOT triggered again
-      vi.clearAllMocks();
+      onPost.mockClear();
       await result.handleMessage(
         new MessageEvent("message", {
           data: {
             type: "RESPONSE",
+            requestId,
             payload: { action: "save", lua: "x", js: "y", data: {} },
           },
         })
       );
 
-      // onPost called again (not saveResolve)
-      expect(onPost).toHaveBeenCalled();
+      // Legacy Blockly shortcut responses remain compatible before v2 session
+      // negotiation; source/origin validation is covered by the primary suite.
+      expect(onPost).not.toHaveBeenCalled();
 
       unmount();
     });
@@ -285,10 +300,14 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         contentWindow: { postMessage: mockPostMessage },
       } as unknown as HTMLIFrameElement;
 
+      const savePromise = result.save();
+      void savePromise.catch(() => undefined);
+
       await result.handleMessage(
         new MessageEvent("message", {
           data: {
             type: "RESPONSE",
+            requestId: latestRequestId(mockPostMessage),
             payload: { action: "save", lua: "x", js: "y", data: {} },
           },
         })
@@ -392,7 +411,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
       unmount();
     });
 
-    it("changing language calls onReady", async () => {
+    it("changing language waits for the new frame PLUGIN_READY", async () => {
       const onReady = vi.fn();
       const { unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions({ onReady }))
@@ -402,7 +421,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
       await nextTick();
       await nextTick();
 
-      expect(onReady).toHaveBeenCalled();
+      expect(onReady).not.toHaveBeenCalled();
 
       unmount();
     });
@@ -445,7 +464,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
           type: "THEME_CHANGE",
           payload: expect.objectContaining({ theme: "dark", dark: true }),
         }),
-        "*"
+        "https://blockly.test"
       );
 
       unmount();
@@ -526,6 +545,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         new MessageEvent("message", {
           data: {
             type: "RESPONSE",
+            requestId: latestRequestId(mockPostMessage),
             payload: { action: "save", lua: "x", js: "y", data: {} },
           },
         })
@@ -566,6 +586,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
         new MessageEvent("message", {
           data: {
             type: "RESPONSE",
+            requestId: latestRequestId(mockPostMessage),
             payload: { action: "save", lua: "x", js: "y", data: {} },
           },
         })
