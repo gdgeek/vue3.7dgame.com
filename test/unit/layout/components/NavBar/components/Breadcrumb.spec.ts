@@ -97,22 +97,35 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
     expect(crumb!.textContent).toContain("breadcrumb.workspace");
   });
 
-  it("renders editor breadcrumb chain for /meta/script", async () => {
-    mockRoute.meta = { title: "系统管理" };
-    mockRoute.path = "/meta/script";
-    mockRoute.query = { title: "测试实体" };
-    const { el } = await mount();
-    const crumbs = Array.from(el.querySelectorAll(".crumb-link")).map(
-      (node) => node.textContent?.trim() || ""
-    );
-    expect(crumbs.length).toBeGreaterThanOrEqual(4);
-    expect(crumbs).toContain("breadcrumb.workspace");
-    expect(crumbs).toContain("sidebar.entity");
-    expect(crumbs).toContain("测试实体");
-    expect(el.querySelector(".crumb-link.is-primary")?.textContent).toContain(
-      "测试实体"
-    );
-  });
+  it.each([
+    ["/meta/script", "测试实体", "route.meta.scriptEditor"],
+    ["/meta/scene", "测试实体", "route.meta.sceneEditor"],
+    ["/verse/script", "测试场景", "route.project.scriptEditor"],
+    ["/verse/scene", "测试场景", "route.project.sceneEditor"],
+  ])(
+    "keeps the breadcrumb chain and renders the current mode as a tag for %s",
+    async (path, name, modeLabel) => {
+      mockRoute.meta = { title: "编辑器" };
+      mockRoute.path = path;
+      mockRoute.query = { title: name };
+      const { el } = await mount();
+      const crumbs = Array.from(el.querySelectorAll(".crumb-link")).map(
+        (node) => node.textContent?.trim() || ""
+      );
+      const modeTag = el.querySelector(".editor-mode-tag");
+
+      expect(crumbs).toContain("breadcrumb.workspace");
+      expect(crumbs).toContain(name);
+      expect(el.querySelector(".crumb-link.is-primary")?.textContent).toContain(
+        name
+      );
+      expect(modeTag?.textContent).toContain(modeLabel);
+      expect(modeTag?.getAttribute("aria-current")).toBe("page");
+      expect(modeTag?.previousElementSibling?.classList).not.toContain(
+        "crumb-separator"
+      );
+    }
+  );
 
   it("handles unknown path — returns workspace breadcrumb key", async () => {
     mockRoute.meta = { title: "SomeTitle" };
