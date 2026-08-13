@@ -3,6 +3,7 @@
  * These component types apply to both Voxel and GLTF models.
  */
 import * as THREE from "three";
+import { toRaw } from "vue";
 import { logger } from "@/utils/logger";
 import type {
   EntityComponent,
@@ -144,25 +145,35 @@ export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
       logger.warn("[ScenePlayer] Rotate component missing speed parameter");
     } else {
       const speed = {
-        x: THREE.MathUtils.degToRad(speedValue.x),
-        y: THREE.MathUtils.degToRad(speedValue.y),
-        z: THREE.MathUtils.degToRad(speedValue.z),
+        x: speedValue.x,
+        y: speedValue.y,
+        z: speedValue.z,
       };
+      const registration = { mesh, speed, checkVisibility: true };
+      const matchesMesh = (object: { mesh: THREE.Object3D }) =>
+        toRaw(object.mesh) === toRaw(mesh);
 
-      rotatingObjects.value.push({ mesh, speed, checkVisibility: true });
+      const setRotating = (isRotating: boolean) => {
+        if (isRotating) {
+          if (!rotatingObjects.value.some(matchesMesh)) {
+            rotatingObjects.value.push(registration);
+          }
+          return;
+        }
 
-      (sourceData.data as SourceModelData).setRotating = (
-        isRotating: boolean
-      ) => {
-        const index = rotatingObjects.value.findIndex(
-          (obj) => obj.mesh === mesh
-        );
-        if (index !== -1 && !isRotating) {
-          rotatingObjects.value.splice(index, 1);
-        } else if (index === -1 && isRotating) {
-          rotatingObjects.value.push({ mesh, speed, checkVisibility: true });
+        for (
+          let index = rotatingObjects.value.length - 1;
+          index >= 0;
+          index--
+        ) {
+          if (matchesMesh(rotatingObjects.value[index])) {
+            rotatingObjects.value.splice(index, 1);
+          }
         }
       };
+
+      (sourceData.data as SourceModelData).setRotating = setRotating;
+      setRotating(rotateComponent.parameters.isRotating !== false);
     }
   }
 
