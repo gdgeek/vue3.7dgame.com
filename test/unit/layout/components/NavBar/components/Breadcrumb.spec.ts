@@ -119,6 +119,9 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
       expect(el.querySelector(".crumb-link.is-primary")?.textContent).toContain(
         name
       );
+      expect(el.querySelector(".breadcrumb-nav")?.classList).toContain(
+        "has-mode-tag"
+      );
       expect(modeTag?.textContent).toContain(modeLabel);
       expect(modeTag?.getAttribute("aria-current")).toBe("page");
       expect(modeTag?.previousElementSibling?.classList).not.toContain(
@@ -134,6 +137,9 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
     const crumb = el.querySelector(".crumb-link");
     // i18n mock returns key, unknown path falls through to t("breadcrumb.workspace")
     expect(crumb!.textContent).toContain("breadcrumb.workspace");
+    expect(el.querySelector(".breadcrumb-nav")?.classList).not.toContain(
+      "has-mode-tag"
+    );
   });
 
   it("navigates when clicking clickable breadcrumb item", async () => {
