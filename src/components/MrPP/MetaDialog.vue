@@ -224,8 +224,20 @@ import {
 import SignalInfoPanel from "@/components/Meta/SignalInfoPanel.vue";
 import { useDialogList } from "@/composables/useDialogList";
 import type { ViewMode } from "@/components/StandardPage/types";
+import {
+  MetaSceneInsertError,
+  insertCompleteMetasForScene,
+} from "./metaSceneInsert";
 
-const emit = defineEmits(["selected", "cancel"]);
+const emit = defineEmits<{
+  selected: [
+    payload: {
+      data: metaInfo;
+      title: string;
+    },
+  ];
+  cancel: [];
+}>();
 
 const { t } = useI18n();
 const metaCache = new Map<
@@ -387,32 +399,38 @@ const handleDetailClose = () => {
   detailLoading.value = false;
 };
 
-const resolveMetaForSceneInsert = async (item: metaInfo): Promise<metaInfo> => {
-  const hasMetaData = item?.data !== undefined && item?.data !== null;
-  const hasResources = Array.isArray(item?.resources);
-  if (hasMetaData && hasResources) return item;
-
-  try {
-    const response = await getMeta(item.id, {
-      expand: "resources",
-    });
-    return response.data;
-  } catch {
-    return item;
-  }
+const loadCompleteMeta = async (metaId: number): Promise<metaInfo> => {
+  const response = await getMeta(metaId, {
+    expand: "resources",
+  });
+  return response.data;
 };
 
-const emitSelectedMeta = async (item: metaInfo) => {
-  const completeMeta = await resolveMetaForSceneInsert(item);
+const notifySceneInsertFailure = () => {
+  ElMessage.error(t("verse.view.metaDialog.loadFailure"));
+};
+
+const emitSelectedMeta = (completeMeta: metaInfo) => {
   emit("selected", {
     data: completeMeta,
-    title: completeMeta.title || item.title,
+    title: completeMeta.title || "",
   });
 };
 
 const putSingle = async (item: metaInfo) => {
-  await emitSelectedMeta(item);
-  dialogVisible.value = false;
+  try {
+    await insertCompleteMetasForScene(
+      [item],
+      loadCompleteMeta,
+      emitSelectedMeta
+    );
+    dialogVisible.value = false;
+  } catch (error) {
+    if (!(error instanceof MetaSceneInsertError)) {
+      console.warn("Failed to load entity details for scene insertion.", error);
+    }
+    notifySceneInsertFailure();
+  }
 };
 
 const putSelected = async () => {
@@ -421,15 +439,31 @@ const putSelected = async () => {
     return;
   }
 
-  for (const id of selectedIds.value) {
-    const selectedMeta =
+  const selectedMetas = selectedIds.value.map((id) => {
+    return (
       selectedMetaMap.get(id) ||
-      active.value.items.find((item) => item.id === id);
-    if (selectedMeta) {
-      await emitSelectedMeta(selectedMeta);
-    }
+      active.value.items.find((item) => item.id === id)
+    );
+  });
+
+  if (selectedMetas.some((item) => !item)) {
+    notifySceneInsertFailure();
+    return;
   }
-  dialogVisible.value = false;
+
+  try {
+    await insertCompleteMetasForScene(
+      selectedMetas as metaInfo[],
+      loadCompleteMeta,
+      emitSelectedMeta
+    );
+    dialogVisible.value = false;
+  } catch (error) {
+    if (!(error instanceof MetaSceneInsertError)) {
+      console.warn("Failed to load selected entity details.", error);
+    }
+    notifySceneInsertFailure();
+  }
 };
 
 const selectAllCurrentPage = () => {

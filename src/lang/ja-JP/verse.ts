@@ -249,6 +249,8 @@ export default {
       metaDialog: {
         title: "メタデータを選択",
         select: "選択",
+        loadFailure:
+          "エンティティの詳細を読み込めませんでした。もう一度お試しください。",
         create: "新規作成",
         cancel: "キャンセル",
         input1: "モデル名を入力してください",

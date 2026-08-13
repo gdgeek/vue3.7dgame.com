@@ -181,6 +181,7 @@ export default {
         putIn: "放入",
         putAllIn: "放入已选",
         noItemSelected: "请至少选择一个实体",
+        loadFailure: "实体详情读取失败，请稍后重试。",
         create: "新 建",
         cancel: "取 消",
         input1: "请输入Model名称",
