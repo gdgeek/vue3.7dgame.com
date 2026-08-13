@@ -12,13 +12,19 @@
     <div v-loading="loading" class="script-editor-content">
       <el-card class="box-card">
         <template #header>
-          <div v-if="verse" class="clearfix">
-            <el-link :href="sceneEditorLink" :underline="false">{{
-              verse.name
-            }}</el-link>
-            /【{{ $t("verse.view.script.title") }}】
+          <div v-if="verse" class="script-editor-modal-header">
+            <div class="script-editor-modal-header__context">
+              <el-link :href="sceneEditorLink" :underline="false">{{
+                verse.name
+              }}</el-link>
+              <EditorModeTag
+                mode="script"
+                :label="String($t('route.project.scriptEditor'))"
+                :dirty="hasUnsavedChanges"
+              ></EditorModeTag>
+            </div>
 
-            <el-button-group style="float: right">
+            <el-button-group>
               <el-button
                 v-if="saveable"
                 type="primary"
@@ -259,6 +265,7 @@ import {
 } from "@/composables/useScriptRuntime";
 import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
+import EditorModeTag from "@/components/EditorModeTag.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
 import {
   normalizeUnityPreviewVerseLua,
@@ -455,6 +462,7 @@ const {
   currentCodeType,
   codeDialogTitle,
   unsavedBlocklyData,
+  hasUnsavedChanges,
   editor,
   src,
   isDark,
@@ -813,6 +821,22 @@ watch(
 </script>
 
 <style scoped>
+.script-editor-modal-header,
+.script-editor-modal-header__context {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.script-editor-modal-header {
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.script-editor-modal-header__context {
+  min-width: 0;
+}
+
 .script-editor-modal :deep(.el-dialog__body) {
   height: calc(100vh - 60px);
   padding: 0;

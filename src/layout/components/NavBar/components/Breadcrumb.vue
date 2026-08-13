@@ -4,7 +4,14 @@
       v-for="(item, index) in breadcrumbItems"
       :key="`${item.label}-${index}`"
     >
+      <EditorModeTag
+        v-if="item.kind === 'mode'"
+        :label="item.label"
+        :mode="item.mode || 'script'"
+        :dirty="showUnsavedDot"
+      ></EditorModeTag>
       <component
+        v-else
         :is="item.clickable ? 'button' : 'span'"
         :type="item.clickable ? 'button' : undefined"
         class="crumb-link"
@@ -26,7 +33,13 @@
           class="crumb-unsaved-dot crumb-unsaved-dot--compact"
         ></span>
       </component>
-      <span v-if="index < breadcrumbItems.length - 1" class="crumb-separator">
+      <span
+        v-if="
+          index < breadcrumbItems.length - 1 &&
+          breadcrumbItems[index + 1]?.kind !== 'mode'
+        "
+        class="crumb-separator"
+      >
         /
       </span>
     </template>
@@ -40,6 +53,7 @@ import type { RouteLocationRaw } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
 import { translateRouteTitle } from "@/utils/i18n";
+import EditorModeTag from "@/components/EditorModeTag.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -81,18 +95,6 @@ const extractNameFromTitle = (title: string): string => {
   return normalized;
 };
 
-const getScriptLabel = (): string => {
-  const metaScript = t("meta.script.title");
-  if (metaScript && metaScript !== "meta.script.title") {
-    return String(metaScript);
-  }
-  const verseScript = t("verse.view.script.title");
-  if (verseScript && verseScript !== "verse.view.script.title") {
-    return String(verseScript);
-  }
-  return "脚本";
-};
-
 const resolveEditorName = (): string => {
   const queryTitle = getQueryString(route.query.title);
   if (queryTitle) return extractNameFromTitle(queryTitle);
@@ -115,6 +117,8 @@ interface BreadcrumbSegment {
   clickable: boolean;
   isCurrent: boolean;
   isPrimary: boolean;
+  kind: "crumb" | "mode";
+  mode?: "script" | "scene" | "entity";
 }
 
 const HOME_PATH: RouteLocationRaw = { path: "/home/index" };
@@ -221,7 +225,6 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
   const workspace = String(t("breadcrumb.workspace"));
   const entity = String(t("sidebar.entity"));
   const scene = String(t("sidebar.scene"));
-  const script = getScriptLabel();
   const editorName = resolveEditorName();
 
   const buildSegments = (
@@ -230,6 +233,8 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       to?: RouteLocationRaw;
       clickable?: boolean;
       primary?: boolean;
+      kind?: "crumb" | "mode";
+      mode?: "script" | "scene" | "entity";
     }>
   ): BreadcrumbSegment[] => {
     const lastIndex = segments.length - 1;
@@ -245,6 +250,8 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
         isCurrent,
         isPrimary:
           Boolean(segment.primary) || (!hasExplicitPrimary && isCurrent),
+        kind: segment.kind || "crumb",
+        mode: segment.mode,
       };
     });
   };
@@ -255,6 +262,11 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       { label: workspace, to: HOME_PATH, clickable: true },
       { label: entity, to: ENTITY_LIST_PATH, clickable: true },
       { label: name, primary: true },
+      {
+        label: String(t("route.meta.sceneEditor")),
+        kind: "mode",
+        mode: "entity",
+      },
     ]);
   }
 
@@ -269,7 +281,11 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
         to: { path: "/meta/scene", query: route.query },
         clickable: true,
       },
-      { label: script },
+      {
+        label: String(t("route.meta.scriptEditor")),
+        kind: "mode",
+        mode: "script",
+      },
     ]);
   }
 
@@ -279,6 +295,11 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       { label: workspace, to: HOME_PATH, clickable: true },
       { label: scene, to: SCENE_LIST_PATH, clickable: true },
       { label: name, primary: true },
+      {
+        label: String(t("route.project.sceneEditor")),
+        kind: "mode",
+        mode: "scene",
+      },
     ]);
   }
 
@@ -293,7 +314,11 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
         to: { path: "/verse/scene", query: route.query },
         clickable: true,
       },
-      { label: script },
+      {
+        label: String(t("route.project.scriptEditor")),
+        kind: "mode",
+        mode: "script",
+      },
     ]);
   }
 
