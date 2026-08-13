@@ -258,6 +258,7 @@ export default {
         putIn: "Put In",
         putAllIn: "Put Selected",
         noItemSelected: "Please select at least one entity",
+        loadFailure: "Failed to load entity details. Please try again.",
         create: "Create New",
         cancel: "Cancel",
         input1: "Please enter Model name",

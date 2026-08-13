@@ -76,6 +76,7 @@ import type {
   ScriptDraftVersion,
   ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
+import type { MetaInfo } from "@/api/v1/types/meta";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
 import { VERSE_SCENE_EXPAND, buildVerseEditorInitConfig } from "./sceneSpace";
@@ -352,7 +353,7 @@ type PrefabSetupPayload = {
 };
 
 type SelectedMetaPayload = {
-  data: unknown;
+  data: MetaInfo;
   setup?: unknown;
   title?: string;
 };

@@ -250,6 +250,7 @@ export default {
       metaDialog: {
         title: "เลือกเอนทิตี",
         select: "เลือก",
+        loadFailure: "โหลดรายละเอียดเอนทิตีไม่สำเร็จ โปรดลองอีกครั้ง",
         create: "สร้างใหม่",
         cancel: "ยกเลิก",
         input1: "กรุณากรอกชื่อ Model",
