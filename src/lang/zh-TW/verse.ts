@@ -253,6 +253,7 @@ export default {
         putIn: "放入",
         putAllIn: "放入已選",
         noItemSelected: "請至少選擇一個實體",
+        loadFailure: "實體詳情讀取失敗，請稍後重試。",
         create: "新 建",
         cancel: "取 消",
         input1: "請輸入Model名稱",
