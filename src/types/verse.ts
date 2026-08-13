@@ -118,6 +118,7 @@ export interface CollisionObject {
 
 export interface RotatingObject {
   mesh: THREE.Object3D;
+  /** Persisted Unity rotation speed in degrees per second (kept unmodified). */
   speed: Vector3;
   checkVisibility: boolean;
 }

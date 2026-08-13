@@ -50,6 +50,7 @@ import { useSceneAnimation } from "./composables/useSceneAnimation";
 import { useVerseMode } from "./composables/useVerseMode";
 import { useThreeScene } from "./composables/useThreeScene";
 import { useResourceLoaders } from "./composables/useResourceLoaders";
+import { advanceUnityRotations } from "./unityRotation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 import type {
@@ -220,13 +221,8 @@ onMounted(async () => {
     const onFrame = (delta: number) => {
       mixers.forEach((mixer) => mixer.update(delta));
 
-      // Rotate objects
-      rotatingObjects.value.forEach((obj) => {
-        if (obj.checkVisibility && !obj.mesh.visible) return;
-        obj.mesh.rotation.x += obj.speed.x * delta;
-        obj.mesh.rotation.y += obj.speed.y * delta;
-        obj.mesh.rotation.z += obj.speed.z * delta;
-      });
+      // Match Unity Transform.Rotate(speed * deltaTime) in local/self space.
+      advanceUnityRotations(rotatingObjects.value, delta);
 
       // Collision detection
       if (collisionObjects.value.length > 0) {
