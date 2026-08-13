@@ -37,6 +37,24 @@ export type EditorUpdatePayload = {
   lua: string;
   js: string;
   blocklyData: unknown;
+  dirty?: boolean;
+  workspaceRevision?: number;
+};
+
+export type ScriptEditorSavedSnapshot = {
+  lua: string;
+  js: string;
+  blocklyData: unknown;
+};
+
+export type ScriptEditorInitState = {
+  data: unknown;
+  code: { lua: string; js: string };
+  persisted: {
+    data: unknown;
+    code: { lua: string; js: string };
+  };
+  hostSessionId: string;
 };
 
 export type EditorEventPayload = {
@@ -156,16 +174,44 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   let initializedSavedSnapshotKey: string | null = null;
   let lastSavedSignature = "";
   let latestEditorSignature = "";
+  let latestEditorPayload: ScriptEditorSavedSnapshot | null = null;
   let snapshotRevision = 0;
   let pendingSavePromise: Promise<void> | null = null;
   let pendingSaveSnapshotRevision: number | null = null;
   let pendingSaveRequestId: string | null = null;
+  let pendingSaveEditorSignature = "";
+  let pendingSaveEditorPayload: ScriptEditorSavedSnapshot | null = null;
+  let legacyDirectSaveInFlight = false;
+  let persistenceInFlight = false;
   let pendingRestorePayload: EditorPostPayload | null = null;
+  let savedSnapshotPayload: ScriptEditorSavedSnapshot | null = null;
+  let hostSessionId = genSessionId();
+  let latestWorkspaceRevision = -1;
+  let sessionProtocolConfirmed = false;
 
   const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
+  function genSessionId() {
+    return `script-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  }
+
   const canSaveCurrentScript = () =>
     typeof options.canSave === "function" ? options.canSave() : true;
+
+  const persistEditorPayload = async (
+    data: EditorPostPayload,
+    trigger: ScriptSaveTrigger
+  ) => {
+    if (persistenceInFlight) {
+      throw new Error("script persistence is already in progress");
+    }
+    persistenceInFlight = true;
+    try {
+      await options.onPost(data, { trigger });
+    } finally {
+      persistenceInFlight = false;
+    }
+  };
 
   const getDraftStorageKey = () => options.getDraftStorageKey?.() || null;
 
@@ -176,7 +222,21 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
 
   const safeStringify = (value: unknown) => {
     try {
-      return JSON.stringify(value ?? null);
+      return JSON.stringify(value ?? null, (_key, currentValue) => {
+        if (
+          currentValue &&
+          typeof currentValue === "object" &&
+          !Array.isArray(currentValue)
+        ) {
+          return Object.keys(currentValue)
+            .sort()
+            .reduce<Record<string, unknown>>((sorted, key) => {
+              sorted[key] = (currentValue as Record<string, unknown>)[key];
+              return sorted;
+            }, {});
+        }
+        return currentValue;
+      });
     } catch {
       return "null";
     }
@@ -200,6 +260,11 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     pendingSavePromise = null;
     pendingSaveSnapshotRevision = null;
     pendingSaveRequestId = null;
+    pendingSaveEditorSignature = "";
+    pendingSaveEditorPayload = null;
+    if (!persistenceInFlight) {
+      legacyDirectSaveInFlight = false;
+    }
     isSaving.value = false;
 
     if (reason && reject) {
@@ -210,17 +275,26 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     }
   };
 
-  const applyEditorCodes = (payload: {
-    lua: string;
-    js: string;
-    blocklyData: unknown;
-  }) => {
-    unsavedBlocklyData.value = safeClone(payload.blocklyData);
+  const applyEditorCodes = (payload: EditorUpdatePayload) => {
+    const clonedBlocklyData = safeClone(payload.blocklyData);
+    unsavedBlocklyData.value = clonedBlocklyData;
     LuaCode.value = buildRuntimeLua(payload.lua);
     JavaScriptCode.value = formatJavaScript(payload.js);
-    const nextSignature = buildSnapshotSignature(payload);
+    const nextSignature = buildSnapshotSignature({
+      lua: payload.lua,
+      js: payload.js,
+      blocklyData: payload.blocklyData,
+    });
     latestEditorSignature = nextSignature;
-    hasUnsavedChanges.value = nextSignature !== lastSavedSignature;
+    latestEditorPayload = {
+      lua: payload.lua,
+      js: payload.js,
+      blocklyData: clonedBlocklyData,
+    };
+    hasUnsavedChanges.value =
+      typeof payload.dirty === "boolean"
+        ? payload.dirty
+        : nextSignature !== lastSavedSignature;
   };
 
   const markCurrentPayloadAsSaved = (payload: {
@@ -229,6 +303,11 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     blocklyData: unknown;
   }) => {
     lastSavedSignature = buildSnapshotSignature(payload);
+    savedSnapshotPayload = {
+      lua: payload.lua,
+      js: payload.js,
+      blocklyData: safeClone(payload.blocklyData),
+    };
     if (!latestEditorSignature) {
       latestEditorSignature = lastSavedSignature;
     }
@@ -236,12 +315,55 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     hasUnsavedChanges.value = latestEditorSignature !== lastSavedSignature;
   };
 
+  const resetEditorSessionState = (payload: ScriptEditorSavedSnapshot) => {
+    snapshotRevision += 1;
+    clearPendingSaveSession(new Error(SNAPSHOT_CHANGED_ERROR));
+    pendingRestorePayload = null;
+    unsavedBlocklyData.value = null;
+    LuaCode.value = "";
+    JavaScriptCode.value = "";
+    editorContentReady.value = false;
+    latestWorkspaceRevision = -1;
+    sessionProtocolConfirmed = false;
+    hostSessionId = genSessionId();
+    lastSavedSignature = buildSnapshotSignature(payload);
+    latestEditorSignature = lastSavedSignature;
+    latestEditorPayload = {
+      lua: payload.lua,
+      js: payload.js,
+      blocklyData: safeClone(payload.blocklyData),
+    };
+    hasInitializedSavedSnapshot = true;
+    hasUnsavedChanges.value = false;
+    savedSnapshotPayload = {
+      lua: payload.lua,
+      js: payload.js,
+      blocklyData: safeClone(payload.blocklyData),
+    };
+  };
+
+  /** Start a new logical script session. This always drops stale KeepAlive data. */
+  const beginEditorSession = (
+    payload: ScriptEditorSavedSnapshot,
+    snapshotKey = "default"
+  ) => {
+    const mustReplaceExistingFrame =
+      hasInitializedSavedSnapshot &&
+      initializedSavedSnapshotKey !== null &&
+      initializedSavedSnapshotKey !== snapshotKey;
+    resetEditorSessionState(payload);
+    initializedSavedSnapshotKey = snapshotKey;
+    if (mustReplaceExistingFrame) {
+      reloadEditorFrame();
+    }
+  };
+
+  /**
+   * Backward-compatible baseline initializer. Repeated calls for the same script
+   * are intentionally non-destructive; new loads should call beginEditorSession.
+   */
   const initializeSavedSnapshot = (
-    payload: {
-      lua: string;
-      js: string;
-      blocklyData: unknown;
-    },
+    payload: ScriptEditorSavedSnapshot,
     snapshotKey = "default"
   ) => {
     if (
@@ -250,27 +372,44 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     ) {
       return;
     }
+    beginEditorSession(payload, snapshotKey);
+  };
 
-    const isSnapshotKeyChange =
-      hasInitializedSavedSnapshot &&
-      initializedSavedSnapshotKey !== null &&
-      initializedSavedSnapshotKey !== snapshotKey;
+  const getEditorInitState = (): ScriptEditorInitState | null => {
+    if (!savedSnapshotPayload) return null;
+    const currentData =
+      pendingRestorePayload?.data ??
+      unsavedBlocklyData.value ??
+      savedSnapshotPayload.blocklyData;
+    return {
+      data: safeClone(currentData),
+      code: {
+        lua: savedSnapshotPayload.lua,
+        js: savedSnapshotPayload.js,
+      },
+      persisted: {
+        data: safeClone(savedSnapshotPayload.blocklyData),
+        code: {
+          lua: savedSnapshotPayload.lua,
+          js: savedSnapshotPayload.js,
+        },
+      },
+      hostSessionId,
+    };
+  };
 
-    if (isSnapshotKeyChange) {
-      snapshotRevision += 1;
-      clearPendingSaveSession(new Error(SNAPSHOT_CHANGED_ERROR));
-      pendingRestorePayload = null;
-      unsavedBlocklyData.value = null;
-      LuaCode.value = "";
-      JavaScriptCode.value = "";
-      editorContentReady.value = false;
+  const discardEditorChanges = () => {
+    if (!savedSnapshotPayload) {
+      hasUnsavedChanges.value = false;
+      return;
     }
-
-    lastSavedSignature = buildSnapshotSignature(payload);
-    latestEditorSignature = lastSavedSignature;
-    hasInitializedSavedSnapshot = true;
-    hasUnsavedChanges.value = false;
-    initializedSavedSnapshotKey = snapshotKey;
+    const saved = {
+      ...savedSnapshotPayload,
+      blocklyData: safeClone(savedSnapshotPayload.blocklyData),
+    };
+    resetEditorSessionState(saved);
+    applyEditorCodes({ ...saved, dirty: false });
+    reloadEditorFrame();
   };
 
   const formatDraftSummary = (
@@ -536,8 +675,13 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   };
 
   const reloadEditorFrame = () => {
+    snapshotRevision += 1;
+    clearPendingSaveSession(new Error(SNAPSHOT_CHANGED_ERROR));
     ready = false;
     editorContentReady.value = false;
+    latestWorkspaceRevision = -1;
+    sessionProtocolConfirmed = false;
+    hostSessionId = genSessionId();
     editorFrameKey.value += 1;
   };
 
@@ -714,13 +858,27 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const postMessage = (type: string, payload?: unknown) => {
     if (editor.value && editor.value.contentWindow) {
       const id = genId();
+      const sessionPayloadTypes = new Set(["REQUEST", "SAVE_ACK", "SAVE_NACK"]);
+      const nextPayload =
+        sessionPayloadTypes.has(type) && isRecord(payload)
+          ? { ...payload, hostSessionId }
+          : payload;
+      let targetOrigin: string;
+      try {
+        targetOrigin = new URL(env.blockly, window.location.href).origin;
+      } catch (error) {
+        logger.error("Invalid Blockly URL; message was not sent", error);
+        Message.error(t(options.i18nKeys.error3));
+        return undefined;
+      }
       editor.value.contentWindow.postMessage(
         {
           type,
           id,
-          payload: payload !== undefined ? safeClone(payload) : undefined,
+          payload:
+            nextPayload !== undefined ? safeClone(nextPayload) : undefined,
         },
-        "*"
+        targetOrigin
       );
       return id;
     } else {
@@ -804,16 +962,34 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       return pendingSavePromise;
     }
 
+    if (legacyDirectSaveInFlight || persistenceInFlight) {
+      return Promise.reject(
+        new Error("script persistence is already in progress")
+      );
+    }
+
     currentSaveTrigger =
       typeof triggerOrEvent === "string" ? triggerOrEvent : "manual";
     currentSaveOptions = saveOptions;
     isSaving.value = true;
+    pendingSaveEditorSignature = latestEditorSignature;
+    pendingSaveEditorPayload = latestEditorPayload
+      ? {
+          ...latestEditorPayload,
+          blocklyData: safeClone(latestEditorPayload.blocklyData),
+        }
+      : null;
 
     pendingSavePromise = new Promise<void>((resolve, reject) => {
       saveResolve = resolve;
       saveReject = reject;
       pendingSaveSnapshotRevision = snapshotRevision;
-      pendingSaveRequestId = postMessage("REQUEST", { action: "save" }) ?? null;
+      pendingSaveRequestId =
+        postMessage("REQUEST", {
+          action: "save",
+          workspaceRevision:
+            latestWorkspaceRevision >= 0 ? latestWorkspaceRevision : undefined,
+        }) ?? null;
     });
     return pendingSavePromise;
   };
@@ -845,7 +1021,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       await confirmSaveScript();
     } catch (action) {
       if (action === "cancel") {
-        hasUnsavedChanges.value = false;
+        discardEditorChanges();
         if (showDiscardInfo) {
           Message.info(t(options.i18nKeys.leaveInfo));
         }
@@ -881,18 +1057,81 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     let messageSnapshotRevision = snapshotRevision;
 
     try {
+      const currentEditorWindow = editor.value?.contentWindow;
+      const isDirectUnitTestCall =
+        import.meta.env.MODE === "test" && e.source == null;
+      if (
+        !isDirectUnitTestCall &&
+        (!currentEditorWindow || e.source !== currentEditorWindow)
+      ) {
+        return;
+      }
+
+      try {
+        const expectedOrigin = new URL(env.blockly, window.location.href)
+          .origin;
+        if (!isDirectUnitTestCall && e.origin !== expectedOrigin) return;
+      } catch (error) {
+        logger.error(
+          "Invalid Blockly URL; incoming message was ignored",
+          error
+        );
+        return;
+      }
+
       const msg = e.data;
       if (!msg || typeof msg.type !== "string") return;
 
       const payload = (msg.payload ?? {}) as Record<string, unknown>;
+      const incomingSessionId = payload.hostSessionId;
+      if (typeof incomingSessionId === "string") {
+        if (incomingSessionId !== hostSessionId) return;
+        sessionProtocolConfirmed = true;
+      } else if (
+        sessionProtocolConfirmed &&
+        (msg.type === "EVENT" || msg.type === "RESPONSE")
+      ) {
+        return;
+      }
 
       if (msg.type === "PLUGIN_READY") {
         ready = true;
         options.onReady();
       } else if (msg.type === "RESPONSE") {
+        const isLegacyDirectSave =
+          !pendingSavePromise &&
+          !legacyDirectSaveInFlight &&
+          !sessionProtocolConfirmed &&
+          typeof msg.requestId !== "string" &&
+          (payload.action === "save" ||
+            payload.action === "save-error" ||
+            payload.noChange === true);
+        if (!pendingSavePromise && !isLegacyDirectSave) return;
+        if (isLegacyDirectSave) {
+          legacyDirectSaveInFlight = true;
+          isSaving.value = true;
+          currentSaveTrigger = "manual";
+          currentSaveOptions = {};
+          pendingSaveSnapshotRevision = snapshotRevision;
+          pendingSaveEditorSignature = latestEditorSignature;
+          pendingSaveEditorPayload = latestEditorPayload
+            ? {
+                ...latestEditorPayload,
+                blocklyData: safeClone(latestEditorPayload.blocklyData),
+              }
+            : null;
+        }
         if (
-          typeof msg.requestId === "string" &&
-          msg.requestId !== pendingSaveRequestId
+          sessionProtocolConfirmed &&
+          (typeof msg.requestId !== "string" ||
+            msg.requestId !== pendingSaveRequestId)
+        ) {
+          return;
+        }
+        if (
+          pendingSavePromise &&
+          (typeof msg.requestId !== "string" ||
+            msg.requestId !== pendingSaveRequestId)
         ) {
           return;
         }
@@ -931,7 +1170,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           };
           const responseTrigger = currentSaveTrigger;
           try {
-            await options.onPost(postData, { trigger: responseTrigger });
+            await persistEditorPayload(postData, responseTrigger);
           } catch (error) {
             if (
               messageSnapshotRevision === snapshotRevision &&
@@ -967,7 +1206,21 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           resolve?.();
         } else if (payload.noChange === true) {
           // --- 无变更的保存响应 ---
-          if (pendingRestorePayload && hasUnsavedChanges.value) {
+          const noChangeSnapshot =
+            isEditorPostPayload(payload) &&
+            Object.prototype.hasOwnProperty.call(payload, "data")
+              ? {
+                  lua: payload.lua,
+                  js: payload.js,
+                  blocklyData: payload.data,
+                }
+              : null;
+
+          if (
+            pendingRestorePayload &&
+            hasUnsavedChanges.value &&
+            !noChangeSnapshot
+          ) {
             if (!canSaveCurrentScript()) {
               if (typeof payload.saveId === "string") {
                 postMessage("SAVE_NACK", { saveId: payload.saveId });
@@ -978,9 +1231,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
             const restorePayload = pendingRestorePayload;
             const responseTrigger = currentSaveTrigger;
             try {
-              await options.onPost(restorePayload, {
-                trigger: responseTrigger,
-              });
+              await persistEditorPayload(restorePayload, responseTrigger);
             } catch (error) {
               if (
                 messageSnapshotRevision === snapshotRevision &&
@@ -1015,6 +1266,29 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
             resolve?.();
             return;
           }
+
+          const requestedSignature = pendingSaveEditorSignature;
+          const requestedPayload = pendingSaveEditorPayload;
+          if (
+            !noChangeSnapshot &&
+            requestedPayload &&
+            requestedSignature !== lastSavedSignature
+          ) {
+            const responseTrigger = currentSaveTrigger;
+            const postData: EditorPostPayload = {
+              data: requestedPayload.blocklyData,
+              lua: requestedPayload.lua,
+              js: requestedPayload.js,
+            };
+            await persistEditorPayload(postData, responseTrigger);
+            if (messageSnapshotRevision !== snapshotRevision) return;
+            const savedAt = addDraftVersion(postData, responseTrigger);
+            markCurrentPayloadAsSaved(requestedPayload);
+            lastSaveTrigger.value = responseTrigger;
+            lastSavedAt.value = savedAt || new Date().toISOString();
+          } else if (noChangeSnapshot) {
+            markCurrentPayloadAsSaved(noChangeSnapshot);
+          }
           lastSaveTrigger.value = currentSaveTrigger;
           lastSavedAt.value = new Date().toISOString();
           const hasWarnings = showSaveWarnings(payload.warnings);
@@ -1026,14 +1300,35 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           resolve?.();
         }
       } else if (msg.type === "EVENT") {
-        if (payload.event === "update") {
+        if (payload.event === "save-request") {
+          void save().catch((error) => {
+            logger.error("Blockly keyboard save failed", error);
+          });
+        } else if (payload.event === "update") {
           // --- 工作区实时更新 ---
           if (!isEditorUpdatePayload(payload)) return;
+          const workspaceRevision =
+            typeof payload.workspaceRevision === "number" &&
+            Number.isFinite(payload.workspaceRevision)
+              ? payload.workspaceRevision
+              : null;
+          if (
+            workspaceRevision !== null &&
+            workspaceRevision < latestWorkspaceRevision
+          ) {
+            return;
+          }
+          if (workspaceRevision !== null) {
+            latestWorkspaceRevision = workspaceRevision;
+          }
           editorContentReady.value = true;
           const updateData: EditorUpdatePayload = {
             lua: payload.lua as string,
             js: payload.js as string,
             blocklyData: payload.blocklyData,
+            dirty:
+              typeof payload.dirty === "boolean" ? payload.dirty : undefined,
+            workspaceRevision: workspaceRevision ?? undefined,
           };
           if (pendingRestorePayload) {
             const nextSignature = buildSnapshotSignature({
@@ -1071,6 +1366,13 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         );
       }
       logger.log("ex:" + String(error));
+    } finally {
+      if (!persistenceInFlight) {
+        legacyDirectSaveInFlight = false;
+        if (!pendingSavePromise) {
+          isSaving.value = false;
+        }
+      }
     }
   };
 
@@ -1110,10 +1412,11 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   watch(
     () => appStore.language,
     (newValue) => {
-      editorContentReady.value = false;
+      // Preserve the current draft, but rotate the iframe/session boundary.
+      // INIT must wait for PLUGIN_READY from the newly loaded frame.
+      reloadEditorFrame();
       src.value =
         env.blockly + "?language=" + newValue + "&v=" + env.buildVersion;
-      options.onReady(); // 语言切换时重新初始化编辑器
     }
   );
 
@@ -1216,7 +1519,10 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     copyCode,
     formatJavaScript,
     postMessage,
+    beginEditorSession,
     initializeSavedSnapshot,
+    getEditorInitState,
+    discardEditorChanges,
     save,
     openVersionDialog,
     closeVersionDialog,

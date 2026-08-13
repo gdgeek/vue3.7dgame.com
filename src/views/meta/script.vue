@@ -228,10 +228,18 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import { CopyDocument, Loading } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
-import { useRoute, useRouter } from "vue-router";
+import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { getVerses } from "@/api/v1/verse";
@@ -269,6 +277,8 @@ const route = useRoute();
 const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
 const loader = getConfiguredGLTFLoader();
+let metaLoadSequence = 0;
+let isScriptViewActive = true;
 
 type ScenePlayerExpose = {
   sources: Map<string, { type: string; data: unknown }>;
@@ -310,6 +320,17 @@ type EntityNode = {
   children?: { entities?: EntityNode[] };
 };
 
+const readSavedEditorSnapshot = () => {
+  if (!meta.value) return null;
+  let blocklyData = meta.value.metaCode?.blockly || "{}";
+  blocklyData = decompressBlockly(blocklyData);
+  return {
+    blocklyData: JSON.parse(blocklyData),
+    js: meta.value.metaCode?.js || "",
+    lua: meta.value.metaCode?.lua || "",
+  };
+};
+
 // ---------- initEditor（Meta 版）----------
 const initEditor = (overrideData?: unknown) => {
   if (!meta.value) return;
@@ -331,7 +352,8 @@ const initEditor = (overrideData?: unknown) => {
       },
       `meta:${meta.value.id}`
     );
-    const data = overrideData ?? unsavedBlocklyData.value ?? savedData;
+    const initState = getEditorInitState();
+    if (!initState) return;
     test.value = getResource(meta.value);
     postMessage("INIT", {
       token: null,
@@ -341,8 +363,10 @@ const initEditor = (overrideData?: unknown) => {
           index: meta.value.id,
           resource: getResource(meta.value),
         },
-        data,
-        code: savedCode,
+        data: overrideData ?? initState.data,
+        code: initState.code,
+        persisted: initState.persisted,
+        hostSessionId: initState.hostSessionId,
         userInfo: {
           id: userStore.userInfo?.id || null,
           role: userStore.getRole(),
@@ -400,7 +424,6 @@ const {
   JavaScriptCode,
   disabled,
   isSceneFullscreen,
-  unsavedBlocklyData,
   resolveUnsavedChangesBeforeLeave,
   hasUnsavedChanges,
   draftVersions,
@@ -417,7 +440,9 @@ const {
   isDark,
   toggleSceneFullscreen,
   postMessage,
+  beginEditorSession,
   initializeSavedSnapshot,
+  getEditorInitState,
   save,
   openVersionDialog,
   clearDraftHistory,
@@ -461,11 +486,20 @@ const editorContentLoading = computed(
   () => loading.value || !editorContentReady.value
 );
 
-onMounted(() => {
+const activateToolbar = () => {
+  isScriptViewActive = true;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
   });
+};
+
+onMounted(activateToolbar);
+onActivated(activateToolbar);
+onDeactivated(() => {
+  isScriptViewActive = false;
+  metaLoadSequence += 1;
+  unregisterToolbar(toolbarOwner);
 });
 
 watch(toolbarStatus, (status) => {
@@ -744,14 +778,19 @@ const run = async () => {
   }
 };
 
-// ---------- onMounted（Meta 专有：加载 meta 数据和模型动画）----------
-onMounted(async () => {
+// ---------- 加载 Meta 脚本会话 ----------
+const loadMetaScriptSession = async () => {
+  if (!isScriptViewActive || route.name !== "MetaScript") return;
+  if (!Number.isFinite(id.value)) return;
+  const requestedId = id.value;
+  const loadSequence = ++metaLoadSequence;
   try {
     loading.value = true;
     await loadSceneNameMap();
     const response = await getMeta(id.value, {
       expand: "cyber,event,share,metaCode,verseMetas",
     });
+    if (loadSequence !== metaLoadSequence || requestedId !== id.value) return;
     logger.log("response数据", response);
 
     const assignAnimations = (
@@ -797,7 +836,6 @@ onMounted(async () => {
                   );
                 }
                 response.data.data = data;
-                meta.value = response.data;
                 resolve();
               },
               undefined,
@@ -810,19 +848,57 @@ onMounted(async () => {
               }
             );
           });
+          if (loadSequence !== metaLoadSequence || requestedId !== id.value) {
+            return;
+          }
         }
       } catch (error) {
-        meta.value = response.data;
+        logger.warn("Failed to load model animations", error);
       }
-    } else {
-      meta.value = response.data;
     }
 
+    if (loadSequence !== metaLoadSequence || requestedId !== id.value) return;
+    meta.value = response.data;
+    const savedSnapshot = readSavedEditorSnapshot();
+    if (savedSnapshot) {
+      beginEditorSession(savedSnapshot, `meta:${meta.value!.id}`);
+    }
     initEditor();
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : String(error));
   } finally {
-    loading.value = false;
+    if (loadSequence === metaLoadSequence) {
+      loading.value = false;
+    }
+  }
+};
+
+onMounted(loadMetaScriptSession);
+onActivated(() => {
+  if (!meta.value || meta.value.id !== id.value) {
+    void loadMetaScriptSession();
+  }
+});
+
+onBeforeRouteUpdate(async (to, from, next) => {
+  if (to.path !== from.path || to.query.id === from.query.id) {
+    next();
+    return;
+  }
+  const canLeave = await resolveUnsavedChangesBeforeLeave({
+    showDiscardInfo: true,
+  });
+  next(canLeave ? undefined : false);
+});
+
+watch(id, (nextId, previousId) => {
+  if (
+    isScriptViewActive &&
+    route.name === "MetaScript" &&
+    Number.isFinite(nextId) &&
+    nextId !== previousId
+  ) {
+    void loadMetaScriptSession();
   }
 });
 

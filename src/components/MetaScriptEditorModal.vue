@@ -117,6 +117,7 @@
                 </el-dialog>
 
                 <iframe
+                  :key="editorFrameKey"
                   style="width: 100%; height: 100%; padding: 0; margin: 0"
                   id="editor"
                   ref="editor"
@@ -224,7 +225,7 @@ import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
-import { Message, MessageBox } from "@/components/Dialog";
+import { Message } from "@/components/Dialog";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
 import { buildMetaResourceIndex } from "@/components/Meta/useMetaResourceParser";
@@ -243,6 +244,7 @@ interface Props {
   modelValue: boolean;
   metaId: number;
   title?: string;
+  switchRequestToken?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -253,6 +255,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
   (e: "saved"): void;
+  (e: "switch-accepted"): void;
+  (e: "switch-rejected"): void;
 }>();
 
 // Visible state
@@ -274,6 +278,7 @@ const dialogTitle = computed(() => {
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
 const loader = getConfiguredGLTFLoader();
+let metaLoadSequence = 0;
 
 const sceneEditorLink = computed(() => {
   const editorLabel = t("route.meta.sceneEditor");
@@ -309,6 +314,17 @@ const getResource = (m: metaInfo) => {
   }
 };
 
+const readSavedEditorSnapshot = () => {
+  if (!meta.value) return null;
+  let blocklyData = meta.value.metaCode?.blockly || "{}";
+  blocklyData = decompressBlockly(blocklyData);
+  return {
+    blocklyData: JSON.parse(blocklyData),
+    js: meta.value.metaCode?.js || "",
+    lua: meta.value.metaCode?.lua || "",
+  };
+};
+
 const initEditor = () => {
   if (!meta.value) return;
   if (!isReady()) return;
@@ -329,7 +345,8 @@ const initEditor = () => {
       },
       `meta:${meta.value.id}`
     );
-    const data = unsavedBlocklyData.value ?? savedData;
+    const initState = getEditorInitState();
+    if (!initState) return;
     postMessage("INIT", {
       token: null,
       config: {
@@ -338,8 +355,10 @@ const initEditor = () => {
           index: meta.value.id,
           resource: getResource(meta.value),
         },
-        data,
-        code: savedCode,
+        data: initState.data,
+        code: initState.code,
+        persisted: initState.persisted,
+        hostSessionId: initState.hostSessionId,
         userInfo: {
           id: userStore.userInfo?.id || null,
           role: userStore.getRole(),
@@ -392,8 +411,8 @@ const {
   currentCode,
   currentCodeType,
   codeDialogTitle,
-  unsavedBlocklyData,
   hasUnsavedChanges,
+  editorFrameKey,
   editor,
   src,
   isDark,
@@ -402,7 +421,10 @@ const {
   toggleSceneFullscreen,
   copyCode,
   postMessage,
+  beginEditorSession,
   initializeSavedSnapshot,
+  getEditorInitState,
+  resolveUnsavedChangesBeforeLeave,
   save,
   decompressBlockly,
   isReady,
@@ -426,12 +448,16 @@ const {
 
 const loadMetaData = async () => {
   if (!props.metaId) return;
+  const requestedId = props.metaId;
+  const loadSequence = ++metaLoadSequence;
 
   try {
     loading.value = true;
     const response = await getMeta(props.metaId, {
       expand: "cyber,event,share,metaCode",
     });
+    if (loadSequence !== metaLoadSequence || requestedId !== props.metaId)
+      return;
 
     const assignAnimations = (
       entities: EntityNode[],
@@ -476,7 +502,6 @@ const loadMetaData = async () => {
                   );
                 }
                 response.data.data = data;
-                meta.value = response.data;
                 resolve();
               },
               undefined,
@@ -489,49 +514,74 @@ const loadMetaData = async () => {
               }
             );
           });
+          if (
+            loadSequence !== metaLoadSequence ||
+            requestedId !== props.metaId
+          ) {
+            return;
+          }
         }
       } catch (error) {
-        meta.value = response.data;
+        logger.warn("Failed to load model animations", error);
       }
-    } else {
-      meta.value = response.data;
     }
 
+    if (loadSequence !== metaLoadSequence || requestedId !== props.metaId)
+      return;
+    meta.value = response.data;
+    const savedSnapshot = readSavedEditorSnapshot();
+    if (savedSnapshot) {
+      beginEditorSession(savedSnapshot, `meta:${meta.value!.id}`);
+    }
     initEditor();
   } catch (error) {
     Message.error(error instanceof Error ? error.message : String(error));
   } finally {
-    loading.value = false;
+    if (loadSequence === metaLoadSequence) {
+      loading.value = false;
+    }
   }
 };
 
 const handleClose = async () => {
-  if (unsavedBlocklyData.value) {
-    try {
-      await MessageBox.confirm(
-        t("meta.script.leave.message1"),
-        t("meta.script.leave.confirm"),
-        {
-          confirmButtonText: t("meta.script.leave.confirm"),
-          cancelButtonText: t("meta.script.leave.cancel"),
-          type: "warning",
-        }
-      );
-      visible.value = false;
-    } catch {
-      // User cancelled
-    }
-  } else {
+  if (
+    await resolveUnsavedChangesBeforeLeave({
+      showDiscardInfo: false,
+    })
+  ) {
     visible.value = false;
   }
 };
 
+watch(
+  () => props.switchRequestToken,
+  async (nextToken, previousToken) => {
+    if (!props.modelValue || !nextToken || nextToken === previousToken) return;
+    if (
+      await resolveUnsavedChangesBeforeLeave({
+        showDiscardInfo: false,
+      })
+    ) {
+      emit("switch-accepted");
+    } else {
+      emit("switch-rejected");
+    }
+  },
+  { flush: "sync" }
+);
+
 // Watch for modal open
 watch(
-  () => props.modelValue,
-  (newVal) => {
-    if (newVal) {
-      loadMetaData();
+  [() => props.modelValue, () => props.metaId],
+  ([newVal, nextMetaId], previous) => {
+    const previousVisible = previous?.[0];
+    const previousMetaId = previous?.[1];
+    if (
+      newVal &&
+      nextMetaId &&
+      (!previousVisible || nextMetaId !== previousMetaId)
+    ) {
+      void loadMetaData();
     }
   },
   { immediate: true }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createApp, defineComponent, h } from "vue";
+import { createApp, defineComponent, h, markRaw } from "vue";
 
 // --- 提升 mock 变量，确保在工厂函数中可用 ---
 const { mockInflate, mockJsBeautify, mockMessage, mockMessageBox } = vi.hoisted(
@@ -74,6 +74,16 @@ type MockBeforeUnloadEvent = Pick<BeforeUnloadEvent, "preventDefault"> & {
 type MockIframe = Pick<HTMLIFrameElement, "contentWindow">;
 
 type MockMessageEvent = Pick<MessageEvent, "data">;
+
+function requestIdFrom(postMessage: ReturnType<typeof vi.fn>): string {
+  const request = [...postMessage.mock.calls]
+    .reverse()
+    .find(([message]) => message?.type === "REQUEST")?.[0] as
+    | { id?: unknown }
+    | undefined;
+  if (typeof request?.id !== "string") throw new Error("REQUEST was not sent");
+  return request.id;
+}
 
 // --- 工具函数：在 Vue 组件上下文中挂载 composable ---
 function withSetup<T>(composable: () => T): { result: T; unmount: () => void } {
@@ -358,7 +368,7 @@ describe("useScriptEditorBase", () => {
           type: "test-action",
           payload: { key: "value" },
         }),
-        "*"
+        "https://blockly.test"
       );
       unmount();
     });
@@ -446,6 +456,7 @@ describe("useScriptEditorBase", () => {
       await result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: {
             action: "save",
             lua: "local x=1",
@@ -463,9 +474,9 @@ describe("useScriptEditorBase", () => {
       expect(mockPost).toHaveBeenLastCalledWith(
         expect.objectContaining({
           type: "SAVE_ACK",
-          payload: { saveId: "save-123" },
+          payload: expect.objectContaining({ saveId: "save-123" }),
         }),
-        "*"
+        "https://blockly.test"
       );
       unmount();
     });
@@ -505,6 +516,7 @@ describe("useScriptEditorBase", () => {
       const responsePromise = result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: {
             action: "save",
             saveId: "save-version-1",
@@ -536,9 +548,9 @@ describe("useScriptEditorBase", () => {
       expect(mockPost).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "SAVE_ACK",
-          payload: { saveId: "save-version-1" },
+          payload: expect.objectContaining({ saveId: "save-version-1" }),
         }),
-        "*"
+        "https://blockly.test"
       );
       unmount();
     });
@@ -548,14 +560,16 @@ describe("useScriptEditorBase", () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions({ onPost }))
       );
+      const mockPost = vi.fn();
       result.editor.value = {
-        contentWindow: { postMessage: vi.fn() },
+        contentWindow: { postMessage: mockPost },
       } as MockIframe as HTMLIFrameElement;
 
       const savePromise = result.save();
       await result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: {
             action: "save",
             lua: "local x=1",
@@ -597,6 +611,7 @@ describe("useScriptEditorBase", () => {
       await result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: {
             action: "save",
             saveId: "save-failed",
@@ -617,9 +632,9 @@ describe("useScriptEditorBase", () => {
       expect(mockPost).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "SAVE_NACK",
-          payload: { saveId: "save-failed" },
+          payload: expect.objectContaining({ saveId: "save-failed" }),
         }),
-        "*"
+        "https://blockly.test"
       );
       expect(result.hasUnsavedChanges.value).toBe(true);
       unmount();
@@ -644,6 +659,7 @@ describe("useScriptEditorBase", () => {
       await result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: {
             action: "save",
             saveId: "save-not-allowed",
@@ -665,9 +681,9 @@ describe("useScriptEditorBase", () => {
       expect(mockPost).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "SAVE_NACK",
-          payload: { saveId: "save-not-allowed" },
+          payload: expect.objectContaining({ saveId: "save-not-allowed" }),
         }),
-        "*"
+        "https://blockly.test"
       );
       expect(result.hasUnsavedChanges.value).toBe(true);
       unmount();
@@ -678,14 +694,16 @@ describe("useScriptEditorBase", () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions({ onPost }))
       );
+      const mockPost = vi.fn();
       result.editor.value = {
-        contentWindow: { postMessage: vi.fn() },
+        contentWindow: { postMessage: mockPost },
       } as MockIframe as HTMLIFrameElement;
 
       const savePromise = result.save();
       await result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: {
             action: "save",
             lua: "local x=1",
@@ -710,8 +728,9 @@ describe("useScriptEditorBase", () => {
       );
 
       // Set up editor so save() can send postMessage
+      const mockPost = vi.fn();
       result.editor.value = {
-        contentWindow: { postMessage: vi.fn() },
+        contentWindow: { postMessage: mockPost },
       } as MockIframe as HTMLIFrameElement;
 
       // Trigger save() first — catch the rejection to avoid unhandled promise
@@ -722,6 +741,7 @@ describe("useScriptEditorBase", () => {
       await result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: { action: "save", lua: 123, js: "ok" },
         },
       } as MockMessageEvent as MessageEvent);
@@ -739,8 +759,9 @@ describe("useScriptEditorBase", () => {
       );
 
       // Set up editor so save() can send postMessage
+      const mockPost = vi.fn();
       result.editor.value = {
-        contentWindow: { postMessage: vi.fn() },
+        contentWindow: { postMessage: mockPost },
       } as MockIframe as HTMLIFrameElement;
 
       // Trigger save() first
@@ -749,6 +770,7 @@ describe("useScriptEditorBase", () => {
       await result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: { action: "save", noChange: true },
         },
       } as MockMessageEvent as MessageEvent);
@@ -761,14 +783,16 @@ describe("useScriptEditorBase", () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
+      const mockPost = vi.fn();
       result.editor.value = {
-        contentWindow: { postMessage: vi.fn() },
+        contentWindow: { postMessage: mockPost },
       } as MockIframe as HTMLIFrameElement;
 
       const savePromise = result.save();
       await result.handleMessage({
         data: {
           type: "RESPONSE",
+          requestId: requestIdFrom(mockPost),
           payload: {
             action: "save",
             noChange: true,
@@ -834,6 +858,357 @@ describe("useScriptEditorBase", () => {
       } as MockMessageEvent as MessageEvent);
 
       expect(result.hasUnsavedChanges.value).toBe(true);
+      unmount();
+    });
+
+    it("EVENT update：插件 dirty 为 false 时不会因协议 revision 变化误报", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+      const contentWindow = { postMessage: vi.fn() };
+      result.editor.value = {
+        contentWindow,
+      } as MockIframe as HTMLIFrameElement;
+      result.beginEditorSession(
+        { lua: "same", js: "same", blocklyData: { b: 2, a: 1 } },
+        "meta:1"
+      );
+      const sessionId = result.getEditorInitState()!.hostSessionId;
+
+      await result.handleMessage({
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            hostSessionId: sessionId,
+            workspaceRevision: 9,
+            dirty: false,
+            lua: "same",
+            js: "same",
+            blocklyData: { a: 1, b: 2 },
+          },
+        },
+      } as unknown as MessageEvent);
+
+      expect(result.hasUnsavedChanges.value).toBe(false);
+      unmount();
+    });
+
+    it("拒绝非当前 iframe、旧会话和倒退 revision 的消息", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+      const contentWindow = { postMessage: vi.fn() };
+      result.editor.value = {
+        contentWindow,
+      } as MockIframe as HTMLIFrameElement;
+      result.beginEditorSession(
+        { lua: "saved", js: "saved", blocklyData: { v: 0 } },
+        "meta:1"
+      );
+      const sessionId = result.getEditorInitState()!.hostSessionId;
+      const event = (
+        source: unknown,
+        session: string,
+        revision: number,
+        v: number
+      ) =>
+        ({
+          ...(source === null ? {} : { source }),
+          data: {
+            type: "EVENT",
+            payload: {
+              event: "update",
+              hostSessionId: session,
+              workspaceRevision: revision,
+              dirty: true,
+              lua: `lua-${v}`,
+              js: `js-${v}`,
+              blocklyData: { v },
+            },
+          },
+        }) as unknown as MessageEvent;
+
+      await result.handleMessage(event({}, sessionId, 1, 1));
+      await result.handleMessage(event(null, "old-session", 1, 2));
+      await result.handleMessage(event(null, sessionId, 3, 3));
+      await result.handleMessage(event(null, sessionId, 2, 4));
+
+      expect(result.unsavedBlocklyData.value).toStrictEqual({ v: 3 });
+      unmount();
+    });
+
+    it("noChange 完整快照只推进请求内容，不吞并发更新", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+      const contentWindow = { postMessage: vi.fn() };
+      result.editor.value = {
+        contentWindow,
+      } as MockIframe as HTMLIFrameElement;
+      result.beginEditorSession(
+        { lua: "saved", js: "saved", blocklyData: { v: 0 } },
+        "meta:1"
+      );
+      const sessionId = result.getEditorInitState()!.hostSessionId;
+      await result.handleMessage({
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            hostSessionId: sessionId,
+            workspaceRevision: 1,
+            dirty: true,
+            lua: "one",
+            js: "one",
+            blocklyData: { v: 1 },
+          },
+        },
+      } as unknown as MessageEvent);
+      const savePromise = result.save();
+      await result.handleMessage({
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            hostSessionId: sessionId,
+            workspaceRevision: 2,
+            dirty: true,
+            lua: "two",
+            js: "two",
+            blocklyData: { v: 2 },
+          },
+        },
+      } as unknown as MessageEvent);
+      const request = contentWindow.postMessage.mock.calls.find(
+        ([message]) => message.type === "REQUEST"
+      )?.[0];
+      await result.handleMessage({
+        data: {
+          type: "RESPONSE",
+          requestId: request.id,
+          payload: {
+            action: "save",
+            noChange: true,
+            hostSessionId: sessionId,
+            workspaceRevision: 1,
+            lua: "one",
+            js: "one",
+            data: { v: 1 },
+          },
+        },
+      } as unknown as MessageEvent);
+
+      await expect(savePromise).resolves.toBeUndefined();
+      expect(result.unsavedBlocklyData.value).toStrictEqual({ v: 2 });
+      expect(result.hasUnsavedChanges.value).toBe(true);
+      unmount();
+    });
+
+    it("旧版 Blockly 的直接 Ctrl+S noChange 会持久化宿主草稿", async () => {
+      const onPost = vi.fn().mockResolvedValue(undefined);
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      const contentWindow = window as unknown as Window;
+      result.editor.value = { contentWindow } as HTMLIFrameElement;
+      result.beginEditorSession(
+        { lua: "saved", js: "saved", blocklyData: { v: 0 } },
+        "meta:1"
+      );
+      await result.handleMessage({
+        source: contentWindow,
+        origin: "https://blockly.test",
+        data: {
+          type: "EVENT",
+          payload: {
+            event: "update",
+            lua: "saved",
+            js: "saved",
+            blocklyData: { v: 1 },
+          },
+        },
+      } as unknown as MessageEvent);
+
+      await result.handleMessage({
+        source: contentWindow,
+        origin: "https://blockly.test",
+        data: {
+          type: "RESPONSE",
+          payload: { action: "save", noChange: true },
+        },
+      } as unknown as MessageEvent);
+
+      expect(onPost).toHaveBeenCalledWith(
+        { data: { v: 1 }, lua: "saved", js: "saved" },
+        { trigger: "manual" }
+      );
+      expect(result.hasUnsavedChanges.value).toBe(false);
+      unmount();
+    });
+
+    it("旧版 Blockly 直接 save-error 会显示错误且不会写入", async () => {
+      const onPost = vi.fn();
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      const contentWindow = window as unknown as Window;
+      result.editor.value = { contentWindow } as HTMLIFrameElement;
+
+      await result.handleMessage({
+        source: contentWindow,
+        origin: "https://blockly.test",
+        data: {
+          type: "RESPONSE",
+          payload: { action: "save-error", message: "serialize failed" },
+        },
+      } as unknown as MessageEvent);
+
+      expect(mockMessage.error).toHaveBeenCalledWith("serialize failed");
+      expect(onPost).not.toHaveBeenCalled();
+      unmount();
+    });
+
+    it("标准保存拒绝缺失 requestId 的响应", async () => {
+      const onPost = vi.fn();
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      const contentWindow = window as unknown as Window;
+      const originalPostMessage = contentWindow.postMessage;
+      contentWindow.postMessage = vi.fn();
+      result.editor.value = { contentWindow } as HTMLIFrameElement;
+      const savePromise = result.save();
+
+      await result.handleMessage({
+        source: contentWindow,
+        origin: "https://blockly.test",
+        data: {
+          type: "RESPONSE",
+          payload: { action: "save", lua: "x", js: "x", data: {} },
+        },
+      } as unknown as MessageEvent);
+
+      expect(onPost).not.toHaveBeenCalled();
+      expect(result.isSaving.value).toBe(true);
+      result.beginEditorSession(
+        { lua: "", js: "", blocklyData: {} },
+        "meta:next"
+      );
+      await expect(savePromise).rejects.toThrow(
+        "script changed while save was pending"
+      );
+      contentWindow.postMessage = originalPostMessage;
+      unmount();
+    });
+
+    it("生产消息严格拒绝错误或 opaque origin", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+      const contentWindow = window as unknown as Window;
+      result.editor.value = { contentWindow } as HTMLIFrameElement;
+      const payload = {
+        event: "update",
+        lua: "unsafe",
+        js: "unsafe",
+        blocklyData: { unsafe: true },
+      };
+
+      await result.handleMessage({
+        source: contentWindow,
+        origin: "null",
+        data: { type: "EVENT", payload },
+      } as unknown as MessageEvent);
+      await result.handleMessage({
+        source: contentWindow,
+        origin: "https://attacker.test",
+        data: { type: "EVENT", payload },
+      } as unknown as MessageEvent);
+
+      expect(result.unsavedBlocklyData.value).toBeNull();
+      unmount();
+    });
+
+    it("连续旧版 Ctrl+S 响应在首个写入完成前只接受一次", async () => {
+      let release!: () => void;
+      const onPost = vi.fn(
+        () => new Promise<void>((resolve) => (release = resolve))
+      );
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onPost }))
+      );
+      const contentWindow = markRaw({
+        postMessage: vi.fn(),
+      }) as unknown as Window;
+      result.editor.value = { contentWindow } as HTMLIFrameElement;
+      const directResponse = (v: number) =>
+        result.handleMessage({
+          source: contentWindow,
+          origin: "https://blockly.test",
+          data: {
+            type: "RESPONSE",
+            payload: {
+              action: "save",
+              lua: `lua-${v}`,
+              js: `js-${v}`,
+              data: { v },
+            },
+          },
+        } as unknown as MessageEvent);
+
+      const first = directResponse(1);
+      await Promise.resolve();
+      await directResponse(2);
+      expect(onPost).toHaveBeenCalledTimes(1);
+
+      const hostSave = result.save();
+      await expect(hostSave).rejects.toThrow(
+        "script persistence is already in progress"
+      );
+      expect(contentWindow.postMessage).not.toHaveBeenCalled();
+
+      release();
+      await first;
+      expect(result.isSaving.value).toBe(false);
+      unmount();
+    });
+
+    it("save-request 通过宿主标准 REQUEST 发起快捷键保存", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+      const messageSource = markRaw({
+        postMessage: vi.fn(),
+      }) as unknown as Window;
+      result.editor.value = {
+        contentWindow: messageSource,
+      } as MockIframe as HTMLIFrameElement;
+      result.beginEditorSession(
+        { lua: "saved", js: "saved", blocklyData: {} },
+        "meta:1"
+      );
+      const sessionId = result.getEditorInitState()!.hostSessionId;
+
+      await result.handleMessage({
+        source: messageSource,
+        origin: "https://blockly.test",
+        data: {
+          type: "EVENT",
+          payload: { event: "save-request", hostSessionId: sessionId },
+        },
+      } as unknown as MessageEvent);
+
+      expect(messageSource.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "REQUEST",
+          payload: expect.objectContaining({
+            action: "save",
+            hostSessionId: sessionId,
+          }),
+        }),
+        "https://blockly.test"
+      );
       unmount();
     });
 
@@ -1141,9 +1516,9 @@ describe("useScriptEditorBase", () => {
       expect(mockPostMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "REQUEST",
-          payload: { action: "save" },
+          payload: expect.objectContaining({ action: "save" }),
         }),
-        "*"
+        "https://blockly.test"
       );
       unmount();
     });
