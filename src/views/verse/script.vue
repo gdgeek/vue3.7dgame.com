@@ -259,8 +259,10 @@ import {
   onBeforeUnmount,
   watch,
   nextTick,
+  onActivated,
+  onDeactivated,
 } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import {
   getVerse,
   putVerseCode,
@@ -316,6 +318,8 @@ const id = computed(() => parseInt(route.query.id as string));
 const metasJavaScriptCode = ref("");
 // map 用于记录每个 meta_id 在场景中对应的实体列表
 let map = new Map<string, Array<{ uuid: string; title: string }>>();
+let verseLoadSequence = 0;
+let isScriptViewActive = true;
 
 const { t } = useI18n();
 const userStore = useUserStore();
@@ -425,6 +429,17 @@ type VerseMeta = {
   };
 };
 
+const readSavedEditorSnapshot = () => {
+  if (!verse.value) return null;
+  let blocklyData = verse.value.verseCode?.blockly || "{}";
+  blocklyData = decompressBlockly(blocklyData);
+  return {
+    blocklyData: JSON.parse(blocklyData),
+    js: verse.value.verseCode?.js || "",
+    lua: verse.value.verseCode?.lua || "",
+  };
+};
+
 const getMetaJavaScriptCode = (meta: VerseMeta | meta): string => {
   const candidate = meta as VerseMeta;
   if (typeof candidate.script === "string") return candidate.script;
@@ -502,7 +517,8 @@ const initEditor = (overrideData?: unknown) => {
       },
       `verse:${verse.value.id}`
     );
-    const data = overrideData ?? unsavedBlocklyData.value ?? savedData;
+    const initState = getEditorInitState();
+    if (!initState) return;
     postMessage("INIT", {
       token: null,
       config: {
@@ -511,8 +527,10 @@ const initEditor = (overrideData?: unknown) => {
           index: verse.value!.id,
           resource: resource.value,
         },
-        data,
-        code: savedCode,
+        data: overrideData ?? initState.data,
+        code: initState.code,
+        persisted: initState.persisted,
+        hostSessionId: initState.hostSessionId,
         userInfo: {
           id: userStore.userInfo?.id || null,
           role: userStore.getRole(),
@@ -611,7 +629,9 @@ const {
   editorContentReady,
   toggleSceneFullscreen,
   postMessage,
+  beginEditorSession,
   initializeSavedSnapshot,
+  getEditorInitState,
   save,
   openVersionDialog,
   clearDraftHistory,
@@ -655,11 +675,20 @@ const editorContentLoading = computed(
   () => loading.value || !editorContentReady.value
 );
 
-onMounted(() => {
+const activateToolbar = () => {
+  isScriptViewActive = true;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
   });
+};
+
+onMounted(activateToolbar);
+onActivated(activateToolbar);
+onDeactivated(() => {
+  isScriptViewActive = false;
+  verseLoadSequence += 1;
+  unregisterToolbar(toolbarOwner);
 });
 
 watch(toolbarStatus, (status) => {
@@ -933,10 +962,15 @@ const run = async () => {
   }
 };
 
-// ---------- onMounted（Verse 专有：加载 verse 数据）----------
-onMounted(async () => {
+// ---------- 加载 Verse 脚本会话 ----------
+const loadVerseScriptSession = async () => {
+  if (!isScriptViewActive || route.name !== "Script") return;
+  if (!Number.isFinite(id.value)) return;
+  const requestedId = id.value;
+  const loadSequence = ++verseLoadSequence;
   try {
     loading.value = true;
+    map.clear();
     const response = await getVerse(
       id.value,
       "metas, module, share, verseCode"
@@ -945,6 +979,7 @@ onMounted(async () => {
       getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
       getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "js"),
     ]);
+    if (loadSequence !== verseLoadSequence || requestedId !== id.value) return;
     verse.value = response.data;
     logger.error(verse.value);
     verseMetasWithLuaCodeData.value =
@@ -955,6 +990,7 @@ onMounted(async () => {
       ? verseMetasWithJsCodeData.value.metas
       : [];
     const metaScripts = await loadMetaJavaScriptCode(previewMetas);
+    if (loadSequence !== verseLoadSequence || requestedId !== id.value) return;
     metasJavaScriptCode.value = metaScripts.join("\n");
     logger.log("实体脚本加载结果", {
       metaCount: previewMetas.length,
@@ -978,11 +1014,46 @@ onMounted(async () => {
         map.set(key, arr);
       });
     }
+    const savedSnapshot = readSavedEditorSnapshot();
+    if (savedSnapshot) {
+      beginEditorSession(savedSnapshot, `verse:${verse.value!.id}`);
+    }
     initEditor();
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : String(error));
   } finally {
-    loading.value = false;
+    if (loadSequence === verseLoadSequence) {
+      loading.value = false;
+    }
+  }
+};
+
+onMounted(loadVerseScriptSession);
+onActivated(() => {
+  if (!verse.value || verse.value.id !== id.value) {
+    void loadVerseScriptSession();
+  }
+});
+
+onBeforeRouteUpdate(async (to, from, next) => {
+  if (to.path !== from.path || to.query.id === from.query.id) {
+    next();
+    return;
+  }
+  const canLeave = await resolveUnsavedChangesBeforeLeave({
+    showDiscardInfo: true,
+  });
+  next(canLeave ? undefined : false);
+});
+
+watch(id, (nextId, previousId) => {
+  if (
+    isScriptViewActive &&
+    route.name === "Script" &&
+    Number.isFinite(nextId) &&
+    nextId !== previousId
+  ) {
+    void loadVerseScriptSession();
   }
 });
 </script>

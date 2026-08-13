@@ -140,6 +140,7 @@
                 ></UnityPreviewDialog>
 
                 <iframe
+                  :key="editorFrameKey"
                   style="width: 100%; height: 100%; padding: 0; margin: 0"
                   id="editor"
                   ref="editor"
@@ -283,6 +284,7 @@ interface Props {
   modelValue: boolean;
   verseId: number;
   title?: string;
+  switchRequestToken?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -293,6 +295,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
   (e: "saved"): void;
+  (e: "switch-accepted"): void;
+  (e: "switch-rejected"): void;
 }>();
 
 // Visible state
@@ -314,6 +318,7 @@ const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const metasJavaScriptCode = ref("");
 let map = new Map<string, Array<{ uuid: string; title: string }>>();
+let verseLoadSequence = 0;
 
 const { t } = useI18n();
 const userStore = useUserStore();
@@ -350,6 +355,17 @@ type VerseMeta = {
   };
 };
 
+const readSavedEditorSnapshot = () => {
+  if (!verse.value) return null;
+  let blocklyData = verse.value.verseCode?.blockly || "{}";
+  blocklyData = decompressBlockly(blocklyData);
+  return {
+    blocklyData: JSON.parse(blocklyData),
+    js: verse.value.verseCode?.js || "",
+    lua: verse.value.verseCode?.lua || "",
+  };
+};
+
 const initEditor = () => {
   if (!verse.value) return;
   if (!isReady()) return;
@@ -370,7 +386,8 @@ const initEditor = () => {
       },
       `verse:${verse.value.id}`
     );
-    const data = unsavedBlocklyData.value ?? savedData;
+    const initState = getEditorInitState();
+    if (!initState) return;
     postMessage("INIT", {
       token: null,
       config: {
@@ -379,8 +396,10 @@ const initEditor = () => {
           index: verse.value!.id,
           resource: resource.value,
         },
-        data,
-        code: savedCode,
+        data: initState.data,
+        code: initState.code,
+        persisted: initState.persisted,
+        hostSessionId: initState.hostSessionId,
         userInfo: {
           id: userStore.userInfo?.id || null,
           role: userStore.getRole(),
@@ -463,6 +482,7 @@ const {
   codeDialogTitle,
   unsavedBlocklyData,
   hasUnsavedChanges,
+  editorFrameKey,
   editor,
   src,
   isDark,
@@ -471,7 +491,10 @@ const {
   toggleSceneFullscreen,
   copyCode,
   postMessage,
+  beginEditorSession,
   initializeSavedSnapshot,
+  getEditorInitState,
+  resolveUnsavedChangesBeforeLeave,
   save,
   decompressBlockly,
   isReady,
@@ -743,6 +766,8 @@ const run = async () => {
 
 const loadVerseData = async () => {
   if (!props.verseId) return;
+  const requestedId = props.verseId;
+  const loadSequence = ++verseLoadSequence;
 
   try {
     loading.value = true;
@@ -756,6 +781,9 @@ const loadVerseData = async () => {
       getVerse(props.verseId, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
       getVerse(props.verseId, UNITY_PREVIEW_VERSE_EXPAND, "js"),
     ]);
+    if (loadSequence !== verseLoadSequence || requestedId !== props.verseId) {
+      return;
+    }
     verse.value = response.data;
     verseMetasWithJsCodeData.value =
       responseJs.data as unknown as VerseMetasWithJsCode;
@@ -779,41 +807,59 @@ const loadVerseData = async () => {
         map.set(key, arr);
       });
     }
+    const savedSnapshot = readSavedEditorSnapshot();
+    if (savedSnapshot) {
+      beginEditorSession(savedSnapshot, `verse:${verse.value!.id}`);
+    }
     initEditor();
   } catch (error) {
     Message.error(error instanceof Error ? error.message : String(error));
   } finally {
-    loading.value = false;
+    if (loadSequence === verseLoadSequence) {
+      loading.value = false;
+    }
   }
 };
 
 const handleClose = async () => {
-  if (unsavedBlocklyData.value) {
-    try {
-      await MessageBox.confirm(
-        t("verse.view.script.leave.message1"),
-        t("verse.view.script.leave.confirm"),
-        {
-          confirmButtonText: t("verse.view.script.leave.confirm"),
-          cancelButtonText: t("verse.view.script.leave.cancel"),
-          type: "warning",
-        }
-      );
-      visible.value = false;
-    } catch {
-      // User cancelled
-    }
-  } else {
+  if (
+    await resolveUnsavedChangesBeforeLeave({
+      showDiscardInfo: false,
+    })
+  ) {
     visible.value = false;
   }
 };
 
+watch(
+  () => props.switchRequestToken,
+  async (nextToken, previousToken) => {
+    if (!props.modelValue || !nextToken || nextToken === previousToken) return;
+    if (
+      await resolveUnsavedChangesBeforeLeave({
+        showDiscardInfo: false,
+      })
+    ) {
+      emit("switch-accepted");
+    } else {
+      emit("switch-rejected");
+    }
+  },
+  { flush: "sync" }
+);
+
 // Watch for modal open
 watch(
-  () => props.modelValue,
-  (newVal) => {
-    if (newVal) {
-      loadVerseData();
+  [() => props.modelValue, () => props.verseId],
+  ([newVal, nextVerseId], previous) => {
+    const previousVisible = previous?.[0];
+    const previousVerseId = previous?.[1];
+    if (
+      newVal &&
+      nextVerseId &&
+      (!previousVisible || nextVerseId !== previousVerseId)
+    ) {
+      void loadVerseData();
     }
   },
   { immediate: true }

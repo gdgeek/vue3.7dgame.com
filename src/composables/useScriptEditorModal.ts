@@ -14,15 +14,49 @@ const currentMetaId = ref<number>(0);
 const currentType = ref<"verse" | "meta">("verse");
 const currentTitle = ref<string>("");
 const savedCallback = ref<(() => void) | undefined>();
+type PendingOpenRequest = ScriptEditorModalOptions & {
+  resolve: (opened: boolean) => void;
+};
+const pendingOpenRequest = ref<PendingOpenRequest | null>(null);
+const switchRequestToken = ref(0);
+
+const applyOpenOptions = (options: ScriptEditorModalOptions) => {
+  currentType.value = options.type;
+  currentVerseId.value = options.verseId || 0;
+  currentMetaId.value = options.metaId || 0;
+  currentTitle.value = options.title || "";
+  savedCallback.value = options.onSaved;
+  isModalOpen.value = true;
+};
 
 export function useScriptEditorModal() {
   const openScriptEditor = (options: ScriptEditorModalOptions) => {
-    currentType.value = options.type;
-    currentVerseId.value = options.verseId || 0;
-    currentMetaId.value = options.metaId || 0;
-    currentTitle.value = options.title || "";
-    savedCallback.value = options.onSaved;
-    isModalOpen.value = true;
+    if (isModalOpen.value) {
+      pendingOpenRequest.value?.resolve(false);
+      return new Promise<boolean>((resolve) => {
+        pendingOpenRequest.value = { ...options, resolve };
+        switchRequestToken.value += 1;
+      });
+    }
+    applyOpenOptions(options);
+    return Promise.resolve(true);
+  };
+
+  const acceptPendingScriptEditor = () => {
+    const pending = pendingOpenRequest.value;
+    if (!pending) return false;
+    pendingOpenRequest.value = null;
+    applyOpenOptions(pending);
+    pending.resolve(true);
+    return true;
+  };
+
+  const rejectPendingScriptEditor = () => {
+    const pending = pendingOpenRequest.value;
+    if (!pending) return false;
+    pendingOpenRequest.value = null;
+    pending.resolve(false);
+    return true;
   };
 
   const closeScriptEditor = () => {
@@ -42,6 +76,10 @@ export function useScriptEditorModal() {
     currentType,
     currentTitle,
     openScriptEditor,
+    pendingOpenRequest,
+    switchRequestToken,
+    acceptPendingScriptEditor,
+    rejectPendingScriptEditor,
     closeScriptEditor,
     handleSaved,
   };
