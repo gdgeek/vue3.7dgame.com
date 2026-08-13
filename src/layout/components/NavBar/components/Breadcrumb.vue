@@ -1,5 +1,5 @@
 <template>
-  <nav class="breadcrumb-nav" :class="{ 'has-mode-tag': hasModeTag }">
+  <nav class="breadcrumb-nav">
     <template
       v-for="(item, index) in breadcrumbItems"
       :key="`${item.label}-${index}`"
@@ -332,10 +332,6 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
   );
 });
 
-const hasModeTag = computed(() =>
-  breadcrumbItems.value.some((item) => item.kind === "mode")
-);
-
 const handleNavigate = (item: BreadcrumbSegment) => {
   if (!item.clickable || !item.to) return;
   router.push(item.to);
@@ -394,10 +390,6 @@ const handleNavigate = (item: BreadcrumbSegment) => {
   }
 }
 
-.breadcrumb-nav.has-mode-tag .crumb-link.is-primary {
-  flex-grow: 0;
-}
-
 .crumb-label {
   min-width: 0;
   overflow: hidden;
@@ -428,10 +420,6 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 @container app-navbar (width <= 1120px) {
   .breadcrumb-nav {
     gap: 0;
-  }
-
-  .breadcrumb-nav.has-mode-tag {
-    gap: 6px;
   }
 
   .crumb-link:not(.is-primary),
