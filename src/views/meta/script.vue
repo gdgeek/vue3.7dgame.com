@@ -109,6 +109,7 @@
                       id="editor"
                       ref="editor"
                       :src="src"
+                      @load="handleEditorFrameLoad"
                     ></iframe>
                   </el-main>
                 </el-tab-pane>
@@ -399,6 +400,7 @@ const {
   clearDraftHistory,
   restoreDraftVersion,
   reloadEditorFrame,
+  handleEditorFrameLoad,
   decompressBlockly,
   isReady,
   copyCode,
