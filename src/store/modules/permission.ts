@@ -4,7 +4,15 @@ import { store } from "@/store";
 import { RouteVO } from "@/api/menu/model";
 import { routerData } from "@/router";
 
-const modules = import.meta.glob("../../views/**/**.vue");
+// These components are owned by explicit development-only routes. Keeping them
+// in the server-driven menu glob would emit orphaned Production chunks even
+// after their routes were removed from the Production route graph.
+const modules = import.meta.glob([
+  "../../views/**/**.vue",
+  "!../../views/test/VueFormDemo.vue",
+  "!../../views/game/**",
+  "!../../views/settings/people.vue",
+]);
 const Layout = () => import("@/layout/index.vue");
 
 export const usePermissionStore = defineStore("permission", () => {

@@ -18,6 +18,10 @@ describe("resourceRoutes 路由模块", () => {
     it("component 为 null", () => {
       expect(resourceRoutes.component).toBeNull();
     });
+
+    it("redirect 到可用资源列表而非 /resource/ 目录", () => {
+      expect(resourceRoutes.redirect).toBe("/resource/voxel/index");
+    });
   });
 
   describe("根路由 meta 属性", () => {

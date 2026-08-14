@@ -52,45 +52,54 @@ export const homeRoutes: RouteRecordRaw = {
   ],
 };
 
+export const shouldRegisterSettingsPeopleRoute = (isProduction: boolean) =>
+  !isProduction;
+
+const settingsChildren: RouteRecordRaw[] = [
+  {
+    meta: {
+      title: "settings.personalData",
+      hidden: true,
+      private: true,
+    },
+    path: "/settings/edit",
+    name: "SettingsEdit",
+    component: () => import("@/views/settings/edit.vue"),
+  },
+  {
+    meta: {
+      title: "settings.accountSetting",
+      hidden: true,
+      private: true,
+    },
+    path: "/settings/email",
+    name: "SettingsEmail",
+    component: () => import("@/views/settings/email.vue"),
+  },
+];
+
+if (!import.meta.env.PROD) {
+  settingsChildren.push({
+    meta: {
+      title: "settings.userPresentation",
+      hidden: true,
+      private: true,
+    },
+    path: "/settings/people",
+    name: "SettingsPeople",
+    component: () => import("@/views/settings/people.vue"),
+  });
+}
+
 export const settingsRoutes: RouteRecordRaw = {
   path: "/settings",
   name: "Settings",
+  redirect: "/settings/edit",
   meta: {
     title: "settings.title",
     hidden: true,
     private: true,
   },
   component: Empty,
-  children: [
-    {
-      meta: {
-        title: "settings.personalData",
-        hidden: true,
-        private: true,
-      },
-      path: "/settings/edit",
-      name: "SettingsEdit",
-      component: () => import("@/views/settings/edit.vue"),
-    },
-    {
-      meta: {
-        title: "settings.accountSetting",
-        hidden: true,
-        private: true,
-      },
-      path: "/settings/email",
-      name: "SettingsEmail",
-      component: () => import("@/views/settings/email.vue"),
-    },
-    {
-      meta: {
-        title: "settings.userPresentation",
-        hidden: true,
-        private: true,
-      },
-      path: "/settings/people",
-      name: "SettingsPeople",
-      component: () => import("@/views/settings/people.vue"),
-    },
-  ],
+  children: settingsChildren,
 };

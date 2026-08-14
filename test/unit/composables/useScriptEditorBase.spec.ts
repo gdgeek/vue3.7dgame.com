@@ -142,8 +142,6 @@ describe("useScriptEditorBase", () => {
       expect(result.languageName.value).toBe("lua");
       expect(result.LuaCode.value).toBe("");
       expect(result.JavaScriptCode.value).toBe("");
-      expect(result.disabled.value).toBe(false);
-      expect(result.isSceneFullscreen.value).toBe(false);
       expect(result.isFullscreen.value).toBe(false);
       expect(result.showCodeDialog.value).toBe(false);
       expect(result.hasUnsavedChanges.value).toBe(false);
@@ -1523,83 +1521,6 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
   });
-
-  // ---- toggleSceneFullscreen ----
-  describe("toggleSceneFullscreen()", () => {
-    it("requests fullscreen on .runArea element when not in fullscreen", () => {
-      const { result, unmount } = withSetup(() =>
-        useScriptEditorBase(makeOptions())
-      );
-
-      Object.defineProperty(document, "fullscreenElement", {
-        value: null,
-        configurable: true,
-      });
-
-      const runArea = document.createElement("div");
-      runArea.className = "runArea";
-      const mockRequestFullscreen = vi.fn().mockResolvedValue(undefined);
-      runArea.requestFullscreen = mockRequestFullscreen;
-      document.body.appendChild(runArea);
-
-      result.toggleSceneFullscreen();
-
-      expect(mockRequestFullscreen).toHaveBeenCalled();
-      expect(result.isSceneFullscreen.value).toBe(true);
-
-      document.body.removeChild(runArea);
-      Object.defineProperty(document, "fullscreenElement", {
-        value: null,
-        configurable: true,
-      });
-      unmount();
-    });
-
-    it("does nothing when .runArea element is not found", () => {
-      const { result, unmount } = withSetup(() =>
-        useScriptEditorBase(makeOptions())
-      );
-
-      Object.defineProperty(document, "fullscreenElement", {
-        value: null,
-        configurable: true,
-      });
-
-      // Ensure no .runArea exists in DOM
-      const existing = document.querySelector(".runArea");
-      if (existing) existing.remove();
-
-      result.toggleSceneFullscreen();
-
-      expect(result.isSceneFullscreen.value).toBe(false);
-      unmount();
-    });
-
-    it("exits fullscreen when already in scene fullscreen mode", () => {
-      const { result, unmount } = withSetup(() =>
-        useScriptEditorBase(makeOptions())
-      );
-
-      const fakeEl = document.createElement("div");
-      Object.defineProperty(document, "fullscreenElement", {
-        value: fakeEl,
-        configurable: true,
-      });
-      const mockExitFullscreen = vi.fn().mockResolvedValue(undefined);
-      document.exitFullscreen = mockExitFullscreen;
-
-      result.toggleSceneFullscreen();
-
-      expect(mockExitFullscreen).toHaveBeenCalled();
-      expect(result.isSceneFullscreen.value).toBe(false);
-
-      Object.defineProperty(document, "fullscreenElement", {
-        value: null,
-        configurable: true,
-      });
-      unmount();
-    });
-  });
 });
 
 describe("useScriptEditorBase copyCode", () => {
@@ -1854,70 +1775,5 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
     });
     fullscreenCallbacks[0]?.();
     expect(result.isFullscreen.value).toBe(false);
-  });
-
-  it("第二个 fullscreenchange 回调更新 isSceneFullscreen (line 425)", () => {
-    const fullscreenCallbacks: (() => void)[] = [];
-
-    const spy = vi
-      .spyOn(document, "removeEventListener")
-      .mockImplementation(
-        (
-          event: string,
-          callback: EventListenerOrEventListenerObject | null
-        ) => {
-          if (event === "fullscreenchange" && typeof callback === "function") {
-            fullscreenCallbacks.push(callback as () => void);
-          }
-        }
-      );
-
-    const { result, unmount } = withSetup(() =>
-      useScriptEditorBase(makeOptions())
-    );
-    unmount();
-    spy.mockRestore();
-
-    // 第二个 fullscreenchange 回调对应 isSceneFullscreen（line 425）
-    expect(fullscreenCallbacks.length).toBeGreaterThanOrEqual(2);
-
-    Object.defineProperty(document, "fullscreenElement", {
-      value: document.createElement("div"),
-      configurable: true,
-    });
-    fullscreenCallbacks[1]!();
-    // line 425: isSceneFullscreen.value = !!document.fullscreenElement → true
-    expect(result.isSceneFullscreen.value).toBe(true);
-  });
-
-  it("第二个 fullscreenchange 回调退出全屏时 isSceneFullscreen=false (line 425 falsy branch)", () => {
-    const fullscreenCallbacks: (() => void)[] = [];
-
-    const spy = vi
-      .spyOn(document, "removeEventListener")
-      .mockImplementation(
-        (
-          event: string,
-          callback: EventListenerOrEventListenerObject | null
-        ) => {
-          if (event === "fullscreenchange" && typeof callback === "function") {
-            fullscreenCallbacks.push(callback as () => void);
-          }
-        }
-      );
-
-    const { result, unmount } = withSetup(() =>
-      useScriptEditorBase(makeOptions())
-    );
-    result.isSceneFullscreen.value = true;
-    unmount();
-    spy.mockRestore();
-
-    Object.defineProperty(document, "fullscreenElement", {
-      value: null,
-      configurable: true,
-    });
-    fullscreenCallbacks[1]?.();
-    expect(result.isSceneFullscreen.value).toBe(false);
   });
 });

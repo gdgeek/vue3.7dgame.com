@@ -20,6 +20,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "audit:production-routes": "node scripts/audit-route-performance.mjs",
     "format:prettier": "prettier --check src",
     "lint": "eslint --fix --ext .ts,.js,.vue ./src && prettier --write \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:fix": "pnpm run lint:eslint:fix && pnpm run lint:prettier:fix && pnpm run lint:stylelint:fix",

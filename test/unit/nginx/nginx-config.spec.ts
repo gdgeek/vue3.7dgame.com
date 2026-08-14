@@ -218,8 +218,9 @@ describe("nginx.conf.template — gzip preserved", () => {
 });
 
 describe("nginx.conf.template — try_files fallback preserved", () => {
-  it("contains try_files with /index.html fallback", () => {
-    expect(nginxConfig).toContain("try_files $uri $uri/ /index.html");
+  it("falls back to the SPA without probing colliding asset directories", () => {
+    expect(nginxConfig).toContain("try_files $uri /index.html");
+    expect(nginxConfig).not.toContain("try_files $uri $uri/ /index.html");
   });
 });
 
@@ -592,7 +593,8 @@ describe("Property 6: Static file fallback", () => {
           .stringMatching(/^\/[a-z]{1,20}$/)
           .filter((p) => !p.startsWith("/api") && !p.startsWith("/api-doc")),
         (_path) => {
-          expect(nginxConfig).toContain("try_files $uri $uri/ /index.html");
+          expect(nginxConfig).toContain("try_files $uri /index.html");
+          expect(nginxConfig).not.toContain("try_files $uri $uri/ /index.html");
           expect(nginxConfig).toMatch(/location\s+\/\s*\{/);
         }
       ),

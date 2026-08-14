@@ -70,5 +70,12 @@ declare module "vue-router" {
      * @example ['admin', 'editor']
      */
     roles?: string[];
+
+    /**
+     * 访问路由所需的稳定能力编码；所有能力都必须满足。
+     * 角色到能力的映射集中维护在全局路由守卫中。
+     * @example ['platform.users.manage']
+     */
+    requiredCapabilities?: string[];
   }
 }
