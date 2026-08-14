@@ -192,6 +192,51 @@ describe("useScriptEditorBase", () => {
       expect(result.editorFrameKey.value).toBe(1);
       unmount();
     });
+
+    it("新脚本会话会主动重试 INIT，并在首个工作区更新后停止", async () => {
+      vi.useFakeTimers();
+      try {
+        const onReady = vi.fn();
+        const { result, unmount } = withSetup(() =>
+          useScriptEditorBase(makeOptions({ onReady }))
+        );
+        const contentWindow = markRaw({ postMessage: vi.fn() });
+        result.editor.value = {
+          contentWindow,
+        } as MockIframe as HTMLIFrameElement;
+        result.beginEditorSession(
+          { lua: "", js: "", blocklyData: { blocks: [] } },
+          "verse:3520"
+        );
+
+        await vi.advanceTimersByTimeAsync(0);
+        expect(onReady).toHaveBeenCalledTimes(1);
+
+        const hostSessionId = result.getEditorInitState()!.hostSessionId;
+        await result.handleMessage({
+          source: contentWindow,
+          origin: "https://blockly.test",
+          data: {
+            type: "EVENT",
+            payload: {
+              event: "update",
+              hostSessionId,
+              workspaceRevision: 0,
+              dirty: false,
+              lua: "",
+              js: "",
+              blocklyData: { blocks: [] },
+            },
+          },
+        } as unknown as MessageEvent);
+
+        await vi.advanceTimersByTimeAsync(3000);
+        expect(onReady).toHaveBeenCalledTimes(1);
+        unmount();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   // ----------------------------------------------------------------
