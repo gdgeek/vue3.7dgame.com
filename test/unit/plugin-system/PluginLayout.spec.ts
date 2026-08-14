@@ -223,6 +223,19 @@ describe("plugin-system/views/PluginLayout.vue", () => {
     expect(el.textContent).toContain("无权限访问插件");
   });
 
+  it("shows a stable unavailable state for an unregistered plugin route", async () => {
+    mockRoute.path = "/plugins/stale-plugin";
+    mockRoute.params.pluginId = "stale-plugin";
+
+    const { el } = await mountView();
+
+    expect(mockInit).toHaveBeenCalledOnce();
+    expect(mockEnsurePluginAccess).not.toHaveBeenCalled();
+    expect(mockActivatePlugin).not.toHaveBeenCalled();
+    expect(el.textContent).toContain("插件不可用");
+    expect(el.querySelector(".plugin-page__iframe")?.childElementCount).toBe(0);
+  });
+
   it("does not replace host-expiry handling with local plugin error text on 401", async () => {
     mockEnsurePluginAccess.mockRejectedValueOnce({
       response: { status: 401 },

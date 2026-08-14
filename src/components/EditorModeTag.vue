@@ -1,6 +1,11 @@
 <template>
   <span class="editor-mode-tag" aria-current="page">
-    <span class="editor-mode-tag__icon" aria-hidden="true">{{ icon }}</span>
+    <span class="editor-mode-tag__icon" aria-hidden="true">
+      <FontAwesomeIcon
+        class="editor-mode-tag__icon-glyph"
+        :icon="icon"
+      ></FontAwesomeIcon>
+    </span>
     <span class="editor-mode-tag__label">{{ label }}</span>
     <span v-if="dirty" class="editor-mode-tag__dirty" aria-hidden="true"></span>
   </span>
@@ -8,6 +13,13 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import {
+  faCode,
+  faCube,
+  faLayerGroup,
+  type IconDefinition,
+} from "@fortawesome/free-solid-svg-icons";
 
 type EditorMode = "script" | "scene" | "entity";
 
@@ -22,7 +34,13 @@ const props = withDefaults(
   }
 );
 
-const icon = computed(() => (props.mode === "script" ? "</>" : "◇"));
+const MODE_ICONS: Record<EditorMode, IconDefinition> = {
+  script: faCode,
+  scene: faLayerGroup,
+  entity: faCube,
+};
+
+const icon = computed(() => MODE_ICONS[props.mode]);
 </script>
 
 <style scoped>
@@ -49,10 +67,17 @@ const icon = computed(() => (props.mode === "script" ? "</>" : "◇"));
 }
 
 .editor-mode-tag__icon {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
+  display: inline-flex;
+  flex: 0 0 14px;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+
+.editor-mode-tag__icon-glyph {
+  width: 14px;
+  height: 14px;
 }
 
 .editor-mode-tag__label {

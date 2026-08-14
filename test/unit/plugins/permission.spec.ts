@@ -6,6 +6,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ── vi.hoisted 变量（在 vi.mock 工厂函数中引用，必须提前 hoist）──────────
 const mockGetAccessToken = vi.hoisted(() => vi.fn(() => null as string | null));
+const mockGetUserInfo = vi.hoisted(() => vi.fn());
 
 // ── 捕获 router 钩子 ────────────────────────────────────────────────────────
 let capturedBeforeEach:
@@ -35,10 +36,17 @@ vi.mock("@/services/auth/authClient", () => ({
 // mockUserInfo 由各 describe 块在 beforeEach 中赋值
 let mockUserInfo: { roles?: string[]; perms?: string[] } | null = null;
 vi.mock("@/store", () => ({
-  useUserStore: () => ({ userInfo: mockUserInfo }),
+  useUserStore: () => ({
+    userInfo: mockUserInfo,
+    getUserInfo: mockGetUserInfo,
+  }),
 }));
 
-import { setupPermission, hasAuth } from "@/plugins/permission";
+import {
+  setupPermission,
+  hasAuth,
+  hasRouteCapabilityAccess,
+} from "@/plugins/permission";
 import NProgress from "@/utils/nprogress";
 
 // ── 辅助函数 ────────────────────────────────────────────────────────────────
@@ -65,6 +73,7 @@ beforeEach(() => {
   capturedAfterEach = null;
   mockUserInfo = null;
   mockGetAccessToken.mockReturnValue(null);
+  mockGetUserInfo.mockReset();
 
   // 设置 mock 实现以捕获注册的回调
   mockRouter.beforeEach.mockImplementation((cb: any) => {
@@ -153,6 +162,21 @@ describe("beforeEach 守卫 — 有 token 时", () => {
     expect(next).toHaveBeenCalledWith("/404");
   });
 
+  it.each(["/plugin-debug", "/test/vue-form-demo"])(
+    "Production direct navigation %s 进入 /404 且不加载身份或调试数据",
+    async (path) => {
+      const next = vi.fn();
+      await capturedBeforeEach!(
+        makeTo({ path, name: undefined, matched: [] }),
+        makeFrom({ name: undefined }),
+        next
+      );
+
+      expect(next).toHaveBeenCalledWith("/404");
+      expect(mockGetUserInfo).not.toHaveBeenCalled();
+    }
+  );
+
   it("params.title 覆盖路由 meta.title", async () => {
     const next = vi.fn();
     const to = makeTo({
@@ -194,6 +218,99 @@ describe("beforeEach 守卫 — 有 token 时", () => {
     const next = vi.fn();
     await capturedBeforeEach!(makeTo(), makeFrom(), next);
     expect(NProgress.done).toHaveBeenCalled();
+  });
+
+  it("Ordinary_User 直接访问受保护路由时进入 /401", async () => {
+    mockUserInfo = { roles: ["user"], perms: [] };
+    const next = vi.fn();
+    await capturedBeforeEach!(
+      makeTo({
+        path: "/manager/user",
+        meta: { requiredCapabilities: ["platform.users.manage"] },
+      }),
+      makeFrom(),
+      next
+    );
+    expect(next).toHaveBeenCalledWith("/401");
+  });
+
+  it("root 可直接访问受保护路由", async () => {
+    mockUserInfo = { roles: ["root"], perms: [] };
+    const next = vi.fn();
+    await capturedBeforeEach!(
+      makeTo({
+        path: "/manager/user",
+        meta: { requiredCapabilities: ["platform.users.manage"] },
+      }),
+      makeFrom(),
+      next
+    );
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it("用户信息未加载时仅加载身份后再做路由授权", async () => {
+    mockUserInfo = null;
+    mockGetUserInfo.mockResolvedValue({ roles: ["admin"], perms: [] });
+    const next = vi.fn();
+    await capturedBeforeEach!(
+      makeTo({
+        path: "/manager/user",
+        meta: { requiredCapabilities: ["platform.users.manage"] },
+      }),
+      makeFrom(),
+      next
+    );
+    expect(mockGetUserInfo).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it("身份加载失败时 fail closed 到 /401", async () => {
+    mockUserInfo = null;
+    mockGetUserInfo.mockRejectedValue(new Error("identity unavailable"));
+    const next = vi.fn();
+    await capturedBeforeEach!(
+      makeTo({
+        path: "/manager/user",
+        meta: { requiredCapabilities: ["platform.users.manage"] },
+      }),
+      makeFrom(),
+      next
+    );
+    expect(next).toHaveBeenCalledWith("/401");
+  });
+});
+
+describe("hasRouteCapabilityAccess()", () => {
+  it("角色映射可满足稳定能力", () => {
+    expect(
+      hasRouteCapabilityAccess({ roles: ["admin"], perms: [] }, [
+        "platform.users.manage",
+      ])
+    ).toBe(true);
+  });
+
+  it("用户直接权限可满足稳定能力", () => {
+    expect(
+      hasRouteCapabilityAccess(
+        { roles: ["user"], perms: ["platform.phototypes.manage"] },
+        ["platform.phototypes.manage"]
+      )
+    ).toBe(true);
+  });
+
+  it("多项能力采用全部满足语义", () => {
+    expect(
+      hasRouteCapabilityAccess({ roles: ["admin"], perms: [] }, [
+        "platform.users.manage",
+        "platform.phototypes.manage",
+      ])
+    ).toBe(false);
+  });
+
+  it("未知能力与空要求均 fail closed", () => {
+    const root = { roles: ["root"], perms: [] };
+    expect(hasRouteCapabilityAccess(root, ["platform.unknown"])).toBe(false);
+    expect(hasRouteCapabilityAccess(root, [])).toBe(false);
   });
 });
 

@@ -1353,11 +1353,6 @@ const handleMessage = async (e: MessageEvent) => {
             path: "/verse/scene",
             query: { id: sceneId, title: sceneTitle },
           });
-        } else if (payload.data === "rete.js") {
-          router.push({
-            path: "/meta/rete-meta",
-            query: { id: id.value, title: title.value },
-          });
         }
       } else if (event === "upload-cover") {
         handleUploadCover(payload);

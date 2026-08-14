@@ -39,6 +39,7 @@ vi.mock("@/router/modules/verse", () => ({
 vi.mock("@/router/modules/manager", () => ({
   managerRoutes: { path: "/manager", name: "Manager", meta: { hidden: false } },
   gameRoutes: { path: "/game", name: "Game", meta: { hidden: false } },
+  environmentGameRoutes: [],
 }));
 
 // Mock layout component (function – cannot be structuredCloned)

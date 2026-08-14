@@ -138,8 +138,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const languageName = ref<string>("lua");
   const LuaCode = ref("");
   const JavaScriptCode = ref("");
-  const disabled = ref<boolean>(false);
-  const isSceneFullscreen = ref(false);
   const isFullscreen = ref(false);
   const showCodeDialog = ref(false);
   const currentCode = ref("");
@@ -713,20 +711,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     } else {
       document.exitFullscreen();
       isFullscreen.value = false;
-    }
-  };
-
-  // ---- 场景全屏 ----
-  const toggleSceneFullscreen = () => {
-    if (!document.fullscreenElement) {
-      const container = document.querySelector(".runArea");
-      if (container) {
-        container.requestFullscreen();
-        isSceneFullscreen.value = true;
-      }
-    } else {
-      document.exitFullscreen();
-      isSceneFullscreen.value = false;
     }
   };
 
@@ -1459,9 +1443,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     document.addEventListener("fullscreenchange", () => {
       isFullscreen.value = !!document.fullscreenElement;
     });
-    document.addEventListener("fullscreenchange", () => {
-      isSceneFullscreen.value = !!document.fullscreenElement;
-    });
   });
 
   // ---- onBeforeUnmount：注销事件监听 ----
@@ -1478,9 +1459,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     document.removeEventListener("fullscreenchange", () => {
       isFullscreen.value = !!document.fullscreenElement;
     });
-    document.removeEventListener("fullscreenchange", () => {
-      isSceneFullscreen.value = !!document.fullscreenElement;
-    });
   });
 
   return {
@@ -1489,8 +1467,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     languageName,
     LuaCode,
     JavaScriptCode,
-    disabled,
-    isSceneFullscreen,
     isFullscreen,
     showCodeDialog,
     currentCode,
@@ -1514,7 +1490,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     handleBlocklyChange,
     toggleFullscreen,
     showFullscreenCode,
-    toggleSceneFullscreen,
     loadHighlightStyle,
     copyCode,
     formatJavaScript,

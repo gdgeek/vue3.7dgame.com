@@ -184,7 +184,10 @@ server {
     }
 
     location / {
-        try_files $uri $uri/ /index.html;
+        # Do not probe $uri/ here. Vite emits real asset directories such as
+        # /resource/, and that probe rewrites the SPA parent route /resource
+        # to the physical directory before Vue Router can apply its redirect.
+        try_files $uri /index.html;
     }
 
     error_page 404 /index.html;

@@ -33,7 +33,7 @@
           </div>
         </template>
 
-        <el-container v-if="!disabled">
+        <el-container>
           <el-tabs v-model="activeName" type="card" style="width: 100%">
             <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
               <el-main
@@ -192,29 +192,6 @@
             </el-tab-pane>
           </el-tabs>
         </el-container>
-        <div v-if="disabled" class="runArea">
-          <div class="scene-fullscreen-controls">
-            <el-button
-              class="scene-fullscreen-btn"
-              size="small"
-              type="primary"
-              plain
-              @click="toggleSceneFullscreen"
-            >
-              <el-icon>
-                <FullScreen v-if="!isSceneFullscreen"></FullScreen>
-                <Aim v-else></Aim>
-              </el-icon>
-            </el-button>
-          </div>
-          <ScenePlayer
-            v-if="meta"
-            ref="scenePlayer"
-            :meta="meta"
-            :is-scene-fullscreen="isSceneFullscreen"
-          >
-          </ScenePlayer>
-        </div>
       </el-card>
     </div>
   </el-dialog>
@@ -229,7 +206,6 @@ import { Message } from "@/components/Dialog";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
 import { buildMetaResourceIndex } from "@/components/Meta/useMetaResourceParser";
-import ScenePlayer from "@/views/meta/ScenePlayer.vue";
 import {
   useScriptEditorBase,
   type EditorPostPayload,
@@ -404,8 +380,6 @@ const {
   languageName,
   LuaCode,
   JavaScriptCode,
-  disabled,
-  isSceneFullscreen,
   isFullscreen,
   showCodeDialog,
   currentCode,
@@ -418,7 +392,6 @@ const {
   isDark,
   toggleFullscreen,
   showFullscreenCode,
-  toggleSceneFullscreen,
   copyCode,
   postMessage,
   beginEditorSession,
@@ -691,31 +664,5 @@ watch(
 
 .light-theme :deep(.hljs) {
   background-color: #fafafa !important;
-}
-
-.runArea {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.scene-fullscreen-controls {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 100;
-}
-
-.scene-fullscreen-btn {
-  opacity: 0.8;
-}
-
-:fullscreen .runArea {
-  height: 100vh !important;
-  padding: 0;
-}
-
-:fullscreen .scene-fullscreen-btn {
-  margin: 10px;
 }
 </style>

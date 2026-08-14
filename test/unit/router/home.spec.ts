@@ -3,7 +3,11 @@
  * 验证 homeRoutes、settingsRoutes 的结构完整性
  */
 import { describe, it, expect } from "vitest";
-import { homeRoutes, settingsRoutes } from "@/router/modules/home";
+import {
+  homeRoutes,
+  settingsRoutes,
+  shouldRegisterSettingsPeopleRoute,
+} from "@/router/modules/home";
 
 // ============================================================================
 // homeRoutes
@@ -159,6 +163,10 @@ describe("settingsRoutes 路由模块", () => {
       expect(settingsRoutes.name).toBe("Settings");
     });
 
+    it("redirect 为 /settings/edit", () => {
+      expect(settingsRoutes.redirect).toBe("/settings/edit");
+    });
+
     it("component 是函数（懒加载 Empty 布局）", () => {
       expect(typeof settingsRoutes.component).toBe("function");
     });
@@ -256,5 +264,9 @@ describe("settingsRoutes 路由模块", () => {
         expect(comp.length).toBe(0);
       });
     });
+  });
+
+  it("Production 不注册空壳 /settings/people", () => {
+    expect(shouldRegisterSettingsPeopleRoute(true)).toBe(false);
   });
 });
