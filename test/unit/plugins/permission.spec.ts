@@ -162,6 +162,21 @@ describe("beforeEach 守卫 — 有 token 时", () => {
     expect(next).toHaveBeenCalledWith("/404");
   });
 
+  it.each(["/plugin-debug", "/test/vue-form-demo"])(
+    "Production direct navigation %s 进入 /404 且不加载身份或调试数据",
+    async (path) => {
+      const next = vi.fn();
+      await capturedBeforeEach!(
+        makeTo({ path, name: undefined, matched: [] }),
+        makeFrom({ name: undefined }),
+        next
+      );
+
+      expect(next).toHaveBeenCalledWith("/404");
+      expect(mockGetUserInfo).not.toHaveBeenCalled();
+    }
+  );
+
   it("params.title 覆盖路由 meta.title", async () => {
     const next = vi.fn();
     const to = makeTo({
