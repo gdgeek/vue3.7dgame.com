@@ -696,8 +696,6 @@ watch(id, (nextId, previousId) => {
     void loadMetaScriptSession();
   }
 });
-
-defineExpose({ run });
 </script>
 
 <style scoped>
