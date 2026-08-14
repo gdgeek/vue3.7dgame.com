@@ -400,6 +400,27 @@ describe("useScriptEditorBase", () => {
   // handleMessage
   // ----------------------------------------------------------------
   describe("handleMessage", () => {
+    it("在组件挂载 iframe 前注册 message 监听器", () => {
+      const addEventListenerSpy = vi.spyOn(window, "addEventListener");
+      let registeredDuringSetup = false;
+
+      const comp = defineComponent({
+        setup() {
+          useScriptEditorBase(makeOptions());
+          registeredDuringSetup = addEventListenerSpy.mock.calls.some(
+            ([type]) => type === "message"
+          );
+          return () => null;
+        },
+      });
+      const app = createApp(comp);
+      const el = document.createElement("div");
+      app.mount(el);
+
+      expect(registeredDuringSetup).toBe(true);
+      app.unmount();
+    });
+
     it("action=ready：调用 onReady 并将 isReady 设为 true", async () => {
       const onReady = vi.fn();
       const { result, unmount } = withSetup(() =>
