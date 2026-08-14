@@ -53,4 +53,25 @@ describe("legacy script preview removal contract", () => {
       )
     ).toBe(true);
   });
+
+  it("场景脚本编辑器初始化不等待 WebGL 预览运行时数据", () => {
+    const source = readSource("src/views/verse/script.vue");
+    const sessionStart = source.indexOf("const loadVerseScriptSession");
+    const sessionEnd = source.indexOf("onMounted(loadVerseScriptSession)");
+    const sessionSource = source.slice(sessionStart, sessionEnd);
+    const previewStart = source.indexOf("const ensureUnityPreviewRuntimeData");
+    const previewEnd = source.indexOf("const buildUnityPreviewPayload");
+    const previewSource = source.slice(previewStart, previewEnd);
+
+    expect(sessionStart).toBeGreaterThan(-1);
+    expect(sessionEnd).toBeGreaterThan(sessionStart);
+    expect(sessionSource).toContain("beginEditorSession(");
+    expect(sessionSource).toContain("initEditor();");
+    expect(sessionSource).not.toContain("UNITY_PREVIEW_VERSE_EXPAND");
+
+    expect(previewStart).toBeGreaterThan(-1);
+    expect(previewEnd).toBeGreaterThan(previewStart);
+    expect(previewSource).toContain("UNITY_PREVIEW_VERSE_EXPAND");
+    expect(previewSource).toContain("loadMetaJavaScriptCode(");
+  });
 });
