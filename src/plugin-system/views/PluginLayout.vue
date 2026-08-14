@@ -28,14 +28,11 @@ const containerRef = ref<HTMLDivElement>();
 
 const pluginId = computed(() => route.params.pluginId as string | undefined);
 
-const _pluginInfo = computed(() => {
-  if (!pluginId.value) return undefined;
-  return store.plugins.get(pluginId.value);
-});
-
 const loading = ref(false);
 const error = ref<string | null>(null);
-const accessState = ref<"idle" | "forbidden" | "degraded">("idle");
+const accessState = ref<"idle" | "forbidden" | "degraded" | "unavailable">(
+  "idle"
+);
 const mountedPluginId = ref<string | null>(null);
 const activeFlowId = ref(0);
 let unsubscribePluginEvents: (() => void) | null = null;
@@ -65,6 +62,14 @@ async function activatePluginForRoute(
   // 确保插件系统已初始化（幂等）
   await store.init();
   if (!isFlowCurrent(flowId, targetPluginId)) return;
+
+  // A stale or mistyped plugin route must not render an empty host shell.
+  // The runtime registry is authoritative after init; use one neutral state so
+  // callers cannot distinguish an unknown plugin from an unavailable one.
+  if (!store.plugins.has(targetPluginId)) {
+    accessState.value = "unavailable";
+    return;
+  }
 
   const access = await store.ensurePluginAccess(
     targetPluginId,
@@ -373,6 +378,14 @@ onBeforeUnmount(() => {
         icon="warning"
         title="无权限访问插件"
         sub-title="当前账号没有该插件的访问权限"
+      ></el-result>
+    </div>
+
+    <div v-else-if="accessState === 'unavailable'" class="plugin-page__error">
+      <el-result
+        icon="info"
+        title="插件不可用"
+        sub-title="该插件不存在或当前环境未注册"
       ></el-result>
     </div>
 
