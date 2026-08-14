@@ -270,7 +270,10 @@ const environment = {
     "",
   unityPreview: resolveUnityPreviewUrl(),
   version: 1,
-  buildVersion: import.meta.env.VITE_DEV_DATE || Date.now().toString(),
+  // This value is part of iframe URLs. It must change for every Web build so
+  // browsers cannot reuse an older plugin entry HTML that references assets
+  // removed by a newer container image.
+  buildVersion: String(__APP_INFO__.buildTimestamp),
   subtitle: () => "支持Rokid设备",
   deploymentMode: resolveDeploymentMode,
   fileStorageDriver: resolveFileStorageDriver,
