@@ -1430,9 +1430,13 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     next(false);
   });
 
-  // ---- onMounted：注册共享事件监听 ----
+  // Register the iframe bridge during setup, before Vue mounts the iframe.
+  // A cached plugin can emit PLUGIN_READY before the parent's onMounted hook;
+  // installing this listener here makes the READY → INIT handshake lossless.
+  window.addEventListener("message", handleMessage);
+
+  // ---- onMounted：注册其余共享事件监听 ----
   onMounted(() => {
-    window.addEventListener("message", handleMessage);
     loadHighlightStyle(isDark.value);
     window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("keydown", (e) => {
