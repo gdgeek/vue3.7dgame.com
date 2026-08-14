@@ -265,6 +265,7 @@ const route = useRoute();
 const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
 const metasJavaScriptCode = ref("");
+let unityPreviewRuntimeVerseId: number | null = null;
 // map 用于记录每个 meta_id 在场景中对应的实体列表
 let map = new Map<string, Array<{ uuid: string; title: string }>>();
 let verseLoadSequence = 0;
@@ -682,12 +683,34 @@ const resource = computed(() => {
 });
 
 const ensureUnityPreviewRuntimeData = async () => {
-  if (verseMetasWithLuaCodeData.value) return;
   if (!Number.isFinite(id.value)) return;
+  const requestedId = id.value;
+  if (
+    unityPreviewRuntimeVerseId === requestedId &&
+    verseMetasWithLuaCodeData.value &&
+    verseMetasWithJsCodeData.value
+  ) {
+    return;
+  }
 
-  const response = await getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua");
+  const [responseLua, responseJs] = await Promise.all([
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "js"),
+  ]);
+  if (requestedId !== id.value) return;
+
   verseMetasWithLuaCodeData.value =
-    response.data as unknown as VerseMetasWithJsCode;
+    responseLua.data as unknown as VerseMetasWithJsCode;
+  verseMetasWithJsCodeData.value =
+    responseJs.data as unknown as VerseMetasWithJsCode;
+  const previewMetas = Array.isArray(verseMetasWithJsCodeData.value.metas)
+    ? verseMetasWithJsCodeData.value.metas
+    : [];
+  const metaScripts = await loadMetaJavaScriptCode(previewMetas);
+  if (requestedId !== id.value) return;
+
+  metasJavaScriptCode.value = metaScripts.join("\n");
+  unityPreviewRuntimeVerseId = requestedId;
 };
 
 const buildUnityPreviewPayload = () => {
@@ -741,35 +764,18 @@ const loadVerseScriptSession = async () => {
   try {
     loading.value = true;
     map.clear();
+    verseMetasWithLuaCodeData.value = undefined;
+    verseMetasWithJsCodeData.value = undefined;
+    metasJavaScriptCode.value = "";
+    unityPreviewRuntimeVerseId = null;
     const response = await getVerse(
       id.value,
       "metas, module, share, verseCode"
     );
-    const [responseLua, responseJs] = await Promise.all([
-      getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
-      getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "js"),
-    ]);
     if (loadSequence !== verseLoadSequence || requestedId !== id.value) return;
     verse.value = response.data;
     logger.error(verse.value);
-    verseMetasWithLuaCodeData.value =
-      responseLua.data as unknown as VerseMetasWithJsCode;
-    verseMetasWithJsCodeData.value =
-      responseJs.data as unknown as VerseMetasWithJsCode;
-    const previewMetas = Array.isArray(verseMetasWithJsCodeData.value.metas)
-      ? verseMetasWithJsCodeData.value.metas
-      : [];
-    const metaScripts = await loadMetaJavaScriptCode(previewMetas);
-    if (loadSequence !== verseLoadSequence || requestedId !== id.value) return;
-    metasJavaScriptCode.value = metaScripts.join("\n");
-    logger.log("实体脚本加载结果", {
-      metaCount: previewMetas.length,
-      scriptCount: metaScripts.length,
-      codeLength: metasJavaScriptCode.value.length,
-      metaKeys: previewMetas.map((metaItem: meta) => Object.keys(metaItem)),
-    });
     logger.log("Verse", verse.value);
-    logger.log("metasJavaScriptCode", metasJavaScriptCode.value);
     if (verse.value && verse.value.data) {
       const data = verse.value.data;
       (data as VerseEntityNode).children?.modules?.forEach((module) => {
