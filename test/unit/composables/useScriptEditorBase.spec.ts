@@ -402,6 +402,20 @@ describe("useScriptEditorBase", () => {
   // handleMessage
   // ----------------------------------------------------------------
   describe("handleMessage", () => {
+    it("iframe load 可作为 READY 的幂等本地兜底", () => {
+      const onReady = vi.fn();
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onReady }))
+      );
+
+      result.handleEditorFrameLoad();
+      result.handleEditorFrameLoad();
+
+      expect(onReady).toHaveBeenCalledOnce();
+      expect(result.isReady()).toBe(true);
+      unmount();
+    });
+
     it("在组件挂载 iframe 前注册 message 监听器", () => {
       const addEventListenerSpy = vi.spyOn(window, "addEventListener");
       let registeredDuringSetup = false;
