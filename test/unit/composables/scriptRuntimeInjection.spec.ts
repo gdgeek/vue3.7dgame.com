@@ -22,6 +22,9 @@ describe("legacy script preview removal contract", () => {
       expect(source, path).not.toContain("<ScenePlayer");
       expect(source, path).not.toContain("runArea");
       expect(source, path).not.toContain("buildScriptRuntime(");
+      expect(source, path).not.toMatch(
+        /\bdefineExpose\s*\(\s*\{\s*run\s*\}\s*\)/
+      );
     });
   });
 
