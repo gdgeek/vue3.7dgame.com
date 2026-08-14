@@ -20,6 +20,13 @@ describe("runtime deployment environment", () => {
     expect(env.useCloud()).toBe(true);
   });
 
+  it("uses the unique Web build timestamp to bust plugin entry caches", async () => {
+    const env = (await import("@/environment")).default;
+
+    expect(env.buildVersion).toBe(String(__APP_INFO__.buildTimestamp));
+    expect(env.buildVersion).not.toBe(import.meta.env.VITE_DEV_DATE);
+  });
+
   it("keeps identity auth and WeChat login auth as separate endpoints", async () => {
     window.__ENV__ = {
       VITE_APP_AUTH_API: "/api-auth",
