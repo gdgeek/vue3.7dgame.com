@@ -355,15 +355,13 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     payload: ScriptEditorSavedSnapshot,
     snapshotKey = "default"
   ) => {
-    const mustReplaceExistingFrame =
-      hasInitializedSavedSnapshot &&
-      initializedSavedSnapshotKey !== null &&
-      initializedSavedSnapshotKey !== snapshotKey;
     resetEditorSessionState(payload);
     initializedSavedSnapshotKey = snapshotKey;
-    if (mustReplaceExistingFrame) {
-      reloadEditorFrame();
-    }
+    // resetEditorSessionState rotates hostSessionId. Always rebuild the iframe
+    // URL in the same operation so Blockly's repeated PLUGIN_READY token and
+    // the INIT session token cannot diverge during the first page load or a
+    // KeepAlive session restart.
+    reloadEditorFrame();
   };
 
   /**
