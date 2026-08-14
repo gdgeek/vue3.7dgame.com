@@ -170,6 +170,28 @@ describe("useScriptEditorBase", () => {
       expect(result.isReady()).toBe(false);
       unmount();
     });
+
+    it("新脚本会话会同步 iframe URL 与 INIT 的 hostSessionId", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+      const initialSessionId = new URL(result.src.value).searchParams.get(
+        "hostSessionId"
+      );
+
+      result.beginEditorSession(
+        { lua: "", js: "", blocklyData: { blocks: [] } },
+        "verse:3520"
+      );
+
+      const initSessionId = result.getEditorInitState()!.hostSessionId;
+      expect(initSessionId).not.toBe(initialSessionId);
+      expect(new URL(result.src.value).searchParams.get("hostSessionId")).toBe(
+        initSessionId
+      );
+      expect(result.editorFrameKey.value).toBe(1);
+      unmount();
+    });
   });
 
   // ----------------------------------------------------------------
