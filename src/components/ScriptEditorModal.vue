@@ -38,7 +38,7 @@
           </div>
         </template>
 
-        <el-container v-if="!disabled">
+        <el-container>
           <el-tabs v-model="activeName" type="card" style="width: 100%">
             <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
               <el-main
@@ -73,14 +73,6 @@
                         @click="showFullscreenCode('javascript')"
                       >
                         JavaScript
-                      </el-button>
-                      <el-button
-                        size="small"
-                        type="primary"
-                        style="margin-right: 10px"
-                        @click="run"
-                      >
-                        测试运行
                       </el-button>
                       <el-button
                         v-if="saveable"
@@ -208,29 +200,6 @@
             </el-tab-pane>
           </el-tabs>
         </el-container>
-        <div v-if="disabled" class="runArea">
-          <div class="scene-fullscreen-controls">
-            <el-button
-              class="scene-fullscreen-btn"
-              size="small"
-              type="primary"
-              plain
-              @click="toggleSceneFullscreen"
-            >
-              <el-icon>
-                <FullScreen v-if="!isSceneFullscreen"></FullScreen>
-                <Aim v-else></Aim>
-              </el-icon>
-            </el-button>
-          </div>
-          <ScenePlayer
-            v-if="verseMetasWithJsCodeData"
-            ref="scenePlayer"
-            :verse="verseMetasWithJsCodeData"
-            :is-scene-fullscreen="isSceneFullscreen"
-          >
-          </ScenePlayer>
-        </div>
       </el-card>
     </div>
   </el-dialog>
@@ -239,7 +208,7 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import { hasPublishableSceneContent } from "@/utils/versePublish";
-import { ref, computed, watch, nextTick } from "vue";
+import { ref, computed, watch } from "vue";
 import {
   getVerse,
   putVerseCode,
@@ -251,19 +220,11 @@ import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
 import { takePhoto } from "@/api/v1/verse";
 import pako from "pako";
-import ScenePlayer from "@/views/verse/ScenePlayer.vue";
-import * as THREE from "three";
 import {
   useScriptEditorBase,
   type EditorPostPayload,
 } from "@/composables/useScriptEditorBase";
 import { useUserStore } from "@/store/modules/user";
-import {
-  buildScriptRuntime,
-  getScriptRuntimeBindingValues,
-  SCRIPT_RUNTIME_BINDING_NAMES,
-  type ScenePlayerLike,
-} from "@/composables/useScriptRuntime";
 import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import EditorModeTag from "@/components/EditorModeTag.vue";
@@ -332,9 +293,6 @@ const sceneEditorLink = computed(() => {
 });
 
 const saveable = computed(() => verse.value?.editable ?? false);
-
-type ScenePlayerInstance = InstanceType<typeof ScenePlayer>;
-const scenePlayer = ref<ScenePlayerInstance>();
 
 type VerseEntityNode = {
   parameters?: { uuid?: string; title?: string; meta_id?: string | number };
@@ -473,8 +431,6 @@ const {
   languageName,
   LuaCode,
   JavaScriptCode,
-  disabled,
-  isSceneFullscreen,
   isFullscreen,
   showCodeDialog,
   currentCode,
@@ -488,7 +444,6 @@ const {
   isDark,
   toggleFullscreen,
   showFullscreenCode,
-  toggleSceneFullscreen,
   copyCode,
   postMessage,
   beginEditorSession,
@@ -554,52 +509,6 @@ const resource = computed(() => {
   return { events: { inputs, outputs } };
 });
 
-const handlePolygen = (uuid: string) => {
-  if (!scenePlayer.value) {
-    logger.error("ScenePlayer未初始化");
-    return null;
-  }
-  const modelUuid = uuid.toString();
-  const getModel = () => {
-    const source = scenePlayer.value?.sources?.get(modelUuid) as
-      | { type: string; data: unknown }
-      | undefined;
-    if (source?.type !== "model") return null;
-    if (source.data instanceof THREE.Object3D) {
-      return { mesh: source.data };
-    }
-    if (
-      source.data &&
-      typeof source.data === "object" &&
-      "mesh" in source.data &&
-      source.data.mesh instanceof THREE.Object3D
-    ) {
-      return source.data;
-    }
-    return null;
-  };
-  const modelData = getModel();
-  const model = modelData?.mesh;
-  logger.log("查找模型:", {
-    requestedUuid: modelUuid,
-    availableModels: Array.from(scenePlayer.value?.sources?.keys() ?? []),
-    modelExists: scenePlayer.value?.sources?.has(modelUuid) ?? false,
-    foundModel: model,
-  });
-  if (!model) {
-    logger.error(`找不到UUID为 ${modelUuid} 的模型`);
-    return null;
-  }
-  return {
-    ...modelData,
-    mesh: model,
-    playAnimation: (animationName: string) => {
-      logger.log("播放动画:", { uuid: modelUuid, animationName, model });
-      scenePlayer.value?.playAnimation(modelUuid, animationName);
-    },
-  };
-};
-
 const ensureUnityPreviewRuntimeData = async () => {
   if (verseMetasWithLuaCodeData.value) return;
   if (!props.verseId) return;
@@ -654,115 +563,6 @@ const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
-
-const run = async () => {
-  const wasFullscreen = isFullscreen.value;
-  if (wasFullscreen) {
-    document.exitFullscreen();
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  disabled.value = true;
-  await nextTick();
-  if (wasFullscreen) {
-    const runArea = document.querySelector(".runArea");
-    if (runArea) {
-      runArea.requestFullscreen();
-      isSceneFullscreen.value = true;
-    }
-  }
-
-  const waitForModels = () =>
-    new Promise((resolve) => {
-      const checkModels = () => {
-        const metasData = verseMetasWithJsCodeData.value!.metas!;
-        let expectedModels = 0;
-        const countEntities = (entities: VerseEntityNode[]): number => {
-          let count = 0;
-          for (const entity of entities) {
-            count++;
-            if ((entity.children?.entities?.length ?? 0) > 0) {
-              count += countEntities(entity.children?.entities ?? []);
-            }
-          }
-          return count;
-        };
-        for (const meta of metasData) {
-          const metaData = meta.data as {
-            children?: { entities?: VerseEntityNode[] };
-          };
-          if (metaData?.children?.entities) {
-            expectedModels += countEntities(metaData.children.entities);
-          }
-        }
-        if (scenePlayer.value?.sources?.size === expectedModels) {
-          logger.error("所有资源加载完成:", {
-            expected: expectedModels,
-            loaded: scenePlayer.value?.sources?.size,
-          });
-          resolve(true);
-        } else {
-          logger.log("等待资源加载...", {
-            expected: expectedModels,
-            current: scenePlayer.value?.sources?.size || 0,
-          });
-          setTimeout(checkModels, 100);
-        }
-      };
-      checkModels();
-    });
-
-  await waitForModels();
-
-  if (JavaScriptCode.value) {
-    const instanceId = scenePlayer.value!.sceneInstanceId;
-    window.__sceneCallbacks = window.__sceneCallbacks ?? {};
-    window.__sceneCallbacks[instanceId] = {};
-    const runtime = buildScriptRuntime(
-      scenePlayer as { value: ScenePlayerLike | null | undefined },
-      {
-        signal: (
-          moduleUuid: string,
-          eventUuid: string,
-          parameter?: unknown
-        ) => {
-          logger.log("触发事件:", moduleUuid, eventUuid, parameter);
-        },
-      }
-    );
-    const runtimeParameterNames = SCRIPT_RUNTIME_BINDING_NAMES.join(", ");
-
-    try {
-      const wrappedCode = `
-            return async function(handlePolygen, THREE, ${runtimeParameterNames}) {
-              const meta = window.__sceneCallbacks['${instanceId}'];
-              const verse = window.__sceneCallbacks['${instanceId}'];
-              const index = ${verse.value?.id};
-
-              ${metasJavaScriptCode.value}
-              ${JavaScriptCode.value}
-
-              if (typeof meta['@init'] === 'function') {
-                await meta['@init']();
-              }
-              if (typeof verse['#init'] === 'function') {
-                await verse['#init']();
-              }
-            }`;
-      const wrappedFunction = new Function(wrappedCode);
-      const executableFunction = wrappedFunction();
-      await executableFunction(
-        handlePolygen,
-        THREE,
-        ...getScriptRuntimeBindingValues(runtime)
-      );
-    } catch (e) {
-      logger.error("执行代码出错:", e);
-      ElMessage.error(
-        `执行代码出错: ${e instanceof Error ? e.message : String(e)}`
-      );
-    }
-  }
-};
 
 const loadVerseData = async () => {
   if (!props.verseId) return;
@@ -1003,31 +803,5 @@ watch(
 
 .light-theme :deep(.hljs) {
   background-color: #fafafa !important;
-}
-
-.runArea {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.scene-fullscreen-controls {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 100;
-}
-
-.scene-fullscreen-btn {
-  opacity: 0.8;
-}
-
-:fullscreen .runArea {
-  height: 100vh !important;
-  padding: 0;
-}
-
-:fullscreen .scene-fullscreen-btn {
-  margin: 10px;
 }
 </style>

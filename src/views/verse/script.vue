@@ -2,8 +2,8 @@
   <div class="script">
     <el-container>
       <el-main>
-        <el-card class="box-card" :class="{ 'is-running-preview': disabled }">
-          <el-container v-if="!disabled">
+        <el-card class="box-card">
+          <el-container>
             <div class="script-tabs-wrapper">
               <div class="script-editor-toolbar">
                 <div
@@ -52,19 +52,6 @@
                       :value="metaOption.id"
                     ></el-option>
                   </el-select>
-                  <el-button
-                    class="script-action-button script-run-button"
-                    type="primary"
-                    size="small"
-                    title="测试运行"
-                    aria-label="测试运行"
-                    @click="run"
-                  >
-                    <el-icon class="script-action-icon">
-                      <VideoPlay></VideoPlay>
-                    </el-icon>
-                    <span class="secondary-action-label">测试运行</span>
-                  </el-button>
                   <el-button
                     class="script-action-button"
                     type="primary"
@@ -192,36 +179,6 @@
               </el-tabs>
             </div>
           </el-container>
-          <div v-if="disabled" class="runArea">
-            <div class="scene-fullscreen-controls">
-              <el-button
-                class="scene-exit-btn"
-                size="small"
-                type="primary"
-                @click="disabled = false"
-              >
-                {{ $t("common.back") }}
-              </el-button>
-              <el-button
-                class="scene-fullscreen-btn"
-                size="small"
-                type="primary"
-                title="全屏预览"
-                @click="toggleSceneFullscreen"
-              >
-                <font-awesome-icon
-                  :icon="['fas', isSceneFullscreen ? 'compress' : 'expand']"
-                ></font-awesome-icon>
-              </el-button>
-            </div>
-            <ScenePlayer
-              v-if="verseMetasWithJsCodeData"
-              ref="scenePlayer"
-              :verse="verseMetasWithJsCodeData"
-              :is-scene-fullscreen="isSceneFullscreen"
-            >
-            </ScenePlayer>
-          </div>
         </el-card>
         <ScriptDraftDialog
           :model-value="versionDialogVisible"
@@ -258,7 +215,6 @@ import {
   onMounted,
   onBeforeUnmount,
   watch,
-  nextTick,
   onActivated,
   onDeactivated,
 } from "vue";
@@ -276,20 +232,12 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { takePhoto } from "@/api/v1/verse";
 import { Message } from "@/components/Dialog";
 import pako from "pako";
-import ScenePlayer from "./ScenePlayer.vue";
-import * as THREE from "three";
 import {
   useScriptEditorBase,
   type EditorPostPayload,
   type ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
-import {
-  buildScriptRuntime,
-  getScriptRuntimeBindingValues,
-  resolveWithRetry,
-  SCRIPT_RUNTIME_BINDING_NAMES,
-} from "@/composables/useScriptRuntime";
-import { CopyDocument, Loading, VideoPlay } from "@element-plus/icons-vue";
+import { CopyDocument, Loading } from "@element-plus/icons-vue";
 import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
 import {
   useEditorVersionToolbar,
@@ -401,9 +349,6 @@ const handleLoadedMetaChange = async (metaId: number) => {
 };
 
 const saveable = computed(() => Boolean(verse.value?.editable));
-
-type ScenePlayerInstance = InstanceType<typeof ScenePlayer>;
-const scenePlayer = ref<ScenePlayerInstance>();
 
 // ---------- Verse 专有类型 ----------
 type VerseEntityNode = {
@@ -610,9 +555,6 @@ const {
   languageName,
   LuaCode,
   JavaScriptCode,
-  disabled,
-  isSceneFullscreen,
-  isFullscreen,
   unsavedBlocklyData,
   resolveUnsavedChangesBeforeLeave,
   hasUnsavedChanges,
@@ -627,7 +569,6 @@ const {
   editor,
   src,
   editorContentReady,
-  toggleSceneFullscreen,
   postMessage,
   beginEditorSession,
   initializeSavedSnapshot,
@@ -738,73 +679,6 @@ const resource = computed(() => {
   return { events: { inputs, outputs } };
 });
 
-// ---------- Verse 专有：handlePolygen（只返回 playAnimation）----------
-const handlePolygen = (uuid: string) => {
-  if (!scenePlayer.value) {
-    logger.error("ScenePlayer未初始化");
-    return null;
-  }
-  const modelUuid = uuid.toString();
-  type PolygenModelData = { mesh: THREE.Object3D } & Record<string, unknown>;
-  const getModel = (uuid: string): PolygenModelData | null => {
-    const source = scenePlayer.value?.sources.get(uuid) as
-      | { type: string; data: unknown }
-      | undefined;
-    if (source && source.type === "model") {
-      if (source.data instanceof THREE.Object3D) {
-        return { mesh: source.data };
-      }
-      if (
-        source.data &&
-        typeof source.data === "object" &&
-        "mesh" in source.data &&
-        source.data.mesh instanceof THREE.Object3D
-      ) {
-        return source.data as PolygenModelData;
-      }
-    }
-    return null;
-  };
-  let delayedModelData: PolygenModelData | null = null;
-  const modelData = resolveWithRetry(
-    () => getModel(modelUuid),
-    (resolvedModelData) => {
-      delayedModelData = resolvedModelData;
-      logger.log("模型重试成功:", { uuid: modelUuid });
-    }
-  );
-  const model = modelData?.mesh;
-  const playAnimation = (animationName: string) => {
-    const resolvedModel = modelData?.mesh ?? delayedModelData?.mesh;
-    logger.log("播放动画:", {
-      uuid: modelUuid,
-      animationName,
-      model: resolvedModel,
-    });
-    scenePlayer.value?.playAnimation(modelUuid, animationName);
-  };
-  logger.log("查找模型:", {
-    requestedUuid: modelUuid,
-    availableModels: Array.from(scenePlayer.value.sources.keys()),
-    modelExists: scenePlayer.value.sources.has(modelUuid),
-    foundModel: model,
-  });
-  if (!model) {
-    logger.error(`找不到UUID为 ${modelUuid} 的模型`);
-    return {
-      get mesh() {
-        return delayedModelData?.mesh;
-      },
-      playAnimation,
-    };
-  }
-  return {
-    ...modelData,
-    mesh: model,
-    playAnimation,
-  };
-};
-
 const ensureUnityPreviewRuntimeData = async () => {
   if (verseMetasWithLuaCodeData.value) return;
   if (!Number.isFinite(id.value)) return;
@@ -855,112 +729,6 @@ const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
-
-// ---------- Verse 专有：run ----------
-const run = async () => {
-  const wasFullscreen = isFullscreen.value;
-  if (wasFullscreen) {
-    document.exitFullscreen();
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  disabled.value = true;
-  await nextTick();
-  if (wasFullscreen) {
-    const runArea = document.querySelector(".runArea");
-    if (runArea) {
-      runArea.requestFullscreen();
-      isSceneFullscreen.value = true;
-    }
-  }
-
-  const waitForScenePlayerReady = async () => {
-    if (!scenePlayer.value) {
-      throw new Error("ScenePlayer未初始化");
-    }
-    await scenePlayer.value.whenReady();
-    if (scenePlayer.value.sceneLoadError) {
-      throw scenePlayer.value.sceneLoadError;
-    }
-    logger.log("场景资源加载流程完成:", {
-      loaded: scenePlayer.value.sources.size,
-    });
-  };
-
-  try {
-    await waitForScenePlayerReady();
-  } catch (error) {
-    logger.error("场景资源加载失败:", error);
-    ElMessage.error(
-      `场景资源加载失败: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-    return;
-  }
-
-  const runtimeCode = [metasJavaScriptCode.value, JavaScriptCode.value]
-    .filter((code) => typeof code === "string" && code.trim())
-    .join("\n");
-
-  if (runtimeCode) {
-    const instanceId = scenePlayer.value!.sceneInstanceId;
-    window.__sceneCallbacks = window.__sceneCallbacks ?? {};
-    window.__sceneCallbacks[instanceId] = {};
-    window.meta = window.__sceneCallbacks[instanceId];
-    window.verse = window.__sceneCallbacks[instanceId];
-    const runtime = buildScriptRuntime(scenePlayer, {
-      signal: (moduleUuid: string, eventUuid: string, parameter?: unknown) => {
-        logger.log("触发事件:", moduleUuid, eventUuid, parameter);
-      },
-    });
-    const runtimeParameterNames = SCRIPT_RUNTIME_BINDING_NAMES.join(", ");
-
-    try {
-      const wrappedCode = `
-            return async function(handlePolygen, THREE, logger, ${runtimeParameterNames}) {
-              const meta = window.__sceneCallbacks['${instanceId}'];
-              const verse = window.__sceneCallbacks['${instanceId}'];
-              const index = ${verse.value?.id};
-              const _G = {
-                handlePolygen,
-                THREE,
-                ${runtimeParameterNames},
-              };
-              window._G = _G;
-              const _runtimeBeforeKeys = Object.keys(meta);
-
-              ${runtimeCode}
-
-              logger.log('实体脚本运行时注册结果:', {
-                before: _runtimeBeforeKeys,
-                after: Object.keys(meta),
-                hasMetaInit: typeof meta['@init'] === 'function',
-                hasVerseInit: typeof verse['#init'] === 'function',
-              });
-
-              if (typeof meta['@init'] === 'function') {
-                await meta['@init']();
-              }
-              if (typeof verse['#init'] === 'function') {
-                await verse['#init']();
-              }
-            }`;
-      const wrappedFunction = new Function(wrappedCode);
-      const executableFunction = wrappedFunction();
-      await executableFunction(
-        handlePolygen,
-        THREE,
-        logger,
-        ...getScriptRuntimeBindingValues(runtime)
-      );
-    } catch (e) {
-      logger.error("执行代码出错:", e);
-      ElMessage.error(
-        `执行代码出错: ${e instanceof Error ? e.message : String(e)}`
-      );
-    }
-  }
-};
 
 // ---------- 加载 Verse 脚本会话 ----------
 const loadVerseScriptSession = async () => {
@@ -1331,7 +1099,6 @@ watch(id, (nextId, previousId) => {
     padding: 0 12px;
   }
 
-  .script-run-button .script-action-icon,
   .script-tabs-actions
     .script-action-button:not(.script-save-button)
     .script-action-icon {
@@ -1362,71 +1129,5 @@ watch(id, (nextId, previousId) => {
 
 .light-theme :deep(.hljs) {
   background-color: #fafafa !important;
-}
-
-.runArea {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-  overflow: hidden;
-  background: #1f2937;
-  border-radius: 18px;
-}
-
-.is-running-preview {
-  --run-preview-gap: 20px;
-
-  height: calc(100dvh - 68px - (var(--run-preview-gap) * 2));
-  overflow: hidden;
-  background: #1f2937;
-  border: 0;
-  border-color: #1f2937;
-  border-radius: 18px;
-  box-shadow: none;
-}
-
-.is-running-preview :deep(.el-card__body) {
-  height: 100%;
-  padding: 0;
-  background: #1f2937;
-}
-
-.scene-fullscreen-controls {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 100;
-}
-
-.scene-fullscreen-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-}
-
-.scene-fullscreen-btn :deep(.svg-inline--fa) {
-  font-size: 14px;
-  line-height: 1;
-  color: #fff;
-}
-
-.scene-exit-btn {
-  margin-right: 8px;
-}
-
-/* 全屏时的样式 */
-:fullscreen .runArea,
-.runArea:fullscreen {
-  width: 100vw !important;
-  max-width: none !important;
-  height: 100vh !important;
-  aspect-ratio: auto;
-  padding: 0;
-}
-
-:fullscreen .scene-fullscreen-btn {
-  margin: 10px;
 }
 </style>

@@ -2,8 +2,8 @@
   <div class="verse-code">
     <el-container>
       <el-main>
-        <el-card class="box-card" :class="{ 'is-running-preview': disabled }">
-          <el-container v-if="!disabled">
+        <el-card class="box-card">
+          <el-container>
             <div class="script-tabs-wrapper">
               <div class="script-editor-toolbar">
                 <div
@@ -180,35 +180,6 @@
               </el-tabs>
             </div>
           </el-container>
-          <div v-if="disabled" class="runArea">
-            <div class="scene-fullscreen-controls">
-              <el-button
-                class="scene-exit-btn"
-                size="small"
-                type="primary"
-                @click="disabled = false"
-              >
-                {{ $t("common.back") }}
-              </el-button>
-              <el-button
-                class="scene-fullscreen-btn"
-                size="small"
-                type="primary"
-                title="全屏预览"
-                @click="toggleSceneFullscreen"
-              >
-                <font-awesome-icon
-                  :icon="['fas', isSceneFullscreen ? 'compress' : 'expand']"
-                ></font-awesome-icon>
-              </el-button>
-            </div>
-            <ScenePlayer
-              v-if="meta"
-              ref="scenePlayer"
-              :meta="meta"
-              :is-scene-fullscreen="isSceneFullscreen"
-            ></ScenePlayer>
-          </div>
         </el-card>
         <ScriptDraftDialog
           :model-value="versionDialogVisible"
@@ -244,25 +215,18 @@ import { ElMessage } from "element-plus";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { getVerses } from "@/api/v1/verse";
 import { Message } from "@/components/Dialog";
-import * as THREE from "three";
+import pako from "pako";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
 import {
   buildMetaResourceIndex,
   type MetaResourceIndex,
 } from "@/components/Meta/useMetaResourceParser";
-import ScenePlayer from "./ScenePlayer.vue";
 import {
   useScriptEditorBase,
   type EditorPostPayload,
   type ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
-import {
-  buildScriptRuntime,
-  getScriptRuntimeBindingValues,
-  resolveWithRetry,
-  SCRIPT_RUNTIME_BINDING_NAMES,
-} from "@/composables/useScriptRuntime";
 import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
 import {
   useEditorVersionToolbar,
@@ -280,16 +244,6 @@ const loader = getConfiguredGLTFLoader();
 let metaLoadSequence = 0;
 let isScriptViewActive = true;
 
-type ScenePlayerExpose = {
-  sources: Map<string, { type: string; data: unknown }>;
-  playAnimation: (uuid: string, animationName: string) => void;
-  getAudioUrl: (uuid: string) => string | undefined;
-  playQueuedAudio: (
-    audio: HTMLAudioElement,
-    skipQueue?: boolean
-  ) => Promise<void> | void;
-};
-const scenePlayer = ref<ScenePlayerExpose | null>(null);
 const test = ref<MetaResourceIndex | null>(null);
 
 // ---------- 资源解析 ----------
@@ -422,8 +376,6 @@ const {
   languageName,
   LuaCode,
   JavaScriptCode,
-  disabled,
-  isSceneFullscreen,
   resolveUnsavedChangesBeforeLeave,
   hasUnsavedChanges,
   draftVersions,
@@ -438,7 +390,6 @@ const {
   src,
   editorContentReady,
   isDark,
-  toggleSceneFullscreen,
   postMessage,
   beginEditorSession,
   initializeSavedSnapshot,
@@ -617,164 +568,6 @@ const loadSceneNameMap = async () => {
     sceneNameMap.value = map;
   } catch (error) {
     logger.error("loadSceneNameMap error", error);
-  }
-};
-
-// ---------- Meta 专有：handlePolygen（返回 mesh + playAnimation）----------
-const handlePolygen = (uuid: string) => {
-  if (!scenePlayer.value) {
-    logger.error("ScenePlayer未初始化");
-    return null;
-  }
-  const modelUuid = uuid.toString();
-  type PolygenModelData = { mesh: THREE.Object3D } & Record<string, unknown>;
-  const getModel = (uuid: string): PolygenModelData | null => {
-    const source = scenePlayer.value?.sources.get(uuid) as
-      | { type: string; data: unknown }
-      | undefined;
-    if (source?.type === "model") {
-      if (source.data instanceof THREE.Object3D) {
-        return { mesh: source.data };
-      }
-      if (
-        source.data &&
-        typeof source.data === "object" &&
-        "mesh" in source.data &&
-        source.data.mesh instanceof THREE.Object3D
-      ) {
-        return source.data as PolygenModelData;
-      }
-    }
-    return null;
-  };
-  let delayedModelData: PolygenModelData | null = null;
-  const modelData = resolveWithRetry(
-    () => getModel(modelUuid),
-    (resolvedModelData) => {
-      delayedModelData = resolvedModelData;
-      logger.log("模型重试成功:", { uuid: modelUuid });
-    }
-  );
-  const model = modelData?.mesh;
-  const playAnimation = (animationName: string) => {
-    const resolvedModel = modelData?.mesh ?? delayedModelData?.mesh;
-    logger.log("播放动画:", {
-      uuid: modelUuid,
-      animationName,
-      model: resolvedModel,
-    });
-    scenePlayer.value?.playAnimation(modelUuid, animationName);
-  };
-  logger.log("查找模型:", {
-    requestedUuid: modelUuid,
-    availableModels: Array.from(scenePlayer.value.sources.keys()),
-    modelExists: scenePlayer.value.sources.has(modelUuid),
-    foundModel: model,
-  });
-  if (!model) {
-    logger.error(`找不到UUID为 ${modelUuid} 的模型`);
-    return {
-      get mesh() {
-        return delayedModelData?.mesh;
-      },
-      playAnimation,
-    };
-  }
-  return {
-    ...modelData,
-    mesh: model,
-    playAnimation,
-  };
-};
-
-// ---------- Meta 专有：run ----------
-import pako from "pako";
-
-const run = async () => {
-  disabled.value = true;
-
-  type EntityNodeLocal = {
-    children?: { entities?: EntityNodeLocal[] };
-  };
-  const countEntities = (entities: EntityNodeLocal[]): number => {
-    let count = 0;
-    for (const entity of entities) {
-      count++;
-      const childEntities = entity.children?.entities;
-      if (childEntities && childEntities.length > 0) {
-        count += countEntities(childEntities);
-      }
-    }
-    return count;
-  };
-
-  const waitForModels = () =>
-    new Promise<void>((resolve) => {
-      const checkModels = () => {
-        const metaData = meta.value?.data;
-        const entities =
-          metaData &&
-          typeof metaData === "object" &&
-          "children" in metaData &&
-          metaData.children?.entities
-            ? metaData.children.entities
-            : undefined;
-        if (!entities || entities.length === 0) {
-          resolve();
-          return;
-        }
-        const expectedModels = countEntities(entities);
-        const loadedModels = scenePlayer.value?.sources?.size ?? 0;
-        if (loadedModels === expectedModels) {
-          logger.log("所有资源加载完成:", {
-            expected: expectedModels,
-            loaded: loadedModels,
-          });
-          resolve();
-          return;
-        }
-        logger.log("等待资源加载...", {
-          expected: expectedModels,
-          current: loadedModels,
-        });
-        setTimeout(checkModels, 100);
-      };
-      checkModels();
-    });
-
-  await waitForModels();
-  if (!JavaScriptCode.value) return;
-
-  window.meta = {};
-  const runtime = buildScriptRuntime(scenePlayer);
-  const runtimeParameterNames = SCRIPT_RUNTIME_BINDING_NAMES.join(", ");
-
-  try {
-    const wrappedCode = `
-        return async function(handlePolygen, THREE, ${runtimeParameterNames}) {
-          const meta = window.meta;
-          const index = ${meta.value?.id};
-
-          ${JavaScriptCode.value}
-
-          if (typeof meta['@init'] === 'function') {
-            await meta['@init']();
-          }
-
-        }
-      `;
-    const createFunction = new Function(wrappedCode);
-    const executableFunction = createFunction();
-    await executableFunction(
-      handlePolygen,
-      THREE,
-      ...getScriptRuntimeBindingValues(runtime)
-    );
-  } catch (e) {
-    logger.error("执行代码出错:", e);
-    ElMessage.error(
-      `执行代码出错: ${e instanceof Error ? e.message : String(e)}`
-    );
   }
 };
 
@@ -1190,71 +983,5 @@ defineExpose({ run });
 
 .light-theme :deep(.hljs) {
   background-color: #fafafa !important;
-}
-
-.runArea {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-  overflow: hidden;
-  background: #1f2937;
-  border-radius: 18px;
-}
-
-.is-running-preview {
-  --run-preview-gap: 20px;
-
-  height: calc(100dvh - 68px - (var(--run-preview-gap) * 2));
-  overflow: hidden;
-  background: #1f2937;
-  border: 0;
-  border-color: #1f2937;
-  border-radius: 18px;
-  box-shadow: none;
-}
-
-.is-running-preview :deep(.el-card__body) {
-  height: 100%;
-  padding: 0;
-  background: #1f2937;
-}
-
-.scene-fullscreen-controls {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 100;
-}
-
-.scene-fullscreen-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-}
-
-.scene-fullscreen-btn :deep(.svg-inline--fa) {
-  font-size: 14px;
-  line-height: 1;
-  color: #fff;
-}
-
-.scene-exit-btn {
-  margin-right: 8px;
-}
-
-/* 全屏时的样式 */
-:fullscreen .runArea,
-.runArea:fullscreen {
-  width: 100vw !important;
-  max-width: none !important;
-  height: 100vh !important;
-  aspect-ratio: auto;
-  padding: 0;
-}
-
-:fullscreen .scene-fullscreen-btn {
-  margin: 10px;
 }
 </style>

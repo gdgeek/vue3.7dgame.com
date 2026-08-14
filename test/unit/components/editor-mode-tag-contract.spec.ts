@@ -6,6 +6,16 @@ const readSource = (relativePath: string) =>
   fs.readFileSync(path.resolve(process.cwd(), relativePath), "utf8");
 
 describe("editor mode tag integration", () => {
+  it("uses one shared mode tag component for breadcrumb editor modes", () => {
+    const breadcrumb = readSource(
+      "src/layout/components/NavBar/components/Breadcrumb.vue"
+    );
+
+    expect(breadcrumb).toContain("EditorModeTag");
+    expect(breadcrumb).toContain(":mode=\"item.mode || 'script'\"");
+    expect(breadcrumb).toContain(':dirty="showUnsavedDot"');
+  });
+
   it("uses the shared tag in both script editor modal headers", () => {
     const verseModal = readSource("src/components/ScriptEditorModal.vue");
     const metaModal = readSource("src/components/MetaScriptEditorModal.vue");
