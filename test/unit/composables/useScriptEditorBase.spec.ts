@@ -155,9 +155,11 @@ describe("useScriptEditorBase", () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
-      expect(result.src.value).toBe(
-        "https://blockly.test?language=zh-CN&v=test-v1"
-      );
+      const editorUrl = new URL(result.src.value);
+      expect(editorUrl.origin).toBe("https://blockly.test");
+      expect(editorUrl.searchParams.get("language")).toBe("zh-CN");
+      expect(editorUrl.searchParams.get("v")).toBe("test-v1");
+      expect(editorUrl.searchParams.get("hostSessionId")).toMatch(/^script-/);
       unmount();
     });
 
@@ -419,6 +421,32 @@ describe("useScriptEditorBase", () => {
 
       expect(registeredDuringSetup).toBe(true);
       app.unmount();
+    });
+
+    it("接受带当前会话令牌的 READY，即使 iframe ref 尚未更新", async () => {
+      const onReady = vi.fn();
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ onReady }))
+      );
+      const currentSessionId = new URL(result.src.value).searchParams.get(
+        "hostSessionId"
+      );
+      result.editor.value = {
+        contentWindow: { postMessage: vi.fn() },
+      } as MockIframe as HTMLIFrameElement;
+
+      await result.handleMessage({
+        origin: "https://blockly.test",
+        source: { postMessage: vi.fn() },
+        data: {
+          type: "PLUGIN_READY",
+          payload: { hostSessionId: currentSessionId },
+        },
+      } as MockMessageEvent as MessageEvent);
+
+      expect(onReady).toHaveBeenCalledOnce();
+      expect(result.isReady()).toBe(true);
+      unmount();
     });
 
     it("action=ready：调用 onReady 并将 isReady 设为 true", async () => {
