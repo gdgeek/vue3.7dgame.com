@@ -694,6 +694,15 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     editorFrameKey.value += 1;
   };
 
+  const handleEditorFrameLoad = () => {
+    if (ready) return;
+    // The iframe load event is emitted only by the exact element rendered from
+    // the trusted Blockly URL. Treat it as a lossless local READY fallback in
+    // case the cross-window PLUGIN_READY event is missed by the host runtime.
+    ready = true;
+    options.onReady();
+  };
+
   const restartAutoSaveTimer = () => {
     clearAutoSaveTimer();
     if (!autoSaveEnabled.value) return;
@@ -1525,6 +1534,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     restoreDraftVersion,
     clearDraftHistory,
     reloadEditorFrame,
+    handleEditorFrameLoad,
     handleBeforeUnload,
     handleMessage,
     decompressBlockly,
