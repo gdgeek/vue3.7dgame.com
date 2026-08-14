@@ -3,7 +3,12 @@
  * 验证 managerRoutes 和 gameRoutes 的结构完整性
  */
 import { describe, it, expect } from "vitest";
-import { managerRoutes, gameRoutes } from "@/router/modules/manager";
+import {
+  gameRoutes,
+  managerRoutes,
+  shouldRegisterGameRoutes,
+  shouldRegisterVueFormDemoRoute,
+} from "@/router/modules/manager";
 
 // ============================================================================
 // managerRoutes
@@ -20,6 +25,10 @@ describe("managerRoutes 路由模块", () => {
 
     it("component 为 null", () => {
       expect(managerRoutes.component).toBeNull();
+    });
+
+    it("redirect 为 /manager/user", () => {
+      expect(managerRoutes.redirect).toBe("/manager/user");
     });
   });
 
@@ -53,6 +62,7 @@ describe("managerRoutes 路由模块", () => {
       );
       expect(route).toBeDefined();
       expect(route?.name).toBe("ManagerUser");
+      expect(route?.meta?.roles).toEqual(["admin", "root"]);
     });
 
     it("包含 /phototype/list 子路由", () => {
@@ -86,6 +96,10 @@ describe("managerRoutes 路由模块", () => {
       }
     });
   });
+
+  it("Production 不注册 VueForm demo", () => {
+    expect(shouldRegisterVueFormDemoRoute(true)).toBe(false);
+  });
 });
 
 // ============================================================================
@@ -103,6 +117,10 @@ describe("gameRoutes 路由模块", () => {
 
     it("component 为 null", () => {
       expect(gameRoutes.component).toBeNull();
+    });
+
+    it("开发环境 redirect 到 /game/index", () => {
+      expect(gameRoutes.redirect).toBe("/game/index");
     });
   });
 
@@ -142,5 +160,9 @@ describe("gameRoutes 路由模块", () => {
         expect(typeof r.component).toBe("function");
       }
     });
+  });
+
+  it("Production 不注册尚无有效数据契约的 Game 路由", () => {
+    expect(shouldRegisterGameRoutes(true)).toBe(false);
   });
 });

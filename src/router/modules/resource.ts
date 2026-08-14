@@ -10,6 +10,7 @@ export const resourceRoutes: RouteRecordRaw = {
   path: "/resource",
   component: null,
   name: "/resource",
+  redirect: "/resource/polygen/index",
   meta: {
     title: "resourceManagement.title",
     icon: "system",

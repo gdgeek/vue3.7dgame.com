@@ -86,6 +86,7 @@ vi.mock("@/router/modules/manager", () => ({
     children: [],
     meta: {},
   },
+  environmentGameRoutes: [],
 }));
 
 // ── Mock ability utilities ────────────────────────────────────────────────────

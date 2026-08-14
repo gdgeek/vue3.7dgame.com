@@ -6,6 +6,18 @@ import authClient from "@/services/auth/authClient";
 const router = useRouter();
 import { useUserStore } from "@/store";
 
+type RouteRoleUser = { roles?: string[] | null } | null;
+
+/** 路由角色采用任一匹配语义；空要求不构成授权。 */
+export function hasRouteRoleAccess(
+  userInfo: RouteRoleUser,
+  requiredRoles: readonly string[]
+): boolean {
+  if (!userInfo || requiredRoles.length === 0) return false;
+  const roles = Array.isArray(userInfo.roles) ? userInfo.roles : [];
+  return requiredRoles.some((role) => roles.includes(role));
+}
+
 export function setupPermission() {
   // 白名单路由
   const whiteList = [
@@ -48,6 +60,35 @@ export function setupPermission() {
           //   alert(JSON.stringify(to));
           next(from.name ? { name: from.name } : "/404");
         } else {
+          const requiredRoles = Array.isArray(to.meta.roles)
+            ? to.meta.roles.filter(
+                (role): role is string =>
+                  typeof role === "string" && role.length > 0
+              )
+            : [];
+
+          if (requiredRoles.length > 0) {
+            const userStore = useUserStore();
+            let userInfo = userStore.userInfo;
+
+            if (!userInfo && typeof userStore.getUserInfo === "function") {
+              try {
+                const loadedUserInfo = await userStore.getUserInfo();
+                if (loadedUserInfo) userInfo = loadedUserInfo;
+              } catch {
+                next("/401");
+                NProgress.done();
+                return;
+              }
+            }
+
+            if (!hasRouteRoleAccess(userInfo, requiredRoles)) {
+              next("/401");
+              NProgress.done();
+              return;
+            }
+          }
+
           // 如果路由参数中有 title，覆盖路由元信息中的 title
           const title =
             (to.params.title as string) || (to.query.title as string);

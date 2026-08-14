@@ -86,7 +86,6 @@ export function UpdateAbility(
         "/verse/rete-verse",
         "/verse/verse-script",
         "/verse/script",
-        "/meta/rete-meta",
         "/meta/script",
         /^\/settings(\/|$)/,
       ]);

@@ -16,8 +16,14 @@ import { homeRoutes, settingsRoutes } from "./modules/home";
 import { resourceRoutes } from "./modules/resource";
 import { metaRoutes } from "./modules/meta";
 import { verseRoutes } from "./modules/verse";
-import { managerRoutes, gameRoutes } from "./modules/manager";
-import { pluginRoutes, pluginDebugRoute } from "./modules/plugin";
+import {
+  managerRoutes,
+  environmentGameRoutes,
+} from "./modules/manager";
+import {
+  pluginRoutes,
+  developmentPluginRoutes,
+} from "./modules/plugin";
 
 // 静态路由
 const routes: RouteRecordRaw[] = [
@@ -57,12 +63,12 @@ const routes: RouteRecordRaw[] = [
       verseRoutes,
       // 管理后台
       managerRoutes,
-      // 游戏
-      gameRoutes,
+      // 游戏（数据契约恢复前不进入 Production route graph）
+      ...environmentGameRoutes,
       // 插件系统
       pluginRoutes,
-      // 插件调试页面
-      pluginDebugRoute,
+      // 开发专用调试页面（Production route graph 中不存在）
+      ...developmentPluginRoutes,
 
       // 错误页面
       {
