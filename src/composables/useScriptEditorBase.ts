@@ -154,9 +154,8 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const lastSavedAt = ref<string | null>(null);
   const editorFrameKey = ref(0);
   const editor = ref<HTMLIFrameElement | null>(null);
-  const src = ref(
-    env.blockly + "?language=" + appStore.language + "&v=" + env.buildVersion
-  );
+  let hostSessionId = genSessionId();
+  const src = ref(buildEditorSrc(appStore.language));
   const editorContentReady = ref(false);
   const isDark = computed<boolean>(
     () => settingsStore.theme === ThemeEnum.DARK
@@ -183,7 +182,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   let persistenceInFlight = false;
   let pendingRestorePayload: EditorPostPayload | null = null;
   let savedSnapshotPayload: ScriptEditorSavedSnapshot | null = null;
-  let hostSessionId = genSessionId();
   let latestWorkspaceRevision = -1;
   let sessionProtocolConfirmed = false;
 
@@ -191,6 +189,18 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
 
   function genSessionId() {
     return `script-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  }
+
+  function buildEditorSrc(language: string) {
+    return (
+      env.blockly +
+      "?language=" +
+      encodeURIComponent(language) +
+      "&v=" +
+      encodeURIComponent(env.buildVersion) +
+      "&hostSessionId=" +
+      encodeURIComponent(hostSessionId)
+    );
   }
 
   const canSaveCurrentScript = () =>
@@ -680,6 +690,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     latestWorkspaceRevision = -1;
     sessionProtocolConfirmed = false;
     hostSessionId = genSessionId();
+    src.value = buildEditorSrc(appStore.language);
     editorFrameKey.value += 1;
   };
 
@@ -1041,15 +1052,13 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     let messageSnapshotRevision = snapshotRevision;
 
     try {
+      const msg = e.data;
+      if (!msg || typeof msg.type !== "string") return;
+
+      const payload = (msg.payload ?? {}) as Record<string, unknown>;
       const currentEditorWindow = editor.value?.contentWindow;
       const isDirectUnitTestCall =
         import.meta.env.MODE === "test" && e.source == null;
-      if (
-        !isDirectUnitTestCall &&
-        (!currentEditorWindow || e.source !== currentEditorWindow)
-      ) {
-        return;
-      }
 
       try {
         const expectedOrigin = new URL(env.blockly, window.location.href)
@@ -1063,10 +1072,18 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         return;
       }
 
-      const msg = e.data;
-      if (!msg || typeof msg.type !== "string") return;
+      const isSessionBoundReady =
+        msg.type === "PLUGIN_READY" &&
+        typeof payload.hostSessionId === "string" &&
+        payload.hostSessionId === hostSessionId;
+      if (
+        !isDirectUnitTestCall &&
+        (!currentEditorWindow || e.source !== currentEditorWindow) &&
+        !isSessionBoundReady
+      ) {
+        return;
+      }
 
-      const payload = (msg.payload ?? {}) as Record<string, unknown>;
       const incomingSessionId = payload.hostSessionId;
       if (typeof incomingSessionId === "string") {
         if (incomingSessionId !== hostSessionId) return;
@@ -1079,6 +1096,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       }
 
       if (msg.type === "PLUGIN_READY") {
+        if (ready) return;
         ready = true;
         options.onReady();
       } else if (msg.type === "RESPONSE") {
@@ -1399,8 +1417,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       // Preserve the current draft, but rotate the iframe/session boundary.
       // INIT must wait for PLUGIN_READY from the newly loaded frame.
       reloadEditorFrame();
-      src.value =
-        env.blockly + "?language=" + newValue + "&v=" + env.buildVersion;
+      src.value = buildEditorSrc(newValue);
     }
   );
 
