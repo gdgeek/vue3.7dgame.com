@@ -6,16 +6,42 @@ import authClient from "@/services/auth/authClient";
 const router = useRouter();
 import { useUserStore } from "@/store";
 
-type RouteRoleUser = { roles?: string[] | null } | null;
+type RouteAccessUser = {
+  roles?: string[] | null;
+  perms?: string[] | null;
+} | null;
+
+const ROUTE_CAPABILITY_ROLES: Readonly<Record<string, readonly string[]>> = {
+  "platform.users.manage": ["admin", "root"],
+  "platform.phototypes.manage": ["root"],
+};
 
 /** 路由角色采用任一匹配语义；空要求不构成授权。 */
 export function hasRouteRoleAccess(
-  userInfo: RouteRoleUser,
+  userInfo: RouteAccessUser,
   requiredRoles: readonly string[]
 ): boolean {
   if (!userInfo || requiredRoles.length === 0) return false;
   const roles = Array.isArray(userInfo.roles) ? userInfo.roles : [];
   return requiredRoles.some((role) => roles.includes(role));
+}
+
+/** 路由能力采用全部满足语义；未知能力与空要求均 fail closed。 */
+export function hasRouteCapabilityAccess(
+  userInfo: RouteAccessUser,
+  requiredCapabilities: readonly string[]
+): boolean {
+  if (!userInfo || requiredCapabilities.length === 0) return false;
+  const roles = Array.isArray(userInfo.roles) ? userInfo.roles : [];
+  const perms = Array.isArray(userInfo.perms) ? userInfo.perms : [];
+
+  return requiredCapabilities.every((capability) => {
+    if (perms.includes(capability)) return true;
+    const allowedRoles = ROUTE_CAPABILITY_ROLES[capability];
+    return Boolean(
+      allowedRoles && allowedRoles.some((role) => roles.includes(role))
+    );
+  });
 }
 
 export function setupPermission() {
@@ -67,7 +93,16 @@ export function setupPermission() {
               )
             : [];
 
-          if (requiredRoles.length > 0) {
+          const requiredCapabilities = Array.isArray(
+            to.meta.requiredCapabilities
+          )
+            ? to.meta.requiredCapabilities.filter(
+                (capability): capability is string =>
+                  typeof capability === "string" && capability.length > 0
+              )
+            : [];
+
+          if (requiredCapabilities.length > 0 || requiredRoles.length > 0) {
             const userStore = useUserStore();
             let userInfo = userStore.userInfo;
 
@@ -82,7 +117,12 @@ export function setupPermission() {
               }
             }
 
-            if (!hasRouteRoleAccess(userInfo, requiredRoles)) {
+            const hasAccess =
+              requiredCapabilities.length > 0
+                ? hasRouteCapabilityAccess(userInfo, requiredCapabilities)
+                : hasRouteRoleAccess(userInfo, requiredRoles);
+
+            if (!hasAccess) {
               next("/401");
               NProgress.done();
               return;

@@ -63,6 +63,9 @@ describe("managerRoutes 路由模块", () => {
       expect(route).toBeDefined();
       expect(route?.name).toBe("ManagerUser");
       expect(route?.meta?.roles).toEqual(["admin", "root"]);
+      expect(route?.meta?.requiredCapabilities).toEqual([
+        "platform.users.manage",
+      ]);
     });
 
     it("包含 /phototype/list 子路由", () => {
@@ -71,6 +74,9 @@ describe("managerRoutes 路由模块", () => {
       );
       expect(route).toBeDefined();
       expect(route?.name).toBe("PhototypeList");
+      expect(route?.meta?.requiredCapabilities).toEqual([
+        "platform.phototypes.manage",
+      ]);
     });
 
     it("包含 /phototype/edit 子路由（private）", () => {
@@ -80,6 +86,9 @@ describe("managerRoutes 路由模块", () => {
       expect(route).toBeDefined();
       expect(route?.name).toBe("PhototypeEdit");
       expect((route?.meta as any)?.private).toBe(true);
+      expect(route?.meta?.requiredCapabilities).toEqual([
+        "platform.phototypes.manage",
+      ]);
     });
 
     it("包含 /test/vue-form-demo 子路由", () => {

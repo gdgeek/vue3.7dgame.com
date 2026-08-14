@@ -42,7 +42,11 @@ vi.mock("@/store", () => ({
   }),
 }));
 
-import { setupPermission, hasAuth } from "@/plugins/permission";
+import {
+  setupPermission,
+  hasAuth,
+  hasRouteCapabilityAccess,
+} from "@/plugins/permission";
 import NProgress from "@/utils/nprogress";
 
 // ── 辅助函数 ────────────────────────────────────────────────────────────────
@@ -207,7 +211,7 @@ describe("beforeEach 守卫 — 有 token 时", () => {
     await capturedBeforeEach!(
       makeTo({
         path: "/manager/user",
-        meta: { roles: ["admin", "root"] },
+        meta: { requiredCapabilities: ["platform.users.manage"] },
       }),
       makeFrom(),
       next
@@ -221,7 +225,7 @@ describe("beforeEach 守卫 — 有 token 时", () => {
     await capturedBeforeEach!(
       makeTo({
         path: "/manager/user",
-        meta: { roles: ["admin", "root"] },
+        meta: { requiredCapabilities: ["platform.users.manage"] },
       }),
       makeFrom(),
       next
@@ -236,7 +240,7 @@ describe("beforeEach 守卫 — 有 token 时", () => {
     await capturedBeforeEach!(
       makeTo({
         path: "/manager/user",
-        meta: { roles: ["admin", "root"] },
+        meta: { requiredCapabilities: ["platform.users.manage"] },
       }),
       makeFrom(),
       next
@@ -252,12 +256,46 @@ describe("beforeEach 守卫 — 有 token 时", () => {
     await capturedBeforeEach!(
       makeTo({
         path: "/manager/user",
-        meta: { roles: ["admin", "root"] },
+        meta: { requiredCapabilities: ["platform.users.manage"] },
       }),
       makeFrom(),
       next
     );
     expect(next).toHaveBeenCalledWith("/401");
+  });
+});
+
+describe("hasRouteCapabilityAccess()", () => {
+  it("角色映射可满足稳定能力", () => {
+    expect(
+      hasRouteCapabilityAccess({ roles: ["admin"], perms: [] }, [
+        "platform.users.manage",
+      ])
+    ).toBe(true);
+  });
+
+  it("用户直接权限可满足稳定能力", () => {
+    expect(
+      hasRouteCapabilityAccess(
+        { roles: ["user"], perms: ["platform.phototypes.manage"] },
+        ["platform.phototypes.manage"]
+      )
+    ).toBe(true);
+  });
+
+  it("多项能力采用全部满足语义", () => {
+    expect(
+      hasRouteCapabilityAccess({ roles: ["admin"], perms: [] }, [
+        "platform.users.manage",
+        "platform.phototypes.manage",
+      ])
+    ).toBe(false);
+  });
+
+  it("未知能力与空要求均 fail closed", () => {
+    const root = { roles: ["root"], perms: [] };
+    expect(hasRouteCapabilityAccess(root, ["platform.unknown"])).toBe(false);
+    expect(hasRouteCapabilityAccess(root, [])).toBe(false);
   });
 });
 

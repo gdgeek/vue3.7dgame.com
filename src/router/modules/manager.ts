@@ -17,6 +17,7 @@ const managerChildren: RouteRecordRaw[] = [
       icon: "cascader",
       hidden: true,
       roles: ["admin", "root"],
+      requiredCapabilities: ["platform.users.manage"],
     },
   },
   {
@@ -28,6 +29,7 @@ const managerChildren: RouteRecordRaw[] = [
       icon: "el-icon-Management",
       hidden: false,
       roles: ["root"],
+      requiredCapabilities: ["platform.phototypes.manage"],
     },
   },
   {
@@ -38,6 +40,7 @@ const managerChildren: RouteRecordRaw[] = [
       hidden: true,
       private: true,
       roles: ["root"],
+      requiredCapabilities: ["platform.phototypes.manage"],
     },
     component: () => import("@/views/phototype/edit.vue"),
   },
@@ -67,6 +70,7 @@ export const managerRoutes: RouteRecordRaw = {
     alwaysShow: false,
     params: null,
     roles: ["admin", "root"],
+    requiredCapabilities: ["platform.users.manage"],
   },
   children: managerChildren,
 };

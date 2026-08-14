@@ -20,7 +20,7 @@ describe("resourceRoutes 路由模块", () => {
     });
 
     it("redirect 到可用资源列表而非 /resource/ 目录", () => {
-      expect(resourceRoutes.redirect).toBe("/resource/polygen/index");
+      expect(resourceRoutes.redirect).toBe("/resource/voxel/index");
     });
   });
 
