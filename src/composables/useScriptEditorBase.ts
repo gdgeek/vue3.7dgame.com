@@ -125,6 +125,8 @@ const DRAFT_SETTINGS_VERSION = 2;
 const SAVE_WARNING_PREVIEW_LENGTH = 160;
 const SAVE_NOT_ALLOWED_ERROR = "current script cannot be saved";
 const SNAPSHOT_CHANGED_ERROR = "script changed while save was pending";
+const EDITOR_INIT_RETRY_INTERVAL_MS = 1000;
+const EDITOR_INIT_RETRY_LIMIT = 15;
 
 // ---------- composable 主体 ----------
 
@@ -162,6 +164,9 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   );
 
   let ready = false;
+  let editorInitRetryTimer: number | null = null;
+  let editorInitKickoffTimer: number | null = null;
+  let editorInitRetryAttempts = 0;
   let saveResolve: (() => void) | null = null;
   let saveReject: ((reason?: unknown) => void) | null = null;
   let saveTimer: number | null = null;
@@ -680,6 +685,48 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     }
   };
 
+  const clearEditorInitRetry = () => {
+    if (editorInitKickoffTimer !== null) {
+      window.clearTimeout(editorInitKickoffTimer);
+      editorInitKickoffTimer = null;
+    }
+    if (editorInitRetryTimer !== null) {
+      window.clearInterval(editorInitRetryTimer);
+      editorInitRetryTimer = null;
+    }
+  };
+
+  const tryEditorInitialization = () => {
+    if (
+      editorContentReady.value ||
+      editorInitRetryAttempts >= EDITOR_INIT_RETRY_LIMIT
+    ) {
+      clearEditorInitRetry();
+      return;
+    }
+    editorInitRetryAttempts += 1;
+    if (!editor.value?.contentWindow) return;
+
+    // INIT remains origin-scoped by postMessage(). Repeating it here only
+    // makes delivery lossless when a cached iframe misses the READY event or
+    // finishes installing its listener after the host's first attempt.
+    ready = true;
+    options.onReady();
+  };
+
+  const scheduleEditorInitialization = () => {
+    clearEditorInitRetry();
+    editorInitRetryAttempts = 0;
+    editorInitKickoffTimer = window.setTimeout(() => {
+      editorInitKickoffTimer = null;
+      tryEditorInitialization();
+    }, 0);
+    editorInitRetryTimer = window.setInterval(
+      tryEditorInitialization,
+      EDITOR_INIT_RETRY_INTERVAL_MS
+    );
+  };
+
   const reloadEditorFrame = () => {
     snapshotRevision += 1;
     clearPendingSaveSession(new Error(SNAPSHOT_CHANGED_ERROR));
@@ -690,6 +737,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     hostSessionId = genSessionId();
     src.value = buildEditorSrc(appStore.language);
     editorFrameKey.value += 1;
+    scheduleEditorInitialization();
   };
 
   const handleEditorFrameLoad = () => {
@@ -699,6 +747,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     // case the cross-window PLUGIN_READY event is missed by the host runtime.
     ready = true;
     options.onReady();
+    scheduleEditorInitialization();
   };
 
   const restartAutoSaveTimer = () => {
@@ -1330,6 +1379,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           if (workspaceRevision !== null) {
             latestWorkspaceRevision = workspaceRevision;
           }
+          clearEditorInitRetry();
           editorContentReady.value = true;
           const updateData: EditorUpdatePayload = {
             lua: payload.lua as string,
@@ -1477,6 +1527,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   onBeforeUnmount(() => {
     postMessage("DESTROY");
     clearAutoSaveTimer();
+    clearEditorInitRetry();
     window.removeEventListener("message", handleMessage);
     window.removeEventListener("beforeunload", handleBeforeUnload);
     document.removeEventListener("keydown", (e) => {
