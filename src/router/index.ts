@@ -16,14 +16,8 @@ import { homeRoutes, settingsRoutes } from "./modules/home";
 import { resourceRoutes } from "./modules/resource";
 import { metaRoutes } from "./modules/meta";
 import { verseRoutes } from "./modules/verse";
-import {
-  managerRoutes,
-  environmentGameRoutes,
-} from "./modules/manager";
-import {
-  pluginRoutes,
-  developmentPluginRoutes,
-} from "./modules/plugin";
+import { managerRoutes, environmentGameRoutes } from "./modules/manager";
+import { pluginRoutes, developmentPluginRoutes } from "./modules/plugin";
 
 // 静态路由
 const routes: RouteRecordRaw[] = [
