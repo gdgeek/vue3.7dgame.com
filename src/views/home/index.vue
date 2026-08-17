@@ -114,16 +114,26 @@
       <div class="api-info">
         <span>API: {{ env.api }}</span>
       </div>
+      <span
+        v-if="iamAuthzProbeStatus !== 'idle'"
+        id="iam-authz-subject-binding-probe"
+        hidden
+        >{{ iamAuthzProbeStatus }}</span
+      >
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 
 import { useSiteTitle } from "@/composables/useSiteTitle";
+import {
+  createIamAuthzSubjectBindingProbe,
+  type IamAuthzSubjectBindingProbeStatus,
+} from "@/composables/useIamAuthzSubjectBindingProbe";
 import environment from "@/environment";
 import LocalPage from "@/components/Home/LocalPage.vue";
 import HomeHeader from "@/components/Home/HomeHeader.vue";
@@ -134,6 +144,22 @@ const siteTitle = useSiteTitle();
 const env = computed(() => environment);
 const { t } = useI18n();
 const router = useRouter();
+const iamAuthzProbeStatus = ref<IamAuthzSubjectBindingProbeStatus>("idle");
+const runIamAuthzProbe = createIamAuthzSubjectBindingProbe();
+
+onMounted(() => {
+  void runIamAuthzProbe(
+    {
+      hostname: window.location.hostname,
+      queryValue: new URLSearchParams(window.location.search).get(
+        "iamAuthzProbe"
+      ),
+    },
+    (status) => {
+      iamAuthzProbeStatus.value = status;
+    }
+  );
+});
 
 const handleFlowAction = (path: string) => {
   router.push(path);
