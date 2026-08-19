@@ -1,6 +1,11 @@
 import type { AxiosError, AxiosRequestConfig } from "axios";
 
 export const IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY = "wp3-subject-binding-v1";
+export const IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE =
+  "v1;binding=match;configured=legacy;rollout=off;source=legacy;decision=deny;reason=legacy_mode;selected=0;fallback=0;failClosed=0;severity=none;classification=not_compared;permissionUnion=0";
+
+const IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER =
+  "x-identity-iam-authz-probe-evidence";
 
 export type IamAuthzSubjectBindingProbeStatus =
   | "idle"
@@ -9,6 +14,13 @@ export type IamAuthzSubjectBindingProbeStatus =
   | "failed";
 
 type ProbeRequest = (config: AxiosRequestConfig) => Promise<unknown>;
+
+interface ProbeResponse {
+  status?: number;
+  headers?: Record<string, unknown> & {
+    get?: (name: string) => unknown;
+  };
+}
 
 interface ProbeContext {
   hostname: string;
@@ -47,17 +59,36 @@ export const createIamAuthzSubjectBindingProbe = (
       await probeRequest({
         url: "/v1/organization/list",
         method: "get",
+        params: {
+          iamAuthzProbe: IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
+        },
         skipErrorMessage: true,
       });
-      onStatus("completed");
-      return "completed";
+      onStatus("failed");
+      return "failed";
     } catch (error) {
-      const httpStatus = (error as AxiosError | undefined)?.response?.status;
-      // An ordinary user's expected 403 still proves that the authenticated
-      // request traversed api.organization.global-rbac and emitted AuthZ evidence.
-      const status = httpStatus === 403 ? "completed" : "failed";
+      const response = (error as AxiosError | undefined)?.response as
+        | ProbeResponse
+        | undefined;
+      // Only an ordinary-user deny carrying the exact in-process safe evidence
+      // proves both traversal and subject binding. A 2xx is an unexpected allow.
+      const status =
+        response?.status === 403 && hasExpectedProbeEvidence(response)
+          ? "completed"
+          : "failed";
       onStatus(status);
       return status;
     }
   };
 };
+
+function hasExpectedProbeEvidence(
+  response: ProbeResponse | undefined
+): boolean {
+  const headers = response?.headers;
+  const raw =
+    typeof headers?.get === "function"
+      ? headers.get(IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER)
+      : headers?.[IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER];
+  return raw === IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE;
+}

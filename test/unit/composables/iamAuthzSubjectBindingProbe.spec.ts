@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   createIamAuthzSubjectBindingProbe,
+  IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
   IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
   shouldRunIamAuthzSubjectBindingProbe,
 } from "@/composables/useIamAuthzSubjectBindingProbe";
@@ -34,13 +35,19 @@ describe("IAM AuthZ subject-binding probe", () => {
     ).toBe(false);
   });
 
-  it("issues exactly one authenticated organization-list GET", async () => {
-    const probeRequest = vi.fn().mockResolvedValue({ status: 200 });
+  it("issues exactly one authenticated organization-list GET and rejects an unexpected allow", async () => {
+    const probeRequest = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: {
+        "x-identity-iam-authz-probe-evidence":
+          IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+      },
+    });
     const probe = createIamAuthzSubjectBindingProbe(probeRequest);
     const statuses: string[] = [];
 
     expect(await probe(developContext, (status) => statuses.push(status))).toBe(
-      "completed"
+      "failed"
     );
     expect(await probe(developContext, (status) => statuses.push(status))).toBe(
       "idle"
@@ -49,15 +56,24 @@ describe("IAM AuthZ subject-binding probe", () => {
     expect(probeRequest).toHaveBeenCalledWith({
       url: "/v1/organization/list",
       method: "get",
+      params: {
+        iamAuthzProbe: IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
+      },
       skipErrorMessage: true,
     });
-    expect(statuses).toEqual(["running", "completed"]);
+    expect(statuses).toEqual(["running", "failed"]);
   });
 
-  it("treats the ordinary-user 403 as completed AuthZ traversal", async () => {
-    const probeRequest = vi
-      .fn()
-      .mockRejectedValue({ response: { status: 403 } });
+  it("requires the ordinary-user 403 and exact safe subject-binding evidence", async () => {
+    const probeRequest = vi.fn().mockRejectedValue({
+      response: {
+        status: 403,
+        headers: {
+          "x-identity-iam-authz-probe-evidence":
+            IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+        },
+      },
+    });
     const probe = createIamAuthzSubjectBindingProbe(probeRequest);
     const statuses: string[] = [];
 
@@ -65,6 +81,23 @@ describe("IAM AuthZ subject-binding probe", () => {
       "completed"
     );
     expect(statuses).toEqual(["running", "completed"]);
+  });
+
+  it("fails closed when a 403 omits or changes the safe evidence", async () => {
+    for (const headers of [
+      {},
+      { "x-identity-iam-authz-probe-evidence": "v1;binding=mismatch" },
+    ]) {
+      const probe = createIamAuthzSubjectBindingProbe(
+        vi.fn().mockRejectedValue({ response: { status: 403, headers } })
+      );
+      const statuses: string[] = [];
+
+      expect(
+        await probe(developContext, (status) => statuses.push(status))
+      ).toBe("failed");
+      expect(statuses).toEqual(["running", "failed"]);
+    }
   });
 
   it("fails closed on 401 or transport errors", async () => {
