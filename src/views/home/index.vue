@@ -131,6 +131,7 @@ import { useRouter } from "vue-router";
 
 import { useSiteTitle } from "@/composables/useSiteTitle";
 import {
+  consumeIamAuthzSubjectBindingProbeLocation,
   createIamAuthzSubjectBindingProbe,
   type IamAuthzSubjectBindingProbeStatus,
 } from "@/composables/useIamAuthzSubjectBindingProbe";
@@ -147,18 +148,24 @@ const router = useRouter();
 const iamAuthzProbeStatus = ref<IamAuthzSubjectBindingProbeStatus>("idle");
 const runIamAuthzProbe = createIamAuthzSubjectBindingProbe();
 
-onMounted(() => {
-  void runIamAuthzProbe(
-    {
-      hostname: window.location.hostname,
-      queryValue: new URLSearchParams(window.location.search).get(
-        "iamAuthzProbe"
-      ),
-    },
-    (status) => {
-      iamAuthzProbeStatus.value = status;
-    }
+onMounted(async () => {
+  const context = {
+    hostname: window.location.hostname,
+    queryValue: new URLSearchParams(window.location.search).get(
+      "iamAuthzProbe"
+    ),
+  };
+  const consumed = await consumeIamAuthzSubjectBindingProbeLocation(
+    window.location,
+    (location) => router.replace(location)
   );
+  if (!consumed) {
+    return;
+  }
+
+  void runIamAuthzProbe(context, (status) => {
+    iamAuthzProbeStatus.value = status;
+  });
 });
 
 const handleFlowAction = (path: string) => {

@@ -1,8 +1,11 @@
+import axios, { AxiosHeaders } from "axios";
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  consumeIamAuthzSubjectBindingProbeLocation,
   createIamAuthzSubjectBindingProbe,
   IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+  IAM_AUTHZ_SUBJECT_BINDING_PROBE_PATH,
   IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
   shouldRunIamAuthzSubjectBindingProbe,
 } from "@/composables/useIamAuthzSubjectBindingProbe";
@@ -35,6 +38,50 @@ describe("IAM AuthZ subject-binding probe", () => {
     ).toBe(false);
   });
 
+  it("consumes the one-shot URL trigger before dispatch and preserves other settings", async () => {
+    let href = `https://d.dev.xrugc.com/home/index?lang=zh-CN&iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}&theme=modern-blue#top`;
+    const location = {
+      get href() {
+        return href;
+      },
+    };
+    const replaceLocation = vi.fn().mockImplementation(async (next: string) => {
+      href = new URL(next, href).href;
+    });
+
+    await expect(
+      consumeIamAuthzSubjectBindingProbeLocation(location, replaceLocation)
+    ).resolves.toBe(true);
+    expect(replaceLocation).toHaveBeenCalledOnce();
+    expect(replaceLocation).toHaveBeenCalledWith(
+      "/home/index?lang=zh-CN&theme=modern-blue#top"
+    );
+  });
+
+  it("does not dispatch when navigation resolves without consuming the trigger", async () => {
+    const href = `https://d.dev.xrugc.com/home/index?iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}`;
+    const replaceLocation = vi.fn().mockResolvedValue(undefined);
+
+    await expect(
+      consumeIamAuthzSubjectBindingProbeLocation({ href }, replaceLocation)
+    ).resolves.toBe(false);
+    expect(replaceLocation).toHaveBeenCalledOnce();
+  });
+
+  it("does not consume or dispatch an invalid, duplicate, or non-Develop trigger", async () => {
+    for (const href of [
+      "https://d.dev.xrugc.com/home/index?iamAuthzProbe=wrong",
+      `https://d.dev.xrugc.com/home/index?iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}&iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}`,
+      `https://d.xrugc.com/home/index?iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}`,
+    ]) {
+      const replaceLocation = vi.fn().mockResolvedValue(undefined);
+      await expect(
+        consumeIamAuthzSubjectBindingProbeLocation({ href }, replaceLocation)
+      ).resolves.toBe(false);
+      expect(replaceLocation).not.toHaveBeenCalled();
+    }
+  });
+
   it("issues exactly one authenticated organization-list GET and rejects an unexpected allow", async () => {
     const probeRequest = vi.fn().mockResolvedValue({
       status: 200,
@@ -54,7 +101,8 @@ describe("IAM AuthZ subject-binding probe", () => {
     );
     expect(probeRequest).toHaveBeenCalledTimes(1);
     expect(probeRequest).toHaveBeenCalledWith({
-      url: "/v1/organization/list",
+      baseURL: "",
+      url: IAM_AUTHZ_SUBJECT_BINDING_PROBE_PATH,
       method: "get",
       params: {
         iamAuthzProbe: IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
@@ -62,6 +110,22 @@ describe("IAM AuthZ subject-binding probe", () => {
       skipErrorMessage: true,
     });
     expect(statuses).toEqual(["running", "failed"]);
+  });
+
+  it("targets the dedicated same-origin path without doubling /api", () => {
+    const client = axios.create({ baseURL: "/api" });
+
+    expect(
+      client.getUri({
+        baseURL: "",
+        url: IAM_AUTHZ_SUBJECT_BINDING_PROBE_PATH,
+        params: {
+          iamAuthzProbe: IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
+        },
+      })
+    ).toBe(
+      "/api/iam-authz-subject-binding-probe?iamAuthzProbe=wp3-subject-binding-v1"
+    );
   });
 
   it("requires the ordinary-user 403 and exact safe subject-binding evidence", async () => {
@@ -75,6 +139,23 @@ describe("IAM AuthZ subject-binding probe", () => {
       },
     });
     const probe = createIamAuthzSubjectBindingProbe(probeRequest);
+    const statuses: string[] = [];
+
+    expect(await probe(developContext, (status) => statuses.push(status))).toBe(
+      "completed"
+    );
+    expect(statuses).toEqual(["running", "completed"]);
+  });
+
+  it("accepts exact safe evidence carried by real AxiosHeaders", async () => {
+    const headers = new AxiosHeaders();
+    headers.set(
+      "x-identity-iam-authz-probe-evidence",
+      IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE
+    );
+    const probe = createIamAuthzSubjectBindingProbe(
+      vi.fn().mockRejectedValue({ response: { status: 403, headers } })
+    );
     const statuses: string[] = [];
 
     expect(await probe(developContext, (status) => statuses.push(status))).toBe(
