@@ -1,10 +1,10 @@
 import type { AxiosError, AxiosRequestConfig } from "axios";
 
 export const IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY = "wp3-subject-binding-v1";
-export const IAM_AUTHZ_SUBJECT_BINDING_PROBE_PATH =
-  "/api/iam-authz-subject-binding-probe";
+export const IAM_AUTHZ_SUBJECT_BINDING_PROBE_URL =
+  "https://api.d.xrteeth.com/v1/organization/list";
 export const IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE =
-  "v1;binding=match;configured=legacy;rollout=off;source=legacy;decision=deny;reason=legacy_mode;selected=0;fallback=0;failClosed=0;severity=none;classification=not_compared;permissionUnion=0";
+  "v1;binding=match;configured=identity-primary;rollout=allowlist;source=identity;decision=deny;reason=allowlist_subject_selected;selected=1;fallback=0;failClosed=0;severity=none;classification=match;permissionUnion=0";
 
 const IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER =
   "x-identity-iam-authz-probe-evidence";
@@ -95,11 +95,13 @@ export const createIamAuthzSubjectBindingProbe = (
 
     try {
       await probeRequest({
-        // Bypass the shared /api baseURL and address the exact Develop-only,
-        // APP_API_1-pinned Nginx location. This prevents both a doubled /api
-        // prefix and random routing to the secondary API upstream.
+        // Address the reviewed Develop xrteeth API directly. The API CORS
+        // contract permits the exact d.dev origin, Authorization request
+        // header and safe evidence response header. This avoids both the
+        // shared /api upstream pool and any dependency on mutable frontend
+        // Stack source or a runtime probe flag.
         baseURL: "",
-        url: IAM_AUTHZ_SUBJECT_BINDING_PROBE_PATH,
+        url: IAM_AUTHZ_SUBJECT_BINDING_PROBE_URL,
         method: "get",
         params: {
           iamAuthzProbe: IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,

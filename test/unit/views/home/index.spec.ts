@@ -8,6 +8,8 @@ import { createApp, nextTick } from "vue";
 import type { PropType } from "vue";
 import { createRouter, createWebHistory, type Router } from "vue-router";
 
+import { IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE } from "@/composables/useIamAuthzSubjectBindingProbe";
+
 const requestMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/utils/request", () => ({
@@ -165,7 +167,7 @@ describe("views/home/index.vue", () => {
         status: 403,
         headers: {
           "x-identity-iam-authz-probe-evidence":
-            "v1;binding=match;configured=legacy;rollout=off;source=legacy;decision=deny;reason=legacy_mode;selected=0;fallback=0;failClosed=0;severity=none;classification=not_compared;permissionUnion=0",
+            IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
         },
       },
     });
@@ -188,6 +190,14 @@ describe("views/home/index.vue", () => {
     const first = await mount({}, router);
     await vi.waitFor(() => expect(requestMock).toHaveBeenCalledTimes(1));
     await nextTick();
+
+    expect(requestMock).toHaveBeenCalledWith({
+      baseURL: "",
+      url: "https://api.d.xrteeth.com/v1/organization/list",
+      method: "get",
+      params: { iamAuthzProbe: "wp3-subject-binding-v1" },
+      skipErrorMessage: true,
+    });
 
     expect(window.location.search).toBe("?lang=zh-CN&theme=modern-blue");
     expect(

@@ -5,8 +5,8 @@ import {
   consumeIamAuthzSubjectBindingProbeLocation,
   createIamAuthzSubjectBindingProbe,
   IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
-  IAM_AUTHZ_SUBJECT_BINDING_PROBE_PATH,
   IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
+  IAM_AUTHZ_SUBJECT_BINDING_PROBE_URL,
   shouldRunIamAuthzSubjectBindingProbe,
 } from "@/composables/useIamAuthzSubjectBindingProbe";
 
@@ -16,6 +16,12 @@ const developContext = {
 };
 
 describe("IAM AuthZ subject-binding probe", () => {
+  it("pins the exact Phase A selected-subject safe evidence contract", () => {
+    expect(IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE).toBe(
+      "v1;binding=match;configured=identity-primary;rollout=allowlist;source=identity;decision=deny;reason=allowlist_subject_selected;selected=1;fallback=0;failClosed=0;severity=none;classification=match;permissionUnion=0"
+    );
+  });
+
   it("is fail-closed outside the exact Develop host and query", () => {
     expect(shouldRunIamAuthzSubjectBindingProbe(developContext)).toBe(true);
     expect(
@@ -102,7 +108,7 @@ describe("IAM AuthZ subject-binding probe", () => {
     expect(probeRequest).toHaveBeenCalledTimes(1);
     expect(probeRequest).toHaveBeenCalledWith({
       baseURL: "",
-      url: IAM_AUTHZ_SUBJECT_BINDING_PROBE_PATH,
+      url: IAM_AUTHZ_SUBJECT_BINDING_PROBE_URL,
       method: "get",
       params: {
         iamAuthzProbe: IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
@@ -112,19 +118,19 @@ describe("IAM AuthZ subject-binding probe", () => {
     expect(statuses).toEqual(["running", "failed"]);
   });
 
-  it("targets the dedicated same-origin path without doubling /api", () => {
+  it("targets the fixed Develop xrteeth API without inheriting /api", () => {
     const client = axios.create({ baseURL: "/api" });
 
     expect(
       client.getUri({
         baseURL: "",
-        url: IAM_AUTHZ_SUBJECT_BINDING_PROBE_PATH,
+        url: IAM_AUTHZ_SUBJECT_BINDING_PROBE_URL,
         params: {
           iamAuthzProbe: IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
         },
       })
     ).toBe(
-      "/api/iam-authz-subject-binding-probe?iamAuthzProbe=wp3-subject-binding-v1"
+      "https://api.d.xrteeth.com/v1/organization/list?iamAuthzProbe=wp3-subject-binding-v1"
     );
   });
 
