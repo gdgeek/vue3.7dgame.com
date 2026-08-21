@@ -125,9 +125,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import { useSiteTitle } from "@/composables/useSiteTitle";
 import {
@@ -144,16 +144,16 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 const siteTitle = useSiteTitle();
 const env = computed(() => environment);
 const { t } = useI18n();
+const route = useRoute();
 const router = useRouter();
 const iamAuthzProbeStatus = ref<IamAuthzSubjectBindingProbeStatus>("idle");
 const runIamAuthzProbe = createIamAuthzSubjectBindingProbe();
 
-onMounted(async () => {
+const dispatchIamAuthzProbe = async () => {
+  const queryValue = route?.query.iamAuthzProbe;
   const context = {
     hostname: window.location.hostname,
-    queryValue: new URLSearchParams(window.location.search).get(
-      "iamAuthzProbe"
-    ),
+    queryValue: Array.isArray(queryValue) ? undefined : queryValue,
   };
   const consumed = await consumeIamAuthzSubjectBindingProbeLocation(
     window.location,
@@ -166,7 +166,18 @@ onMounted(async () => {
   void runIamAuthzProbe(context, (status) => {
     iamAuthzProbeStatus.value = status;
   });
-});
+};
+
+// Handle both a full page load and an already-mounted Home view receiving the
+// canonical query through SPA navigation/browser automation. The composable's
+// one-shot latch still prevents replay after the query is consumed.
+watch(
+  () => route?.query.iamAuthzProbe,
+  () => {
+    void dispatchIamAuthzProbe();
+  },
+  { immediate: true }
+);
 
 const handleFlowAction = (path: string) => {
   router.push(path);

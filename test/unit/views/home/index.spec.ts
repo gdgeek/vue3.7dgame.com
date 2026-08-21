@@ -215,4 +215,31 @@ describe("views/home/index.vue", () => {
     await nextTick();
     expect(requestMock).toHaveBeenCalledTimes(1);
   });
+
+  it("dispatches when an already-mounted Home view receives the canonical query", async () => {
+    requestMock.mockRejectedValue({
+      response: {
+        status: 403,
+        headers: {
+          "x-identity-iam-authz-probe-evidence":
+            IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+        },
+      },
+    });
+    window.history.replaceState(null, "", "/home/index");
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: "/home/index", component: { template: "<div />" } }],
+    });
+    await router.replace("/home/index");
+    await mount({}, router);
+    expect(requestMock).not.toHaveBeenCalled();
+
+    await router.push({
+      path: "/home/index",
+      query: { iamAuthzProbe: "wp3-subject-binding-v1" },
+    });
+    await vi.waitFor(() => expect(requestMock).toHaveBeenCalledTimes(1));
+    expect(window.location.search).toBe("");
+  });
 });
