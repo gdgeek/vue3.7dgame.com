@@ -134,7 +134,7 @@ describe("IAM AuthZ subject-binding probe", () => {
     const statuses: string[] = [];
 
     expect(await probe(developContext, (status) => statuses.push(status))).toBe(
-      "failed"
+      "failed-unexpected-allow"
     );
     expect(await probe(developContext, (status) => statuses.push(status))).toBe(
       "idle"
@@ -149,7 +149,7 @@ describe("IAM AuthZ subject-binding probe", () => {
       },
       skipErrorMessage: true,
     });
-    expect(statuses).toEqual(["running", "failed"]);
+    expect(statuses).toEqual(["running", "failed-unexpected-allow"]);
   });
 
   it("targets the fixed Develop xrteeth API without inheriting /api", () => {
@@ -204,11 +204,15 @@ describe("IAM AuthZ subject-binding probe", () => {
     expect(statuses).toEqual(["running", "completed"]);
   });
 
-  it("fails closed when a 403 omits or changes the safe evidence", async () => {
-    for (const headers of [
-      {},
+  it.each([
+    [{}, "failed-evidence-missing"],
+    [
       { "x-identity-iam-authz-probe-evidence": "v1;binding=mismatch" },
-    ]) {
+      "failed-evidence-mismatch",
+    ],
+  ])(
+    "fails closed with a safe 403 classification",
+    async (headers, expected) => {
       const probe = createIamAuthzSubjectBindingProbe(
         vi.fn().mockRejectedValue({ response: { status: 403, headers } })
       );
@@ -216,13 +220,18 @@ describe("IAM AuthZ subject-binding probe", () => {
 
       expect(
         await probe(developContext, (status) => statuses.push(status))
-      ).toBe("failed");
-      expect(statuses).toEqual(["running", "failed"]);
+      ).toBe(expected);
+      expect(statuses).toEqual(["running", expected]);
     }
-  });
+  );
 
-  it("fails closed on 401 or transport errors", async () => {
-    for (const error of [{ response: { status: 401 } }, new Error("network")]) {
+  it.each([
+    [{ response: { status: 401 } }, "failed-unauthorized"],
+    [{ response: { status: 404 } }, "failed-http-status"],
+    [new Error("network"), "failed-transport"],
+  ])(
+    "fails closed with a safe non-evidence classification",
+    async (error, expected) => {
       const probe = createIamAuthzSubjectBindingProbe(
         vi.fn().mockRejectedValue(error)
       );
@@ -230,8 +239,8 @@ describe("IAM AuthZ subject-binding probe", () => {
 
       expect(
         await probe(developContext, (status) => statuses.push(status))
-      ).toBe("failed");
-      expect(statuses).toEqual(["running", "failed"]);
+      ).toBe(expected);
+      expect(statuses).toEqual(["running", expected]);
     }
-  });
+  );
 });

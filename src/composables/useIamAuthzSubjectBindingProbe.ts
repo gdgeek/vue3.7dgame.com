@@ -13,7 +13,12 @@ export type IamAuthzSubjectBindingProbeStatus =
   | "idle"
   | "running"
   | "completed"
-  | "failed";
+  | "failed-unexpected-allow"
+  | "failed-unauthorized"
+  | "failed-http-status"
+  | "failed-evidence-missing"
+  | "failed-evidence-mismatch"
+  | "failed-transport";
 
 type ProbeRequest = (config: AxiosRequestConfig) => Promise<unknown>;
 
@@ -162,31 +167,45 @@ export const createIamAuthzSubjectBindingProbe = (
         },
         skipErrorMessage: true,
       });
-      onStatus("failed");
-      return "failed";
+      onStatus("failed-unexpected-allow");
+      return "failed-unexpected-allow";
     } catch (error) {
       const response = (error as AxiosError | undefined)?.response as
         | ProbeResponse
         | undefined;
       // Only an ordinary-user deny carrying the exact in-process safe evidence
       // proves both traversal and subject binding. A 2xx is an unexpected allow.
-      const status =
-        response?.status === 403 && hasExpectedProbeEvidence(response)
-          ? "completed"
-          : "failed";
+      const status = classifyProbeResponse(response);
       onStatus(status);
       return status;
     }
   };
 };
 
-function hasExpectedProbeEvidence(
+function classifyProbeResponse(
   response: ProbeResponse | undefined
-): boolean {
+): IamAuthzSubjectBindingProbeStatus {
+  if (response === undefined) {
+    return "failed-transport";
+  }
+  if (response.status === 401) {
+    return "failed-unauthorized";
+  }
+  if (response.status !== 403) {
+    return "failed-http-status";
+  }
+  const evidence = readProbeEvidence(response);
+  if (evidence === undefined || evidence === null || evidence === "") {
+    return "failed-evidence-missing";
+  }
+  return evidence === IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE
+    ? "completed"
+    : "failed-evidence-mismatch";
+}
+
+function readProbeEvidence(response: ProbeResponse | undefined): unknown {
   const headers = response?.headers;
-  const raw =
-    typeof headers?.get === "function"
-      ? headers.get(IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER)
-      : headers?.[IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER];
-  return raw === IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE;
+  return typeof headers?.get === "function"
+    ? headers.get(IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER)
+    : headers?.[IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER];
 }
