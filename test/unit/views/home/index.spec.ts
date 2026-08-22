@@ -216,6 +216,72 @@ describe("views/home/index.vue", () => {
     expect(requestMock).toHaveBeenCalledTimes(1);
   });
 
+  it("dispatches once from the pre-router snapshot when bootstrap loses the query", async () => {
+    requestMock.mockRejectedValue({
+      response: {
+        status: 403,
+        headers: {
+          "x-identity-iam-authz-probe-evidence":
+            IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+        },
+      },
+    });
+    window.history.replaceState(
+      null,
+      "",
+      "/home/index?lang=zh-CN&iamAuthzProbe=wp3-subject-binding-v1&theme=modern-blue"
+    );
+    const { initializeIamAuthzSubjectBindingProbeBootstrap } = await import(
+      "@/composables/useIamAuthzSubjectBindingProbe"
+    );
+    initializeIamAuthzSubjectBindingProbeBootstrap();
+
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: "/home/index", component: { template: "<div />" } }],
+    });
+    await router.replace("/home/index?lang=zh-CN&theme=modern-blue");
+    const first = await mount({}, router);
+
+    await vi.waitFor(() => expect(requestMock).toHaveBeenCalledTimes(1));
+    await nextTick();
+    expect(
+      first.el.querySelector("#iam-authz-subject-binding-probe")?.textContent
+    ).toBe("completed");
+    expect(window.location.search).toBe("?lang=zh-CN&theme=modern-blue");
+
+    await mount({}, router);
+    await nextTick();
+    expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not fall back to the snapshot when a duplicate live trigger appears", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/home/index?iamAuthzProbe=wp3-subject-binding-v1"
+    );
+    const { initializeIamAuthzSubjectBindingProbeBootstrap } = await import(
+      "@/composables/useIamAuthzSubjectBindingProbe"
+    );
+    initializeIamAuthzSubjectBindingProbeBootstrap();
+
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: "/home/index", component: { template: "<div />" } }],
+    });
+    await router.replace(
+      "/home/index?iamAuthzProbe=wp3-subject-binding-v1&iamAuthzProbe=wp3-subject-binding-v1"
+    );
+    const mounted = await mount({}, router);
+    await nextTick();
+
+    expect(requestMock).not.toHaveBeenCalled();
+    expect(
+      mounted.el.querySelector("#iam-authz-subject-binding-probe")
+    ).toBeNull();
+  });
+
   it("dispatches when an already-mounted Home view receives the canonical query", async () => {
     requestMock.mockRejectedValue({
       response: {

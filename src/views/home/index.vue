@@ -133,6 +133,9 @@ import { useSiteTitle } from "@/composables/useSiteTitle";
 import {
   consumeIamAuthzSubjectBindingProbeLocation,
   createIamAuthzSubjectBindingProbe,
+  initializeIamAuthzSubjectBindingProbeBootstrap,
+  shouldRunIamAuthzSubjectBindingProbe,
+  takeIamAuthzSubjectBindingProbeBootstrap,
   type IamAuthzSubjectBindingProbeStatus,
 } from "@/composables/useIamAuthzSubjectBindingProbe";
 import environment from "@/environment";
@@ -149,18 +152,39 @@ const router = useRouter();
 const iamAuthzProbeStatus = ref<IamAuthzSubjectBindingProbeStatus>("idle");
 const runIamAuthzProbe = createIamAuthzSubjectBindingProbe();
 
+// main.ts initializes this before the router. Keep this idempotent fallback so
+// isolated Home mounts and tests retain the same fail-closed behavior.
+initializeIamAuthzSubjectBindingProbeBootstrap();
+
 const dispatchIamAuthzProbe = async () => {
-  const queryValue = route?.query.iamAuthzProbe;
-  const context = {
-    hostname: window.location.hostname,
-    queryValue: Array.isArray(queryValue) ? undefined : queryValue,
+  const url = new URL(window.location.href);
+  const liveValues = url.searchParams.getAll("iamAuthzProbe");
+  const captured = takeIamAuthzSubjectBindingProbeBootstrap();
+  const liveContext = {
+    hostname: url.hostname,
+    queryValue: liveValues.length === 1 ? liveValues[0] : undefined,
   };
-  const consumed = await consumeIamAuthzSubjectBindingProbeLocation(
-    window.location,
-    (location) => router.replace(location)
-  );
-  if (!consumed) {
+  const hasLiveTrigger = shouldRunIamAuthzSubjectBindingProbe(liveContext);
+  const canUseBootstrapCapture =
+    liveValues.length === 0 &&
+    captured !== undefined &&
+    captured.hostname.toLowerCase() === url.hostname.toLowerCase() &&
+    captured.pathname === url.pathname;
+  const context = hasLiveTrigger ? liveContext : captured;
+
+  // A duplicate/invalid live trigger never falls back to the captured value.
+  if ((!hasLiveTrigger && !canUseBootstrapCapture) || context === undefined) {
     return;
+  }
+
+  if (hasLiveTrigger) {
+    const consumed = await consumeIamAuthzSubjectBindingProbeLocation(
+      window.location,
+      (location) => router.replace(location)
+    );
+    if (!consumed) {
+      return;
+    }
   }
 
   void runIamAuthzProbe(context, (status) => {

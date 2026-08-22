@@ -44,6 +44,40 @@ describe("IAM AuthZ subject-binding probe", () => {
     ).toBe(false);
   });
 
+  it("captures an exact full-page Develop trigger once before router bootstrap", async () => {
+    vi.resetModules();
+    const {
+      initializeIamAuthzSubjectBindingProbeBootstrap,
+      takeIamAuthzSubjectBindingProbeBootstrap,
+    } = await import("@/composables/useIamAuthzSubjectBindingProbe");
+    initializeIamAuthzSubjectBindingProbeBootstrap({
+      href: `https://d.dev.xrugc.com/home/index?iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}`,
+    });
+
+    expect(takeIamAuthzSubjectBindingProbeBootstrap()).toEqual({
+      hostname: "d.dev.xrugc.com",
+      pathname: "/home/index",
+      queryValue: IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY,
+    });
+    expect(takeIamAuthzSubjectBindingProbeBootstrap()).toBeUndefined();
+  });
+
+  it.each([
+    `https://d.xrugc.com/home/index?iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}`,
+    `https://d.dev.xrugc.com/home/index?iamAuthzProbe=wrong`,
+    `https://d.dev.xrugc.com/home/index?iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}&iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}`,
+    `https://d.dev.xrugc.com/away?iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}`,
+  ])("does not bootstrap-capture an invalid trigger: %s", async (href) => {
+    vi.resetModules();
+    const {
+      initializeIamAuthzSubjectBindingProbeBootstrap,
+      takeIamAuthzSubjectBindingProbeBootstrap,
+    } = await import("@/composables/useIamAuthzSubjectBindingProbe");
+    initializeIamAuthzSubjectBindingProbeBootstrap({ href });
+
+    expect(takeIamAuthzSubjectBindingProbeBootstrap()).toBeUndefined();
+  });
+
   it("consumes the one-shot URL trigger before dispatch and preserves other settings", async () => {
     let href = `https://d.dev.xrugc.com/home/index?lang=zh-CN&iamAuthzProbe=${IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY}&theme=modern-blue#top`;
     const location = {

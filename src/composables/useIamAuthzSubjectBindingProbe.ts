@@ -33,7 +33,15 @@ interface ProbeLocation {
   href: string;
 }
 
+interface CapturedProbeContext extends ProbeContext {
+  pathname: string;
+}
+
 type ProbeLocationReplace = (url: string) => Promise<unknown>;
+
+let bootstrapCaptureInitialized = false;
+let bootstrapCaptureTaken = false;
+let bootstrapProbeContext: CapturedProbeContext | undefined;
 
 const authenticatedRequest: ProbeRequest = async (config) => {
   const { default: request } = await import("@/utils/request");
@@ -46,6 +54,52 @@ export const shouldRunIamAuthzSubjectBindingProbe = ({
 }: ProbeContext): boolean =>
   hostname.toLowerCase() === "d.dev.xrugc.com" &&
   queryValue === IAM_AUTHZ_SUBJECT_BINDING_PROBE_QUERY;
+
+/**
+ * Capture the approved full-page trigger before Vue Router starts its initial
+ * navigation. Home is lazy-loaded, so reading only route.query from Home can
+ * be too late after an initial redirect/history synchronization.
+ */
+export const initializeIamAuthzSubjectBindingProbeBootstrap = (
+  location: ProbeLocation = window.location
+): void => {
+  if (bootstrapCaptureInitialized) {
+    return;
+  }
+
+  bootstrapCaptureInitialized = true;
+  try {
+    const url = new URL(location.href);
+    const values = url.searchParams.getAll("iamAuthzProbe");
+    if (
+      url.pathname === "/home/index" &&
+      values.length === 1 &&
+      shouldRunIamAuthzSubjectBindingProbe({
+        hostname: url.hostname,
+        queryValue: values[0],
+      })
+    ) {
+      bootstrapProbeContext = {
+        hostname: url.hostname,
+        pathname: url.pathname,
+        queryValue: values[0],
+      };
+    }
+  } catch {
+    bootstrapProbeContext = undefined;
+  }
+};
+
+export const takeIamAuthzSubjectBindingProbeBootstrap = ():
+  | CapturedProbeContext
+  | undefined => {
+  if (bootstrapCaptureTaken) {
+    return undefined;
+  }
+
+  bootstrapCaptureTaken = true;
+  return bootstrapProbeContext;
+};
 
 export const consumeIamAuthzSubjectBindingProbeLocation = async (
   location: ProbeLocation,
