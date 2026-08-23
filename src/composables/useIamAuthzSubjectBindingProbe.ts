@@ -24,6 +24,7 @@ type ProbeRequest = (config: AxiosRequestConfig) => Promise<unknown>;
 
 interface ProbeResponse {
   status?: number;
+  data?: unknown;
   headers?: Record<string, unknown> & {
     get?: (name: string) => unknown;
   };
@@ -205,7 +206,21 @@ function classifyProbeResponse(
 
 function readProbeEvidence(response: ProbeResponse | undefined): unknown {
   const headers = response?.headers;
-  return typeof headers?.get === "function"
-    ? headers.get(IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER)
-    : headers?.[IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER];
+  const headerEvidence =
+    typeof headers?.get === "function"
+      ? headers.get(IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER)
+      : headers?.[IAM_AUTHZ_SUBJECT_BINDING_PROBE_HEADER];
+  if (
+    headerEvidence !== undefined &&
+    headerEvidence !== null &&
+    headerEvidence !== ""
+  ) {
+    return headerEvidence;
+  }
+  const data = response?.data;
+  return isRecord(data) ? data.iamAuthzProbeEvidence : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

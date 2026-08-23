@@ -204,6 +204,109 @@ describe("IAM AuthZ subject-binding probe", () => {
     expect(statuses).toEqual(["running", "completed"]);
   });
 
+  it("accepts the exact denied-response evidence body when the transport hides the header", async () => {
+    const probe = createIamAuthzSubjectBindingProbe(
+      vi.fn().mockRejectedValue({
+        response: {
+          status: 403,
+          headers: {},
+          data: {
+            code: 2003,
+            message: "没有权限执行此操作",
+            iamAuthzProbeEvidence: IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+          },
+        },
+      })
+    );
+    const statuses: string[] = [];
+
+    expect(await probe(developContext, (status) => statuses.push(status))).toBe(
+      "completed"
+    );
+    expect(statuses).toEqual(["running", "completed"]);
+  });
+
+  it.each([undefined, ""])(
+    "accepts exact body evidence when AxiosHeaders returns %s",
+    async (headerValue) => {
+      const headers = new AxiosHeaders();
+      if (headerValue !== undefined) {
+        headers.set("x-identity-iam-authz-probe-evidence", headerValue);
+      }
+      const probe = createIamAuthzSubjectBindingProbe(
+        vi.fn().mockRejectedValue({
+          response: {
+            status: 403,
+            headers,
+            data: {
+              iamAuthzProbeEvidence: IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+            },
+          },
+        })
+      );
+
+      await expect(probe(developContext, vi.fn())).resolves.toBe("completed");
+    }
+  );
+
+  it("prefers matching header evidence over a conflicting body", async () => {
+    const probe = createIamAuthzSubjectBindingProbe(
+      vi.fn().mockRejectedValue({
+        response: {
+          status: 403,
+          headers: {
+            "x-identity-iam-authz-probe-evidence":
+              IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+          },
+          data: { iamAuthzProbeEvidence: "v1;binding=mismatch" },
+        },
+      })
+    );
+
+    await expect(probe(developContext, vi.fn())).resolves.toBe("completed");
+  });
+
+  it.each(["v1;binding=mismatch", true, { nested: "value" }])(
+    "fails closed for invalid body-only evidence: %j",
+    async (iamAuthzProbeEvidence) => {
+      const probe = createIamAuthzSubjectBindingProbe(
+        vi.fn().mockRejectedValue({
+          response: {
+            status: 403,
+            headers: {},
+            data: { iamAuthzProbeEvidence },
+          },
+        })
+      );
+
+      await expect(probe(developContext, vi.fn())).resolves.toBe(
+        "failed-evidence-mismatch"
+      );
+    }
+  );
+
+  it("fails closed when header and body evidence conflict", async () => {
+    const probe = createIamAuthzSubjectBindingProbe(
+      vi.fn().mockRejectedValue({
+        response: {
+          status: 403,
+          headers: {
+            "x-identity-iam-authz-probe-evidence": "v1;binding=mismatch",
+          },
+          data: {
+            iamAuthzProbeEvidence: IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+          },
+        },
+      })
+    );
+    const statuses: string[] = [];
+
+    expect(await probe(developContext, (status) => statuses.push(status))).toBe(
+      "failed-evidence-mismatch"
+    );
+    expect(statuses).toEqual(["running", "failed-evidence-mismatch"]);
+  });
+
   it.each([
     [{}, "failed-evidence-missing"],
     [
