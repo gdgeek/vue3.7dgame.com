@@ -24,6 +24,10 @@ export const homeRoutes: RouteRecordRaw = {
         affix: true,
         keepAlive: true,
         hidden: true,
+        // The Develop-only AuthZ probe consumes this one-shot query before
+        // dispatch. Preserve Home across that router.replace so the pending
+        // status and its hidden evidence marker stay bound to the live view.
+        preserveComponentOnQueryKeys: ["iamAuthzProbe"],
       },
       path: "/home/index",
       name: "HomeIndex",

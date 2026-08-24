@@ -96,6 +96,15 @@ describe("homeRoutes 路由模块", () => {
       it("meta.hidden=true", () => {
         expect(getRoute()?.meta?.hidden).toBe(true);
       });
+
+      it("preserves Home while the one-shot AuthZ probe query is consumed", () => {
+        expect(getRoute()?.meta?.preserveComponentOnQueryKeys).toEqual([
+          "iamAuthzProbe",
+        ]);
+        expect(
+          getRoute()?.meta?.preserveComponentOnQueryChange
+        ).toBeUndefined();
+      });
     });
 
     // HomeDocument

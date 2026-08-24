@@ -258,6 +258,60 @@ describe("App.vue route transition key", () => {
     expect(probeStats.unmounted).toBe(0);
   });
 
+  it("keeps Home mounted while the one-shot AuthZ probe query is consumed", async () => {
+    mockRoute.fullPath =
+      "/home/index?lang=zh-CN&iamAuthzProbe=wp3-subject-binding-v1&theme=modern-blue";
+    mockRoute.path = "/home/index";
+    mockRoute.query = {
+      lang: "zh-CN",
+      iamAuthzProbe: "wp3-subject-binding-v1",
+      theme: "modern-blue",
+    };
+    mockRoute.meta = {
+      preserveComponentOnQueryKeys: ["iamAuthzProbe"],
+    };
+
+    await mountApp();
+
+    mockRoute.fullPath = "/home/index?lang=zh-CN&theme=modern-blue";
+    mockRoute.query = {
+      lang: "zh-CN",
+      theme: "modern-blue",
+    };
+    await nextTick();
+    await nextTick();
+
+    expect(probeStats.mounted).toBe(1);
+    expect(probeStats.unmounted).toBe(0);
+  });
+
+  it("still remounts Home for non-probe query changes", async () => {
+    mockRoute.fullPath =
+      "/home/index?lang=zh-CN&iamAuthzProbe=wp3-subject-binding-v1&theme=modern-blue";
+    mockRoute.path = "/home/index";
+    mockRoute.query = {
+      lang: "zh-CN",
+      iamAuthzProbe: "wp3-subject-binding-v1",
+      theme: "modern-blue",
+    };
+    mockRoute.meta = {
+      preserveComponentOnQueryKeys: ["iamAuthzProbe"],
+    };
+
+    await mountApp();
+
+    mockRoute.fullPath = "/home/index?lang=en-US&theme=modern-blue";
+    mockRoute.query = {
+      lang: "en-US",
+      theme: "modern-blue",
+    };
+    await nextTick();
+    await nextTick();
+
+    expect(probeStats.mounted).toBe(2);
+    expect(probeStats.unmounted).toBe(1);
+  });
+
   it("remounts plugin pages for non-pluginUrl query changes", async () => {
     mockRoute.fullPath =
       "/plugins/ai-3d-generator-v3?pluginUrl=%2Fsample&panel=wide";

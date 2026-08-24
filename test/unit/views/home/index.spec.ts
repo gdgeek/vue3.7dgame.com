@@ -1,9 +1,20 @@
 /**
+ * @vitest-environment-options {"url":"https://d.dev.xrugc.com/"}
+ *
  * Tests for src/views/home/index.vue
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createApp, nextTick } from "vue";
 import type { PropType } from "vue";
+import { createRouter, createWebHistory, type Router } from "vue-router";
+
+import { IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE } from "@/composables/useIamAuthzSubjectBindingProbe";
+
+const requestMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/utils/request", () => ({
+  default: requestMock,
+}));
 
 // ─── Mock stores ───────────────────────────────────────────────────────────────
 vi.mock("@/store/modules/domain", () => ({
@@ -69,13 +80,21 @@ const cleanups: (() => void)[] = [];
 afterEach(() => {
   cleanups.forEach((fn) => fn());
   cleanups.length = 0;
+  window.history.replaceState(null, "", "/");
+  vi.clearAllMocks();
   vi.resetModules();
 });
 
-async function mount(props: Record<string, unknown> = {}) {
+async function mount(
+  props: Record<string, unknown> = {},
+  activeRouter?: Router
+) {
   const { default: HomePage } = await import("@/views/home/index.vue");
   const el = document.createElement("div");
   const app = createApp(HomePage as Parameters<typeof createApp>[0], props);
+  if (activeRouter) {
+    app.use(activeRouter);
+  }
   app.component("FontAwesomeIcon", {
     name: "FontAwesomeIcon",
     props: {
@@ -140,5 +159,153 @@ describe("views/home/index.vue", () => {
   it("renders platform overview content", async () => {
     const { el } = await mount();
     expect(el.querySelector(".platform-overview-stub")).not.toBeNull();
+  });
+
+  it("consumes the approved query before dispatch and does not replay after remount", async () => {
+    requestMock.mockRejectedValue({
+      response: {
+        status: 403,
+        headers: {
+          "x-identity-iam-authz-probe-evidence":
+            IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+        },
+      },
+    });
+    window.history.replaceState(
+      null,
+      "",
+      "/home/index?lang=zh-CN&iamAuthzProbe=wp3-subject-binding-v1&theme=modern-blue"
+    );
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [
+        { path: "/home/index", component: { template: "<div />" } },
+        { path: "/away", component: { template: "<div />" } },
+      ],
+    });
+    await router.replace(
+      `${window.location.pathname}${window.location.search}`
+    );
+
+    const first = await mount({}, router);
+    await vi.waitFor(() => expect(requestMock).toHaveBeenCalledTimes(1));
+    await nextTick();
+
+    expect(requestMock).toHaveBeenCalledWith({
+      baseURL: "",
+      url: "https://api.d.xrteeth.com/v1/organization/list",
+      method: "get",
+      params: { iamAuthzProbe: "wp3-subject-binding-v1" },
+      skipErrorMessage: true,
+    });
+
+    expect(window.location.search).toBe("?lang=zh-CN&theme=modern-blue");
+    expect(
+      first.el.querySelector("#iam-authz-subject-binding-probe")?.textContent
+    ).toBe("completed");
+
+    await router.push("/away");
+    router.back();
+    await vi.waitFor(() => {
+      expect(router.currentRoute.value.path).toBe("/home/index");
+      expect(router.currentRoute.value.query.iamAuthzProbe).toBeUndefined();
+    });
+
+    await mount({}, router);
+    await nextTick();
+    expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("dispatches once from the pre-router snapshot when bootstrap loses the query", async () => {
+    requestMock.mockRejectedValue({
+      response: {
+        status: 403,
+        headers: {
+          "x-identity-iam-authz-probe-evidence":
+            IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+        },
+      },
+    });
+    window.history.replaceState(
+      null,
+      "",
+      "/home/index?lang=zh-CN&iamAuthzProbe=wp3-subject-binding-v1&theme=modern-blue"
+    );
+    const { initializeIamAuthzSubjectBindingProbeBootstrap } = await import(
+      "@/composables/useIamAuthzSubjectBindingProbe"
+    );
+    initializeIamAuthzSubjectBindingProbeBootstrap();
+
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: "/home/index", component: { template: "<div />" } }],
+    });
+    await router.replace("/home/index?lang=zh-CN&theme=modern-blue");
+    const first = await mount({}, router);
+
+    await vi.waitFor(() => expect(requestMock).toHaveBeenCalledTimes(1));
+    await nextTick();
+    expect(
+      first.el.querySelector("#iam-authz-subject-binding-probe")?.textContent
+    ).toBe("completed");
+    expect(window.location.search).toBe("?lang=zh-CN&theme=modern-blue");
+
+    await mount({}, router);
+    await nextTick();
+    expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not fall back to the snapshot when a duplicate live trigger appears", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/home/index?iamAuthzProbe=wp3-subject-binding-v1"
+    );
+    const { initializeIamAuthzSubjectBindingProbeBootstrap } = await import(
+      "@/composables/useIamAuthzSubjectBindingProbe"
+    );
+    initializeIamAuthzSubjectBindingProbeBootstrap();
+
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: "/home/index", component: { template: "<div />" } }],
+    });
+    await router.replace(
+      "/home/index?iamAuthzProbe=wp3-subject-binding-v1&iamAuthzProbe=wp3-subject-binding-v1"
+    );
+    const mounted = await mount({}, router);
+    await nextTick();
+
+    expect(requestMock).not.toHaveBeenCalled();
+    expect(
+      mounted.el.querySelector("#iam-authz-subject-binding-probe")
+    ).toBeNull();
+  });
+
+  it("dispatches when an already-mounted Home view receives the canonical query", async () => {
+    requestMock.mockRejectedValue({
+      response: {
+        status: 403,
+        headers: {
+          "x-identity-iam-authz-probe-evidence":
+            IAM_AUTHZ_SUBJECT_BINDING_PROBE_EVIDENCE,
+        },
+      },
+    });
+    window.history.replaceState(null, "", "/home/index");
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: "/home/index", component: { template: "<div />" } }],
+    });
+    await router.replace("/home/index");
+    await mount({}, router);
+    expect(requestMock).not.toHaveBeenCalled();
+
+    await router.push({
+      path: "/home/index",
+      query: { iamAuthzProbe: "wp3-subject-binding-v1" },
+    });
+    await vi.waitFor(() => expect(requestMock).toHaveBeenCalledTimes(1));
+    expect(window.location.search).toBe("");
   });
 });
