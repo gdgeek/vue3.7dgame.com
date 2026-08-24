@@ -334,6 +334,98 @@ ${GEEK_BLOCK}
     }"
 }
 
+# ============================================================
+# generate_iam_authz_subject_binding_probe_location
+#   Develop-only IAM AuthZ probe route pinned to the canonical xrteeth API.
+#
+# The ordinary /api/ route may distribute traffic across multiple backends.
+# A one-shot subject-binding proof must not randomly cross that boundary, so
+# this exact route deliberately has no split_clients or failover behavior.
+# It is generated only when APP_API_1 is the reviewed Develop xrteeth origin.
+# ============================================================
+generate_iam_authz_subject_binding_probe_location() {
+  # A deny-only location is always present. Without it, the reserved path
+  # would fall through to the ordinary /api/ pool while this control is off.
+  IAM_AUTHZ_SUBJECT_BINDING_PROBE_LOCATION="
+    # ============ IAM AuthZ subject-binding probe (default-off tombstone) ============
+    location = /api/iam-authz-subject-binding-probe {
+        return 404;
+    }
+
+    location ^~ /api/iam-authz-subject-binding-probe {
+        return 404;
+    }"
+
+  if [ "${APP_IAM_AUTHZ_SUBJECT_BINDING_PROBE_ENABLED:-false}" != "true" ]; then
+    echo "[entrypoint] IAM AuthZ subject-binding probe disabled (default-off)"
+    return
+  fi
+
+  probe_url="${APP_API_1_URL:-}"
+  probe_host="${APP_API_1_HOST:-}"
+  if [ -z "$probe_url" ]; then
+    echo "[entrypoint] IAM AuthZ subject-binding probe disabled: APP_API_1_URL is missing"
+    return
+  fi
+
+  normalized_probe_url=$(printf '%s' "$probe_url" | sed 's|/*$||')
+  derived_probe_host=$(printf '%s' "$normalized_probe_url" | sed -E 's|https?://||' | sed 's|/.*||' | sed 's|:.*||')
+  if [ -z "$probe_host" ]; then
+    probe_host="$derived_probe_host"
+  fi
+
+  if [ "$normalized_probe_url" != "https://api.d.xrteeth.com" ] || \
+     [ "$probe_host" != "api.d.xrteeth.com" ]; then
+    echo "[entrypoint] IAM AuthZ subject-binding probe disabled: APP_API_1 is not the reviewed Develop xrteeth origin"
+    return
+  fi
+
+  echo "[entrypoint] IAM AuthZ subject-binding probe pinned to APP_API_1 (no load balancing or failover)"
+  IAM_AUTHZ_SUBJECT_BINDING_PROBE_LOCATION="
+    # ============ Develop IAM AuthZ subject-binding one-shot probe ============
+    location = /api/iam-authz-subject-binding-probe {
+        if (\$host != \"d.dev.xrugc.com\") {
+            return 404;
+        }
+        if (\$request_method != \"GET\") {
+            return 404;
+        }
+        if (\$request_uri != \"/api/iam-authz-subject-binding-probe?iamAuthzProbe=wp3-subject-binding-v1\") {
+            return 404;
+        }
+
+        set \$iam_authz_probe_backend \"${normalized_probe_url}/v1/organization/list?iamAuthzProbe=wp3-subject-binding-v1\";
+        proxy_pass \$iam_authz_probe_backend;
+
+        proxy_ssl_server_name on;
+        proxy_ssl_name ${probe_host};
+        proxy_set_header Host ${probe_host};
+        proxy_set_header Authorization \$http_authorization;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Original-Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-GEEK-Proxy \"true\";
+        proxy_set_header X-GEEK-Real-IP \$remote_addr;
+        proxy_set_header X-GEEK-Source \"nginx\";
+
+        client_max_body_size 50m;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_cache off;
+        proxy_next_upstream off;
+        proxy_intercept_errors off;
+    }
+
+    # Reject suffixes and trailing slashes locally instead of falling through
+    # to the ordinary /api/ load-balanced location.
+    location ^~ /api/iam-authz-subject-binding-probe {
+        return 404;
+    }"
+}
+
 # JSON 编码函数（不依赖 Python）
 # 如果输入为空，返回 null；否则返回 JSON 字符串
 json_encode() {
@@ -346,7 +438,8 @@ json_encode() {
 
 # --- 1. 生成 API 负载均衡配置 ---
 generate_lb_config "APP_API" "/api/" "api" "yes"
-API_LOCATIONS="$CHAIN_RESULT"
+generate_iam_authz_subject_binding_probe_location
+API_LOCATIONS="${IAM_AUTHZ_SUBJECT_BINDING_PROBE_LOCATION}${CHAIN_RESULT}"
 
 # --- 2. 生成统一认证 API 负载均衡配置 ---
 generate_lb_config "APP_AUTH" "/api-auth/" "auth" "yes"

@@ -8,6 +8,7 @@
  *
  * Property-based tests validate correctness properties from the design doc.
  */
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it, expect, beforeAll } from "vitest";
@@ -46,6 +47,35 @@ function extractLocationBlock(config: string, path: string): string {
     }
   }
   return "";
+}
+
+function renderIamAuthzProbeLocation(env: Record<string, string> = {}): string {
+  const functionStart = entrypointScript.indexOf(
+    "generate_iam_authz_subject_binding_probe_location() {"
+  );
+  const functionEnd = entrypointScript.indexOf(
+    "\n}\n\n# JSON 编码函数",
+    functionStart
+  );
+  if (functionStart === -1 || functionEnd === -1) {
+    throw new Error("IAM AuthZ probe generator function not found");
+  }
+
+  const functionSource = entrypointScript.slice(functionStart, functionEnd + 2);
+  return execFileSync(
+    "sh",
+    [
+      "-c",
+      `${functionSource}\ngenerate_iam_authz_subject_binding_probe_location >/dev/null\nprintf '%s' "$IAM_AUTHZ_SUBJECT_BINDING_PROBE_LOCATION"`,
+    ],
+    {
+      encoding: "utf-8",
+      env: {
+        PATH: process.env.PATH ?? "/usr/bin:/bin",
+        ...env,
+      },
+    }
+  );
 }
 
 // ===========================================================================
@@ -270,6 +300,60 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
     expect(entrypointScript).toContain('"/api/"');
   });
 
+  it("pins the Develop subject-binding probe to the reviewed xrteeth primary", () => {
+    const probe = renderIamAuthzProbeLocation({
+      APP_IAM_AUTHZ_SUBJECT_BINDING_PROBE_ENABLED: "true",
+      APP_API_1_URL: "https://api.d.xrteeth.com",
+    });
+
+    expect(entrypointScript).toContain(
+      "generate_iam_authz_subject_binding_probe_location"
+    );
+    expect(entrypointScript).toContain(
+      'API_LOCATIONS="${IAM_AUTHZ_SUBJECT_BINDING_PROBE_LOCATION}${CHAIN_RESULT}"'
+    );
+    expect(entrypointScript).toContain(
+      "${APP_IAM_AUTHZ_SUBJECT_BINDING_PROBE_ENABLED:-false}"
+    );
+    expect(entrypointScript).toContain(
+      'APP_IAM_AUTHZ_SUBJECT_BINDING_PROBE_ENABLED:-false}" != "true"'
+    );
+    expect(entrypointScript).toContain(
+      'normalized_probe_url" != "https://api.d.xrteeth.com"'
+    );
+    expect(entrypointScript).toContain('probe_host" != "api.d.xrteeth.com"');
+    expect(probe).toContain('if ($host != "d.dev.xrugc.com")');
+    expect(probe).toContain('if ($request_method != "GET")');
+    expect(probe).toContain(
+      'if ($request_uri != "/api/iam-authz-subject-binding-probe?iamAuthzProbe=wp3-subject-binding-v1")'
+    );
+    expect(probe).toContain(
+      "/v1/organization/list?iamAuthzProbe=wp3-subject-binding-v1"
+    );
+    expect(probe).toContain("proxy_pass $iam_authz_probe_backend");
+    expect(probe).toContain("proxy_ssl_name api.d.xrteeth.com");
+    expect(probe).toContain("proxy_set_header Host api.d.xrteeth.com");
+    expect(probe).toContain(
+      "proxy_set_header Authorization $http_authorization"
+    );
+  });
+
+  it("keeps the subject-binding probe outside API load balancing and failover", () => {
+    const probe = renderIamAuthzProbeLocation({
+      APP_IAM_AUTHZ_SUBJECT_BINDING_PROBE_ENABLED: "true",
+      APP_API_1_URL: "https://api.d.xrteeth.com",
+    });
+
+    expect(probe).not.toContain("split_clients");
+    expect(probe).not.toContain("api_backend_url");
+    expect(probe).not.toContain("api_fb_url");
+    expect(probe).not.toContain("error_page");
+    expect(probe).not.toContain("rewrite");
+    expect(probe).toContain("proxy_cache off");
+    expect(probe).toContain("proxy_next_upstream off");
+    expect(probe).toContain("proxy_intercept_errors off");
+  });
+
   it("generates /api-auth/ failover chain", () => {
     expect(entrypointScript).toContain('"/api-auth/"');
   });
@@ -416,6 +500,67 @@ describe("docker-entrypoint.sh — entrypoint script structure", () => {
 
   it("ends with exec nginx", () => {
     expect(entrypointScript).toContain("exec nginx -g");
+  });
+});
+
+describe("docker-entrypoint.sh — deterministic IAM AuthZ probe generation", () => {
+  it("is default-off even when APP_API_1 points at Develop xrteeth", () => {
+    const generated = renderIamAuthzProbeLocation({
+      APP_API_1_URL: "https://api.d.xrteeth.com",
+    });
+
+    expect(generated).toContain(
+      "location = /api/iam-authz-subject-binding-probe"
+    );
+    expect(generated).toContain("return 404");
+    expect(generated).not.toContain("proxy_pass");
+  });
+
+  it("stays disabled for a non-reviewed upstream or Host override", () => {
+    for (const env of [
+      {
+        APP_IAM_AUTHZ_SUBJECT_BINDING_PROBE_ENABLED: "true",
+        APP_API_1_URL: "https://api.d.tmrpp.com",
+      },
+      {
+        APP_IAM_AUTHZ_SUBJECT_BINDING_PROBE_ENABLED: "true",
+        APP_API_1_URL: "https://api.d.xrteeth.com",
+        APP_API_1_HOST: "api.d.tmrpp.com",
+      },
+    ]) {
+      const generated = renderIamAuthzProbeLocation(env);
+      expect(generated).toContain(
+        "location = /api/iam-authz-subject-binding-probe"
+      );
+      expect(generated).toContain("return 404");
+      expect(generated).not.toContain("proxy_pass");
+    }
+  });
+
+  it("generates one canonical xrteeth-only location without secondary routing", () => {
+    const generated = renderIamAuthzProbeLocation({
+      APP_IAM_AUTHZ_SUBJECT_BINDING_PROBE_ENABLED: "true",
+      APP_API_1_URL: "https://api.d.xrteeth.com/",
+      APP_API_2_URL: "https://api.d.tmrpp.com",
+    });
+
+    expect(generated).toContain(
+      "location = /api/iam-authz-subject-binding-probe"
+    );
+    expect(generated).toContain(
+      'if ($request_uri != "/api/iam-authz-subject-binding-probe?iamAuthzProbe=wp3-subject-binding-v1")'
+    );
+    expect(generated).toContain(
+      'set $iam_authz_probe_backend "https://api.d.xrteeth.com/v1/organization/list?iamAuthzProbe=wp3-subject-binding-v1"'
+    );
+    expect(generated).toContain("proxy_ssl_name api.d.xrteeth.com");
+    expect(generated).toContain("proxy_set_header Host api.d.xrteeth.com");
+    expect(generated).toContain(
+      "location ^~ /api/iam-authz-subject-binding-probe"
+    );
+    expect(generated).not.toContain("tmrpp");
+    expect(generated).not.toContain("split_clients");
+    expect(generated).not.toContain("error_page");
   });
 });
 

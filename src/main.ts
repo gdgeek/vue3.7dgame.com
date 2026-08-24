@@ -179,10 +179,12 @@ import "@/styles/index.scss";
 import "uno.css";
 import "@/styles/animate.css";
 import { useRouter } from "@/router";
+import { initializeIamAuthzSubjectBindingProbeBootstrap } from "@/composables/useIamAuthzSubjectBindingProbe";
 import { translateRouteTitle } from "./utils/i18n";
 import { useAppStore, store } from "./store";
 import { useDomainStore } from "./store/modules/domain";
 import { getSiteTitle } from "@/composables/useSiteTitle";
+initializeIamAuthzSubjectBindingProbeBootstrap();
 const router = useRouter();
 const domainStore = useDomainStore(store);
 

@@ -146,6 +146,30 @@ describe("request interceptor logic", () => {
     expect(config.headers.Authorization).toBe("Bearer my-access-token");
   });
 
+  it("keeps the absolute Develop probe URL and attaches Authorization", async () => {
+    mockAuthClient.getTokenInfo.mockReturnValue({
+      accessToken: "probe-access-token",
+      refreshToken: "probe-refresh-token",
+      expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    });
+    mockAuthClient.getAccessToken.mockReturnValue("probe-access-token");
+    await import("@/utils/request");
+
+    const reqInterceptor =
+      mockService.interceptors.request.use.mock.calls[0]?.[0];
+    const config = {
+      url: "https://api.d.xrteeth.com/v1/organization/list",
+      headers: {},
+      baseURL: "",
+    };
+    const result = await reqInterceptor(config);
+
+    expect(result).toBe(config);
+    expect(config.url).toBe("https://api.d.xrteeth.com/v1/organization/list");
+    expect(config.baseURL).toBe("");
+    expect(config.headers.Authorization).toBe("Bearer probe-access-token");
+  });
+
   // TODO: Move to failover.spec.ts — baseURL is set by createFailoverAxios interceptor (now in failover.ts)
   it.skip("sets baseURL from currentApi when config.baseURL does not start with http", async () => {
     mockAuthClient.getTokenInfo.mockReturnValue(null);

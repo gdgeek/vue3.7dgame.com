@@ -114,16 +114,30 @@
       <div class="api-info">
         <span>API: {{ env.api }}</span>
       </div>
+      <span
+        v-if="iamAuthzProbeStatus !== 'idle'"
+        id="iam-authz-subject-binding-probe"
+        hidden
+        >{{ iamAuthzProbeStatus }}</span
+      >
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import { useSiteTitle } from "@/composables/useSiteTitle";
+import {
+  consumeIamAuthzSubjectBindingProbeLocation,
+  createIamAuthzSubjectBindingProbe,
+  initializeIamAuthzSubjectBindingProbeBootstrap,
+  shouldRunIamAuthzSubjectBindingProbe,
+  takeIamAuthzSubjectBindingProbeBootstrap,
+  type IamAuthzSubjectBindingProbeStatus,
+} from "@/composables/useIamAuthzSubjectBindingProbe";
 import environment from "@/environment";
 import LocalPage from "@/components/Home/LocalPage.vue";
 import HomeHeader from "@/components/Home/HomeHeader.vue";
@@ -133,7 +147,61 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 const siteTitle = useSiteTitle();
 const env = computed(() => environment);
 const { t } = useI18n();
+const route = useRoute();
 const router = useRouter();
+const iamAuthzProbeStatus = ref<IamAuthzSubjectBindingProbeStatus>("idle");
+const runIamAuthzProbe = createIamAuthzSubjectBindingProbe();
+
+// main.ts initializes this before the router. Keep this idempotent fallback so
+// isolated Home mounts and tests retain the same fail-closed behavior.
+initializeIamAuthzSubjectBindingProbeBootstrap();
+
+const dispatchIamAuthzProbe = async () => {
+  const url = new URL(window.location.href);
+  const liveValues = url.searchParams.getAll("iamAuthzProbe");
+  const captured = takeIamAuthzSubjectBindingProbeBootstrap();
+  const liveContext = {
+    hostname: url.hostname,
+    queryValue: liveValues.length === 1 ? liveValues[0] : undefined,
+  };
+  const hasLiveTrigger = shouldRunIamAuthzSubjectBindingProbe(liveContext);
+  const canUseBootstrapCapture =
+    liveValues.length === 0 &&
+    captured !== undefined &&
+    captured.hostname.toLowerCase() === url.hostname.toLowerCase() &&
+    captured.pathname === url.pathname;
+  const context = hasLiveTrigger ? liveContext : captured;
+
+  // A duplicate/invalid live trigger never falls back to the captured value.
+  if ((!hasLiveTrigger && !canUseBootstrapCapture) || context === undefined) {
+    return;
+  }
+
+  if (hasLiveTrigger) {
+    const consumed = await consumeIamAuthzSubjectBindingProbeLocation(
+      window.location,
+      (location) => router.replace(location)
+    );
+    if (!consumed) {
+      return;
+    }
+  }
+
+  void runIamAuthzProbe(context, (status) => {
+    iamAuthzProbeStatus.value = status;
+  });
+};
+
+// Handle both a full page load and an already-mounted Home view receiving the
+// canonical query through SPA navigation/browser automation. The composable's
+// one-shot latch still prevents replay after the query is consumed.
+watch(
+  () => route?.query.iamAuthzProbe,
+  () => {
+    void dispatchIamAuthzProbe();
+  },
+  { immediate: true }
+);
 
 const handleFlowAction = (path: string) => {
   router.push(path);
