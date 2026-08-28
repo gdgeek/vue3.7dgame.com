@@ -6,7 +6,9 @@ import {
   DOMAIN_MANIFEST_MAX_BYTES,
   DOMAIN_MANIFEST_MAX_DOMAINS,
   readDomainManifest,
+  resolveWhiteLabelConfig,
   serializeDomainManifest,
+  serializeWhiteLabelNginxMap,
   type DomainConfigSourceFile,
 } from "../../../build/vite-plugin-domain-manifest";
 
@@ -360,5 +362,82 @@ describe("checked-in domain catalog contract", () => {
       expect(entry.description).toBe(entry.config.description);
       expect(entry.isActive).toBe(entry.config.is_active);
     }
+  });
+
+  it("resolves the full host before progressively broader parent domains", () => {
+    const manifest = createDomainManifest([
+      { fileName: "default.json", source: configSource("default") },
+      { fileName: "xrugc.com.json", source: configSource("xrugc.com") },
+      {
+        fileName: "dev.xrugc.com.json",
+        source: configSource("dev.xrugc.com"),
+      },
+      {
+        fileName: "d.dev.xrugc.com.json",
+        source: configSource("d.dev.xrugc.com"),
+      },
+      {
+        fileName: "bujiaban.com.json",
+        source: configSource("bujiaban.com"),
+      },
+      {
+        fileName: "ar-creator.cn.json",
+        source: configSource("ar-creator.cn"),
+      },
+    ]);
+
+    expect(resolveWhiteLabelConfig(manifest, "d.dev.xrugc.com")?.name).toBe(
+      "d.dev.xrugc.com"
+    );
+    expect(
+      resolveWhiteLabelConfig(manifest, "foo.dev.xrugc.com:3000")?.name
+    ).toBe("dev.xrugc.com");
+    expect(resolveWhiteLabelConfig(manifest, "www.bujiaban.com")?.name).toBe(
+      "bujiaban.com"
+    );
+    expect(resolveWhiteLabelConfig(manifest, "D.AR-CREATOR.CN.")?.name).toBe(
+      "ar-creator.cn"
+    );
+    expect(resolveWhiteLabelConfig(manifest, "unknown.example")?.name).toBe(
+      "default"
+    );
+  });
+
+  it("falls back from a missing full host to the nearest checked-in parent", () => {
+    const withoutExactHost = createDomainManifest([
+      { fileName: "default.json", source: configSource("default") },
+      { fileName: "xrugc.com.json", source: configSource("xrugc.com") },
+      {
+        fileName: "dev.xrugc.com.json",
+        source: configSource("dev.xrugc.com"),
+      },
+    ]);
+    expect(
+      resolveWhiteLabelConfig(withoutExactHost, "d.dev.xrugc.com")?.name
+    ).toBe("dev.xrugc.com");
+
+    const withoutTwoSpecificHosts = createDomainManifest([
+      { fileName: "default.json", source: configSource("default") },
+      { fileName: "xrugc.com.json", source: configSource("xrugc.com") },
+    ]);
+    expect(
+      resolveWhiteLabelConfig(withoutTwoSpecificHosts, "d.dev.xrugc.com")?.name
+    ).toBe("xrugc.com");
+  });
+
+  it("generates an Nginx longest-hostname map from every domain JSON", () => {
+    const manifest = readDomainManifest(repositoryRoot);
+    const nginxMap = serializeWhiteLabelNginxMap(manifest);
+
+    expect(nginxMap).toContain("map $host $white_label_config_uri {");
+    expect(nginxMap).toContain("    hostnames;");
+    expect(nginxMap).toContain("    default /config/domains/default.json;");
+    expect(nginxMap).toContain(
+      "    .dev.xrugc.com /config/domains/dev.xrugc.com.json;"
+    );
+    expect(nginxMap).toContain(
+      "    .xrugc.com /config/domains/xrugc.com.json;"
+    );
+    expect(nginxMap).not.toContain(".default ");
   });
 });

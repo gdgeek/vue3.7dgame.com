@@ -2,6 +2,11 @@
 
 # __LB_HTTP_BLOCK__
 
+# Generated from public/config/domains/*.json at build time. Nginx `hostnames`
+# maps select the longest matching domain suffix, so any subdomain resolves to
+# the nearest checked-in white-label config and unknown hosts use default.json.
+include /usr/share/nginx/html/config/domains/white-label-nginx-map.conf;
+
 proxy_cache_path /var/cache/nginx/webgl-preview
     levels=1:2
     keys_zone=webgl_preview_cache:256m
@@ -138,6 +143,22 @@ server {
         add_header Pragma "no-cache" always;
         add_header Expires "0" always;
         try_files $uri =404;
+    }
+
+    # Stable Unity/frontend white-label entrypoint. The same frontend image is
+    # served by many hosts, so select the JSON by Host and walk toward the
+    # parent domain before falling back to default.json.
+    location ~ ^/white-label/?$ {
+        default_type application/json;
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+        add_header Expires "0" always;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files
+            $white_label_config_uri
+            /config/domains/default.json
+            =404;
     }
 
     # JS/CSS 文件带 hash，长期缓存
