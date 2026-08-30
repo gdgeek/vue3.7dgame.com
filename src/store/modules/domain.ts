@@ -88,7 +88,6 @@ export const useDomainStore = defineStore("domain", {
     keywords: (state) => state.langInfo?.keywords || "",
     author: (state) => state.langInfo?.author || "",
     homepage: (state) => state.defaultInfo?.homepage || "",
-    domain: (state) => state.langInfo?.domain || "",
     links: (state) => state.langInfo?.links || [],
     defaultLang: (state) => state.defaultInfo?.lang || "",
     /** 域名指定了支持的语言时，锁定语言，隐藏切换 */

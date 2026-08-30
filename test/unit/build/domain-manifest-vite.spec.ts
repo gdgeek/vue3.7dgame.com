@@ -6,6 +6,8 @@ import {
   domainManifestJson,
   readDomainManifest,
   serializeDomainManifest,
+  serializeWhiteLabelNginxMap,
+  WHITE_LABEL_NGINX_MAP_FILE_NAME,
 } from "../../../build/vite-plugin-domain-manifest";
 
 const repositoryRoot = process.cwd();
@@ -36,13 +38,18 @@ describe("domain manifest Vite contract", () => {
       readDomainManifest(repositoryRoot)
     );
 
-    expect(emitFile).toHaveBeenCalledOnce();
+    expect(emitFile).toHaveBeenCalledTimes(2);
     expect(emitFile).toHaveBeenCalledWith({
       type: "asset",
       fileName: DOMAIN_MANIFEST_FILE_NAME,
       source: expectedSource,
     });
     expect(expectedSource).not.toContain("generatedAt");
+    expect(emitFile).toHaveBeenCalledWith({
+      type: "asset",
+      fileName: WHITE_LABEL_NGINX_MAP_FILE_NAME,
+      source: serializeWhiteLabelNginxMap(readDomainManifest(repositoryRoot)),
+    });
   });
 
   it("serves the development pathname with or without a query", () => {
@@ -90,5 +97,47 @@ describe("domain manifest Vite contract", () => {
     const otherNext = vi.fn();
     middleware({ url: "/config/domains/other.json" }, response, otherNext);
     expect(otherNext).toHaveBeenCalledOnce();
+  });
+
+  it("serves host-aware white-label JSON for both stable path variants", () => {
+    const plugin = domainManifestJson();
+    functionHook(plugin.configResolved)({ root: repositoryRoot } as never);
+
+    const use = vi.fn();
+    functionHook(plugin.configureServer)({
+      middlewares: { use },
+      config: { logger: { error: vi.fn() } },
+    } as never);
+    const middleware = use.mock.calls[0]?.[0];
+
+    const invoke = (url: string, host: string) => {
+      const headers = new Map<string, string>();
+      let body = "";
+      const response = {
+        statusCode: 0,
+        setHeader(name: string, value: string) {
+          headers.set(name, value);
+        },
+        end(value: string) {
+          body = value;
+        },
+      };
+      const next = vi.fn();
+      middleware({ url, headers: { host } }, response, next);
+      return { response, headers, body, next };
+    };
+
+    const dev = invoke("/white-label/", "d.dev.xrugc.com:3000");
+    expect(dev.next).not.toHaveBeenCalled();
+    expect(dev.response.statusCode).toBe(200);
+    expect(JSON.parse(dev.body).name).toBe("dev.xrugc.com");
+    expect(dev.headers.get("Access-Control-Allow-Origin")).toBe("*");
+    expect(dev.headers.get("X-Content-Type-Options")).toBe("nosniff");
+
+    const arCreator = invoke("/white-label?cache-bust=1", "d.ar-creator.cn");
+    expect(JSON.parse(arCreator.body).name).toBe("ar-creator.cn");
+
+    const unknown = invoke("/white-label/", "unknown.example");
+    expect(JSON.parse(unknown.body).name).toBe("default");
   });
 });

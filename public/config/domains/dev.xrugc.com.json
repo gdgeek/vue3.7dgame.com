@@ -1,15 +1,11 @@
 {
   "name": "dev.xrugc.com",
-  "description": "XR UGC Dev",
-  "is_active": true,
-  "fallback_domain": null,
+  "homepage": "https://dev.xrugc.com/",
   "default_config": {
-    "icon": "/config/domains/xingkou-logo.webp",
-    "homepage": "https://dev.xrugc.com/"
+    "icon": "/config/domains/xingkou-logo.webp"
   },
   "configs": {
     "zh-CN": {
-      "domain": "dev.xrugc.com",
       "links": [
         {
           "url": "https://dev.xrugc.com/",
@@ -18,7 +14,6 @@
       ],
       "title": "XR UGC Dev",
       "author": "XR UGC",
-      "homepage": "https://dev.xrugc.com/",
       "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
       "description": "让每个人都可以快乐的创造世界"
     }

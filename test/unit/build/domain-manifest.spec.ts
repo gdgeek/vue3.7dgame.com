@@ -6,7 +6,9 @@ import {
   DOMAIN_MANIFEST_MAX_BYTES,
   DOMAIN_MANIFEST_MAX_DOMAINS,
   readDomainManifest,
+  resolveWhiteLabelConfig,
   serializeDomainManifest,
+  serializeWhiteLabelNginxMap,
   type DomainConfigSourceFile,
 } from "../../../build/vite-plugin-domain-manifest";
 
@@ -18,9 +20,6 @@ function configSource(
 ): string {
   return JSON.stringify({
     name,
-    description: `${name} description`,
-    is_active: true,
-    fallback_domain: null,
     default_config: {},
     configs: {},
     ...overrides,
@@ -32,7 +31,6 @@ function localizedConfig(
   overrides: Record<string, unknown> = {}
 ): Record<string, unknown> {
   return {
-    domain,
     title: `${domain} title`,
     description: `${domain} localized description`,
     keywords: "AR, XR",
@@ -48,15 +46,12 @@ describe("domain manifest pure builder", () => {
       {
         fileName: "z.example.json",
         source: configSource("z.example", {
-          default_config: { homepage: "https://z.example/" },
+          homepage: "https://z.example/",
         }),
       },
       {
         fileName: "a.example.json",
-        source: configSource("a.example", {
-          description: "A domain",
-          is_active: false,
-        }),
+        source: configSource("a.example"),
       },
       {
         fileName: "manifest.json",
@@ -66,19 +61,15 @@ describe("domain manifest pure builder", () => {
     ]);
 
     expect(manifest).toEqual({
-      schemaVersion: 1,
+      schemaVersion: 2,
       domains: [
         expect.objectContaining({
           configKey: "a.example",
-          description: "A domain",
-          isActive: false,
         }),
         expect.objectContaining({
           configKey: "z.example",
-          description: "z.example description",
-          isActive: true,
           config: expect.objectContaining({
-            default_config: { homepage: "https://z.example/" },
+            homepage: "https://z.example/",
           }),
         }),
       ],
@@ -88,13 +79,7 @@ describe("domain manifest pure builder", () => {
 
   it.each([
     ["name", 1, 'field "name" must be a string'],
-    ["description", null, 'field "description" must be a string'],
-    ["is_active", "yes", 'field "is_active" must be a boolean'],
-    [
-      "fallback_domain",
-      false,
-      'field "fallback_domain" must be a string or null',
-    ],
+    ["homepage", 1, 'field "homepage" must be a string'],
     ["default_config", [], 'field "default_config" must be an object'],
     ["configs", [], 'field "configs" must be an object'],
   ])("rejects an invalid %s top-level field", (field, value, message) => {
@@ -131,16 +116,42 @@ describe("domain manifest pure builder", () => {
       ])
     ).toThrow('field "$.future_field" is not public');
 
+    for (const removedField of [
+      "description",
+      "is_active",
+      "fallback_domain",
+    ]) {
+      expect(() =>
+        createDomainManifest([
+          {
+            fileName: "example.com.json",
+            source: configSource("example.com", { [removedField]: true }),
+          },
+        ])
+      ).toThrow(`field "$.${removedField}" is not public`);
+    }
+
     expect(() =>
       createDomainManifest([
         {
           fileName: "example.com.json",
           source: configSource("example.com", {
-            default_config: { homepage: "", secret: "not-public" },
+            default_config: { secret: "not-public" },
           }),
         },
       ])
     ).toThrow('field "default_config.secret" is not public');
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            default_config: { homepage: "https://example.com/" },
+          }),
+        },
+      ])
+    ).toThrow('field "default_config.homepage" is not public');
 
     expect(() =>
       createDomainManifest([
@@ -154,6 +165,23 @@ describe("domain manifest pure builder", () => {
         },
       ])
     ).toThrow('field "configs.zh-CN.internal" is not public');
+
+    for (const removedField of ["domain", "homepage"]) {
+      expect(() =>
+        createDomainManifest([
+          {
+            fileName: "example.com.json",
+            source: configSource("example.com", {
+              configs: {
+                "zh-CN": localizedConfig("example.com", {
+                  [removedField]: "https://example.com/",
+                }),
+              },
+            }),
+          },
+        ])
+      ).toThrow(`field "configs.zh-CN.${removedField}" is not public`);
+    }
 
     expect(() =>
       createDomainManifest([
@@ -199,63 +227,26 @@ describe("domain manifest pure builder", () => {
         {
           fileName: "example.com.json",
           source: configSource("example.com", {
-            description: "api_key=should-not-be-public",
-          }),
-        },
-      ])
-    ).toThrow('field "description" contains a sensitive value');
-
-    expect(() =>
-      createDomainManifest([
-        {
-          fileName: "example.com.json",
-          source: configSource("example.com", {
-            default_config: {
-              homepage: "https://user:password@example.com/",
+            configs: {
+              "zh-CN": localizedConfig("example.com", {
+                description: "api_key=should-not-be-public",
+              }),
             },
           }),
         },
       ])
-    ).toThrow(
-      'field "default_config.homepage" must not contain URL credentials'
-    );
-  });
-
-  it("rejects missing, self-referential, and cyclic fallbacks", () => {
-    expect(() =>
-      createDomainManifest([
-        {
-          fileName: "example.com.json",
-          source: configSource("example.com", {
-            fallback_domain: "missing.example",
-          }),
-        },
-      ])
-    ).toThrow('fallback_domain "missing.example" does not reference');
+    ).toThrow('field "configs.zh-CN.description" contains a sensitive value');
 
     expect(() =>
       createDomainManifest([
         {
           fileName: "example.com.json",
           source: configSource("example.com", {
-            fallback_domain: "example.com",
+            homepage: "https://user:password@example.com/",
           }),
         },
       ])
-    ).toThrow("fallback_domain must not reference itself");
-
-    expect(() =>
-      createDomainManifest([
-        {
-          fileName: "a.example.json",
-          source: configSource("a.example", { fallback_domain: "b.example" }),
-        },
-        {
-          fileName: "b.example.json",
-          source: configSource("b.example", { fallback_domain: "a.example" }),
-        },
-      ])
-    ).toThrow("fallback_domain cycle detected");
+    ).toThrow('field "homepage" must not contain URL credentials');
   });
 
   it("rejects filename/config-name drift, duplicate keys, malformed JSON, and empty input", () => {
@@ -324,9 +315,7 @@ describe("domain manifest pure builder", () => {
       {
         fileName: "large.example.json",
         source: configSource("large.example", {
-          default_config: {
-            homepage: "x".repeat(DOMAIN_MANIFEST_MAX_BYTES),
-          },
+          homepage: "x".repeat(DOMAIN_MANIFEST_MAX_BYTES),
         }),
       },
     ]);
@@ -357,8 +346,83 @@ describe("checked-in domain catalog contract", () => {
       );
       expect(entry.config).toEqual(raw);
       expect(entry.config.name).toBe(entry.configKey);
-      expect(entry.description).toBe(entry.config.description);
-      expect(entry.isActive).toBe(entry.config.is_active);
     }
+  });
+
+  it("resolves the full host before progressively broader parent domains", () => {
+    const manifest = createDomainManifest([
+      { fileName: "default.json", source: configSource("default") },
+      { fileName: "xrugc.com.json", source: configSource("xrugc.com") },
+      {
+        fileName: "dev.xrugc.com.json",
+        source: configSource("dev.xrugc.com"),
+      },
+      {
+        fileName: "d.dev.xrugc.com.json",
+        source: configSource("d.dev.xrugc.com"),
+      },
+      {
+        fileName: "bujiaban.com.json",
+        source: configSource("bujiaban.com"),
+      },
+      {
+        fileName: "ar-creator.cn.json",
+        source: configSource("ar-creator.cn"),
+      },
+    ]);
+
+    expect(resolveWhiteLabelConfig(manifest, "d.dev.xrugc.com")?.name).toBe(
+      "d.dev.xrugc.com"
+    );
+    expect(
+      resolveWhiteLabelConfig(manifest, "foo.dev.xrugc.com:3000")?.name
+    ).toBe("dev.xrugc.com");
+    expect(resolveWhiteLabelConfig(manifest, "www.bujiaban.com")?.name).toBe(
+      "bujiaban.com"
+    );
+    expect(resolveWhiteLabelConfig(manifest, "D.AR-CREATOR.CN.")?.name).toBe(
+      "ar-creator.cn"
+    );
+    expect(resolveWhiteLabelConfig(manifest, "unknown.example")?.name).toBe(
+      "default"
+    );
+  });
+
+  it("falls back from a missing full host to the nearest checked-in parent", () => {
+    const withoutExactHost = createDomainManifest([
+      { fileName: "default.json", source: configSource("default") },
+      { fileName: "xrugc.com.json", source: configSource("xrugc.com") },
+      {
+        fileName: "dev.xrugc.com.json",
+        source: configSource("dev.xrugc.com"),
+      },
+    ]);
+    expect(
+      resolveWhiteLabelConfig(withoutExactHost, "d.dev.xrugc.com")?.name
+    ).toBe("dev.xrugc.com");
+
+    const withoutTwoSpecificHosts = createDomainManifest([
+      { fileName: "default.json", source: configSource("default") },
+      { fileName: "xrugc.com.json", source: configSource("xrugc.com") },
+    ]);
+    expect(
+      resolveWhiteLabelConfig(withoutTwoSpecificHosts, "d.dev.xrugc.com")?.name
+    ).toBe("xrugc.com");
+  });
+
+  it("generates an Nginx longest-hostname map from every domain JSON", () => {
+    const manifest = readDomainManifest(repositoryRoot);
+    const nginxMap = serializeWhiteLabelNginxMap(manifest);
+
+    expect(nginxMap).toContain("map $host $white_label_config_uri {");
+    expect(nginxMap).toContain("    hostnames;");
+    expect(nginxMap).toContain("    default /config/domains/default.json;");
+    expect(nginxMap).toContain(
+      "    .dev.xrugc.com /config/domains/dev.xrugc.com.json;"
+    );
+    expect(nginxMap).toContain(
+      "    .xrugc.com /config/domains/xrugc.com.json;"
+    );
+    expect(nginxMap).not.toContain(".default ");
   });
 });

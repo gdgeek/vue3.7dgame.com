@@ -1,18 +1,14 @@
 {
   "name": "ar-creator.cn",
-  "description": "星扣ar网络",
-  "is_active": true,
-  "fallback_domain": null,
+  "homepage": "https://ar-creator.cn/",
   "default_config": {
     "blog": "https://blog.ar-creator.cn/",
     "icon": "/config/domains/xingkou-logo.webp",
     "lang": "zh-CN",
-    "style": 1,
-    "homepage": "https://ar-creator.cn/"
+    "style": 1
   },
   "configs": {
     "zh-CN": {
-      "domain": "ar-creator.cn",
       "links": [
         {
           "url": "https://ar-creator.cn/",
@@ -25,7 +21,6 @@
       ],
       "title": "星扣AR教育平台",
       "author": "湖南星扣网络科技有限公司",
-      "homepage": "https://ar-creator.cn/",
       "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
       "description": "让AR创作像搭积木一样简单"
     }

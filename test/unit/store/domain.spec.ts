@@ -155,11 +155,6 @@ describe("useDomainStore", () => {
       expect(store.homepage).toBe("");
     });
 
-    it("domain 返回空字符串", () => {
-      const store = useDomainStore();
-      expect(store.domain).toBe("");
-    });
-
     it("links 返回空数组", () => {
       const store = useDomainStore();
       expect(store.links).toEqual([]);

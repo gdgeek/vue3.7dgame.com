@@ -219,4 +219,4 @@ curl -L 'https://www.bujiaban.com/?lang=zh-CN' | rg 'index\.|__env'
 
 如果 `Last-Modified` 仍是旧时间，或入口 JS hash 没变化，需要在生产环境拉取新镜像并重启 web 容器后再验证。
 
-涉及 `homepage`、白牌域名配置、未登录跳转、公开首页挂载跳转时，必须参考 [首页自刷新问题复盘与防回归清单](./homepage-redirect-loop-runbook.md)。尤其注意：`default_config.homepage` 指向当前站点根路径时，可能和权限守卫形成循环；代码侧必须保留同站根路径防护，不能只依赖配置修正。
+涉及 `homepage`、白牌域名配置、未登录跳转、公开首页挂载跳转时，必须参考 [首页自刷新问题复盘与防回归清单](./homepage-redirect-loop-runbook.md)。尤其注意：顶层 `homepage` 指向当前站点根路径时，可能和权限守卫形成循环；代码侧必须保留同站根路径防护，不能只依赖配置修正。

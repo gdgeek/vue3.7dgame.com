@@ -4,9 +4,7 @@ const DEFAULT_LANGUAGE = "zh-CN";
 
 export interface StaticDomainConfig {
   name: string;
-  description?: string;
-  is_active?: boolean;
-  fallback_domain?: string | null;
+  homepage?: string;
   default_config?: Record<string, unknown>;
   configs?: Record<string, Record<string, unknown>>;
 }
@@ -48,39 +46,20 @@ function isLocalDomain(domain: string): boolean {
 
 function getStaticDomainCandidates(domain: string): string[] {
   const candidates: string[] = [];
+  let candidate = domain;
 
-  const addDomainAndParents = (domainName: string) => {
-    let candidate = domainName;
+  while (candidate) {
+    candidates.push(candidate);
 
-    while (candidate) {
-      candidates.push(candidate);
+    const nextDot = candidate.indexOf(".");
+    if (nextDot < 0) break;
 
-      const nextDot = candidate.indexOf(".");
-      if (nextDot < 0) {
-        break;
-      }
-
-      const nextCandidate = candidate.slice(nextDot + 1);
-      if (!nextCandidate.includes(".")) {
-        break;
-      }
-
-      candidate = nextCandidate;
-    }
-  };
-
-  const publicDomain = domain.startsWith("www.") ? domain.slice(4) : domain;
-  if (publicDomain.startsWith("d.")) {
-    addDomainAndParents(publicDomain.slice(2));
+    const nextCandidate = candidate.slice(nextDot + 1);
+    if (!nextCandidate.includes(".")) break;
+    candidate = nextCandidate;
   }
 
-  if (domain.startsWith("www.")) {
-    addDomainAndParents(domain.slice(4));
-  }
-
-  addDomainAndParents(domain);
-
-  return [...new Set(candidates.filter(Boolean))];
+  return candidates;
 }
 
 export function normalizeStaticDomainName(domain?: string): string {
@@ -132,13 +111,7 @@ function normalizeStaticConfig(
 
   return {
     name,
-    description:
-      typeof raw.description === "string" ? raw.description : undefined,
-    is_active: typeof raw.is_active === "boolean" ? raw.is_active : undefined,
-    fallback_domain:
-      typeof raw.fallback_domain === "string" && raw.fallback_domain.trim()
-        ? raw.fallback_domain.trim().toLowerCase()
-        : null,
+    ...(typeof raw.homepage === "string" ? { homepage: raw.homepage } : {}),
     default_config: isObjectRecord(raw.default_config)
       ? raw.default_config
       : {},
@@ -199,35 +172,10 @@ async function loadStaticConfig(
   return null;
 }
 
-async function loadFallbackConfig(
-  config: StaticDomainConfig
-): Promise<StaticDomainConfig | null> {
-  if (!config.fallback_domain) {
-    return null;
-  }
-
-  const fallbackDomain = normalizeStaticDomainName(config.fallback_domain);
-
-  if (!fallbackDomain || fallbackDomain === config.name) {
-    return null;
-  }
-
-  const fallbackConfig = await loadStaticConfig(fallbackDomain);
-  if (!fallbackConfig || fallbackConfig.is_active === false) {
-    return null;
-  }
-
-  return fallbackConfig;
-}
-
 async function loadCurrentOrDefault(
   requestedDomain: string
 ): Promise<ConfigLookup | null> {
   const currentConfig = await loadStaticConfig(requestedDomain);
-
-  if (currentConfig?.is_active === false) {
-    return null;
-  }
 
   if (currentConfig) {
     return {
@@ -241,7 +189,7 @@ async function loadCurrentOrDefault(
   }
 
   const defaultConfig = await loadStaticConfig(DEFAULT_DOMAIN);
-  if (!defaultConfig || defaultConfig.is_active === false) {
+  if (!defaultConfig) {
     return null;
   }
 
@@ -262,7 +210,12 @@ function makeDefaultResult(
     requested_language: null,
     is_fallback: false,
     is_domain_fallback: lookup.isDomainFallback,
-    data: lookup.config.default_config || {},
+    data: {
+      ...(lookup.config.default_config || {}),
+      ...(typeof lookup.config.homepage === "string"
+        ? { homepage: lookup.config.homepage }
+        : {}),
+    },
   };
 }
 
@@ -294,17 +247,21 @@ export async function getStaticDomainDefault(
     return null;
   }
 
-  if (hasConfigData(currentLookup.config.default_config)) {
+  if (
+    typeof currentLookup.config.homepage === "string" ||
+    hasConfigData(currentLookup.config.default_config) ||
+    currentLookup.config.name === DEFAULT_DOMAIN
+  ) {
     return makeDefaultResult(requestedDomain, currentLookup);
   }
 
-  const fallbackConfig = await loadFallbackConfig(currentLookup.config);
-  if (!fallbackConfig || !hasConfigData(fallbackConfig.default_config)) {
+  const defaultConfig = await loadStaticConfig(DEFAULT_DOMAIN);
+  if (!defaultConfig) {
     return null;
   }
 
   return makeDefaultResult(requestedDomain, {
-    config: fallbackConfig,
+    config: defaultConfig,
     isDomainFallback: true,
   });
 }
@@ -346,16 +303,20 @@ export async function getStaticDomainLanguage(
     );
   }
 
-  const fallbackConfig = await loadFallbackConfig(currentLookup.config);
-  if (!fallbackConfig) {
+  if (currentLookup.config.name === DEFAULT_DOMAIN) {
+    return null;
+  }
+
+  const defaultConfig = await loadStaticConfig(DEFAULT_DOMAIN);
+  if (!defaultConfig) {
     return null;
   }
 
   const fallbackLookup = {
-    config: fallbackConfig,
+    config: defaultConfig,
     isDomainFallback: true,
   };
-  const fallbackRequestedConfig = fallbackConfig.configs?.[requestedLanguage];
+  const fallbackRequestedConfig = defaultConfig.configs?.[requestedLanguage];
   if (hasConfigData(fallbackRequestedConfig)) {
     return makeLanguageResult(
       requestedDomain,
@@ -369,7 +330,7 @@ export async function getStaticDomainLanguage(
   const fallbackDefaultConfig =
     requestedLanguage === DEFAULT_LANGUAGE
       ? undefined
-      : fallbackConfig.configs?.[DEFAULT_LANGUAGE];
+      : defaultConfig.configs?.[DEFAULT_LANGUAGE];
   if (hasConfigData(fallbackDefaultConfig)) {
     return makeLanguageResult(
       requestedDomain,
