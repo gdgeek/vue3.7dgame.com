@@ -18,10 +18,7 @@
       </el-tooltip> -->
 
       <!-- 语言选择 -->
-      <lang-select
-        v-if="!domainStore.isLanguageLocked"
-        class="setting-item"
-      ></lang-select>
+      <lang-select class="setting-item"></lang-select>
     </template>
     <div>
       <!-- 或者独立使用它，不从父级获取属性 -->
@@ -77,7 +74,6 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import { useAppStore, useUserStore, useSettingsStore } from "@/store";
-import { useDomainStore } from "@/store/modules/domain";
 import { getUserAvatarUrl } from "@/utils/avatar";
 
 import defaultSettings from "@/settings";
@@ -86,7 +82,6 @@ import { DeviceEnum } from "@/enums/DeviceEnum";
 const appStore = useAppStore();
 const userStore = useUserStore();
 const settingStore = useSettingsStore();
-const domainStore = useDomainStore();
 
 const router = useRouter();
 const { t } = useI18n();

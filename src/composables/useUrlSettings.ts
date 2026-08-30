@@ -5,17 +5,24 @@
  * URL 参数优先级高于 localStorage，适用于分享链接场景
  * 示例: ?lang=en-US&theme=cyber-dark
  *
- * 当域名通过 domain hub 锁定了语言或样式时，对应的 URL 参数不生效
+ * URL 参数和用户已保存的选择优先于域名提供的默认值。
  */
 import { watch } from "vue";
 import { useAppStoreHook } from "@/store/modules/app";
-import { useDomainStoreHook } from "@/store/modules/domain";
 import { loadLanguageAsync } from "@/lang";
 import { useTheme } from "@/composables/useTheme";
 import { getTheme } from "@/styles/themes";
+import { LanguageEnum } from "@/enums/LanguageEnum";
 
 const URL_PARAM_LANG = "lang";
 const URL_PARAM_THEME = "theme";
+const SUPPORTED_LANGUAGES = new Set<string>([
+  LanguageEnum.ZH_CN,
+  LanguageEnum.EN,
+  LanguageEnum.JA,
+  LanguageEnum.TH,
+  LanguageEnum.ZH_TW,
+]);
 
 // 在模块加载时立即捕获原始 URL 参数（Vue Router redirect 之前）
 const initialParams = new URLSearchParams(window.location.search);
@@ -41,24 +48,19 @@ function setUrlParams(updates: Record<string, string | null>) {
  * 初始化：从捕获的 URL 参数应用设置
  * 应在 app mount 之前调用
  *
- * 注意：此时 domain info 可能尚未加载，所以先应用 URL 参数。
- * domain fetchDefaultInfo 之后会强制覆盖被锁定的设置。
+ * 注意：此时 domain info 可能尚未加载，所以先应用并保存 URL 参数，
+ * 让后续加载的域名默认值不会覆盖用户明确传入的选择。
  */
 export async function initUrlSettings(): Promise<void> {
-  const appStore = useAppStoreHook();
-  const { setTheme, initTheme, currentThemeName } = useTheme();
+  const { setTheme, initTheme } = useTheme();
 
   // 应用 URL 中的语言（如果有效）
-  if (savedLang && savedLang !== appStore.language) {
+  if (savedLang && SUPPORTED_LANGUAGES.has(savedLang)) {
     await loadLanguageAsync(savedLang);
   }
 
   // 应用 URL 中的主题（如果有效）
-  if (
-    savedTheme &&
-    getTheme(savedTheme) &&
-    savedTheme !== currentThemeName.value
-  ) {
+  if (savedTheme && getTheme(savedTheme)) {
     setTheme(savedTheme);
   }
 
@@ -68,70 +70,34 @@ export async function initUrlSettings(): Promise<void> {
 
 /**
  * 启动 watcher，设置变更时自动同步到 URL
- * 被 domain 锁定的参数不写入 URL
  */
 export function watchUrlSettings(): void {
   const appStore = useAppStoreHook();
-  const domainStore = useDomainStoreHook();
   const { currentThemeName } = useTheme();
 
-  // 初始同步：仅写入未被锁定的参数
-  syncToUrl(appStore, domainStore, currentThemeName.value);
+  syncToUrl(appStore, currentThemeName.value);
 
   // 监听语言变化
   watch(
     () => appStore.language,
-    () => syncToUrl(appStore, domainStore, currentThemeName.value)
+    () => syncToUrl(appStore, currentThemeName.value)
   );
 
   // 监听主题变化
-  watch(currentThemeName, (theme) => syncToUrl(appStore, domainStore, theme));
-
-  // 监听 domain 锁定状态变化（domain info 异步加载完成后触发）
-  // 锁定后移除对应的 URL 参数
-  watch(
-    () => domainStore.isLanguageLocked,
-    (locked) => {
-      if (locked) {
-        setUrlParams({ [URL_PARAM_LANG]: null });
-      }
-    }
-  );
-
-  watch(
-    () => domainStore.isStyleLocked,
-    (locked) => {
-      if (locked) {
-        setUrlParams({ [URL_PARAM_THEME]: null });
-      }
-    }
-  );
+  watch(currentThemeName, (theme) => syncToUrl(appStore, theme));
 }
 
 /**
- * 同步当前设置到 URL，跳过被锁定的参数
+ * 同步当前设置到 URL
  */
 function syncToUrl(
   appStore: ReturnType<typeof useAppStoreHook>,
-  domainStore: ReturnType<typeof useDomainStoreHook>,
   theme: string
 ) {
-  const updates: Record<string, string | null> = {};
-
-  if (domainStore.isLanguageLocked) {
-    // 锁定时移除 URL 参数
-    updates[URL_PARAM_LANG] = null;
-  } else {
-    updates[URL_PARAM_LANG] = appStore.language;
-  }
-
-  if (domainStore.isStyleLocked) {
-    updates[URL_PARAM_THEME] = null;
-  } else {
-    updates[URL_PARAM_THEME] = theme;
-  }
-
-  setUrlParams(updates);
+  setUrlParams({
+    [URL_PARAM_LANG]: appStore.language,
+    [URL_PARAM_THEME]: theme,
+  });
 }
 
 /**
@@ -141,10 +107,9 @@ export function installRouterGuard(router: {
   afterEach: (guard: () => void) => void;
 }): void {
   const appStore = useAppStoreHook();
-  const domainStore = useDomainStoreHook();
   const { currentThemeName } = useTheme();
 
   router.afterEach(() => {
-    syncToUrl(appStore, domainStore, currentThemeName.value);
+    syncToUrl(appStore, currentThemeName.value);
   });
 }

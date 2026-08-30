@@ -189,6 +189,12 @@ describe("changeLanguage()", () => {
 // Initial state
 // -----------------------------------------------------------------------
 describe("initial state", () => {
+  it("does not persist the global language before a default or user choice is applied", () => {
+    const store = useAppStore();
+    expect(store.language).toBe("zh-CN");
+    expect(localStorage.getItem("language")).toBeNull();
+  });
+
   it("device starts as desktop", () => {
     const store = useAppStore();
     expect(store.device).toBe("desktop");

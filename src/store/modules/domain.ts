@@ -65,6 +65,14 @@ function getDomainForQuery(): string {
   return domain;
 }
 
+function getStoredUserPreference(key: "language" | "appTheme"): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
 interface DomainState {
   defaultInfo: DomainDefaultInfo | null;
   langInfo: DomainLanguageInfo | null;
@@ -90,16 +98,6 @@ export const useDomainStore = defineStore("domain", {
     homepage: (state) => state.defaultInfo?.homepage || "",
     links: (state) => state.langInfo?.links || [],
     defaultLang: (state) => state.defaultInfo?.lang || "",
-    /** 域名指定了支持的语言时，锁定语言，隐藏切换 */
-    isLanguageLocked: (state) => {
-      const lang = state.defaultInfo?.lang;
-      return !!lang && SUPPORTED_LANGUAGES.has(lang);
-    },
-    /** 域名指定了有效样式（style > 0）时，锁定样式，隐藏切换 */
-    isStyleLocked: (state) => {
-      const style = state.defaultInfo?.style;
-      return !!style && style > 0;
-    },
     /** WordPress 博客地址 */
     blog: (state) => state.defaultInfo?.blog || "",
     /** 域名自定义图标 */
@@ -146,19 +144,28 @@ export const useDomainStore = defineStore("domain", {
         this.error = message;
       }
 
-      // 域名指定了支持的语言 → 强制锁定
-      if (this.isLanguageLocked && this.defaultInfo?.lang) {
+      // 域名语言仅作为首次访问默认值；已保存的用户选择优先。
+      if (
+        this.defaultInfo?.lang &&
+        SUPPORTED_LANGUAGES.has(this.defaultInfo.lang) &&
+        !SUPPORTED_LANGUAGES.has(getStoredUserPreference("language") || "")
+      ) {
         const { loadLanguageAsync } = await import("@/lang");
         await loadLanguageAsync(this.defaultInfo.lang);
       }
 
-      // 域名指定了有效样式 → 强制切换到对应主题（style 从 1 开始，themes 数组从 0 开始）
-      if (this.isStyleLocked && this.defaultInfo?.style) {
+      // 域名样式仅作为首次访问默认值；已保存的用户选择优先。
+      // style 从 1 开始，themes 数组从 0 开始。
+      if (this.defaultInfo?.style && this.defaultInfo.style > 0) {
         const { useTheme } = await import("@/composables/useTheme");
         const { availableThemes, setTheme } = useTheme();
+        const storedTheme = getStoredUserPreference("appTheme");
+        const hasValidStoredTheme = availableThemes.value.some(
+          (theme) => theme.name === storedTheme
+        );
         const themeIndex = this.defaultInfo.style - 1;
         const targetTheme = availableThemes.value[themeIndex];
-        if (targetTheme) {
+        if (!hasValidStoredTheme && targetTheme) {
           setTheme(targetTheme.name);
         }
       }
