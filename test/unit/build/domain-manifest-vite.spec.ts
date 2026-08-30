@@ -6,6 +6,7 @@ import {
   domainManifestJson,
   readDomainManifest,
   serializeDomainManifest,
+  serializeWhiteLabelConfig,
   serializeWhiteLabelNginxMap,
   WHITE_LABEL_NGINX_MAP_FILE_NAME,
 } from "../../../build/vite-plugin-domain-manifest";
@@ -131,6 +132,13 @@ describe("domain manifest Vite contract", () => {
     expect(dev.next).not.toHaveBeenCalled();
     expect(dev.response.statusCode).toBe(200);
     expect(JSON.parse(dev.body).name).toBe("dev.xrugc.com");
+    expect(dev.body).toBe(
+      serializeWhiteLabelConfig(
+        readDomainManifest(repositoryRoot).domains.find(
+          ({ configKey }) => configKey === "dev.xrugc.com"
+        )!.config
+      )
+    );
     expect(dev.headers.get("Access-Control-Allow-Origin")).toBe("*");
     expect(dev.headers.get("X-Content-Type-Options")).toBe("nosniff");
 

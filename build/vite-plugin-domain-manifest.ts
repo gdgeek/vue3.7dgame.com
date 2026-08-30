@@ -15,13 +15,15 @@ export const DOMAIN_MANIFEST_MAX_BYTES = 1024 * 1024;
 
 const DOMAIN_CONFIG_KEY_PATTERN =
   /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/;
-const SUPPORTED_LOCALES = new Set([
-  "zh-CN",
+const DEFAULT_LOCALE = "zh-CN";
+const SUPPORTED_LOCALES = [
+  DEFAULT_LOCALE,
   "zh-TW",
   "en-US",
   "ja-JP",
   "th-TH",
-]);
+] as const;
+const SUPPORTED_LOCALE_SET = new Set<string>(SUPPORTED_LOCALES);
 const TOP_LEVEL_KEYS = new Set([
   "name",
   "homepage",
@@ -57,10 +59,10 @@ export type JsonValue =
 export type JsonObject = { [key: string]: JsonValue };
 
 export interface StaticDomainDefaultConfig {
-  blog?: string;
-  icon?: string;
   lang?: string;
   style?: number;
+  icon?: string;
+  blog?: string;
 }
 
 export interface StaticDomainLink {
@@ -69,11 +71,11 @@ export interface StaticDomainLink {
 }
 
 export interface StaticDomainLocalizedConfig {
-  author: string;
+  title: string;
   description: string;
   keywords: string;
+  author: string;
   links: StaticDomainLink[];
-  title: string;
 }
 
 export interface StaticDomainConfig {
@@ -157,12 +159,29 @@ function validateDefaultConfig(
       validatePublicString(fileName, `default_config.${key}`, value[key]);
     }
   }
+  if (typeof value.lang === "string" && !SUPPORTED_LOCALE_SET.has(value.lang)) {
+    validationError(
+      fileName,
+      'field "default_config.lang" uses an unsupported locale'
+    );
+  }
   if (
     "style" in value &&
     (typeof value.style !== "number" || !Number.isFinite(value.style))
   ) {
     validationError(fileName, 'field "default_config.style" must be a number');
   }
+}
+
+function canonicalizeDefaultConfig(
+  value: Record<string, unknown> & StaticDomainDefaultConfig
+): StaticDomainDefaultConfig {
+  return {
+    ...(typeof value.lang === "string" ? { lang: value.lang } : {}),
+    ...(typeof value.style === "number" ? { style: value.style } : {}),
+    ...(typeof value.icon === "string" ? { icon: value.icon } : {}),
+    ...(typeof value.blog === "string" ? { blog: value.blog } : {}),
+  };
 }
 
 function validateLocalizedConfig(
@@ -273,9 +292,9 @@ function parseStaticDomainConfig(
   if (!isObjectRecord(raw.configs)) {
     return validationError(fileName, 'field "configs" must be an object');
   }
-  const configs: Record<string, StaticDomainLocalizedConfig> = {};
+  const validatedConfigs = new Map<string, StaticDomainLocalizedConfig>();
   for (const [locale, localizedConfig] of Object.entries(raw.configs)) {
-    if (!SUPPORTED_LOCALES.has(locale)) {
+    if (!SUPPORTED_LOCALE_SET.has(locale)) {
       return validationError(
         fileName,
         `field "configs.${locale}" uses an unsupported locale`
@@ -288,13 +307,38 @@ function parseStaticDomainConfig(
       );
     }
     validateLocalizedConfig(fileName, locale, localizedConfig);
-    configs[locale] = localizedConfig;
+    validatedConfigs.set(locale, localizedConfig);
+  }
+
+  const defaultLocale = raw.default_config.lang ?? DEFAULT_LOCALE;
+  if (!validatedConfigs.has(defaultLocale)) {
+    return validationError(
+      fileName,
+      `field "configs.${defaultLocale}" must provide the default language configuration`
+    );
+  }
+
+  const configs: Record<string, StaticDomainLocalizedConfig> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    const localizedConfig = validatedConfigs.get(locale);
+    if (!localizedConfig) continue;
+
+    configs[locale] = {
+      title: localizedConfig.title,
+      description: localizedConfig.description,
+      keywords: localizedConfig.keywords,
+      author: localizedConfig.author,
+      links: localizedConfig.links.map((link) => ({
+        name: link.name,
+        url: link.url,
+      })),
+    };
   }
 
   return {
     name: raw.name,
     ...(typeof raw.homepage === "string" ? { homepage: raw.homepage } : {}),
-    default_config: raw.default_config,
+    default_config: canonicalizeDefaultConfig(raw.default_config),
     configs,
   };
 }
@@ -366,6 +410,11 @@ export function serializeDomainManifest(manifest: DomainManifest): string {
     );
   }
   return serialized;
+}
+
+/** Stable public representation used by /white-label in development. */
+export function serializeWhiteLabelConfig(config: StaticDomainConfig): string {
+  return `${JSON.stringify(config, null, 2)}\n`;
 }
 
 function normalizeRequestHostname(host: string | undefined): string {
@@ -471,7 +520,7 @@ export function domainManifestJson(): Plugin {
                 '[domain-manifest] white-label endpoint requires "default.json"'
               );
             }
-            body = `${JSON.stringify(config, null, 2)}\n`;
+            body = serializeWhiteLabelConfig(config);
           }
           response.statusCode = 200;
           response.setHeader("Content-Type", "application/json; charset=utf-8");

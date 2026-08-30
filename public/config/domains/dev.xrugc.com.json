@@ -2,20 +2,21 @@
   "name": "dev.xrugc.com",
   "homepage": "https://dev.xrugc.com/",
   "default_config": {
-    "icon": "/config/domains/xingkou-logo.webp"
+    "icon": "/config/domains/xingkou-logo.webp",
+    "blog": ""
   },
   "configs": {
     "zh-CN": {
+      "title": "XR UGC Dev",
+      "description": "让每个人都可以快乐的创造世界",
+      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
+      "author": "XR UGC",
       "links": [
         {
-          "url": "https://dev.xrugc.com/",
-          "name": "XR UGC 开发工作室"
+          "name": "XR UGC 开发工作室",
+          "url": "https://dev.xrugc.com/"
         }
-      ],
-      "title": "XR UGC Dev",
-      "author": "XR UGC",
-      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
-      "description": "让每个人都可以快乐的创造世界"
+      ]
     }
   }
 }

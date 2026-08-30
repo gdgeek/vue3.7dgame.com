@@ -2,23 +2,23 @@
   "name": "xingkou.net",
   "homepage": "https://xingkou.net/",
   "default_config": {
-    "blog": "https://blog.xingkou.net/",
-    "icon": "/config/domains/xingkou-logo.webp",
     "lang": "zh-CN",
-    "style": 1
+    "style": 1,
+    "icon": "/config/domains/xingkou-logo.webp",
+    "blog": ""
   },
   "configs": {
     "zh-CN": {
+      "title": "星扣AR教育平台",
+      "description": "让AR创作像搭积木一样简单",
+      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
+      "author": "湖南星扣网络科技有限公司",
       "links": [
         {
-          "url": "https://xingkou.net/",
-          "name": "湖南星扣网络科技有限公司"
+          "name": "湖南星扣网络科技有限公司",
+          "url": "https://xingkou.net/"
         }
-      ],
-      "title": "星扣AR教育平台",
-      "author": "湖南星扣网络科技有限公司",
-      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
-      "description": "让AR创作像搭积木一样简单"
+      ]
     }
   }
 }

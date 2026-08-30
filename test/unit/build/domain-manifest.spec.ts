@@ -8,6 +8,7 @@ import {
   readDomainManifest,
   resolveWhiteLabelConfig,
   serializeDomainManifest,
+  serializeWhiteLabelConfig,
   serializeWhiteLabelNginxMap,
   type DomainConfigSourceFile,
 } from "../../../build/vite-plugin-domain-manifest";
@@ -21,7 +22,7 @@ function configSource(
   return JSON.stringify({
     name,
     default_config: {},
-    configs: {},
+    configs: { "zh-CN": localizedConfig(name) },
     ...overrides,
   });
 }
@@ -249,6 +250,52 @@ describe("domain manifest pure builder", () => {
     ).toThrow('field "homepage" must not contain URL credentials');
   });
 
+  it("requires a localized config for the effective default language", () => {
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "empty.example.json",
+          source: configSource("empty.example", { configs: {} }),
+        },
+      ])
+    ).toThrow(
+      'field "configs.zh-CN" must provide the default language configuration'
+    );
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "mismatch.example.json",
+          source: configSource("mismatch.example", {
+            default_config: { lang: "zh-TW" },
+          }),
+        },
+      ])
+    ).toThrow(
+      'field "configs.zh-TW" must provide the default language configuration'
+    );
+
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "locale.example.json",
+          source: configSource("locale.example", {
+            default_config: { lang: "fr-FR" },
+          }),
+        },
+      ])
+    ).toThrow('field "default_config.lang" uses an unsupported locale');
+
+    expect(
+      createDomainManifest([
+        {
+          fileName: "fallback.example.json",
+          source: configSource("fallback.example"),
+        },
+      ]).domains[0]?.config.configs["zh-CN"]
+    ).toBeDefined();
+  });
+
   it("rejects filename/config-name drift, duplicate keys, malformed JSON, and empty input", () => {
     expect(() =>
       createDomainManifest([
@@ -344,8 +391,17 @@ describe("checked-in domain catalog contract", () => {
       const raw = JSON.parse(
         readFileSync(resolve(directory, `${entry.configKey}.json`), "utf8")
       );
+      const source = readFileSync(
+        resolve(directory, `${entry.configKey}.json`),
+        "utf8"
+      );
       expect(entry.config).toEqual(raw);
       expect(entry.config.name).toBe(entry.configKey);
+      expect(entry.config.default_config.blog).toBe("");
+      expect(
+        entry.config.configs[entry.config.default_config.lang ?? "zh-CN"]
+      ).toBeDefined();
+      expect(source).toBe(serializeWhiteLabelConfig(entry.config));
     }
   });
 

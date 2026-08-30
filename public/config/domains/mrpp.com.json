@@ -2,20 +2,21 @@
   "name": "mrpp.com",
   "homepage": "https://mrpp.com/",
   "default_config": {
-    "icon": "/config/domains/mrpp-logo.webp"
+    "icon": "/config/domains/mrpp-logo.webp",
+    "blog": ""
   },
   "configs": {
     "zh-CN": {
+      "title": "Rokid AR 创作平台",
+      "description": "零代码/低代码MR内容创作平台",
+      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
+      "author": "Rokid AR Creation Platform",
       "links": [
         {
-          "url": "https://mrpp.com/",
-          "name": "灵伴科技"
+          "name": "灵伴科技",
+          "url": "https://mrpp.com/"
         }
-      ],
-      "title": "Rokid AR 创作平台",
-      "author": "Rokid AR Creation Platform",
-      "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",
-      "description": "零代码/低代码MR内容创作平台"
+      ]
     }
   }
 }

@@ -135,7 +135,7 @@ healthcheck:
 | `/api/*` | `APP_API_1_URL` → `APP_API_2_URL` → ... | 链式 failover，由 entrypoint 动态生成 |
 | `/api-doc/*` | `${APP_DOC_API_URL}`（可选） | WordPress 文档 API |
 
-前端代码在生产环境中直接请求 `/api`、`/api-doc`，由 nginx 转发到实际后端。白牌域名信息直接读取 `/config/domains/{domain}.json` 或 `/config/domains/default.json` 静态文件，不再配置或调用 `APP_DOMAIN_N_URL`。
+前端代码在生产环境中直接请求 `/api`、`/api-doc`，由 nginx 转发到实际后端。白牌域名信息直接读取 `/config/domains/{domain}.json` 或 `/config/domains/default.json` 静态文件，不再配置或调用 `APP_DOMAIN_N_URL`。跨端调用统一使用 Host 感知的 `/white-label/`，格式与字段约束见 [前端白牌 JSON 接入指南](./API_INTEGRATION_GUIDE.md)。
 
 `src/environment.ts` 中的逻辑：
 
