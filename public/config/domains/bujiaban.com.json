@@ -2,7 +2,8 @@
   "name": "bujiaban.com",
   "homepage": "https://www.bujiaban.com/",
   "default_config": {
-    "icon": "/config/domains/bujiaban-icon.png"
+    "icon": "/config/domains/bujiaban-icon.png",
+    "blog": ""
   },
   "configs": {
     "zh-CN": {
