@@ -41,10 +41,7 @@
             @change="toggleTheme"
           ></el-switch>
         </div>
-        <div
-          class="lang-select"
-          v-if="!isMobile && !domainStore.isLanguageLocked"
-        >
+        <div class="lang-select" v-if="!isMobile">
           <LangSelect></LangSelect>
         </div>
         <el-button
@@ -93,7 +90,7 @@
             @change="toggleTheme"
           ></el-switch>
         </div>
-        <div class="lang-select-mobile" v-if="!domainStore.isLanguageLocked">
+        <div class="lang-select-mobile">
           <LangSelect></LangSelect>
         </div>
         <div

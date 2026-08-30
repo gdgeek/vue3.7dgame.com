@@ -33,7 +33,6 @@
               @change="toggleTheme"
             ></el-switch>
             <lang-select
-              v-if="!domainStore.isLanguageLocked"
               class="ml-2 cursor-pointer"
               style="margin-left: 25px"
             ></lang-select>
@@ -100,7 +99,6 @@
               @change="toggleTheme"
             ></el-switch>
             <lang-select
-              v-if="!domainStore.isLanguageLocked"
               class="ml-2 cursor-pointer"
               style="margin-left: 10px"
             ></lang-select>

@@ -8,16 +8,11 @@ import { createApp, defineComponent, nextTick } from "vue";
 const mockAppStore = { device: "desktop" };
 const mockUserStore = { userInfo: null };
 const mockSettingsStore = { settingsVisible: false };
-const mockDomainStore = { isLanguageLocked: false };
 
 vi.mock("@/store", () => ({
   useAppStore: vi.fn(() => mockAppStore),
   useUserStore: vi.fn(() => mockUserStore),
   useSettingsStore: vi.fn(() => mockSettingsStore),
-}));
-
-vi.mock("@/store/modules/domain", () => ({
-  useDomainStore: vi.fn(() => mockDomainStore),
 }));
 
 vi.mock("@/settings", () => ({
@@ -53,7 +48,7 @@ vi.mock("@vueuse/core", () => ({
 // ─── Stubs ────────────────────────────────────────────────────────────────────
 const SvgIconStub = defineComponent({
   name: "SvgIcon",
-  props: ["iconClass"],
+  props: { iconClass: String },
   template: '<i class="svg-icon-stub" :data-icon="iconClass"></i>',
 });
 
@@ -64,7 +59,7 @@ const LangSelectStub = defineComponent({
 
 const ElDropdownStub = defineComponent({
   name: "ElDropdown",
-  props: ["trigger"],
+  props: { trigger: String },
   template:
     '<div class="el-dropdown-stub"><slot /><slot name="dropdown" /></div>',
 });
@@ -76,19 +71,23 @@ const ElDropdownMenuStub = defineComponent({
 
 const ElDropdownItemStub = defineComponent({
   name: "ElDropdownItem",
-  props: ["divided"],
+  props: { divided: Boolean },
   template: '<li class="el-dropdown-item-stub"><slot /></li>',
 });
 
 const ElAvatarStub = defineComponent({
   name: "ElAvatar",
-  props: ["shape", "size", "src"],
+  props: {
+    shape: String,
+    size: [String, Number],
+    src: String,
+  },
   template: '<span class="el-avatar-stub"></span>',
 });
 
 const RouterLinkStub = defineComponent({
   name: "RouterLink",
-  props: ["to"],
+  props: { to: [String, Object] },
   template: '<a class="router-link-stub"><slot /></a>',
 });
 
@@ -138,7 +137,7 @@ describe("layout/components/NavBar/components/NavbarRight.vue", () => {
     expect(el.querySelector(".el-dropdown-stub")).not.toBeNull();
   });
 
-  it("renders lang-select when isLanguageLocked is false", async () => {
+  it("always renders lang-select on desktop", async () => {
     const { el } = await mount();
     expect(el.querySelector(".lang-select-stub")).not.toBeNull();
   });

@@ -16,7 +16,6 @@ vi.mock("@/store/modules/domain", () => ({
   useDomainStore: vi.fn(() => ({
     title: "TestDomain",
     icon: null,
-    isLanguageLocked: false,
     homepage: null,
   })),
 }));

@@ -35,9 +35,21 @@ export function setupI18n(app: App<Element>) {
 /**
  * 异步加载语言包
  * @param locale 语言标识
+ * @param options.persistPreference 是否保存为用户偏好；应用启动探测时可关闭
  */
-export const loadLanguageAsync = async (locale: string) => {
+export const loadLanguageAsync = async (
+  locale: string,
+  options: { persistPreference?: boolean } = {}
+) => {
   const appStore = useAppStoreHook();
+  const persistPreference = options.persistPreference !== false;
+
+  const persistResolvedLanguage = (resolvedLocale: string) => {
+    if (persistPreference && typeof window !== "undefined") {
+      window.localStorage.setItem("language", resolvedLocale);
+    }
+  };
+
   // 检查语言是否已经加载（不仅在 availableLocales 中，还要有实际的消息内容）
   const messages = i18n.global.getLocaleMessage(locale);
   const hasMessages = messages && Object.keys(messages).length > 0;
@@ -56,6 +68,7 @@ export const loadLanguageAsync = async (locale: string) => {
       // Refresh domain info with new language
       await refreshDomainInfo();
     }
+    persistResolvedLanguage(locale);
     return Promise.resolve();
   }
 
@@ -85,6 +98,7 @@ export const loadLanguageAsync = async (locale: string) => {
       await appStore.changeLanguage(correctLocale);
       // Refresh domain info with new language
       await refreshDomainInfo();
+      persistResolvedLanguage(correctLocale);
       return Promise.resolve();
     });
   } else {
@@ -98,6 +112,7 @@ export const loadLanguageAsync = async (locale: string) => {
       // Refresh domain info with new language
       await refreshDomainInfo();
     }
+    persistResolvedLanguage("zh-CN");
     return Promise.resolve();
   }
 };
