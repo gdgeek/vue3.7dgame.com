@@ -1,18 +1,8 @@
 {
   "name": "default",
-  "description": "Default XRUGC domain config",
-  "is_active": true,
-  "fallback_domain": null,
-  "default_config": {
-    "homepage": "",
-    "lang": "",
-    "style": 0,
-    "blog": "",
-    "icon": ""
-  },
+  "default_config": {},
   "configs": {
     "zh-CN": {
-      "domain": "default",
       "title": "XR UGC平台（XRUGC.com）",
       "description": "让每个人都可以快乐的创造世界。",
       "keywords": "AR, User-Generated Content, Education, Teaching, No Overtime",

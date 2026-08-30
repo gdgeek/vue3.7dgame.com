@@ -160,6 +160,27 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(block).not.toContain("public, immutable");
   });
 
+  it("serves stable host-aware white-label paths from the generated domain map", () => {
+    const block = extractLocationBlock(nginxConfig, "~ ^/white-label/?$");
+
+    expect(nginxConfig).toContain(
+      "include /usr/share/nginx/html/config/domains/white-label-nginx-map.conf;"
+    );
+    expect(block).toContain("default_type application/json");
+    expect(block).toContain("$white_label_config_uri");
+    expect(block).toContain("/config/domains/default.json");
+    expect(block).toContain(
+      'add_header Cache-Control "no-cache, no-store, must-revalidate" always'
+    );
+    expect(block).toContain(
+      'add_header Access-Control-Allow-Origin "*" always'
+    );
+    expect(block).toContain(
+      'add_header X-Content-Type-Options "nosniff" always'
+    );
+    expect(block).not.toContain("proxy_pass");
+  });
+
   it("caches proxied WebGL preview assets on the web server", () => {
     const block = extractLocationBlock(nginxConfig, "^~ /webgl-preview/");
 

@@ -12,7 +12,6 @@ export interface DomainDefaultInfo {
 }
 
 export interface DomainLanguageInfo {
-  domain: string;
   title: string;
   description: string;
   keywords: string;
