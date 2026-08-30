@@ -264,19 +264,21 @@ async function bootstrapApp() {
 
   // 从 URL 参数初始化语言和主题设置，然后加载语言包
   await initUrlSettings();
-  loadLanguageAsync(appStore.language).then(() => {
-    app.mount("#app");
-    // 启动 URL 参数同步 watcher + 路由守卫
-    watchUrlSettings();
-    installRouterGuard(router);
-    // 确保路由就绪后，再更新页面标题（修复刷新时标题多语言不生效的问题）
-    router.isReady().then(() => {
-      const metaTitle = router.currentRoute.value.meta.title as string;
-      if (metaTitle) {
-        updateTitle(metaTitle);
-      }
-    });
-  });
+  loadLanguageAsync(appStore.language, { persistPreference: false }).then(
+    () => {
+      app.mount("#app");
+      // 启动 URL 参数同步 watcher + 路由守卫
+      watchUrlSettings();
+      installRouterGuard(router);
+      // 确保路由就绪后，再更新页面标题（修复刷新时标题多语言不生效的问题）
+      router.isReady().then(() => {
+        const metaTitle = router.currentRoute.value.meta.title as string;
+        if (metaTitle) {
+          updateTitle(metaTitle);
+        }
+      });
+    }
+  );
 }
 
 void bootstrapApp();

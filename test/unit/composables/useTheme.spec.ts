@@ -92,6 +92,11 @@ describe("useTheme", () => {
       const { currentThemeName } = useTheme();
       expect(currentThemeName.value).toBe(defaultTheme.name);
     });
+
+    it("does not persist the global theme before a default or user choice is applied", () => {
+      useTheme();
+      expect(localStorage.getItem("appTheme")).toBeNull();
+    });
   });
 
   // ── setTheme ──────────────────────────────────────────────────────────────
@@ -100,6 +105,14 @@ describe("useTheme", () => {
   // if (themeName === "modern-blue" && customPrimaryColor.value) { … }
   //
   describe("setTheme() — custom-color branch (lines 281-289)", () => {
+    it("persists an explicit choice even when it matches the current theme", () => {
+      const { setTheme } = useTheme();
+
+      setTheme("modern-blue");
+
+      expect(localStorage.getItem("appTheme")).toBe("modern-blue");
+    });
+
     it("setTheme('modern-blue') with existing custom color applies custom shadow via generatePrimaryShadow", () => {
       const { setTheme, setCustomPrimaryColor } = useTheme();
       // Ensure we are on modern-blue so that setCustomPrimaryColor works
@@ -132,9 +145,6 @@ describe("useTheme", () => {
 
     it("setTheme to non-modern-blue theme takes the else branch (no custom colors)", () => {
       const { setTheme } = useTheme();
-      const darkTheme = (globalThis as any).__themes__?.find(
-        (t: any) => t.isDark
-      );
 
       // Get a non-modern-blue theme
       const { themes: allThemes } = (() => {

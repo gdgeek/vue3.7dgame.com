@@ -21,6 +21,13 @@ describe("responsive editor header regression", () => {
   );
   const verseScriptSource = readSource("src/views/verse/script.vue");
   const metaScriptSource = readSource("src/views/meta/script.vue");
+  const publicLanguageSources = [
+    readSource("src/views/login/index.vue"),
+    readSource("src/views/register/index.vue"),
+    readSource("src/views/site/index.vue"),
+    readSource("src/views/web/index.vue"),
+    readSource("src/layout/components/NavBar/components/NavbarRight.vue"),
+  ];
 
   it("uses a named container and removes low-priority navbar content at compact widths", () => {
     expect(navbarSource).toContain("container-name: app-navbar");
@@ -44,6 +51,16 @@ describe("responsive editor header regression", () => {
     expect(userDropdownSource).not.toContain(
       "@container app-navbar (width <= 1200px)"
     );
+  });
+
+  it("always exposes theme and language choices instead of domain-locking them", () => {
+    expect(headerActionsSource).toContain('class="theme-dropdown"');
+    expect(headerActionsSource).toContain('class="language-dropdown"');
+    expect(headerActionsSource).not.toContain("isStyleLocked");
+    expect(headerActionsSource).not.toContain("isLanguageLocked");
+    for (const source of publicLanguageSources) {
+      expect(source).not.toContain("isLanguageLocked");
+    }
   });
 
   it("continues to compact version controls by available navbar width", () => {
