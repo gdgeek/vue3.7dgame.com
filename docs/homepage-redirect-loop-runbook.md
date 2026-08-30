@@ -24,7 +24,7 @@
 - `src/router/index.ts`: 根路由 `/` 的默认重定向。
 - `src/plugins/permission.ts`: 未登录用户跳到 `/web/index?redirect=...`。
 - `src/views/web/index.vue`: 公开首页挂载时跳转 `domainStore.homepage`。
-- `public/config/domains/*.json`: 白牌域名的 `default_config.homepage`。
+- `public/config/domains/*.json`: 白牌域名的顶层 `homepage`。
 
 ## 根因
 
@@ -51,7 +51,7 @@
 
 ## 以后改首页/白牌配置时必须检查
 
-修改 `public/config/domains/*.json` 的 `default_config.homepage` 前，先确认：
+修改 `public/config/domains/*.json` 的顶层 `homepage` 前，先确认：
 
 - `homepage` 是否真的要跳到外部官网或独立白牌首页。
 - `homepage` 是否等于当前站点 origin 的根路径，例如 `https://www.bujiaban.com/`。
@@ -150,7 +150,7 @@ curl -L 'https://www.bujiaban.com/?lang=zh-CN' | rg 'index\.|__env'
 - `src/utils/homepageRedirect.ts`
 - `src/views/web/index.vue` 中的 homepage 跳转逻辑
 - `src/plugins/permission.ts` 中的未登录跳转逻辑
-- `public/config/domains/*.json` 中的 `default_config.homepage`
+- `public/config/domains/*.json` 中的顶层 `homepage`
 
 最低测试要求：
 

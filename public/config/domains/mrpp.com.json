@@ -1,15 +1,11 @@
 {
   "name": "mrpp.com",
-  "description": "Rokid AR 创作平台",
-  "is_active": true,
-  "fallback_domain": null,
+  "homepage": "https://mrpp.com/",
   "default_config": {
-    "icon": "/config/domains/mrpp-logo.webp",
-    "homepage": "https://mrpp.com/"
+    "icon": "/config/domains/mrpp-logo.webp"
   },
   "configs": {
     "zh-CN": {
-      "domain": "mrpp.com",
       "links": [
         {
           "url": "https://mrpp.com/",
