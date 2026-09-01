@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
+import { subscribeSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 
 vi.mock("@/utils/logger", () => ({ logger: { error: vi.fn() } }));
 vi.mock("@/api/v1/auth", () => ({
@@ -147,6 +148,44 @@ describe("useUserStore", () => {
   // -----------------------------------------------------------------------
   // login()
   // -----------------------------------------------------------------------
+  it("signals synchronously before user auth dispatch and Pinia mutation", async () => {
+    const activity = vi.fn();
+    const unsubscribe = subscribeSensitiveRuntimeActivity(activity);
+    const store = useUserStore();
+    const returnedUser = {
+      id: 8,
+      roles: ["user"],
+      userData: {},
+      userInfo: {},
+    };
+    mockAuthClient.login.mockImplementation(async () => {
+      expect(activity).toHaveBeenCalled();
+      return { success: true, token: { accessToken: "test-only" } };
+    });
+
+    try {
+      await store.login({ username: "u", password: "p" });
+      activity.mockClear();
+      mockAuthClient.getCurrentUser.mockImplementation(async () => {
+        expect(activity).toHaveBeenCalled();
+        return { success: true, data: returnedUser };
+      });
+      await store.getUserInfo();
+      expect(activity).toHaveBeenCalledTimes(2);
+      expect(store.userInfo?.id).toBe(8);
+
+      activity.mockClear();
+      mockAuthClient.logout.mockImplementation(async () => {
+        expect(activity).toHaveBeenCalled();
+      });
+      await store.logout();
+      expect(activity).toHaveBeenCalledTimes(2);
+      expect(store.userInfo?.id).toBe(0);
+    } finally {
+      unsubscribe();
+    }
+  });
+
   it("login() calls authClient.login on success", async () => {
     mockAuthClient.login.mockResolvedValue({
       success: true,

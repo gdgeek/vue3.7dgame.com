@@ -23,6 +23,7 @@ import { PluginLoader } from "@/plugin-system/core/PluginLoader";
 import { MessageBus } from "@/plugin-system/core/MessageBus";
 import { AuthService } from "@/plugin-system/services/AuthService";
 import { ConfigService } from "@/plugin-system/services/ConfigService";
+import { subscribeSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 
 import type {
   PluginMessage,
@@ -250,6 +251,39 @@ describe("PluginSystem", () => {
   // -------------------------------------------------------------------------
 
   describe("initialize", () => {
+    it("signals before plugin token postMessage and refresh dispatch", async () => {
+      await system.initialize();
+      await system.loadPlugin("plugin-a", createContainer());
+      const activity = vi.fn();
+      const unsubscribe = subscribeSensitiveRuntimeActivity(activity);
+
+      try {
+        getRegisteredMessageHandler(messageBus, "PLUGIN_READY")(
+          "plugin-a",
+          createPluginMessage("PLUGIN_READY")
+        );
+        expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+          (loader.sendInitMessage as ReturnType<typeof vi.fn>).mock
+            .invocationCallOrder[0]
+        );
+
+        activity.mockClear();
+        (
+          authService.refreshAccessToken as ReturnType<typeof vi.fn>
+        ).mockClear();
+        getRegisteredMessageHandler(messageBus, "TOKEN_REFRESH_REQUEST")(
+          "plugin-a",
+          createPluginMessage("TOKEN_REFRESH_REQUEST")
+        );
+        expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+          (authService.refreshAccessToken as ReturnType<typeof vi.fn>).mock
+            .invocationCallOrder[0]
+        );
+      } finally {
+        unsubscribe();
+      }
+    });
+
     it("should load config and register enabled plugins", async () => {
       await system.initialize();
 
