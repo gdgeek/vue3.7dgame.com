@@ -4,7 +4,12 @@
  */
 import type { App } from "vue";
 import { ref } from "vue";
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import {
+  createRouter,
+  createWebHistory,
+  RouteLocationNormalized,
+  RouteRecordRaw,
+} from "vue-router";
 import { Meta, RouteVO } from "@/api/menu/model";
 
 // 布局组件
@@ -18,6 +23,86 @@ import { metaRoutes } from "./modules/meta";
 import { verseRoutes } from "./modules/verse";
 import { managerRoutes, environmentGameRoutes } from "./modules/manager";
 import { pluginRoutes, developmentPluginRoutes } from "./modules/plugin";
+
+export const TASK51_MEMORY_RUNNER_ROUTE_NAME =
+  "InternalTask51MemoryIsolatedRunner";
+export const TASK51_MEMORY_RUNNER_PATH =
+  "/internal/task51/memory-isolated-runner";
+export const TASK51_MEMORY_RUNNER_ORIGIN = "https://d.xrugc.com";
+
+export const isPermanentlyHiddenRoute = (route: Pick<RouteRecordRaw, "name">) =>
+  route.name === TASK51_MEMORY_RUNNER_ROUTE_NAME;
+
+export const shouldRegisterTask51MemoryRunnerRoute = (
+  isProduction: boolean,
+  origin: string
+) => isProduction && origin === TASK51_MEMORY_RUNNER_ORIGIN;
+
+export const isWarmTask51Navigation = (
+  from: Pick<RouteLocationNormalized, "matched">
+) => from.matched.length > 0;
+
+export const getTask51PrimaryRole = (
+  roles: readonly string[] | null | undefined
+) => {
+  if (!roles) return null;
+  if (roles.includes("root")) return "root";
+  if (roles.includes("admin")) return "admin";
+  if (roles.includes("manager")) return "manager";
+  if (roles.includes("user")) return "user";
+  return null;
+};
+
+type Task51RouteGuardDependencies = {
+  origin: () => string;
+  loadFreshRoles: () => Promise<readonly string[] | null | undefined>;
+};
+
+const task51RouteGuardDependencies: Task51RouteGuardDependencies = {
+  origin: () => (typeof window === "undefined" ? "" : window.location.origin),
+  loadFreshRoles: async () => {
+    const { useUserStore } = await import("@/store");
+    const userStore = useUserStore();
+    const userInfo = await userStore.getUserInfo();
+    return userInfo?.roles;
+  },
+};
+
+export const createTask51MemoryRunnerBeforeEnter = (
+  dependencies: Task51RouteGuardDependencies = task51RouteGuardDependencies
+) => {
+  return async (
+    _to: RouteLocationNormalized,
+    from: RouteLocationNormalized
+  ) => {
+    if (dependencies.origin() !== TASK51_MEMORY_RUNNER_ORIGIN) {
+      return "/404";
+    }
+
+    if (!isWarmTask51Navigation(from)) {
+      return "/404";
+    }
+
+    try {
+      const roles = await dependencies.loadFreshRoles();
+      return getTask51PrimaryRole(roles) === "root" ? true : "/401";
+    } catch {
+      return "/401";
+    }
+  };
+};
+
+export const task51MemoryRunnerRoute: RouteRecordRaw = {
+  path: TASK51_MEMORY_RUNNER_PATH,
+  name: TASK51_MEMORY_RUNNER_ROUTE_NAME,
+  component: () => import("@/views/internal/task51/MemoryIsolatedRunner.vue"),
+  beforeEnter: createTask51MemoryRunnerBeforeEnter(),
+  meta: {
+    hidden: true,
+    private: true,
+    roles: ["root"],
+  },
+};
 
 // 静态路由
 const routes: RouteRecordRaw[] = [
@@ -63,6 +148,15 @@ const routes: RouteRecordRaw[] = [
       pluginRoutes,
       // 开发专用调试页面（Production route graph 中不存在）
       ...developmentPluginRoutes,
+
+      // Task 5.1 one-shot evidence runner. It has no menu/link and rejects
+      // cold deep-links in its route guard.
+      ...(shouldRegisterTask51MemoryRunnerRoute(
+        import.meta.env.PROD,
+        typeof window === "undefined" ? "" : window.location.origin
+      )
+        ? [task51MemoryRunnerRoute]
+        : []),
 
       // 错误页面
       {
@@ -147,7 +241,9 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {
     if (route.meta) {
-      route.meta.hidden = !can("open", new AbilityRouter(route.path));
+      route.meta.hidden = isPermanentlyHiddenRoute(route)
+        ? true
+        : !can("open", new AbilityRouter(route.path));
     }
     if (route.children) {
       check(route.children, ability);

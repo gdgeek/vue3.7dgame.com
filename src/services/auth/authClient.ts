@@ -8,6 +8,7 @@ import type {
   TokenInfo,
 } from "@/api/v1/types/auth";
 import env from "@/environment";
+import { signalSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 import Token from "@/store/modules/token";
 import { resolveAuthProvider, type AuthProvider } from "./provider";
 
@@ -112,17 +113,20 @@ export function createAuthClient(options: AuthClientOptions = {}) {
     token: TokenInfo,
     reason: TokenChangedReason = "external"
   ) {
+    signalSensitiveRuntimeActivity();
     tokenStore.setToken(token);
     notify(token, reason);
     return token;
   }
 
   function clearToken(reason: TokenChangedReason = "external") {
+    signalSensitiveRuntimeActivity();
     tokenStore.removeToken();
     notify(null, reason);
   }
 
   async function login(data: LoginRequest): Promise<LoginResponse> {
+    signalSensitiveRuntimeActivity();
     const response = await authHttp.post<LoginResponse>("/v1/auth/login", data);
     if (response.data?.token) {
       acceptToken(response.data.token, "login");
@@ -151,6 +155,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
       const codeVerifier = generatePkceVerifier();
       const codeChallenge = await generatePkceChallenge(codeVerifier);
       const state = generatePkceVerifier().slice(0, 32);
+      signalSensitiveRuntimeActivity();
       const authorization = await authHttp.get<OidcAuthorizationResponse>(
         "/authorize",
         {
@@ -172,6 +177,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
         return null;
       }
 
+      signalSensitiveRuntimeActivity();
       const token = await authHttp.post<OidcTokenResponse>("/token", {
         grant_type: "authorization_code",
         client_id: oidcBridge.clientId,
@@ -203,6 +209,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
   }
 
   async function refresh(refreshToken?: string): Promise<RefreshTokenResponse> {
+    signalSensitiveRuntimeActivity();
     if (refreshPromise) {
       return refreshPromise;
     }
@@ -244,6 +251,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
   }
 
   async function logout(): Promise<void> {
+    signalSensitiveRuntimeActivity();
     const token = tokenStore.getToken();
     let logoutError: unknown = null;
 
@@ -267,6 +275,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
   }
 
   async function getCurrentUser(): Promise<UserInfoReturnType> {
+    signalSensitiveRuntimeActivity();
     const response = await mainHttp.get<UserInfoReturnType>("/v1/user/info", {
       headers: buildAuthHeaders(tokenStore.getToken()),
     });

@@ -5,6 +5,7 @@ import type { PluginLoadOptions } from "@/plugin-system/core/PluginLoader";
 import { MessageBus } from "@/plugin-system/core/MessageBus";
 import { AuthService } from "@/plugin-system/services/AuthService";
 import { ConfigService } from "@/plugin-system/services/ConfigService";
+import { signalSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 import type {
   MessageHandler,
   Unsubscribe,
@@ -263,6 +264,7 @@ export class PluginSystem {
 
     // Listen for token changes and broadcast to all active plugins
     this.tokenUnsubscribe = this.authService.onTokenChange((token) => {
+      signalSensitiveRuntimeActivity();
       this.pendingRoleWriteHandoffs.clear();
       logger.info("Token changed, broadcasting TOKEN_UPDATE to active plugins");
       this.broadcastAfterHandshake({
@@ -559,6 +561,7 @@ export class PluginSystem {
   private async handleTokenRefreshRequest(pluginId: string): Promise<void> {
     logger.info(`Refreshing access token for plugin "${pluginId}"`);
     try {
+      signalSensitiveRuntimeActivity();
       await this.authService.refreshAccessToken();
       logger.info(`Access token refreshed for plugin "${pluginId}"`);
     } catch {
@@ -795,6 +798,7 @@ export class PluginSystem {
       return;
     }
 
+    signalSensitiveRuntimeActivity();
     const token = this.authService.getAccessToken() || "";
     logger.debug(
       `sendInit("${pluginId}") token=${token ? "(present)" : "(empty)"}`
@@ -824,6 +828,7 @@ export class PluginSystem {
     if (!this.handshakeSessions.has(pluginId)) {
       return;
     }
+    if (message.type === "TOKEN_UPDATE") signalSensitiveRuntimeActivity();
     this.messageBus.sendToPlugin(
       pluginId,
       this.bindHandshakeSession(pluginId, message)
