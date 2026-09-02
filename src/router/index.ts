@@ -61,7 +61,10 @@ type Task51RouteGuardDependencies = {
 const task51RouteGuardDependencies: Task51RouteGuardDependencies = {
   origin: () => (typeof window === "undefined" ? "" : window.location.origin),
   loadFreshRoles: async () => {
-    const { useUserStore } = await import("@/store");
+    // Import the concrete module instead of the store barrel. Dynamically
+    // materializing every barrel export makes Rollup read useAppStore before
+    // its declaration and crashes the production bundle during startup.
+    const { useUserStore } = await import("@/store/modules/user");
     const userStore = useUserStore();
     const userInfo = await userStore.getUserInfo();
     return userInfo?.roles;
