@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { TokenInfo } from "@/api/v1/types/auth";
+import { subscribeSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 import { createAuthClient } from "../authClient";
 
 function createToken(value: Partial<TokenInfo> = {}): TokenInfo {
@@ -30,6 +31,67 @@ function createTokenStore(initialToken: TokenInfo | null = null) {
 }
 
 describe("authClient", () => {
+  it("signals synchronously before auth network and token-store side effects", async () => {
+    const token = createToken({ accessToken: "fence-test-token" });
+    const refreshed = createToken({ accessToken: "fence-refreshed-token" });
+    const tokenStore = createTokenStore(token);
+    const http = {
+      get: vi.fn().mockResolvedValue({ data: { success: true } }),
+      post: vi.fn(async (url: string) => {
+        if (url === "/v1/auth/refresh") return { data: { token: refreshed } };
+        return { data: { success: true } };
+      }),
+    };
+    const client = createAuthClient({ http, tokenStore, provider: "legacy" });
+    const activity = vi.fn();
+    const unsubscribe = subscribeSensitiveRuntimeActivity(activity);
+
+    try {
+      await client.login({ username: "test-user", password: "test-pass" });
+      expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+        http.post.mock.invocationCallOrder[0]
+      );
+
+      activity.mockClear();
+      tokenStore.setToken.mockClear();
+      client.acceptToken(token);
+      expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+        tokenStore.setToken.mock.invocationCallOrder[0]
+      );
+
+      activity.mockClear();
+      tokenStore.removeToken.mockClear();
+      client.clearToken();
+      expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+        tokenStore.removeToken.mock.invocationCallOrder[0]
+      );
+
+      client.acceptToken(token);
+      activity.mockClear();
+      http.post.mockClear();
+      await client.refresh();
+      expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+        http.post.mock.invocationCallOrder[0]
+      );
+
+      activity.mockClear();
+      http.get.mockClear();
+      await client.getCurrentUser();
+      expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+        http.get.mock.invocationCallOrder[0]
+      );
+
+      activity.mockClear();
+      http.post.mockClear();
+      await client.logout();
+      expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+        http.post.mock.invocationCallOrder[0]
+      );
+    } finally {
+      unsubscribe();
+    }
+  });
+
   it("logs in through legacy API, stores the token, and notifies subscribers", async () => {
     const token = createToken({ accessToken: "login-token" });
     const tokenStore = createTokenStore();
