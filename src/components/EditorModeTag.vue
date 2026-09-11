@@ -98,4 +98,26 @@ const icon = computed(() => MODE_ICONS[props.mode]);
     font-size: 12px;
   }
 }
+
+@container app-navbar (width <= 360px) {
+  .editor-mode-tag {
+    flex-shrink: 1;
+    gap: 4px;
+    min-width: 0;
+    height: auto;
+    min-height: 28px;
+    padding: 4px 6px;
+    white-space: normal;
+  }
+
+  .editor-mode-tag__label {
+    min-width: 0;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  .editor-mode-tag__dirty {
+    flex-shrink: 0;
+  }
+}
 </style>

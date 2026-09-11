@@ -74,9 +74,9 @@ export default {
     unityPreview: {
       entry: "運行場景",
       title: "運行場景",
-      helpClick: "單擊畫面後可操作場景",
-      helpRotate: "按住 Alt + 滑鼠左鍵旋轉視角",
-      helpZoomPan: "滾輪縮放視角，右鍵平移視角",
+      helpClick: "先點擊運行畫面，使其取得焦點",
+      helpRotate: "按住 Alt（Mac：⌥ Option）並用滑鼠左鍵拖曳，旋轉視角",
+      helpZoomPan: "滾輪或觸控板雙指捲動可縮放；滑鼠右鍵拖曳可平移",
       helpFullscreen: "全螢幕可獲得更完整預覽",
       fullscreen: "全螢幕運行場景",
       close: "關閉運行場景",
