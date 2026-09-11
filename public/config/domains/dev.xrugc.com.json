@@ -3,7 +3,10 @@
   "homepage": "https://dev.xrugc.com/",
   "default_config": {
     "icon": "/config/domains/xingkou-logo.webp",
-    "blog": ""
+    "blog": "",
+    "features": {
+      "voxel": true
+    }
   },
   "configs": {
     "zh-CN": {

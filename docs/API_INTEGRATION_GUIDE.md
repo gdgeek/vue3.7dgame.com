@@ -70,7 +70,7 @@ JSON 对象的键顺序不影响解析，但仓库会校验上述标准排列，
 `"voxel": true` 开启主前端的体素素材入口及相关编辑能力；设为 `false` 或省略
 时关闭。此开关与用户原有角色权限共同生效，不会授予用户额外的角色权限。
 
-当前只有 `public/config/domains/xrugc.com.json` 启用了体素功能：
+当前只有 `public/config/domains/dev.xrugc.com.json` 启用了体素功能：
 
 ```json
 {
@@ -139,8 +139,8 @@ cyber-tech、`4` edu-friendly、`5` neo-brutalism、`6` minimal-pure。
 等元数据。
 
 功能开关使用匹配到的整份域名配置，不会逐字段继承父域名或 `default` 的
-开关。例如 `d.xrugc.com` 匹配 `xrugc.com.json`，因此开启体素；
-`d.dev.xrugc.com` 优先匹配 `dev.xrugc.com.json`，该配置未声明开关，因此关闭。
+开关。例如 `d.xrugc.com` 匹配 `xrugc.com.json`，该配置显式关闭体素；
+`d.dev.xrugc.com` 优先匹配 `dev.xrugc.com.json`，因此开启体素。
 
 主 Web 内部读取同一批配置。语言内容依次回退为：当前域名请求语言、当前域名
 `zh-CN`、`default` 请求语言、`default` 的 `zh-CN`。
@@ -171,7 +171,7 @@ console.log(whiteLabel.name, whiteLabel.configs[defaultLanguage].title);
 - 配置文件位于 `public/config/domains/{name}.json`。
 - 顶层只允许 `name`、`homepage`、`default_config`、`configs`。
 - `default_config.features` 只允许布尔值开关 `voxel`；字符串 `"true"`、数字
-  `1`、`null` 及未知功能名都会被构建校验拒绝。当前仅 `xrugc.com.json` 开启
+  `1`、`null` 及未知功能名都会被构建校验拒绝。当前仅 `dev.xrugc.com.json` 开启
   体素，其他品牌配置不得启用。
 - 公开格式中的 `blog` 字段仍为可选；当前仓库内的所有域名必须显式设置
   `"blog": ""`，统一使用部署级文档 API。

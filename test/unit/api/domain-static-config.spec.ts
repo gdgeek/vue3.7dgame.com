@@ -77,10 +77,10 @@ describe("domain-static-config", () => {
   });
 
   it.each([
-    ["xrugc.com", "xrugc.com", true],
-    ["d.xrugc.com", "xrugc.com", true],
-    ["dev.xrugc.com", "dev.xrugc.com", false],
-    ["d.dev.xrugc.com", "dev.xrugc.com", false],
+    ["xrugc.com", "xrugc.com", false],
+    ["d.xrugc.com", "xrugc.com", false],
+    ["dev.xrugc.com", "dev.xrugc.com", true],
+    ["d.dev.xrugc.com", "dev.xrugc.com", true],
     ["bujiaban.com", "bujiaban.com", false],
     ["other.example.com", "default", false],
   ])(

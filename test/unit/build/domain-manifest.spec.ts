@@ -452,19 +452,19 @@ describe("domain manifest pure builder", () => {
 });
 
 describe("checked-in domain catalog contract", () => {
-  it("enables voxel only for the xrugc.com configuration", () => {
+  it("enables voxel only for the dev.xrugc.com configuration", () => {
     const manifest = readDomainManifest(repositoryRoot);
     expect(
       manifest.domains
         .filter(({ config }) => config.default_config.features?.voxel === true)
         .map(({ configKey }) => configKey)
-    ).toEqual(["xrugc.com"]);
+    ).toEqual(["dev.xrugc.com"]);
 
     expect(
-      resolveWhiteLabelConfig(manifest, "d.xrugc.com")?.default_config.features
-        ?.voxel
+      resolveWhiteLabelConfig(manifest, "d.dev.xrugc.com")?.default_config
+        .features?.voxel
     ).toBe(true);
-    for (const host of ["d.dev.xrugc.com", "unknown.example"]) {
+    for (const host of ["d.xrugc.com", "unknown.example"]) {
       expect(
         resolveWhiteLabelConfig(manifest, host)?.default_config.features?.voxel
       ).not.toBe(true);
