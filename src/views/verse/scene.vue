@@ -44,6 +44,10 @@
 import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
 import { createIframeRpc } from "@/utils/iframeRpc";
+import {
+  useIframeInitialization,
+  type IframeInitializationTicket,
+} from "@/composables/useIframeInitialization";
 import { logger } from "@/utils/logger";
 import { hasPublishableSceneContent } from "@/utils/versePublish";
 import { saveThenPublishScene } from "@/utils/scenePublish";
@@ -130,11 +134,9 @@ const route = useRoute();
 const router = useRouter();
 const editor = ref<HTMLIFrameElement>();
 import qs from "querystringify";
-let init = false;
 const saveable = ref(false);
 let unsavedCheckPollingTimer: number | null = null;
 const editorFrameKey = ref(0);
-const editorContentReady = ref(false);
 let webMcpLifecycle: AbortController | null = null;
 const isRestoringDraft = ref(false);
 const versionDialogVisible = ref(false);
@@ -343,17 +345,14 @@ const getSceneRuntimePreviewStatus = () => {
   };
 };
 
-// 监听语言变化
-watch(
-  () => appStore.language,
-  async () => {
-    await refresh();
-  }
-);
 const verse = ref<VerseData | null>(null);
-const pushVerseToEditor = (nextVerse: VerseData) => {
+const pushVerseToEditor = (
+  nextVerse: VerseData,
+  ticket: IframeInitializationTicket | null = editorInitialization.begin()
+) => {
+  if (!ticket || !editorInitialization.isCurrent(ticket)) return;
   webMcpRpc.cancel("编辑器正在重新初始化");
-  postStandardMessage("INIT", {
+  editorInitialization.send(ticket, {
     token: null,
     config: buildVerseEditorInitConfig({
       id: id.value,
@@ -370,11 +369,17 @@ const pushVerseToEditor = (nextVerse: VerseData) => {
 
 // 刷新场景数据
 const refresh = async () => {
-  const response = await getVerse(id.value, VERSE_SCENE_EXPAND);
-  verse.value = response.data;
-  saveable.value = verse.value ? verse.value.editable : false;
-  if (verse.value) {
-    pushVerseToEditor(verse.value);
+  const ticket = editorInitialization.begin();
+  if (!ticket) return;
+  webMcpRpc.cancel("编辑器正在重新初始化");
+  try {
+    const response = await getVerse(ticket.owner, VERSE_SCENE_EXPAND);
+    if (!editorInitialization.isCurrent(ticket)) return;
+    verse.value = response.data;
+    saveable.value = verse.value ? verse.value.editable : false;
+    if (verse.value) pushVerseToEditor(verse.value, ticket);
+  } catch (error) {
+    if (editorInitialization.isCurrent(ticket)) logger.error(error);
   }
 };
 
@@ -753,9 +758,19 @@ const { postStandardMessage, sendRequest, pendingRequests, getHostSessionId } =
     onError: () => ElMessage.error(t("verse.view.sceneEditor.error1")),
   });
 
+const editorInitialization = useIframeInitialization({
+  frame: () => editor.value,
+  owner: () => id.value,
+  src: () => src.value,
+  frameKey: () => editorFrameKey.value,
+  sendInit: (payload) => postStandardMessage("INIT", payload),
+});
+const editorContentReady = editorInitialization.ready;
+
 const webMcpRpc = createIframeRpc({
   frame: () => editor.value,
   session: getHostSessionId,
+  ready: editorInitialization.isReady,
   send: sendRequest,
 });
 const requestEditor = webMcpRpc.request;
@@ -1242,15 +1257,17 @@ const handleMessage = async (e: MessageEvent) => {
 
   switch (msg.type) {
     case "PLUGIN_READY":
-      editorContentReady.value = true;
+      if (!editorInitialization.acceptReady(payload)) break;
+      webMcpRpc.cancel("编辑器文档已重新加载");
+      webMcpLifecycle?.abort();
+      registerPageWebMcpTools();
       hasUnsavedChangesBeforeUnload.value = false;
       if (isRestoringDraft.value && verse.value) {
         isRestoringDraft.value = false;
         pushVerseToEditor(verse.value);
         hasUnsavedChangesBeforeUnload.value = true;
-      } else if (!init) {
-        init = true;
-        refresh();
+      } else {
+        await refresh();
       }
       break;
 
@@ -1507,13 +1524,23 @@ const handleUploadCover = async (data: unknown) => {
   }
 };
 
+watch(
+  [id, src, editorFrameKey],
+  () => {
+    editorInitialization.reset();
+    webMcpRpc.cancel("编辑器目标已改变");
+    webMcpLifecycle?.abort();
+    registerPageWebMcpTools();
+  },
+  { flush: "sync" }
+);
+
 watch(id, (nextId, previousId) => {
   if (!Number.isFinite(nextId) || nextId === previousId) return;
   webMcpRpc.cancel();
   webMcpLifecycle?.abort();
   unityPreview.close();
   verse.value = null;
-  init = false;
   editorContentReady.value = false;
   pendingRestorePayload.value = null;
   isRestoringDraft.value = false;
@@ -2254,6 +2281,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  editorInitialization.reset();
   webMcpLifecycle?.abort();
   webMcpLifecycle = null;
   webMcpRpc.cancel();

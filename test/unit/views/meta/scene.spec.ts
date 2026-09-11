@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createApp, defineComponent, nextTick, reactive } from "vue";
+import { createApp, defineComponent, nextTick, reactive, ref } from "vue";
 
 const mockRoute = reactive({
   query: {
@@ -12,6 +12,9 @@ const mockPush = vi.fn();
 const mockPostStandardMessage = vi.fn();
 const mockSendRequest = vi.fn();
 const mockGetMeta = vi.fn();
+const mockGetVerse = vi.fn();
+const mockDirty = ref(false);
+const mockAppStore = reactive({ language: "zh-CN" });
 const mockGetVerses = vi.fn();
 const mockRegisterToolbar = vi.fn();
 const mockUpdateToolbarStatus = vi.fn();
@@ -47,8 +50,11 @@ vi.mock("@/utils/logger", () => ({
 
 vi.mock("@/api/v1/meta", () => ({
   getMeta: mockGetMeta,
+  getMetas: vi.fn(),
   putMeta: vi.fn(),
 }));
+
+vi.mock("@/api/v1/prefab", () => ({ getPrefab: vi.fn() }));
 
 vi.mock("@/api/v1/files", () => ({
   postFile: vi.fn(),
@@ -56,6 +62,9 @@ vi.mock("@/api/v1/files", () => ({
 
 vi.mock("@/api/v1/verse", () => ({
   getVerses: mockGetVerses,
+  getVerse: mockGetVerse,
+  putVerse: vi.fn(),
+  takePhoto: vi.fn(),
 }));
 
 vi.mock("@/api/v1/resources", () => ({
@@ -79,9 +88,7 @@ vi.mock("@/components/Dialog", () => ({
 }));
 
 vi.mock("@/store/modules/app", () => ({
-  useAppStore: () => ({
-    language: "zh-CN",
-  }),
+  useAppStore: () => mockAppStore,
 }));
 
 vi.mock("@/store/modules/user", () => ({
@@ -162,7 +169,7 @@ vi.mock("@/composables/useIframeMessaging", () => ({
 
 vi.mock("@/composables/useSceneSaveGuard", () => ({
   useSceneSaveGuard: () => ({
-    hasUnsavedChangesBeforeUnload: { value: false },
+    hasUnsavedChangesBeforeUnload: mockDirty,
     syncUnsavedChangesForBeforeUnload: vi.fn(),
     resolveLeaveSave: vi.fn(),
     requestSceneSave: vi.fn(),
@@ -193,6 +200,73 @@ vi.mock("@/components/ScriptDraftDialog.vue", () => ({
   }),
 }));
 
+vi.mock("@/components/MrPP/MetaDialog.vue", () => ({
+  default: defineComponent({ template: "<div />" }),
+}));
+vi.mock("@/components/MrPP/KnightDataDialog.vue", () => ({
+  default: defineComponent({ template: "<div />" }),
+}));
+vi.mock("@/components/UnityPreviewDialog.vue", () => ({
+  default: defineComponent({ template: "<div />" }),
+}));
+vi.mock("@/composables/useUnityPreviewBridge", () => ({
+  useUnityPreviewBridge: () => ({
+    dialogRef: ref(null),
+    visible: ref(false),
+    frameVisible: ref(false),
+    frameKey: ref(0),
+    src: ref(""),
+    ready: ref(false),
+    status: ref("closed"),
+    failure: ref(null),
+    close: vi.fn(),
+    open: vi.fn(),
+    handleLoad: vi.fn(),
+    handleClosed: vi.fn(),
+  }),
+}));
+
+const flushAsync = async () => {
+  for (let i = 0; i < 8; i += 1) await Promise.resolve();
+  await nextTick();
+};
+const sendReady = (
+  documentId: string,
+  origin = "https://editor.example.test",
+  source = document.querySelector("iframe")?.contentWindow
+) => {
+  window.dispatchEvent(
+    new MessageEvent("message", {
+      source,
+      origin,
+      data: { type: "PLUGIN_READY", payload: { documentId } },
+    })
+  );
+};
+const initCalls = () =>
+  mockPostStandardMessage.mock.calls.filter(([type]) => type === "INIT");
+const registerTools = () => {
+  const registry = new Map<
+    string,
+    { execute: (input: unknown) => Promise<unknown> }
+  >();
+  Object.defineProperty(document, "modelContext", {
+    configurable: true,
+    value: {
+      registerTool(
+        tool: { name: string; execute: (input: unknown) => Promise<unknown> },
+        options: { signal: AbortSignal }
+      ) {
+        registry.set(tool.name, tool);
+        options.signal.addEventListener("abort", () => {
+          if (registry.get(tool.name) === tool) registry.delete(tool.name);
+        });
+      },
+    },
+  });
+  return registry;
+};
+
 const cleanups: Array<() => void> = [];
 
 const makeMetaResponse = (id: number) => ({
@@ -213,8 +287,11 @@ const makeMetaResponse = (id: number) => ({
   },
 });
 
-async function mountSceneView() {
-  const { default: SceneView } = await import("@/views/meta/scene.vue");
+async function mountSceneView(kind: "meta" | "verse" = "meta") {
+  const { default: SceneView } =
+    kind === "meta"
+      ? await import("@/views/meta/scene.vue")
+      : await import("@/views/verse/scene.vue");
   const el = document.createElement("div");
   document.body.appendChild(el);
   const app = createApp(SceneView);
@@ -235,6 +312,11 @@ describe("views/meta/scene.vue", () => {
     mockRoute.query.title = "test-scene";
     mockPush.mockReset();
     mockPostStandardMessage.mockReset();
+    mockPostStandardMessage.mockReturnValue("init-request");
+    mockGetVerse.mockReset();
+    mockAppStore.language = "zh-CN";
+    mockDirty.value = false;
+    mockGetVerse.mockImplementation(async (id: number) => makeMetaResponse(id));
     mockSendRequest.mockReset();
     mockSendRequest.mockReturnValue("webmcp-request");
     mockGetMeta.mockReset();
@@ -385,4 +467,208 @@ describe("views/meta/scene.vue", () => {
     await nextTick();
     await expect(tool.execute({})).rejects.toThrow();
   });
+  it("keeps entity live reads blocked while referenced scene names are loading", async () => {
+    const registry = registerTools();
+    const result = makeMetaResponse(1);
+    mockGetMeta.mockResolvedValueOnce({
+      data: { ...result.data, verseMetas: [{ verse_id: 10 }] },
+    });
+    let release!: (value: unknown) => void;
+    mockGetVerses.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        })
+    );
+    await mountSceneView();
+    sendReady("document-one");
+    await flushAsync();
+    expect(mockGetVerses).toHaveBeenCalledOnce();
+    await expect(
+      registry.get("xrugc_get_editor_context")!.execute({})
+    ).rejects.toThrow();
+    expect(mockSendRequest).not.toHaveBeenCalled();
+    expect(initCalls()).toHaveLength(0);
+    release({
+      data: [{ id: 10, name: "Referenced scene" }],
+      headers: { "x-pagination-page-count": "1" },
+    });
+    await flushAsync();
+    expect(initCalls()[0][1].config.entitySceneNames).toEqual([
+      "Referenced scene",
+    ]);
+  });
+
+  describe.each(["meta", "verse"] as const)(
+    "%s initialization lifecycle",
+    (kind) => {
+      const contextTool =
+        kind === "meta"
+          ? "xrugc_get_editor_context"
+          : "xrugc_get_scene_editor_context";
+      const fetchData = () => (kind === "meta" ? mockGetMeta : mockGetVerse);
+
+      it("does not issue live RPC while scene data is waiting for INIT", async () => {
+        const registry = registerTools();
+        let release!: (value: ReturnType<typeof makeMetaResponse>) => void;
+        fetchData().mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              release = resolve;
+            })
+        );
+        await mountSceneView(kind);
+        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow();
+        sendReady("document-one");
+        await flushAsync();
+        expect(initCalls()).toHaveLength(0);
+        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow();
+        expect(registry.has("xrugc_get_workflow_guide")).toBe(true);
+        await expect(
+          registry.get("xrugc_get_workflow_guide")!.execute({})
+        ).resolves.toMatchObject({ topic: "overview" });
+        expect(mockSendRequest).not.toHaveBeenCalled();
+        release(makeMetaResponse(1));
+        await flushAsync();
+        expect(initCalls()).toHaveLength(1);
+        expect(registry.has(contextTool)).toBe(true);
+        const action =
+          kind === "meta"
+            ? "webmcp-get-entity-state"
+            : "webmcp-get-scene-state";
+        const context = registry.get(contextTool)!.execute({});
+        expect(mockSendRequest).toHaveBeenCalledWith(action, {});
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: document.querySelector("iframe")?.contentWindow,
+            origin: "https://editor.example.test",
+            data: {
+              type: "RESPONSE",
+              requestId: "webmcp-request",
+              payload: {
+                action,
+                hostSessionId: "test-session",
+                ok: true,
+                entityId: 1,
+                meta: makeMetaResponse(1).data.data,
+                verse: makeMetaResponse(1).data.data,
+                entityVersion: "entity-live",
+                sceneVersion: "scene-live",
+                changed: false,
+                loading: false,
+                selectedModuleIds: [],
+              },
+            },
+          })
+        );
+        await expect(context).resolves.toMatchObject(
+          kind === "meta"
+            ? { editor: "entity", entity: { id: 1 } }
+            : { editor: "scene", ready: true, scene: { id: 1 } }
+        );
+      });
+
+      it("ignores duplicate READY and initializes a new document in the same frame", async () => {
+        await mountSceneView(kind);
+        sendReady("document-one");
+        await flushAsync();
+        expect(initCalls()).toHaveLength(1);
+        mockDirty.value = true;
+        sendReady("document-one");
+        await flushAsync();
+        expect(initCalls()).toHaveLength(1);
+        expect(mockDirty.value).toBe(true);
+        expect(fetchData()).toHaveBeenCalledTimes(1);
+        sendReady("document-two");
+        await flushAsync();
+        expect(initCalls()).toHaveLength(2);
+        expect(fetchData()).toHaveBeenCalledTimes(2);
+      });
+
+      it("ignores a prior document fetch after an iframe reload", async () => {
+        let release!: (value: ReturnType<typeof makeMetaResponse>) => void;
+        fetchData().mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              release = resolve;
+            })
+        );
+        await mountSceneView(kind);
+        sendReady("document-one");
+        await flushAsync();
+        sendReady("document-two");
+        await flushAsync();
+        release(makeMetaResponse(99));
+        await flushAsync();
+        expect(initCalls()).toHaveLength(1);
+        expect(initCalls()[0][1].config.data.id).toBe(1);
+      });
+
+      it("does not apply an older route response to the replacement frame", async () => {
+        let release!: (value: ReturnType<typeof makeMetaResponse>) => void;
+        fetchData().mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              release = resolve;
+            })
+        );
+        await mountSceneView(kind);
+        sendReady("document-one");
+        await flushAsync();
+        mockRoute.query.id = "2";
+        await nextTick();
+        sendReady("document-two");
+        await flushAsync();
+        release(makeMetaResponse(1));
+        await flushAsync();
+        expect(initCalls()).toHaveLength(1);
+        expect(initCalls()[0][1].config.data.id).toBe(2);
+      });
+
+      it("waits for the new src document and discards the previous src fetch", async () => {
+        let release!: (value: ReturnType<typeof makeMetaResponse>) => void;
+        fetchData().mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              release = resolve;
+            })
+        );
+        await mountSceneView(kind);
+        sendReady("document-one");
+        await flushAsync();
+        mockAppStore.language = "en-US";
+        await nextTick();
+        release(makeMetaResponse(1));
+        await flushAsync();
+        expect(initCalls()).toHaveLength(0);
+        sendReady("document-two");
+        await flushAsync();
+        expect(initCalls()).toHaveLength(1);
+      });
+
+      it("does not initialize from another origin or window", async () => {
+        await mountSceneView(kind);
+        sendReady("foreign", "https://wrong.example");
+        sendReady("foreign", "https://editor.example.test", window);
+        await flushAsync();
+        expect(fetchData()).not.toHaveBeenCalled();
+        expect(initCalls()).toHaveLength(0);
+        sendReady("document-one");
+        await flushAsync();
+        expect(initCalls()).toHaveLength(1);
+      });
+
+      it("keeps live RPC blocked when posting INIT fails", async () => {
+        const registry = registerTools();
+        mockPostStandardMessage.mockReturnValue(undefined);
+        await mountSceneView(kind);
+        sendReady("document-one");
+        await flushAsync();
+        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow(
+          /准备|加载/
+        );
+        expect(mockSendRequest).not.toHaveBeenCalled();
+      });
+    }
+  );
 });

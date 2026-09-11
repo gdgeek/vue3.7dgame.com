@@ -2,6 +2,7 @@
 export function createIframeRpc(options: {
   frame: () => HTMLIFrameElement | null | undefined;
   session: () => string | null | undefined;
+  ready?: () => boolean;
   send: (action: string, data: Record<string, unknown>) => string | undefined;
 }) {
   const pending = new Map<
@@ -28,7 +29,8 @@ export function createIframeRpc(options: {
   ) =>
     new Promise<Record<string, unknown>>((resolve, reject) => {
       const frame = options.frame()?.contentWindow;
-      if (!frame) return reject(new Error("编辑器尚未准备完成"));
+      if (!frame || options.ready?.() === false)
+        return reject(new Error("编辑器尚未准备完成"));
       const session = options.session();
       const requestId = options.send(action, data);
       if (!requestId) return reject(new Error("编辑器请求未发送"));
