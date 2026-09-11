@@ -22,6 +22,9 @@ const UNITY_PREVIEW_ASSET_ORIGINS = new Set([
 // Display metadata can contain colons (e.g. "Polygen:model.glb") or links.
 // These strings are not resource locations and must retain their exact text.
 const UNITY_PREVIEW_TEXT_FIELDS = new Set(["name", "title", "description"]);
+// File API records carry a storage key and original filename alongside url.
+// A key such as "/ai/polygen/model.glb" is not a relative download address.
+const UNITY_PREVIEW_FILE_TEXT_FIELDS = new Set(["key", "filename"]);
 
 export class UnityPreviewAssetError extends Error {
   readonly fields: string[] = [];
@@ -269,7 +272,12 @@ export const rewriteUnityPreviewUrls = (
   Object.entries(record).forEach(([key, item]) =>
     atUnityPreviewField(key, () => {
       if (typeof item === "string") {
-        if (UNITY_PREVIEW_TEXT_FIELDS.has(key)) return;
+        if (
+          UNITY_PREVIEW_TEXT_FIELDS.has(key) ||
+          (typeof record.url === "string" &&
+            UNITY_PREVIEW_FILE_TEXT_FIELDS.has(key))
+        )
+          return;
         record[key] = rewriteUnityPreviewStringUrls(
           item,
           proxyOrigin,
