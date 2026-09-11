@@ -227,6 +227,62 @@ describe("unityPreviewPayload", () => {
         options
       );
 
+    it("keeps scene 506 metadata as text while preparing its model URL", () => {
+      const legacyModel =
+        "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/ai/polygen/model.glb?sign=a%2Fb%3D&part=2&part=1";
+      const title = "Polygen:脱口秀小朋友.glb";
+      const description = "详情见 https://www.example.org/about";
+      const payload = {
+        scene: { id: 506, name: title, description },
+        metas: [
+          {
+            name: title,
+            data: JSON.stringify({ name: title, title, description }),
+            resources: [{ name: title, file: { url: legacyModel } }],
+          },
+        ],
+      };
+
+      rewrite(payload);
+
+      expect(payload.scene).toEqual({ id: 506, name: title, description });
+      expect(payload.metas[0].name).toBe(title);
+      expect(JSON.parse(payload.metas[0].data)).toEqual({
+        name: title,
+        title,
+        description,
+      });
+      expect(payload.metas[0].resources[0]).toEqual({
+        name: title,
+        file: {
+          url: legacyModel.replace(
+            "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com",
+            "data.7dgame.com"
+          ),
+        },
+      });
+    });
+
+    it.each([
+      "https://attacker.example/model.glb",
+      "ftp://attacker.example/model.glb",
+      "file:///private/model.glb",
+      "blob:https://attacker.example/resource-id",
+      "data:model/gltf-binary;base64,AAAA",
+      "javascript:alert(1)",
+    ])(
+      "still rejects actual resource URLs beside display metadata: %s",
+      (url) => {
+        for (const payload of [
+          { name: "Polygen:模型", resources: [{ file: { url } }] },
+          { data: JSON.stringify({ title: "Model:preview", file: { url } }) },
+          { name: { file: { url } } },
+        ]) {
+          expect(() => rewrite(payload)).toThrow("WGP-ASSET-DENIED");
+        }
+      }
+    );
+
     it.each([
       "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2",
       "https://mrpp-1257979353.cos.ap-chengdu.myqcloud.com/image.png?sign=a%2Fb%3D&part=2&part=1",
