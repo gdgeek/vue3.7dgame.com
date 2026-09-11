@@ -20,7 +20,10 @@ vi.mock("@/utils/unityPreviewPayload", async (importOriginal) => {
   };
 });
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
-import { rewriteUnityPreviewUrls } from "@/utils/unityPreviewPayload";
+import {
+  rewriteUnityPreviewUrls,
+  UnityPreviewAssetError,
+} from "@/utils/unityPreviewPayload";
 
 const release = {
   protocolVersion: 1,
@@ -184,6 +187,35 @@ describe("built-in Unity controller", () => {
     expect(bridge.frameVisible.value).toBe(false);
     expect(bridge.failure.value?.code).toBe("SCENE_FORWARD_FAILED");
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("exposes safe asset rejection details to the shared runtime status", async () => {
+    vi.mocked(rewriteUnityPreviewUrls).mockImplementationOnce(() => {
+      const error = new UnityPreviewAssetError(
+        "https://private.example/model.glb?token=secret",
+        "origin"
+      );
+      error.fields.push("resources", "0", "file", "url");
+      throw error;
+    });
+    await bridge.open();
+    expect(bridge.runtimeState.value).toMatchObject({
+      frameVisible: false,
+      failure: {
+        code: "SCENE_ASSET_ORIGIN_DENIED",
+        asset: {
+          field: "resources.0.file.url",
+          origin: "https://private.example",
+          reason: "origin",
+        },
+      },
+    });
+    expect(JSON.stringify(bridge.runtimeState.value)).not.toContain(
+      "token=secret"
+    );
+    expect(() => structuredClone(bridge.runtimeState.value)).not.toThrow();
+    await bridge.close();
+    expect(bridge.runtimeState.value.failure).toBeNull();
   });
 
   it("rejects unsupported resource origins during preparing without mounting or downloading Unity", async () => {

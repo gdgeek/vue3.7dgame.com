@@ -22,6 +22,7 @@ export type UnityRuntimeFailure = {
   code: string;
   stage: UnityRuntimeStage;
   message: string;
+  asset?: { field: string; origin: string | null; reason: string };
 };
 
 export type UnityRuntimeRelease = {
