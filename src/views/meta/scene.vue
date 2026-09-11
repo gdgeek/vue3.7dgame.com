@@ -53,6 +53,10 @@
 <script setup lang="ts">
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
 import { createIframeRpc } from "@/utils/iframeRpc";
+import {
+  useIframeInitialization,
+  type IframeInitializationTicket,
+} from "@/composables/useIframeInitialization";
 import { logger } from "@/utils/logger";
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import {
@@ -302,7 +306,6 @@ const { t } = useI18n();
 const dialog = ref();
 const phototypeDialogRef = ref<InstanceType<typeof PhototypeDialog>>();
 const editor = ref<HTMLIFrameElement | null>();
-let init = false;
 const ability = useAbility();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
@@ -964,13 +967,6 @@ const src = computed(() => {
   return url;
   //return `${env.editor}/three.js/editor/meta-editor.html?language=${appStore.language}&timestamp=${Date.now()}`;
 });
-// 监听语言变化
-watch(
-  () => appStore.language,
-  async () => {
-    await refresh();
-  }
-);
 
 const selectedPhototype = async (
   phototype: PhototypeType,
@@ -1037,9 +1033,18 @@ const { postStandardMessage, sendRequest, pendingRequests, getHostSessionId } =
     onError: () => ElMessage.error(t("meta.scene.error")),
   });
 
+const editorInitialization = useIframeInitialization({
+  frame: () => editor.value,
+  owner: () => id.value,
+  src: () => src.value,
+  frameKey: () => editorFrameKey.value,
+  sendInit: (payload) => postStandardMessage("INIT", payload),
+});
+
 const webMcpRpc = createIframeRpc({
   frame: () => editor.value,
   session: getHostSessionId,
+  ready: editorInitialization.isReady,
   send: sendRequest,
 });
 const requestEditor = webMcpRpc.request;
@@ -1715,14 +1720,17 @@ const handleMessage = async (e: MessageEvent) => {
 
   switch (msg.type) {
     case "PLUGIN_READY":
+      if (!editorInitialization.acceptReady(payload)) break;
+      webMcpRpc.cancel("编辑器文档已重新加载");
+      webMcpLifecycle?.abort();
+      registerPageWebMcpTools();
       hasUnsavedChangesBeforeUnload.value = false;
       if (isRestoringDraft.value && metaDetail.value) {
         isRestoringDraft.value = false;
         const restoredMetaDetail = metaDetail.value as unknown as metaInfo;
         pushMetaToEditor(restoredMetaDetail);
         hasUnsavedChangesBeforeUnload.value = true;
-      } else if (!init) {
-        init = true;
+      } else {
         await refresh();
       }
       break;
@@ -1927,10 +1935,14 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
-const pushMetaToEditor = (meta: metaInfo) => {
+const pushMetaToEditor = (
+  meta: metaInfo,
+  ticket: IframeInitializationTicket | null = editorInitialization.begin()
+) => {
+  if (!ticket || !editorInitialization.isCurrent(ticket)) return;
   const availableTypes = getAvailableResourceTypes();
   webMcpRpc.cancel("编辑器正在重新初始化");
-  postStandardMessage("INIT", {
+  editorInitialization.send(ticket, {
     token: null,
     config: {
       data: meta,
@@ -1950,19 +1962,25 @@ const pushMetaToEditor = (meta: metaInfo) => {
 
 // 刷新元数据
 const refresh = async () => {
+  const ticket = editorInitialization.begin();
+  if (!ticket) return;
+  webMcpRpc.cancel("编辑器正在重新初始化");
   try {
-    const metaResponse = await getMeta(id.value, { expand: "verseMetas" });
+    const metaResponse = await getMeta(ticket.owner, { expand: "verseMetas" });
+    if (!editorInitialization.isCurrent(ticket)) return;
     const nextMetaDetail = metaResponse.data as metaInfo;
+    const nextEntityScenes = await getEntityScenes(nextMetaDetail.verseMetas);
+    if (!editorInitialization.isCurrent(ticket)) return;
     metaDetail.value = nextMetaDetail;
-    entityScenes.value = await getEntityScenes(nextMetaDetail.verseMetas);
-    pushMetaToEditor(nextMetaDetail);
+    entityScenes.value = nextEntityScenes;
+    pushMetaToEditor(nextMetaDetail, ticket);
   } catch (error) {
-    logger.error(error);
+    editorInitialization.fail(ticket);
+    if (editorInitialization.isCurrent(ticket)) logger.error(error);
   }
 };
 
 const resetEditorStateForSceneChange = () => {
-  init = false;
   isRestoringDraft.value = false;
   pendingRestorePayload.value = null;
   hasUnsavedChangesBeforeUnload.value = false;
@@ -1975,6 +1993,17 @@ const resetEditorStateForSceneChange = () => {
   editorFrameKey.value += 1;
   registerPageWebMcpTools();
 };
+
+watch(
+  [id, src, editorFrameKey],
+  () => {
+    editorInitialization.reset();
+    webMcpRpc.cancel("编辑器目标已改变");
+    webMcpLifecycle?.abort();
+    registerPageWebMcpTools();
+  },
+  { flush: "sync" }
+);
 
 watch(id, (newId, oldId) => {
   if (!Number.isFinite(newId) || newId === oldId) return;
@@ -2040,7 +2069,7 @@ const registerPageWebMcpTools = () => {
     getContext: () => ({
       entity: metaDetail.value as metaInfo | null,
       dirty: hasUnsavedChangesBeforeUnload.value,
-      loading: metaDetail.value === null,
+      loading: !editorInitialization.isReady() || metaDetail.value === null,
       sceneNames: entityScenes.value.map((scene) => scene.name),
     }),
     getLiveContext: async () => {
@@ -3223,6 +3252,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  editorInitialization.reset();
   webMcpLifecycle?.abort();
   webMcpLifecycle = null;
   webMcpRpc.cancel();
