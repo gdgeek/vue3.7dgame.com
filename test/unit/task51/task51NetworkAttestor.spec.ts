@@ -1,3 +1,7 @@
+import { mkdtemp, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -6,18 +10,29 @@ import {
   TASK51_EXPECTED_BUSINESS_REQUEST_COUNT,
   TASK51_NETWORK_CONSTANTS,
   createTask51NetworkLedger,
+  validateTask51StaticAllowlist,
 } from "../../../tools/identity/task51-network-attestor-ledger.mjs";
 import {
   buildTask51NetworkReceipt,
+  assertTask51StageBExecutionSourceBindings,
   canonicalTask51Json,
   parseTask51NetworkAttestorReleaseEvidence,
   parseTask51NetworkReceipt,
+  parseTask51StageBExecutionSources,
   serializeTask51NetworkReceipt,
   task51Sha256,
   task51StaticResponseManifestSha256,
   task51StaticUrlManifestSha256,
 } from "../../../tools/identity/task51-network-receipt.mjs";
 import { TASK51_RUNNER_URL } from "../../../tools/identity/task51-stage-b-supervisor.mjs";
+import * as supervisorModule from "../../../tools/identity/task51-stage-b-supervisor.mjs";
+import {
+  assertTask51ExecutingToolIdentity,
+  createTask51EvidenceMapReader,
+  createTask51SafeRequestDescriptor,
+  runTask51HeadedNetworkAttestor,
+  task51RunnerFragmentBindings,
+} from "../../../tools/identity/run-task51-headed-network-attestor.mjs";
 
 const RUNNER_URL = "https://d.xrugc.com/internal/task51/memory-isolated-runner";
 const STATIC_URL = "https://d.xrugc.com/assets/task51-fixed.js";
@@ -243,12 +258,12 @@ function stageAAttestorArtifact() {
       cleanCheckoutImportSmokeAt: "2026-08-28T00:40:00.000Z",
       cleanCheckoutImportSmokePassed: true,
       developCandidateContentSha256: "1".repeat(64),
-      developCandidateTreeSha: "5".repeat(40),
+      developCandidateTreeSha: "2".repeat(40),
       developCommitSha: "6".repeat(40),
       developTreeSha: "2".repeat(40),
       evidenceRef: "reports/task51-attestor.json",
       mainCandidateContentSha256: "1".repeat(64),
-      mainCandidateTreeSha: "5".repeat(40),
+      mainCandidateTreeSha: "2".repeat(40),
       mainCommitSha: "7".repeat(40),
       mainTreeSha: "2".repeat(40),
       networkProvenance: {
@@ -277,7 +292,7 @@ function stageAAttestorArtifact() {
       nonForcePromotions: true,
       playwrightVersion: "1.55.0",
       publishCandidateContentSha256: "1".repeat(64),
-      publishCandidateTreeSha: "5".repeat(40),
+      publishCandidateTreeSha: "2".repeat(40),
       publishCommitSha: "b".repeat(40),
       publishTreeSha: "2".repeat(40),
     },
@@ -287,6 +302,862 @@ function stageAAttestorArtifact() {
   };
   return `${canonicalTask51Json(value)}\n`;
 }
+
+function executionSourcesFixture() {
+  const a = JSON.parse(stageAAttestorArtifact());
+  const binding = (name: string) => ({
+    evidenceRef: `reports/${name}.json`,
+    evidenceSha256: "a".repeat(64),
+  });
+  const ci = (name: string) => ({
+    ciRunId: 1,
+    ciRunAttempt: 1,
+    ciJobId: 2,
+    ciCompletedAt: "2026-09-11T00:00:00.000Z",
+    runTranscript: binding(`${name}-run`),
+    jobsTranscript: binding(`${name}-jobs`),
+    jobLog: binding(`${name}-log`),
+  });
+  const prewarm = {
+    warmUrl: ROOT_URL,
+    documentUrls: [ROOT_URL],
+    loginUrl: "https://xrugc.com/api-auth/v1/auth/login",
+    oidc: null,
+    bootstrapReads: [
+      {
+        url: "https://api.xrteeth.com/v1/user/info",
+        minimumCount: 1,
+        maximumCount: 2,
+      },
+    ],
+    transitionUserInfoUrl: "https://api.xrteeth.com/v1/user/info",
+  };
+  const urls = [
+    ROOT_URL,
+    STATIC_URL,
+    "https://d.xrugc.com/__env.js?v=1789108461",
+    "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js",
+  ];
+  const responses = urls
+    .map((url) => ({ url, ...staticMetadata(url) }))
+    .map(({ httpStatus: _status, ...rest }) => rest);
+  const provenance = {
+    ...a.networkAttestorRelease.networkProvenance,
+    receiptSchema: "wp3-task51-safe-network-receipt-v3",
+    servedWebRevision: "c".repeat(40),
+    servedWebOciRevision: "c".repeat(40),
+    bootstrapReadAllowlist: prewarm.bootstrapReads.map(({ url }) => url),
+    staticUrlManifest: urls,
+    staticUrlManifestSha256: task51StaticUrlManifestSha256(urls),
+    staticResponses: responses,
+    servedAssetManifestSha256: task51StaticResponseManifestSha256(responses),
+    staticRequestCounts: urls.map((url) => ({
+      url,
+      count: url === STATIC_URL ? 4 : 1,
+    })),
+  };
+  const observers = ["xrteeth", "tmrpp"].map((node) => ({
+    node,
+    frontdoorOrigin: `https://d.${node}.com`,
+    frontendUrl: `https://d.${node}.com/`,
+    pluginManifestUrl: `https://d.${node}.com/plugin.json`,
+  }));
+  const publicUrls = [
+    ...new Set([
+      ...urls,
+      ...observers.flatMap((entry) => [
+        entry.frontendUrl,
+        entry.pluginManifestUrl,
+      ]),
+    ]),
+  ];
+  return {
+    schema: "wp3-task51-stage-b-execution-sources-v1",
+    approvalRef: "WP3-TASK51-MEMORY-RUNNER-STAGE-B-20260911",
+    executionId: "task51-stage-b-offline-sources-20260911",
+    generatedAt: "2026-09-11T01:00:00.000Z",
+    historicalStageAFreezeSha256:
+      "271a6e540bb26d6c320c2cdd6a7c4222384bcfeff797e85e93007ae150f43ce3",
+    historicalStageANetworkAttestor: {
+      ...binding("historical-a"),
+      evidenceSha256: task51Sha256(stageAAttestorArtifact()),
+    },
+    currentWeb: {
+      repository: "gdgeek/vue3.7dgame.com",
+      develop: {
+        ...ci("develop"),
+        branch: "develop",
+        commitSha: "d".repeat(40),
+        treeSha: "e".repeat(40),
+        indexDigest: `sha256:${"2".repeat(64)}`,
+        configDigest: `sha256:${"3".repeat(64)}`,
+        commitTranscript: binding("develop-commit"),
+      },
+      publish: {
+        ...ci("publish"),
+        branch: "publish",
+        commitSha: "c".repeat(40),
+        treeSha: "f".repeat(40),
+        indexDigest: provenance.servedWebImageDigest,
+        configDigest: `sha256:${"5".repeat(64)}`,
+        commitTranscript: binding("publish-commit"),
+      },
+      networkProvenance: provenance,
+    },
+    localTool: {
+      ...ci("tool"),
+      repository: "gdgeek/vue3.7dgame.com",
+      branch: "codex/task51-offline-test",
+      commitSha: "1".repeat(40),
+      treeSha: "2".repeat(40),
+      candidateContentHashAlgorithm: "sha256-path-nul-git-blob-sha-v1",
+      candidateContentSha256: "3".repeat(64),
+      candidateFileManifest: a.networkAttestorRelease.candidateFileManifest,
+    },
+    browser: {
+      channel: "chromium",
+      version: "143.0.7499.4",
+      binarySha256: "4".repeat(64),
+    },
+    prewarm,
+    publicSources: publicUrls.map((url, index) => ({
+      url,
+      ...binding(`public-${index}`),
+    })),
+    observerSources: observers,
+  };
+}
+
+function rawSources(value = executionSourcesFixture()) {
+  return `${canonicalTask51Json(value)}\n`;
+}
+
+describe("Task 5.1 current execution sources (offline only)", () => {
+  it("keeps current served Web, tool checkout and historical A identities distinct", () => {
+    const parsed = parseTask51StageBExecutionSources(rawSources());
+    expect(
+      assertTask51StageBExecutionSourceBindings(parsed, {
+        approvalRef: parsed.value.approvalRef,
+        executionId: parsed.value.executionId,
+        historicalStageA: parseTask51NetworkAttestorReleaseEvidence(
+          stageAAttestorArtifact()
+        ),
+      }).sha256
+    ).toBe(parsed.sha256);
+    expect(parsed.value.currentWeb.publish.commitSha).not.toBe(
+      parsed.value.localTool.commitSha
+    );
+    expect(() =>
+      assertTask51StageBExecutionSourceBindings(parsed, {
+        approvalRef: parsed.value.approvalRef,
+        executionId: parsed.value.executionId,
+        historicalStageA: {
+          ...parseTask51NetworkAttestorReleaseEvidence(
+            stageAAttestorArtifact()
+          ),
+          sha256: "0".repeat(64),
+        },
+      })
+    ).toThrow();
+    expect(() =>
+      assertTask51ExecutingToolIdentity(parsed.value.localTool)
+    ).toThrow("TASK51_EXECUTING_TOOL_IDENTITY_REJECTED");
+  });
+  it("preserves exact query and CDN URLs without generalizing origins", () => {
+    const source = executionSourcesFixture();
+    const urls = source.currentWeb.networkProvenance.staticUrlManifest;
+    expect([
+      ...validateTask51StaticAllowlist(RUNNER_URL, urls, {
+        currentSources: true,
+      }),
+    ]).toEqual(urls);
+    expect(() => validateTask51StaticAllowlist(RUNNER_URL, urls)).toThrow();
+    for (const url of [
+      "https://d.xrugc.com/__env.js?token=private",
+      "https://d.xrugc.com/__env.js?v=1&v=2",
+      "https://d.xrugc.com/__env.js#x",
+      "https://appleid.cdn-apple.com/api-auth/v1/auth/login",
+    ]) {
+      expect(() =>
+        validateTask51StaticAllowlist(RUNNER_URL, [ROOT_URL, url], {
+          currentSources: true,
+        })
+      ).toThrow();
+    }
+    const ledger = createTask51NetworkLedger({
+      runnerUrl: RUNNER_URL,
+      staticUrls: urls,
+      currentSources: true,
+      staticRequestCounts:
+        source.currentWeb.networkProvenance.staticRequestCounts,
+    });
+    expect(
+      ledger.beginRequest(
+        descriptor(
+          "wrong-query",
+          "GET",
+          "https://d.xrugc.com/__env.js?v=1789108462",
+          "script"
+        )
+      ).allowed
+    ).toBe(false);
+  });
+  it.each([
+    "missing",
+    "null",
+    "zero",
+    "over-limit",
+    "duplicate",
+    "config-as-index",
+    "wrong-branch",
+    "missing-public-source",
+    "wrong-historical",
+  ])("rejects %s source binding/count faults", (fault) => {
+    const value = executionSourcesFixture();
+    const p = value.currentWeb.networkProvenance;
+    if (fault === "missing") delete p.staticRequestCounts;
+    if (fault === "null") p.staticRequestCounts = null;
+    if (fault === "zero") p.staticRequestCounts[1].count = 0;
+    if (fault === "over-limit") p.staticRequestCounts[1].count = 17;
+    if (fault === "duplicate") p.staticRequestCounts[1].url = ROOT_URL;
+    if (fault === "config-as-index")
+      value.currentWeb.publish.configDigest =
+        value.currentWeb.publish.indexDigest;
+    if (fault === "wrong-branch") value.currentWeb.publish.branch = "develop";
+    if (fault === "missing-public-source") value.publicSources.shift();
+    if (fault === "wrong-historical")
+      value.historicalStageANetworkAttestor.evidenceSha256 = "0".repeat(64);
+    expect(() => {
+      const parsed = parseTask51StageBExecutionSources(rawSources(value));
+      assertTask51StageBExecutionSourceBindings(parsed, {
+        approvalRef: value.approvalRef,
+        executionId: value.executionId,
+        historicalStageA: parseTask51NetworkAttestorReleaseEvidence(
+          stageAAttestorArtifact()
+        ),
+      });
+    }).toThrow();
+  });
+  it("reads only pinned map entries within explicit evidence roots, including binary historical evidence", async () => {
+    const directory = await realpath(
+      await mkdtemp(join(tmpdir(), "task51-evidence-map-test-"))
+    );
+    try {
+      const path = join(directory, "source.bin");
+      const body = Buffer.from([0, 1, 2, 255]);
+      await writeFile(path, body);
+      const map = {
+        "git:web:historical-key": {
+          path,
+          sha256: task51Sha256(body),
+          byteLength: body.length,
+        },
+      };
+      const reader = createTask51EvidenceMapReader(JSON.stringify(map), [
+        directory,
+      ]);
+      expect(() =>
+        createTask51EvidenceMapReader("invalid-private-input", [directory])
+      ).toThrow("TASK51_EXECUTION_PREFLIGHT_JSON_REJECTED");
+      expect(reader("git:web:historical-key")).toEqual(body);
+      expect(() => reader("/etc/passwd")).toThrow();
+      const bad = {
+        x: { ...map["git:web:historical-key"], path: "/etc/passwd" },
+      };
+      expect(() =>
+        createTask51EvidenceMapReader(JSON.stringify(bad), [directory])("x")
+      ).toThrow();
+      await symlink(path, join(directory, "linked.bin"));
+      const linked = {
+        x: {
+          ...map["git:web:historical-key"],
+          path: join(directory, "linked.bin"),
+        },
+      };
+      expect(() =>
+        createTask51EvidenceMapReader(JSON.stringify(linked), [directory])("x")
+      ).toThrow();
+      await writeFile(path, Buffer.from([9, 9, 9, 9]));
+      expect(() => reader("git:web:historical-key")).toThrow();
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("Task 5.1 current static repeated loads and receipt v3", () => {
+  function currentReceipt() {
+    const urls = [...STATIC_URLS];
+    const counts = urls.map((url) => ({
+      url,
+      count: url === STATIC_URL ? 4 : 1,
+    }));
+    const ledger = createTask51NetworkLedger({
+      runnerUrl: RUNNER_URL,
+      staticUrls: urls,
+      currentSources: true,
+      staticRequestCounts: counts,
+    });
+    let serial = 0;
+    for (const { url, count } of counts)
+      for (let i = 0; i < count; i++) {
+        const id = `load-${++serial}`;
+        expect(
+          ledger.beginRequest(descriptor(id, "GET", url, "script")).allowed
+        ).toBe(true);
+        expect(ledger.finishRequest(id, staticMetadata(url)).allowed).toBe(
+          true
+        );
+      }
+    ledger.arm(RUNNER_URL);
+    completeBusinessLedger(ledger);
+    const network = ledger.finalize();
+    const old = bindingsFor(network);
+    return buildTask51NetworkReceipt(
+      {
+        ...old,
+        executionSourcesSha256: "a".repeat(64),
+        staticRequestCounts: counts,
+        attestor: {
+          candidateContentSha256: "1".repeat(64),
+          commitSha: "c".repeat(40),
+          treeSha: "2".repeat(40),
+          branch: "codex/task51-test",
+          releaseEvidenceSha256: "f".repeat(64),
+        },
+      },
+      network,
+      FLAGS
+    );
+  }
+  it("records four actual successful Worker loads, no retry, and the first response sequence", () => {
+    const receipt = currentReceipt();
+    expect(receipt.network.staticRequestCount).toBe(5);
+    expect(receipt.network.retryCount).toBe(0);
+    expect(receipt.staticUrlManifest.responses[1].sequence).toBe(2);
+    expect(
+      parseTask51NetworkReceipt(serializeTask51NetworkReceipt(receipt)).schema
+    ).toBe("wp3-task51-safe-network-receipt-v3");
+  });
+  it.each([
+    "first-sequence",
+    "different-bytes",
+    "missing-count",
+    "null-count",
+    "wrong-count",
+  ])("rejects %s rather than hiding duplicate observations", (fault) => {
+    const value = structuredClone(currentReceipt());
+    if (fault === "first-sequence")
+      value.staticUrlManifest.responses[1].sequence = 5;
+    if (fault === "different-bytes")
+      value.network.transcript[3].contentSha256 = "1".repeat(64);
+    if (fault === "missing-count") delete value.staticUrlManifest.requestCounts;
+    if (fault === "null-count") value.staticUrlManifest.requestCounts = null;
+    if (fault === "wrong-count")
+      value.staticUrlManifest.requestCounts[1].count = 3;
+    value.network.transcriptSha256 = task51Sha256(
+      canonicalTask51Json(value.network.transcript)
+    );
+    expect(() => serializeTask51NetworkReceipt(value)).toThrow();
+  });
+});
+
+describe("Task 5.1 source-bound prewarm (offline request descriptors only)", () => {
+  it("admits the exact Identity/OIDC flow with bounded reads, then retains the 16 minute quiet gate", () => {
+    const contract = executionSourcesFixture().prewarm;
+    contract.oidc = {
+      authorizeUrl: "https://xrugc.com/api-auth/authorize",
+      tokenUrl: "https://xrugc.com/api-auth/token",
+      clientId: "task51-test",
+      redirectUri: "https://d.xrugc.com/auth/callback",
+      scope: "openid profile",
+    };
+    const supervisor = supervisorModule.createTask51PreArmSupervisor({
+      staticUrls: [...STATIC_URLS],
+      prewarmContract: contract,
+    });
+    let id = 0;
+    const complete = (method: string, url: string) => {
+      const request = descriptor(`warm-${++id}`, method, url, "xhr");
+      expect(supervisor.beginRequest(request).allowed).toBe(true);
+      expect(
+        supervisor.finishRequest(request.id, { httpStatus: 200 }).allowed
+      ).toBe(true);
+    };
+    complete("POST", contract.loginUrl);
+    const p = new URLSearchParams({
+      response_type: "code",
+      response_mode: "json",
+      client_id: contract.oidc.clientId,
+      redirect_uri: contract.oidc.redirectUri,
+      scope: contract.oidc.scope,
+      state: "a".repeat(32),
+      code_challenge: "b".repeat(43),
+      code_challenge_method: "S256",
+    });
+    complete("GET", `${contract.oidc.authorizeUrl}?${p}`);
+    complete("POST", contract.oidc.tokenUrl);
+    complete("GET", contract.bootstrapReads[0].url);
+    supervisor.enterTransition();
+    complete("GET", contract.transitionUserInfoUrl);
+    supervisor.enterQuiet(1000);
+    expect(() =>
+      supervisor.assertReadyToClaim(
+        1000 + supervisorModule.TASK51_AUTH_QUIET_MS - 1
+      )
+    ).toThrow();
+    supervisor.assertReadyToClaim(1000 + supervisorModule.TASK51_AUTH_QUIET_MS);
+    expect(supervisor.snapshot().mode).toBe("strict");
+    expect(
+      supervisor.beginRequest(
+        descriptor("late", "GET", contract.bootstrapReads[0].url)
+      ).allowed
+    ).toBe(false);
+  });
+  it("rejects excess bootstrap reads, refresh fallback and failed auth responses", () => {
+    for (const fault of ["budget", "refresh", "failed-login"]) {
+      const contract = executionSourcesFixture().prewarm;
+      const supervisor = supervisorModule.createTask51PreArmSupervisor({
+        staticUrls: [...STATIC_URLS],
+        prewarmContract: contract,
+      });
+      expect(
+        supervisor.beginRequest(
+          descriptor("login", "POST", contract.loginUrl, "xhr")
+        ).allowed
+      ).toBe(true);
+      expect(
+        supervisor.finishRequest("login", {
+          httpStatus: fault === "failed-login" ? 401 : 200,
+        }).allowed
+      ).toBe(fault !== "failed-login");
+      if (fault === "refresh")
+        expect(
+          supervisor.beginRequest(
+            descriptor(
+              "refresh",
+              "POST",
+              "https://xrugc.com/api-auth/v1/auth/refresh",
+              "xhr"
+            )
+          ).allowed
+        ).toBe(false);
+      if (fault === "budget")
+        for (let i = 0; i < 3; i++) {
+          const id = `read-${i}`;
+          expect(
+            supervisor.beginRequest(
+              descriptor(id, "GET", contract.bootstrapReads[0].url)
+            ).allowed
+          ).toBe(i < 2);
+          if (i < 2) supervisor.finishRequest(id, { httpStatus: 200 });
+        }
+      expect(() => supervisor.enterTransition()).toThrow();
+    }
+  });
+});
+
+function ssoExecutionSourcesFixture() {
+  const source = executionSourcesFixture();
+  const documents = [
+    "https://xrugc.com/?lang=en-US",
+    "https://d.xrugc.com/sso",
+  ];
+  const publicUrl =
+    "https://blog.xrugc.com/index.php?per_page=100&hide_empty=false&rest_route=%2Fwp%2Fv2%2Fcategories";
+  const prewarm = {
+    ...source.prewarm,
+    documentUrls: [ROOT_URL, ...documents],
+    sso: {
+      callbackDocumentUrl: documents[1],
+      refreshUrl: "https://d.xrugc.com/api-auth/v1/auth/refresh",
+    },
+    bootstrapReads: [
+      {
+        url: publicUrl,
+        minimumCount: 1,
+        maximumCount: 1,
+        phase: "before-login-public",
+      },
+      {
+        url: "https://d.xrugc.com/api/v1/user/info",
+        minimumCount: 1,
+        maximumCount: 1,
+        phase: "after-authentication",
+      },
+    ],
+    transitionUserInfoUrl: "https://d.xrugc.com/api/v1/user/info",
+  };
+  const p = source.currentWeb.networkProvenance;
+  for (const [index, url] of documents.entries()) {
+    p.staticUrlManifest.push(url);
+    p.staticRequestCounts.push({ url, count: 1 });
+    p.staticResponses.push({
+      url,
+      byteLength: 100,
+      contentSha256: "f".repeat(64),
+    });
+    source.publicSources.push({
+      url,
+      evidenceRef: `reports/sso-document-${index}.json`,
+      evidenceSha256: "c".repeat(64),
+    });
+  }
+  source.publicSources.push({
+    url: publicUrl,
+    evidenceRef: "reports/public-news.json",
+    evidenceSha256: "d".repeat(64),
+  });
+  p.bootstrapReadAllowlist = prewarm.bootstrapReads.map(({ url }) => url);
+  p.staticUrlManifestSha256 = task51StaticUrlManifestSha256(
+    p.staticUrlManifest
+  );
+  p.servedAssetManifestSha256 = task51StaticResponseManifestSha256(
+    p.staticResponses
+  );
+  return { ...source, prewarm };
+}
+
+describe("Task 5.1 normal brand SSO prewarm (offline only)", () => {
+  const create = () => {
+    const source = ssoExecutionSourcesFixture();
+    const contract = source.prewarm;
+    const supervisor = supervisorModule.createTask51PreArmSupervisor({
+      staticUrls: source.currentWeb.networkProvenance.staticUrlManifest,
+      prewarmContract: contract,
+    });
+    let sequence = 0;
+    const begin = (method: string, url: string, resource = "xhr") => {
+      const request = descriptor(`sso-${++sequence}`, method, url, resource);
+      return { request, decision: supervisor.beginRequest(request) };
+    };
+    const complete = (
+      method: string,
+      url: string,
+      resource = "xhr",
+      status = 200
+    ) => {
+      const { request, decision } = begin(method, url, resource);
+      expect(decision.allowed).toBe(true);
+      if (decision.category !== "static")
+        expect(
+          supervisor.finishRequest(request.id, { httpStatus: status }).allowed
+        ).toBe(true);
+    };
+    const publicRead = () => complete("GET", contract.bootstrapReads[0].url);
+    const login = () => complete("POST", contract.loginUrl);
+    const callback = () =>
+      complete("GET", contract.sso.callbackDocumentUrl, "document");
+    return {
+      source,
+      contract,
+      supervisor,
+      begin,
+      complete,
+      publicRead,
+      login,
+      callback,
+    };
+  };
+  it("pins public GETs and performs public reads → brand login → SSO document → one refresh, without OIDC", () => {
+    const f = create();
+    const parsed = parseTask51StageBExecutionSources(
+      `${canonicalTask51Json(f.source)}\n`
+    );
+    expect(parsed.value.prewarm.oidc).toBe(null);
+    f.complete("GET", ROOT_URL, "document");
+    f.complete("GET", f.contract.documentUrls[1], "document");
+    f.publicRead();
+    f.login();
+    f.callback();
+    f.complete("POST", f.contract.sso.refreshUrl);
+    f.complete("GET", f.contract.bootstrapReads[1].url);
+    f.supervisor.enterTransition();
+    f.complete("GET", f.contract.transitionUserInfoUrl);
+    f.supervisor.enterQuiet(1000);
+    expect(() =>
+      f.supervisor.assertReadyToClaim(
+        1000 + supervisorModule.TASK51_AUTH_QUIET_MS - 1
+      )
+    ).toThrow();
+    f.supervisor.assertReadyToClaim(
+      1000 + supervisorModule.TASK51_AUTH_QUIET_MS
+    );
+    expect(f.supervisor.snapshot()).toMatchObject({
+      mode: "strict",
+      ssoCallbackDocumentCount: 1,
+      ssoRefreshPostCount: 1,
+    });
+  });
+  it.each([
+    "refresh-before-login",
+    "refresh-before-callback",
+    "read-before-refresh",
+    "read-before-refresh-finished",
+    "duplicate-refresh",
+    "wrong-refresh",
+    "callback-as-fetch",
+    "callback-before-login",
+    "public-after-login",
+    "extra-public-get",
+    "login-before-public",
+    "failed-refresh",
+    "refresh-in-quiet",
+  ])("rejects %s at admission/terminal instead of proceeding", (fault) => {
+    const f = create();
+    if (fault === "refresh-before-login")
+      expect(f.begin("POST", f.contract.sso.refreshUrl).decision.allowed).toBe(
+        false
+      );
+    else if (fault === "callback-before-login")
+      expect(
+        f.begin("GET", f.contract.sso.callbackDocumentUrl, "document").decision
+          .allowed
+      ).toBe(false);
+    else if (fault === "extra-public-get")
+      expect(
+        f.begin("GET", f.contract.bootstrapReads[0].url + "&page=2").decision
+          .allowed
+      ).toBe(false);
+    else if (fault === "login-before-public")
+      expect(f.begin("POST", f.contract.loginUrl).decision.allowed).toBe(false);
+    else {
+      f.publicRead();
+      f.login();
+      if (fault === "public-after-login")
+        expect(
+          f.begin("GET", f.contract.bootstrapReads[0].url).decision.allowed
+        ).toBe(false);
+      else if (fault === "refresh-before-callback")
+        expect(
+          f.begin("POST", f.contract.sso.refreshUrl).decision.allowed
+        ).toBe(false);
+      else if (fault === "callback-as-fetch")
+        expect(
+          f.begin("GET", f.contract.sso.callbackDocumentUrl).decision.allowed
+        ).toBe(false);
+      else {
+        f.callback();
+        if (fault === "read-before-refresh")
+          expect(
+            f.begin("GET", f.contract.bootstrapReads[1].url).decision.allowed
+          ).toBe(false);
+        else if (fault === "wrong-refresh")
+          expect(
+            f.begin("POST", "https://other.example/api-auth/v1/auth/refresh")
+              .decision.allowed
+          ).toBe(false);
+        else if (
+          fault === "read-before-refresh-finished" ||
+          fault === "failed-refresh"
+        ) {
+          const { request, decision } = f.begin(
+            "POST",
+            f.contract.sso.refreshUrl
+          );
+          expect(decision.allowed).toBe(true);
+          if (fault === "read-before-refresh-finished")
+            expect(
+              f.begin("GET", f.contract.bootstrapReads[1].url).decision.allowed
+            ).toBe(false);
+          else
+            expect(
+              f.supervisor.finishRequest(request.id, { httpStatus: 401 })
+                .allowed
+            ).toBe(false);
+        } else {
+          f.complete("POST", f.contract.sso.refreshUrl);
+          if (fault === "refresh-in-quiet") {
+            f.complete("GET", f.contract.bootstrapReads[1].url);
+            f.supervisor.enterTransition();
+            f.complete("GET", f.contract.transitionUserInfoUrl);
+            f.supervisor.enterQuiet(1000);
+          }
+          expect(
+            f.begin("POST", f.contract.sso.refreshUrl).decision.allowed
+          ).toBe(false);
+        }
+      }
+    }
+    expect(() => f.supervisor.enterTransition()).toThrow();
+  });
+  it.each([
+    "missing-public-grant",
+    "missing-public-source",
+    "wrong-info-origin",
+    "fragment-callback",
+    "oidc-and-sso",
+    "public-range",
+    "wrong-phase",
+  ])("fails closed for %s in the owner-bound contract", (fault) => {
+    const value = ssoExecutionSourcesFixture();
+    if (fault === "missing-public-grant") {
+      value.prewarm.bootstrapReads.shift();
+      value.currentWeb.networkProvenance.bootstrapReadAllowlist.shift();
+      const supervisor = supervisorModule.createTask51PreArmSupervisor({
+        staticUrls: value.currentWeb.networkProvenance.staticUrlManifest,
+        prewarmContract: value.prewarm,
+      });
+      expect(
+        supervisor.beginRequest(
+          descriptor(
+            "ungranted",
+            "GET",
+            ssoExecutionSourcesFixture().prewarm.bootstrapReads[0].url
+          )
+        ).allowed
+      ).toBe(false);
+      return;
+    }
+    if (fault === "missing-public-source")
+      value.publicSources = value.publicSources.filter(
+        ({ url }) => url !== value.prewarm.bootstrapReads[0].url
+      );
+    if (fault === "wrong-info-origin")
+      value.prewarm.transitionUserInfoUrl =
+        "https://other.example/api/v1/user/info";
+    if (fault === "fragment-callback")
+      value.prewarm.sso.callbackDocumentUrl += "#unread-fragment";
+    if (fault === "oidc-and-sso")
+      value.prewarm.oidc = {
+        authorizeUrl: "https://xrugc.com/api-auth/authorize",
+        tokenUrl: "https://xrugc.com/api-auth/token",
+        clientId: "test",
+        redirectUri: "https://d.xrugc.com/auth/callback",
+        scope: "openid",
+      };
+    if (fault === "public-range")
+      value.prewarm.bootstrapReads[0].maximumCount = 2;
+    if (fault === "wrong-phase")
+      value.prewarm.bootstrapReads[0].phase = "any-time";
+    expect(() =>
+      parseTask51StageBExecutionSources(`${canonicalTask51Json(value)}\n`)
+    ).toThrow();
+  });
+  it("obtains refresh metadata without reading auth material", async () => {
+    const forbidden = vi.fn(() => {
+      throw new Error("auth material must not be read");
+    });
+    const request = {
+      method: () => "POST",
+      url: () => "https://d.xrugc.com/api-auth/v1/auth/refresh",
+      resourceType: () => "xhr",
+      redirectedFrom: () => null,
+      headerValue: forbidden,
+      allHeaders: forbidden,
+      headers: forbidden,
+      postData: forbidden,
+      postDataJSON: forbidden,
+    };
+    expect(
+      await createTask51SafeRequestDescriptor(request, "refresh-metadata")
+    ).toMatchObject({
+      method: "POST",
+      corsRequestHeaderNames: null,
+      corsRequestMethod: null,
+    });
+    expect(forbidden).not.toHaveBeenCalled();
+  });
+  it("admits only the exact public/refresh OPTIONS metadata and never an authorization-bearing public preflight", () => {
+    const f = create();
+    const preflight = (
+      id: string,
+      url: string,
+      method: string,
+      names: string
+    ) => descriptor(id, "OPTIONS", url, "other", false, method, names);
+    expect(
+      f.supervisor.beginRequest(
+        preflight(
+          "public-options",
+          f.contract.bootstrapReads[0].url,
+          "GET",
+          "content-type"
+        )
+      ).allowed
+    ).toBe(true);
+    expect(
+      f.supervisor.finishRequest("public-options", { httpStatus: 204 }).allowed
+    ).toBe(true);
+    f.publicRead();
+    f.login();
+    f.callback();
+    expect(
+      f.supervisor.beginRequest(
+        preflight(
+          "refresh-options",
+          f.contract.sso.refreshUrl,
+          "POST",
+          "content-type"
+        )
+      ).allowed
+    ).toBe(true);
+    expect(
+      f.supervisor.finishRequest("refresh-options", { httpStatus: 204 }).allowed
+    ).toBe(true);
+    f.complete("POST", f.contract.sso.refreshUrl);
+    const denied = create();
+    expect(
+      denied.supervisor.beginRequest(
+        preflight(
+          "public-auth-option",
+          denied.contract.bootstrapReads[0].url,
+          "GET",
+          "authorization,content-type"
+        )
+      ).allowed
+    ).toBe(false);
+  });
+});
+
+describe("Task 5.1 mandatory execution preflight", () => {
+  it("passes both matrix bindings through the same assembler used by the real F read", () => {
+    const prepared = {
+      approvalRef: "WP3-TASK51-MEMORY-RUNNER-STAGE-B-20260911",
+      executionId: "task51-stage-b-offline-test-20260911",
+      stageB: { expiresAt: "2026-09-11T03:00:00.000Z" },
+      productionDirectMatrixEvidenceRef: "reports/offline-matrix.json",
+      productionDirectMatrixSubjectDigest: "a".repeat(64),
+      stageBExecutionEvidenceSha256: "b".repeat(64),
+    };
+    const claim = {
+      claimedAt: "2026-09-11T02:00:00.000Z",
+      receiptSha256: "c".repeat(64),
+    };
+    expect(task51RunnerFragmentBindings(prepared, claim)).toMatchObject({
+      productionDirectMatrixEvidenceRef:
+        prepared.productionDirectMatrixEvidenceRef,
+      productionDirectMatrixSubjectDigest:
+        prepared.productionDirectMatrixSubjectDigest,
+    });
+    for (const key of [
+      "productionDirectMatrixEvidenceRef",
+      "productionDirectMatrixSubjectDigest",
+    ]) {
+      const incomplete = { ...prepared };
+      delete incomplete[key];
+      expect(() => task51RunnerFragmentBindings(incomplete, claim)).toThrow(
+        "TASK51_RUNNER_FRAGMENT_BINDINGS_REJECTED"
+      );
+    }
+  });
+  it("rejects missing sources before prepare, launch or claim", async () => {
+    const launch = vi.fn();
+    const prepare = vi.spyOn(supervisorModule, "prepareTask51StageB");
+    const claim = vi.spyOn(supervisorModule, "claimPreparedTask51StageB");
+    try {
+      await expect(
+        runTask51HeadedNetworkAttestor({}, { chromium: { launch } })
+      ).rejects.toThrow("TASK51_EXECUTION_PREFLIGHT_INPUTS_REJECTED");
+      expect(prepare).not.toHaveBeenCalled();
+      expect(launch).not.toHaveBeenCalled();
+      expect(claim).not.toHaveBeenCalled();
+    } finally {
+      prepare.mockRestore();
+      claim.mockRestore();
+    }
+  });
+});
 
 describe("Task 5.1 browser network fixed ledger", () => {
   it("uses the exact same runner route in the supervisor and network policy", () => {
@@ -662,6 +1533,39 @@ describe("Task 5.1 browser network fixed ledger", () => {
 });
 
 describe("Task 5.1 canonical safe network receipt", () => {
+  it("binds each candidate to its own branch tree without rewriting historical trees", () => {
+    const artifact = JSON.parse(stageAAttestorArtifact());
+    const release = artifact.networkAttestorRelease;
+    // These are the distinct develop and main/publish trees in frozen A.
+    release.developTreeSha = "91156708b83917d60649dbb32d05d76429373bf2";
+    release.mainTreeSha = "1a97799debc710fda38a72f193921afaf2432512";
+    release.publishTreeSha = release.mainTreeSha;
+    release.ciTreeSha = release.publishTreeSha;
+    for (const branch of ["develop", "main", "publish"]) {
+      release[`${branch}CandidateTreeSha`] = release[`${branch}TreeSha`];
+    }
+    const raw = `${canonicalTask51Json(artifact)}\n`;
+    expect(parseTask51NetworkAttestorReleaseEvidence(raw).raw).toBe(raw);
+    for (const branch of ["develop", "main", "publish"]) {
+      const invalid = structuredClone(artifact);
+      invalid.networkAttestorRelease[`${branch}CandidateTreeSha`] =
+        branch === "develop" ? release.mainTreeSha : release.developTreeSha;
+      expect(() =>
+        parseTask51NetworkAttestorReleaseEvidence(
+          `${canonicalTask51Json(invalid)}\n`
+        )
+      ).toThrow("TASK51_STAGE_A_ATTESTOR_RELEASE_REJECTED");
+    }
+    const invalidContent = structuredClone(artifact);
+    invalidContent.networkAttestorRelease.mainCandidateContentSha256 =
+      "8".repeat(64);
+    expect(() =>
+      parseTask51NetworkAttestorReleaseEvidence(
+        `${canonicalTask51Json(invalidContent)}\n`
+      )
+    ).toThrow("TASK51_STAGE_A_ATTESTOR_RELEASE_REJECTED");
+  });
+
   it("parses canonical Stage A attestor bytes and rejects provenance forgery", () => {
     const raw = stageAAttestorArtifact();
     const parsed = parseTask51NetworkAttestorReleaseEvidence(raw);

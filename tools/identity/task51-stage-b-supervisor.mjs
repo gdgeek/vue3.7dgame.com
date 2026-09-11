@@ -182,12 +182,14 @@ function hasExactKeys(value, keys) {
 }
 
 function isJsonEvidenceRef(value) {
-  return typeof value === "string" &&
+  return (
+    typeof value === "string" &&
     value.length <= 256 &&
     /^reports\/[A-Za-z0-9._/-]+\.json$/.test(value) &&
     !value
       .split("/")
-      .some((segment) => segment === "" || segment === "." || segment === "..");
+      .some((segment) => segment === "" || segment === "." || segment === "..")
+  );
 }
 
 function isTimestamp(value) {
@@ -830,7 +832,8 @@ function validateFragment(raw, bindings) {
   const roleSubjectDigests = new Map();
   for (const cell of value.safeCellResults) {
     const first = roleSubjectDigests.get(cell.role);
-    if (first === undefined) roleSubjectDigests.set(cell.role, cell.roleSubjectDigest);
+    if (first === undefined)
+      roleSubjectDigests.set(cell.role, cell.roleSubjectDigest);
     else if (first !== cell.roleSubjectDigest) {
       throw new Error("TASK51_RUNNER_FRAGMENT_REJECTED");
     }
@@ -840,7 +843,9 @@ function validateFragment(raw, bindings) {
     new Set(roleSubjectDigests.values()).size !== ROLES.length ||
     sha256(
       canonicalTask51StageBJson(
-        Object.fromEntries(ROLES.map((role) => [role, roleSubjectDigests.get(role)]))
+        Object.fromEntries(
+          ROLES.map((role) => [role, roleSubjectDigests.get(role)])
+        )
       )
     ) !== value.productionDirectMatrixSubjectDigest
   ) {
@@ -878,8 +883,15 @@ export async function readTask51RunnerFragment(path, bindings, overrides = {}) {
 export function createTask51PreArmSupervisor({
   bootstrapReadAllowlist = [],
   staticUrls,
+  prewarmContract = null,
   onViolation = () => {},
 } = {}) {
+  if (prewarmContract !== null)
+    return createCurrentPreArmSupervisor(
+      prewarmContract,
+      staticUrls,
+      onViolation
+    );
   const allowedStatic = new Set(staticUrls);
   if (
     !Array.isArray(bootstrapReadAllowlist) ||
@@ -1126,5 +1138,420 @@ export function createTask51PreArmSupervisor({
     finishRequest: (id) => terminateRequest(id, false),
     failRequest: (id) => terminateRequest(id, true),
     snapshot,
+  });
+}
+
+function exactPublicUrl(value) {
+  try {
+    const url = new URL(value);
+    return (
+      url.href === value &&
+      url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      !url.hash &&
+      value.length <= 2048
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** These are format/resource ceilings, not a production request grant. A new
+ * contract is usable only behind the independently owner-anchored preflight. */
+export function assertTask51PrewarmContract(contract) {
+  const fail = () => {
+    throw new Error("TASK51_PREWARM_CONTRACT_REJECTED");
+  };
+  if (
+    !hasExactKeys(contract, [
+      "warmUrl",
+      "documentUrls",
+      "loginUrl",
+      "oidc",
+      "bootstrapReads",
+      "transitionUserInfoUrl",
+      ...(Object.hasOwn(contract ?? {}, "sso") ? ["sso"] : []),
+    ]) ||
+    contract.warmUrl !== TASK51_WARM_URL ||
+    !Array.isArray(contract.documentUrls) ||
+    contract.documentUrls.length < 1 ||
+    contract.documentUrls.length > 8 ||
+    contract.documentUrls[0] !== contract.warmUrl ||
+    contract.documentUrls.some((url) => !exactPublicUrl(url)) ||
+    new Set(contract.documentUrls).size !== contract.documentUrls.length ||
+    !exactPublicUrl(contract.loginUrl) ||
+    !new URL(contract.loginUrl).pathname.endsWith("/v1/auth/login") ||
+    new URL(contract.loginUrl).search ||
+    (!USER_INFO_URLS.has(contract.transitionUserInfoUrl) &&
+      contract.transitionUserInfoUrl !==
+        `${TASK51_PRODUCTION_ORIGIN}/api/v1/user/info`) ||
+    !Array.isArray(contract.bootstrapReads) ||
+    contract.bootstrapReads.length < 1 ||
+    contract.bootstrapReads.length > 64 ||
+    contract.bootstrapReads.some(
+      (entry) =>
+        !hasExactKeys(entry, [
+          "url",
+          "minimumCount",
+          "maximumCount",
+          ...(Object.hasOwn(entry ?? {}, "phase") ? ["phase"] : []),
+        ]) ||
+        (entry.phase !== undefined &&
+          !["before-login-public", "after-authentication"].includes(
+            entry.phase
+          )) ||
+        (entry.phase === "before-login-public" &&
+          (entry.minimumCount < 1 ||
+            entry.minimumCount !== entry.maximumCount)) ||
+        !exactPublicUrl(entry.url) ||
+        [...new URL(entry.url).searchParams.keys()].some((key) =>
+          /token|password|secret|code|credential|authorization|cookie/i.test(
+            key
+          )
+        ) ||
+        !Number.isSafeInteger(entry.minimumCount) ||
+        !Number.isSafeInteger(entry.maximumCount) ||
+        entry.minimumCount < 0 ||
+        entry.maximumCount < Math.max(1, entry.minimumCount) ||
+        entry.maximumCount > 16
+    ) ||
+    new Set(contract.bootstrapReads.map(({ url }) => url)).size !==
+      contract.bootstrapReads.length ||
+    contract.bootstrapReads.reduce(
+      (sum, entry) => sum + entry.maximumCount,
+      0
+    ) > 128
+  )
+    fail();
+  if (contract.sso !== undefined && contract.sso !== null) {
+    const sso = contract.sso;
+    if (
+      !hasExactKeys(sso, ["callbackDocumentUrl", "refreshUrl"]) ||
+      contract.oidc !== null ||
+      sso.callbackDocumentUrl !== `${TASK51_PRODUCTION_ORIGIN}/sso` ||
+      !contract.documentUrls.includes(sso.callbackDocumentUrl) ||
+      !exactPublicUrl(sso.refreshUrl) ||
+      new URL(sso.refreshUrl).search ||
+      !new URL(sso.refreshUrl).pathname.endsWith("/v1/auth/refresh") ||
+      ![TASK51_PRODUCTION_ORIGIN, new URL(contract.loginUrl).origin].includes(
+        new URL(sso.refreshUrl).origin
+      )
+    )
+      fail();
+  }
+  if (contract.oidc !== null) {
+    const oidc = contract.oidc;
+    if (
+      !hasExactKeys(oidc, [
+        "authorizeUrl",
+        "tokenUrl",
+        "clientId",
+        "redirectUri",
+        "scope",
+      ]) ||
+      ![oidc.authorizeUrl, oidc.tokenUrl, oidc.redirectUri].every(
+        exactPublicUrl
+      ) ||
+      new URL(oidc.authorizeUrl).origin !== new URL(contract.loginUrl).origin ||
+      new URL(oidc.tokenUrl).origin !== new URL(contract.loginUrl).origin ||
+      !new URL(oidc.authorizeUrl).pathname.endsWith("/authorize") ||
+      new URL(oidc.authorizeUrl).search ||
+      !new URL(oidc.tokenUrl).pathname.endsWith("/token") ||
+      new URL(oidc.tokenUrl).search ||
+      !/^[A-Za-z0-9._-]{1,128}$/.test(oidc.clientId) ||
+      !/^[A-Za-z0-9._: -]{1,256}$/.test(oidc.scope)
+    )
+      fail();
+  }
+  return true;
+}
+
+function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
+  assertTask51PrewarmContract(contract);
+  const statics = new Set(staticUrls);
+  const active = new Map();
+  const reads = new Map(
+    contract.bootstrapReads.map((entry) => [entry.url, { ...entry, count: 0 }])
+  );
+  const options = new Map();
+  let mode = "bootstrap";
+  let loginCount = 0;
+  let authorizeCount = 0;
+  let tokenCount = 0;
+  let ssoDocumentCount = 0;
+  let refreshCount = 0;
+  let transitionCount = 0;
+  let quietStartedAt = null;
+  let unexpectedRequestCount = 0;
+  const violate = (code) => {
+    unexpectedRequestCount++;
+    onViolation(code);
+    return Object.freeze({ allowed: false, code });
+  };
+  function requestKind(method, url) {
+    if (url.href === contract.loginUrl && method === "POST") return "login";
+    if (
+      contract.sso &&
+      url.href === contract.sso.refreshUrl &&
+      method === "POST"
+    )
+      return "sso-refresh";
+    if (
+      contract.oidc &&
+      method === "GET" &&
+      url.origin + url.pathname === contract.oidc.authorizeUrl
+    ) {
+      const p = url.searchParams;
+      const keys = [
+        "response_type",
+        "response_mode",
+        "client_id",
+        "redirect_uri",
+        "scope",
+        "state",
+        "code_challenge",
+        "code_challenge_method",
+      ];
+      if (
+        [...p.keys()].length !== keys.length ||
+        keys.some((key) => p.getAll(key).length !== 1) ||
+        p.get("response_type") !== "code" ||
+        p.get("response_mode") !== "json" ||
+        p.get("client_id") !== contract.oidc.clientId ||
+        p.get("redirect_uri") !== contract.oidc.redirectUri ||
+        p.get("scope") !== contract.oidc.scope ||
+        p.get("code_challenge_method") !== "S256" ||
+        !/^[A-Za-z0-9_-]{16,128}$/.test(p.get("state") ?? "") ||
+        !/^[A-Za-z0-9_-]{43}$/.test(p.get("code_challenge") ?? "")
+      )
+        return null;
+      return "authorize";
+    }
+    if (
+      contract.oidc &&
+      url.href === contract.oidc.tokenUrl &&
+      method === "POST"
+    )
+      return "token";
+    if (method === "GET" && reads.has(url.href))
+      return reads.get(url.href).phase === "before-login-public"
+        ? "public-read"
+        : "read";
+    return null;
+  }
+  function beginRequest(descriptor) {
+    if (
+      !hasExactKeys(descriptor, [
+        "corsRequestHeaderNames",
+        "corsRequestMethod",
+        "id",
+        "method",
+        "redirected",
+        "resourceType",
+        "url",
+      ]) ||
+      ["id", "method", "resourceType", "url"].some(
+        (key) => typeof descriptor[key] !== "string" || !descriptor[key]
+      ) ||
+      ["corsRequestHeaderNames", "corsRequestMethod"].some(
+        (key) => descriptor[key] !== null && typeof descriptor[key] !== "string"
+      ) ||
+      active.has(descriptor.id) ||
+      descriptor.redirected !== false ||
+      !exactPublicUrl(descriptor.url)
+    )
+      return violate("TASK51_PREARM_REQUEST_REJECTED");
+    const method = descriptor.method.toUpperCase();
+    const resource = descriptor.resourceType.toLowerCase();
+    if (["websocket", "ping"].includes(resource))
+      return violate("TASK51_PREARM_CHANNEL_REJECTED");
+    if (method === "GET" && statics.has(descriptor.url)) {
+      if (contract.sso && descriptor.url === contract.sso.callbackDocumentUrl) {
+        if (
+          resource !== "document" ||
+          mode !== "bootstrap" ||
+          loginCount !== 1 ||
+          active.size !== 0 ||
+          ssoDocumentCount !== 0 ||
+          unexpectedRequestCount
+        )
+          return violate("TASK51_PREARM_SSO_DOCUMENT_REJECTED");
+        ssoDocumentCount++;
+      }
+      return Object.freeze({ allowed: true, category: "static" });
+    }
+    if (
+      !(
+        ["fetch", "xhr"].includes(resource) ||
+        (method === "OPTIONS" && resource === "other")
+      )
+    )
+      return violate("TASK51_PREARM_REQUEST_REJECTED");
+    if (
+      method !== "OPTIONS" &&
+      (descriptor.corsRequestHeaderNames !== null ||
+        descriptor.corsRequestMethod !== null)
+    )
+      return violate("TASK51_PREARM_REQUEST_REJECTED");
+    const url = new URL(descriptor.url);
+    const effectiveMethod =
+      method === "OPTIONS"
+        ? descriptor.corsRequestMethod?.toUpperCase()
+        : method;
+    let kind = requestKind(effectiveMethod, url);
+    if (mode === "transition")
+      kind =
+        effectiveMethod === "GET" && url.href === contract.transitionUserInfoUrl
+          ? "transition"
+          : null;
+    if (mode === "quiet" || mode === "strict" || !kind)
+      return violate("TASK51_PREARM_QUIET_REQUEST_REJECTED");
+    if (
+      (kind === "login" &&
+        (loginCount !== 0 ||
+          active.size !== 0 ||
+          [...reads.values()].some(
+            (entry) =>
+              entry.phase === "before-login-public" &&
+              entry.count !== entry.minimumCount
+          ))) ||
+      (kind === "authorize" &&
+        (loginCount !== 1 || authorizeCount !== 0 || active.size !== 0)) ||
+      (kind === "token" &&
+        (authorizeCount !== 1 || tokenCount !== 0 || active.size !== 0)) ||
+      (kind === "sso-refresh" &&
+        (loginCount !== 1 ||
+          ssoDocumentCount !== 1 ||
+          refreshCount !== 0 ||
+          active.size !== 0)) ||
+      (kind === "public-read" &&
+        (loginCount !== 0 ||
+          reads.get(url.href).count >= reads.get(url.href).maximumCount)) ||
+      (kind === "read" &&
+        (loginCount !== 1 ||
+          [...active.values()].some((entry) =>
+            ["login", "authorize", "token", "sso-refresh"].includes(entry.kind)
+          ) ||
+          (contract.oidc && tokenCount !== 1) ||
+          (contract.sso &&
+            (refreshCount !== 1 ||
+              [...active.values()].some(
+                (entry) => entry.kind === "sso-refresh"
+              ))) ||
+          reads.get(url.href).count >= reads.get(url.href).maximumCount)) ||
+      (kind === "transition" && transitionCount !== 0)
+    )
+      return violate("TASK51_PREARM_BOOTSTRAP_REJECTED");
+    if (method === "OPTIONS") {
+      const names = descriptor.corsRequestHeaderNames
+        ?.split(",")
+        .map((name) => name.trim().toLowerCase())
+        .sort()
+        .join(",");
+      const expected = [
+        "login",
+        "token",
+        "sso-refresh",
+        "public-read",
+      ].includes(kind)
+        ? "content-type"
+        : "authorization,content-type";
+      const count = options.get(url.href) ?? 0;
+      const limit = ["read", "public-read"].includes(kind)
+        ? reads.get(url.href).maximumCount
+        : 1;
+      if (names !== expected || count >= limit)
+        return violate("TASK51_PREARM_REQUEST_REJECTED");
+      options.set(url.href, count + 1);
+      active.set(descriptor.id, { kind: "options" });
+    } else {
+      if (kind === "login") loginCount++;
+      if (kind === "authorize") authorizeCount++;
+      if (kind === "token") tokenCount++;
+      if (kind === "sso-refresh") refreshCount++;
+      if (["read", "public-read"].includes(kind)) reads.get(url.href).count++;
+      if (kind === "transition") transitionCount++;
+      active.set(descriptor.id, { kind });
+    }
+    return Object.freeze({ allowed: true, category: "prearm" });
+  }
+  function finishRequest(id, metadata) {
+    const record = active.get(id);
+    if (!record) return violate("TASK51_PREARM_TERMINAL_REJECTED");
+    active.delete(id);
+    const statuses =
+      record.kind === "options"
+        ? [200, 204]
+        : record.kind === "login"
+          ? [200, 201]
+          : [200];
+    if (
+      !hasExactKeys(metadata, ["httpStatus"]) ||
+      !statuses.includes(metadata.httpStatus)
+    )
+      return violate("TASK51_PREARM_FAILURE_REJECTED");
+    return Object.freeze({ allowed: true, category: "prearm" });
+  }
+  return Object.freeze({
+    beginRequest,
+    finishRequest,
+    failRequest: (id) => {
+      active.delete(id);
+      return violate("TASK51_PREARM_FAILURE_REJECTED");
+    },
+    enterTransition: () => {
+      if (
+        mode !== "bootstrap" ||
+        active.size ||
+        unexpectedRequestCount ||
+        loginCount !== 1 ||
+        (contract.oidc && (authorizeCount !== 1 || tokenCount !== 1)) ||
+        (contract.sso && (ssoDocumentCount !== 1 || refreshCount !== 1)) ||
+        [...reads.values()].some((entry) => entry.count < entry.minimumCount)
+      )
+        throw new Error("TASK51_PREARM_TRANSITION_GATE_REJECTED");
+      mode = "transition";
+    },
+    enterQuiet: (nowMs) => {
+      if (
+        mode !== "transition" ||
+        active.size ||
+        transitionCount !== 1 ||
+        unexpectedRequestCount
+      )
+        throw new Error("TASK51_PREARM_QUIET_GATE_REJECTED");
+      mode = "quiet";
+      quietStartedAt = nowMs;
+    },
+    assertReadyToClaim: (nowMs) => {
+      if (
+        mode !== "quiet" ||
+        active.size ||
+        unexpectedRequestCount ||
+        quietStartedAt === null ||
+        nowMs - quietStartedAt < TASK51_AUTH_QUIET_MS
+      )
+        throw new Error("TASK51_PREARM_CLAIM_GATE_REJECTED");
+      mode = "strict";
+    },
+    snapshot: () =>
+      Object.freeze({
+        mode,
+        activeRequestCount: active.size,
+        unexpectedRequestCount,
+        quietStartedAt,
+        bootstrapLoginPostCount: loginCount,
+        ...(contract.sso
+          ? {
+              ssoCallbackDocumentCount: ssoDocumentCount,
+              ssoRefreshPostCount: refreshCount,
+            }
+          : {}),
+        bootstrapReadCount: [...reads.values()].reduce(
+          (sum, entry) => sum + entry.count,
+          0
+        ),
+      }),
   });
 }
