@@ -34,7 +34,9 @@
       :frame-visible="unityPreviewFrameVisible"
       :frame-key="unityPreviewFrameKey"
       :src="unityPreviewSrc"
-      @closed="handleUnityPreviewClosed"
+      @close="handleUnityPreviewClosed"
+      :state="unityPreviewState"
+      @retry="runSceneRuntimePreview"
       @frame-load="handleUnityPreviewLoad"
     ></UnityPreviewDialog>
   </div>
@@ -52,7 +54,12 @@ import { logger } from "@/utils/logger";
 import { hasPublishableSceneContent } from "@/utils/versePublish";
 import { saveThenPublishScene } from "@/utils/scenePublish";
 import { takePhoto } from "@/api/v1/verse";
-import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
+import {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useRoute,
+  useRouter,
+} from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 //import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
@@ -161,6 +168,7 @@ const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
+    onRunPreview: runSceneRuntimePreview,
   });
 };
 const toolbarStatus = computed<EditorToolbarStatus>(() => {
@@ -237,14 +245,16 @@ const src = computed(() => {
 const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 
-const ensureUnityPreviewRuntimeData = async () => {
+const ensureUnityPreviewRuntimeData = async (signal?: AbortSignal) => {
   if (verseMetasWithLuaCodeData.value && verseMetasWithJsCodeData.value) return;
   if (!Number.isFinite(id.value)) return;
 
+  const requestedId = id.value;
   const [responseLua, responseJs] = await Promise.all([
-    getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
-    getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "js"),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "lua", signal),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "js", signal),
   ]);
+  if (signal?.aborted || requestedId !== id.value) return;
   verseMetasWithLuaCodeData.value =
     responseLua.data as unknown as VerseMetasWithJsCode;
   verseMetasWithJsCodeData.value =
@@ -300,6 +310,7 @@ const unityPreviewVisible = unityPreview.visible;
 const unityPreviewFrameVisible = unityPreview.frameVisible;
 const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
+const unityPreviewState = unityPreview.runtimeState;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
 
@@ -322,28 +333,11 @@ const checkPublicationResources = async () => {
   return report;
 };
 
-const getSceneRuntimePreviewStatus = () => {
-  const visible = unityPreview.visible.value;
-  const ready = unityPreview.ready.value;
-  const status = visible ? unityPreview.status.value : "预览已关闭";
-  let phase: "closed" | "loading" | "ready" | "running" | "attention" =
-    "loading";
-  if (!visible) phase = "closed";
-  else if (status.includes("已在 Unity 中运行")) phase = "running";
-  else if (unityPreview.failure.value || status.includes("若画面为空"))
-    phase = "attention";
-  else if (ready) phase = "ready";
-  return {
-    sceneId: Number.isFinite(id.value) ? id.value : null,
-    sceneName: verse.value?.name ?? null,
-    visible,
-    frameVisible: unityPreview.frameVisible.value,
-    ready,
-    phase,
-    status,
-    failure: unityPreview.failure.value,
-  };
-};
+const getSceneRuntimePreviewStatus = () => ({
+  sceneId: Number.isFinite(id.value) ? id.value : null,
+  sceneName: verse.value?.name ?? null,
+  ...unityPreview.runtimeState.value,
+});
 
 const verse = ref<VerseData | null>(null);
 const pushVerseToEditor = (
@@ -1569,6 +1563,48 @@ onMounted(() => {
   registerPageWebMcpTools();
 });
 
+const startSceneRuntimePreview = async () => {
+  const scene = verse.value;
+  if (!scene || !Number.isFinite(scene.id)) {
+    throw new Error("场景数据尚未加载完成");
+  }
+  if (!scene.viewable) {
+    throw new Error("当前账号没有预览此场景的权限");
+  }
+
+  const liveState = await getLiveSceneState();
+  const hasUnsavedChanges =
+    liveState.changed ||
+    hasUnsavedChangesBeforeUnload.value ||
+    Boolean(pendingRestorePayload.value);
+  hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+  if (liveState.loading) {
+    throw new Error("场景实体仍在加载，暂时不能启动运行预览");
+  }
+  if (hasUnsavedChanges) {
+    throw new Error("运行预览读取已保存版本，请先保存当前场景修改");
+  }
+  const validation = validateScene(scene, liveState);
+  if (!validation.valid) {
+    throw new Error(`场景校验失败：${validation.errors.join("；")}`);
+  }
+  if (validation.moduleCount === 0) {
+    throw new Error("空场景不能启动运行预览");
+  }
+
+  verseMetasWithLuaCodeData.value = undefined;
+  verseMetasWithJsCodeData.value = undefined;
+  await unityPreview.open();
+  return getSceneRuntimePreviewStatus();
+};
+const runSceneRuntimePreview = () => {
+  void startSceneRuntimePreview().catch((error) => {
+    ElMessage.error(
+      error instanceof Error ? error.message : "无法启动场景运行"
+    );
+  });
+};
+
 const registerPageWebMcpTools = () => {
   const ownerId = id.value;
   const ownerSession = getHostSessionId();
@@ -2202,43 +2238,9 @@ const registerPageWebMcpTools = () => {
     validateForReadiness: async () =>
       validateScene(verse.value, await getLiveSceneState()),
     getPreviewStatus: getSceneRuntimePreviewStatus,
-    startPreview: async () => {
-      const scene = verse.value;
-      if (!scene || !Number.isFinite(scene.id)) {
-        throw new Error("场景数据尚未加载完成");
-      }
-      if (!scene.viewable) {
-        throw new Error("当前账号没有预览此场景的权限");
-      }
-
-      const liveState = await getLiveSceneState();
-      const hasUnsavedChanges =
-        liveState.changed ||
-        hasUnsavedChangesBeforeUnload.value ||
-        Boolean(pendingRestorePayload.value);
-      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
-      if (liveState.loading) {
-        throw new Error("场景实体仍在加载，暂时不能启动运行预览");
-      }
-      if (hasUnsavedChanges) {
-        throw new Error("运行预览读取已保存版本，请先保存当前场景修改");
-      }
-      const validation = validateScene(scene, liveState);
-      if (!validation.valid) {
-        throw new Error(`场景校验失败：${validation.errors.join("；")}`);
-      }
-      if (validation.moduleCount === 0) {
-        throw new Error("空场景不能启动运行预览");
-      }
-
-      verseMetasWithLuaCodeData.value = undefined;
-      verseMetasWithJsCodeData.value = undefined;
-      if (unityPreview.visible.value) unityPreview.close();
-      await unityPreview.open();
-      return getSceneRuntimePreviewStatus();
-    },
+    startPreview: startSceneRuntimePreview,
     stopPreview: async () => {
-      unityPreview.close();
+      await unityPreview.close();
       return getSceneRuntimePreviewStatus();
     },
     onRegistrationError: (toolName, error) => {
@@ -2259,7 +2261,11 @@ onDeactivated(() => {
 
 onBeforeRouteLeave(async (_to, _from, next) => {
   const canLeave = await resolveUnsavedBeforeLeave();
+  if (canLeave) await unityPreview.close();
   next(canLeave);
+});
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.query.id !== from.query.id) await unityPreview.close();
 });
 
 watch(toolbarStatus, (status) => {

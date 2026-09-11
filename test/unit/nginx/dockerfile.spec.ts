@@ -15,7 +15,8 @@ let stagingDockerfile: string;
 
 const NODE_24_ALPINE_PATTERN =
   /^FROM (node:24-alpine@sha256:[a-f0-9]{64}) AS build$/m;
-const NGINX_ALPINE_PATTERN = /^FROM (nginx:alpine@sha256:[a-f0-9]{64})$/m;
+const NGINX_ALPINE_PATTERN =
+  /^FROM (nginx:alpine@sha256:[a-f0-9]{64})(?: AS final)?$/m;
 
 beforeAll(() => {
   rootDockerfile = readFileSync(
@@ -45,8 +46,23 @@ describe.each(dockerfiles)("$name", ({ get }) => {
 
     const fromLines = get().match(/^FROM .+$/gm) ?? [];
     expect(fromLines.length).toBeGreaterThan(0);
+    const declaredStages = new Set<string>();
     for (const fromLine of fromLines) {
-      expect(fromLine).toMatch(/@sha256:[a-f0-9]{64}(?:\s|$)/);
+      const match = fromLine.match(
+        /^FROM(?: --platform=\S+)? (\S+)(?: AS (\S+))?$/
+      );
+      expect(match).not.toBeNull();
+      const [, image, alias] = match!;
+      if (image === "${UNITY_PREVIOUS_IMAGE}") {
+        expect(get()).toMatch(
+          /^ARG UNITY_PREVIOUS_IMAGE=[^\s@]+@sha256:[a-f0-9]{64}$/m
+        );
+        expect(get()).toContain('"$UNITY_PREVIOUS_IMAGE" | grep -Eq');
+        expect(get()).toContain('--previous-image "$UNITY_PREVIOUS_IMAGE"');
+      } else if (!declaredStages.has(image)) {
+        expect(image).toMatch(/^[^\s@]+@sha256:[a-f0-9]{64}$/);
+      }
+      if (alias) declaredStages.add(alias);
     }
   });
 

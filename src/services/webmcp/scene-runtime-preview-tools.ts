@@ -1,3 +1,4 @@
+import type { UnityRuntimeViewState } from "@/services/unity/runtime";
 import type { WebMcpTool } from "./model-context";
 
 type JsonRecord = Record<string, unknown>;
@@ -10,8 +11,8 @@ export type SceneRuntimePreviewStatus = {
   ready: boolean;
   phase: "closed" | "loading" | "ready" | "running" | "attention";
   status: string;
-  failure?: { code: string; stage: string } | null;
-};
+  failure?: { code: string; stage: string; message?: string } | null;
+} & Partial<Omit<UnityRuntimeViewState, "failure">>;
 
 export type SceneRuntimePreviewToolOptions = {
   getPreviewStatus: () => SceneRuntimePreviewStatus;
@@ -61,7 +62,7 @@ export const createSceneRuntimePreviewTools = (
     name: "xrugc_stop_scene_runtime_preview",
     title: "停止 XRUGC 场景运行预览",
     description:
-      "关闭页面内可见 Unity 场景运行预览并清理当前预览 iframe 状态。不会修改、保存或发布场景。",
+      "停止页面内 Unity 预览，等待有界 Quit/销毁确认后移除 iframe。不会修改、保存或发布场景。",
     inputSchema: {
       type: "object",
       properties: {},

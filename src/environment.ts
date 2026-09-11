@@ -35,9 +35,6 @@ function title(): string {
 }
 */
 
-const productionUnityPreviewUrl = "/webgl-preview/embed.html";
-const developUnityPreviewUrl = "/webgl-preview/embed.html";
-
 const getRuntimeEnv = () =>
   (window as unknown as { __ENV__?: Record<string, string | undefined> })
     .__ENV__ || {};
@@ -222,33 +219,6 @@ const featureEnabled = (name: string, defaultValue: boolean) => {
   return typeof value === "boolean" ? value : defaultValue;
 };
 
-const isDevelopHost = () => {
-  const hostname = window.location.hostname.toLowerCase();
-  return (
-    hostname.includes(".dev.xrugc.com") || hostname.includes(".d.xrugc.com")
-  );
-};
-
-const resolveUnityPreviewUrl = () => {
-  const configuredUrl =
-    getRuntimeEnv().UNITY_PREVIEW_URL ||
-    import.meta.env.VITE_APP_UNITY_PREVIEW_URL ||
-    "";
-
-  if (
-    isDevelopHost() &&
-    (!configuredUrl || configuredUrl === productionUnityPreviewUrl)
-  ) {
-    return developUnityPreviewUrl;
-  }
-
-  if (configuredUrl) {
-    return configuredUrl;
-  }
-
-  return productionUnityPreviewUrl;
-};
-
 const environment = {
   api: resolveApiBase(),
   authApi: resolveAuthApiBase(),
@@ -268,7 +238,7 @@ const environment = {
       ?.EDITOR_URL ||
     import.meta.env.VITE_APP_EDITOR_URL ||
     "",
-  unityPreview: resolveUnityPreviewUrl(),
+  unityPreview: "/webgl-preview/active.json",
   version: 1,
   // This value is part of iframe URLs. It must change for every Web build so
   // browsers cannot reuse an older plugin entry HTML that references assets

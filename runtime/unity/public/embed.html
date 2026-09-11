@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity Web Player | Web Preview</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="./TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-logo-title-footer"></div>
+        <div id="unity-build-title">Web Preview</div>
+      </div>
+      <div id="web-preview-loading-shield">
+        <div id="web-preview-loading-panel">
+          <div id="web-preview-loading-title">正在加载 Unity 场景</div>
+          <div id="web-preview-loading-detail">正在准备 Unity 运行环境，请稍候。</div>
+        </div>
+      </div>
+    </div>
+    <script src="./modules/embed-parent-protocol.js"></script>
+    <script src="./modules/sw-build-cache.js"></script>
+    <script src="./modules/runtime-state.js"></script>
+    <script src="./modules/download-progress.js"></script>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingShield = document.querySelector("#web-preview-loading-shield");
+      var loadingTitle = document.querySelector("#web-preview-loading-title");
+      var loadingDetail = document.querySelector("#web-preview-loading-detail");
+      var webPreviewEmbedded = window.parent && window.parent !== window;
+      var webPreviewCacheActive = false;
+      var webPreviewUnityReady = false;
+      var webPreviewParams = new URLSearchParams(window.location.search);
+      var webPreviewParentProtocol = window.XRUGCEmbedParentProtocol.createEmbedParentProtocol({
+        embedded: webPreviewEmbedded,
+        parentWindow: window.parent,
+        parentOrigin: window.location.origin,
+        searchParams: webPreviewParams
+      });
+      var webPreviewSession = webPreviewParentProtocol.session;
+      var webPreviewParentOrigin = webPreviewParentProtocol.parentOrigin;
+      var webPreviewUnityInstance = null;
+      var webPreviewDisposed = false;
+      var webPreviewStartupFailed = false;
+      var webPreviewBridgeDispatch = null;
+      var webPreviewLoadingI18n = null;
+
+      var webPreviewAbortController = new AbortController();
+      var webPreviewCleanups = [];
+      var webPreviewRuntimeRelease = null;
+      var webPreviewRuntimeState = window.XRUGCUnityRuntimeState.createRuntimeState({
+        post: function(message) { webPreviewParentProtocol.post(message); },
+        setTimeout: window.setTimeout.bind(window),
+        clearTimeout: window.clearTimeout.bind(window),
+        sceneTimeoutMs: 120000
+      });
+      function postWebPreviewParent(message) {
+        if (message.type === "unity-web-preview-error") {
+          webPreviewRuntimeState.emit("error", { kind: "indeterminate" }, {
+            failure: { code: message.code, message: message.message }
+          });
+        }
+        return webPreviewParentProtocol.post(message);
+      }
+      // All fetches belong to this iframe. Cancellation never touches the host.
+      var originalWebPreviewFetch = window.fetch.bind(window);
+      window.fetch = function(input, options) {
+        var next = Object.assign({}, options || {});
+        var suppliedSignal = next.signal || (input instanceof Request ? input.signal : null);
+        var controller = new AbortController();
+        function abort() { controller.abort(); }
+        if (webPreviewAbortController.signal.aborted || (suppliedSignal && suppliedSignal.aborted)) abort();
+        webPreviewAbortController.signal.addEventListener("abort", abort, { once: true });
+        if (suppliedSignal) suppliedSignal.addEventListener("abort", abort, { once: true });
+        // Keep the abort wiring until disposal so cancelling also interrupts
+        // response streams after fetch has resolved.
+        webPreviewCleanups.push(function() {
+          webPreviewAbortController.signal.removeEventListener("abort", abort);
+          if (suppliedSignal) suppliedSignal.removeEventListener("abort", abort);
+        });
+        next.signal = controller.signal;
+        var requestUrl = new URL(input instanceof Request ? input.url : String(input), window.location.href);
+        var file = webPreviewBuildManifest && webPreviewBuildManifest.files.find(function(candidate) {
+          return new URL(candidate.url, window.location.href).href.split("?")[0] === requestUrl.href.split("?")[0];
+        });
+        var idleTimer;
+        function clearIdle() { window.clearTimeout(idleTimer); }
+        function resetIdle() {
+          clearIdle();
+          idleTimer = window.setTimeout(function() {
+            controller.abort();
+            webPreviewStartupFailed = true;
+            webPreviewAbortController.abort();
+            postWebPreviewParent({ type: "unity-web-preview-error", code: "UNITY_DOWNLOAD_STALLED", message: "Unity " + file.role + " download made no progress for 45 seconds." });
+          }, 45000);
+        }
+        if (file) {
+          resetIdle();
+          webPreviewCleanups.push(clearIdle);
+          controller.signal.addEventListener("abort", clearIdle, { once: true });
+        }
+        return originalWebPreviewFetch(input, next).then(function(response) {
+          if (!file || !response.body || !response.ok) { clearIdle(); return response; }
+          return window.XRUGCUnityDownloadProgress.trackResponse(response, file, function(progress) {
+            if (!webPreviewUnityReady && !webPreviewDisposed && !webPreviewLargeDataCacheReady) {
+              webPreviewRuntimeState.emit("downloading_runtime", progress);
+            } else if (!webPreviewUnityReady && !webPreviewDisposed && file.role !== "data") {
+              webPreviewRuntimeState.emit("downloading_runtime", progress);
+            }
+          }, { onActivity: resetIdle, onComplete: clearIdle, cached: requestUrl.searchParams.get("__xrugc_cache_ready") === "1" });
+        }).catch(function(error) { clearIdle(); throw error; });
+      };
+      async function loadWebPreviewRuntimeRelease() {
+        var url = new URL("runtime-release.json", window.location.href);
+        var response = await fetch(url, { cache: "no-store", credentials: "same-origin" });
+        if (!response.ok) throw new Error("Runtime release HTTP " + response.status);
+        var release = await response.json();
+        webPreviewParentProtocol.setIdentity(release);
+        if (new URL(".", window.location.href).pathname !== "/webgl-preview/releases/" + release.runtimeReleaseId + "/") {
+          throw new Error("Runtime release path does not match its identity");
+        }
+        webPreviewRuntimeRelease = release;
+        webPreviewRuntimeState.emit("preparing");
+      }
+      (function installWebPreviewConsoleFilter() {
+        var verbose = /^(1|true|debug|verbose)$/i.test(
+          String(webPreviewParams.get("debug") || webPreviewParams.get("verbose") || "")
+        );
+        if (verbose || window.__xrugcWebPreviewConsoleFilterInstalled) {
+          return;
+        }
+
+        window.__xrugcWebPreviewConsoleFilterInstalled = true;
+        var originalConsole = {
+          log: console.log.bind(console),
+          warn: console.warn.bind(console),
+          error: console.error.bind(console)
+        };
+        var noisyPatterns = [
+          /The AudioContext was not allowed to start/i,
+          /WebGL:\s*INVALID_ENUM:\s*getInternalformatParameter/i,
+          /Manual synchronization of Unity Application\.persistentDataPath/i,
+          /No active UnityEngine\.XR\./i,
+          /ARAnchor component .* failed to add itself to the anchor subsystem/i,
+          /^\s*(?:Shader Graphs\/|Legacy Shaders\/|Universal Render Pipeline\/|Hidden\/)/i,
+          /^\s*\[WebPreview\](?:\[| Scene content bounds:| Preview camera ready:| Event block=)/i
+        ];
+        var keepPatterns = [
+          /HTTP\/\d/i,
+          /\b(?:error|failed|exception|abort|denied|unauthorized|forbidden)\b/i,
+          /Failed to send scene json/i,
+          /Scene is running/i,
+          /Scene is visible/i
+        ];
+
+        function stringifyConsoleArgs(args) {
+          return Array.prototype.map.call(args, function(arg) {
+            if (typeof arg === "string") {
+              return arg;
+            }
+            if (arg instanceof Error) {
+              return arg.message || String(arg);
+            }
+            try {
+              return JSON.stringify(arg);
+            } catch (error) {
+              return String(arg);
+            }
+          }).join(" ");
+        }
+
+        function shouldSuppress(args, level) {
+          var text = stringifyConsoleArgs(args);
+          if (!text) {
+            return false;
+          }
+          if (level === "error" && keepPatterns.some(function(pattern) { return pattern.test(text); })) {
+            return false;
+          }
+          return noisyPatterns.some(function(pattern) { return pattern.test(text); });
+        }
+
+        ["log", "warn", "error"].forEach(function(level) {
+          console[level] = function() {
+            if (shouldSuppress(arguments, level)) {
+              return;
+            }
+            return originalConsole[level].apply(console, arguments);
+          };
+        });
+      })();
+      function normalizeWebPreviewLocale(value) {
+        var lang = String(value || navigator.language || "zh-CN")
+          .toLowerCase()
+          .replace("_", "-");
+        if (
+          lang === "zh-tw" ||
+          lang === "zh-hk" ||
+          lang === "zh-mo" ||
+          lang.indexOf("hant") !== -1
+        ) {
+          return "zh-TW";
+        }
+        if (lang.indexOf("zh") === 0) {
+          return "zh";
+        }
+        if (lang.indexOf("ja") === 0) {
+          return "ja";
+        }
+        if (lang.indexOf("th") === 0) {
+          return "th";
+        }
+        return "en";
+      }
+      var webPreviewLocale = normalizeWebPreviewLocale(webPreviewParams.get("lang"));
+      var webPreviewText = {
+        zh: {
+          loadingPlugin: "正在加载 Unity 场景",
+          loadingRuntime: "正在准备 Unity 运行环境，请稍候。",
+          loadingRuntimePercent: "{percent}% 正在加载 Unity WebGL 运行环境，请稍候。",
+          cachePlugin: "正在缓存 Unity 场景",
+          cacheReuse: "已复用本地缓存",
+          cachePrepare: "正在准备插件资源",
+          cacheDetail: "{percent} {action} {completed}/{total}{path}。首次加载 Unity 大包会较慢，请勿退出或重复操作。"
+        },
+        "zh-TW": {
+          loadingPlugin: "正在載入 Unity 场景",
+          loadingRuntime: "正在準備 Unity 執行環境，請稍候。",
+          loadingRuntimePercent: "{percent}% 正在載入 Unity WebGL 執行環境，請稍候。",
+          cachePlugin: "正在快取 Unity 场景",
+          cacheReuse: "已復用本機快取",
+          cachePrepare: "正在準備插件資源",
+          cacheDetail: "{percent} {action} {completed}/{total}{path}。首次載入 Unity 大包會較慢，請勿退出或重複操作。"
+        },
+        en: {
+          loadingPlugin: "Loading Unity Scene",
+          loadingRuntime: "Preparing the Unity runtime. Please wait.",
+          loadingRuntimePercent: "{percent}% Loading the Unity WebGL runtime. Please wait.",
+          cachePlugin: "Caching Unity Scene",
+          cacheReuse: "Using local cache",
+          cachePrepare: "Preparing plugin assets",
+          cacheDetail: "{percent} {action} {completed}/{total}{path}. The first Unity package load can be slow. Do not leave or repeat actions."
+        },
+        ja: {
+          loadingPlugin: "Unity シーンを読み込み中",
+          loadingRuntime: "Unity ランタイムを準備しています。しばらくお待ちください。",
+          loadingRuntimePercent: "{percent}% Unity WebGL ランタイムを読み込み中です。しばらくお待ちください。",
+          cachePlugin: "Unity シーンをキャッシュ中",
+          cacheReuse: "ローカルキャッシュを使用中",
+          cachePrepare: "プラグインリソースを準備中",
+          cacheDetail: "{percent} {action} {completed}/{total}{path}。初回の Unity パッケージ読み込みには時間がかかります。ページを離れたり操作を繰り返したりしないでください。"
+        },
+        th: {
+          loadingPlugin: "กำลังโหลดปลั๊กอิน WebGL",
+          loadingRuntime: "กำลังเตรียม Unity runtime กรุณารอสักครู่",
+          loadingRuntimePercent: "{percent}% กำลังโหลด Unity WebGL runtime กรุณารอสักครู่",
+          cachePlugin: "กำลังแคชปลั๊กอิน WebGL",
+          cacheReuse: "ใช้แคชในเครื่อง",
+          cachePrepare: "กำลังเตรียมทรัพยากรปลั๊กอิน",
+          cacheDetail: "{percent} {action} {completed}/{total}{path} การโหลดแพ็กเกจ Unity ครั้งแรกอาจใช้เวลานาน กรุณาอย่าออกจากหน้า หรือกดซ้ำ"
+        }
+      };
+
+      function webPreviewT(key, params) {
+        var template = (webPreviewText[webPreviewLocale] && webPreviewText[webPreviewLocale][key]) ||
+          webPreviewText.zh[key] ||
+          key;
+        return template.replace(/\{(\w+)\}/g, function(_, name) {
+          return params && Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : "";
+        });
+      }
+
+      function extractWebPreviewLocaleCandidate(value) {
+        if (!value || typeof value !== "object") {
+          return "";
+        }
+        var direct = value.lang || value.language || value.locale || value.currentLang || value.currentLanguage;
+        if (typeof direct === "string") {
+          return direct;
+        }
+        if (value.payload && typeof value.payload === "object") {
+          return extractWebPreviewLocaleCandidate(value.payload);
+        }
+        if (value.config && typeof value.config === "object") {
+          return extractWebPreviewLocaleCandidate(value.config);
+        }
+        return "";
+      }
+
+      function normalizeWebPreviewLoadingI18n(i18n) {
+        if (!i18n || typeof i18n !== "object") {
+          return null;
+        }
+        return {
+          titleKey: i18n.titleKey || "",
+          detailKey: i18n.detailKey || "",
+          params: i18n.params && typeof i18n.params === "object" ? Object.assign({}, i18n.params) : {}
+        };
+      }
+
+      function translateWebPreviewLoadingI18n(i18n) {
+        var next = normalizeWebPreviewLoadingI18n(i18n);
+        if (!next || (!next.titleKey && !next.detailKey)) {
+          return null;
+        }
+        if (next.params.actionKey) {
+          next.params.action = webPreviewT(next.params.actionKey);
+        }
+        return {
+          title: next.titleKey ? webPreviewT(next.titleKey, next.params) : "",
+          detail: next.detailKey ? webPreviewT(next.detailKey, next.params) : ""
+        };
+      }
+
+      loadingTitle.textContent = webPreviewT("loadingPlugin");
+      loadingDetail.textContent = webPreviewT("loadingRuntime");
+
+      function setWebPreviewLoading(visible, detail, title, i18n) {
+        var nextI18n = normalizeWebPreviewLoadingI18n(i18n);
+        var translated = nextI18n ? translateWebPreviewLoadingI18n(nextI18n) : null;
+        if (translated) {
+          title = title || translated.title;
+          detail = detail || translated.detail;
+        }
+        webPreviewLoadingI18n = visible ? nextI18n : null;
+        if (title) {
+          loadingTitle.textContent = title;
+        }
+        if (detail) {
+          loadingDetail.textContent = detail;
+        }
+        loadingShield.style.display = visible && !webPreviewEmbedded ? "grid" : "none";
+        if (webPreviewEmbedded) {
+          postWebPreviewParent({
+            type: "webgl-preview-loading",
+            visible: !!visible,
+            title: loadingTitle.textContent,
+            detail: loadingDetail.textContent,
+            i18n: webPreviewLoadingI18n
+          });
+        }
+      }
+
+      function updateWebPreviewLocale(nextLang) {
+        var nextLocale = normalizeWebPreviewLocale(nextLang);
+        if (nextLocale === webPreviewLocale) {
+          return false;
+        }
+        webPreviewLocale = nextLocale;
+        if (webPreviewLoadingI18n) {
+          setWebPreviewLoading(true, "", "", webPreviewLoadingI18n);
+        } else {
+          loadingTitle.textContent = webPreviewT("loadingPlugin");
+          loadingDetail.textContent = webPreviewT("loadingRuntime");
+        }
+        return true;
+      }
+
+      function handleWebPreviewParentMessage(event) {
+        var message = event.data || {};
+        if (!webPreviewParentProtocol.accept(event, message)) {
+          return;
+        }
+        if (
+          message.type === "webgl-preview-locale-change" ||
+          message.type === "LANGUAGE_CHANGE" ||
+          message.type === "LOCALE_CHANGE" ||
+          message.type === "SET_LANGUAGE" ||
+          message.type === "SET_LOCALE" ||
+          message.type === "CHANGE_LANGUAGE" ||
+          message.type === "CHANGE_LOCALE" ||
+          message.type === "LANG_CHANGE" ||
+          message.type === "I18N_CHANGE"
+        ) {
+          updateWebPreviewLocale(extractWebPreviewLocaleCandidate(message));
+          return;
+        }
+
+        if (message.type === "unity-web-preview-dispose") {
+          disposeWebPreview();
+          return;
+        }
+
+        if (webPreviewBridgeDispatch) {
+          webPreviewBridgeDispatch(message);
+        }
+      }
+
+      window.addEventListener("message", handleWebPreviewParentMessage);
+
+      function updateWebPreviewRuntimeProgress(progress) {
+        if (webPreviewDisposed || typeof progress !== "number" || !isFinite(progress)) return;
+        var value = Math.max(0, Math.min(1, progress));
+        document.querySelector("#unity-progress-bar-full").style.width = Math.round(value * 100) + "%";
+        // This locked loader uses 0..0.9 for data/wasm downloads, then 1
+        // from postRun. Keep byte downloads in their stage; a loader callback
+        // must not prematurely start the host's initialization deadline.
+        if (value >= 0.9) {
+          webPreviewRuntimeState.emit("initializing_runtime", value === 1
+            ? { kind: "fraction", value: 1, unit: "unity-loader-callback" }
+            : { kind: "indeterminate" });
+        }
+      }
+      function startWebPreviewRuntimeProgress() {
+        webPreviewRuntimeState.emit("downloading_runtime");
+      }
+      function stopWebPreviewRuntimeProgress() {}
+
+      function disposeWebPreview() {
+        if (webPreviewDisposed) return;
+        webPreviewDisposed = true;
+        webPreviewRuntimeState.dispose();
+        webPreviewAbortController.abort();
+        webPreviewCleanups.splice(0).forEach(function(cleanup) { cleanup(); });
+        window.removeEventListener("message", handleWebPreviewParentMessage);
+        window.fetch = originalWebPreviewFetch;
+        if (webPreviewServiceWorkerController) {
+          webPreviewServiceWorkerController.postMessage({ type: "cancel-webgl-preview-cache" });
+        }
+        webPreviewBridgeDispatch = null;
+        window.unityWebPreview = null;
+        var instance = webPreviewUnityInstance;
+        webPreviewUnityInstance = null;
+        var timer;
+        var quit = instance && typeof instance.Quit === "function"
+          ? Promise.resolve().then(function() { return instance.Quit(); })
+          : Promise.resolve();
+        Promise.race([
+          quit.then(function() { return { quit: "completed" }; }),
+          new Promise(function(resolve) { timer = window.setTimeout(function() { resolve({ quit: "timeout" }); }, 2000); })
+        ]).then(function(result) {
+          window.clearTimeout(timer);
+          postWebPreviewParent({ type: "unity-web-preview-disposed", quit: result.quit });
+        }).catch(function() {
+          window.clearTimeout(timer);
+          postWebPreviewParent({ type: "unity-web-preview-disposed", quit: "failed" });
+        });
+      }
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.textContent = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var webPreviewBuildCacheVersion = "";
+      var webPreviewBuildManifest = null;
+      var webPreviewLargeDataCacheReady = false;
+      var webPreviewCacheStatusTimeoutMs = 10000;
+      var webPreviewServiceWorkerStartupTimeoutMs = 30000;
+      function withBuildCacheVersion(url) {
+        var nextUrl = new URL(url, window.location.href);
+        if (webPreviewBuildCacheVersion) {
+          nextUrl.searchParams.set("v", webPreviewBuildCacheVersion);
+        }
+        return nextUrl.toString();
+      }
+
+      function loadWebPreviewBuildManifest() {
+        var controller = new AbortController();
+        var timeout = window.setTimeout(function() {
+          controller.abort();
+        }, 15000);
+
+        return fetch(new URL("build-manifest.json", window.location.href).toString(), {
+          method: "GET",
+          cache: "no-store",
+          credentials: "same-origin",
+          signal: controller.signal
+        }).then(function(response) {
+          if (!response.ok) {
+            throw new Error("Build manifest HTTP " + response.status);
+          }
+          return response.json();
+        }).then(function(manifest) {
+          if (
+            !manifest ||
+            manifest.schemaVersion !== 1 ||
+            !/^sha256:[a-f0-9]{64}$/.test(String(manifest.buildId || "")) ||
+            !Array.isArray(manifest.files)
+          ) {
+            throw new Error("Build manifest shape is invalid");
+          }
+
+          var byRole = {};
+          manifest.files.forEach(function(file) {
+            if (!file || ["loader", "data", "framework", "wasm"].indexOf(file.role) === -1) {
+              throw new Error("Build manifest contains an unknown role");
+            }
+            if (byRole[file.role]) {
+              throw new Error("Build manifest contains duplicate role " + file.role);
+            }
+            if (!/^[a-f0-9]{64}$/.test(String(file.sha256 || "")) || !Number.isSafeInteger(file.size)) {
+              throw new Error("Build manifest metadata is invalid for " + file.role);
+            }
+            var resolved = new URL(file.url, window.location.href);
+            if (resolved.origin !== window.location.origin || !/^Build\/[^/]+$/.test(file.url) || file.url.includes("..")) {
+              throw new Error("Build manifest URL is outside this plugin: " + file.url);
+            }
+            byRole[file.role] = resolved.toString();
+          });
+
+          ["loader", "data", "framework", "wasm"].forEach(function(role) {
+            if (!byRole[role]) {
+              throw new Error("Build manifest is missing role " + role);
+            }
+          });
+
+          if (!webPreviewRuntimeRelease || manifest.buildId !== webPreviewRuntimeRelease.buildId) {
+            throw new Error("Unity build does not match runtime release");
+          }
+          webPreviewBuildManifest = manifest;
+          webPreviewBuildCacheVersion = manifest.buildId;
+          return byRole;
+        }).finally(function() {
+          window.clearTimeout(timeout);
+        });
+      }
+
+      function postCacheStatusToParent(message) {
+        postWebPreviewParent(message);
+      }
+
+      function webPreviewBuildCacheName(manifest) {
+        return "xrugc-main-unity-" + webPreviewRuntimeRelease.runtimeReleaseId + "-build-v3-" +
+          String(manifest.buildId || "").replace(/^sha256:/, "");
+      }
+
+      function webPreviewBuildCacheKey(url, manifest) {
+        var keyUrl = new URL(url, window.location.href);
+        keyUrl.searchParams.set("__xrugc_build", manifest.buildId);
+        keyUrl.searchParams.delete("__xrugc_cache_ready");
+        return new Request(keyUrl.toString(), { credentials: "same-origin" });
+      }
+
+      function webPreviewBuildCacheReadyKey(manifest, file) {
+        var markerUrl = new URL("__xrugc_build_cache_ready__", window.location.href);
+        markerUrl.searchParams.set("v", manifest.buildId);
+        markerUrl.searchParams.set("role", file.role);
+        return new Request(markerUrl.toString(), { credentials: "same-origin" });
+      }
+
+      function postLargeDataCacheStatus(status, file, details) {
+        var payload = Object.assign({
+          type: "webgl-preview-cache-status",
+          status: status,
+          background: false,
+          version: webPreviewBuildManifest.buildId,
+          buildId: webPreviewBuildManifest.buildId,
+          path: file.url,
+          completed: 0,
+          total: file.responseSize || 0
+        }, details || {});
+        postCacheStatusToParent(payload);
+        if (!webPreviewUnityReady && !webPreviewDisposed) {
+          webPreviewRuntimeState.emit("downloading_runtime", {
+            kind: payload.total > 0 ? "bytes" : "indeterminate",
+            loaded: payload.completed, total: payload.total || undefined,
+            cached: payload.reused === true, unit: "decoded-response-bytes", artifact: "data"
+          });
+        }
+      }
+
+      function largeDataCacheMetadataMatches(metadata, manifest, file) {
+        return !!(
+          metadata &&
+          metadata.buildId === manifest.buildId &&
+          metadata.role === file.role &&
+          metadata.responseSha256 === file.responseSha256 &&
+          metadata.responseSize === file.responseSize
+        );
+      }
+
+      async function prepareLargeUnityDataCache(byRole) {
+        var manifest = webPreviewBuildManifest;
+        var file = manifest && manifest.files.find(function(candidate) {
+          return candidate.role === "data";
+        });
+        if (
+          !file ||
+          file.size <= 64 * 1024 * 1024 ||
+          !/^[a-f0-9]{64}$/.test(String(file.responseSha256 || "")) ||
+          !Number.isSafeInteger(file.responseSize) ||
+          file.responseSize <= 0 ||
+          !("caches" in window) ||
+          !window.WebGlBuildCacheCore ||
+          typeof window.WebGlBuildCacheCore.cacheVerifiedResponse !== "function"
+        ) {
+          return false;
+        }
+
+        var cache = null;
+        var requestUrl = withBuildCacheVersion(byRole.data);
+        var cacheKey = webPreviewBuildCacheKey(requestUrl, manifest);
+        var readyKey = webPreviewBuildCacheReadyKey(manifest, file);
+        try {
+          cache = await caches.open(webPreviewBuildCacheName(manifest));
+          var marker = await cache.match(readyKey);
+          var cached = await cache.match(cacheKey);
+          if (marker && cached) {
+            if (largeDataCacheMetadataMatches(await marker.json(), manifest, file)) {
+              postLargeDataCacheStatus("complete", file, {
+                completed: file.responseSize,
+                total: file.responseSize,
+                reused: true
+              });
+              return true;
+            }
+          }
+
+          await Promise.all([
+            cache.delete(readyKey).catch(function() { return false; }),
+            cache.delete(cacheKey).catch(function() { return false; })
+          ]);
+
+          if (navigator.storage && typeof navigator.storage.persist === "function") {
+            await navigator.storage.persist().catch(function() { return false; });
+          }
+
+          var lastProgressAt = 0;
+          postLargeDataCacheStatus("started", file);
+          setWebPreviewLoading(true, "", "", {
+            titleKey: "cachePlugin",
+            detailKey: "cacheDetail",
+            params: {
+              percent: "0%",
+              actionKey: "cachePrepare",
+              completed: 0,
+              total: 1,
+              path: "：" + file.url
+            }
+          });
+
+          var response = await fetch(requestUrl, {
+            method: "GET",
+            cache: "reload",
+            credentials: "same-origin"
+          });
+          if (!response.ok || !response.body) {
+            throw new Error("Unity data HTTP " + response.status);
+          }
+          await window.WebGlBuildCacheCore.cacheVerifiedResponse(
+            cache,
+            cacheKey,
+            response,
+            file,
+            {
+              onProgress: function(receivedBytes, totalBytes) {
+                var now = Date.now();
+                if (now - lastProgressAt < 250 && receivedBytes < totalBytes) {
+                  return;
+                }
+                lastProgressAt = now;
+                var percent = totalBytes
+                  ? Math.min(99, Math.floor((receivedBytes / totalBytes) * 100))
+                  : 0;
+                postLargeDataCacheStatus("progress", file, {
+                  completed: receivedBytes,
+                  total: totalBytes
+                });
+                setWebPreviewLoading(true, "", "", {
+                  titleKey: "cachePlugin",
+                  detailKey: "cacheDetail",
+                  params: {
+                    percent: percent + "%",
+                    actionKey: "cachePrepare",
+                    completed: Math.round(receivedBytes / 1048576),
+                    total: Math.round(totalBytes / 1048576),
+                    path: " MB：" + file.url
+                  }
+                });
+              }
+            }
+          );
+          await cache.put(
+            readyKey,
+            new Response(JSON.stringify({
+              buildId: manifest.buildId,
+              role: file.role,
+              responseSha256: file.responseSha256,
+              responseSize: file.responseSize
+            }), {
+              headers: {
+                "cache-control": "no-store",
+                "content-type": "application/json; charset=utf-8"
+              }
+            })
+          );
+          postLargeDataCacheStatus("complete", file, {
+            completed: file.responseSize,
+            total: file.responseSize,
+            reused: false
+          });
+          return true;
+        } catch (error) {
+          if (cache) {
+            await Promise.all([
+              cache.delete(readyKey).catch(function() { return false; }),
+              cache.delete(cacheKey).catch(function() { return false; })
+            ]);
+          }
+          postLargeDataCacheStatus("incomplete", file, {
+            failedFiles: [file.url],
+            streamedFiles: [file.url],
+            message: error instanceof Error ? error.message : String(error)
+          });
+          if (webPreviewDisposed || webPreviewStartupFailed || (error && error.code === "WGP-CACHE-MISMATCH")) throw error;
+          console.warn("[WebPreview] Verified Unity data cache unavailable; using direct streaming.");
+          return false;
+        }
+      }
+
+      function createWebPreviewServiceWorkerError(message) {
+        var error = new Error(message);
+        error.code = "WGP-SERVICE-WORKER";
+        return error;
+      }
+
+      function waitForWebPreviewServiceWorkerController(registration) {
+        return new Promise(function(resolve, reject) {
+          var worker = registration.installing || registration.waiting || registration.active;
+          if (!worker) {
+            reject(createWebPreviewServiceWorkerError("No registered service worker is available."));
+            return;
+          }
+
+          var settled = false;
+          var timeout = window.setTimeout(function() {
+            finish(createWebPreviewServiceWorkerError("Service worker activation timed out."));
+          }, webPreviewServiceWorkerStartupTimeoutMs);
+
+          function cleanup() {
+            window.clearTimeout(timeout);
+            worker.removeEventListener("statechange", check);
+            navigator.serviceWorker.removeEventListener("controllerchange", check);
+          }
+
+          function finish(error) {
+            if (settled) {
+              return;
+            }
+            settled = true;
+            cleanup();
+            if (error) {
+              reject(error);
+            } else {
+              resolve(worker);
+            }
+          }
+
+          function check() {
+            if (worker.state === "redundant") {
+              finish(createWebPreviewServiceWorkerError("Service worker became redundant before activation."));
+              return;
+            }
+            if (
+              worker.state === "activated" &&
+              navigator.serviceWorker.controller === worker
+            ) {
+              finish();
+            }
+          }
+
+          webPreviewCleanups.push(function() { finish(createWebPreviewServiceWorkerError("Runtime disposed.")); });
+          worker.addEventListener("statechange", check);
+          navigator.serviceWorker.addEventListener("controllerchange", check);
+          check();
+        });
+      }
+
+      function prepareWebPreviewServiceWorker() {
+        if (!("serviceWorker" in navigator)) {
+          return Promise.reject(
+            createWebPreviewServiceWorkerError("This browser does not support service workers.")
+          );
+        }
+
+        return navigator.serviceWorker.register(
+          new URL("sw.js", window.location.href).toString(),
+          {
+            scope: new URL(".", window.location.href).toString(),
+            updateViaCache: "none"
+          }
+        ).then(function(registration) {
+          // A content-addressed release never updates a running worker in place.
+          return registration;
+        }).then(waitForWebPreviewServiceWorkerController).catch(function(error) {
+          if (error && error.code === "WGP-SERVICE-WORKER") {
+            throw error;
+          }
+          throw createWebPreviewServiceWorkerError(
+            error instanceof Error ? error.message : String(error || "Service worker registration failed.")
+          );
+        });
+      }
+
+      function warmWebPreviewCache(controller) {
+        if (!controller) {
+          return;
+        }
+
+        function cachePercent(completed, total) {
+          if (!total) {
+            return "0%";
+          }
+          return Math.max(0, Math.min(100, Math.round((completed / total) * 100))) + "%";
+        }
+
+        var settled = false;
+        var statusTimer = window.setTimeout(function() {
+          webPreviewCacheActive = false;
+          console.warn("[WebPreview] Cache warm continues in the background.");
+          settle();
+        }, webPreviewCacheStatusTimeoutMs);
+
+        function settle() {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          window.clearTimeout(statusTimer);
+          navigator.serviceWorker.removeEventListener("message", onMessage);
+        }
+
+        function onMessage(event) {
+          var message = event.data || {};
+          if (event.source !== controller || message.type !== "webgl-preview-cache-status" || message.buildId !== webPreviewRuntimeRelease.buildId) {
+            return;
+          }
+
+          postCacheStatusToParent(message);
+          if (
+            message.status === "started" ||
+            message.status === "fetching" ||
+            message.status === "progress"
+          ) {
+            webPreviewCacheActive = true;
+            var completed = Number(message.completed || 0);
+            var total = Number(message.total || 0);
+            var path = message.path ? "：" + message.path : "";
+            setWebPreviewLoading(
+              true,
+              "",
+              "",
+              {
+                titleKey: "cachePlugin",
+                detailKey: "cacheDetail",
+                params: {
+                  percent: cachePercent(completed, total),
+                  actionKey: message.reused ? "cacheReuse" : "cachePrepare",
+                  completed: completed,
+                  total: total,
+                  path: path
+                }
+              }
+            );
+          }
+
+          if (
+            message.status === "complete" ||
+            message.status === "cancelled" ||
+            message.status === "incomplete"
+          ) {
+            webPreviewCacheActive = false;
+            settle();
+            if (webPreviewUnityReady) {
+              setWebPreviewLoading(false);
+            }
+          }
+
+          if (message.status === "error") {
+            webPreviewCacheActive = false;
+            console.warn("[WebPreview] Service worker cache warm failed.", message.message);
+            settle();
+          }
+        }
+
+        webPreviewCleanups.push(settle);
+        navigator.serviceWorker.addEventListener("message", onMessage);
+        try {
+          controller.postMessage({
+            type: "warm-webgl-preview-cache"
+          });
+        } catch (error) {
+          console.warn("[WebPreview] Service worker cache warm could not start.", error);
+          settle();
+        }
+      }
+
+      var webPreviewSceneVisibleNotified = false;
+
+      function notifyWebPreviewSceneVisible(message) {
+        if (webPreviewSceneVisibleNotified || !window.parent || window.parent === window) {
+          return;
+        }
+        webPreviewSceneVisibleNotified = true;
+        postWebPreviewParent({
+          type: "unity-web-preview-scene-visible",
+          evidence: { kind: "unity-scene-bounds-log", message: "Unity reported scene bounds with renderers; script/resource completion is unverified." }
+        });
+      }
+
+      (function installWebPreviewSceneLogObserver() {
+        var originalLog = console.log;
+        console.log = function() {
+          var first = arguments.length ? String(arguments[0] || "") : "";
+          if (
+            first.indexOf("[WebPreview] Scene content bounds:") !== -1 &&
+            /(?:hasBounds=True|hasBounds=true|renderers=[1-9]\d*)/.test(first)
+          ) {
+            notifyWebPreviewSceneVisible(first);
+          }
+          return originalLog.apply(console, arguments);
+        };
+      })();
+
+      var loaderUrl = "";
+      var config = {
+        arguments: [],
+        dataUrl: "",
+        frameworkUrl: "",
+        codeUrl: "",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "bujiaban.com",
+        productName: "Web Preview",
+        productVersion: "1.0.0",
+        showBanner: unityShowBanner,
+        errorHandler: function(message) {
+          postWebPreviewParent({
+            type: "unity-web-preview-error", code: "UNITY_RUNTIME_ERROR",
+            message: String(message || "Unity runtime failed").replace(/https?:\/\/[^\s]+/g, "[resource URL]").slice(0, 600)
+          });
+          return true;
+        }
+      };
+
+      function applyWebPreviewBuildFiles(byRole) {
+        loaderUrl = withBuildCacheVersion(byRole.loader);
+        config.dataUrl = withBuildCacheVersion(byRole.data);
+        if (webPreviewLargeDataCacheReady) {
+          var cachedDataUrl = new URL(config.dataUrl);
+          cachedDataUrl.searchParams.set("__xrugc_cache_ready", "1");
+          config.dataUrl = cachedDataUrl.toString();
+        }
+        config.frameworkUrl = withBuildCacheVersion(byRole.framework);
+        config.codeUrl = withBuildCacheVersion(byRole.wasm);
+      }
+
+      var configuredMaxDevicePixelRatio = Number(webPreviewParams.get("maxDpr"));
+      if (!isFinite(configuredMaxDevicePixelRatio) || configuredMaxDevicePixelRatio <= 0) {
+        configuredMaxDevicePixelRatio = 2;
+      }
+      config.devicePixelRatio = Math.min(
+        Math.max(1, window.devicePixelRatio || 1),
+        Math.min(3, configuredMaxDevicePixelRatio)
+      );
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
+      } else {
+        // Desktop style: fit the canvas to the host modal iframe.
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+      }
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      function createWebPreviewBridge(unityInstance) {
+        function toSceneJson(payload) {
+          if (typeof payload === "string") {
+            logScenePayloadSummary(parseScenePayloadForSummary(payload));
+            return payload;
+          }
+
+          try {
+            var preparedPayload = prepareScenePayload(payload || {});
+            logScenePayloadSummary(preparedPayload);
+            return JSON.stringify(preparedPayload);
+          } catch (error) {
+            console.warn("[WebPreview] Failed to stringify scene payload.", error);
+            return "{}";
+          }
+        }
+
+        function parseScenePayloadForSummary(payload) {
+          try {
+            return JSON.parse(payload);
+          } catch (error) {
+            return null;
+          }
+        }
+
+        function prepareScenePayload(payload) {
+          // The shell has already validated asset origins. The runner must not
+          // rewrite signed URLs or route them through a credential-bearing
+          // generic proxy because doing so changes query semantics.
+          return clonePayload(payload);
+        }
+
+        function logScenePayloadSummary(payload) {
+          if (!payload || typeof payload !== "object") {
+            return;
+          }
+
+          var scene = payload.scene && typeof payload.scene === "object" ? payload.scene : {};
+          var script = payload.script && typeof payload.script === "object" ? payload.script : {};
+          var metas = Array.isArray(payload.metas) ? payload.metas : [];
+          var lua = readFirstString(script.lua, payload.code, scene.code);
+          var metaSummaries = metas.slice(0, 12).map(function(meta, index) {
+            var code = readFirstString(meta && meta.code, meta && meta.script);
+            return {
+              index: index,
+              id: meta && meta.id,
+              title: meta && (meta.title || meta.name),
+              codeLength: code.length,
+              actions: extractLuaActions(code)
+            };
+          });
+
+          console.log("[WebPreview][Payload] scene", {
+            sceneId: scene.id || payload.sceneId || payload.id,
+            sceneName: scene.name || payload.title || payload.name,
+            metas: metas.length,
+            resources: Array.isArray(payload.resources) ? payload.resources.length : 0,
+            luaLength: lua.length,
+            luaActions: extractLuaActions(lua),
+            metaActions: metaSummaries
+          });
+        }
+
+        function readFirstString() {
+          for (var index = 0; index < arguments.length; index += 1) {
+            if (typeof arguments[index] === "string") {
+              return arguments[index];
+            }
+          }
+
+          return "";
+        }
+
+        function extractLuaActions(code) {
+          if (typeof code !== "string" || !code) {
+            return [];
+          }
+
+          var actions = [];
+          var actionRegex = /(?:meta|verse)\s*\[\s*["']([^"']+)["']\s*\]/g;
+          var match;
+          while ((match = actionRegex.exec(code)) !== null) {
+            var action = match[1];
+            if (!action || action === "@init" || action === "#init" || actions.indexOf(action) !== -1) {
+              continue;
+            }
+
+            actions.push(action);
+          }
+
+          return actions;
+        }
+
+        function clonePayload(payload) {
+          try {
+            if (typeof structuredClone === "function") {
+              return structuredClone(payload);
+            }
+          } catch (error) {
+            console.warn("[WebPreview] structuredClone failed, falling back to JSON clone.", error);
+          }
+
+          return JSON.parse(JSON.stringify(payload));
+        }
+
+        function forwardSceneJson(json, options) {
+          try {
+            webPreviewRuntimeState.sceneForwarded();
+            unityInstance.SendMessage("WebPreviewBootstrap", "LoadSceneJson", json);
+            if (!(options && options.quiet)) {
+              console.log("[WebPreview] Forwarded scene json to Unity (" + json.length + " chars)");
+            }
+
+            if (webPreviewEmbedded) {
+              postWebPreviewParent({
+                type: "unity-web-preview-scene-forwarded",
+                length: json.length
+              });
+            }
+
+            return true;
+          } catch (error) {
+            console.error("[WebPreview] Failed to send scene json to Unity.", error);
+            if (webPreviewEmbedded) {
+              postWebPreviewParent({
+                type: "unity-web-preview-error",
+                code: "SCENE_FORWARD_FAILED",
+                message: "Failed to send scene data to Unity."
+              });
+            }
+            return false;
+          }
+        }
+
+        function sendSceneJson(payload) {
+          webPreviewSceneVisibleNotified = false;
+          var json = toSceneJson(payload);
+          forwardSceneJson(json);
+        }
+
+        function getMessagePayload(data) {
+          if (Object.prototype.hasOwnProperty.call(data, "payload")) {
+            return data.payload;
+          }
+
+          if (Object.prototype.hasOwnProperty.call(data, "scene")) {
+            return data.scene;
+          }
+
+          if (Object.prototype.hasOwnProperty.call(data, "json")) {
+            return data.json;
+          }
+
+          return {};
+        }
+
+        function readInitialScenePayload() {
+          var params = new URLSearchParams(window.location.search);
+          var scene = params.get("scene");
+
+          if (!scene) {
+            if (webPreviewEmbedded) {
+              return null;
+            }
+            return {
+              sceneId: "web-preview-smoke-test",
+              title: "Web Preview Smoke Test",
+              entities: [],
+              scripts: [],
+              source: "webgl-template"
+            };
+          }
+
+          try {
+            return JSON.parse(scene);
+          } catch (error) {
+            console.warn("[WebPreview] The scene query parameter is not valid JSON; forwarding it as raw text.", error);
+            return {
+              sceneId: "web-preview-query",
+              rawScene: scene,
+              source: "query-string"
+            };
+          }
+        }
+
+        var bridge = {
+          unityInstance: unityInstance,
+          sendSceneJson: sendSceneJson,
+          ping: function(message) {
+            unityInstance.SendMessage("WebPreviewBootstrap", "Ping", message || "");
+          },
+          setCameraMode: function(mode) {
+            var nextMode = mode || "orbit";
+            unityInstance.SendMessage("WebPreviewBootstrap", "SetCameraMode", nextMode);
+            console.log("[WebPreview][CameraControl] forwarded camera mode " + nextMode);
+          }
+        };
+
+        window.unityWebPreview = bridge;
+        webPreviewBridgeDispatch = function(data) {
+          // The pinned framework sends its native scene-running callback
+          // directly to the host without an envelope. Only the host can bind
+          // event.source to this iframe. It acknowledges that narrow callback
+          // using our complete identity, then we end the scene watchdog.
+          if (data.type === "unity-web-preview-runtime-confirmed") {
+            webPreviewRuntimeState.emit("running", { kind: "indeterminate" }, { evidence: data.evidence });
+          }
+          if (data.type === "load-scene-json" || data.type === "xrugc-load-scene-json") {
+            sendSceneJson(getMessagePayload(data));
+          }
+
+          if (data.type === "unity-web-preview-ping") {
+            bridge.ping(data.message || "");
+          }
+
+          if (data.type === "unity-web-preview-camera-mode") {
+            bridge.setCameraMode(data.mode || "orbit");
+          }
+        };
+
+        var initialScenePayload = readInitialScenePayload();
+        if (initialScenePayload !== null) {
+          sendSceneJson(initialScenePayload, { retry: false });
+        }
+
+        if (webPreviewEmbedded) {
+          postWebPreviewParent({
+            type: "unity-web-preview-ready",
+            productName: "Web Preview",
+            productVersion: "1.0.0"
+          });
+        }
+
+        return bridge;
+      }
+
+      function startUnityWebPreview() {
+        if (webPreviewDisposed || webPreviewStartupFailed) {
+          return;
+        }
+        var script = document.createElement("script");
+        var settled = false;
+        var timeoutMs = Number(webPreviewParams.get("loaderTimeoutMs"));
+        if (!isFinite(timeoutMs) || timeoutMs < 1000) {
+          timeoutMs = 600000;
+        }
+        var startupTimer = window.setTimeout(function() {
+          failStartup("WGP-UNITY-TIMEOUT", "Unity loader timed out.");
+        }, Math.min(timeoutMs, 900000));
+
+        webPreviewCleanups.push(function() {
+          window.clearTimeout(startupTimer);
+          script.onload = null;
+          script.onerror = null;
+          script.remove();
+        });
+        function failStartup(code, error) {
+          if (settled || webPreviewDisposed || webPreviewStartupFailed) {
+            return;
+          }
+          settled = true;
+          window.clearTimeout(startupTimer);
+          stopWebPreviewRuntimeProgress();
+          var message = error instanceof Error ? error.message : String(error || code);
+          setWebPreviewLoading(true, code + ": " + message, webPreviewT("loadingPlugin"));
+          unityShowBanner(code + ": " + message, "error");
+          postWebPreviewParent({
+            type: "unity-web-preview-error",
+            code: code,
+            message: message
+          });
+        }
+
+        script.src = loaderUrl;
+        script.onerror = function() {
+          failStartup("WGP-UNITY-LOADER", "Failed to load the Unity loader script.");
+        };
+        script.onload = () => {
+          if (settled || webPreviewDisposed || webPreviewStartupFailed) {
+            return;
+          }
+          startWebPreviewRuntimeProgress();
+          createUnityInstance(canvas, config, (progress) => {
+            updateWebPreviewRuntimeProgress(progress);
+                }).then((unityInstance) => {
+                  if (settled || webPreviewDisposed || webPreviewStartupFailed) {
+                    if (unityInstance && typeof unityInstance.Quit === "function") {
+                      Promise.resolve(unityInstance.Quit()).catch(function() {});
+                    }
+                    return;
+                  }
+                  settled = true;
+                  window.clearTimeout(startupTimer);
+                  webPreviewUnityInstance = unityInstance;
+                  stopWebPreviewRuntimeProgress();
+                  document.querySelector("#unity-loading-bar").style.display = "none";
+                  webPreviewUnityReady = true;
+                  // Background cache warming must never keep the ready Unity
+                  // canvas behind the loading shield.
+                  setWebPreviewLoading(false);
+
+                  createWebPreviewBridge(unityInstance);
+
+                }).catch((message) => {
+                  failStartup("WGP-UNITY-START", message);
+                });
+              };
+
+        document.body.appendChild(script);
+      }
+
+      var webPreviewServiceWorkerController = null;
+      loadWebPreviewRuntimeRelease().then(function() {
+        return prepareWebPreviewServiceWorker();
+      }).then(function(controller) {
+        webPreviewServiceWorkerController = controller;
+        function handleVerifiedCacheFailure(event) {
+          var message = event.data || {};
+          if (event.source !== controller || message.type !== "webgl-preview-cache-status" || message.buildId !== webPreviewRuntimeRelease.buildId || message.code !== "WGP-CACHE-MISMATCH") return;
+          webPreviewStartupFailed = true;
+          webPreviewAbortController.abort();
+          postWebPreviewParent({ type: "unity-web-preview-error", code: "WGP-CACHE-MISMATCH", message: "A downloaded Unity artifact failed its decoded-response integrity check." });
+        }
+        navigator.serviceWorker.addEventListener("message", handleVerifiedCacheFailure);
+        webPreviewCleanups.push(function() { navigator.serviceWorker.removeEventListener("message", handleVerifiedCacheFailure); });
+        return loadWebPreviewBuildManifest();
+      }).then(function(byRole) {
+        return prepareLargeUnityDataCache(byRole).then(function(cacheReady) {
+          webPreviewLargeDataCacheReady = cacheReady;
+          // Warm only after the foreground runtime starts to avoid competing
+          // downloads and misleading file-count progress in the host interface.
+          return byRole;
+        });
+      }).then(function(byRole) {
+        applyWebPreviewBuildFiles(byRole);
+        startUnityWebPreview();
+      }).catch(function(error) {
+        if (webPreviewDisposed) return;
+        var message = error instanceof Error ? error.message : String(error);
+        var code = error && ["WGP-SERVICE-WORKER", "WGP-CACHE-MISMATCH"].includes(error.code)
+          ? error.code
+          : "WGP-BUILD-MANIFEST";
+        stopWebPreviewRuntimeProgress();
+        setWebPreviewLoading(
+          true,
+          code + ": " + message,
+          webPreviewT("loadingPlugin")
+        );
+        unityShowBanner(code + ": " + message, "error");
+        postWebPreviewParent({
+          type: "unity-web-preview-error",
+          code: code,
+          message: message
+        });
+      });
+
+    </script>
+  </body>
+</html>
