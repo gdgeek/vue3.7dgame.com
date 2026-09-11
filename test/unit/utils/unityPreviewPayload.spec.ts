@@ -3,6 +3,7 @@ import {
   cloneForUnityPreview,
   normalizeUnityPreviewData,
   rewriteUnityPreviewUrls,
+  UnityPreviewAssetError,
 } from "@/utils/unityPreviewPayload";
 
 const withWindowLocation = <T>(
@@ -25,6 +26,141 @@ const withWindowLocation = <T>(
 };
 
 describe("unityPreviewPayload", () => {
+  it("preserves scene 506 file storage keys and filenames while validating download URLs", () => {
+    const file = {
+      key: "/ai/polygen/model.glb",
+      filename: "Polygen:model.glb",
+      url: "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/ai/polygen/model.glb?sign=a%26b&part=1&part=2",
+    };
+    const image = {
+      key: "/screenshot/polygen/model.jpg",
+      filename: "preview.jpg",
+      url: "https://data.7dgame.com/screenshot/polygen/model.jpg",
+    };
+    const resource = { name: "Polygen:model.glb", file, image };
+    const source = {
+      resources: [resource],
+      metas: [
+        { resources: [resource], data: JSON.stringify({ fileData: file }) },
+      ],
+    };
+    const payload = structuredClone(source);
+    rewriteUnityPreviewUrls(
+      payload,
+      "https://d.dev.xrugc.com",
+      "https://d.dev.xrugc.com",
+      { restrictToRuntimeOrigins: true }
+    );
+    const expectedFile = {
+      ...file,
+      url: file.url.replace(
+        "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com",
+        "data.7dgame.com"
+      ),
+    };
+    expect(payload.resources[0].file).toEqual(expectedFile);
+    expect(payload.resources[0].image).toEqual(image);
+    expect(payload.metas[0].resources[0].file).toEqual(expectedFile);
+    expect(JSON.parse(payload.metas[0].data).fileData).toEqual(expectedFile);
+    expect(source.resources[0].file).toEqual(file);
+  });
+
+  it.each([
+    "http://data.7dgame.com/model.glb",
+    "https://private.example/model.glb",
+    "file:///private/model.glb",
+  ])(
+    "still rejects a denied file URL beside preserved storage metadata: %s",
+    (url) => {
+      expect(() =>
+        rewriteUnityPreviewUrls(
+          {
+            resources: [
+              {
+                file: {
+                  key: "/ai/polygen/model.glb",
+                  filename: "Polygen:model.glb",
+                  url,
+                },
+              },
+            ],
+          },
+          "https://d.dev.xrugc.com",
+          "https://d.dev.xrugc.com",
+          { restrictToRuntimeOrigins: true }
+        )
+      ).toThrow("WGP-ASSET-DENIED");
+    }
+  );
+
+  it("does not skip structured data stored under a file metadata key", () => {
+    expect(() =>
+      rewriteUnityPreviewUrls(
+        {
+          file: {
+            url: "https://data.7dgame.com/model.glb",
+            key: { url: "https://private.example/model.glb" },
+          },
+        },
+        "https://d.dev.xrugc.com",
+        "https://d.dev.xrugc.com",
+        { restrictToRuntimeOrigins: true }
+      )
+    ).toThrow("WGP-ASSET-DENIED");
+  });
+
+  it("identifies denied nested JSON fields without exposing URL secrets", () => {
+    const payload = {
+      metas: [
+        {
+          data: JSON.stringify({
+            file: {
+              url: "https://user:password@private.example/secret-model.glb?token=secret#private",
+            },
+          }),
+        },
+      ],
+    };
+    let denied: unknown;
+    try {
+      rewriteUnityPreviewUrls(
+        payload,
+        "https://app.example",
+        "https://api.example",
+        { restrictToRuntimeOrigins: true }
+      );
+    } catch (error) {
+      denied = error;
+    }
+    expect(denied).toBeInstanceOf(UnityPreviewAssetError);
+    expect(denied).toMatchObject({
+      fields: ["metas", "0", "data", "file", "url"],
+      origin: "https://private.example",
+      reason: "credentials",
+    });
+    const diagnostic = JSON.stringify(denied);
+    for (const secret of ["password", "secret-model", "token=", "#private"])
+      expect(diagnostic).not.toContain(secret);
+  });
+
+  it("redacts arbitrary field keys and opaque URL contents from denial diagnostics", () => {
+    try {
+      rewriteUnityPreviewUrls(
+        { "https://private.example/?token=secret": ["data:secret"] },
+        "https://app.example",
+        "https://api.example"
+      );
+      expect.fail("must reject unsupported schemes");
+    } catch (error) {
+      expect(error).toMatchObject({
+        fields: ["[field]", "0"],
+        origin: null,
+        reason: "scheme",
+      });
+      expect(JSON.stringify(error)).not.toContain("secret");
+    }
+  });
+
   it("preserves allowlisted absolute signed asset urls byte-for-byte", () => {
     const signedUrl =
       "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2";

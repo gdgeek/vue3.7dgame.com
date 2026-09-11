@@ -22,6 +22,41 @@ const UNITY_PREVIEW_ASSET_ORIGINS = new Set([
 // Display metadata can contain colons (e.g. "Polygen:model.glb") or links.
 // These strings are not resource locations and must retain their exact text.
 const UNITY_PREVIEW_TEXT_FIELDS = new Set(["name", "title", "description"]);
+// File API records carry a storage key and original filename alongside url.
+// A key such as "/ai/polygen/model.glb" is not a relative download address.
+const UNITY_PREVIEW_FILE_TEXT_FIELDS = new Set(["key", "filename"]);
+
+export class UnityPreviewAssetError extends Error {
+  readonly fields: string[] = [];
+  readonly origin: string | null;
+
+  constructor(
+    value: string,
+    readonly reason: "scheme" | "origin" | "credentials"
+  ) {
+    super("WGP-ASSET-DENIED");
+    // Diagnostics must never expose credentials, signed queries or file paths.
+    try {
+      const url = new URL(value, window.location.origin);
+      this.origin = /^https?:$/.test(url.protocol) ? url.origin : null;
+    } catch {
+      this.origin = null;
+    }
+  }
+}
+
+const atUnityPreviewField = (field: string, callback: () => void) => {
+  try {
+    callback();
+  } catch (error) {
+    if (error instanceof UnityPreviewAssetError) {
+      error.fields.unshift(
+        /^(?:[a-zA-Z_]\w{0,39}|\d+)$/.test(field) ? field : "[field]"
+      );
+    }
+    throw error;
+  }
+};
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -118,7 +153,7 @@ const toUnityPreviewDirectAssetUrl = (
   );
   const explicitScheme = /^[a-z][a-z0-9+.-]*:/i.test(candidate);
   if (explicitScheme && !/^https?:\/\//i.test(candidate)) {
-    throw new Error("WGP-ASSET-DENIED");
+    throw new UnityPreviewAssetError(candidate, "scheme");
   }
   const absoluteUrl = /^(?:https?:)?\/\//i.test(candidate);
   if (!absoluteUrl && !candidate.startsWith("/")) {
@@ -154,7 +189,10 @@ const toUnityPreviewDirectAssetUrl = (
     url.username ||
     url.password
   ) {
-    throw new Error("WGP-ASSET-DENIED");
+    throw new UnityPreviewAssetError(
+      candidate,
+      url.username || url.password ? "credentials" : "origin"
+    );
   }
 
   // Preserve validated absolute URLs byte-for-byte so signed query ordering
@@ -213,9 +251,34 @@ export const rewriteUnityPreviewUrls = (
   if (!value || typeof value !== "object") return;
 
   if (Array.isArray(value)) {
-    value.forEach((item, index) => {
+    value.forEach((item, index) =>
+      atUnityPreviewField(String(index), () => {
+        if (typeof item === "string") {
+          value[index] = rewriteUnityPreviewStringUrls(
+            item,
+            proxyOrigin,
+            assetBaseOrigin,
+            options
+          );
+        } else {
+          rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin, options);
+        }
+      })
+    );
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  Object.entries(record).forEach(([key, item]) =>
+    atUnityPreviewField(key, () => {
       if (typeof item === "string") {
-        value[index] = rewriteUnityPreviewStringUrls(
+        if (
+          UNITY_PREVIEW_TEXT_FIELDS.has(key) ||
+          (typeof record.url === "string" &&
+            UNITY_PREVIEW_FILE_TEXT_FIELDS.has(key))
+        )
+          return;
+        record[key] = rewriteUnityPreviewStringUrls(
           item,
           proxyOrigin,
           assetBaseOrigin,
@@ -224,24 +287,8 @@ export const rewriteUnityPreviewUrls = (
       } else {
         rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin, options);
       }
-    });
-    return;
-  }
-
-  const record = value as Record<string, unknown>;
-  Object.entries(record).forEach(([key, item]) => {
-    if (typeof item === "string") {
-      if (UNITY_PREVIEW_TEXT_FIELDS.has(key)) return;
-      record[key] = rewriteUnityPreviewStringUrls(
-        item,
-        proxyOrigin,
-        assetBaseOrigin,
-        options
-      );
-    } else {
-      rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin, options);
-    }
-  });
+    })
+  );
 };
 
 export const normalizeUnityPreviewMetas = (metas: unknown): unknown[] => {
