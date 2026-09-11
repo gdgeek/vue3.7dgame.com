@@ -42,3 +42,20 @@ describe("acknowledged scene publication", () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 });
+
+it("does not treat version-looking response fields as independently verified history", async () => {
+  const result = await readBackScenePublication({
+    sceneId: 2329,
+    snapshot: {
+      id: 1082,
+      publicationRevision: "85da37e3-12ad-423e-b31d-4d50fd344001",
+      contentHash: `sha256:${"a".repeat(64)}`,
+    },
+    refresh: async () => ({}),
+    apply: vi.fn(),
+  });
+  expect(result.readBackVerified).toBe(false);
+  expect(result.verification).toBe("server_acknowledged");
+  expect(result).not.toHaveProperty("publicationRevision");
+  expect(result).not.toHaveProperty("contentHash");
+});

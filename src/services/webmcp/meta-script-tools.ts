@@ -284,6 +284,7 @@ export const registerMetaScriptWebMcpTools = (
     withWorkflowGuide(createTools(options), "entity-script"),
     {
       document: options.document,
+      operations: options.operations,
       onRegistrationError: options.onRegistrationError,
     }
   );

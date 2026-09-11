@@ -25,7 +25,7 @@ export async function readBackScenePublication<T>(options: {
       typeof options.snapshot.uuid === "string" ? options.snapshot.uuid : null,
     published: true,
     verification: "server_acknowledged" as const,
-    // getVerse refresh does not prove a release points at this exact snapshot.
+    // The current Snapshot is mutable. A refresh cannot verify historical content.
     readBackVerified: false,
     refreshSucceeded,
     ...(refreshSucceeded

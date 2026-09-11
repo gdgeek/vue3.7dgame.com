@@ -220,6 +220,12 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import {
+  createWriteOptions,
+  applyWriteRevision,
+  type WriteOptions,
+} from "@/api/v1/write-contract";
+import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
 import { logger } from "@/utils/logger";
 import { hasPublishableSceneContent } from "@/utils/versePublish";
 import {
@@ -535,7 +541,7 @@ const initEditor = (overrideData?: unknown) => {
 // ---------- postScript（Verse 版：保存 + 发布流程）----------
 const postScript = async (
   message: EditorPostPayload,
-  context: { trigger: ScriptSaveTrigger }
+  context: { trigger: ScriptSaveTrigger; write?: WriteOptions }
 ) => {
   if (verse.value === null) {
     const errorMessage = t("verse.view.script.error1");
@@ -555,11 +561,17 @@ const postScript = async (
     blocklyData = `compressed:${base64Str}`;
   }
 
-  await putVerseCode(verse.value!.id, {
-    blockly: blocklyData,
-    js: message.js,
-    lua: message.lua,
-  });
+  const savedOwner = verse.value;
+  const savedResponse = await putVerseCode(
+    verse.value!.id,
+    {
+      blockly: blocklyData,
+      js: message.js,
+      lua: message.lua,
+    },
+    context.write ?? createWriteOptions(savedOwner?.serverRevision)
+  );
+  if (verse.value === savedOwner) applyWriteRevision(savedOwner, savedResponse);
 
   if (context.trigger === "manual") {
     Message.success(t("verse.view.script.success"));
@@ -581,7 +593,10 @@ const postScript = async (
       }
     )
       .then(async () => {
-        await takePhoto(id.value);
+        await takePhoto(
+          id.value,
+          createWriteOptions(verse.value?.serverRevision)
+        );
         ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
       })
       .catch(() => {
@@ -725,6 +740,15 @@ const registerVerseScriptTools = () => {
 
   webMcpLifecycle?.abort();
   registration = webMcpLifecycle = registerVerseScriptWebMcpTools({
+    operations: {
+      registerStatusTools: true,
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "verse",
+        targetId: id.value,
+        serverRevision: verse.value?.serverRevision ?? "",
+      }),
+    },
     getContext: () => ({
       sceneId: Number.isFinite(id.value) ? id.value : null,
       sceneTitle: verse.value?.name ?? "未命名场景",
@@ -854,7 +878,10 @@ const registerVerseScriptTools = () => {
       );
       if (!response.noChange) {
         try {
-          await save("manual", { suppressNoChangeInfo: true });
+          await save("manual", {
+            suppressNoChangeInfo: true,
+            write: writeOptionsForPreview(preview, verse.value?.serverRevision),
+          });
         } catch {
           throw new WebMcpCompletionError(
             {
@@ -926,6 +953,15 @@ const registerScriptBlockTools = () => {
 
   scriptBlockWebMcpLifecycle?.abort();
   registration = scriptBlockWebMcpLifecycle = registerScriptBlockWebMcpTools({
+    operations: {
+      registerStatusTools: false,
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "verse",
+        targetId: id.value,
+        serverRevision: verse.value?.serverRevision ?? "",
+      }),
+    },
     getContext: () => ({
       ownerKind: "scene",
       ownerId: Number.isFinite(id.value) ? id.value : null,
@@ -1020,7 +1056,10 @@ const registerScriptBlockTools = () => {
       );
       if (!response.noChange) {
         try {
-          await save("manual", { suppressNoChangeInfo: true });
+          await save("manual", {
+            suppressNoChangeInfo: true,
+            write: writeOptionsForPreview(preview, verse.value?.serverRevision),
+          });
         } catch {
           throw new WebMcpCompletionError(
             {
