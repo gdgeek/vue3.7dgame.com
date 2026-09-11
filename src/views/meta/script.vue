@@ -203,6 +203,12 @@
 <script setup lang="ts">
 // @ts-nocheck
 import {
+  createWriteOptions,
+  applyWriteRevision,
+  type WriteOptions,
+} from "@/api/v1/write-contract";
+import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
+import {
   computed,
   onActivated,
   onBeforeUnmount,
@@ -358,7 +364,7 @@ const initEditor = (overrideData?: unknown) => {
 // ---------- postScript（Meta 版：保存到服务端，无发布流程）----------
 const postScript = async (
   message: EditorPostPayload,
-  context: { trigger: ScriptSaveTrigger }
+  context: { trigger: ScriptSaveTrigger; write?: WriteOptions }
 ) => {
   if (meta.value === null) {
     const errorMessage = t("meta.script.error1");
@@ -378,11 +384,17 @@ const postScript = async (
     blocklyData = `compressed:${base64Str}`;
   }
 
-  await putMetaCode(meta.value.id, {
-    blockly: blocklyData,
-    lua: message.lua,
-    js: message.js,
-  });
+  const savedOwner = meta.value;
+  const savedResponse = await putMetaCode(
+    meta.value.id,
+    {
+      blockly: blocklyData,
+      lua: message.lua,
+      js: message.js,
+    },
+    context.write ?? createWriteOptions(savedOwner?.serverRevision)
+  );
+  if (meta.value === savedOwner) applyWriteRevision(savedOwner, savedResponse);
 
   if (context.trigger === "manual") {
     Message.success(t("meta.script.success"));
@@ -523,6 +535,15 @@ const registerMetaScriptTools = () => {
 
   webMcpLifecycle?.abort();
   registration = webMcpLifecycle = registerMetaScriptWebMcpTools({
+    operations: {
+      registerStatusTools: true,
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "meta",
+        targetId: id.value,
+        serverRevision: meta.value?.serverRevision ?? "",
+      }),
+    },
     getContext: () => ({
       entityId: Number.isFinite(id.value) ? id.value : null,
       entityTitle: meta.value?.title ?? "未命名实体",
@@ -652,7 +673,10 @@ const registerMetaScriptTools = () => {
       );
       if (!response.noChange) {
         try {
-          await save("manual", { suppressNoChangeInfo: true });
+          await save("manual", {
+            suppressNoChangeInfo: true,
+            write: writeOptionsForPreview(preview, meta.value?.serverRevision),
+          });
         } catch {
           throw new WebMcpCompletionError(
             {
@@ -724,6 +748,15 @@ const registerScriptBlockTools = () => {
 
   scriptBlockWebMcpLifecycle?.abort();
   registration = scriptBlockWebMcpLifecycle = registerScriptBlockWebMcpTools({
+    operations: {
+      registerStatusTools: false,
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "meta",
+        targetId: id.value,
+        serverRevision: meta.value?.serverRevision ?? "",
+      }),
+    },
     getContext: () => ({
       ownerKind: "entity",
       ownerId: Number.isFinite(id.value) ? id.value : null,
@@ -818,7 +851,10 @@ const registerScriptBlockTools = () => {
       );
       if (!response.noChange) {
         try {
-          await save("manual", { suppressNoChangeInfo: true });
+          await save("manual", {
+            suppressNoChangeInfo: true,
+            write: writeOptionsForPreview(preview, meta.value?.serverRevision),
+          });
         } catch {
           throw new WebMcpCompletionError(
             {

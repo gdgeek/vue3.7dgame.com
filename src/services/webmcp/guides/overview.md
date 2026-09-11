@@ -9,7 +9,7 @@
 1. 确定目标场景、模型尺寸、观察方向、按钮功能、媒体顺序、运行端及发布范围。承接已有工作时先检查保存状态和已有验收结果。
 2. 按当前页面发现工具并读取 schema。实体页用 `xrugc_get_editor_context`，场景页用 `xrugc_get_scene_editor_context`；脚本页用 `xrugc_get_meta_script` 或 `xrugc_get_scene_script`。切换页面后重新发现，工具不会同时出现在所有页面。
 3. 查询真实节点、素材和实例 ID。实体可能被多个场景共享；先核对使用范围，仅调整某个场景布局时优先修改场景实例。
-4. 按“读取 → stage → 核对差异 → complete → 检查保存 → 重读”执行。`stage` 仅暂存提案；`complete` 使用返回的 `draftId` 并等待页面用户确认，不能绕过确认。
+4. 按“读取 → stage → 核对差异 → complete → 检查保存 → 重读”执行。`stage` 仅暂存提案；`complete` 使用返回的 `draftId` 并启动页面确认，不能绕过确认。新版先返回 `operationId` 和 `awaiting_confirmation`；完成页面确认后，使用 `xrugc_get_operation_status` 查询最终结果。等待状态不表示成功；只可在尚未确认时使用 `xrugc_cancel_operation` 取消。
 5. 依次核对改动的实体、实体脚本、场景和场景脚本，再进入 `publication` 与 `acceptance` 主题。
 
 ## 验证与限制

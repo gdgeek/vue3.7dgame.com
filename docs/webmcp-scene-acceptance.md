@@ -23,6 +23,20 @@
 - 使用不支持 `document.modelContext` 的浏览器打开同样页面，确认无注册错误，原有人工编辑、保存和预览流程正常。静态文档仍可读取，但不应宣称该浏览器已获得 WebMCP 能力。
 - 确认指南没有安装本地 Skill、执行脚本或提供 Blender、Qwen、FFmpeg。已有素材任务应可继续；需要外部制作环境时记录实际缺项，不把 `dry-run` 当作真实合成成功。
 
+## P1 服务端回执验收
+
+本节是部署后的待执行清单；单元测试与数据库并发测试不替代原生浏览器验收。
+
+- 先完成后端 P1 精确迁移，确认对象 GET 返回 serverRevision，operation/publication 路由通过当前账号权限检查，再部署 web。
+- 在独立测试对象 stage/complete 一次，确认 complete 很快返回 operationId，等待页面确认超过 25 秒后再确认。轮询 xrugc_get_operation_status，验证仅保存一次，最终回执与目标、操作 ID 一致。
+- 等待确认时调用 xrugc_cancel_operation，然后在旧确认框点确认，核对没有服务端写入；开始提交后取消必须返回 not_cancellable。
+- 对同一草稿重复 complete，核对没有重复节点、脚本修改、Snapshot 或操作记录。模拟提交响应断开后，以原 operationId 查回执，不重新生成提案重试。
+- 提交后重载页面，查询已知 operationId，仍可拿到本账号的服务端回执。未知操作只返回 unknown/not_observed；换账号或失去目标权限后不能泄漏原账号回执。
+- 两个标签页载入同一版本，A 保存后 B 保存应返回 409 并保留 B 本地修改，不静默覆盖 A。实体、场景及两个脚本页都检查人工保存与 WebMCP 保存。
+- 发布返回 snapshotId 和操作回执后，重载再按 operationId 查询。用 xrugc_get_scene_publication 核对当前发布状态；再次发布后，旧操作回执仍可查，但不把当前 Snapshot 当作第一次发布的固定内容。
+- 对迁移前已发布场景只读检查 published=true 和当前快照标识，不为补验收重新发布用户场景。页面刷新失败仍保留已确认回执；P1 的 readBackVerified=false，历史发布归档留给 P2。
+- 记录当前构建、后端镜像、迁移状态、对象、操作 ID、最终状态和当前发布查询结果。素材上传/重命名不列为本次后端幂等已覆盖。
+
 ## 实体编辑闭环
 
 - 读取实体树；在可见 iframe 内手工重命名但不保存，再读取，确认工具返回新名称、dirty=true 和 live-editor 来源。
@@ -58,7 +72,7 @@
 - 读取场景、实体引用与资源检查结果；空场景、缺失文件元数据、权限不足和未保存修改应阻止发布。
 - 暂存发布后修改可见场景，确认旧草稿失效。
 - 在独立场景确认发布，记录 snapshotId。若发布后刷新失败，应仍返回服务器确认的 snapshotId，并提示重新读取而非重复发布。
-- 使用后端支持的独立查询验证快照；若接口缺失，保留 readBackVerified=false，不将 GET 场景成功视为快照验证成功。
+- P1 只独立查询操作回执与当前发布状态，保留 readBackVerified=false，不将 GET 场景或当前 Snapshot 成功视为历史快照验证成功。
 - 打开 Unity 预览，先观察 loading，再等待运行器报告 running。分别注入 loader/start/timeout/scene-forward 错误，检查脱敏码与阶段。
 - 关闭/重新打开预览后注入旧 nonce 消息，状态不得变化。
 - 场景 Blockly 页使用同一个 Unity 预览合同；实体 Blockly 脚本在其所属场景中验证运行效果。

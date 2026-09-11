@@ -347,5 +347,6 @@ export const registerScriptBlockWebMcpTools = (
 ) =>
   registerWebMcpTools(createTools(options), {
     document: options.document,
+    operations: options.operations,
     onRegistrationError: options.onRegistrationError,
   });

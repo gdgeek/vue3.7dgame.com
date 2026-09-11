@@ -39,6 +39,7 @@ export interface EventOutput {
 
 /** Meta 信息 */
 export interface MetaInfo {
+  serverRevision?: string;
   id: number;
   author_id: number;
   info: string | null;
