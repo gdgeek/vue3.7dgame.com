@@ -70,13 +70,18 @@ const entity = {
   updated_at: "2026-08-31T00:00:00.000Z",
 } as MetaInfo;
 
-const register = () => {
+const register = (
+  readPublication?: () => Promise<
+    import("@/api/v1/write-protocol").ScenePublicationState
+  >
+) => {
   const registered: Array<{
     name: string;
     execute: (input: unknown) => unknown;
     signal?: AbortSignal;
   }> = [];
   const options = {
+    readPublication,
     document: {
       modelContext: {
         registerTool: (
@@ -197,7 +202,7 @@ describe("scene editor WebMCP tools", () => {
       scene: {
         id: 1420,
         name: "中国空间站",
-        published: true,
+        published: null,
         moduleCount: 2,
         space: { id: 3, name: "太空" },
       },
@@ -305,4 +310,24 @@ describe("scene editor WebMCP tools", () => {
     const { registered } = register();
     await expect(registered[2].execute({})).rejects.toThrow("至少需要提供一个");
   });
+});
+
+it("reads authoritative publication metadata instead of a legacy field", async () => {
+  const readPublication = vi
+    .fn()
+    .mockResolvedValue({
+      sceneId: 1420,
+      published: false,
+      snapshotId: null,
+      snapshotUuid: null,
+      publicationRevision: null,
+      contentHash: null,
+    });
+  const { registered } = register(readPublication);
+  await expect(registered[0].execute({})).resolves.toMatchObject({
+    scene: { published: false },
+  });
+  expect(
+    registered.some((tool) => tool.name === "xrugc_get_scene_publication")
+  ).toBe(true);
 });

@@ -23,6 +23,20 @@
 - 使用不支持 `document.modelContext` 的浏览器打开同样页面，确认无注册错误，原有人工编辑、保存和预览流程正常。静态文档仍可读取，但不应宣称该浏览器已获得 WebMCP 能力。
 - 确认指南没有安装本地 Skill、执行脚本或提供 Blender、Qwen、FFmpeg。已有素材任务应可继续；需要外部制作环境时记录实际缺项，不把 `dry-run` 当作真实合成成功。
 
+## P1 服务端回执验收
+
+本节是部署后的待执行清单；单元测试与数据库并发测试不替代原生浏览器验收。
+
+- 先完成后端 P1 精确迁移，确认对象 GET 返回 serverRevision，operation/publication 路由通过当前账号权限检查，再部署 web。
+- 在独立测试对象 stage/complete 一次，确认 complete 很快返回 operationId，等待页面确认超过 25 秒后再确认。轮询 xrugc_get_operation_status，验证仅保存一次，最终回执与目标、操作 ID 一致。
+- 等待确认时调用 xrugc_cancel_operation，然后在旧确认框点确认，核对没有服务端写入；开始提交后取消必须返回 not_cancellable。
+- 对同一草稿重复 complete，核对没有重复节点、脚本修改、Snapshot 或操作记录。模拟提交响应断开后，以原 operationId 查回执，不重新生成提案重试。
+- 提交后重载页面，查询已知 operationId，仍可拿到本账号的服务端回执。未知操作只返回 unknown/not_observed；换账号或失去目标权限后不能泄漏原账号回执。
+- 两个标签页载入同一版本，A 保存后 B 保存应返回 409 并保留 B 本地修改，不静默覆盖 A。实体、场景及两个脚本页都检查人工保存与 WebMCP 保存。
+- 发布返回 publicationRevision、contentHash 后，独立调用 xrugc_get_scene_publication 读取指定版本；核对 snapshotId、版本和哈希，并得到完整快照。再次发布同一场景后，旧版本内容保持不变。
+- 对迁移前已发布场景只读检查 published=true、版本未知；不为补验收重新发布用户场景。版本读回失败时必须保留已确认的发布回执，readBackVerified=false。
+- 记录当前构建、后端镜像、迁移状态、对象、操作 ID、最终状态和独立读回结果。素材上传/重命名不列为本次后端幂等已覆盖。
+
 ## 实体编辑闭环
 
 - 读取实体树；在可见 iframe 内手工重命名但不保存，再读取，确认工具返回新名称、dirty=true 和 live-editor 来源。

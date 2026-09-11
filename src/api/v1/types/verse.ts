@@ -85,6 +85,7 @@ export interface SpaceInfo {
 
 /** 场景数据 */
 export interface VerseData {
+  serverRevision?: string;
   id: number;
   author_id: number;
   created_at?: string;

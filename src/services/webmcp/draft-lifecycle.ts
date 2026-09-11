@@ -1,3 +1,4 @@
+import { bindOperationPreview, operationForSignal } from "./operation-context";
 /** Page-local, bounded storage. Reading never evicts a valid draft. */
 export const createDraftStore = <T extends { expiresAt: number }>(
   capacity: number
@@ -79,5 +80,7 @@ export const confirmDraft = async <
   options.signal?.throwIfAborted();
   if (draft.expiresAt <= Date.now()) return reject("expired_or_missing");
   if (!options.isCurrent(draft.preview)) return reject(options.changedStatus);
+  bindOperationPreview(draft.preview, options.signal);
+  operationForSignal(options.signal)?.phase("executing");
   return { ok: true, draft };
 };

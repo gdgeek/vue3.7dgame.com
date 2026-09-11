@@ -43,6 +43,13 @@
 </template>
 
 <script setup lang="ts">
+import {
+  createWriteOptions,
+  applyWriteRevision,
+  type WriteOptions,
+} from "@/api/v1/write-contract";
+import { getScenePublication } from "@/api/v1/write-protocol";
+import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
 import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
 import { createIframeRpc } from "@/utils/iframeRpc";
@@ -901,13 +908,7 @@ const saveVerse = async (
   if (verse?.children?.modules) {
     retitleVerses(verse.children.modules);
   }
-  await putVerse(id.value, { data: verse as unknown as JsonValue });
-  if (verse.value) {
-    verse.value = {
-      ...verse.value,
-      data: safeClone(verse),
-    };
-  }
+  await saveScenePayload(verse as unknown as JsonValue);
 
   if (trigger === "manual") {
     if (!hasPublishableSceneContent(verse)) {
@@ -925,7 +926,10 @@ const saveVerse = async (
       }
     )
       .then(async () => {
-        await takePhoto(id.value);
+        await takePhoto(
+          id.value,
+          createWriteOptions(getSceneServerModel()?.serverRevision)
+        );
         ElMessage({
           type: "success",
           message: t("verse.view.sceneEditor.publishSuccess"),
@@ -983,13 +987,7 @@ const saveVerseBeforeLeave = async (
   }
 
   try {
-    await putVerse(id.value, { data: verse as unknown as JsonValue });
-    if (verse.value) {
-      verse.value = {
-        ...verse.value,
-        data: safeClone(verse),
-      };
-    }
+    await saveScenePayload(verse as unknown as JsonValue);
     if (trigger === "manual" && showSuccess) {
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
     }
@@ -1104,12 +1102,30 @@ const countEntityRootNodes = (data: unknown) => {
   return Array.isArray(children?.entities) ? children.entities.length : 0;
 };
 
+const getSceneServerModel = () => verse.value;
+const saveScenePayload = async (sceneData: JsonValue, write?: WriteOptions) => {
+  const scene = verse.value;
+  const ownerId = id.value;
+  const result = await putVerse(
+    ownerId,
+    { data: sceneData },
+    write ?? createWriteOptions(scene?.serverRevision)
+  );
+  if (scene && verse.value === scene && id.value === ownerId) {
+    applyWriteRevision(scene, result);
+    verse.value = { ...scene, data: safeClone(sceneData) };
+  }
+  return result;
+};
+
 const persistWebMcpSceneMutation = async (
   response: Record<string, unknown>,
-  messages: { success: string; failure: string }
+  messages: { success: string; failure: string },
+  preview: object
 ) => {
   const ownerId = id.value;
   const ownerSession = getHostSessionId();
+  const ownerModel = verse.value;
   if (!isRecord(response.verse)) {
     throw new WebMcpCompletionError(
       {
@@ -1130,9 +1146,18 @@ const persistWebMcpSceneMutation = async (
   let serverSaved = false;
   let editorAcknowledged = false;
   try {
-    await putVerse(ownerId, { data: sceneData as unknown as JsonValue });
+    const savedResponse = await putVerse(
+      ownerId,
+      { data: sceneData as unknown as JsonValue },
+      writeOptionsForPreview(preview, verse.value?.serverRevision)
+    );
     serverSaved = true;
-    if (ownerId === id.value && ownerSession === getHostSessionId()) {
+    if (
+      ownerId === id.value &&
+      ownerSession === getHostSessionId() &&
+      ownerModel === verse.value
+    ) {
+      applyWriteRevision(verse.value, savedResponse);
       verseMetasWithLuaCodeData.value = undefined;
       verseMetasWithJsCodeData.value = undefined;
       if (verse.value)
@@ -1218,7 +1243,11 @@ const releaseVerse = async (data: unknown) => {
     const published = await saveThenPublishScene(
       payload,
       (currentPayload) => saveVerseBeforeLeave(currentPayload, "manual", false),
-      () => takePhoto(id.value)
+      () =>
+        takePhoto(
+          id.value,
+          createWriteOptions(getSceneServerModel()?.serverRevision)
+        )
     );
     if (!published) return;
 
@@ -1646,6 +1675,18 @@ const registerPageWebMcpTools = () => {
 
   webMcpLifecycle?.abort();
   registration = webMcpLifecycle = registerSceneEditorWebMcpTools({
+    readPublication: async (revision) => {
+      assertActive();
+      return (await getScenePublication(ownerId, revision)).data;
+    },
+    operations: {
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "verse",
+        targetId: id.value,
+        serverRevision: verse.value?.serverRevision ?? "",
+      }),
+    },
     getContext: () => ({
       scene: verse.value,
       dirty:
@@ -1789,10 +1830,14 @@ const registerPageWebMcpTools = () => {
           120000
         )
       );
-      const persistence = await saveWebMcpSceneMutation(response, {
-        success: "实体已放入场景并保存，场景尚未发布",
-        failure: "实体实例已放入编辑器",
-      });
+      const persistence = await saveWebMcpSceneMutation(
+        response,
+        {
+          success: "实体已放入场景并保存，场景尚未发布",
+          failure: "实体实例已放入编辑器",
+        },
+        preview
+      );
       // Validation must include the entity just placed, before the next reload.
       if (verse.value?.id === preview.sceneId) {
         verse.value.metas = [
@@ -1896,10 +1941,14 @@ const registerPageWebMcpTools = () => {
           proposed: preview.proposed,
         })
       );
-      const persistence = await saveWebMcpSceneMutation(response, {
-        success: "实体实例变换已保存，场景尚未发布",
-        failure: "实体实例变换已应用到编辑器",
-      });
+      const persistence = await saveWebMcpSceneMutation(
+        response,
+        {
+          success: "实体实例变换已保存，场景尚未发布",
+          failure: "实体实例变换已应用到编辑器",
+        },
+        preview
+      );
       return {
         ...persistence,
         moduleId: String(response.moduleId),
@@ -1996,10 +2045,14 @@ const registerPageWebMcpTools = () => {
           proposed: preview.proposed,
         })
       );
-      const persistence = await saveWebMcpSceneMutation(response, {
-        success: "实体实例属性已保存，场景尚未发布",
-        failure: "实体实例属性已应用到编辑器",
-      });
+      const persistence = await saveWebMcpSceneMutation(
+        response,
+        {
+          success: "实体实例属性已保存，场景尚未发布",
+          failure: "实体实例属性已应用到编辑器",
+        },
+        preview
+      );
       return {
         ...persistence,
         moduleId: String(response.moduleId),
@@ -2102,10 +2155,14 @@ const registerPageWebMcpTools = () => {
           },
         })
       );
-      const persistence = await saveWebMcpSceneMutation(response, {
-        success: "实体实例已删除并保存，场景尚未发布",
-        failure: "实体实例已从编辑器删除",
-      });
+      const persistence = await saveWebMcpSceneMutation(
+        response,
+        {
+          success: "实体实例已删除并保存，场景尚未发布",
+          failure: "实体实例已从编辑器删除",
+        },
+        preview
+      );
       const entityId = Number(response.entityId);
       return {
         ...persistence,
@@ -2156,8 +2213,7 @@ const registerPageWebMcpTools = () => {
         moduleCount: validation.moduleCount,
         warningCount: validation.warnings.length,
         warnings: validation.warnings.slice(0, 8),
-        alreadyPublished:
-          scene.verseRelease === undefined ? null : Boolean(scene.verseRelease),
+        alreadyPublished: (await getScenePublication(scene.id)).data.published,
       };
     },
     confirmScenePublication: async (preview) => {
@@ -2217,15 +2273,19 @@ const registerPageWebMcpTools = () => {
         throw new Error("资源检查期间场景发生变化，请重新执行发布前检查");
       }
       assertActive();
-      const snapshotResponse = await takePhoto(scene.id);
+      const snapshotResponse = await takePhoto(
+        scene.id,
+        writeOptionsForPreview(preview, scene.serverRevision)
+      );
       const snapshot = isRecord(snapshotResponse.data)
         ? snapshotResponse.data
         : {};
       const result = await readBackScenePublication({
         sceneId: scene.id,
         snapshot,
-        refresh: () =>
-          getVerse(scene.id, `${VERSE_SCENE_EXPAND}, verseRelease`),
+        readSnapshot: async (revision) =>
+          (await getScenePublication(scene.id, revision)).data,
+        refresh: () => getVerse(scene.id, VERSE_SCENE_EXPAND),
         apply: (response) => {
           if (verse.value?.id === scene.id) verse.value = response.data;
         },

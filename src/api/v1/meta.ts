@@ -1,3 +1,4 @@
+import { guardedWrite, type WriteOptions } from "./write-protocol";
 import request from "@/utils/request";
 import qs from "querystringify";
 import type {
@@ -16,7 +17,20 @@ export const postMeta = (data: CreateMetaRequest) => {
     data,
   });
 };
-export const putMetaCode = (id: string | number, data: MetaCode | null) => {
+export const putMetaCode = (
+  id: string | number,
+  data: MetaCode | null,
+  write?: WriteOptions
+) => {
+  if (write)
+    return guardedWrite<MetaCode>(
+      `/v1/metas/${id}/code`,
+      "put",
+      data,
+      { targetType: "meta", targetId: Number(id) },
+      "save_code",
+      write
+    );
   return request<MetaCode>({
     url: `/v1/metas/${id}/code`,
     data,
@@ -71,7 +85,20 @@ export const getMetas = (
   });
 };
 
-export const putMeta = (id: string | number, data: UpdateMetaRequest) => {
+export const putMeta = (
+  id: string | number,
+  data: UpdateMetaRequest,
+  write?: WriteOptions
+) => {
+  if (write)
+    return guardedWrite<MetaInfo>(
+      `/v1/metas/${id}`,
+      "put",
+      data,
+      { targetType: "meta", targetId: Number(id) },
+      "save",
+      write
+    );
   return request({
     url: `/v1/metas/${id}`,
     method: "put",

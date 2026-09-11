@@ -262,5 +262,6 @@ export const registerVerseScriptWebMcpTools = (
 ) =>
   registerWebMcpTools(withWorkflowGuide(createTools(options), "scene-script"), {
     document: options.document,
+    operations: options.operations,
     onRegistrationError: options.onRegistrationError,
   });
