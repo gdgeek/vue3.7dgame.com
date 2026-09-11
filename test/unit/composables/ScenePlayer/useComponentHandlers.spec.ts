@@ -259,6 +259,34 @@ describe("applyComponents", () => {
   });
 
   describe("Rotate component", () => {
+    it("honors disabled startup and supports idempotent start/stop", () => {
+      const ctx = makeCtx();
+      const result = applyComponents({
+        mesh: makeMesh(),
+        uuid: "u1",
+        ctx,
+        components: [
+          {
+            type: "Rotate",
+            parameters: {
+              uuid: "r1",
+              speed: { x: 0, y: 15, z: 0 },
+              isRotating: false,
+            },
+          },
+        ],
+      });
+      const setRotating = (
+        result.data as { setRotating: (enabled: boolean) => void }
+      ).setRotating;
+      expect(ctx.rotatingObjects.value).toHaveLength(0);
+      setRotating(true);
+      setRotating(true);
+      expect(ctx.rotatingObjects.value).toHaveLength(1);
+      setRotating(false);
+      expect(ctx.rotatingObjects.value).toHaveLength(0);
+    });
+
     it("adds a rotating object when speed is provided", () => {
       const mesh = makeMesh();
       const ctx = makeCtx();

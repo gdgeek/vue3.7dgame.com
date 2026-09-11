@@ -171,6 +171,7 @@
     "postcss": "^8.5.3",
     "postcss-html": "^1.8.0",
     "postcss-scss": "^4.0.9",
+    "prettier": "3.5.3",
     "rollup-plugin-visualizer": "^6.0.5",
     "sass": "^1.85.0",
     "storybook": "^10.1.11",

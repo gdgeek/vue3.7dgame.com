@@ -9,6 +9,7 @@ type AudioQueueItem = {
 export function useSceneAudio(sources: Map<string, SourceRecord>) {
   const audioPlaybackQueue: AudioQueueItem[] = [];
   let isPlaying = false;
+  const activePlayback = new Map<HTMLAudioElement, () => void>();
 
   const getAudioUrl = (uuid: string): string | undefined => {
     const source = sources.get(uuid.toString());
@@ -26,7 +27,17 @@ export function useSceneAudio(sources: Map<string, SourceRecord>) {
       currentTime: audio.currentTime,
     });
 
+    activePlayback.get(audio)?.();
     return new Promise<void>((resolve) => {
+      const finish = () => {
+        audio.removeEventListener("xrugc-audio-stop", finish);
+        audio.onended = null;
+        audio.onerror = null;
+        if (activePlayback.get(audio) === finish) activePlayback.delete(audio);
+        resolve();
+      };
+      activePlayback.set(audio, finish);
+      audio.addEventListener("xrugc-audio-stop", finish, { once: true });
       audio.currentTime = 0;
 
       audio.onended = () => {
@@ -34,7 +45,7 @@ export function useSceneAudio(sources: Map<string, SourceRecord>) {
           src: audio.src,
           duration: audio.duration,
         });
-        resolve();
+        finish();
       };
 
       audio.onerror = () => {
@@ -42,7 +53,7 @@ export function useSceneAudio(sources: Map<string, SourceRecord>) {
           src: audio.src,
           error: audio.error,
         });
-        resolve();
+        finish();
       };
 
       audio.play().catch((error) => {
@@ -50,7 +61,7 @@ export function useSceneAudio(sources: Map<string, SourceRecord>) {
           src: audio.src,
           error,
         });
-        resolve();
+        finish();
       });
     });
   };
@@ -73,7 +84,7 @@ export function useSceneAudio(sources: Map<string, SourceRecord>) {
       });
       await handleAudioPlay(current.audio);
       current.resolve();
-      audioPlaybackQueue.shift();
+      if (audioPlaybackQueue[0] === current) audioPlaybackQueue.shift();
     }
 
     isPlaying = false;
@@ -101,6 +112,11 @@ export function useSceneAudio(sources: Map<string, SourceRecord>) {
   };
 
   const cleanup = () => {
+    for (const [audio, finish] of activePlayback) {
+      audio.pause();
+      audio.currentTime = 0;
+      finish();
+    }
     while (audioPlaybackQueue.length > 0) {
       const queueItem = audioPlaybackQueue.shift();
       if (queueItem) {
@@ -110,7 +126,7 @@ export function useSceneAudio(sources: Map<string, SourceRecord>) {
         queueItem.resolve();
       }
     }
-    isPlaying = false;
+    // The queue processor releases its lock after its current await resumes.
   };
 
   return { getAudioUrl, playQueuedAudio, cleanup };

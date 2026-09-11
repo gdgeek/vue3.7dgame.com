@@ -51,6 +51,8 @@
 </template>
 
 <script setup lang="ts">
+import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
+import { createIframeRpc } from "@/utils/iframeRpc";
 import { logger } from "@/utils/logger";
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import {
@@ -61,6 +63,12 @@ import {
   getResources,
   getVideo,
   getVoxel,
+  putAudio,
+  putParticle,
+  putPolygen,
+  putPicture,
+  putVideo,
+  putVoxel,
 } from "@/api/v1/resources";
 import { getPhototypes } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
@@ -216,7 +224,7 @@ import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
 import { Message } from "@/components/Dialog";
 import { putMeta, getMeta, type metaInfo } from "@/api/v1/meta";
 import type { UpdateMetaRequest } from "@/api/v1/types/meta";
-import { getVerses, type VerseData } from "@/api/v1/verse";
+import { getVerse, getVerses, type VerseData } from "@/api/v1/verse";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
@@ -239,7 +247,50 @@ import type {
 } from "@/composables/useScriptEditorBase";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
+import { registerEntityEditorWebMcpTools } from "@/services/webmcp/entity-editor-tools";
+import type {
+  NodeTransformPreview,
+  NodeTransformSnapshot,
+} from "@/services/webmcp/entity-transform-tools";
+import type {
+  NodePropertyPreview,
+  NodePropertySnapshot,
+} from "@/services/webmcp/entity-node-property-tools";
+import type { ResourcePlacementPreview } from "@/services/webmcp/entity-resource-placement-tools";
+import type {
+  NodeParentSnapshot,
+  NodeReparentPreview,
+} from "@/services/webmcp/entity-hierarchy-tools";
+import type { NodeDeletionPreview } from "@/services/webmcp/entity-node-deletion-tools";
+import type {
+  NodeOrderPreview,
+  NodeOrderSnapshot,
+} from "@/services/webmcp/entity-node-order-tools";
+import type { NodeClonePreview } from "@/services/webmcp/entity-node-clone-tools";
+import type {
+  NodeBatchCompletion,
+  NodeBatchPreview,
+  NodeBatchPreviewItem,
+} from "@/services/webmcp/entity-node-batch-tools";
+import type {
+  AssetRenamePreview,
+  EntityAssetType,
+} from "@/services/webmcp/entity-asset-lifecycle-tools";
+import type {
+  ComponentBatchCompletion,
+  ComponentBatchPreview,
+  ComponentBatchPreviewItem,
+  NodeComponentList,
+} from "@/services/webmcp/entity-component-tools";
+import type {
+  EntitySignalList,
+  SignalBatchCompletion,
+  SignalBatchPreview,
+  SignalBatchPreviewItem,
+  SignalReference,
+} from "@/services/webmcp/entity-signal-tools";
 
+import pako from "pako";
 import qs from "querystringify";
 
 // 组件状态
@@ -274,6 +325,7 @@ const pendingRestorePayload = ref<{
 } | null>(null);
 let currentSaveTrigger: ScriptSaveTrigger = "manual";
 let autoSaveTimer: number | null = null;
+let webMcpLifecycle: AbortController | null = null;
 
 const toolbarOwner = "meta-scene-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
@@ -406,6 +458,39 @@ const fetchResourceByRef = async (
     logger.error("Failed to hydrate restored meta resource", ref, error);
     return null;
   }
+};
+
+const updateResourceName = async (
+  resourceType: EntityAssetType,
+  resourceId: number,
+  name: string
+): Promise<ResourceInfo | null> => {
+  const payload = { name };
+  switch (resourceType) {
+    case "polygen":
+      return (await putPolygen(resourceId, payload)).data as ResourceInfo;
+    case "picture":
+      return (await putPicture(resourceId, payload)).data as ResourceInfo;
+    case "video":
+      return (await putVideo(resourceId, payload)).data as ResourceInfo;
+    case "voxel":
+      return (await putVoxel(resourceId, payload)).data as ResourceInfo;
+    case "audio":
+      return (await putAudio(resourceId, payload)).data as ResourceInfo;
+    case "particle":
+      return (await putParticle(resourceId, payload)).data as ResourceInfo;
+    default:
+      return null;
+  }
+};
+
+const RESOURCE_UPLOAD_ROUTES: Record<EntityAssetType, string> = {
+  polygen: "/resource/polygen/index",
+  picture: "/resource/picture/index",
+  video: "/resource/video/index",
+  voxel: "/resource/voxel/index",
+  audio: "/resource/audio/index",
+  particle: "/resource/particle/index",
 };
 
 const hydrateMetaResources = async (
@@ -716,7 +801,10 @@ const restoreDraftVersion = async (draftId: string) => {
     meta: JSON.parse(JSON.stringify(nextDataSource)) as MetaPayload,
     events: JSON.parse(JSON.stringify(nextEventsSource)),
   };
+  webMcpRpc.cancel();
+  webMcpLifecycle?.abort();
   editorFrameKey.value += 1;
+  registerPageWebMcpTools();
   hasUnsavedChangesBeforeUnload.value = true;
   Message.success(t("common.scriptDraft.restoreSuccess"));
 };
@@ -944,10 +1032,376 @@ const saveable = (data: unknown) => {
 };
 
 // 消息发送基础设施
-const { postStandardMessage, sendRequest, pendingRequests } =
+const { postStandardMessage, sendRequest, pendingRequests, getHostSessionId } =
   useIframeMessaging(editor, {
     onError: () => ElMessage.error(t("meta.scene.error")),
   });
+
+const webMcpRpc = createIframeRpc({
+  frame: () => editor.value,
+  session: getHostSessionId,
+  send: sendRequest,
+});
+const requestEditor = webMcpRpc.request;
+
+const requireSuccessfulEditorResponse = (response: Record<string, unknown>) => {
+  if (response.ok !== true) {
+    throw new Error(
+      typeof response.error === "string" ? response.error : "实体编辑器操作失败"
+    );
+  }
+  return response;
+};
+
+const formatTransformVector = (value: { x: number; y: number; z: number }) =>
+  `${value.x.toFixed(3)} / ${value.y.toFixed(3)} / ${value.z.toFixed(3)}`;
+
+const formatTransformConfirmation = (preview: NodeTransformPreview) => {
+  const lines = [`确认修改节点“${preview.nodeName}”吗？`];
+  const appendChange = (
+    label: string,
+    current: { x: number; y: number; z: number },
+    proposed: { x: number; y: number; z: number }
+  ) => {
+    if (formatTransformVector(current) !== formatTransformVector(proposed)) {
+      lines.push(
+        `${label}：${formatTransformVector(current)} → ${formatTransformVector(
+          proposed
+        )}`
+      );
+    }
+  };
+  appendChange("位置", preview.current.position, preview.proposed.position);
+  appendChange(
+    "旋转角度",
+    preview.current.rotationDegrees,
+    preview.proposed.rotationDegrees
+  );
+  appendChange("缩放", preview.current.scale, preview.proposed.scale);
+  lines.push("确认后将立即保存到当前实体");
+  return lines.join("\n");
+};
+
+const formatNodePropertyConfirmation = (preview: NodePropertyPreview) => {
+  const lines = [`确认修改节点“${preview.nodeName}”吗？`];
+  if (preview.current.name !== preview.proposed.name) {
+    lines.push(`名称：${preview.current.name} → ${preview.proposed.name}`);
+  }
+  if (preview.current.visible !== preview.proposed.visible) {
+    lines.push(
+      `可见性：${preview.current.visible ? "显示" : "隐藏"} → ${
+        preview.proposed.visible ? "显示" : "隐藏"
+      }`
+    );
+  }
+  lines.push("确认后将立即保存到当前实体");
+  return lines.join("\n");
+};
+
+const formatResourcePlacementConfirmation = (
+  preview: ResourcePlacementPreview
+) =>
+  [
+    `确认把素材“${preview.resourceName}”放入当前实体吗？`,
+    `类型：${preview.resourceType}`,
+    `素材 ID：${preview.resourceId}`,
+    "确认后将在实体根层级创建节点并立即保存",
+  ].join("\n");
+
+const formatAssetRenameConfirmation = (preview: AssetRenamePreview) =>
+  [
+    `确认重命名素材“${preview.currentName}”吗？`,
+    `类型：${preview.resourceType}`,
+    `素材 ID：${preview.resourceId}`,
+    `新名称：${preview.proposedName}`,
+    "这是素材库中的全局名称；当前实体里已有节点的名称不会自动改变",
+  ].join("\n");
+
+const formatNodeReparentConfirmation = (preview: NodeReparentPreview) =>
+  [
+    `确认移动节点“${preview.nodeName}”吗？`,
+    `当前父级：${preview.currentParent.parentName}`,
+    `目标父级：${preview.proposedParent.parentName}`,
+    "节点本地位置、旋转和缩放值保持不变，视觉位置可能随父节点坐标系变化",
+    "确认后将立即保存到当前实体",
+  ].join("\n");
+
+const formatNodeDeletionConfirmation = (preview: NodeDeletionPreview) => {
+  const lines = [
+    `确认删除节点“${preview.nodeName}”吗？`,
+    `类型：${preview.nodeType}`,
+    `当前父级：${preview.parent.parentName}`,
+    `将删除：目标节点及 ${preview.descendantCount} 个子节点，共 ${
+      preview.descendantCount + 1
+    } 个节点`,
+  ];
+  if (preview.descendantNames.length > 0) {
+    lines.push(`包含子节点：${preview.descendantNames.join("、")}`);
+    if (preview.descendantCount > preview.descendantNames.length) {
+      lines.push(
+        `另有 ${preview.descendantCount - preview.descendantNames.length} 个子节点`
+      );
+    }
+  }
+  lines.push("确认后将立即删除并保存；仍可在当前编辑器中撤销后重新保存");
+  return lines.join("\n");
+};
+
+const formatNodeOrderConfirmation = (preview: NodeOrderPreview) =>
+  [
+    `确认调整节点“${preview.nodeName}”的同级顺序吗？`,
+    `父级：${preview.current.parentName}`,
+    `当前序号：${preview.current.currentIndex + 1} / ${
+      preview.current.siblingCount
+    }`,
+    `目标序号：${preview.proposed.targetIndex + 1} / ${
+      preview.current.siblingCount
+    }`,
+    preview.proposed.beforeNodeName
+      ? `放到“${preview.proposed.beforeNodeName}”之前`
+      : "移动到同级末尾",
+    "只调整同一父级内的顺序，不改变父级或节点变换；确认后将立即保存",
+  ].join("\n");
+
+const formatNodeCloneConfirmation = (preview: NodeClonePreview) =>
+  [
+    `确认复制节点“${preview.nodeName}”吗？`,
+    `类型：${preview.nodeType}`,
+    `父级：${preview.parent.parentName}`,
+    `新名称：${preview.proposedName}`,
+    `将复制：源节点及 ${preview.descendantCount} 个子节点，共 ${
+      preview.descendantCount + 1
+    } 个节点`,
+    "复制件将插入源节点之后，并为节点、组件和指令生成新的 UUID",
+    "确认后将立即保存到当前实体",
+  ].join("\n");
+
+const summarizeNodeBatchChange = (item: NodeBatchPreviewItem) => {
+  const parts: string[] = [];
+  if (item.current.transform && item.proposed.transform) {
+    if (
+      formatTransformVector(item.current.transform.position) !==
+      formatTransformVector(item.proposed.transform.position)
+    ) {
+      parts.push(
+        `位置 ${formatTransformVector(
+          item.current.transform.position
+        )} → ${formatTransformVector(item.proposed.transform.position)}`
+      );
+    }
+    if (
+      formatTransformVector(item.current.transform.rotationDegrees) !==
+      formatTransformVector(item.proposed.transform.rotationDegrees)
+    ) {
+      parts.push(
+        `旋转 ${formatTransformVector(
+          item.current.transform.rotationDegrees
+        )} → ${formatTransformVector(item.proposed.transform.rotationDegrees)}`
+      );
+    }
+    if (
+      formatTransformVector(item.current.transform.scale) !==
+      formatTransformVector(item.proposed.transform.scale)
+    ) {
+      parts.push(
+        `缩放 ${formatTransformVector(
+          item.current.transform.scale
+        )} → ${formatTransformVector(item.proposed.transform.scale)}`
+      );
+    }
+  }
+  if (item.current.properties && item.proposed.properties) {
+    if (item.current.properties.name !== item.proposed.properties.name) {
+      parts.push(
+        `名称 ${item.current.properties.name} → ${item.proposed.properties.name}`
+      );
+    }
+    if (item.current.properties.visible !== item.proposed.properties.visible) {
+      parts.push(
+        `可见性 ${item.current.properties.visible ? "显示" : "隐藏"} → ${
+          item.proposed.properties.visible ? "显示" : "隐藏"
+        }`
+      );
+    }
+  }
+  return `${item.nodeName}：${parts.join("；") || "无变化"}`;
+};
+
+const formatNodeBatchConfirmation = (preview: NodeBatchPreview) =>
+  [
+    `确认批量修改 ${preview.changedCount} 个节点吗？`,
+    ...preview.changes
+      .filter((item) => item.changed)
+      .map((item, index) => `${index + 1}. ${summarizeNodeBatchChange(item)}`),
+    "全部修改将作为一个可撤销操作执行，并且只保存一次",
+  ].join("\n");
+
+const formatComponentChange = (item: ComponentBatchPreviewItem) => {
+  const operation =
+    item.operation === "add"
+      ? "添加"
+      : item.operation === "remove"
+        ? "移除"
+        : "更新";
+  const lines = [`${operation} ${item.componentType}：节点“${item.nodeName}”`];
+  if (item.operation === "update" && item.current && item.proposed) {
+    lines.push(
+      `${JSON.stringify(item.current.settings)} → ${JSON.stringify(
+        item.proposed.settings
+      )}`
+    );
+  } else if (item.proposed) {
+    lines.push(`设置：${JSON.stringify(item.proposed.settings)}`);
+  }
+  return lines.join("；");
+};
+
+const formatComponentBatchConfirmation = (preview: ComponentBatchPreview) =>
+  [
+    `确认执行 ${preview.changedCount} 项组件修改吗？`,
+    ...preview.changes
+      .filter((item) => item.changed)
+      .map((item, index) => `${index + 1}. ${formatComponentChange(item)}`),
+    "Action、Moved、Trigger 的互斥规则和目标节点有效性已经检查",
+    "全部修改将作为一个可撤销操作执行，并且只保存一次",
+  ].join("\n");
+
+type SignalCode = {
+  blockly?: string;
+  lua?: string;
+  js?: string;
+};
+
+const decompressSignalBlockly = (value: string) => {
+  if (!value.startsWith("compressed:")) return value;
+  const binary = safeAtob(value.slice(11));
+  if (binary === null) throw new Error("Blockly 数据不是有效的 Base64");
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return pako.inflate(bytes, { to: "string" });
+};
+
+const countSignalId = (source: string, signalId: string) => {
+  let count = 0;
+  let offset = 0;
+  while (offset < source.length) {
+    const index = source.indexOf(signalId, offset);
+    if (index < 0) break;
+    count += 1;
+    offset = index + signalId.length;
+  }
+  return count;
+};
+
+const appendSignalCodeReferences = (
+  references: Map<string, SignalReference[]>,
+  signalIds: string[],
+  code: SignalCode | null | undefined,
+  context:
+    | { scope: "entity_script" }
+    | { scope: "scene_script"; sceneId: number; sceneName: string }
+) => {
+  if (!code) return;
+  const sources: Array<{
+    source: SignalReference["source"];
+    value: string;
+  }> = [];
+  if (typeof code.blockly === "string" && code.blockly) {
+    sources.push({
+      source: "blockly",
+      value: decompressSignalBlockly(code.blockly),
+    });
+  }
+  if (typeof code.lua === "string" && code.lua) {
+    sources.push({ source: "lua", value: code.lua });
+  }
+  if (typeof code.js === "string" && code.js) {
+    sources.push({ source: "js", value: code.js });
+  }
+
+  for (const signalId of signalIds) {
+    for (const source of sources) {
+      const count = countSignalId(source.value, signalId);
+      if (count === 0) continue;
+      references.get(signalId)?.push({
+        ...context,
+        source: source.source,
+        count,
+      });
+    }
+  }
+};
+
+const getSignalReferences = async (signalIds: string[]) => {
+  const uniqueSignalIds = Array.from(new Set(signalIds));
+  const references = new Map<string, SignalReference[]>(
+    uniqueSignalIds.map((signalId) => [signalId, []])
+  );
+  if (uniqueSignalIds.length === 0) return references;
+
+  const entity = metaDetail.value as metaInfo | null;
+  if (!entity || !Number.isFinite(entity.id)) {
+    throw new Error("实体数据尚未加载完成");
+  }
+
+  try {
+    const [entityResponse, sceneResponses] = await Promise.all([
+      getMeta(entity.id, { expand: "metaCode" }),
+      Promise.all(
+        entityScenes.value.map(async (scene) => ({
+          scene,
+          response: await getVerse(scene.id, "verseCode"),
+        }))
+      ),
+    ]);
+    appendSignalCodeReferences(
+      references,
+      uniqueSignalIds,
+      entityResponse.data.metaCode,
+      { scope: "entity_script" }
+    );
+    sceneResponses.forEach(({ scene, response }) => {
+      appendSignalCodeReferences(
+        references,
+        uniqueSignalIds,
+        response.data.verseCode,
+        {
+          scope: "scene_script",
+          sceneId: scene.id,
+          sceneName: scene.name,
+        }
+      );
+    });
+    return references;
+  } catch (error) {
+    logger.error("WebMCP signal reference scan failed", error);
+    throw new Error("无法完成信号脚本引用检查，请稍后重试");
+  }
+};
+
+const signalDirectionLabel = (direction: "input" | "output") =>
+  direction === "input" ? "输入" : "输出";
+
+const formatSignalBatchConfirmation = (preview: SignalBatchPreview) =>
+  [
+    `确认执行 ${preview.changedCount} 项信号修改吗？`,
+    ...preview.changes
+      .filter((item) => item.changed)
+      .map((item, index) => {
+        const direction = signalDirectionLabel(item.direction);
+        if (item.operation === "add") {
+          return `${index + 1}. 添加${direction}信号“${item.proposed?.title}”`;
+        }
+        if (item.operation === "remove") {
+          return `${index + 1}. 移除${direction}信号“${item.current?.title}”`;
+        }
+        return `${index + 1}. 重命名${direction}信号：${item.current?.title} → ${item.proposed?.title}`;
+      }),
+    "信号 UUID 保持稳定；待删除信号的实体及场景脚本引用已经检查",
+    "全部修改将作为一个可撤销操作执行，并且只保存一次",
+  ].join("\n");
 
 const confirmSaveCurrentEntity = () =>
   ElMessageBox.confirm(t("common.entitySaveConfirm.message"), "", {
@@ -1007,11 +1461,13 @@ const saveMeta = async (
     meta: MetaPayload;
     events: unknown;
   },
-  trigger: ScriptSaveTrigger = "manual"
+  trigger: ScriptSaveTrigger = "manual",
+  onServerSaved?: () => void
 ): Promise<boolean> => {
+  const savedOwnerId = id.value;
   if (!metaDetail.value || !saveable(metaDetail.value as metaInfo)) {
     ElMessage.info(t("meta.scene.info"));
-    return true;
+    return false;
   }
 
   // 在上传前处理 meta 数据，确保 name 唯一
@@ -1045,10 +1501,12 @@ const saveMeta = async (
   }
 
   try {
-    await putMeta(id.value, {
+    await putMeta(savedOwnerId, {
       data: meta,
       events: events as import("@/api/v1/types/meta").Events | null,
     });
+    onServerSaved?.();
+    if (id.value !== savedOwnerId) return true;
     if (metaDetail.value) {
       const currentMetaDetail = metaDetail.value as metaInfo;
       const nextMetaDetail = JSON.parse(
@@ -1067,6 +1525,90 @@ const saveMeta = async (
   } catch (error) {
     ElMessage.error(t("meta.scene.saveError"));
     return false;
+  }
+};
+
+const persistWebMcpMutation = async (
+  response: Record<string, unknown>,
+  failureMessage: string
+) => {
+  if (response.noChange)
+    return { editorApplied: false, persistence: "unchanged" };
+  const ownerId = id.value;
+  if (response.readBackVerified === false || !isRecord(response.meta)) {
+    throw new WebMcpCompletionError(
+      {
+        status: "partial",
+        editorApplied: true,
+        persistence: "unverified",
+        retry: "read_state_before_retry",
+        ownerId,
+        nodeId: response.nodeId,
+      },
+      "编辑器已应用修改，但未返回可保存的实体快照，请重新读取状态"
+    );
+  }
+  const ownerSession = getHostSessionId();
+  currentSaveTrigger = "manual";
+  isSavingVersion.value = true;
+  const saveData = {
+    meta: response.meta as MetaPayload,
+    events: response.events,
+  };
+  let serverSaved = false;
+  let editorAcknowledged = false;
+  try {
+    const saved = await saveMeta(saveData, currentSaveTrigger, () => {
+      serverSaved = true;
+    });
+    if (!saved && !serverSaved) {
+      throw new WebMcpCompletionError(
+        {
+          status: "partial",
+          editorApplied: true,
+          persistence: "unverified",
+          retry: "read_state_before_retry",
+          ownerId,
+          nodeId: response.nodeId,
+          entityVersion: response.entityVersion,
+        },
+        failureMessage
+      );
+    }
+    if (ownerId === id.value && ownerSession === getHostSessionId()) {
+      try {
+        requireSuccessfulEditorResponse(
+          await requestEditor("webmcp-mark-entity-saved", {
+            expectedEntityVersion: response.entityVersion,
+          })
+        );
+        editorAcknowledged = true;
+      } catch {
+        /* The backend receipt remains valid even if the editor changed. */
+      }
+      hasUnsavedChangesBeforeUnload.value = !editorAcknowledged;
+      const savedAt = addSceneDraftVersion(saveData, currentSaveTrigger);
+      pendingRestorePayload.value = null;
+      lastSaveTrigger.value = currentSaveTrigger;
+      lastSavedAt.value = savedAt || new Date().toISOString();
+    }
+    return {
+      editorApplied: true,
+      persistence: "server_acknowledged",
+      editorAcknowledged,
+      ownerId,
+    };
+  } catch (error) {
+    if (!serverSaved) throw error;
+    return {
+      editorApplied: true,
+      persistence: "server_acknowledged",
+      editorAcknowledged,
+      ownerId,
+      refreshWarning: "实体已保存，但页面状态刷新未完成，请重新读取",
+    };
+  } finally {
+    isSavingVersion.value = false;
   }
 };
 
@@ -1158,6 +1700,14 @@ const handleUploadCover = async (data: unknown) => {
 
 // 处理编辑器发来的消息（标准协议：msg.type 路由）
 const handleMessage = async (e: MessageEvent) => {
+  if (e.source !== editor.value?.contentWindow) return;
+  try {
+    if (e.origin !== new URL(editor.value.src, window.location.href).origin)
+      return;
+  } catch {
+    return;
+  }
+  webMcpRpc.handleMessage(e);
   const msg = e.data;
   if (!msg || typeof msg.type !== "string") return;
 
@@ -1179,6 +1729,18 @@ const handleMessage = async (e: MessageEvent) => {
 
     case "RESPONSE": {
       const action = payload.action as string | undefined;
+      const requestId =
+        typeof msg.requestId === "string" ? msg.requestId : undefined;
+      const requestResolver = requestId
+        ? pendingRequests.get(requestId)
+        : undefined;
+      if (requestResolver) {
+        requestResolver(payload);
+      }
+
+      if (action?.startsWith("webmcp-")) {
+        break;
+      }
 
       if (action === "save" && !payload.noChange) {
         // Original save-meta logic
@@ -1289,11 +1851,7 @@ const handleMessage = async (e: MessageEvent) => {
           resolveLeaveSave(true);
         }
       } else if (action === "check-unsaved-changes") {
-        // Match via msg.requestId against pendingRequests Map callback
-        const resolver = pendingRequests.get(msg.requestId);
-        if (resolver) {
-          resolver(payload);
-        } else {
+        if (!requestResolver) {
           // Fallback: direct update of hasUnsavedChangesBeforeUnload
           hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
             ? true
@@ -1371,6 +1929,7 @@ const handleMessage = async (e: MessageEvent) => {
 
 const pushMetaToEditor = (meta: metaInfo) => {
   const availableTypes = getAvailableResourceTypes();
+  webMcpRpc.cancel("编辑器正在重新初始化");
   postStandardMessage("INIT", {
     token: null,
     config: {
@@ -1386,6 +1945,7 @@ const pushMetaToEditor = (meta: metaInfo) => {
       system: {},
     },
   });
+  registerPageWebMcpTools();
 };
 
 // 刷新元数据
@@ -1410,7 +1970,10 @@ const resetEditorStateForSceneChange = () => {
   entityScenes.value = [];
   loadSceneDraftState();
   restartAutoSaveTimer();
+  webMcpRpc.cancel();
+  webMcpLifecycle?.abort();
   editorFrameKey.value += 1;
+  registerPageWebMcpTools();
 };
 
 watch(id, (newId, oldId) => {
@@ -1429,10 +1992,1211 @@ onMounted(() => {
   unsavedCheckPollingTimer = window.setInterval(() => {
     void syncUnsavedChangesForBeforeUnload();
   }, 2000);
+
+  registerPageWebMcpTools();
 });
 
-onActivated(activateToolbar);
-onDeactivated(() => unregisterToolbar(toolbarOwner));
+const registerPageWebMcpTools = () => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  let registration: AbortController | null = null;
+  const assertActive = () => {
+    if (
+      registration?.signal.aborted ||
+      ownerId !== id.value ||
+      ownerSession !== getHostSessionId()
+    ) {
+      throw new Error("编辑器会话已经切换，请重新预览");
+    }
+  };
+  const requestEditor = (...args: Parameters<typeof webMcpRpc.request>) => {
+    assertActive();
+    return webMcpRpc.request(...args);
+  };
+  const saveWebMcpMutation = (
+    ...args: Parameters<typeof persistWebMcpMutation>
+  ) => {
+    try {
+      assertActive();
+    } catch {
+      throw new WebMcpCompletionError(
+        {
+          status: "partial",
+          editorApplied: true,
+          persistence: "unverified",
+          retry: "read_state_before_retry",
+          ownerId,
+          nodeId: args[0].nodeId,
+          moduleId: args[0].moduleId,
+        },
+        "编辑器已应用修改，但会话已切换，请重新读取状态"
+      );
+    }
+    return persistWebMcpMutation(...args);
+  };
+
+  webMcpLifecycle?.abort();
+  registration = webMcpLifecycle = registerEntityEditorWebMcpTools({
+    getContext: () => ({
+      entity: metaDetail.value as metaInfo | null,
+      dirty: hasUnsavedChangesBeforeUnload.value,
+      loading: metaDetail.value === null,
+      sceneNames: entityScenes.value.map((scene) => scene.name),
+    }),
+    getLiveContext: async () => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity) throw new Error("实体尚未加载完成");
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-get-entity-state")
+      );
+      if (
+        (metaDetail.value as metaInfo | null)?.id !== entity.id ||
+        Number(response.entityId) !== entity.id
+      ) {
+        throw new Error("当前实体已切换，请重新读取");
+      }
+      hasUnsavedChangesBeforeUnload.value = Boolean(response.changed);
+      return {
+        entity: {
+          ...entity,
+          data: response.meta,
+          events: response.events,
+        } as metaInfo,
+        dirty: Boolean(response.changed),
+        loading: Boolean(response.loading),
+        sceneNames: entityScenes.value.map((scene) => scene.name),
+        source: "live-editor",
+        entityVersion: String(response.entityVersion),
+        contextGeneration: Number(response.contextGeneration),
+      };
+    },
+    searchAssets: async ({ type, query, page, pageSize }) => {
+      const response = await getResources(
+        type,
+        "-created_at",
+        query,
+        page,
+        "image",
+        pageSize
+      );
+      const totalHeader = response.headers?.["x-pagination-total-count"];
+      const total = Number(totalHeader);
+      return {
+        items: response.data,
+        page,
+        pageSize,
+        total: Number.isFinite(total) ? total : undefined,
+      };
+    },
+    stageNodeTransform: async (nodeId, transform) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建变换预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-node-transform", {
+          nodeId,
+          transform,
+        })
+      );
+      return {
+        entityId: entity.id,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || "未命名节点"),
+        current: response.current as NodeTransformSnapshot,
+        proposed: response.proposed as NodeTransformSnapshot,
+        changed: Boolean(response.changed),
+      };
+    },
+    confirmNodeTransform: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatTransformConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeNodeTransform: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建变换预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-node-transform",
+          {
+            nodeId: preview.nodeId,
+            expectedCurrent: preview.current,
+            proposed: preview.proposed,
+          },
+          30000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "节点变换已应用，但保存到服务器失败，请手动保存"
+      );
+
+      return {
+        ...persistence,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || preview.nodeName),
+        transform: response.transform as NodeTransformSnapshot,
+        noChange: Boolean(response.noChange),
+      };
+    },
+    stageNodeProperties: async (nodeId, properties) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建属性预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-node-properties", {
+          nodeId,
+          properties,
+        })
+      );
+      return {
+        entityId: entity.id,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || "未命名节点"),
+        current: response.current as NodePropertySnapshot,
+        proposed: response.proposed as NodePropertySnapshot,
+        changed: Boolean(response.changed),
+      };
+    },
+    confirmNodeProperties: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatNodePropertyConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeNodeProperties: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建属性预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-node-properties",
+          {
+            nodeId: preview.nodeId,
+            expectedCurrent: preview.current,
+            proposed: preview.proposed,
+          },
+          30000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "节点属性已应用，但保存到服务器失败，请手动保存"
+      );
+
+      return {
+        ...persistence,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || preview.nodeName),
+        properties: response.properties as NodePropertySnapshot,
+        noChange: Boolean(response.noChange),
+      };
+    },
+    stageResourcePlacement: async (resourceType, resourceId) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+      if (!getAvailableResourceTypes().includes(resourceType)) {
+        throw new Error(`当前账号不能在实体中使用 ${resourceType} 素材`);
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建素材放入预览");
+      }
+
+      const live = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-get-entity-state")
+      );
+      const resource = await fetchResourceByRef({
+        id: resourceId,
+        type: resourceType as RestorableResourceType,
+      });
+      if (!resource || resource.type.toLowerCase() !== resourceType) {
+        throw new Error(`找不到 ${resourceType} 素材 ${resourceId}`);
+      }
+      return {
+        entityId: entity.id,
+        resourceId,
+        entityVersion: String(live.entityVersion),
+        resourceType,
+        resourceName: resource.name || "未命名素材",
+        resourceUpdatedAt: resource.updated_at,
+      };
+    },
+    confirmResourcePlacement: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatResourcePlacementConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeResourcePlacement: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建素材放入预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+      if (!getAvailableResourceTypes().includes(preview.resourceType)) {
+        throw new Error(
+          `当前账号不能在实体中使用 ${preview.resourceType} 素材`
+        );
+      }
+
+      const resource = await fetchResourceByRef({
+        id: preview.resourceId,
+        type: preview.resourceType as RestorableResourceType,
+      });
+      if (!resource || resource.type.toLowerCase() !== preview.resourceType) {
+        throw new Error("素材不存在或类型已经变化，请重新预览");
+      }
+      if (
+        preview.resourceUpdatedAt &&
+        resource.updated_at &&
+        preview.resourceUpdatedAt !== resource.updated_at
+      ) {
+        throw new Error("素材在预览后已被更新，请重新预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-resource-placement",
+          {
+            resource,
+            operationId: preview.operationId,
+            expectedEntityVersion: preview.entityVersion,
+          },
+          120000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "素材节点已创建，但保存到服务器失败，请手动保存"
+      );
+      if ((metaDetail.value as metaInfo | null)?.id === preview.entityId) {
+        const current = metaDetail.value as metaInfo;
+        current.resources = [
+          ...(current.resources ?? []).filter(
+            (item) => item.id !== resource.id
+          ),
+          resource,
+        ];
+      }
+      return {
+        ...persistence,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || preview.resourceName),
+        nodeType: String(response.nodeType || preview.resourceType),
+        resourceId: Number(response.resourceId),
+      };
+    },
+    stageNodeReparent: async (nodeId, parentNodeId) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建层级预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-node-reparent", {
+          nodeId,
+          parentNodeId,
+        })
+      );
+      return {
+        entityId: entity.id,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || "未命名节点"),
+        currentParent: response.currentParent as NodeParentSnapshot,
+        proposedParent: response.proposedParent as {
+          parentNodeId: string | null;
+          parentName: string;
+        },
+        changed: Boolean(response.changed),
+      };
+    },
+    confirmNodeReparent: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatNodeReparentConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeNodeReparent: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建层级预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-node-reparent",
+          {
+            nodeId: preview.nodeId,
+            expectedCurrentParent: preview.currentParent,
+            proposedParent: preview.proposedParent,
+          },
+          30000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "节点层级已修改，但保存到服务器失败，请手动保存"
+      );
+      return {
+        ...persistence,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || preview.nodeName),
+        parent: response.parent as NodeParentSnapshot,
+        noChange: Boolean(response.noChange),
+      };
+    },
+    stageNodeDeletion: async (nodeId) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建删除预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-node-deletion", { nodeId })
+      );
+      return {
+        entityId: entity.id,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || "未命名节点"),
+        nodeType: String(response.nodeType || "unknown"),
+        parent: response.parent as NodeParentSnapshot,
+        subtreeVersion: String(response.subtreeVersion),
+        directChildCount: Number(response.directChildCount),
+        descendantCount: Number(response.descendantCount),
+        descendantNames: Array.isArray(response.descendantNames)
+          ? response.descendantNames.map(String)
+          : [],
+      };
+    },
+    confirmNodeDeletion: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatNodeDeletionConfirmation(preview),
+          "WebMCP 删除节点",
+          {
+            type: "warning",
+            confirmButtonText: "删除并保存",
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeNodeDeletion: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建删除预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-node-deletion",
+          {
+            nodeId: preview.nodeId,
+            expected: {
+              parent: preview.parent,
+              subtreeVersion: preview.subtreeVersion,
+              directChildCount: preview.directChildCount,
+              descendantCount: preview.descendantCount,
+            },
+          },
+          30000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "节点已从编辑器删除，但保存到服务器失败，请撤销删除或手动保存"
+      );
+      return {
+        ...persistence,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || preview.nodeName),
+        removedNodeCount: Number(response.removedNodeCount),
+        parent: response.parent as NodeParentSnapshot,
+      };
+    },
+    stageNodeReorder: async (nodeId, beforeNodeId) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建顺序预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-node-reorder", {
+          nodeId,
+          beforeNodeId,
+        })
+      );
+      return {
+        entityId: entity.id,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || "未命名节点"),
+        current: response.current as NodeOrderSnapshot,
+        proposed: response.proposed as NodeOrderPreview["proposed"],
+        changed: Boolean(response.changed),
+      };
+    },
+    confirmNodeReorder: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatNodeOrderConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeNodeReorder: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建顺序预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-node-reorder",
+          {
+            nodeId: preview.nodeId,
+            expected: preview.current,
+            proposed: preview.proposed,
+          },
+          30000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "节点顺序已修改，但保存到服务器失败，请手动保存"
+      );
+      return {
+        ...persistence,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || preview.nodeName),
+        order: response.order as NodeOrderSnapshot,
+        noChange: Boolean(response.noChange),
+      };
+    },
+    stageNodeClone: async (nodeId, name) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建复制预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-node-clone", { nodeId, name })
+      );
+      return {
+        entityId: entity.id,
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || "未命名节点"),
+        nodeType: String(response.nodeType || "unknown"),
+        parent: response.parent as NodeParentSnapshot,
+        sourceVersion: String(response.sourceVersion),
+        siblingOrderVersion: String(response.siblingOrderVersion),
+        directChildCount: Number(response.directChildCount),
+        descendantCount: Number(response.descendantCount),
+        proposedName: String(response.proposedName),
+      };
+    },
+    confirmNodeClone: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatNodeCloneConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeNodeClone: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建复制预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-node-clone",
+          {
+            nodeId: preview.nodeId,
+            expected: {
+              parent: preview.parent,
+              sourceVersion: preview.sourceVersion,
+              siblingOrderVersion: preview.siblingOrderVersion,
+              directChildCount: preview.directChildCount,
+              descendantCount: preview.descendantCount,
+            },
+            proposedName: preview.proposedName,
+          },
+          120000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "节点复制件已创建，但保存到服务器失败，请撤销复制或手动保存"
+      );
+      return {
+        ...persistence,
+        sourceNodeId: String(response.sourceNodeId),
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || preview.proposedName),
+        nodeType: String(response.nodeType || preview.nodeType),
+        clonedNodeCount: Number(response.clonedNodeCount),
+        parent: response.parent as NodeParentSnapshot,
+      };
+    },
+    stageNodeBatch: async (changes) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建批量预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-node-batch", { changes })
+      );
+      return {
+        entityId: entity.id,
+        changes: response.changes as NodeBatchPreviewItem[],
+        changedCount: Number(response.changedCount),
+      };
+    },
+    confirmNodeBatch: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatNodeBatchConfirmation(preview),
+          "WebMCP 批量修改",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeNodeBatch: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建批量预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-node-batch",
+          { changes: preview.changes },
+          30000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "批量修改已应用，但保存到服务器失败，请撤销修改或手动保存"
+      );
+      return {
+        ...persistence,
+        noChange: Boolean(response.noChange),
+        commandCount: Number(response.commandCount),
+        changes: response.changes as NodeBatchCompletion["changes"],
+      };
+    },
+    startAssetUpload: async (resourceType) => {
+      if (!getAvailableResourceTypes().includes(resourceType)) {
+        throw new Error(`当前账号不能上传 ${resourceType} 素材`);
+      }
+
+      const target = router.resolve({
+        path: RESOURCE_UPLOAD_ROUTES[resourceType],
+        query: { webmcpUpload: "1" },
+      }).href;
+      try {
+        await ElMessageBox.confirm(
+          [
+            `准备打开 ${resourceType} 素材上传页面`,
+            "新页面会自动打开平台原有上传对话框",
+            "本地文件必须由你在系统文件选择器中选择，WebMCP 不会读取文件路径",
+          ].join("\n"),
+          "WebMCP 素材上传",
+          {
+            confirmButtonText: "打开上传页面",
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+      } catch {
+        return {
+          opened: false,
+          resourceType,
+          url: target,
+          message: "用户取消打开素材上传页面",
+        };
+      }
+
+      const uploadWindow = window.open(target, "_blank");
+      if (!uploadWindow) {
+        ElMessage.warning("浏览器阻止了新窗口，请允许弹窗后重试");
+        return {
+          opened: false,
+          resourceType,
+          url: target,
+          message: "浏览器阻止了上传页面新窗口",
+        };
+      }
+      uploadWindow.opener = null;
+      return { opened: true, resourceType, url: target };
+    },
+    stageAssetRename: async (resourceType, resourceId, proposedName) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!getAvailableResourceTypes().includes(resourceType)) {
+        throw new Error(`当前账号不能修改 ${resourceType} 素材`);
+      }
+
+      const resource = await fetchResourceByRef({
+        id: resourceId,
+        type: resourceType,
+      });
+      if (!resource || resource.type.toLowerCase() !== resourceType) {
+        throw new Error(`找不到 ${resourceType} 素材 ${resourceId}`);
+      }
+      return {
+        entityId: entity.id,
+        resourceId,
+        resourceType,
+        currentName: resource.name || "未命名素材",
+        proposedName,
+        resourceUpdatedAt: resource.updated_at,
+      };
+    },
+    confirmAssetRename: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatAssetRenameConfirmation(preview),
+          "WebMCP 素材重命名",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeAssetRename: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建素材重命名预览");
+      }
+      if (!getAvailableResourceTypes().includes(preview.resourceType)) {
+        throw new Error(`当前账号不能修改 ${preview.resourceType} 素材`);
+      }
+
+      const current = await fetchResourceByRef({
+        id: preview.resourceId,
+        type: preview.resourceType,
+      });
+      if (!current || current.type.toLowerCase() !== preview.resourceType) {
+        throw new Error("素材不存在或类型已经变化，请重新预览");
+      }
+      if ((current.name || "未命名素材") !== preview.currentName) {
+        throw new Error("素材名称在预览后已变化，请重新预览");
+      }
+      if (
+        preview.resourceUpdatedAt &&
+        current.updated_at &&
+        preview.resourceUpdatedAt !== current.updated_at
+      ) {
+        throw new Error("素材在预览后已被更新，请重新预览");
+      }
+
+      assertActive();
+      const updated = await updateResourceName(
+        preview.resourceType,
+        preview.resourceId,
+        preview.proposedName
+      );
+      if (!updated) throw new Error("平台没有返回重命名后的素材数据");
+
+      const localResource = entity.resources?.find(
+        (resource) => resource.id === preview.resourceId
+      );
+      if (localResource) {
+        localResource.name = preview.proposedName;
+        if (updated.updated_at) localResource.updated_at = updated.updated_at;
+      }
+      ElMessage.success(`素材已重命名为“${preview.proposedName}”`);
+      return {
+        resourceId: preview.resourceId,
+        resourceType: preview.resourceType,
+        resourceName: preview.proposedName,
+      };
+    },
+    getNodeComponents: async (nodeId) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-get-node-components", { nodeId })
+      );
+      return {
+        nodeId: String(response.nodeId),
+        nodeName: String(response.nodeName || "未命名节点"),
+        nodeType: String(response.nodeType || "unknown"),
+        components: Array.isArray(response.components)
+          ? (response.components as NodeComponentList["components"])
+          : [],
+      };
+    },
+    stageComponentBatch: async (changes) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建组件预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-component-batch", { changes })
+      );
+      return {
+        entityId: entity.id,
+        changes: response.changes as ComponentBatchPreviewItem[],
+        changedCount: Number(response.changedCount),
+      };
+    },
+    confirmComponentBatch: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatComponentBatchConfirmation(preview),
+          "WebMCP 组件修改",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeComponentBatch: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建组件预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-component-batch",
+          { changes: preview.changes },
+          30000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "组件修改已应用，但保存到服务器失败，请撤销修改或手动保存"
+      );
+      return {
+        ...persistence,
+        noChange: Boolean(response.noChange),
+        commandCount: Number(response.commandCount),
+        changes: response.changes as ComponentBatchCompletion["changes"],
+      };
+    },
+    getEntitySignals: async () => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-get-entity-signals")
+      );
+      const inputs = Array.isArray(response.inputs)
+        ? (response.inputs as EntitySignalList["inputs"])
+        : [];
+      const outputs = Array.isArray(response.outputs)
+        ? (response.outputs as EntitySignalList["outputs"])
+        : [];
+      const referenceMap = await getSignalReferences(
+        [...inputs, ...outputs].map((signal) => signal.signalId)
+      );
+      return {
+        entityId: entity.id,
+        inputs: inputs.map((signal) => ({
+          ...signal,
+          references: referenceMap.get(signal.signalId) ?? [],
+        })),
+        outputs: outputs.map((signal) => ({
+          ...signal,
+          references: referenceMap.get(signal.signalId) ?? [],
+        })),
+      };
+    },
+    stageSignalBatch: async (changes) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || !Number.isFinite(entity.id)) {
+        throw new Error("实体数据尚未加载完成");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const unsavedResponse = await requestEditor("check-unsaved-changes");
+      const hasUnsavedChanges =
+        Boolean(unsavedResponse.changed) ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        throw new Error("当前实体存在未保存修改，请先保存后再创建信号预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-signal-batch", { changes })
+      );
+      const previewChanges = response.changes as SignalBatchPreviewItem[];
+      const removalIds = previewChanges
+        .filter((item) => item.operation === "remove")
+        .map((item) => item.signalId);
+      const referenceMap = await getSignalReferences(removalIds);
+      const enrichedChanges = previewChanges.map((item) => {
+        const references = referenceMap.get(item.signalId) ?? [];
+        return {
+          ...item,
+          references,
+          blockedReason:
+            item.operation === "remove" && references.length > 0
+              ? `信号仍被 ${references.length} 处脚本来源引用`
+              : undefined,
+        };
+      });
+      return {
+        entityId: entity.id,
+        changes: enrichedChanges,
+        changedCount: Number(response.changedCount),
+        blockedCount: enrichedChanges.filter((item) => item.blockedReason)
+          .length,
+      };
+    },
+    confirmSignalBatch: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatSignalBatchConfirmation(preview),
+          "WebMCP 信号修改",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeSignalBatch: async (preview) => {
+      const entity = metaDetail.value as metaInfo | null;
+      if (!entity || entity.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建信号预览");
+      }
+      if (!saveable(entity)) {
+        throw new Error("当前账号没有修改此实体的权限");
+      }
+
+      const removalIds = preview.changes
+        .filter((item) => item.operation === "remove")
+        .map((item) => item.signalId);
+      const currentReferences = await getSignalReferences(removalIds);
+      const newlyReferenced = removalIds.find(
+        (signalId) => (currentReferences.get(signalId) ?? []).length > 0
+      );
+      if (newlyReferenced) {
+        throw new Error(
+          `信号 ${newlyReferenced} 在预览后出现脚本引用，请先修改对应脚本`
+        );
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-signal-batch",
+          { changes: preview.changes },
+          30000
+        )
+      );
+      const persistence = await saveWebMcpMutation(
+        response,
+        "信号修改已应用，但保存到服务器失败，请撤销修改或手动保存"
+      );
+      return {
+        ...persistence,
+        noChange: Boolean(response.noChange),
+        commandCount: Number(response.commandCount),
+        changes: response.changes as SignalBatchCompletion["changes"],
+      };
+    },
+    onRegistrationError: (toolName, error) => {
+      logger.warn(`WebMCP tool registration failed: ${toolName}`, error);
+    },
+  });
+};
+
+onActivated(() => {
+  activateToolbar();
+  registerPageWebMcpTools();
+});
+onDeactivated(() => {
+  unregisterToolbar(toolbarOwner);
+  webMcpLifecycle?.abort();
+  webMcpRpc.cancel();
+});
 
 onBeforeRouteLeave(async (_to, _from, next) => {
   const canLeave = await resolveUnsavedBeforeLeave();
@@ -1459,6 +3223,9 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  webMcpLifecycle?.abort();
+  webMcpLifecycle = null;
+  webMcpRpc.cancel();
   postStandardMessage("DESTROY");
   unregisterToolbar(toolbarOwner);
   clearAutoSaveTimer();

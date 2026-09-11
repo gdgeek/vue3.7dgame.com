@@ -56,6 +56,48 @@ describe("useSceneAnimation", () => {
   };
 
   describe("playAnimation", () => {
+    it("waits for the matching one-shot animation and holds its final pose", async () => {
+      const action = {
+        reset: vi.fn(),
+        setLoop: vi.fn(),
+        play: vi.fn(),
+        clampWhenFinished: false,
+      };
+      let finished: (event: { action: unknown }) => void = () => {};
+      const mixer = {
+        stopAllAction: vi.fn(),
+        clipAction: vi.fn(() => action),
+        addEventListener: vi.fn((_name, handler) => {
+          finished = handler;
+        }),
+        removeEventListener: vi.fn(),
+      };
+      sources.set("model1", {
+        type: "model",
+        data: { mesh: { userData: { animations: [{ name: "Explode" }] } } },
+      } as never);
+      mixers.set("model1", mixer as never);
+      const { playAnimation } = await getComposable();
+      let settled = false;
+      const promise = Promise.resolve(
+        playAnimation("model1", "Explode", { loop: false })
+      ).then(() => {
+        settled = true;
+      });
+      expect(action.setLoop).toHaveBeenCalledWith(2200, 1);
+      expect(action.clampWhenFinished).toBe(true);
+      finished({ action: {} });
+      await Promise.resolve();
+      expect(settled).toBe(false);
+      finished({ action });
+      await promise;
+      expect(settled).toBe(true);
+      expect(mixer.removeEventListener).toHaveBeenCalledWith(
+        "finished",
+        finished
+      );
+    });
+
     it("plays animation when all resources exist", async () => {
       const mockPlay = vi.fn();
       const mockMixer = {

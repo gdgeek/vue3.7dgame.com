@@ -353,4 +353,63 @@ describe("useUnityPreviewBridge session boundary", () => {
       expect.any(String)
     );
   });
+  it.each([
+    "WGP-UNITY-LOADER",
+    "WGP-UNITY-START",
+    "WGP-UNITY-TIMEOUT",
+    "WGP-SERVICE-WORKER",
+    "WGP-BUILD-MANIFEST",
+  ])("captures %s before READY only for the active nonce", async (code) => {
+    await bridge.open();
+    const url = new URL(bridge.src.value);
+    const session = url.searchParams.get("session");
+    dispatchRunnerMessage(
+      {
+        type: "unity-web-preview-error",
+        code,
+        session: "stale",
+        message: "private-token",
+      },
+      url.origin
+    );
+    expect(bridge.failure.value).toBeNull();
+    dispatchRunnerMessage(
+      {
+        type: "unity-web-preview-error",
+        code,
+        session,
+        message: "private-token",
+      },
+      url.origin
+    );
+    expect(bridge.failure.value).toEqual({ code, stage: "runtime_load" });
+    expect(JSON.stringify(bridge.failure.value)).not.toContain("private-token");
+    bridge.close();
+    dispatchRunnerMessage(
+      { type: "unity-web-preview-error", code, session },
+      url.origin
+    );
+    expect(bridge.failure.value).toBeNull();
+  });
+  it("reports scene forwarding failure after a session READY", async () => {
+    await bridge.open();
+    const url = new URL(bridge.src.value);
+    const session = url.searchParams.get("session");
+    dispatchRunnerMessage(
+      { type: "unity-web-preview-ready", session },
+      url.origin
+    );
+    dispatchRunnerMessage(
+      {
+        type: "unity-web-preview-error",
+        code: "SCENE_FORWARD_FAILED",
+        session,
+      },
+      url.origin
+    );
+    expect(bridge.failure.value).toEqual({
+      code: "SCENE_FORWARD_FAILED",
+      stage: "scene_load",
+    });
+  });
 });

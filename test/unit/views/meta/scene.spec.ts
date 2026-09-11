@@ -10,6 +10,7 @@ const mockRoute = reactive({
 
 const mockPush = vi.fn();
 const mockPostStandardMessage = vi.fn();
+const mockSendRequest = vi.fn();
 const mockGetMeta = vi.fn();
 const mockGetVerses = vi.fn();
 const mockRegisterToolbar = vi.fn();
@@ -153,8 +154,9 @@ vi.mock("@/composables/useEditorVersionToolbar", () => ({
 vi.mock("@/composables/useIframeMessaging", () => ({
   useIframeMessaging: () => ({
     postStandardMessage: mockPostStandardMessage,
-    sendRequest: vi.fn(),
+    sendRequest: mockSendRequest,
     pendingRequests: new Map(),
+    getHostSessionId: () => "test-session",
   }),
 }));
 
@@ -233,6 +235,8 @@ describe("views/meta/scene.vue", () => {
     mockRoute.query.title = "test-scene";
     mockPush.mockReset();
     mockPostStandardMessage.mockReset();
+    mockSendRequest.mockReset();
+    mockSendRequest.mockReturnValue("webmcp-request");
     mockGetMeta.mockReset();
     mockGetVerses.mockReset();
     mockRegisterToolbar.mockReset();
@@ -253,6 +257,7 @@ describe("views/meta/scene.vue", () => {
     cleanups.length = 0;
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
+    delete (document as Document & { modelContext?: unknown }).modelContext;
     vi.resetModules();
   });
 
@@ -262,6 +267,8 @@ describe("views/meta/scene.vue", () => {
     window.dispatchEvent(
       new MessageEvent("message", {
         data: { type: "PLUGIN_READY" },
+        source: document.querySelector("iframe")?.contentWindow,
+        origin: "https://editor.example.test",
       })
     );
     await nextTick();
@@ -283,6 +290,8 @@ describe("views/meta/scene.vue", () => {
     window.dispatchEvent(
       new MessageEvent("message", {
         data: { type: "PLUGIN_READY" },
+        source: document.querySelector("iframe")?.contentWindow,
+        origin: "https://editor.example.test",
       })
     );
     await nextTick();
@@ -297,5 +306,83 @@ describe("views/meta/scene.vue", () => {
         }),
       })
     );
+  });
+  it("reads unsaved entity content from the current iframe and aborts the old tools on route changes", async () => {
+    const registry = new Map<
+      string,
+      { execute: (input: unknown) => Promise<unknown> }
+    >();
+    Object.defineProperty(document, "modelContext", {
+      configurable: true,
+      value: {
+        registerTool(
+          tool: { name: string; execute: (input: unknown) => Promise<unknown> },
+          options: { signal: AbortSignal }
+        ) {
+          registry.set(tool.name, tool);
+          options.signal.addEventListener("abort", () => {
+            if (registry.get(tool.name) === tool) registry.delete(tool.name);
+          });
+        },
+      },
+    });
+    await mountSceneView();
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        source: document.querySelector("iframe")?.contentWindow,
+        origin: "https://editor.example.test",
+        data: { type: "PLUGIN_READY" },
+      })
+    );
+    await nextTick();
+    await Promise.resolve();
+    const tool = registry.get("xrugc_get_entity_tree")!;
+    expect(tool).toBeDefined();
+    const result = tool.execute({});
+    expect(mockSendRequest).toHaveBeenCalledWith("webmcp-get-entity-state", {});
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        source: document.querySelector("iframe")?.contentWindow,
+        origin: "https://editor.example.test",
+        data: {
+          type: "RESPONSE",
+          requestId: "webmcp-request",
+          payload: {
+            action: "webmcp-get-entity-state",
+            hostSessionId: "test-session",
+            ok: true,
+            entityId: 1,
+            meta: {
+              children: {
+                entities: [
+                  {
+                    type: "Group",
+                    parameters: { uuid: "new-node", name: "Unsaved live node" },
+                    children: { entities: [] },
+                  },
+                ],
+              },
+            },
+            events: null,
+            entityVersion: "live-version",
+            changed: true,
+            loading: false,
+            contextGeneration: 1,
+          },
+        },
+      })
+    );
+    const snapshot = await result;
+    expect(JSON.stringify(snapshot)).toContain("Unsaved live node");
+    expect(snapshot).toMatchObject({
+      source: "live-editor",
+      dirty: true,
+      entityVersion: "live-version",
+    });
+    mockRoute.query.id = "2";
+    await nextTick();
+    mockRoute.query.id = "1";
+    await nextTick();
+    await expect(tool.execute({})).rejects.toThrow();
   });
 });
