@@ -36,7 +36,7 @@
                 <div v-if="meta" class="script-tabs-actions">
                   <el-select
                     v-model="selectedUsedSceneId"
-                    class="script-used-scenes-select"
+                    class="script-context-select script-used-scenes-select"
                     size="small"
                     :placeholder="usedSceneSelectPlaceholder"
                     :disabled="usedSceneOptions.length === 0"
@@ -50,36 +50,38 @@
                       :value="scene.id"
                     ></el-option>
                   </el-select>
-                  <el-button
-                    class="script-action-button"
-                    type="primary"
-                    size="small"
-                    :title="$t('meta.script.entityEditor')"
-                    :aria-label="$t('meta.script.entityEditor')"
-                    @click="goBackToSceneEditor"
-                  >
-                    <font-awesome-icon
-                      class="script-action-icon"
-                      :icon="['fas', 'cube']"
-                    ></font-awesome-icon>
-                    <span class="secondary-action-label">
-                      {{ $t("meta.script.entityEditor") }}
-                    </span>
-                  </el-button>
-                  <el-button
-                    class="script-action-button script-save-button"
-                    type="primary"
-                    size="small"
-                    :title="$t('meta.script.save')"
-                    :aria-label="$t('meta.script.save')"
-                    @click="save"
-                  >
-                    <font-awesome-icon
-                      class="script-action-icon"
-                      icon="save"
-                    ></font-awesome-icon>
-                    <span>{{ $t("meta.script.save") }}</span>
-                  </el-button>
+                  <div class="script-primary-actions">
+                    <el-button
+                      class="script-action-button"
+                      type="primary"
+                      size="small"
+                      :title="$t('meta.script.entityEditor')"
+                      :aria-label="$t('meta.script.entityEditor')"
+                      @click="goBackToSceneEditor"
+                    >
+                      <font-awesome-icon
+                        class="script-action-icon"
+                        :icon="['fas', 'cube']"
+                      ></font-awesome-icon>
+                      <span class="secondary-action-label">
+                        {{ $t("meta.script.entityEditor") }}
+                      </span>
+                    </el-button>
+                    <el-button
+                      class="script-action-button script-save-button"
+                      type="primary"
+                      size="small"
+                      :title="$t('meta.script.save')"
+                      :aria-label="$t('meta.script.save')"
+                      @click="save"
+                    >
+                      <font-awesome-icon
+                        class="script-action-icon"
+                        icon="save"
+                      ></font-awesome-icon>
+                      <span>{{ $t("meta.script.save") }}</span>
+                    </el-button>
+                  </div>
                 </div>
               </div>
               <el-tabs
@@ -1155,100 +1157,6 @@ watch([id, editorFrameKey, editorContentReady], () => {
   background-color: #fafafa !important;
 }
 
-.script-tabs-wrapper {
-  container-name: script-editor;
-  container-type: inline-size;
-  position: relative;
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-}
-
-.script-editor-toolbar {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-  min-height: 40px;
-  margin-bottom: 8px;
-}
-
-.script-mode-tabs {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  min-width: 0;
-}
-
-.script-mode-tab {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 92px;
-  height: 32px;
-  padding: 0 12px;
-  font-size: 12px;
-  line-height: 1.1;
-  color: var(--text-secondary, #64748b);
-  white-space: nowrap;
-  cursor: pointer;
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-color, #d6deea);
-  border-radius: 8px;
-}
-
-.script-mode-tab:hover,
-.script-mode-tab:focus-visible,
-.script-mode-tab.is-active {
-  color: var(--primary-color, #06a7ee);
-  border-color: var(--primary-color, #06a7ee);
-}
-
-.script-mode-tab:focus-visible {
-  outline: 2px solid
-    color-mix(in srgb, var(--primary-color, #06a7ee) 30%, transparent);
-  outline-offset: 2px;
-}
-
-.script-tabs-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-self: end;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.script-action-button {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  min-height: 32px;
-  margin-left: 0 !important;
-}
-
-.script-action-icon {
-  margin-right: 4px;
-  font-size: 14px;
-  color: inherit;
-}
-
-.script-used-scenes-select {
-  width: 180px;
-}
-
-.script-used-scenes-select :deep(.el-select__wrapper) {
-  align-items: center;
-  min-height: 32px;
-}
-
-.script-used-scenes-select :deep(.el-select__placeholder),
-.script-used-scenes-select :deep(.el-select__selected-item) {
-  line-height: 20px;
-  text-align: center;
-}
-
 :global(.script-used-scenes-popper .el-select-dropdown__item) {
   box-sizing: border-box;
   display: flex;
@@ -1333,83 +1241,6 @@ watch([id, editorFrameKey, editorContentReady], () => {
   color: var(--primary-color, #06a7ee);
 }
 
-@container script-editor (width <= 1100px) {
-  .script-editor-toolbar {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-
-  .script-tabs-actions {
-    justify-content: flex-end;
-    justify-self: stretch;
-    width: 100%;
-    max-width: none;
-  }
-
-  .script-used-scenes-select {
-    flex: 1 1 220px;
-    width: auto;
-    min-width: 180px;
-  }
-
-  .blockly-editor-main {
-    height: calc(100dvh - 225px);
-  }
-}
-
-@container script-editor (width <= 620px) {
-  .script-mode-tabs {
-    width: 100%;
-  }
-
-  .script-mode-tab {
-    flex: 1 1 50%;
-    min-width: 0;
-    min-height: 40px;
-  }
-
-  .script-tabs-actions {
-    display: grid;
-    grid-template-columns: 44px minmax(88px, auto);
-    justify-content: end;
-  }
-
-  .script-used-scenes-select {
-    grid-column: 1 / -1;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .script-action-button {
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0 12px;
-  }
-
-  .script-tabs-actions
-    .script-action-button:not(.script-save-button)
-    .script-action-icon {
-    margin-right: 0;
-  }
-
-  .secondary-action-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .blockly-editor-main {
-    height: calc(100dvh - 285px);
-    min-height: 360px;
-  }
-}
-
 .dark-theme :deep(.hljs) {
   background-color: rgb(24 24 24) !important;
 }
@@ -1418,3 +1249,5 @@ watch([id, editorFrameKey, editorContentReady], () => {
   background-color: #fafafa !important;
 }
 </style>
+
+<style scoped src="@/styles/script-editor-toolbar.css"></style>

@@ -20,6 +20,7 @@ describe("responsive editor header regression", () => {
     "src/layout/components/NavBar/components/EditorVersionToolbar.vue"
   );
   const verseScriptSource = readSource("src/views/verse/script.vue");
+  const toolbarStyles = readSource("src/styles/script-editor-toolbar.css");
   const metaScriptSource = readSource("src/views/meta/script.vue");
   const publicLanguageSources = [
     readSource("src/views/login/index.vue"),
@@ -78,11 +79,17 @@ describe("responsive editor header regression", () => {
     (_, source) => {
       expect(source).toContain('class="script-editor-toolbar"');
       expect(source).toContain('class="script-mode-tabs"');
-      expect(source).toContain("container-name: script-editor");
-      expect(source).toContain("@container script-editor (width <= 1100px)");
-      expect(source).toContain("@container script-editor (width <= 620px)");
+      expect(source).toContain('src="@/styles/script-editor-toolbar.css"');
+      expect(source).toContain('class="script-primary-actions"');
+      expect(toolbarStyles).toContain("container-name: script-editor");
+      expect(toolbarStyles).toContain(
+        "@container script-editor (width <= 800px)"
+      );
+      expect(toolbarStyles).toContain(
+        "@container script-editor (width <= 620px)"
+      );
       expect(source).not.toContain("padding-right: 460px");
-      expect(source).not.toMatch(
+      expect(toolbarStyles).not.toMatch(
         /\.script-tabs-actions\s*\{[^}]*position:\s*absolute/s
       );
     }
