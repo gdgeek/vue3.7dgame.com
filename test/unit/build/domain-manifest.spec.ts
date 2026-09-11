@@ -94,6 +94,85 @@ describe("domain manifest pure builder", () => {
     ).toThrow(message);
   });
 
+  it.each([true, false])("preserves a boolean voxel flag: %s", (voxel) => {
+    const manifest = createDomainManifest([
+      {
+        fileName: "example.com.json",
+        source: configSource("example.com", {
+          default_config: { features: { voxel } },
+        }),
+      },
+    ]);
+
+    expect(manifest.domains[0].config.default_config.features).toEqual({
+      voxel,
+    });
+    expect(
+      JSON.parse(serializeWhiteLabelConfig(manifest.domains[0].config))
+    ).toHaveProperty("default_config.features.voxel", voxel);
+  });
+
+  it("keeps omitted feature flags absent", () => {
+    const manifest = createDomainManifest([
+      { fileName: "example.com.json", source: configSource("example.com") },
+      {
+        fileName: "empty.example.json",
+        source: configSource("empty.example", {
+          default_config: { features: {} },
+        }),
+      },
+    ]);
+
+    for (const { config } of manifest.domains) {
+      expect(config.default_config.features?.voxel).toBeUndefined();
+    }
+  });
+
+  it.each([null, [], true, "true", 1])(
+    "rejects invalid feature objects: %j",
+    (features) => {
+      expect(() =>
+        createDomainManifest([
+          {
+            fileName: "example.com.json",
+            source: configSource("example.com", {
+              default_config: { features },
+            }),
+          },
+        ])
+      ).toThrow('field "default_config.features" must be an object');
+    }
+  );
+
+  it.each([null, [], {}, "true", "false", 1, 0])(
+    "rejects non-boolean voxel flags: %j",
+    (voxel) => {
+      expect(() =>
+        createDomainManifest([
+          {
+            fileName: "example.com.json",
+            source: configSource("example.com", {
+              default_config: { features: { voxel } },
+            }),
+          },
+        ])
+      ).toThrow('field "default_config.features.voxel" must be a boolean');
+    }
+  );
+
+  it("rejects unknown feature flags", () => {
+    expect(() =>
+      createDomainManifest([
+        {
+          fileName: "example.com.json",
+          source: configSource("example.com", {
+            default_config: { features: { unknown: true } },
+          }),
+        },
+      ])
+    ).toThrow('field "default_config.features.unknown" is not public');
+  });
+
   it("rejects localized configs that are not objects", () => {
     expect(() =>
       createDomainManifest([
@@ -373,6 +452,25 @@ describe("domain manifest pure builder", () => {
 });
 
 describe("checked-in domain catalog contract", () => {
+  it("enables voxel only for the xrugc.com configuration", () => {
+    const manifest = readDomainManifest(repositoryRoot);
+    expect(
+      manifest.domains
+        .filter(({ config }) => config.default_config.features?.voxel === true)
+        .map(({ configKey }) => configKey)
+    ).toEqual(["xrugc.com"]);
+
+    expect(
+      resolveWhiteLabelConfig(manifest, "d.xrugc.com")?.default_config.features
+        ?.voxel
+    ).toBe(true);
+    for (const host of ["d.dev.xrugc.com", "unknown.example"]) {
+      expect(
+        resolveWhiteLabelConfig(manifest, host)?.default_config.features?.voxel
+      ).not.toBe(true);
+    }
+  });
+
   it("contains every domain JSON exactly once and in key order", () => {
     const directory = resolve(repositoryRoot, "public/config/domains");
     const expectedKeys = readdirSync(directory)

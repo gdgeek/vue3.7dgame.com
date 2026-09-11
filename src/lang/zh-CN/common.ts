@@ -117,6 +117,7 @@ export default {
     home: "主页",
     resources: "素材库",
     model: "模型",
+    voxel: "体素",
     picture: "图片",
     audio: "音频",
     video: "视频",

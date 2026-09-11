@@ -143,6 +143,21 @@ const resolveMapSegments = (
       { key: "sidebar.resources" },
       { key: "sidebar.model" },
     ],
+    "/resource/voxel/index": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+      { key: "sidebar.voxel" },
+    ],
+    "/resource/voxel/view": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+      {
+        key: "sidebar.voxel",
+        to: { path: "/resource/voxel/index" },
+        clickable: true,
+      },
+      { key: "route.resourceManagement.voxelManagement.voxelProcessing" },
+    ],
     "/resource/picture/index": [
       { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
       { key: "sidebar.resources" },

@@ -94,16 +94,12 @@ async function ensureBootToken() {
 }
 
 watch(
-  () => userStore.userInfo,
-  (newUserInfo) => {
-    if (
-      newUserInfo == null ||
-      newUserInfo.id === 0 ||
-      userStore.userInfo == null
-    ) {
-      return;
-    }
-    UpdateAbility(ability, userStore.userInfo.roles, userStore.userInfo.id);
+  [() => userStore.userInfo, () => domainStore.voxelEnabled],
+  ([userInfo, voxelEnabled]) => {
+    const currentUser = userInfo?.id ? userInfo : null;
+    UpdateAbility(ability, currentUser?.roles ?? [], currentUser?.id ?? 0, {
+      voxelEnabled,
+    });
     UpdateRoutes(ability);
   },
   { deep: true, immediate: true }

@@ -5,6 +5,7 @@ import { useRouter } from "@/router";
 import authClient from "@/services/auth/authClient";
 const router = useRouter();
 import { useUserStore } from "@/store";
+import { useDomainStore } from "@/store/modules/domain";
 
 type RouteAccessUser = {
   roles?: string[] | null;
@@ -86,6 +87,23 @@ export function setupPermission() {
           //   alert(JSON.stringify(to));
           next(from.name ? { name: from.name } : "/404");
         } else {
+          if (/^\/resource\/voxel(\/|$)/i.test(to.path)) {
+            const domainStore = useDomainStore();
+            try {
+              // defaultInfo 可能只是 Cookie 品牌缓存，必须等本次配置请求完成。
+              await domainStore.fetchDefaultInfo();
+            } catch {
+              next("/404");
+              NProgress.done();
+              return;
+            }
+            if (!domainStore.voxelEnabled) {
+              next("/404");
+              NProgress.done();
+              return;
+            }
+          }
+
           const requiredRoles = Array.isArray(to.meta.roles)
             ? to.meta.roles.filter(
                 (role): role is string =>

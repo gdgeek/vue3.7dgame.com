@@ -4,6 +4,7 @@
  * Tests all exported classes and the UpdateAbility function.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createMongoAbility } from "@casl/ability";
 import {
   AbilityRouter,
   AbilityEdit,
@@ -289,6 +290,87 @@ describe("UpdateAbility", () => {
           rule.conditions?.type === "polygen"
       )
     ).toBe(true);
+  });
+
+  it.each(["user", "manager", "admin", "root"])(
+    "allows %s to open and edit voxel resources without matching other prefixes",
+    (role) => {
+      UpdateAbility(mockAbility, [role], 7, { voxelEnabled: true });
+      const ability = createMongoAbility(mockAbility.update.mock.calls[0][0]);
+
+      expect(ability.can("edit", new AbilityEdit("voxel"))).toBe(true);
+      for (const action of ["open", "goto"]) {
+        for (const path of [
+          "/resource/voxel",
+          "/resource/voxel/index",
+          "/resource/voxel/view",
+        ]) {
+          expect(ability.can(action, new AbilityRouter(path))).toBe(true);
+        }
+        expect(
+          ability.can(action, new AbilityRouter("/resource/voxel-other"))
+        ).toBe(false);
+      }
+    }
+  );
+
+  it.each([
+    { label: "null roles", roles: null },
+    { label: "empty roles", roles: [] },
+    { label: "guest role", roles: ["guest"] },
+  ])("denies voxel resource access with $label", ({ roles }) => {
+    UpdateAbility(mockAbility, roles, 7, { voxelEnabled: true });
+    const ability = createMongoAbility(mockAbility.update.mock.calls[0][0]);
+
+    expect(ability.can("edit", new AbilityEdit("voxel"))).toBe(false);
+    for (const action of ["open", "goto"]) {
+      for (const path of [
+        "/resource/voxel",
+        "/resource/voxel/index",
+        "/resource/voxel/view",
+      ]) {
+        expect(ability.can(action, new AbilityRouter(path))).toBe(false);
+      }
+    }
+  });
+
+  it.each(["user", "manager", "admin", "root"])(
+    "denies voxel access to %s unless explicitly enabled by white-label configuration",
+    (role) => {
+      for (const options of [undefined, {}, { voxelEnabled: false }]) {
+        const ability = createMongoAbility();
+        UpdateAbility(ability, [role], 7, options);
+
+        expect(ability.can("edit", new AbilityEdit("voxel"))).toBe(false);
+        expect(ability.can("edit", new AbilityEdit("polygen"))).toBe(true);
+        for (const action of ["open", "goto"]) {
+          for (const path of [
+            "/resource/voxel",
+            "/resource/voxel/index",
+            "/resource/voxel/view",
+          ]) {
+            expect(ability.can(action, new AbilityRouter(path))).toBe(false);
+          }
+        }
+      }
+    }
+  );
+
+  it("removes existing voxel rules when the white-label feature is disabled", () => {
+    const ability = createMongoAbility();
+    UpdateAbility(ability, ["user"], 7, { voxelEnabled: true });
+    expect(ability.can("edit", new AbilityEdit("voxel"))).toBe(true);
+    expect(
+      ability.can("goto", new AbilityRouter("/resource/voxel/index"))
+    ).toBe(true);
+
+    UpdateAbility(ability, ["user"], 7, { voxelEnabled: false });
+
+    expect(ability.can("edit", new AbilityEdit("voxel"))).toBe(false);
+    expect(
+      ability.can("goto", new AbilityRouter("/resource/voxel/index"))
+    ).toBe(false);
+    expect(ability.can("edit", new AbilityEdit("polygen"))).toBe(true);
   });
 
   it("binds work ownership rules to the given userId", () => {

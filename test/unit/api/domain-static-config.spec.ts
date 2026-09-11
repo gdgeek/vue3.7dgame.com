@@ -7,6 +7,8 @@ import {
 } from "@/api/domain-static-config";
 import bujiabanConfig from "../../../public/config/domains/bujiaban.com.json";
 import devXrugcConfig from "../../../public/config/domains/dev.xrugc.com.json";
+import xrugcConfig from "../../../public/config/domains/xrugc.com.json";
+import defaultConfig from "../../../public/config/domains/default.json";
 import xiadingConfig from "../../../public/config/domains/xiading.hxgxonline.com.json";
 
 function makeFetch(configs: Record<string, unknown>) {
@@ -73,6 +75,34 @@ describe("domain-static-config", () => {
       },
     });
   });
+
+  it.each([
+    ["xrugc.com", "xrugc.com", true],
+    ["d.xrugc.com", "xrugc.com", true],
+    ["dev.xrugc.com", "dev.xrugc.com", false],
+    ["d.dev.xrugc.com", "dev.xrugc.com", false],
+    ["bujiaban.com", "bujiaban.com", false],
+    ["other.example.com", "default", false],
+  ])(
+    "按 %s 的完整白牌配置决定体素开关",
+    async (domain, actualDomain, enabled) => {
+      vi.stubGlobal(
+        "fetch",
+        makeFetch({
+          "/config/domains/xrugc.com.json": xrugcConfig,
+          "/config/domains/dev.xrugc.com.json": devXrugcConfig,
+          "/config/domains/bujiaban.com.json": bujiabanConfig,
+          "/config/domains/default.json": defaultConfig,
+        })
+      );
+
+      const result = await getStaticDomainDefault(domain);
+
+      expect(result?.actual_domain).toBe(actualDomain);
+      const features = result?.data.features as { voxel?: boolean } | undefined;
+      expect(features?.voxel === true).toBe(enabled);
+    }
+  );
 
   it("falls back to zh-CN when requested language is missing", async () => {
     vi.stubGlobal(

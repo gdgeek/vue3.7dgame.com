@@ -59,7 +59,7 @@ describe("Production parent route direct navigation and refresh", () => {
   it.each([
     ["/settings", "/settings/edit"],
     ["/manager", "/manager/user"],
-    ["/resource", "/resource/voxel/index"],
+    ["/resource", "/resource/polygen/index"],
   ])("resolves a fresh navigation to %s through %s", async (path, target) => {
     await expect(navigateFromFreshBrowser(path)).resolves.toBe(target);
   });

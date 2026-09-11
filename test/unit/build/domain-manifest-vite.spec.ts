@@ -141,11 +141,19 @@ describe("domain manifest Vite contract", () => {
     );
     expect(dev.headers.get("Access-Control-Allow-Origin")).toBe("*");
     expect(dev.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    expect(JSON.parse(dev.body).default_config.features?.voxel).not.toBe(true);
+
+    const xrugc = invoke("/white-label/", "d.xrugc.com");
+    expect(JSON.parse(xrugc.body).name).toBe("xrugc.com");
+    expect(JSON.parse(xrugc.body).default_config.features?.voxel).toBe(true);
 
     const arCreator = invoke("/white-label?cache-bust=1", "d.ar-creator.cn");
     expect(JSON.parse(arCreator.body).name).toBe("ar-creator.cn");
 
     const unknown = invoke("/white-label/", "unknown.example");
     expect(JSON.parse(unknown.body).name).toBe("default");
+    expect(JSON.parse(unknown.body).default_config.features?.voxel).not.toBe(
+      true
+    );
   });
 });
