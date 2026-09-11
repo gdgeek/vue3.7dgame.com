@@ -75,9 +75,11 @@ export default {
     unityPreview: {
       entry: "Run Scene",
       title: "Run Scene",
-      helpClick: "Click the view to control the scene",
-      helpRotate: "Hold Alt + left mouse button to rotate",
-      helpZoomPan: "Use the wheel to zoom, right mouse button to pan",
+      helpClick: "Click the preview first to focus it",
+      helpRotate:
+        "Hold Alt (⌥ Option on Mac) and drag with the left mouse button to rotate",
+      helpZoomPan:
+        "Use the mouse wheel or two-finger trackpad scrolling to zoom; drag with the right mouse button to pan",
       helpFullscreen: "Use fullscreen for a fuller preview",
       fullscreen: "Fullscreen run scene",
       close: "Close run scene",

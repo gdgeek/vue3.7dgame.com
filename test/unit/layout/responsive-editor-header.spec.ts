@@ -67,7 +67,7 @@ describe("responsive editor header regression", () => {
   it("continues to compact version controls by available navbar width", () => {
     expect(versionToolbarSource).toContain('class="entry-label"');
     expect(versionToolbarSource).toContain(
-      "@container app-navbar (width <= 1200px)"
+      "@container app-navbar (width <= 900px)"
     );
   });
 
