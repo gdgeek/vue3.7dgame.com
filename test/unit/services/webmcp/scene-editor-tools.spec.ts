@@ -313,16 +313,14 @@ describe("scene editor WebMCP tools", () => {
 });
 
 it("reads authoritative publication metadata instead of a legacy field", async () => {
-  const readPublication = vi
-    .fn()
-    .mockResolvedValue({
-      sceneId: 1420,
-      published: false,
-      snapshotId: null,
-      snapshotUuid: null,
-      publicationRevision: null,
-      contentHash: null,
-    });
+  const readPublication = vi.fn().mockResolvedValue({
+    sceneId: 1420,
+    published: false,
+    snapshotId: null,
+    snapshotUuid: null,
+    publicationRevision: null,
+    contentHash: null,
+  });
   const { registered } = register(readPublication);
   await expect(registered[0].execute({})).resolves.toMatchObject({
     scene: { published: false },
