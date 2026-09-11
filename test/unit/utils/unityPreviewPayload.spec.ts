@@ -3,6 +3,7 @@ import {
   cloneForUnityPreview,
   normalizeUnityPreviewData,
   rewriteUnityPreviewUrls,
+  UnityPreviewAssetError,
 } from "@/utils/unityPreviewPayload";
 
 const withWindowLocation = <T>(
@@ -25,6 +26,58 @@ const withWindowLocation = <T>(
 };
 
 describe("unityPreviewPayload", () => {
+  it("identifies denied nested JSON fields without exposing URL secrets", () => {
+    const payload = {
+      metas: [
+        {
+          data: JSON.stringify({
+            file: {
+              url: "https://user:password@private.example/secret-model.glb?token=secret#private",
+            },
+          }),
+        },
+      ],
+    };
+    let denied: unknown;
+    try {
+      rewriteUnityPreviewUrls(
+        payload,
+        "https://app.example",
+        "https://api.example",
+        { restrictToRuntimeOrigins: true }
+      );
+    } catch (error) {
+      denied = error;
+    }
+    expect(denied).toBeInstanceOf(UnityPreviewAssetError);
+    expect(denied).toMatchObject({
+      fields: ["metas", "0", "data", "file", "url"],
+      origin: "https://private.example",
+      reason: "credentials",
+    });
+    const diagnostic = JSON.stringify(denied);
+    for (const secret of ["password", "secret-model", "token=", "#private"])
+      expect(diagnostic).not.toContain(secret);
+  });
+
+  it("redacts arbitrary field keys and opaque URL contents from denial diagnostics", () => {
+    try {
+      rewriteUnityPreviewUrls(
+        { "https://private.example/?token=secret": ["data:secret"] },
+        "https://app.example",
+        "https://api.example"
+      );
+      expect.fail("must reject unsupported schemes");
+    } catch (error) {
+      expect(error).toMatchObject({
+        fields: ["[field]", "0"],
+        origin: null,
+        reason: "scheme",
+      });
+      expect(JSON.stringify(error)).not.toContain("secret");
+    }
+  });
+
   it("preserves allowlisted absolute signed asset urls byte-for-byte", () => {
     const signedUrl =
       "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2";
