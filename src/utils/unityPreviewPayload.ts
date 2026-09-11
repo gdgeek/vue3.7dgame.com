@@ -19,6 +19,9 @@ const UNITY_PREVIEW_ASSET_ORIGINS = new Set([
   `https://${UNITY_PREVIEW_CDN_HOST}`,
   `https://${UNITY_PREVIEW_MRPP_COS_HOST}`,
 ]);
+// Display metadata can contain colons (e.g. "Polygen:model.glb") or links.
+// These strings are not resource locations and must retain their exact text.
+const UNITY_PREVIEW_TEXT_FIELDS = new Set(["name", "title", "description"]);
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -228,6 +231,7 @@ export const rewriteUnityPreviewUrls = (
   const record = value as Record<string, unknown>;
   Object.entries(record).forEach(([key, item]) => {
     if (typeof item === "string") {
+      if (UNITY_PREVIEW_TEXT_FIELDS.has(key)) return;
       record[key] = rewriteUnityPreviewStringUrls(
         item,
         proxyOrigin,
