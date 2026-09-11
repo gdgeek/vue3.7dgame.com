@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { getCurrentScope, onScopeDispose } from "vue";
 import { logger } from "@/utils/logger";
 import type { SourceRecord, SourceModelData } from "../types";
 
@@ -6,7 +7,16 @@ export function useSceneAnimation(
   sources: Map<string, SourceRecord>,
   mixers: Map<string, THREE.AnimationMixer>
 ) {
-  const playAnimation = (uuid: string, animationName: string) => {
+  const pending = new Map<string, () => void>();
+  if (getCurrentScope())
+    onScopeDispose(() => {
+      for (const finish of pending.values()) finish();
+    });
+  const playAnimation = (
+    uuid: string,
+    animationName: string,
+    options?: { loop?: boolean }
+  ) => {
     const source = sources.get(uuid.toString());
     if (!source || source.type !== "model") {
       logger.error(`[ScenePlayer] Model resource not found for UUID: ${uuid}`);
@@ -46,12 +56,30 @@ export function useSceneAnimation(
       return;
     }
 
+    pending.get(uuid)?.();
     mixer.stopAllAction();
     const action = mixer.clipAction(clip);
     action.reset();
-    action.setLoop(THREE.LoopRepeat, Infinity);
-    action.fadeIn(0.5);
+    const once = options?.loop === false;
+    action.setLoop(
+      once ? THREE.LoopOnce : THREE.LoopRepeat,
+      once ? 1 : Infinity
+    );
+    action.clampWhenFinished = once;
     action.play();
+    if (once)
+      return new Promise<void>((resolve) => {
+        const finish = () => {
+          mixer.removeEventListener("finished", onFinished);
+          pending.delete(uuid);
+          resolve();
+        };
+        const onFinished = (event: { action: THREE.AnimationAction }) => {
+          if (event.action === action) finish();
+        };
+        pending.set(uuid, finish);
+        mixer.addEventListener("finished", onFinished);
+      });
   };
 
   return { playAnimation };

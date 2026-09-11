@@ -10,6 +10,9 @@ export function useIframeMessaging(
   editorRef: Ref<HTMLIFrameElement | null | undefined>,
   options?: UseIframeMessagingOptions
 ) {
+  let hostSessionId = genId();
+  const getHostSessionId = () => hostSessionId;
+
   const pendingRequests = new Map<
     string,
     (payload: Record<string, unknown>) => void
@@ -21,6 +24,24 @@ export function useIframeMessaging(
   ): string | undefined => {
     if (editorRef.value && editorRef.value.contentWindow) {
       const id = genId();
+      if (type === "INIT" || type === "DESTROY") hostSessionId = genId();
+      const record =
+        payload && typeof payload === "object"
+          ? (payload as Record<string, unknown>)
+          : {};
+      if (type === "INIT") {
+        payload = {
+          ...record,
+          config: { ...((record.config as object) ?? {}), hostSessionId },
+        };
+      } else if (type === "REQUEST") payload = { ...record, hostSessionId };
+      let origin: string;
+      try {
+        origin = new URL(editorRef.value.src, window.location.href).origin;
+      } catch {
+        options?.onError?.();
+        return undefined;
+      }
       editorRef.value.contentWindow.postMessage(
         {
           type,
@@ -30,7 +51,7 @@ export function useIframeMessaging(
               ? JSON.parse(JSON.stringify(payload))
               : undefined,
         },
-        "*"
+        origin
       );
       return id;
     } else {
@@ -50,5 +71,6 @@ export function useIframeMessaging(
     postStandardMessage,
     sendRequest,
     pendingRequests,
+    getHostSessionId,
   };
 }

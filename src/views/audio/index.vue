@@ -212,6 +212,7 @@ import {
 import { toHttps } from "@/utils/helper";
 import { getDefaultAvatarUrl } from "@/utils/avatar";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
+import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
@@ -346,6 +347,7 @@ const detailProperties = computed(() => {
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
+useWebMcpUploadIntent(openUploadDialog);
 
 const openViewDialog = async (id: number) => {
   viewDialogVisible.value = true;

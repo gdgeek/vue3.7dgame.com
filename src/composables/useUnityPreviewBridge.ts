@@ -84,6 +84,7 @@ export const useUnityPreviewBridge = ({
   const frameVisible = ref(false);
   const ready = ref(false);
   const status = ref(initialStatus);
+  const failure = ref<{ code: string; stage: string } | null>(null);
   const frameKey = ref(0);
   const runSession = ref("");
   const runnerProtocol = ref<UnityPreviewProtocol>("pending");
@@ -152,6 +153,9 @@ export const useUnityPreviewBridge = ({
       // Only a READY from the current iframe and exact runner origin may select
       // the protocol for this load epoch. Older runners either omit session or
       // echo an empty session; current runners must echo the exact nonce.
+      if (message.type === "unity-web-preview-error") {
+        return hasSession && message.session === session;
+      }
       if (message.type !== "unity-web-preview-ready") return false;
       if (hasSession && message.session !== "" && message.session !== session) {
         return false;
@@ -198,6 +202,10 @@ export const useUnityPreviewBridge = ({
       );
     } catch {
       logger.warn("[UnityPreview] scene asset origin denied");
+      failure.value = {
+        code: "SCENE_ASSET_ORIGIN_DENIED",
+        stage: "scene_payload",
+      };
       notifyError("场景包含不受信任的资源地址，无法运行预览");
       return;
     }
@@ -273,13 +281,45 @@ export const useUnityPreviewBridge = ({
     const session = runSession.value;
     if (!acceptsRunnerMessage(event.data, session)) return;
 
+    if (event.data.type === "unity-web-preview-error") {
+      clearRunningFallbackTimer();
+      const allowed = [
+        "UNITY_LOAD_FAILED",
+        "SCENE_FORWARD_FAILED",
+        "WGP-UNITY-LOADER",
+        "WGP-UNITY-START",
+        "WGP-UNITY-TIMEOUT",
+        "WGP-SERVICE-WORKER",
+        "WGP-BUILD-MANIFEST",
+      ];
+      failure.value = {
+        code: allowed.includes(event.data.code)
+          ? event.data.code
+          : "RUNTIME_ERROR",
+        stage:
+          event.data.code === "UNITY_LOAD_FAILED" ||
+          String(event.data.code).startsWith("WGP-")
+            ? "runtime_load"
+            : "scene_load",
+      };
+      status.value = "Unity 运行预览失败，请查看运行诊断";
+      return;
+    }
+
     if (event.data.type === "unity-web-preview-ready") {
       ready.value = true;
       status.value = "Unity 已就绪，正在发送场景...";
       if (hasPendingPayload) {
         postPayload(pendingPayload.value, session, generation);
       } else {
-        void send();
+        void send().catch(() => {
+          if (!isCurrentRun(generation, session)) return;
+          failure.value = {
+            code: "SCENE_PAYLOAD_FAILED",
+            stage: "scene_payload",
+          };
+          status.value = "Unity 场景数据准备失败";
+        });
       }
       postCameraMode(session, generation);
     }
@@ -290,15 +330,17 @@ export const useUnityPreviewBridge = ({
 
     if (event.data.type === "unity-web-preview-scene-running") {
       clearRunningFallbackTimer();
+      failure.value = null;
       status.value = "场景已在 Unity 中运行";
     }
   };
 
   const handleLoad = () => {
-    status.value = "Unity 运行器加载中...";
+    if (!failure.value) status.value = "Unity 运行器加载中...";
   };
 
   const open = async () => {
+    failure.value = null;
     const openResult = canOpen?.() ?? true;
     if (openResult !== true) {
       notifyError(openResult);
@@ -326,6 +368,7 @@ export const useUnityPreviewBridge = ({
     panMode.value = false;
     status.value = initialStatus;
     runSession.value = session;
+    failure.value = null;
     frameKey.value += 1;
     frameVisible.value = true;
     visible.value = true;
@@ -344,6 +387,12 @@ export const useUnityPreviewBridge = ({
     runnerProtocol.value = "pending";
     pendingPayload.value = null;
     hasPendingPayload = false;
+    failure.value = null;
+  };
+
+  const close = () => {
+    visible.value = false;
+    handleClosed();
   };
 
   onMounted(() => {
@@ -367,12 +416,14 @@ export const useUnityPreviewBridge = ({
     frameVisible,
     ready,
     status,
+    failure,
     frameKey,
     runnerProtocol,
     panMode,
     pendingPayload,
     src,
     open,
+    close,
     send,
     handleLoad,
     handleClosed,
