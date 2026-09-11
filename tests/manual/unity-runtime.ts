@@ -68,9 +68,9 @@ app.use(
           unityPreview: {
             title: "运行场景",
             close: "关闭运行场景",
-            helpClick: "点击与场景交互",
-            helpRotate: "拖动旋转视角",
-            helpZoomPan: "滚轮缩放",
+            helpClick: "先单击运行画面，使其获得焦点",
+            helpRotate: "按住 Alt（Mac：⌥ Option）并用鼠标左键拖动，旋转视角",
+            helpZoomPan: "滚轮或触控板双指滚动可缩放；鼠标右键拖动可平移",
           },
         },
       },
