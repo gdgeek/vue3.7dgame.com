@@ -1,3 +1,7 @@
+import {
+  getWorkflowGuideEntry,
+  withWorkflowGuide,
+} from "./workflow-guide-tools";
 import { completionFailure } from "./completion-result";
 import { createDraftStore, confirmDraft } from "./draft-lifecycle";
 import {
@@ -162,10 +166,14 @@ const createTools = (
       annotations: { readOnlyHint: true, untrustedContentHint: true },
       async execute(input, _execution) {
         if (!isRecord(input)) throw new TypeError("工具参数必须是对象");
-        return options.getMetaScript({
+        const result = await options.getMetaScript({
           includeWorkspace: parseBoolean(input.includeWorkspace, false),
           includeGeneratedCode: parseBoolean(input.includeGeneratedCode, false),
         });
+        return {
+          ...result,
+          workflowGuide: getWorkflowGuideEntry("entity-script"),
+        };
       },
     },
     {
@@ -272,7 +280,10 @@ const createTools = (
 export const registerMetaScriptWebMcpTools = (
   options: RegisterMetaScriptWebMcpOptions
 ) =>
-  registerWebMcpTools(createTools(options), {
-    document: options.document,
-    onRegistrationError: options.onRegistrationError,
-  });
+  registerWebMcpTools(
+    withWorkflowGuide(createTools(options), "entity-script"),
+    {
+      document: options.document,
+      onRegistrationError: options.onRegistrationError,
+    }
+  );

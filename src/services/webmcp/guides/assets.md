@@ -1,0 +1,17 @@
+# 素材与模型动画
+
+## 目的与前置条件
+
+把可用素材正确关联到实体，再把实体放入场景。准备具有使用权限的模型、图片或音频；已有合格素材可以直接复用。制作或修改模型动画另需 Blender 与可调用的 BlenderMCP，网站指南不会提供这些执行环境。
+
+## 操作步骤
+
+1. 在实体编辑页用 `xrugc_search_assets` 搜索已有资源，用 `xrugc_get_entity_asset_usage` 核对当前实体引用，避免仅凭同名文件重复上传。此引用清单不覆盖账号其他实体和场景。
+2. 缺少素材时调用 `xrugc_start_asset_upload`，由用户在打开的界面选择文件并确认上传。工具只打开界面；等待处理完成并重新查询，取得实际资源 ID。
+3. 检查模型尺寸、原点、正面、贴图、外部引用和实际动画 clip 名。优先使用已验证的 GLB、内嵌 PNG/JPEG 与标准 PBR；压缩扩展是否可用由目标导入器决定。
+4. 可移动根节点与内部动画部件分开，避免播放动画覆盖用户拖动和缩放。拆解、还原、循环运行按真实 clip 配置；需要完整还原时检查所有受影响部件。
+5. 使用 `xrugc_stage_resource_placement` 与 `xrugc_complete_resource_placement` 放入素材并确认保存。切换场景编辑页后重新发现工具，用 `xrugc_search_entities` 查询实体，再使用 `xrugc_stage_scene_entity_placement` 与 `xrugc_complete_scene_entity_placement` 放入。
+
+## 验证与限制
+
+保存后重读引用和层级，再检查真实预览。文件上传、格式检查或元数据存在均不能证明 Unity 能加载；不要把文件 URL 当作实体 ID。离线模型检验不替代贴图、蒙皮和目标设备验收。仅有照片的复原需区分视觉示意与真实尺寸、结构事实。

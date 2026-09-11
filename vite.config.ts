@@ -18,6 +18,7 @@ import { resolve } from "path";
 import { normalizeDevProxyTarget } from "./build/dev-proxy-target";
 import { domainManifestJson } from "./build/vite-plugin-domain-manifest";
 import { pluginEnvJson } from "./build/vite-plugin-env-json";
+import { webMcpGuides } from "./build/vite-plugin-webmcp-guides";
 import {
   name,
   version,
@@ -207,6 +208,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       }),
       domainManifestJson(),
       pluginEnvJson(),
+      webMcpGuides(),
     ],
     // 预加载项目必需的组件
     optimizeDeps: {

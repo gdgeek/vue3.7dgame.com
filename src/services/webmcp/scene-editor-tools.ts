@@ -1,3 +1,7 @@
+import {
+  getWorkflowGuideEntry,
+  withWorkflowGuide,
+} from "./workflow-guide-tools";
 import { createSceneReliabilityTools } from "./scene-reliability-tools";
 import type { MetaInfo } from "@/api/v1/types/meta";
 import type { VerseData } from "@/api/v1/verse";
@@ -445,6 +449,7 @@ const createTools = (
       const scene = context.scene;
       return {
         editor: "scene",
+        workflowGuide: getWorkflowGuideEntry("scene"),
         ready: context.ready,
         loading: context.loading || liveState.loading,
         dirty: context.dirty || liveState.changed,
@@ -581,45 +586,48 @@ export const registerSceneEditorWebMcpTools = (
   options: RegisterSceneEditorWebMcpOptions
 ) =>
   registerWebMcpTools(
-    [
-      ...createTools(options),
-      ...createSceneReliabilityTools(options),
-      ...createSceneEntityPlacementTools({
-        getSceneId: () => options.getContext().scene?.id ?? null,
-        stageEntityPlacement: options.stageEntityPlacement,
-        confirmEntityPlacement: options.confirmEntityPlacement,
-        completeEntityPlacement: options.completeEntityPlacement,
-      }),
-      ...createSceneModuleTransformTools({
-        getSceneId: () => options.getContext().scene?.id ?? null,
-        stageModuleTransform: options.stageModuleTransform,
-        confirmModuleTransform: options.confirmModuleTransform,
-        completeModuleTransform: options.completeModuleTransform,
-      }),
-      ...createSceneModulePropertyTools({
-        getSceneId: () => options.getContext().scene?.id ?? null,
-        stageModuleProperties: options.stageModuleProperties,
-        confirmModuleProperties: options.confirmModuleProperties,
-        completeModuleProperties: options.completeModuleProperties,
-      }),
-      ...createSceneModuleDeletionTools({
-        getSceneId: () => options.getContext().scene?.id ?? null,
-        stageModuleDeletion: options.stageModuleDeletion,
-        confirmModuleDeletion: options.confirmModuleDeletion,
-        completeModuleDeletion: options.completeModuleDeletion,
-      }),
-      ...createScenePublicationTools({
-        getSceneId: () => options.getContext().scene?.id ?? null,
-        stageScenePublication: options.stageScenePublication,
-        confirmScenePublication: options.confirmScenePublication,
-        completeScenePublication: options.completeScenePublication,
-      }),
-      ...createSceneRuntimePreviewTools({
-        getPreviewStatus: options.getPreviewStatus,
-        startPreview: options.startPreview,
-        stopPreview: options.stopPreview,
-      }),
-    ],
+    withWorkflowGuide(
+      [
+        ...createTools(options),
+        ...createSceneReliabilityTools(options),
+        ...createSceneEntityPlacementTools({
+          getSceneId: () => options.getContext().scene?.id ?? null,
+          stageEntityPlacement: options.stageEntityPlacement,
+          confirmEntityPlacement: options.confirmEntityPlacement,
+          completeEntityPlacement: options.completeEntityPlacement,
+        }),
+        ...createSceneModuleTransformTools({
+          getSceneId: () => options.getContext().scene?.id ?? null,
+          stageModuleTransform: options.stageModuleTransform,
+          confirmModuleTransform: options.confirmModuleTransform,
+          completeModuleTransform: options.completeModuleTransform,
+        }),
+        ...createSceneModulePropertyTools({
+          getSceneId: () => options.getContext().scene?.id ?? null,
+          stageModuleProperties: options.stageModuleProperties,
+          confirmModuleProperties: options.confirmModuleProperties,
+          completeModuleProperties: options.completeModuleProperties,
+        }),
+        ...createSceneModuleDeletionTools({
+          getSceneId: () => options.getContext().scene?.id ?? null,
+          stageModuleDeletion: options.stageModuleDeletion,
+          confirmModuleDeletion: options.confirmModuleDeletion,
+          completeModuleDeletion: options.completeModuleDeletion,
+        }),
+        ...createScenePublicationTools({
+          getSceneId: () => options.getContext().scene?.id ?? null,
+          stageScenePublication: options.stageScenePublication,
+          confirmScenePublication: options.confirmScenePublication,
+          completeScenePublication: options.completeScenePublication,
+        }),
+        ...createSceneRuntimePreviewTools({
+          getPreviewStatus: options.getPreviewStatus,
+          startPreview: options.startPreview,
+          stopPreview: options.stopPreview,
+        }),
+      ],
+      "scene"
+    ),
     {
       document: options.document,
       onRegistrationError: options.onRegistrationError,

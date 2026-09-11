@@ -221,11 +221,17 @@ describe("entity editor WebMCP tools", () => {
       "xrugc_get_entity_signals",
       "xrugc_stage_signal_batch",
       "xrugc_complete_signal_batch",
+      "xrugc_get_workflow_guide",
     ]);
     expect(registered.every(({ signal }) => !signal?.aborted)).toBe(true);
 
     await expect(registered[0].tool.execute({})).resolves.toMatchObject({
       source: "live-editor",
+      workflowGuide: {
+        tool: "xrugc_get_workflow_guide",
+        page: "entity",
+        input: { topic: "overview" },
+      },
       dirty: true,
       entityVersion: "revision-live",
       contextGeneration: 3,
