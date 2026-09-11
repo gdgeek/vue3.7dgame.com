@@ -3,6 +3,7 @@ import {
   cloneForUnityPreview,
   normalizeUnityPreviewData,
   rewriteUnityPreviewUrls,
+  UnityPreviewAssetError,
 } from "@/utils/unityPreviewPayload";
 
 const withWindowLocation = <T>(
@@ -25,6 +26,58 @@ const withWindowLocation = <T>(
 };
 
 describe("unityPreviewPayload", () => {
+  it("identifies denied nested JSON fields without exposing URL secrets", () => {
+    const payload = {
+      metas: [
+        {
+          data: JSON.stringify({
+            file: {
+              url: "https://user:password@private.example/secret-model.glb?token=secret#private",
+            },
+          }),
+        },
+      ],
+    };
+    let denied: unknown;
+    try {
+      rewriteUnityPreviewUrls(
+        payload,
+        "https://app.example",
+        "https://api.example",
+        { restrictToRuntimeOrigins: true }
+      );
+    } catch (error) {
+      denied = error;
+    }
+    expect(denied).toBeInstanceOf(UnityPreviewAssetError);
+    expect(denied).toMatchObject({
+      fields: ["metas", "0", "data", "file", "url"],
+      origin: "https://private.example",
+      reason: "credentials",
+    });
+    const diagnostic = JSON.stringify(denied);
+    for (const secret of ["password", "secret-model", "token=", "#private"])
+      expect(diagnostic).not.toContain(secret);
+  });
+
+  it("redacts arbitrary field keys and opaque URL contents from denial diagnostics", () => {
+    try {
+      rewriteUnityPreviewUrls(
+        { "https://private.example/?token=secret": ["data:secret"] },
+        "https://app.example",
+        "https://api.example"
+      );
+      expect.fail("must reject unsupported schemes");
+    } catch (error) {
+      expect(error).toMatchObject({
+        fields: ["[field]", "0"],
+        origin: null,
+        reason: "scheme",
+      });
+      expect(JSON.stringify(error)).not.toContain("secret");
+    }
+  });
+
   it("preserves allowlisted absolute signed asset urls byte-for-byte", () => {
     const signedUrl =
       "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2";
@@ -226,6 +279,62 @@ describe("unityPreviewPayload", () => {
         "http://localhost:8081",
         options
       );
+
+    it("keeps scene 506 metadata as text while preparing its model URL", () => {
+      const legacyModel =
+        "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/ai/polygen/model.glb?sign=a%2Fb%3D&part=2&part=1";
+      const title = "Polygen:脱口秀小朋友.glb";
+      const description = "详情见 https://www.example.org/about";
+      const payload = {
+        scene: { id: 506, name: title, description },
+        metas: [
+          {
+            name: title,
+            data: JSON.stringify({ name: title, title, description }),
+            resources: [{ name: title, file: { url: legacyModel } }],
+          },
+        ],
+      };
+
+      rewrite(payload);
+
+      expect(payload.scene).toEqual({ id: 506, name: title, description });
+      expect(payload.metas[0].name).toBe(title);
+      expect(JSON.parse(payload.metas[0].data)).toEqual({
+        name: title,
+        title,
+        description,
+      });
+      expect(payload.metas[0].resources[0]).toEqual({
+        name: title,
+        file: {
+          url: legacyModel.replace(
+            "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com",
+            "data.7dgame.com"
+          ),
+        },
+      });
+    });
+
+    it.each([
+      "https://attacker.example/model.glb",
+      "ftp://attacker.example/model.glb",
+      "file:///private/model.glb",
+      "blob:https://attacker.example/resource-id",
+      "data:model/gltf-binary;base64,AAAA",
+      "javascript:alert(1)",
+    ])(
+      "still rejects actual resource URLs beside display metadata: %s",
+      (url) => {
+        for (const payload of [
+          { name: "Polygen:模型", resources: [{ file: { url } }] },
+          { data: JSON.stringify({ title: "Model:preview", file: { url } }) },
+          { name: { file: { url } } },
+        ]) {
+          expect(() => rewrite(payload)).toThrow("WGP-ASSET-DENIED");
+        }
+      }
+    );
 
     it.each([
       "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2",

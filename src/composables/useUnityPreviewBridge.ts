@@ -5,6 +5,7 @@ import {
   cloneForUnityPreview,
   rewriteUnityPreviewUrls,
   summarizeUnityPreviewPayload,
+  UnityPreviewAssetError,
 } from "@/utils/unityPreviewPayload";
 import {
   readUnityRuntimeProgress,
@@ -129,7 +130,7 @@ export const useUnityPreviewBridge = ({
     if (elapsedTimer !== undefined) window.clearInterval(elapsedTimer);
     elapsedTimer = undefined;
   };
-  const fail = (code: string) => {
+  const fail = (code: string, error?: unknown) => {
     if (["closed", "stopping", "error"].includes(stage.value)) return;
     const safeCode = Object.hasOwn(unityRuntimeFailures, code)
       ? code
@@ -138,6 +139,16 @@ export const useUnityPreviewBridge = ({
       code: safeCode,
       stage: stage.value,
       message: unityRuntimeFailures[safeCode],
+      ...(error instanceof Error &&
+      error.cause instanceof UnityPreviewAssetError
+        ? {
+            asset: {
+              field: error.cause.fields.join("."),
+              origin: error.cause.origin,
+              reason: error.cause.reason,
+            },
+          }
+        : {}),
     };
     pendingNativeRunning = false;
     stage.value = "error";
@@ -195,8 +206,8 @@ export const useUnityPreviewBridge = ({
         assetOrigin,
         { restrictToRuntimeOrigins: true }
       );
-    } catch {
-      throw new Error("SCENE_ASSET_ORIGIN_DENIED");
+    } catch (error) {
+      throw new Error("SCENE_ASSET_ORIGIN_DENIED", { cause: error });
     }
     return postablePayload;
   };
@@ -230,7 +241,8 @@ export const useUnityPreviewBridge = ({
           error instanceof Error &&
             error.message === "SCENE_ASSET_ORIGIN_DENIED"
             ? error.message
-            : "SCENE_PAYLOAD_FAILED"
+            : "SCENE_PAYLOAD_FAILED",
+          error
         );
     }
   };
@@ -474,7 +486,8 @@ export const useUnityPreviewBridge = ({
         code.startsWith("RUNTIME_METADATA_") ||
           code === "SCENE_ASSET_ORIGIN_DENIED"
           ? code
-          : "SCENE_PAYLOAD_FAILED"
+          : "SCENE_PAYLOAD_FAILED",
+        error
       );
     }
   };
