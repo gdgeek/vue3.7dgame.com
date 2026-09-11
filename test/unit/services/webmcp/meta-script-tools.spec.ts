@@ -85,6 +85,24 @@ const register = (overrides = {}) => {
 };
 
 describe("meta script WebMCP tools", () => {
+  it("provides a discoverable workflow guide while preserving the script result", async () => {
+    const { registered } = register();
+    const result = await registered[0].execute({});
+    expect(result).toMatchObject({
+      workflowGuide: {
+        tool: "xrugc_get_workflow_guide",
+        page: "entity-script",
+        input: { topic: "overview" },
+      },
+    });
+    const guide = registered.find(
+      (tool) => tool.name === "xrugc_get_workflow_guide"
+    )!;
+    await expect(
+      guide.execute({ topic: "interaction" })
+    ).resolves.toMatchObject({ page: "entity-script", topic: "interaction" });
+  });
+
   it("registers four page-scoped tools with one lifecycle", () => {
     const { registered, lifecycle } = register();
     expect(registered.map((tool) => tool.name)).toEqual([
@@ -92,6 +110,7 @@ describe("meta script WebMCP tools", () => {
       "xrugc_validate_meta_script",
       "xrugc_stage_meta_script_replace",
       "xrugc_complete_meta_script_replace",
+      "xrugc_get_workflow_guide",
     ]);
     lifecycle?.abort();
   });

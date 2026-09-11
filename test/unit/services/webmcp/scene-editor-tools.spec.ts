@@ -161,6 +161,7 @@ describe("scene editor WebMCP tools", () => {
       "xrugc_get_scene_runtime_preview_status",
       "xrugc_start_scene_runtime_preview",
       "xrugc_stop_scene_runtime_preview",
+      "xrugc_get_workflow_guide",
     ]);
     expect(registered.every(({ signal }) => !signal?.aborted)).toBe(true);
     lifecycle?.abort();
@@ -186,6 +187,11 @@ describe("scene editor WebMCP tools", () => {
     const { registered } = register();
     await expect(registered[0].execute({})).resolves.toMatchObject({
       editor: "scene",
+      workflowGuide: {
+        tool: "xrugc_get_workflow_guide",
+        page: "scene",
+        input: { topic: "overview" },
+      },
       ready: true,
       dirty: true,
       scene: {
