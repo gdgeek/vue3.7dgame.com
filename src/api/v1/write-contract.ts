@@ -8,8 +8,6 @@ export type WriteReceipt = WriteTarget & {
   action: "save" | "save_code" | "publish";
   status: "completed";
   snapshotId?: number;
-  publicationRevision?: string;
-  contentHash?: string;
 };
 export type WriteOptions = {
   operationId: string;

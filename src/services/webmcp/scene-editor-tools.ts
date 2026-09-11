@@ -75,7 +75,7 @@ export type SceneEntitySearchResult = {
 };
 
 export type RegisterSceneEditorWebMcpOptions = WebMcpRegistrationOptions & {
-  readPublication?: (revision?: string) => Promise<ScenePublicationState>;
+  readPublication?: () => Promise<ScenePublicationState>;
   readEntityForReadiness?: (entityId: number) => Promise<MetaInfo>;
   validateForReadiness?: () => Promise<{
     valid: boolean;
@@ -600,24 +600,21 @@ export const registerSceneEditorWebMcpTools = (
           ? [
               {
                 name: "xrugc_get_scene_publication",
-                title: "读取服务器场景发布版本",
+                title: "读取服务器当前场景发布状态",
                 description:
-                  "读取当前场景服务器发布状态；提供 publicationRevision 可独立读取不可变版本及快照内容。读取失败不代表从未发布。",
+                  "读取当前场景服务器发布状态和快照标识。快照可能被后续发布覆盖，此查询不验证历史发布内容。读取失败不代表从未发布。",
                 inputSchema: {
                   type: "object",
-                  properties: {
-                    publicationRevision: { type: "string", format: "uuid" },
-                  },
+                  properties: {},
                   additionalProperties: false,
                 },
                 annotations: { readOnlyHint: true, untrustedContentHint: true },
                 execute: (input: unknown) => {
-                  const params = requireRecordInput(input);
-                  return options.readPublication!(
-                    typeof params.publicationRevision === "string"
-                      ? params.publicationRevision
-                      : undefined
-                  );
+                  if (Object.keys(requireRecordInput(input)).length > 0)
+                    throw new Error(
+                      "当前仅支持读取当前发布状态，不接受历史版本参数"
+                    );
+                  return options.readPublication!();
                 },
               },
             ]

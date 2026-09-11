@@ -33,9 +33,9 @@
 - 对同一草稿重复 complete，核对没有重复节点、脚本修改、Snapshot 或操作记录。模拟提交响应断开后，以原 operationId 查回执，不重新生成提案重试。
 - 提交后重载页面，查询已知 operationId，仍可拿到本账号的服务端回执。未知操作只返回 unknown/not_observed；换账号或失去目标权限后不能泄漏原账号回执。
 - 两个标签页载入同一版本，A 保存后 B 保存应返回 409 并保留 B 本地修改，不静默覆盖 A。实体、场景及两个脚本页都检查人工保存与 WebMCP 保存。
-- 发布返回 publicationRevision、contentHash 后，独立调用 xrugc_get_scene_publication 读取指定版本；核对 snapshotId、版本和哈希，并得到完整快照。再次发布同一场景后，旧版本内容保持不变。
-- 对迁移前已发布场景只读检查 published=true、版本未知；不为补验收重新发布用户场景。版本读回失败时必须保留已确认的发布回执，readBackVerified=false。
-- 记录当前构建、后端镜像、迁移状态、对象、操作 ID、最终状态和独立读回结果。素材上传/重命名不列为本次后端幂等已覆盖。
+- 发布返回 snapshotId 和操作回执后，重载再按 operationId 查询。用 xrugc_get_scene_publication 核对当前发布状态；再次发布后，旧操作回执仍可查，但不把当前 Snapshot 当作第一次发布的固定内容。
+- 对迁移前已发布场景只读检查 published=true 和当前快照标识，不为补验收重新发布用户场景。页面刷新失败仍保留已确认回执；P1 的 readBackVerified=false，历史发布归档留给 P2。
+- 记录当前构建、后端镜像、迁移状态、对象、操作 ID、最终状态和当前发布查询结果。素材上传/重命名不列为本次后端幂等已覆盖。
 
 ## 实体编辑闭环
 
@@ -72,7 +72,7 @@
 - 读取场景、实体引用与资源检查结果；空场景、缺失文件元数据、权限不足和未保存修改应阻止发布。
 - 暂存发布后修改可见场景，确认旧草稿失效。
 - 在独立场景确认发布，记录 snapshotId。若发布后刷新失败，应仍返回服务器确认的 snapshotId，并提示重新读取而非重复发布。
-- 使用后端支持的独立查询验证快照；若接口缺失，保留 readBackVerified=false，不将 GET 场景成功视为快照验证成功。
+- P1 只独立查询操作回执与当前发布状态，保留 readBackVerified=false，不将 GET 场景或当前 Snapshot 成功视为历史快照验证成功。
 - 打开 Unity 预览，先观察 loading，再等待运行器报告 running。分别注入 loader/start/timeout/scene-forward 错误，检查脱敏码与阶段。
 - 关闭/重新打开预览后注入旧 nonce 消息，状态不得变化。
 - 场景 Blockly 页使用同一个 Unity 预览合同；实体 Blockly 脚本在其所属场景中验证运行效果。

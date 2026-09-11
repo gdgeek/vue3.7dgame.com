@@ -1675,9 +1675,9 @@ const registerPageWebMcpTools = () => {
 
   webMcpLifecycle?.abort();
   registration = webMcpLifecycle = registerSceneEditorWebMcpTools({
-    readPublication: async (revision) => {
+    readPublication: async () => {
       assertActive();
-      return (await getScenePublication(ownerId, revision)).data;
+      return (await getScenePublication(ownerId)).data;
     },
     operations: {
       getScope: () => ({
@@ -2283,8 +2283,6 @@ const registerPageWebMcpTools = () => {
       const result = await readBackScenePublication({
         sceneId: scene.id,
         snapshot,
-        readSnapshot: async (revision) =>
-          (await getScenePublication(scene.id, revision)).data,
         refresh: () => getVerse(scene.id, VERSE_SCENE_EXPAND),
         apply: (response) => {
           if (verse.value?.id === scene.id) verse.value = response.data;

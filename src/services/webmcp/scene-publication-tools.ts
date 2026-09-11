@@ -19,7 +19,7 @@ export type ScenePublicationCompletion = {
   snapshotId: number | null;
   snapshotUuid: string | null;
   published: boolean;
-  verification?: "server_acknowledged" | "snapshot_read_back";
+  verification?: "server_acknowledged";
   readBackVerified?: boolean;
 };
 

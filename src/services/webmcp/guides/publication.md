@@ -9,8 +9,8 @@
 1. 检查各修改工具的状态、`persistence` 与 `editorAcknowledged`。`server_acknowledged` 表示服务器已响应；仍需通过页面重载或受支持的独立读取核对保存内容。切页前处理未保存修改。
 2. 回到场景编辑页并重新发现工具。用 `xrugc_get_scene_editor_context` 确认目标，再读取 `xrugc_check_scene_resource_readiness` 和 `xrugc_check_scene_publication_readiness`，处理缺失引用与阻塞项。
 3. 调用 `xrugc_stage_scene_publication`，核对具体场景和警告；用返回的 `draftId` 调用 `xrugc_complete_scene_publication`，等待页面用户确认；工具先返回 `operationId` 时，用 `xrugc_get_operation_status` 查询最终回执。不得将 `awaiting_confirmation` 或 `submitting` 当作成功。
-4. 记录最终回执的 `snapshotId`、`publicationRevision`、`contentHash`、`verification`、`readBackVerified` 及 `refreshSucceeded`。通过 `xrugc_get_scene_publication` 查询当前发布状态；指定 `publicationRevision` 可独立读取对应不可变快照。刷新失败但已有服务器快照回执时，先读取状态，不重复发布。
-5. 通过平台支持的独立查询验证发布版本与快照内容，再按 `acceptance` 验收。若没有独立查询能力，明确保留未验证状态。
+4. 记录最终回执的 `operationId`、`snapshotId`、`verification`、`readBackVerified` 及 `refreshSucceeded`。重载后用操作 ID 查询已提交回执；通过 `xrugc_get_scene_publication` 读取当前发布状态和快照标识。刷新失败但已有服务器回执时，先读取状态，不重复发布。
+5. 按 `acceptance` 验收实际运行。当前 Snapshot 可能被后续发布覆盖；P1 不提供固定历史版本，`readBackVerified` 保留 false。操作回执证明当次提交成功，不代表保存了当时的快照正文。
 
 ## 验证与限制
 

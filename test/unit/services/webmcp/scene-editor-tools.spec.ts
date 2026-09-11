@@ -318,8 +318,7 @@ it("reads authoritative publication metadata instead of a legacy field", async (
     published: false,
     snapshotId: null,
     snapshotUuid: null,
-    publicationRevision: null,
-    contentHash: null,
+    verification: "current_snapshot",
   });
   const { registered } = register(readPublication);
   await expect(registered[0].execute({})).resolves.toMatchObject({
@@ -328,4 +327,18 @@ it("reads authoritative publication metadata instead of a legacy field", async (
   expect(
     registered.some((tool) => tool.name === "xrugc_get_scene_publication")
   ).toBe(true);
+  const tool = registered.find(
+    (item) => item.name === "xrugc_get_scene_publication"
+  )!;
+  readPublication.mockClear();
+  await expect(
+    tool.execute({
+      publicationRevision: "85da37e3-12ad-423e-b31d-4d50fd344001",
+    })
+  ).rejects.toThrow("不接受历史版本参数");
+  expect(readPublication).not.toHaveBeenCalled();
+  await expect(tool.execute({})).resolves.toMatchObject({
+    verification: "current_snapshot",
+  });
+  expect(readPublication).toHaveBeenCalledWith();
 });

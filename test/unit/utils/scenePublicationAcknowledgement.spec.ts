@@ -43,51 +43,19 @@ describe("acknowledged scene publication", () => {
   });
 });
 
-it("verifies the immutable snapshot independently of the editable scene refresh", async () => {
-  const publicationRevision = "85da37e3-12ad-423e-b31d-4d50fd344001";
-  const contentHash = `sha256:${"a".repeat(64)}`;
+it("does not treat version-looking response fields as independently verified history", async () => {
   const result = await readBackScenePublication({
     sceneId: 2329,
-    snapshot: { id: 1082, publicationRevision, contentHash },
-    readSnapshot: async () => ({
-      sceneId: 2329,
-      published: true,
-      snapshotId: 1082,
-      snapshotUuid: null,
-      publicationRevision,
-      contentHash,
-      snapshot: { data: { children: {} } },
-    }),
-    refresh: async () => {
-      throw new Error("refresh unavailable");
+    snapshot: {
+      id: 1082,
+      publicationRevision: "85da37e3-12ad-423e-b31d-4d50fd344001",
+      contentHash: `sha256:${"a".repeat(64)}`,
     },
-    apply: vi.fn(),
-  });
-  expect(result).toMatchObject({
-    published: true,
-    readBackVerified: true,
-    verification: "snapshot_read_back",
-    refreshSucceeded: false,
-  });
-});
-
-it("never verifies a different publication revision", async () => {
-  const publicationRevision = "85da37e3-12ad-423e-b31d-4d50fd344001";
-  const contentHash = `sha256:${"a".repeat(64)}`;
-  const result = await readBackScenePublication({
-    sceneId: 2329,
-    snapshot: { id: 1082, publicationRevision, contentHash },
-    readSnapshot: async () => ({
-      sceneId: 2329,
-      published: true,
-      snapshotId: 1082,
-      snapshotUuid: null,
-      publicationRevision: "85da37e3-12ad-423e-b31d-4d50fd344002",
-      contentHash,
-      snapshot: {},
-    }),
     refresh: async () => ({}),
     apply: vi.fn(),
   });
   expect(result.readBackVerified).toBe(false);
+  expect(result.verification).toBe("server_acknowledged");
+  expect(result).not.toHaveProperty("publicationRevision");
+  expect(result).not.toHaveProperty("contentHash");
 });

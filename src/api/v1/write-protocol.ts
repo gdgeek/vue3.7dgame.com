@@ -75,14 +75,12 @@ export type ScenePublicationState = {
   published: boolean;
   snapshotId: number | null;
   snapshotUuid: string | null;
-  publicationRevision: string | null;
-  contentHash: string | null;
-  snapshot?: Record<string, unknown>;
+  verification: "current_snapshot";
 };
-export const getScenePublication = (id: number, revision?: string) => {
-  if (revision && !validOperationId(revision)) throw new Error("发布版本无效");
+export const getScenePublication = (id: number) => {
+  if (!Number.isSafeInteger(id) || id <= 0) throw new Error("场景 ID 无效");
   return request<ScenePublicationState>({
-    url: `/v1/verses/${id}/publication${revision ? `/${revision}` : ""}`,
+    url: `/v1/verses/${id}/publication`,
     method: "get",
     skipErrorMessage: true,
   });
