@@ -104,6 +104,7 @@ export default {
     home: "หน้าแรก",
     resources: "คลังทรัพยากร",
     model: "โมเดล",
+    voxel: "วอกเซล",
     picture: "รูปภาพ",
     audio: "เสียง",
     video: "วิดีโอ",

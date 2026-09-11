@@ -9,6 +9,9 @@ export interface DomainDefaultInfo {
   style: number;
   blog: string;
   icon: string;
+  features?: {
+    voxel?: boolean;
+  };
 }
 
 export interface DomainLanguageInfo {

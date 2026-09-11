@@ -104,6 +104,7 @@ export default {
     home: "Home",
     resources: "Resources",
     model: "Model",
+    voxel: "Voxel",
     picture: "Picture",
     audio: "Audio",
     video: "Video",

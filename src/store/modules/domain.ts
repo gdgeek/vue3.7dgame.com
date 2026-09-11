@@ -26,6 +26,8 @@ interface FetchDefaultInfoOptions {
   forceRefresh?: boolean;
 }
 
+const defaultInfoRequests = new WeakMap<object, Promise<void>>();
+
 // Cookie helper functions
 function setCookie(name: string, value: string, days: number) {
   const expires = new Date();
@@ -102,6 +104,8 @@ export const useDomainStore = defineStore("domain", {
     blog: (state) => state.defaultInfo?.blog || "",
     /** 域名自定义图标 */
     icon: (state) => state.defaultInfo?.icon || "",
+    /** 体素功能必须由当前白牌显式开启。 */
+    voxelEnabled: (state) => state.defaultInfo?.features?.voxel === true,
     isLoaded: (state) =>
       state.defaultInfo !== null && state.langInfo !== null && !state.loading,
   },
@@ -110,14 +114,33 @@ export const useDomainStore = defineStore("domain", {
     /**
      * 启动时调用一次，获取基础信息（homepage, lang）
      */
-    async fetchDefaultInfo(options: FetchDefaultInfoOptions = {}) {
+    fetchDefaultInfo(options: FetchDefaultInfoOptions = {}): Promise<void> {
+      const pending = defaultInfoRequests.get(this);
+      if (pending) {
+        return options.forceRefresh
+          ? pending.then(() => this.fetchDefaultInfo(options))
+          : pending;
+      }
+
+      const request = this.loadDefaultInfo(options).finally(() => {
+        defaultInfoRequests.delete(this);
+      });
+      defaultInfoRequests.set(this, request);
+      return request;
+    },
+
+    async loadDefaultInfo(options: FetchDefaultInfoOptions) {
       // Try cookie cache first
       const cachedData = options.forceRefresh
         ? null
         : getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
       if (cachedData) {
         try {
-          this.defaultInfo = JSON.parse(cachedData);
+          this.defaultInfo = {
+            ...JSON.parse(cachedData),
+            // 缓存只恢复品牌信息；功能开关等待本次配置请求确认。
+            features: undefined,
+          };
         } catch (e) {
           logger.warn("Failed to parse cached default domain info:", e);
         }
@@ -142,6 +165,9 @@ export const useDomainStore = defineStore("domain", {
           err instanceof Error ? err.message : "Failed to fetch default info";
         logger.error("Failed to fetch default domain info:", err);
         this.error = message;
+        if (this.defaultInfo) {
+          this.defaultInfo = { ...this.defaultInfo, features: undefined };
+        }
       }
 
       // 域名语言仅作为首次访问默认值；已保存的用户选择优先。

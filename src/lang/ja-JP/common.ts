@@ -104,6 +104,7 @@ export default {
     home: "ホーム",
     resources: "素材ライブラリ",
     model: "モデル",
+    voxel: "ボクセル",
     picture: "画像",
     audio: "音声",
     video: "動画",

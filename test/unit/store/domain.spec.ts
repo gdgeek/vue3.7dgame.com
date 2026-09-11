@@ -246,6 +246,65 @@ describe("useDomainStore", () => {
 
   // ── fetchDefaultInfo ─────────────────────────────────────────────────────
 
+  describe("白牌体素开关", () => {
+    it("配置未加载时关闭", () => {
+      expect(useDomainStore().voxelEnabled).toBe(false);
+    });
+
+    it.each([
+      [undefined, false],
+      [{}, false],
+      [{ voxel: false }, false],
+      [{ voxel: true }, true],
+      [{ voxel: "true" }, false],
+      [{ voxel: 1 }, false],
+      [null, false],
+    ])("仅布尔 true 开启体素：%j", (features, enabled) => {
+      const store = useDomainStore();
+      store.defaultInfo = makeDefaultInfo({ features });
+      expect(store.voxelEnabled).toBe(enabled);
+    });
+
+    it("不从旧 Cookie 开启功能，等待当前白牌配置", async () => {
+      const cachedInfo = makeDefaultInfo({ features: { voxel: true } });
+      document.cookie = `domain_default_info=${encodeURIComponent(
+        JSON.stringify(cachedInfo)
+      )};path=/`;
+      let resolveConfig!: (response: {
+        data: ReturnType<typeof makeDefaultInfo>;
+      }) => void;
+      getDomainDefault.mockReturnValue(
+        new Promise((resolve) => {
+          resolveConfig = resolve;
+        })
+      );
+
+      const store = useDomainStore();
+      const pending = store.fetchDefaultInfo();
+      const concurrent = store.fetchDefaultInfo();
+      expect(getDomainDefault).toHaveBeenCalledTimes(1);
+      expect(store.voxelEnabled).toBe(false);
+      resolveConfig({ data: makeDefaultInfo({ features: { voxel: true } }) });
+      await Promise.all([pending, concurrent]);
+      expect(store.voxelEnabled).toBe(true);
+
+      getDomainDefault.mockResolvedValue({ data: makeDefaultInfo() });
+      await store.fetchDefaultInfo({ forceRefresh: true });
+      expect(store.voxelEnabled).toBe(false);
+    });
+
+    it("配置刷新失败时关闭曾经开启的功能", async () => {
+      const store = useDomainStore();
+      store.defaultInfo = makeDefaultInfo({ features: { voxel: true } });
+      getDomainDefault.mockRejectedValue(new Error("Network error"));
+
+      await store.fetchDefaultInfo({ forceRefresh: true });
+
+      expect(store.voxelEnabled).toBe(false);
+      expect(store.homepage).toBe("https://test.com");
+    });
+  });
+
   describe("fetchDefaultInfo()", () => {
     it("成功时更新 defaultInfo", async () => {
       const info = makeDefaultInfo({ homepage: "https://fetched.com" });

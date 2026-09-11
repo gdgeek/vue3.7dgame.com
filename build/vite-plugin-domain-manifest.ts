@@ -30,7 +30,14 @@ const TOP_LEVEL_KEYS = new Set([
   "default_config",
   "configs",
 ]);
-const DEFAULT_CONFIG_KEYS = new Set(["blog", "icon", "lang", "style"]);
+const DEFAULT_CONFIG_KEYS = new Set([
+  "blog",
+  "icon",
+  "lang",
+  "style",
+  "features",
+]);
+const FEATURE_CONFIG_KEYS = new Set(["voxel"]);
 const LOCALIZED_CONFIG_KEYS = new Set([
   "author",
   "description",
@@ -63,6 +70,9 @@ export interface StaticDomainDefaultConfig {
   style?: number;
   icon?: string;
   blog?: string;
+  features?: {
+    voxel?: boolean;
+  };
 }
 
 export interface StaticDomainLink {
@@ -171,6 +181,29 @@ function validateDefaultConfig(
   ) {
     validationError(fileName, 'field "default_config.style" must be a number');
   }
+  if ("features" in value) {
+    if (!isObjectRecord(value.features)) {
+      validationError(
+        fileName,
+        'field "default_config.features" must be an object'
+      );
+    }
+    validateAllowedKeys(
+      fileName,
+      "default_config.features",
+      value.features,
+      FEATURE_CONFIG_KEYS
+    );
+    if (
+      "voxel" in value.features &&
+      typeof value.features.voxel !== "boolean"
+    ) {
+      validationError(
+        fileName,
+        'field "default_config.features.voxel" must be a boolean'
+      );
+    }
+  }
 }
 
 function canonicalizeDefaultConfig(
@@ -181,6 +214,15 @@ function canonicalizeDefaultConfig(
     ...(typeof value.style === "number" ? { style: value.style } : {}),
     ...(typeof value.icon === "string" ? { icon: value.icon } : {}),
     ...(typeof value.blog === "string" ? { blog: value.blog } : {}),
+    ...(value.features
+      ? {
+          features: {
+            ...(typeof value.features.voxel === "boolean"
+              ? { voxel: value.features.voxel }
+              : {}),
+          },
+        }
+      : {}),
   };
 }
 

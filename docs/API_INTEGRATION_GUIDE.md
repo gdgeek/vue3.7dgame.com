@@ -64,6 +64,28 @@ JSON 对象的键顺序不影响解析，但仓库会校验上述标准排列，
 | `style` | number | 否 | 首次访问的默认主题序号，从 `1` 开始，不覆盖用户已经保存的有效选择 |
 | `icon` | string | 否 | Favicon 路径或 URL |
 | `blog` | string | 否 | WordPress 博客地址；空字符串表示不使用域名级覆盖，开发环境回落到 `VITE_APP_DOC_API`，生产环境回落到 `/api-doc` |
+| `features` | object | 否 | 站点功能开关；省略时所有可选功能关闭 |
+
+`features` 当前只允许 `voxel` 字段，且必须使用 JSON 布尔值。设置
+`"voxel": true` 开启主前端的体素素材入口及相关编辑能力；设为 `false` 或省略
+时关闭。此开关与用户原有角色权限共同生效，不会授予用户额外的角色权限。
+
+当前只有 `public/config/domains/xrugc.com.json` 启用了体素功能：
+
+```json
+{
+  "default_config": {
+    "icon": "/config/domains/xingkou-logo.webp",
+    "blog": "",
+    "features": {
+      "voxel": true
+    }
+  }
+}
+```
+
+以上是该配置的字段片段；其余品牌配置保持缺省关闭。修改配置后，开发环境刷新
+页面即可读取；生产环境需重新构建并部署前端镜像，然后刷新页面。
 
 当前支持的语言代码为 `zh-CN`、`zh-TW`、`en-US`、`ja-JP` 和
 `th-TH`。当前主题序号为：`1` modern-blue、`2` deep-space、`3`
@@ -116,6 +138,10 @@ cyber-tech、`4` edu-friendly、`5` neo-brutalism、`6` minimal-pure。
 `xiading.cc`。这个接口始终返回一份完整的原始配置，不额外返回“实际匹配域名”
 等元数据。
 
+功能开关使用匹配到的整份域名配置，不会逐字段继承父域名或 `default` 的
+开关。例如 `d.xrugc.com` 匹配 `xrugc.com.json`，因此开启体素；
+`d.dev.xrugc.com` 优先匹配 `dev.xrugc.com.json`，该配置未声明开关，因此关闭。
+
 主 Web 内部读取同一批配置。语言内容依次回退为：当前域名请求语言、当前域名
 `zh-CN`、`default` 请求语言、`default` 的 `zh-CN`。
 
@@ -144,6 +170,9 @@ console.log(whiteLabel.name, whiteLabel.configs[defaultLanguage].title);
 
 - 配置文件位于 `public/config/domains/{name}.json`。
 - 顶层只允许 `name`、`homepage`、`default_config`、`configs`。
+- `default_config.features` 只允许布尔值开关 `voxel`；字符串 `"true"`、数字
+  `1`、`null` 及未知功能名都会被构建校验拒绝。当前仅 `xrugc.com.json` 开启
+  体素，其他品牌配置不得启用。
 - 公开格式中的 `blog` 字段仍为可选；当前仓库内的所有域名必须显式设置
   `"blog": ""`，统一使用部署级文档 API。
 - 已移除的旧字段不再兼容：顶层 `description`、`is_active`、
@@ -154,7 +183,7 @@ console.log(whiteLabel.name, whiteLabel.configs[defaultLanguage].title);
 - 修改配置后至少运行：
 
 ```bash
-pnpm test:run -- test/unit/build/domain-manifest.spec.ts \
+pnpm exec vitest run test/unit/build/domain-manifest.spec.ts \
   test/unit/build/domain-manifest-vite.spec.ts \
   test/unit/api/domain-static-config.spec.ts \
   test/unit/nginx/nginx-config.spec.ts
