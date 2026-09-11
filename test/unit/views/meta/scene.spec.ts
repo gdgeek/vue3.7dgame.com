@@ -12,6 +12,7 @@ const mockPush = vi.fn();
 const mockPostStandardMessage = vi.fn();
 const mockSendRequest = vi.fn();
 const mockGetMeta = vi.fn();
+const mockPutMeta = vi.fn();
 const mockGetVerse = vi.fn();
 const mockDirty = ref(false);
 const mockAppStore = reactive({ language: "zh-CN" });
@@ -52,7 +53,12 @@ vi.mock("@/utils/logger", () => ({
 vi.mock("@/api/v1/meta", () => ({
   getMeta: mockGetMeta,
   getMetas: vi.fn(),
-  putMeta: vi.fn(),
+  putMeta: mockPutMeta,
+}));
+
+vi.mock("@/api/v1/write-protocol", () => ({
+  getScenePublication: vi.fn(async () => ({ data: { published: false } })),
+  getWriteReceipt: vi.fn(),
 }));
 
 vi.mock("@/api/v1/prefab", () => ({ getPrefab: vi.fn() }));
@@ -273,6 +279,7 @@ const cleanups: Array<() => void> = [];
 const makeMetaResponse = (id: number) => ({
   data: {
     id,
+    serverRevision: `sha256:${"a".repeat(64)}`,
     editable: true,
     verseMetas: [],
     resources: [],
@@ -305,6 +312,12 @@ async function mountSceneView(kind: "meta" | "verse" = "meta") {
 
   return {
     el,
+    saveMeta: (...args: unknown[]) =>
+      (
+        app._instance!.setupState as {
+          saveMeta: (...args: unknown[]) => Promise<boolean>;
+        }
+      ).saveMeta(...args),
     refresh: () =>
       (app._instance!.setupState as { refresh: () => Promise<void> }).refresh(),
   };
@@ -325,6 +338,10 @@ describe("views/meta/scene.vue", () => {
     mockSendRequest.mockReset();
     mockSendRequest.mockReturnValue("webmcp-request");
     mockGetMeta.mockReset();
+    mockPutMeta.mockReset();
+    mockPutMeta.mockResolvedValue({
+      data: { serverRevision: `sha256:${"b".repeat(64)}` },
+    });
     mockGetVerses.mockReset();
     mockRegisterToolbar.mockReset();
     mockUpdateToolbarStatus.mockReset();
@@ -394,6 +411,38 @@ describe("views/meta/scene.vue", () => {
       })
     );
   });
+  it("guards an editor save with its loaded revision and adopts only the acknowledged revision", async () => {
+    vi.stubGlobal("ElMessage", { error: vi.fn(), info: vi.fn() });
+    const view = await mountSceneView();
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        source: document.querySelector("iframe")?.contentWindow,
+        origin: "https://editor.example.test",
+        data: { type: "PLUGIN_READY" },
+      })
+    );
+    await flushAsync();
+    const payload = { meta: makeMetaResponse(1).data.data, events: null };
+    expect(await view.saveMeta(payload)).toBe(true);
+    expect(mockPutMeta).toHaveBeenLastCalledWith(
+      1,
+      expect.any(Object),
+      expect.objectContaining({
+        expectedRevision: `sha256:${"a".repeat(64)}`,
+        operationId: expect.any(String),
+      })
+    );
+    expect(await view.saveMeta(payload)).toBe(true);
+    expect(mockPutMeta).toHaveBeenLastCalledWith(
+      1,
+      expect.any(Object),
+      expect.objectContaining({ expectedRevision: `sha256:${"b".repeat(64)}` })
+    );
+    mockPutMeta.mockRejectedValueOnce({ response: { status: 409 } });
+    expect(await view.saveMeta(payload)).toBe(false);
+    expect(mockPutMeta).toHaveBeenCalledTimes(3);
+  });
+
   it("reads unsaved entity content from the current iframe and aborts the old tools on route changes", async () => {
     const registry = new Map<
       string,

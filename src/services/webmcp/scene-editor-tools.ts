@@ -1,3 +1,4 @@
+import type { ScenePublicationState } from "@/api/v1/write-protocol";
 import {
   getWorkflowGuideEntry,
   withWorkflowGuide,
@@ -74,6 +75,7 @@ export type SceneEntitySearchResult = {
 };
 
 export type RegisterSceneEditorWebMcpOptions = WebMcpRegistrationOptions & {
+  readPublication?: () => Promise<ScenePublicationState>;
   readEntityForReadiness?: (entityId: number) => Promise<MetaInfo>;
   validateForReadiness?: () => Promise<{
     valid: boolean;
@@ -447,6 +449,12 @@ const createTools = (
       const context = options.getContext();
       const liveState = await options.getLiveState();
       const scene = context.scene;
+      let publication: ScenePublicationState | null = null;
+      try {
+        publication = (await options.readPublication?.()) ?? null;
+      } catch {
+        /* Unknown when server read is unavailable. */
+      }
       return {
         editor: "scene",
         workflowGuide: getWorkflowGuideEntry("scene"),
@@ -460,10 +468,9 @@ const createTools = (
               name: scene.name,
               editable: scene.editable,
               viewable: scene.viewable,
-              published:
-                scene.verseRelease === undefined
-                  ? null
-                  : Boolean(scene.verseRelease),
+              published: publication?.published ?? null,
+              publication,
+              serverRevision: scene.serverRevision ?? null,
               moduleCount: getModules(liveState.verse).length,
               space: scene.space
                 ? { id: scene.space.id, name: scene.space.name }
@@ -589,6 +596,29 @@ export const registerSceneEditorWebMcpTools = (
     withWorkflowGuide(
       [
         ...createTools(options),
+        ...(options.readPublication
+          ? [
+              {
+                name: "xrugc_get_scene_publication",
+                title: "读取服务器当前场景发布状态",
+                description:
+                  "读取当前场景服务器发布状态和快照标识。快照可能被后续发布覆盖，此查询不验证历史发布内容。读取失败不代表从未发布。",
+                inputSchema: {
+                  type: "object",
+                  properties: {},
+                  additionalProperties: false,
+                },
+                annotations: { readOnlyHint: true, untrustedContentHint: true },
+                execute: (input: unknown) => {
+                  if (Object.keys(requireRecordInput(input)).length > 0)
+                    throw new Error(
+                      "当前仅支持读取当前发布状态，不接受历史版本参数"
+                    );
+                  return options.readPublication!();
+                },
+              },
+            ]
+          : []),
         ...createSceneReliabilityTools(options),
         ...createSceneEntityPlacementTools({
           getSceneId: () => options.getContext().scene?.id ?? null,
@@ -630,6 +660,7 @@ export const registerSceneEditorWebMcpTools = (
     ),
     {
       document: options.document,
+      operations: options.operations,
       onRegistrationError: options.onRegistrationError,
     }
   );

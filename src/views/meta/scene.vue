@@ -51,6 +51,12 @@
 </template>
 
 <script setup lang="ts">
+import {
+  createWriteOptions,
+  applyWriteRevision,
+  type WriteOptions,
+} from "@/api/v1/write-contract";
+import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
 import { createIframeRpc } from "@/utils/iframeRpc";
 import {
@@ -1467,9 +1473,11 @@ const saveMeta = async (
     events: unknown;
   },
   trigger: ScriptSaveTrigger = "manual",
-  onServerSaved?: () => void
+  onServerSaved?: () => void,
+  write?: WriteOptions
 ): Promise<boolean> => {
   const savedOwnerId = id.value;
+  const savedOwner = metaDetail.value;
   if (!metaDetail.value || !saveable(metaDetail.value as metaInfo)) {
     ElMessage.info(t("meta.scene.info"));
     return false;
@@ -1506,12 +1514,21 @@ const saveMeta = async (
   }
 
   try {
-    await putMeta(savedOwnerId, {
-      data: meta,
-      events: events as import("@/api/v1/types/meta").Events | null,
-    });
+    const savedResponse = await putMeta(
+      savedOwnerId,
+      {
+        data: meta,
+        events: events as import("@/api/v1/types/meta").Events | null,
+      },
+      write ??
+        createWriteOptions(
+          (metaDetail.value as metaInfo | null)?.serverRevision
+        )
+    );
     onServerSaved?.();
-    if (id.value !== savedOwnerId) return true;
+    if (id.value !== savedOwnerId || metaDetail.value !== savedOwner)
+      return true;
+    applyWriteRevision(metaDetail.value as metaInfo, savedResponse);
     if (metaDetail.value) {
       const currentMetaDetail = metaDetail.value as metaInfo;
       const nextMetaDetail = JSON.parse(
@@ -1535,7 +1552,8 @@ const saveMeta = async (
 
 const persistWebMcpMutation = async (
   response: Record<string, unknown>,
-  failureMessage: string
+  failureMessage: string,
+  preview: object
 ) => {
   if (response.noChange)
     return { editorApplied: false, persistence: "unchanged" };
@@ -1563,9 +1581,17 @@ const persistWebMcpMutation = async (
   let serverSaved = false;
   let editorAcknowledged = false;
   try {
-    const saved = await saveMeta(saveData, currentSaveTrigger, () => {
-      serverSaved = true;
-    });
+    const saved = await saveMeta(
+      saveData,
+      currentSaveTrigger,
+      () => {
+        serverSaved = true;
+      },
+      writeOptionsForPreview(
+        preview,
+        (metaDetail.value as metaInfo | null)?.serverRevision
+      )
+    );
     if (!saved && !serverSaved) {
       throw new WebMcpCompletionError(
         {
@@ -2066,6 +2092,15 @@ const registerPageWebMcpTools = () => {
 
   webMcpLifecycle?.abort();
   registration = webMcpLifecycle = registerEntityEditorWebMcpTools({
+    operations: {
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "meta",
+        targetId: id.value,
+        serverRevision:
+          (metaDetail.value as metaInfo | null)?.serverRevision ?? "",
+      }),
+    },
     getContext: () => ({
       entity: metaDetail.value as metaInfo | null,
       dirty: hasUnsavedChangesBeforeUnload.value,
@@ -2192,7 +2227,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "节点变换已应用，但保存到服务器失败，请手动保存"
+        "节点变换已应用，但保存到服务器失败，请手动保存",
+        preview
       );
 
       return {
@@ -2278,7 +2314,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "节点属性已应用，但保存到服务器失败，请手动保存"
+        "节点属性已应用，但保存到服务器失败，请手动保存",
+        preview
       );
 
       return {
@@ -2391,7 +2428,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "素材节点已创建，但保存到服务器失败，请手动保存"
+        "素材节点已创建，但保存到服务器失败，请手动保存",
+        preview
       );
       if ((metaDetail.value as metaInfo | null)?.id === preview.entityId) {
         const current = metaDetail.value as metaInfo;
@@ -2488,7 +2526,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "节点层级已修改，但保存到服务器失败，请手动保存"
+        "节点层级已修改，但保存到服务器失败，请手动保存",
+        preview
       );
       return {
         ...persistence,
@@ -2580,7 +2619,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "节点已从编辑器删除，但保存到服务器失败，请撤销删除或手动保存"
+        "节点已从编辑器删除，但保存到服务器失败，请撤销删除或手动保存",
+        preview
       );
       return {
         ...persistence,
@@ -2665,7 +2705,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "节点顺序已修改，但保存到服务器失败，请手动保存"
+        "节点顺序已修改，但保存到服务器失败，请手动保存",
+        preview
       );
       return {
         ...persistence,
@@ -2757,7 +2798,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "节点复制件已创建，但保存到服务器失败，请撤销复制或手动保存"
+        "节点复制件已创建，但保存到服务器失败，请撤销复制或手动保存",
+        preview
       );
       return {
         ...persistence,
@@ -2834,7 +2876,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "批量修改已应用，但保存到服务器失败，请撤销修改或手动保存"
+        "批量修改已应用，但保存到服务器失败，请撤销修改或手动保存",
+        preview
       );
       return {
         ...persistence,
@@ -3068,7 +3111,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "组件修改已应用，但保存到服务器失败，请撤销修改或手动保存"
+        "组件修改已应用，但保存到服务器失败，请撤销修改或手动保存",
+        preview
       );
       return {
         ...persistence,
@@ -3202,7 +3246,8 @@ const registerPageWebMcpTools = () => {
       );
       const persistence = await saveWebMcpMutation(
         response,
-        "信号修改已应用，但保存到服务器失败，请撤销修改或手动保存"
+        "信号修改已应用，但保存到服务器失败，请撤销修改或手动保存",
+        preview
       );
       return {
         ...persistence,

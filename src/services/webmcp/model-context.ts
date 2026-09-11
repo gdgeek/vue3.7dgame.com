@@ -1,3 +1,7 @@
+import {
+  withOperationReceipts,
+  type OperationRegistration,
+} from "./operation-registry";
 export type WebMcpToolAnnotations = {
   readOnlyHint?: boolean;
   untrustedContentHint?: boolean;
@@ -28,6 +32,7 @@ type WebMcpDocument = Document & {
 
 export type WebMcpRegistrationOptions = {
   document?: Document;
+  operations?: OperationRegistration;
   onRegistrationError?: (toolName: string, error: unknown) => void;
 };
 
@@ -51,7 +56,10 @@ export const registerWebMcpTools = (
 
   const lifecycle = new AbortController();
 
-  for (const tool of tools) {
+  const registeredTools = options.operations
+    ? withOperationReceipts(tools, options.operations, lifecycle.signal)
+    : tools;
+  for (const tool of registeredTools) {
     try {
       void Promise.resolve(
         modelContext.registerTool(

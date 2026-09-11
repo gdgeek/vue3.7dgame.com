@@ -1,3 +1,4 @@
+import type { WriteOptions } from "@/api/v1/write-contract";
 /**
  * 共享编辑器基础 composable，供 meta/script.vue 和 verse/script.vue 共用。
  * 包含所有与领域无关的状态管理、消息通信、全屏控制、代码格式化、
@@ -97,7 +98,7 @@ export type UseScriptEditorBaseOptions = {
   /** 保存到服务端的回调（meta/verse 各自实现） */
   onPost: (
     data: EditorPostPayload,
-    context: { trigger: ScriptSaveTrigger }
+    context: { trigger: ScriptSaveTrigger; write?: WriteOptions }
   ) => Promise<void>;
   /**
    * 编辑器就绪 / 语言切换时的回调（meta/verse 各自实现 initEditor）。
@@ -117,6 +118,7 @@ type ResolveUnsavedChangesOptions = {
 };
 
 export type SaveRequestOptions = {
+  write?: WriteOptions;
   suppressNoChangeInfo?: boolean;
 };
 
@@ -220,7 +222,12 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     }
     persistenceInFlight = true;
     try {
-      await options.onPost(data, { trigger });
+      await options.onPost(data, {
+        trigger,
+        ...(currentSaveOptions.write
+          ? { write: currentSaveOptions.write }
+          : {}),
+      });
     } finally {
       persistenceInFlight = false;
     }

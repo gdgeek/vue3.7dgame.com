@@ -742,6 +742,7 @@ export const registerEntityEditorWebMcpTools = (
     ),
     {
       document: options.document,
+      operations: options.operations,
       onRegistrationError: options.onRegistrationError,
     }
   );
