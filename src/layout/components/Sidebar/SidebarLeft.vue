@@ -72,6 +72,20 @@
                 </div>
               </router-link>
               <router-link
+                v-if="domainStore.voxelEnabled"
+                to="/resource/voxel/index"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.voxel") }}</span>
+                </div>
+              </router-link>
+              <router-link
                 to="/resource/picture/index"
                 custom
                 v-slot="{ isActive, navigate }"
@@ -128,6 +142,21 @@
                 >
                   <span class="submenu-dot"></span>
                   <span>{{ t("sidebar.model") }}</span>
+                </div>
+              </router-link>
+              <router-link
+                v-if="domainStore.voxelEnabled"
+                to="/resource/voxel/index"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="sidebar-subitem"
+                  :class="{ 'sidebar-subitem-active': isActive }"
+                  @click="navigate"
+                >
+                  <span class="submenu-dot"></span>
+                  <span>{{ t("sidebar.voxel") }}</span>
                 </div>
               </router-link>
               <router-link

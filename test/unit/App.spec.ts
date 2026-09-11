@@ -64,6 +64,14 @@ const mockUpdateAbility = vi.fn();
 const mockUpdateRoutes = vi.fn();
 const mockFetchDomainInfo = vi.fn(async () => {});
 const mockGetUserInfo = vi.fn(async () => {});
+const mockUserStore = reactive({
+  userInfo: null as { id: number; roles: string[] } | null,
+  getUserInfo: mockGetUserInfo,
+});
+const mockDomainStore = reactive({
+  voxelEnabled: false,
+  fetchDomainInfo: mockFetchDomainInfo,
+});
 const mockDisposeKTX2Loader = vi.fn();
 const mockLoggerWarn = vi.fn();
 const mockLoggerError = vi.fn();
@@ -109,16 +117,11 @@ vi.mock("@/store/modules/app", () => ({
 }));
 
 vi.mock("@/store/modules/user", () => ({
-  useUserStore: () => ({
-    userInfo: null,
-    getUserInfo: mockGetUserInfo,
-  }),
+  useUserStore: () => mockUserStore,
 }));
 
 vi.mock("@/store/modules/domain", () => ({
-  useDomainStore: () => ({
-    fetchDomainInfo: mockFetchDomainInfo,
-  }),
+  useDomainStore: () => mockDomainStore,
 }));
 
 vi.mock("@/services/auth/authClient", () => ({
@@ -148,7 +151,10 @@ describe("App.vue route transition key", () => {
     probeStats.unmounted = 0;
     mockUpdateAbility.mockReset();
     mockUpdateRoutes.mockReset();
-    mockFetchDomainInfo.mockClear();
+    mockFetchDomainInfo.mockReset();
+    mockFetchDomainInfo.mockResolvedValue(undefined);
+    mockUserStore.userInfo = null;
+    mockDomainStore.voxelEnabled = false;
     mockGetUserInfo.mockClear();
     mockDisposeKTX2Loader.mockReset();
     mockLoggerWarn.mockReset();
@@ -381,6 +387,67 @@ describe("App.vue route transition key", () => {
     expect(mockFetchDomainInfo).toHaveBeenCalledTimes(1);
     expect(mockGetUserInfo).not.toHaveBeenCalled();
     expect(mockAuthClient.refresh).not.toHaveBeenCalled();
+  });
+
+  it("recomputes voxel access when white-label configuration finishes loading", async () => {
+    mockUserStore.userInfo = { id: 7, roles: ["user"] };
+    let finishDomainLoad!: () => void;
+    mockFetchDomainInfo.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishDomainLoad = () => {
+            mockDomainStore.voxelEnabled = true;
+            resolve();
+          };
+        })
+    );
+
+    await mountApp();
+
+    expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, ["user"], 7, {
+      voxelEnabled: false,
+    });
+    expect(mockUpdateRoutes).toHaveBeenCalledTimes(1);
+
+    finishDomainLoad();
+    await flushAll();
+
+    expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, ["user"], 7, {
+      voxelEnabled: true,
+    });
+    expect(mockUpdateRoutes).toHaveBeenCalledTimes(2);
+
+    mockDomainStore.voxelEnabled = false;
+    await flushAll();
+
+    expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, ["user"], 7, {
+      voxelEnabled: false,
+    });
+    expect(mockUpdateRoutes).toHaveBeenCalledTimes(3);
+  });
+
+  it("recomputes access when user info arrives after configuration and revokes on logout", async () => {
+    mockDomainStore.voxelEnabled = true;
+    await mountApp();
+
+    expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, [], 0, {
+      voxelEnabled: true,
+    });
+
+    mockUserStore.userInfo = { id: 7, roles: ["user"] };
+    await flushAll();
+
+    expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, ["user"], 7, {
+      voxelEnabled: true,
+    });
+
+    mockUserStore.userInfo = null;
+    await flushAll();
+
+    expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, [], 0, {
+      voxelEnabled: true,
+    });
+    expect(mockUpdateRoutes).toHaveBeenCalledTimes(3);
   });
 
   it("refreshes an expired access token before requesting user info", async () => {

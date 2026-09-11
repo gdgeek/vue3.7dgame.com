@@ -10,7 +10,7 @@ export const resourceRoutes: RouteRecordRaw = {
   path: "/resource",
   component: null,
   name: "/resource",
-  redirect: "/resource/voxel/index",
+  redirect: "/resource/polygen/index",
   meta: {
     title: "resourceManagement.title",
     icon: "system",
@@ -29,7 +29,6 @@ export const resourceRoutes: RouteRecordRaw = {
         title: "resourceManagement.voxelManagement.title",
         icon: "",
         hidden: true,
-        private: true,
         alwaysShow: false,
         params: null,
       },
