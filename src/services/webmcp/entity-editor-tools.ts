@@ -1,3 +1,7 @@
+import {
+  getWorkflowGuideEntry,
+  withWorkflowGuide,
+} from "./workflow-guide-tools";
 import type { MetaInfo } from "@/api/v1/types/meta";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import {
@@ -520,6 +524,7 @@ const createTools = (
       const entity = context.entity;
       return {
         editor: "entity",
+        workflowGuide: getWorkflowGuideEntry("entity"),
         source: context.source ?? "saved",
         entityVersion: context.entityVersion,
         contextGeneration: context.contextGeneration,
@@ -659,79 +664,82 @@ export const registerEntityEditorWebMcpTools = (
   options: RegisterEntityEditorWebMcpOptions
 ) =>
   registerWebMcpTools(
-    [
-      ...createTools(options),
-      ...createEntityTransformTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        stageNodeTransform: options.stageNodeTransform,
-        confirmNodeTransform: options.confirmNodeTransform,
-        completeNodeTransform: options.completeNodeTransform,
-      }),
-      ...createEntityNodePropertyTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        stageNodeProperties: options.stageNodeProperties,
-        confirmNodeProperties: options.confirmNodeProperties,
-        completeNodeProperties: options.completeNodeProperties,
-      }),
-      ...createEntityResourcePlacementTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        stageResourcePlacement: options.stageResourcePlacement,
-        confirmResourcePlacement: options.confirmResourcePlacement,
-        completeResourcePlacement: options.completeResourcePlacement,
-      }),
-      ...createEntityHierarchyTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        stageNodeReparent: options.stageNodeReparent,
-        confirmNodeReparent: options.confirmNodeReparent,
-        completeNodeReparent: options.completeNodeReparent,
-      }),
-      ...createEntityNodeDeletionTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        stageNodeDeletion: options.stageNodeDeletion,
-        confirmNodeDeletion: options.confirmNodeDeletion,
-        completeNodeDeletion: options.completeNodeDeletion,
-      }),
-      ...createEntityNodeOrderTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        stageNodeReorder: options.stageNodeReorder,
-        confirmNodeReorder: options.confirmNodeReorder,
-        completeNodeReorder: options.completeNodeReorder,
-      }),
-      ...createEntityNodeCloneTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        stageNodeClone: options.stageNodeClone,
-        confirmNodeClone: options.confirmNodeClone,
-        completeNodeClone: options.completeNodeClone,
-      }),
-      ...createEntityNodeBatchTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        stageNodeBatch: options.stageNodeBatch,
-        confirmNodeBatch: options.confirmNodeBatch,
-        completeNodeBatch: options.completeNodeBatch,
-      }),
-      ...createEntityAssetLifecycleTools({
-        getEntity: () => options.getContext().entity,
-        getLiveContext: options.getLiveContext,
-        startAssetUpload: options.startAssetUpload,
-        stageAssetRename: options.stageAssetRename,
-        confirmAssetRename: options.confirmAssetRename,
-        completeAssetRename: options.completeAssetRename,
-      }),
-      ...createEntityComponentTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        getNodeComponents: options.getNodeComponents,
-        stageComponentBatch: options.stageComponentBatch,
-        confirmComponentBatch: options.confirmComponentBatch,
-        completeComponentBatch: options.completeComponentBatch,
-      }),
-      ...createEntitySignalTools({
-        getEntityId: () => options.getContext().entity?.id ?? null,
-        getEntitySignals: options.getEntitySignals,
-        stageSignalBatch: options.stageSignalBatch,
-        confirmSignalBatch: options.confirmSignalBatch,
-        completeSignalBatch: options.completeSignalBatch,
-      }),
-    ],
+    withWorkflowGuide(
+      [
+        ...createTools(options),
+        ...createEntityTransformTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          stageNodeTransform: options.stageNodeTransform,
+          confirmNodeTransform: options.confirmNodeTransform,
+          completeNodeTransform: options.completeNodeTransform,
+        }),
+        ...createEntityNodePropertyTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          stageNodeProperties: options.stageNodeProperties,
+          confirmNodeProperties: options.confirmNodeProperties,
+          completeNodeProperties: options.completeNodeProperties,
+        }),
+        ...createEntityResourcePlacementTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          stageResourcePlacement: options.stageResourcePlacement,
+          confirmResourcePlacement: options.confirmResourcePlacement,
+          completeResourcePlacement: options.completeResourcePlacement,
+        }),
+        ...createEntityHierarchyTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          stageNodeReparent: options.stageNodeReparent,
+          confirmNodeReparent: options.confirmNodeReparent,
+          completeNodeReparent: options.completeNodeReparent,
+        }),
+        ...createEntityNodeDeletionTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          stageNodeDeletion: options.stageNodeDeletion,
+          confirmNodeDeletion: options.confirmNodeDeletion,
+          completeNodeDeletion: options.completeNodeDeletion,
+        }),
+        ...createEntityNodeOrderTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          stageNodeReorder: options.stageNodeReorder,
+          confirmNodeReorder: options.confirmNodeReorder,
+          completeNodeReorder: options.completeNodeReorder,
+        }),
+        ...createEntityNodeCloneTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          stageNodeClone: options.stageNodeClone,
+          confirmNodeClone: options.confirmNodeClone,
+          completeNodeClone: options.completeNodeClone,
+        }),
+        ...createEntityNodeBatchTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          stageNodeBatch: options.stageNodeBatch,
+          confirmNodeBatch: options.confirmNodeBatch,
+          completeNodeBatch: options.completeNodeBatch,
+        }),
+        ...createEntityAssetLifecycleTools({
+          getEntity: () => options.getContext().entity,
+          getLiveContext: options.getLiveContext,
+          startAssetUpload: options.startAssetUpload,
+          stageAssetRename: options.stageAssetRename,
+          confirmAssetRename: options.confirmAssetRename,
+          completeAssetRename: options.completeAssetRename,
+        }),
+        ...createEntityComponentTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          getNodeComponents: options.getNodeComponents,
+          stageComponentBatch: options.stageComponentBatch,
+          confirmComponentBatch: options.confirmComponentBatch,
+          completeComponentBatch: options.completeComponentBatch,
+        }),
+        ...createEntitySignalTools({
+          getEntityId: () => options.getContext().entity?.id ?? null,
+          getEntitySignals: options.getEntitySignals,
+          stageSignalBatch: options.stageSignalBatch,
+          confirmSignalBatch: options.confirmSignalBatch,
+          completeSignalBatch: options.completeSignalBatch,
+        }),
+      ],
+      "entity"
+    ),
     {
       document: options.document,
       onRegistrationError: options.onRegistrationError,
