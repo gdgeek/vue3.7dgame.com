@@ -75,9 +75,11 @@ export default {
     unityPreview: {
       entry: "シーンを実行",
       title: "シーンを実行",
-      helpClick: "画面をクリックするとシーンを操作できます",
-      helpRotate: "Alt + マウス左ボタンで視点を回転",
-      helpZoomPan: "ホイールでズーム、右ボタンでパン",
+      helpClick: "まず実行画面をクリックしてフォーカスを合わせます",
+      helpRotate:
+        "Alt（Mac：⌥ Option）を押しながらマウスの左ボタンでドラッグすると視点を回転できます",
+      helpZoomPan:
+        "マウスホイールまたはトラックパッドの2本指スクロールでズームし、右ボタンでドラッグすると視点を平行移動できます",
       helpFullscreen: "全画面でより広くプレビューできます",
       fullscreen: "シーンを全画面で実行",
       close: "シーン実行を閉じる",
