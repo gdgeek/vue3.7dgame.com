@@ -1975,6 +1975,7 @@ const refresh = async () => {
     entityScenes.value = nextEntityScenes;
     pushMetaToEditor(nextMetaDetail, ticket);
   } catch (error) {
+    editorInitialization.fail(ticket);
     if (editorInitialization.isCurrent(ticket)) logger.error(error);
   }
 };

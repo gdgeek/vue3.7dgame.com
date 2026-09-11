@@ -302,7 +302,11 @@ async function mountSceneView(kind: "meta" | "verse" = "meta") {
     el.remove();
   });
 
-  return { el };
+  return {
+    el,
+    refresh: () =>
+      (app._instance!.setupState as { refresh: () => Promise<void> }).refresh(),
+  };
 }
 
 describe("views/meta/scene.vue", () => {
@@ -656,6 +660,122 @@ describe("views/meta/scene.vue", () => {
         sendReady("document-one");
         await flushAsync();
         expect(initCalls()).toHaveLength(1);
+      });
+
+      const resolveContext = async (
+        registry: ReturnType<typeof registerTools>
+      ) => {
+        const action =
+          kind === "meta"
+            ? "webmcp-get-entity-state"
+            : "webmcp-get-scene-state";
+        const context = registry.get(contextTool)!.execute({});
+        expect(mockSendRequest).toHaveBeenCalledWith(action, {});
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: document.querySelector("iframe")?.contentWindow,
+            origin: "https://editor.example.test",
+            data: {
+              type: "RESPONSE",
+              requestId: "webmcp-request",
+              payload: {
+                action,
+                hostSessionId: "test-session",
+                ok: true,
+                entityId: 1,
+                meta: makeMetaResponse(1).data.data,
+                verse: makeMetaResponse(1).data.data,
+                sceneVersion: "scene-live",
+                entityVersion: "entity-live",
+                changed: false,
+                loading: false,
+                selectedModuleIds: [],
+              },
+            },
+          })
+        );
+        await expect(context).resolves.toMatchObject(
+          kind === "meta"
+            ? { editor: "entity", entity: { id: 1 } }
+            : { editor: "scene", ready: true, scene: { id: 1 } }
+        );
+      };
+
+      it("restores live RPC after an API refresh fails without sending a new INIT", async () => {
+        const registry = registerTools();
+        const page = await mountSceneView(kind);
+        sendReady("document-one");
+        await flushAsync();
+        await resolveContext(registry);
+        mockSendRequest.mockClear();
+        fetchData().mockRejectedValueOnce(new Error("Temporary API failure"));
+        await page.refresh();
+        expect(initCalls()).toHaveLength(1);
+        await resolveContext(registry);
+      });
+
+      it("keeps a document blocked when its first API initialization fails", async () => {
+        const registry = registerTools();
+        fetchData().mockRejectedValueOnce(new Error("Initial API failure"));
+        await mountSceneView(kind);
+        sendReady("document-one");
+        await flushAsync();
+        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow();
+        expect(initCalls()).toHaveLength(0);
+        expect(mockSendRequest).not.toHaveBeenCalled();
+      });
+
+      it.each(["returns no id", "throws"])(
+        "keeps RPC blocked when re-INIT %s",
+        async (failure) => {
+          const registry = registerTools();
+          const page = await mountSceneView(kind);
+          sendReady("document-one");
+          await flushAsync();
+          if (failure === "throws")
+            mockPostStandardMessage.mockImplementationOnce(() => {
+              throw new Error("Post failed after session rotation");
+            });
+          else mockPostStandardMessage.mockReturnValueOnce(undefined);
+          await page.refresh();
+          await expect(registry.get(contextTool)!.execute({})).rejects.toThrow(
+            /准备|加载/
+          );
+          expect(mockSendRequest).not.toHaveBeenCalled();
+        }
+      );
+
+      it("does not restore old readiness when a stale refresh fails after reload", async () => {
+        const registry = registerTools();
+        const page = await mountSceneView(kind);
+        sendReady("document-one");
+        await flushAsync();
+        let rejectOld!: (error: Error) => void;
+        fetchData().mockImplementationOnce(
+          () =>
+            new Promise((_resolve, reject) => {
+              rejectOld = reject;
+            })
+        );
+        const oldRefresh = page.refresh();
+        let resolveNew!: (value: ReturnType<typeof makeMetaResponse>) => void;
+        fetchData().mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveNew = resolve;
+            })
+        );
+        sendReady("document-two");
+        await flushAsync();
+        rejectOld(new Error("Old API failure"));
+        await oldRefresh;
+        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow(
+          /准备|加载/
+        );
+        expect(mockSendRequest).not.toHaveBeenCalled();
+        resolveNew(makeMetaResponse(1));
+        await flushAsync();
+        await resolveContext(registry);
       });
 
       it("keeps live RPC blocked when posting INIT fails", async () => {

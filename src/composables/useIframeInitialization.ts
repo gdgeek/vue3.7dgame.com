@@ -22,6 +22,7 @@ export function useIframeInitialization(options: {
   sendInit: (payload: unknown) => string | undefined;
 }) {
   const ready = ref(false);
+  let initialized = false;
   let generation = 0;
   let request = 0;
   let documentId: string | null = null;
@@ -46,6 +47,7 @@ export function useIframeInitialization(options: {
     request += 1;
     accepted = null;
     documentId = null;
+    initialized = false;
     ready.value = false;
   };
   const acceptReady = (payload: Record<string, unknown>) => {
@@ -77,11 +79,20 @@ export function useIframeInitialization(options: {
     matches(ticket);
   const send = (ticket: IframeInitializationTicket, payload: unknown) => {
     if (!isCurrent(ticket)) return false;
+    // INIT may rotate the host session even if posting subsequently fails.
+    initialized = false;
+    ready.value = false;
     const messageId = options.sendInit(payload);
-    ready.value = Boolean(messageId) && isCurrent(ticket);
+    initialized = Boolean(messageId) && isCurrent(ticket);
+    ready.value = initialized;
     return ready.value;
+  };
+  const fail = (ticket: IframeInitializationTicket) => {
+    if (!isCurrent(ticket)) return;
+    // A failed API refresh leaves the previously initialized document intact.
+    ready.value = initialized;
   };
   const isReady = () => ready.value && Boolean(accepted && matches(accepted));
 
-  return { ready, reset, acceptReady, begin, isCurrent, send, isReady };
+  return { ready, reset, acceptReady, begin, isCurrent, send, fail, isReady };
 }

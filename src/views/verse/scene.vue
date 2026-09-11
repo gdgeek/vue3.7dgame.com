@@ -379,6 +379,7 @@ const refresh = async () => {
     saveable.value = verse.value ? verse.value.editable : false;
     if (verse.value) pushVerseToEditor(verse.value, ticket);
   } catch (error) {
+    editorInitialization.fail(ticket);
     if (editorInitialization.isCurrent(ticket)) logger.error(error);
   }
 };
