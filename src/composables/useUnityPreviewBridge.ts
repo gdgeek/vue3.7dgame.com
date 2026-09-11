@@ -58,7 +58,8 @@ export const useUnityPreviewBridge = ({
   const release = ref<UnityRuntimeRelease | null>(null);
   const stage = ref<UnityRuntimeStage>("closed");
   const progress = ref<UnityRuntimeProgress>({ kind: "indeterminate" });
-  const failure = ref<UnityRuntimeFailure | null>(null);
+  // Failure details cross the native WebMCP structured-clone boundary.
+  const failure = shallowRef<UnityRuntimeFailure | null>(null);
   const evidence = ref<{ kind: string } | null>(null);
   const cleanup = ref<"none" | "disposed" | "timeout" | "frame-unavailable">(
     "none"

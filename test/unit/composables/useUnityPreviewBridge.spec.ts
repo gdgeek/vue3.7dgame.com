@@ -213,6 +213,7 @@ describe("built-in Unity controller", () => {
     expect(JSON.stringify(bridge.runtimeState.value)).not.toContain(
       "token=secret"
     );
+    expect(() => structuredClone(bridge.runtimeState.value)).not.toThrow();
     await bridge.close();
     expect(bridge.runtimeState.value.failure).toBeNull();
   });
