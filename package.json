@@ -41,7 +41,12 @@
     "check": "node scripts/check-project.js",
     "replace-console": "node scripts/replace-console.js",
     "check:icons": "node scripts/check-icons.js",
-    "lint:check": "eslint --ext .ts,.js,.vue ./src && prettier --check \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\" && pnpm run lint:stylelint:ci"
+    "lint:check": "eslint --ext .ts,.js,.vue ./src && prettier --check \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\" && pnpm run lint:stylelint:ci",
+    "unity:acquire": "node scripts/unity/acquire.mjs",
+    "unity:prepare": "node scripts/unity/runtime.mjs prepare",
+    "unity:verify": "node scripts/unity/runtime.mjs verify",
+    "unity:test": "node --test scripts/unity/runtime.test.mjs runtime/unity/tests/*.test.cjs",
+    "unity:smoke": "node scripts/unity/container-smoke.mjs"
   },
   "config": {
     "commitizen": {

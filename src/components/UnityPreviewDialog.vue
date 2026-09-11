@@ -1,14 +1,14 @@
 <template>
   <el-dialog
-    v-model="visible"
+    :model-value="modelValue"
+    :before-close="requestClose"
     width="min(1120px, calc(100vw - 64px))"
     :show-close="false"
     :close-on-click-modal="false"
     :close-on-press-escape="true"
     class="unity-preview-dialog"
-    @closed="$emit('closed')"
   >
-    <template #header="{ close, titleId, titleClass }">
+    <template #header="{ titleId, titleClass }">
       <div class="unity-preview-header">
         <div class="unity-preview-title-wrap">
           <span :id="titleId" :class="titleClass">
@@ -24,7 +24,6 @@
                 <div>{{ t("common.unityPreview.helpClick") }}</div>
                 <div>{{ t("common.unityPreview.helpRotate") }}</div>
                 <div>{{ t("common.unityPreview.helpZoomPan") }}</div>
-                <div>{{ t("common.unityPreview.helpFullscreen") }}</div>
               </div>
             </template>
             <el-icon class="unity-preview-help-icon">
@@ -36,74 +35,81 @@
           <button
             class="unity-preview-header-button"
             type="button"
-            :aria-label="t('common.unityPreview.fullscreen')"
-            @click="toggleFullscreen"
-          >
-            <el-icon><FullScreen></FullScreen></el-icon>
-          </button>
-          <button
-            class="unity-preview-header-button"
-            type="button"
             :aria-label="t('common.unityPreview.close')"
-            @click="close"
+            @click="requestClose"
           >
             <el-icon><Close></Close></el-icon>
           </button>
         </div>
       </div>
     </template>
-    <div ref="frameWrap" class="unity-preview-frame-wrap">
+    <div class="unity-preview-frame-wrap">
       <iframe
         v-if="frameVisible"
         :key="frameKey"
         ref="frame"
         class="unity-preview-frame"
+        title="Unity 场景运行器"
         :src="src"
-        allow="autoplay; fullscreen; gamepad; xr-spatial-tracking"
+        allow="autoplay; gamepad; xr-spatial-tracking; fullscreen 'none'"
         @load="$emit('frameLoad')"
       ></iframe>
+      <div
+        v-if="!frameVisible || state?.failure"
+        class="unity-preview-placeholder"
+        role="status"
+        aria-live="polite"
+      >
+        <p>
+          {{
+            state?.failure
+              ? failureMessage
+              : (state?.status ?? "正在准备运行器")
+          }}
+        </p>
+        <button
+          v-if="state?.failure"
+          class="unity-preview-retry"
+          type="button"
+          @click="$emit('retry')"
+        >
+          重试
+        </button>
+      </div>
     </div>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import type { UnityRuntimeViewState } from "@/services/unity/runtime";
 import { useI18n } from "vue-i18n";
-import { Close, FullScreen, QuestionFilled } from "@element-plus/icons-vue";
+import { Close, QuestionFilled } from "@element-plus/icons-vue";
 
 const props = defineProps<{
   modelValue: boolean;
   frameVisible: boolean;
   frameKey: number;
   src: string;
+  state?: UnityRuntimeViewState;
 }>();
 
 const emit = defineEmits<{
   (event: "update:modelValue", value: boolean): void;
-  (event: "closed"): void;
+  (event: "close"): void;
+  (event: "retry"): void;
   (event: "frameLoad"): void;
 }>();
 
 const { t } = useI18n();
 const frame = ref<HTMLIFrameElement | null>(null);
-const frameWrap = ref<HTMLElement | null>(null);
 
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
-});
-
-const toggleFullscreen = () => {
-  const target = frameWrap.value;
-  if (!target) return;
-
-  if (document.fullscreenElement === target) {
-    document.exitFullscreen?.();
-    return;
-  }
-
-  target.requestFullscreen?.();
-};
+const requestClose = () => emit("close");
+const failureMessage = computed(() =>
+  props.state?.failure?.code === "SCENE_ASSET_ORIGIN_DENIED"
+    ? "当前场景资源来源暂不支持，请使用已支持的 CDN 资源。"
+    : (props.state?.failure?.message ?? "场景运行失败，请重试")
+);
 
 defineExpose({
   isFrameSource(source: MessageEventSource | null): boolean {
@@ -116,7 +122,6 @@ defineExpose({
     targetWindow.postMessage(message, targetOrigin);
     return true;
   },
-  toggleFullscreen,
 });
 </script>
 
@@ -131,10 +136,6 @@ defineExpose({
   border-radius: 8px;
   outline: none;
   box-shadow: 0 18px 44px rgb(15 23 42 / 28%);
-}
-
-:global(.unity-preview-dialog *) {
-  outline: none;
 }
 
 :global(.unity-preview-dialog .el-dialog__header) {
@@ -226,6 +227,7 @@ defineExpose({
 }
 
 .unity-preview-frame-wrap {
+  position: relative;
   display: flex;
   flex: 1;
   align-items: flex-start;
@@ -240,14 +242,43 @@ defineExpose({
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 520px;
+  min-height: 0;
   background: #2f3a4a;
   border: 0;
   outline: none;
 }
 
-.unity-preview-frame-wrap:fullscreen {
-  width: 100vw;
-  height: 100vh;
+.unity-preview-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #eef3f8;
+  text-align: center;
+  overflow-wrap: anywhere;
+  background: #2f3a4a;
+}
+
+.unity-preview-placeholder p {
+  margin: 0;
+}
+
+.unity-preview-retry {
+  padding: 5px 10px;
+  color: #fff;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid #758294;
+  border-radius: 6px;
+}
+
+.unity-preview-header-button:focus-visible,
+.unity-preview-retry:focus-visible {
+  outline: 2px solid #70b6ff;
+  outline-offset: 2px;
 }
 </style>

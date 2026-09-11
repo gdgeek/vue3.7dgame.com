@@ -51,6 +51,9 @@ jobs:
         run: pnpm run format:prettier
         continue-on-error: false
 
+      - name: Unity artifact contract tests
+        run: pnpm unity:test
+
       - name: Run tests
         run: pnpm run test:run
 
@@ -70,7 +73,7 @@ jobs:
       queue: max
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
-      digest: ${{ steps.build.outputs.digest }}
+      digest: ${{ steps.publish.outputs.digest }}
 
     permissions:
       contents: read
@@ -99,15 +102,44 @@ jobs:
             type=ref,event=branch
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/publish' }}
 
-      - name: Build and push Docker image
+      - name: Set up Node.js for final-image validation
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Build the complete image before publication
         id: build
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
+          push: false
+          load: true
+          platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BUILD_MODE=production
+            UNITY_PREVIOUS_IMAGE=${{ vars.UNITY_PREVIOUS_IMAGE || 'hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Verify final image and static HTTP behavior with old plugin DNS blocked
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          image=$(printf '%s\n' "$IMAGE_TAGS" | head -n 1)
+          node scripts/unity/container-smoke.mjs "$image"
+
+      - name: Push only the verified image
+        id: publish
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          while IFS= read -r image; do
+            [ -z "$image" ] || docker push "$image"
+          done <<< "$IMAGE_TAGS"
+          image=$(printf '%s\n' "$IMAGE_TAGS" | head -n 1)
+          digest=$(docker image inspect "$image" --format '{{index .RepoDigests 0}}' | cut -d@ -f2)
+          test -n "$digest"
+          printf 'digest=%s\n' "$digest" >> "$GITHUB_OUTPUT"

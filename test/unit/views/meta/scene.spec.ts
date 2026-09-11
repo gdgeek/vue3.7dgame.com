@@ -31,6 +31,7 @@ vi.mock("vue-router", () => ({
   useRoute: vi.fn(() => mockRoute),
   useRouter: vi.fn(() => ({ push: mockPush, getRoutes: () => [] })),
   onBeforeRouteLeave: vi.fn(),
+  onBeforeRouteUpdate: vi.fn(),
 }));
 
 vi.mock("vue-i18n", () => ({

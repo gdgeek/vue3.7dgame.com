@@ -18,6 +18,7 @@ import { resolve } from "path";
 import { normalizeDevProxyTarget } from "./build/dev-proxy-target";
 import { domainManifestJson } from "./build/vite-plugin-domain-manifest";
 import { pluginEnvJson } from "./build/vite-plugin-env-json";
+import { unityRuntimeStatic } from "./build/vite-plugin-unity-runtime";
 import { webMcpGuides } from "./build/vite-plugin-webmcp-guides";
 import {
   name,
@@ -114,21 +115,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           target: wechatAuthProxyTarget,
           rewrite: (path) => path.replace(/^\/wechat-auth/, ""),
         },
-        "/webgl-preview": {
-          changeOrigin: true,
-          target: normalizeDevProxyTarget(
-            env.VITE_APP_UNITY_PREVIEW_PROXY_TARGET ||
-              "https://webgl-preview.plugins.xrugc.com"
-          ),
-          rewrite: (path) => path.replace(/^\/webgl-preview/, ""),
-        },
-        "/__xrugc_proxy__": {
-          changeOrigin: true,
-          target: normalizeDevProxyTarget(
-            env.VITE_APP_UNITY_PREVIEW_PROXY_TARGET ||
-              "https://webgl-preview.plugins.xrugc.com"
-          ),
-        },
       },
     },
     plugins: [
@@ -209,6 +195,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       domainManifestJson(),
       pluginEnvJson(),
       webMcpGuides(),
+      unityRuntimeStatic(),
     ],
     // 预加载项目必需的组件
     optimizeDeps: {

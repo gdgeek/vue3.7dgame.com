@@ -73,10 +73,16 @@ export const putVerseCode = (id: number, data: VerseCode) => {
     method: "put",
   });
 };
-export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
+export const getVerse = (
+  id: number,
+  expand = "metas,share",
+  cl = "lua",
+  signal?: AbortSignal
+) => {
   return request<VerseData>({
     url: `/v1/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`,
     method: "get",
+    signal,
   });
 };
 /*

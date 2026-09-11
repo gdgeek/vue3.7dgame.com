@@ -123,19 +123,24 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(nginxConfig).toContain("location /api-doc/");
   });
 
-  it("proxies the exact legacy route and rejects slash or nested variants", () => {
-    const exactProxy = extractLocationBlock(nginxConfig, "= /__xrugc_proxy__");
-    const nestedProxy = extractLocationBlock(
+  it("serves the built-in WebGL path and rejects the arbitrary URL proxy", () => {
+    const removedProxyExact = extractLocationBlock(
+      nginxConfig,
+      "= /__xrugc_proxy__"
+    );
+    const removedProxyPrefix = extractLocationBlock(
       nginxConfig,
       "^~ /__xrugc_proxy__/"
     );
 
     expect(nginxConfig).toContain("location ^~ /webgl-preview/");
-    expect(exactProxy).toContain(
-      "proxy_pass ${APP_UNITY_PREVIEW_UPSTREAM}/__xrugc_proxy__?$args"
-    );
-    expect(nestedProxy).toContain("return 404");
-    expect(nestedProxy).not.toContain("proxy_pass");
+    expect(nginxConfig).toContain("location = /__xrugc_proxy__");
+    expect(nginxConfig).toContain("location ^~ /__xrugc_proxy__/");
+    expect(nginxConfig).not.toContain("APP_UNITY_PREVIEW_UPSTREAM");
+    for (const removedProxy of [removedProxyExact, removedProxyPrefix]) {
+      expect(removedProxy).toContain("return 404");
+      expect(removedProxy).not.toContain("proxy_pass");
+    }
   });
 
   it("serves runtime env without immutable caching", () => {
@@ -181,20 +186,22 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(block).not.toContain("proxy_pass");
   });
 
-  it("caches proxied WebGL preview assets on the web server", () => {
+  it("serves immutable Unity assets with precise MIME and real missing-file errors", () => {
     const block = extractLocationBlock(nginxConfig, "^~ /webgl-preview/");
-
-    expect(nginxConfig).toContain(
-      "proxy_cache_path /var/cache/nginx/webgl-preview"
+    expect(block).not.toContain("proxy_pass");
+    expect(block).toContain("try_files $uri =404");
+    expect(block).toContain("default_type application/wasm");
+    expect(block).toContain("default_type application/javascript");
+    expect(block).toContain("default_type application/octet-stream");
+    expect(block).toContain("add_header Content-Encoding gzip");
+    expect(block).toContain("max-age=31536000, immutable");
+    expect(block).toContain("connect-src 'self'");
+    expect(nginxConfig).not.toContain("error_page 404 /index.html");
+    const active = extractLocationBlock(
+      nginxConfig,
+      "= /webgl-preview/active.json"
     );
-    expect(nginxConfig).toContain("keys_zone=webgl_preview_cache:256m");
-    expect(block).toContain("proxy_buffering on");
-    expect(block).toContain("proxy_cache webgl_preview_cache");
-    expect(block).toContain("proxy_cache_lock on");
-    expect(block).toContain("proxy_cache_valid 200 206 1y");
-    expect(block).toContain(
-      "add_header X-WebGL-Preview-Cache $upstream_cache_status always"
-    );
+    expect(active).toContain('Cache-Control "no-store"');
   });
 
   it("proxy_pass uses ${APP_DOC_API_URL} variable", () => {
@@ -727,8 +734,9 @@ describe("Property 5: Environment-aware URL selection", () => {
       "utf-8"
     );
 
-    expect(envSource).toContain("/webgl-preview/embed.html");
-    expect(envSource).toContain("UNITY_PREVIEW_URL");
+    expect(envSource).toContain("/webgl-preview/active.json");
+    expect(envSource).not.toContain("VITE_APP_UNITY_PREVIEW_URL");
+    expect(envSource).not.toContain("runtimeEnv.UNITY_PREVIEW_URL");
   });
 
   it("environment.ts does not import ReplaceURL, ReplaceIP, or GetIP", () => {

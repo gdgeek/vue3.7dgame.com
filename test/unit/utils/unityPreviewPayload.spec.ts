@@ -217,6 +217,72 @@ describe("unityPreviewPayload", () => {
     expect((payload as typeof source).data).not.toContain("/__xrugc_proxy__");
   });
 
+  describe("built-in runtime origin restriction", () => {
+    const options = { restrictToRuntimeOrigins: true };
+    const rewrite = (payload: unknown) =>
+      rewriteUnityPreviewUrls(
+        payload,
+        "http://localhost:3016",
+        "http://localhost:8081",
+        options
+      );
+
+    it.each([
+      "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2",
+      "https://mrpp-1257979353.cos.ap-chengdu.myqcloud.com/image.png?sign=a%2Fb%3D&part=2&part=1",
+    ])("preserves approved signed CDN asset byte-for-byte: %s", (url) => {
+      const payload = {
+        resources: [{ file: { url } }],
+        data: JSON.stringify({ model: url }),
+      };
+      rewrite(payload);
+      expect(payload.resources[0].file.url).toBe(url);
+      expect(JSON.parse(payload.data).model).toBe(url);
+    });
+
+    it.each([
+      "http://localhost:8081/uploads/model.glb",
+      "http://127.0.0.1:8081/uploads/model.glb",
+      "https://api.example.com/uploads/model.glb",
+      "/uploads/model.glb",
+    ])("rejects API/local resources during strict preparation: %s", (url) => {
+      withWindowLocation({ hostname: "localhost", protocol: "http:" }, () => {
+        const payload = { resources: [{ file: { url } }] };
+        expect(() =>
+          rewriteUnityPreviewUrls(
+            payload,
+            "https://app.example.com",
+            "https://api.example.com",
+            options
+          )
+        ).toThrow("WGP-ASSET-DENIED");
+      });
+    });
+
+    it("keeps the strict policy through encoded JSON, arrays and legacy proxy aliases", () => {
+      const target = "http://localhost:8081/uploads/model.glb";
+      for (const payload of [
+        { data: JSON.stringify({ model: target }) },
+        { data: [target] },
+        {
+          model: `http://localhost:3016/__xrugc_proxy__?url=${encodeURIComponent(target)}`,
+        },
+      ])
+        expect(() => rewrite(payload)).toThrow("WGP-ASSET-DENIED");
+    });
+
+    it("keeps non-resource relative API references and ordinary payload metadata unchanged", () => {
+      const payload = {
+        scene: { id: 42, source: "xrugc-web-scene-editor" },
+        route: "/v1/verses/42",
+        script: 'print("scene ready")',
+      };
+      const before = structuredClone(payload);
+      rewrite(payload);
+      expect(payload).toEqual(before);
+    });
+  });
+
   it("parses json scene data when possible", () => {
     expect(normalizeUnityPreviewData('{"foo":1}')).toEqual({ foo: 1 });
     expect(normalizeUnityPreviewData("plain text")).toBe("plain text");

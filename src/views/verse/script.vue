@@ -57,6 +57,14 @@
                       class="script-action-button"
                       type="primary"
                       size="small"
+                      :disabled="!editorContentReady || unityPreviewVisible"
+                      @click="runSceneRuntimePreview"
+                      >运行场景</el-button
+                    >
+                    <el-button
+                      class="script-action-button"
+                      type="primary"
+                      size="small"
                       :title="$t('route.project.sceneEditor')"
                       :aria-label="$t('route.project.sceneEditor')"
                       @click="goBackToSceneEditor"
@@ -200,7 +208,9 @@
           :frame-visible="unityPreviewFrameVisible"
           :frame-key="unityPreviewFrameKey"
           :src="unityPreviewSrc"
-          @closed="handleUnityPreviewClosed"
+          @close="handleUnityPreviewClosed"
+          :state="unityPreviewState"
+          @retry="runSceneRuntimePreview"
           @frame-load="handleUnityPreviewLoad"
         ></UnityPreviewDialog>
       </el-main>
@@ -221,7 +231,12 @@ import {
   onActivated,
   onDeactivated,
 } from "vue";
-import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
+import {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useRoute,
+  useRouter,
+} from "vue-router";
 import {
   getVerse,
   putVerseCode,
@@ -428,7 +443,10 @@ const getMetaJavaScriptCode = (meta: VerseMeta | meta): string => {
   return "";
 };
 
-const loadMetaJavaScriptCode = async (metas: Array<VerseMeta | meta>) => {
+const loadMetaJavaScriptCode = async (
+  metas: Array<VerseMeta | meta>,
+  signal?: AbortSignal
+) => {
   const directScripts = metas.map((metaItem) => ({
     id: metaItem.id,
     script: getMetaJavaScriptCode(metaItem),
@@ -449,7 +467,7 @@ const loadMetaJavaScriptCode = async (metas: Array<VerseMeta | meta>) => {
   const fetchedScripts = await Promise.all(
     missingMetaIds.map(async (metaId) => {
       try {
-        const response = await getMeta(metaId, { expand: "metaCode" });
+        const response = await getMeta(metaId, { expand: "metaCode" }, signal);
         return { id: metaId, script: response.data.metaCode?.js || "" };
       } catch (error) {
         logger.error("实体脚本补充加载失败:", { metaId, error });
@@ -1097,7 +1115,7 @@ const resource = computed(() => {
   return { events: { inputs, outputs } };
 });
 
-const ensureUnityPreviewRuntimeData = async () => {
+const ensureUnityPreviewRuntimeData = async (signal?: AbortSignal) => {
   if (!Number.isFinite(id.value)) return;
   const requestedId = id.value;
   if (
@@ -1109,10 +1127,10 @@ const ensureUnityPreviewRuntimeData = async () => {
   }
 
   const [responseLua, responseJs] = await Promise.all([
-    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
-    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "js"),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "lua", signal),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "js", signal),
   ]);
-  if (requestedId !== id.value) return;
+  if (signal?.aborted || requestedId !== id.value) return;
 
   verseMetasWithLuaCodeData.value =
     responseLua.data as unknown as VerseMetasWithJsCode;
@@ -1121,8 +1139,8 @@ const ensureUnityPreviewRuntimeData = async () => {
   const previewMetas = Array.isArray(verseMetasWithJsCodeData.value.metas)
     ? verseMetasWithJsCodeData.value.metas
     : [];
-  const metaScripts = await loadMetaJavaScriptCode(previewMetas);
-  if (requestedId !== id.value) return;
+  const metaScripts = await loadMetaJavaScriptCode(previewMetas, signal);
+  if (signal?.aborted || requestedId !== id.value) return;
 
   metasJavaScriptCode.value = metaScripts.join("\n");
   unityPreviewRuntimeVerseId = requestedId;
@@ -1167,6 +1185,7 @@ const unityPreviewVisible = unityPreview.visible;
 const unityPreviewFrameVisible = unityPreview.frameVisible;
 const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
+const unityPreviewState = unityPreview.runtimeState;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
 
@@ -1234,7 +1253,11 @@ onBeforeRouteUpdate(async (to, from, next) => {
   const canLeave = await resolveUnsavedChangesBeforeLeave({
     showDiscardInfo: true,
   });
+  if (canLeave) await unityPreview.close();
   next(canLeave ? undefined : false);
+});
+onBeforeRouteLeave(async () => {
+  await unityPreview.close();
 });
 
 watch(id, (nextId, previousId) => {
@@ -1249,59 +1272,46 @@ watch(id, (nextId, previousId) => {
 });
 
 let runtimeWebMcpLifecycle: AbortController | null = null;
-const getSceneRuntimePreviewStatus = () => {
-  const visible = unityPreview.visible.value;
-  const status = visible ? unityPreview.status.value : "预览已关闭";
-  return {
-    sceneId: verse.value?.id ?? null,
-    sceneName: verse.value?.name ?? null,
-    visible,
-    frameVisible: unityPreview.frameVisible.value,
-    ready: unityPreview.ready.value,
-    phase: !visible
-      ? "closed"
-      : unityPreview.failure.value || status.includes("若画面为空")
-        ? "attention"
-        : status.includes("已在 Unity 中运行")
-          ? "running"
-          : unityPreview.ready.value
-            ? "ready"
-            : "loading",
-    status,
-    failure: unityPreview.failure.value,
-  };
+const getSceneRuntimePreviewStatus = () => ({
+  sceneId: verse.value?.id ?? null,
+  sceneName: verse.value?.name ?? null,
+  ...unityPreview.runtimeState.value,
+});
+
+const startSceneRuntimePreview = async () => {
+  const session = getEditorInitState()?.hostSessionId;
+  if (!isScriptViewActive || !editorContentReady.value || !verse.value)
+    throw new Error("场景脚本尚未准备完成");
+  if (hasUnsavedChanges.value || isSaving.value)
+    throw new Error("请先保存当前 Blockly 工作区，再启动场景运行预览");
+  const response = requireSuccessfulWebMcpResponse(
+    await requestBlocklyEditor("webmcp-validate-scene-script", {
+      focusIssue: false,
+    })
+  );
+  if (response.canSave === false || hasGeneratedScriptErrors(response.warnings))
+    throw new Error("脚本包含阻塞错误，请先修复");
+  if (!isScriptViewActive || session !== getEditorInitState()?.hostSessionId)
+    throw new Error("编辑器会话已经切换");
+  await unityPreview.open();
+  return getSceneRuntimePreviewStatus();
 };
+const runSceneRuntimePreview = () => {
+  void startSceneRuntimePreview().catch((error) => {
+    ElMessage.error(
+      error instanceof Error ? error.message : "无法启动场景运行"
+    );
+  });
+};
+
 const registerRuntimeTools = () => {
   runtimeWebMcpLifecycle?.abort();
-  const session = getEditorInitState()?.hostSessionId;
   runtimeWebMcpLifecycle = registerWebMcpTools(
     createSceneRuntimePreviewTools({
       getPreviewStatus: getSceneRuntimePreviewStatus,
-      startPreview: async () => {
-        if (!isScriptViewActive || !editorContentReady.value || !verse.value)
-          throw new Error("场景脚本尚未准备完成");
-        if (hasUnsavedChanges.value || isSaving.value)
-          throw new Error("请先保存当前 Blockly 工作区，再启动场景运行预览");
-        const response = requireSuccessfulWebMcpResponse(
-          await requestBlocklyEditor("webmcp-validate-scene-script", {
-            focusIssue: false,
-          })
-        );
-        if (
-          response.canSave === false ||
-          hasGeneratedScriptErrors(response.warnings)
-        )
-          throw new Error("脚本包含阻塞错误，请先修复");
-        if (
-          !isScriptViewActive ||
-          session !== getEditorInitState()?.hostSessionId
-        )
-          throw new Error("编辑器会话已经切换");
-        await unityPreview.open();
-        return getSceneRuntimePreviewStatus();
-      },
+      startPreview: startSceneRuntimePreview,
       stopPreview: async () => {
-        unityPreview.close();
+        await unityPreview.close();
         return getSceneRuntimePreviewStatus();
       },
     })

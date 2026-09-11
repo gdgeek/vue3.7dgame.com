@@ -25,11 +25,13 @@ export const putMetaCode = (id: string | number, data: MetaCode | null) => {
 };
 export const getMeta = (
   id: string | number,
-  params: Record<string, unknown> = {}
+  params: Record<string, unknown> = {},
+  signal?: AbortSignal
 ) => {
   return request<MetaInfo>({
     url: `/v1/metas/${id}${qs.stringify(params, true)}`,
     method: "get",
+    signal,
   });
 };
 
