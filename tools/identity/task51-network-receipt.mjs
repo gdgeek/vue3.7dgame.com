@@ -7,11 +7,17 @@ import {
   TASK51_NETWORK_CONSTANTS,
   TASK51_NETWORK_RECEIPT_SCHEMA,
   validateTask51StaticAllowlist,
+  validateTask51StaticRequestCounts,
 } from "./task51-network-attestor-ledger.mjs";
+import { assertTask51PrewarmContract } from "./task51-stage-b-supervisor.mjs";
 
 const FORBIDDEN_FIELD = /(authorization|body|cookie|header|postdata|token)/i;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 const GIT_SHA_PATTERN = /^[a-f0-9]{40}$/;
+export const TASK51_EXECUTION_SOURCES_SCHEMA =
+  "wp3-task51-stage-b-execution-sources-v1";
+export const TASK51_CURRENT_NETWORK_RECEIPT_SCHEMA =
+  "wp3-task51-safe-network-receipt-v3";
 export const TASK51_MAX_STATIC_RESPONSE_BYTES = 32 * 1024 * 1024;
 export const TASK51_MAX_STATIC_TOTAL_BYTES = 96 * 1024 * 1024;
 const APPROVAL_PATTERN =
@@ -320,6 +326,295 @@ function isTask51EvidenceRef(value) {
   );
 }
 
+function sourceBinding(value) {
+  return (
+    hasExactKeys(value, ["evidenceRef", "evidenceSha256"]) &&
+    typeof value.evidenceRef === "string" &&
+    value.evidenceRef.length <= 256 &&
+    /^reports\/[A-Za-z0-9._/-]+\.(?:json|jsonl|log)$/.test(value.evidenceRef) &&
+    !value.evidenceRef
+      .split("/")
+      .some((part) => part === "" || part === "." || part === "..") &&
+    SHA256_PATTERN.test(value.evidenceSha256)
+  );
+}
+
+function sourceCi(value) {
+  return (
+    ["ciRunId", "ciRunAttempt", "ciJobId"].every(
+      (key) => Number.isSafeInteger(value[key]) && value[key] > 0
+    ) &&
+    validStageATimestamp(value.ciCompletedAt) &&
+    ["runTranscript", "jobsTranscript", "jobLog"].every((key) =>
+      sourceBinding(value[key])
+    )
+  );
+}
+
+/** Shared structural contract only. Git/CI/public-source authenticity and the
+ * independent release-owner authority are separate mandatory preclaim gates. */
+export function parseTask51StageBExecutionSources(raw) {
+  const error = () => {
+    throw new Error("TASK51_EXECUTION_SOURCES_REJECTED");
+  };
+  let text;
+  let value;
+  try {
+    text =
+      typeof raw === "string"
+        ? raw
+        : new TextDecoder("utf-8", { fatal: true }).decode(raw);
+    if (Buffer.byteLength(text) > 512 * 1024) error();
+    value = JSON.parse(text);
+  } catch {
+    error();
+  }
+  if (
+    `${canonicalTask51Json(value)}\n` !== text ||
+    !/^[\x00-\x7f]*$/.test(text) ||
+    !hasExactKeys(value, [
+      "schema",
+      "approvalRef",
+      "executionId",
+      "generatedAt",
+      "historicalStageAFreezeSha256",
+      "historicalStageANetworkAttestor",
+      "currentWeb",
+      "localTool",
+      "browser",
+      "prewarm",
+      "publicSources",
+      "observerSources",
+    ]) ||
+    value.schema !== TASK51_EXECUTION_SOURCES_SCHEMA ||
+    !APPROVAL_PATTERN.test(value.approvalRef) ||
+    !EXECUTION_PATTERN.test(value.executionId) ||
+    !validStageATimestamp(value.generatedAt) ||
+    !SHA256_PATTERN.test(value.historicalStageAFreezeSha256) ||
+    !sourceBinding(value.historicalStageANetworkAttestor)
+  )
+    error();
+  const web = value.currentWeb;
+  if (
+    !hasExactKeys(web, [
+      "repository",
+      "develop",
+      "publish",
+      "networkProvenance",
+    ]) ||
+    web.repository !== "gdgeek/vue3.7dgame.com"
+  )
+    error();
+  const ciKeys = [
+    "ciRunId",
+    "ciRunAttempt",
+    "ciJobId",
+    "ciCompletedAt",
+    "runTranscript",
+    "jobsTranscript",
+    "jobLog",
+  ];
+  for (const branch of ["develop", "publish"]) {
+    const release = web[branch];
+    if (
+      !hasExactKeys(release, [
+        "branch",
+        "commitSha",
+        "treeSha",
+        "indexDigest",
+        "configDigest",
+        "commitTranscript",
+        ...ciKeys,
+      ]) ||
+      release.branch !== branch ||
+      !GIT_SHA_PATTERN.test(release.commitSha) ||
+      !GIT_SHA_PATTERN.test(release.treeSha) ||
+      !/^sha256:[a-f0-9]{64}$/.test(release.indexDigest) ||
+      !/^sha256:[a-f0-9]{64}$/.test(release.configDigest) ||
+      release.indexDigest === release.configDigest ||
+      !sourceBinding(release.commitTranscript) ||
+      !sourceCi(release) ||
+      Date.parse(release.ciCompletedAt) > Date.parse(value.generatedAt)
+    )
+      error();
+  }
+  const tool = value.localTool;
+  if (
+    !hasExactKeys(tool, [
+      "repository",
+      "branch",
+      "commitSha",
+      "treeSha",
+      "candidateContentHashAlgorithm",
+      "candidateContentSha256",
+      "candidateFileManifest",
+      ...ciKeys,
+    ]) ||
+    tool.repository !== web.repository ||
+    !/^codex\/[A-Za-z0-9._/-]+$/.test(tool.branch) ||
+    tool.branch.includes("..") ||
+    !GIT_SHA_PATTERN.test(tool.commitSha) ||
+    !GIT_SHA_PATTERN.test(tool.treeSha) ||
+    tool.candidateContentHashAlgorithm !== "sha256-path-nul-git-blob-sha-v1" ||
+    !SHA256_PATTERN.test(tool.candidateContentSha256) ||
+    JSON.stringify(tool.candidateFileManifest) !==
+      JSON.stringify(TASK51_NETWORK_ATTESTOR_CANDIDATE_FILES) ||
+    !sourceCi(tool) ||
+    Date.parse(tool.ciCompletedAt) > Date.parse(value.generatedAt)
+  )
+    error();
+  if (
+    !hasExactKeys(value.browser, BROWSER_RELEASE_KEYS) ||
+    value.browser.channel !== "chromium" ||
+    !/^\d+\.\d+\.\d+\.\d+$/.test(value.browser.version) ||
+    !SHA256_PATTERN.test(value.browser.binarySha256)
+  )
+    error();
+  assertTask51PrewarmContract(value.prewarm);
+  const p = web.networkProvenance;
+  if (
+    !hasExactKeys(p, [
+      ...STAGE_A_ATTESTOR_PROVENANCE_KEYS,
+      "staticRequestCounts",
+    ]) ||
+    p.receiptSchema !== TASK51_CURRENT_NETWORK_RECEIPT_SCHEMA ||
+    p.productionOrigin !== TASK51_NETWORK_CONSTANTS.productionOrigin ||
+    p.runnerRoute !== TASK51_NETWORK_CONSTANTS.runnerPath ||
+    p.releaseProvenanceExact !== true ||
+    p.servedWebRevision !== web.publish.commitSha ||
+    p.servedWebOciRevision !== web.publish.commitSha ||
+    p.servedWebImageDigest !== web.publish.indexDigest ||
+    p.staticUrlManifestHashAlgorithm !== "sha256-lf-utf8-url-list-v1" ||
+    p.servedAssetManifestHashAlgorithm !==
+      "sha256-canonical-static-response-manifest-v1" ||
+    !isTask51EvidenceRef(p.evidenceRef) ||
+    JSON.stringify(p.bootstrapReadAllowlist) !==
+      JSON.stringify(value.prewarm.bootstrapReads.map(({ url }) => url))
+  )
+    error();
+  const urls = [
+    ...validateTask51StaticAllowlist(
+      `${p.productionOrigin}${p.runnerRoute}`,
+      p.staticUrlManifest,
+      { currentSources: true }
+    ),
+  ];
+  if (!Array.isArray(p.staticRequestCounts)) error();
+  const counts = validateTask51StaticRequestCounts(urls, p.staticRequestCounts);
+  if (
+    p.staticUrlManifestSha256 !== task51StaticUrlManifestSha256(urls) ||
+    !Array.isArray(p.staticResponses) ||
+    p.staticResponses.length !== urls.length ||
+    p.staticResponses.some(
+      (response, index) =>
+        !hasExactKeys(response, STAGE_A_STATIC_RESPONSE_KEYS) ||
+        response.url !== urls[index] ||
+        !Number.isSafeInteger(response.byteLength) ||
+        response.byteLength < 0 ||
+        response.byteLength > TASK51_MAX_STATIC_RESPONSE_BYTES ||
+        !SHA256_PATTERN.test(response.contentSha256)
+    ) ||
+    p.staticResponses.reduce(
+      (sum, response) => sum + response.byteLength * counts.get(response.url),
+      0
+    ) > TASK51_MAX_STATIC_TOTAL_BYTES ||
+    p.servedAssetManifestSha256 !==
+      task51StaticResponseManifestSha256(p.staticResponses) ||
+    p.staticResponses.find(({ url }) => url === `${p.productionOrigin}/`)
+      ?.contentSha256 !== p.servedEntrySha256 ||
+    value.prewarm.documentUrls.some(
+      (url) => !urls.includes(url) || counts.get(url) !== 1
+    )
+  )
+    error();
+  if (
+    !Array.isArray(value.publicSources) ||
+    value.publicSources.length < 1 ||
+    value.publicSources.length > 1024 ||
+    value.publicSources.some(
+      (entry) =>
+        !hasExactKeys(entry, ["url", "evidenceRef", "evidenceSha256"]) ||
+        !sourceBinding({
+          evidenceRef: entry.evidenceRef,
+          evidenceSha256: entry.evidenceSha256,
+        }) ||
+        !validPublicSourceUrl(entry.url)
+    ) ||
+    new Set(value.publicSources.map(({ url }) => url)).size !==
+      value.publicSources.length ||
+    new Set(value.publicSources.map(({ evidenceRef }) => evidenceRef)).size !==
+      value.publicSources.length ||
+    urls.some(
+      (url) => !value.publicSources.some((entry) => entry.url === url)
+    ) ||
+    value.prewarm.bootstrapReads.some(
+      (read) =>
+        read.phase === "before-login-public" &&
+        !value.publicSources.some((entry) => entry.url === read.url)
+    ) ||
+    value.prewarm.bootstrapReads.some((read) => urls.includes(read.url))
+  )
+    error();
+  if (
+    !Array.isArray(value.observerSources) ||
+    value.observerSources.length !== 2 ||
+    value.observerSources.some(
+      (entry, index) =>
+        !hasExactKeys(entry, [
+          "node",
+          "frontdoorOrigin",
+          "frontendUrl",
+          "pluginManifestUrl",
+        ]) ||
+        entry.node !== ["xrteeth", "tmrpp"][index] ||
+        !validPublicSourceUrl(entry.frontendUrl) ||
+        new URL(entry.frontendUrl).origin !== entry.frontdoorOrigin ||
+        ![entry.frontendUrl, entry.pluginManifestUrl].every((url) =>
+          value.publicSources.some((source) => source.url === url)
+        )
+    )
+  )
+    error();
+  return deepFreeze({ raw: text, sha256: task51Sha256(text), value });
+}
+
+function validPublicSourceUrl(value) {
+  try {
+    const url = new URL(value);
+    return (
+      url.href === value &&
+      url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      !url.hash &&
+      value.length <= 2048
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function assertTask51StageBExecutionSourceBindings(
+  parsed,
+  { approvalRef, executionId, historicalStageA }
+) {
+  const reparsed = parseTask51StageBExecutionSources(parsed.raw);
+  const historical = parseTask51NetworkAttestorReleaseEvidence(
+    historicalStageA.raw
+  );
+  if (
+    parsed.sha256 !== reparsed.sha256 ||
+    reparsed.value.approvalRef !== approvalRef ||
+    reparsed.value.executionId !== executionId ||
+    historical.sha256 !== historicalStageA.sha256 ||
+    reparsed.value.historicalStageANetworkAttestor.evidenceSha256 !==
+      historical.sha256
+  ) {
+    throw new Error("TASK51_EXECUTION_SOURCE_BINDING_REJECTED");
+  }
+  return reparsed;
+}
+
 function assertImageDigest(value, name) {
   assertBinding(value, name, /^sha256:[a-f0-9]{64}$/);
 }
@@ -356,7 +651,7 @@ function expectedCorsNames(entry) {
       : "authorization";
 }
 
-function assertTranscript(transcript, staticUrls) {
+function assertTranscript(transcript, staticUrls, requestCounts = null) {
   if (!Array.isArray(transcript)) {
     throw new Error("TASK51_NETWORK_RECEIPT_TRANSCRIPT_REJECTED");
   }
@@ -446,15 +741,23 @@ function assertTranscript(transcript, staticUrls) {
     nextBusinessIndex += 1;
     optionsSeenForCurrentBusiness = false;
   }
+  const expectedCounts = validateTask51StaticRequestCounts(
+    staticUrls,
+    requestCounts
+  );
   if (
     nextBusinessIndex !== TASK51_EXPECTED_BUSINESS_REQUEST_COUNT ||
     business.length !== TASK51_EXPECTED_BUSINESS_REQUEST_COUNT ||
     business.some((entry, index) => entry.businessIndex !== index) ||
     new Set(options.map((entry) => entry.businessIndex)).size !==
       options.length ||
-    statics.length !== staticUrls.length ||
-    new Set(statics.map((entry) => entry.url)).size !== staticUrls.length ||
-    staticUrls.some((url) => !statics.some((entry) => entry.url === url))
+    statics.length !==
+      [...expectedCounts.values()].reduce((sum, count) => sum + count, 0) ||
+    staticUrls.some(
+      (url) =>
+        statics.filter((entry) => entry.url === url).length !==
+        expectedCounts.get(url)
+    )
   ) {
     throw new Error("TASK51_NETWORK_RECEIPT_TRANSCRIPT_REJECTED");
   }
@@ -558,13 +861,12 @@ export function parseTask51NetworkAttestorReleaseEvidence(raw) {
     release.nonForcePromotions !== true ||
     release.ciPassed !== true ||
     release.cleanCheckoutImportSmokePassed !== true ||
-    release.developTreeSha !== release.mainTreeSha ||
-    release.mainTreeSha !== release.publishTreeSha ||
+    release.developCandidateTreeSha !== release.developTreeSha ||
+    release.mainCandidateTreeSha !== release.mainTreeSha ||
+    release.publishCandidateTreeSha !== release.publishTreeSha ||
     release.developCandidateContentSha256 !== release.candidateContentSha256 ||
     release.mainCandidateContentSha256 !== release.candidateContentSha256 ||
     release.publishCandidateContentSha256 !== release.candidateContentSha256 ||
-    release.mainCandidateTreeSha !== release.developCandidateTreeSha ||
-    release.publishCandidateTreeSha !== release.developCandidateTreeSha ||
     release.ciHeadSha !== release.publishCommitSha ||
     release.ciTreeSha !== release.publishTreeSha ||
     !hasExactKeys(release.browser, STAGE_A_BROWSER_KEYS) ||
@@ -698,10 +1000,16 @@ export function parseTask51NetworkAttestorReleaseEvidence(raw) {
 
 export function assertTask51NetworkReceipt(value) {
   assertTask51ReceiptHasNoForbiddenFields(value);
-  if (!hasExactKeys(value, RECEIPT_KEYS)) {
+  const current = value?.schema === TASK51_CURRENT_NETWORK_RECEIPT_SCHEMA;
+  if (
+    !hasExactKeys(
+      value,
+      current ? [...RECEIPT_KEYS, "executionSourcesSha256"] : RECEIPT_KEYS
+    )
+  ) {
     throw new Error("TASK51_NETWORK_RECEIPT_SHAPE_REJECTED");
   }
-  if (value.schema !== TASK51_NETWORK_RECEIPT_SCHEMA) {
+  if (value.schema !== TASK51_NETWORK_RECEIPT_SCHEMA && !current) {
     throw new Error("TASK51_NETWORK_RECEIPT_SCHEMA_REJECTED");
   }
   assertBinding(value.approvalRef, "APPROVAL_REF", APPROVAL_PATTERN);
@@ -724,7 +1032,26 @@ export function assertTask51NetworkReceipt(value) {
   );
   assertTimestamp(value.finalizedAt, "FINALIZED_AT");
 
-  if (!hasExactKeys(value.attestor, ATTESTOR_KEYS)) {
+  if (current)
+    assertBinding(
+      value.executionSourcesSha256,
+      "EXECUTION_SOURCES_SHA256",
+      SHA256_PATTERN
+    );
+  if (
+    !hasExactKeys(
+      value.attestor,
+      current
+        ? [
+            "candidateContentSha256",
+            "commitSha",
+            "treeSha",
+            "branch",
+            "releaseEvidenceSha256",
+          ]
+        : ATTESTOR_KEYS
+    )
+  ) {
     throw new Error("TASK51_NETWORK_RECEIPT_ATTESTOR_REJECTED");
   }
   assertBinding(
@@ -733,15 +1060,22 @@ export function assertTask51NetworkReceipt(value) {
     SHA256_PATTERN
   );
   assertBinding(
-    value.attestor.publishCommitSha,
+    current ? value.attestor.commitSha : value.attestor.publishCommitSha,
     "ATTESTOR_PUBLISH_COMMIT",
     GIT_SHA_PATTERN
   );
   assertBinding(
-    value.attestor.publishTreeSha,
+    current ? value.attestor.treeSha : value.attestor.publishTreeSha,
     "ATTESTOR_PUBLISH_TREE",
     GIT_SHA_PATTERN
   );
+  if (
+    current &&
+    (!/^codex\/[A-Za-z0-9._/-]+$/.test(value.attestor.branch) ||
+      value.attestor.branch.includes(".."))
+  ) {
+    throw new Error("TASK51_NETWORK_RECEIPT_ATTESTOR_REJECTED");
+  }
   assertBinding(
     value.attestor.releaseEvidenceSha256,
     "ATTESTOR_RELEASE_SHA256",
@@ -782,13 +1116,18 @@ export function assertTask51NetworkReceipt(value) {
   );
   if (
     value.webReleaseSha !== value.servedRelease.ociRevision ||
-    value.webReleaseSha !== value.attestor.publishCommitSha
+    (!current && value.webReleaseSha !== value.attestor.publishCommitSha)
   ) {
     throw new Error("TASK51_NETWORK_RECEIPT_WEB_RELEASE_BINDING_REJECTED");
   }
 
   if (
-    !hasExactKeys(value.staticUrlManifest, STATIC_MANIFEST_KEYS) ||
+    !hasExactKeys(
+      value.staticUrlManifest,
+      current
+        ? [...STATIC_MANIFEST_KEYS, "requestCounts"]
+        : STATIC_MANIFEST_KEYS
+    ) ||
     value.staticUrlManifest.hashAlgorithm !== "sha256-lf-utf8-url-list-v1" ||
     !Array.isArray(value.staticUrlManifest.urls)
   ) {
@@ -796,8 +1135,12 @@ export function assertTask51NetworkReceipt(value) {
   }
   const runnerUrl = `${TASK51_NETWORK_CONSTANTS.productionOrigin}${TASK51_NETWORK_CONSTANTS.runnerPath}`;
   const staticUrls = [
-    ...validateTask51StaticAllowlist(runnerUrl, value.staticUrlManifest.urls),
+    ...validateTask51StaticAllowlist(runnerUrl, value.staticUrlManifest.urls, {
+      currentSources: current,
+    }),
   ];
+  if (current && !Array.isArray(value.staticUrlManifest.requestCounts))
+    throw new Error("TASK51_NETWORK_STATIC_REQUEST_COUNTS_REJECTED");
   if (
     task51StaticUrlManifestSha256(staticUrls) !==
       value.staticUrlManifest.sha256 ||
@@ -822,7 +1165,8 @@ export function assertTask51NetworkReceipt(value) {
   }
   const transcriptParts = assertTranscript(
     value.network.transcript,
-    staticUrls
+    staticUrls,
+    current ? value.staticUrlManifest.requestCounts : null
   );
   if (
     !SHA256_PATTERN.test(value.network.transcriptSha256) ||
@@ -857,14 +1201,13 @@ export function assertTask51NetworkReceipt(value) {
   ) {
     throw new Error("TASK51_NETWORK_RECEIPT_TERMINAL_GATE_REJECTED");
   }
-  if (
-    value.staticUrlManifest.responses.length !== transcriptParts.statics.length
-  ) {
+  if (value.staticUrlManifest.responses.length !== staticUrls.length) {
     throw new Error("TASK51_NETWORK_RECEIPT_STATIC_RESPONSE_REJECTED");
   }
-  const staticTranscriptByUrl = new Map(
-    transcriptParts.statics.map((entry) => [entry.url, entry])
-  );
+  const staticTranscriptByUrl = new Map();
+  for (const entry of transcriptParts.statics)
+    if (!staticTranscriptByUrl.has(entry.url))
+      staticTranscriptByUrl.set(entry.url, entry);
   for (
     let index = 0;
     index < value.staticUrlManifest.responses.length;
@@ -879,7 +1222,15 @@ export function assertTask51NetworkReceipt(value) {
       response.sequence !== transcriptEntry.sequence ||
       response.httpStatus !== transcriptEntry.httpStatus ||
       response.byteLength !== transcriptEntry.byteLength ||
-      response.contentSha256 !== transcriptEntry.contentSha256
+      response.contentSha256 !== transcriptEntry.contentSha256 ||
+      transcriptParts.statics
+        .filter((entry) => entry.url === response.url)
+        .some(
+          (entry) =>
+            entry.httpStatus !== response.httpStatus ||
+            entry.byteLength !== response.byteLength ||
+            entry.contentSha256 !== response.contentSha256
+        )
     ) {
       throw new Error("TASK51_NETWORK_RECEIPT_STATIC_RESPONSE_REJECTED");
     }
@@ -905,11 +1256,14 @@ export function buildTask51NetworkReceipt(
   finalizedNetwork,
   observedFlags
 ) {
-  const staticTranscriptByUrl = new Map(
-    finalizedNetwork.transcript
-      .filter((entry) => entry.category === "static")
-      .map((entry) => [entry.url, entry])
-  );
+  const current = bindings.executionSourcesSha256 !== undefined;
+  const staticTranscriptByUrl = new Map();
+  for (const entry of finalizedNetwork.transcript.filter(
+    (entry) => entry.category === "static"
+  )) {
+    if (!staticTranscriptByUrl.has(entry.url))
+      staticTranscriptByUrl.set(entry.url, entry);
+  }
   const staticResponses = bindings.staticUrls.map((url) => {
     const entry = staticTranscriptByUrl.get(url);
     if (!entry) {
@@ -925,7 +1279,12 @@ export function buildTask51NetworkReceipt(
     };
   });
   const receipt = {
-    schema: TASK51_NETWORK_RECEIPT_SCHEMA,
+    schema: current
+      ? TASK51_CURRENT_NETWORK_RECEIPT_SCHEMA
+      : TASK51_NETWORK_RECEIPT_SCHEMA,
+    ...(current
+      ? { executionSourcesSha256: bindings.executionSourcesSha256 }
+      : {}),
     approvalRef: bindings.approvalRef,
     attestor: structuredClone(bindings.attestor),
     browserRelease: structuredClone(bindings.browserRelease),
@@ -938,6 +1297,9 @@ export function buildTask51NetworkReceipt(
     runnerFragmentSha256: bindings.runnerFragmentSha256,
     servedRelease: structuredClone(bindings.servedRelease),
     staticUrlManifest: {
+      ...(current
+        ? { requestCounts: structuredClone(bindings.staticRequestCounts) }
+        : {}),
       hashAlgorithm: "sha256-lf-utf8-url-list-v1",
       responses: staticResponses,
       sha256: bindings.staticUrlManifestSha256,

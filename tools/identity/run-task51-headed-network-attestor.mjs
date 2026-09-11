@@ -1,21 +1,34 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { O_NOFOLLOW, O_RDONLY } from "node:constants";
+import {
+  closeSync,
+  fstatSync,
+  lstatSync,
+  openSync,
+  readFileSync,
+  realpathSync,
+} from "node:fs";
 import { lstat, open } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { resolve } from "node:path";
+import { dirname, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { chromium } from "playwright";
 
 import { createTask51NetworkLedger } from "./task51-network-attestor-ledger.mjs";
 import {
   buildTask51NetworkReceipt,
+  assertTask51StageBExecutionSourceBindings,
   parseTask51NetworkAttestorReleaseEvidence,
+  parseTask51StageBExecutionSources,
   serializeTask51NetworkReceipt,
   TASK51_MAX_STATIC_RESPONSE_BYTES,
   TASK51_MAX_STATIC_TOTAL_BYTES,
+  task51Sha256,
 } from "./task51-network-receipt.mjs";
 import {
   TASK51_AUTH_QUIET_MS,
@@ -41,10 +54,18 @@ function usage() {
     "    --claim-capability-file <0600-secret-file> \\",
     "    --claim-receipt-out <new-canonical-claim-receipt.json> \\",
     "    --runner-fragment <new-final-F-v2.json> \\",
-    "    --receipt-out <new-path>",
+    "    --receipt-out <new-path> \\",
+    "    --execution-sources <canonical-current-sources.json> \\",
+    "    --observer-manifest <owner-pinned-manifest.json> \\",
+    "    --observer-authorization <production-authorization.json> \\",
+    "    --stage-b-readiness <owner-pinned-readiness.json> \\",
+    "    --trusted-authorization-anchor <independent-owner-anchor.json> \\",
+    "    --evidence-map <existing-artifact-map.json> \\",
+    "    --evidence-root <task51-evidence-root> [--evidence-root <historical-root>]",
     "",
-    "The canonical Stage A attestor artifact supplies the exact release assets",
-    "and served-release provenance. Pass only the capability",
+    "Stage A remains immutable historical evidence. Current sources and the",
+    "independent owner/readiness preflight are mandatory before any browser launch.",
+    "Pass only the capability",
     "file path in argv; the capability value is never accepted in argv or env.",
   ].join("\n");
 }
@@ -62,6 +83,12 @@ export function parseTask51AttestorArguments(argv) {
     ["--claim-receipt-out", "claimReceiptOutPath"],
     ["--runner-fragment", "runnerFragmentPath"],
     ["--receipt-out", "receiptOut"],
+    ["--execution-sources", "executionSourcesPath"],
+    ["--observer-manifest", "observerManifestPath"],
+    ["--observer-authorization", "observerAuthorizationPath"],
+    ["--stage-b-readiness", "stageBReadinessPath"],
+    ["--trusted-authorization-anchor", "trustedAuthorizationAnchorPath"],
+    ["--evidence-map", "evidenceMapPath"],
   ]);
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -71,7 +98,9 @@ export function parseTask51AttestorArguments(argv) {
     if (!value || value.startsWith("--")) {
       throw new Error(`Missing value for ${flag}`);
     }
-    if (scalarFlags.has(flag)) {
+    if (flag === "--evidence-root") {
+      (values.evidenceRoots ??= []).push(value);
+    } else if (scalarFlags.has(flag)) {
       const key = scalarFlags.get(flag);
       if (values[key] !== undefined) {
         throw new Error(`Duplicate argument: ${flag}`);
@@ -95,6 +124,21 @@ export function parseTask51AttestorArguments(argv) {
   ]) {
     if (!values[key]) throw new Error(`Missing required argument: ${key}`);
   }
+  const sourceKeys = [
+    "executionSourcesPath",
+    "observerManifestPath",
+    "observerAuthorizationPath",
+    "stageBReadinessPath",
+    "trustedAuthorizationAnchorPath",
+    "evidenceMapPath",
+    "evidenceRoots",
+  ];
+  if (
+    sourceKeys.some((key) => values[key] !== undefined) &&
+    sourceKeys.some((key) => !values[key])
+  ) {
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_INPUTS_REJECTED");
+  }
   if (
     values.warmUrl !== TASK51_WARM_URL ||
     values.runnerUrl !== TASK51_RUNNER_URL ||
@@ -112,6 +156,212 @@ export function parseTask51AttestorArguments(argv) {
     throw new Error("TASK51_ATTESTOR_FIXED_URLS_REJECTED");
   }
   return Object.freeze({ ...values });
+}
+
+function parsePreflightJson(raw) {
+  try {
+    return JSON.parse(
+      new TextDecoder("utf-8", { fatal: true }).decode(
+        typeof raw === "string" ? new TextEncoder().encode(raw) : raw
+      )
+    );
+  } catch {
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_JSON_REJECTED");
+  }
+}
+
+export function createTask51EvidenceMapReader(mapRaw, evidenceRoots) {
+  const reject = () => {
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_REF_REJECTED");
+  };
+  if (
+    !Array.isArray(evidenceRoots) ||
+    evidenceRoots.length < 1 ||
+    evidenceRoots.length > 16
+  )
+    reject();
+  const roots = evidenceRoots.map((path) => {
+    if (typeof path !== "string") reject();
+    const real = realpathSync(path);
+    // A task evidence root, not a home/workspace/system directory. Explicit
+    // historical sibling roots can be provided without allowing arbitrary FS.
+    if (
+      !real.split(sep).some((part) => /^task51[-_]/.test(part)) ||
+      !lstatSync(real).isDirectory()
+    )
+      reject();
+    return real;
+  });
+  const map = parsePreflightJson(mapRaw);
+  if (
+    !map ||
+    typeof map !== "object" ||
+    Array.isArray(map) ||
+    Object.keys(map).length > 8192
+  )
+    reject();
+  return (ref) => {
+    if (typeof ref !== "string" || !Object.hasOwn(map, ref)) reject();
+    const entry = map[ref];
+    if (
+      !entry ||
+      Object.keys(entry).sort().join(",") !== "byteLength,path,sha256" ||
+      typeof entry.path !== "string" ||
+      !/^[a-f0-9]{64}$/.test(entry.sha256) ||
+      !Number.isSafeInteger(entry.byteLength) ||
+      entry.byteLength < 1 ||
+      entry.byteLength > 64 * 1024 * 1024
+    )
+      reject();
+    const path = resolve(entry.path);
+    const root = roots.find((value) => path.startsWith(value + sep));
+    if (!root) reject();
+    // Every mapped path component must be real, non-symlink and inside its
+    // selected root. O_NOFOLLOW also protects the final open from substitution.
+    let parent = path;
+    while (parent !== root) {
+      if (lstatSync(parent).isSymbolicLink() || realpathSync(parent) !== parent)
+        reject();
+      parent = dirname(parent);
+    }
+    const bytes = readPreflightFile(path);
+    if (
+      bytes.length !== entry.byteLength ||
+      task51Sha256(bytes) !== entry.sha256
+    )
+      reject();
+    return bytes;
+  };
+}
+
+function readPreflightFile(path, limit = 64 * 1024 * 1024) {
+  let fd;
+  try {
+    fd = openSync(path, O_RDONLY | O_NOFOLLOW);
+    const stat = fstatSync(fd);
+    if (!stat.isFile() || stat.size < 1 || stat.size > limit) throw new Error();
+    return readFileSync(fd);
+  } catch {
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_FILE_REJECTED");
+  } finally {
+    if (fd !== undefined) closeSync(fd);
+  }
+}
+
+// Independently verify the executing checkout, not merely a caller's declared
+// localTool object. The root preflight additionally verifies parent/scope/CI.
+export function assertTask51ExecutingToolIdentity(localTool) {
+  const root = realpathSync(
+    resolve(dirname(fileURLToPath(import.meta.url)), "../..")
+  );
+  const git = (args) =>
+    execFileSync("git", ["-C", root, ...args], {
+      encoding: "utf8",
+      timeout: 10_000,
+      maxBuffer: 2 * 1024 * 1024,
+    }).trim();
+  try {
+    if (
+      git(["rev-parse", "--verify", "HEAD^{commit}"]) !== localTool.commitSha ||
+      git(["rev-parse", "HEAD^{tree}"]) !== localTool.treeSha ||
+      git(["symbolic-ref", "--short", "HEAD"]) !== localTool.branch ||
+      realpathSync(git(["rev-parse", "--show-toplevel"])) !== root
+    )
+      throw new Error();
+    const entries = localTool.candidateFileManifest.map((path) => {
+      const blob = git(["rev-parse", `${localTool.commitSha}:${path}`]);
+      const bytes = readPreflightFile(resolve(root, path), 4 * 1024 * 1024);
+      if (
+        !/^[a-f0-9]{40}$/.test(blob) ||
+        createHash("sha1")
+          .update(`blob ${bytes.length}\0`)
+          .update(bytes)
+          .digest("hex") !== blob
+      )
+        throw new Error();
+      return `${path}\0${blob}\n`;
+    });
+    if (task51Sha256(entries.join("")) !== localTool.candidateContentSha256)
+      throw new Error();
+  } catch {
+    throw new Error("TASK51_EXECUTING_TOOL_IDENTITY_REJECTED");
+  }
+}
+
+async function prepareExecutionSources(
+  options,
+  stageAAttestor,
+  preparedStageB
+) {
+  const sources = assertTask51StageBExecutionSourceBindings(
+    parseTask51StageBExecutionSources(
+      readPreflightFile(options.executionSourcesPath, 512 * 1024)
+    ),
+    {
+      approvalRef: options.approvalRef,
+      executionId: options.executionId,
+      historicalStageA: stageAAttestor,
+    }
+  );
+  const manifestRaw = readPreflightFile(options.observerManifestPath);
+  const authorizationRaw = readPreflightFile(options.observerAuthorizationPath);
+  const readinessRaw = readPreflightFile(options.stageBReadinessPath);
+  const stageBRaw = readPreflightFile(options.stageBArtifactPath);
+  const anchorRaw = readPreflightFile(
+    options.trustedAuthorizationAnchorPath,
+    64 * 1024
+  );
+  const readiness = parsePreflightJson(readinessRaw);
+  const manifest = parsePreflightJson(manifestRaw);
+  const anchor = parsePreflightJson(anchorRaw);
+  if (
+    task51Sha256(stageBRaw) !== preparedStageB.stageBExecutionEvidenceSha256 ||
+    manifest.executionSources?.evidenceSha256 !== sources.sha256 ||
+    manifest.stageBReadiness?.evidenceSha256 !== task51Sha256(readinessRaw) ||
+    anchor.manifestBinding?.evidenceSha256 !== task51Sha256(manifestRaw)
+  )
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_BINDING_REJECTED");
+  assertTask51ExecutingToolIdentity(sources.value.localTool);
+  const rootValidator = resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    "../../../tools/identity/validate-role-permission-production-shadow-closeout.mjs"
+  );
+  const validatorBytes = readPreflightFile(rootValidator, 4 * 1024 * 1024);
+  if (
+    task51Sha256(validatorBytes) !==
+    readiness.policyAttestor?.validatorSourceSha256
+  )
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_POLICY_REJECTED");
+  const artifactReader = createTask51EvidenceMapReader(
+    readPreflightFile(options.evidenceMapPath, 4 * 1024 * 1024),
+    options.evidenceRoots
+  );
+  const validator = await import(
+    "../../../tools/identity/validate-role-permission-production-shadow-closeout.mjs"
+  );
+  if (
+    task51Sha256(readPreflightFile(rootValidator, 4 * 1024 * 1024)) !==
+      task51Sha256(validatorBytes) ||
+    typeof validator.verifyTask51StageBExecutionPreflight !== "function"
+  )
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_POLICY_REJECTED");
+  const result = await validator.verifyTask51StageBExecutionPreflight({
+    executionSourcesRaw: sources.raw,
+    stageARaw: stageAAttestor.raw,
+    stageBRaw,
+    manifestRaw,
+    authorizationRaw,
+    readinessRaw,
+    artifactReader,
+    trustedAuthorizationAnchor: anchor,
+  });
+  if (
+    !result.passed ||
+    result.executionSourcesSha256 !== sources.sha256 ||
+    result.manifestSha256 !== task51Sha256(manifestRaw)
+  )
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_REJECTED");
+  return sources;
 }
 
 export async function createTask51SafeRequestDescriptor(request, id) {
@@ -303,6 +553,32 @@ export function assertTask51StageAAttestorStageBBinding(
   }
 }
 
+export function task51RunnerFragmentBindings(preparedStageB, claim) {
+  if (
+    typeof preparedStageB.productionDirectMatrixEvidenceRef !== "string" ||
+    !/^reports\/[A-Za-z0-9._/-]+\.json$/.test(
+      preparedStageB.productionDirectMatrixEvidenceRef
+    ) ||
+    preparedStageB.productionDirectMatrixEvidenceRef
+      .split("/")
+      .some((part) => part === "." || part === "..") ||
+    !/^[a-f0-9]{64}$/.test(preparedStageB.productionDirectMatrixSubjectDigest)
+  )
+    throw new Error("TASK51_RUNNER_FRAGMENT_BINDINGS_REJECTED");
+  return Object.freeze({
+    approvalRef: preparedStageB.approvalRef,
+    claimedAt: claim.claimedAt,
+    executionId: preparedStageB.executionId,
+    expiresAt: preparedStageB.stageB.expiresAt,
+    productionDirectMatrixEvidenceRef:
+      preparedStageB.productionDirectMatrixEvidenceRef,
+    productionDirectMatrixSubjectDigest:
+      preparedStageB.productionDirectMatrixSubjectDigest,
+    receiptSha256: claim.receiptSha256,
+    stageBExecutionEvidenceSha256: preparedStageB.stageBExecutionEvidenceSha256,
+  });
+}
+
 async function waitForBrowserIdle(
   supervisor,
   ledger,
@@ -346,14 +622,26 @@ async function pushTask51RunnerThroughVueRouter(page, failureSignal) {
 }
 
 export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
+  if (
+    [
+      "executionSourcesPath",
+      "observerManifestPath",
+      "observerAuthorizationPath",
+      "stageBReadinessPath",
+      "trustedAuthorizationAnchorPath",
+      "evidenceMapPath",
+    ].some((key) => typeof options[key] !== "string" || !options[key]) ||
+    !Array.isArray(options.evidenceRoots) ||
+    !options.evidenceRoots.length
+  ) {
+    throw new Error("TASK51_EXECUTION_PREFLIGHT_INPUTS_REJECTED");
+  }
   await assertPathAbsent(options.receiptOut);
   await assertPathAbsent(options.runnerFragmentPath);
   const stageAAttestor = await readTask51StageAAttestorArtifact(
     options.stageAAttestorArtifactPath
   );
   const attestorRelease = stageAAttestor.value.networkAttestorRelease;
-  const provenance = attestorRelease.networkProvenance;
-  const staticUrls = Object.freeze([...provenance.staticUrlManifest]);
   const preparedStageB = await prepareTask51StageB(
     {
       approvalRef: options.approvalRef,
@@ -368,6 +656,17 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     stageAAttestor,
     preparedStageB.stageB
   );
+  // This runs before launch, login/prewarm, quiet and the single-use claim.
+  // Source declarations alone never grant the new prewarm request budget.
+  const executionSources = await prepareExecutionSources(
+    options,
+    stageAAttestor,
+    preparedStageB
+  );
+  const current = executionSources?.value ?? null;
+  const provenance =
+    current?.currentWeb.networkProvenance ?? attestorRelease.networkProvenance;
+  const staticUrls = Object.freeze([...provenance.staticUrlManifest]);
 
   let activeClaimController = null;
   const failureSignal = createTask51FailureSignal(() => {
@@ -393,14 +692,18 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     runnerUrl: options.runnerUrl,
     staticUrls,
     onViolation,
+    currentSources: current !== null,
+    staticRequestCounts:
+      current?.currentWeb.networkProvenance.staticRequestCounts ?? null,
   });
   const preArm = createTask51PreArmSupervisor({
     bootstrapReadAllowlist: provenance.bootstrapReadAllowlist,
     staticUrls,
     onViolation,
+    prewarmContract: current?.prewarm ?? null,
   });
   const browserType = overrides.chromium ?? chromium;
-  const expectedBrowser = attestorRelease.browser;
+  const expectedBrowser = current?.browser ?? attestorRelease.browser;
   const browserBinaryPath =
     overrides.observeBrowserRelease === undefined
       ? browserType.executablePath()
@@ -461,6 +764,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     let pageCount = 0;
     let requestSequence = 0;
     let initialDocumentPending = true;
+    const admittedDocumentUrls = new Set();
     let downloadCount = 0;
     let popupCount = 0;
     let serviceWorkerCount = 0;
@@ -542,13 +846,13 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
       const owner = requestOwners.get(request);
       if (!owner) return;
       requestOwners.delete(request);
-      if (owner.kind !== "ledger") {
-        preArm.finishRequest(owner.id);
-        return;
-      }
       const task = (async () => {
         const response = await request.response();
         if (!response) throw new Error("TASK51_NETWORK_RESPONSE_MISSING");
+        if (owner.kind !== "ledger") {
+          preArm.finishRequest(owner.id, { httpStatus: response.status() });
+          return;
+        }
         let contentSha256 = null;
         if (owner.category === "static") {
           const responseBytes = await response.body();
@@ -603,7 +907,13 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
         await route.abort("blockedbyclient");
         return;
       }
-      if (resourceType === "document" && !initialDocumentPending) {
+      const allowedDocument =
+        current !== null
+          ? preArm.snapshot().mode === "bootstrap" &&
+            current.prewarm.documentUrls.includes(request.url()) &&
+            !admittedDocumentUrls.has(request.url())
+          : initialDocumentPending;
+      if (resourceType === "document" && !allowedDocument) {
         ledger.recordForbiddenChannel("navigation");
         await route.abort("blockedbyclient");
         return;
@@ -646,6 +956,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
         id,
         kind: ownerKind,
       });
+      if (resourceType === "document") admittedDocumentUrls.add(request.url());
       await route.continue();
     });
 
@@ -685,7 +996,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     const ask = overrides.ask ?? ((question) => prompt.question(question));
     await failureSignal.race(
       ask(
-        "Log in manually as root in the visible warm SPA, then press Enter here: "
+        "Log in manually as root through the visible approved login flow; return to the warm SPA, then press Enter here: "
       )
     );
     await waitForBrowserIdle(preArm, ledger, failureSignal);
@@ -765,15 +1076,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     const fragment = await failureSignal.race(
       readTask51RunnerFragment(
         options.runnerFragmentPath,
-        {
-          approvalRef: preparedStageB.approvalRef,
-          claimedAt: claim.claimedAt,
-          executionId: preparedStageB.executionId,
-          expiresAt: preparedStageB.stageB.expiresAt,
-          receiptSha256: claim.receiptSha256,
-          stageBExecutionEvidenceSha256:
-            preparedStageB.stageBExecutionEvidenceSha256,
-        },
+        task51RunnerFragmentBindings(preparedStageB, claim),
         overrides.stageBDependencies
       )
     );
@@ -824,12 +1127,26 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     const receipt = buildTask51NetworkReceipt(
       {
         approvalRef: preparedStageB.approvalRef,
-        attestor: {
-          candidateContentSha256: attestorRelease.candidateContentSha256,
-          publishCommitSha: attestorRelease.publishCommitSha,
-          publishTreeSha: attestorRelease.publishTreeSha,
-          releaseEvidenceSha256: stageAAttestor.sha256,
-        },
+        ...(current
+          ? {
+              executionSourcesSha256: executionSources.sha256,
+              staticRequestCounts: provenance.staticRequestCounts,
+            }
+          : {}),
+        attestor: current
+          ? {
+              candidateContentSha256: current.localTool.candidateContentSha256,
+              commitSha: current.localTool.commitSha,
+              treeSha: current.localTool.treeSha,
+              branch: current.localTool.branch,
+              releaseEvidenceSha256: stageAAttestor.sha256,
+            }
+          : {
+              candidateContentSha256: attestorRelease.candidateContentSha256,
+              publishCommitSha: attestorRelease.publishCommitSha,
+              publishTreeSha: attestorRelease.publishTreeSha,
+              releaseEvidenceSha256: stageAAttestor.sha256,
+            },
         browserRelease: observedBrowserRelease,
         executionId: preparedStageB.executionId,
         finalizedAt,

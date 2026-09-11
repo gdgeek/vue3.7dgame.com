@@ -126,7 +126,9 @@ export const TASK51_BUSINESS_LEDGER = buildTask51BusinessLedger();
 
 function normalizedNetworkUrl(value) {
   const parsed = new URL(value);
-  parsed.hash = "";
+  if (parsed.href !== value || parsed.hash !== "") {
+    throw new Error("TASK51_NETWORK_NONCANONICAL_URL");
+  }
   return parsed.href;
 }
 
@@ -139,7 +141,11 @@ function isForbiddenSameOriginPath(pathname) {
   );
 }
 
-export function validateTask51StaticAllowlist(runnerUrl, staticUrls) {
+export function validateTask51StaticAllowlist(
+  runnerUrl,
+  staticUrls,
+  { currentSources = false } = {}
+) {
   const runner = new URL(runnerUrl);
   if (
     runner.origin !== PRODUCTION_ORIGIN ||
@@ -153,19 +159,28 @@ export function validateTask51StaticAllowlist(runnerUrl, staticUrls) {
     throw new Error("TASK51_NETWORK_RUNNER_URL_REJECTED");
   }
 
-  if (!Array.isArray(staticUrls) || staticUrls.length === 0) {
+  if (
+    !Array.isArray(staticUrls) ||
+    staticUrls.length === 0 ||
+    staticUrls.length > 512
+  ) {
     throw new Error("TASK51_NETWORK_STATIC_URL_REJECTED");
   }
   const allowed = new Set();
   for (const value of staticUrls) {
     const parsed = new URL(value);
     if (
-      parsed.origin !== PRODUCTION_ORIGIN ||
+      (currentSources
+        ? parsed.protocol !== "https:"
+        : parsed.origin !== PRODUCTION_ORIGIN) ||
+      parsed.href !== value ||
+      value.length > 2048 ||
       parsed.username !== "" ||
       parsed.password !== "" ||
-      parsed.search !== "" ||
+      (!currentSources && parsed.search !== "") ||
       parsed.hash !== "" ||
-      isForbiddenSameOriginPath(parsed.pathname)
+      isForbiddenSameOriginPath(parsed.pathname) ||
+      (currentSources && !validStaticQuery(parsed))
     ) {
       throw new Error("TASK51_NETWORK_STATIC_URL_REJECTED");
     }
@@ -176,6 +191,51 @@ export function validateTask51StaticAllowlist(runnerUrl, staticUrls) {
     allowed.add(normalized);
   }
   return allowed;
+}
+
+function validStaticQuery(parsed) {
+  const seen = new Set();
+  for (const [key, value] of parsed.searchParams) {
+    if (
+      seen.has(key) ||
+      !["v", "ver", "version", "lang", "theme", "redirect"].includes(key)
+    )
+      return false;
+    seen.add(key);
+    if (key === "redirect") {
+      if (
+        !value.startsWith("/") ||
+        value.startsWith("//") ||
+        /[\\\r\n\0#]/.test(value) ||
+        value.length > 512
+      )
+        return false;
+      const nested = new URL(value, PRODUCTION_ORIGIN);
+      if (nested.origin !== PRODUCTION_ORIGIN || !validStaticQuery(nested))
+        return false;
+    } else if (!/^[A-Za-z0-9._-]{1,128}$/.test(value)) return false;
+  }
+  return true;
+}
+
+export function validateTask51StaticRequestCounts(staticUrls, counts = null) {
+  const values = counts ?? staticUrls.map((url) => ({ url, count: 1 }));
+  if (
+    !Array.isArray(values) ||
+    values.length !== staticUrls.length ||
+    values.some(
+      (entry, index) =>
+        !exactKeys(entry, ["url", "count"]) ||
+        entry.url !== staticUrls[index] ||
+        !Number.isSafeInteger(entry.count) ||
+        entry.count < 1 ||
+        entry.count > 16
+    ) ||
+    values.reduce((total, entry) => total + entry.count, 0) > 2048
+  ) {
+    throw new Error("TASK51_NETWORK_STATIC_REQUEST_COUNTS_REJECTED");
+  }
+  return new Map(values.map(({ url, count }) => [url, count]));
 }
 
 function exactKeys(value, expected) {
@@ -279,13 +339,25 @@ function safeTerminalMetadata(value, category, expected) {
 export function createTask51NetworkLedger({
   runnerUrl,
   staticUrls = [],
+  currentSources = false,
+  staticRequestCounts = null,
   onViolation = () => {},
 } = {}) {
-  const staticAllowlist = validateTask51StaticAllowlist(runnerUrl, staticUrls);
+  const staticAllowlist = validateTask51StaticAllowlist(runnerUrl, staticUrls, {
+    currentSources,
+  });
+  if (!currentSources && staticRequestCounts !== null)
+    throw new Error("TASK51_NETWORK_STATIC_REQUEST_COUNTS_REJECTED");
+  if (currentSources && !Array.isArray(staticRequestCounts))
+    throw new Error("TASK51_NETWORK_STATIC_REQUEST_COUNTS_REJECTED");
+  const allowedStaticCounts = validateTask51StaticRequestCounts(
+    staticUrls,
+    staticRequestCounts
+  );
   const apiEndpointUrls = new Set(TASK51_BUSINESS_LEDGER.map(({ url }) => url));
   const started = new Map();
   const transcript = [];
-  const startedStaticUrls = new Set();
+  const startedStaticUrls = new Map();
   const optionBusinessIndexes = new Set();
   const previouslyStartedSignatures = new Set();
   let armed = false;
@@ -361,7 +433,10 @@ export function createTask51NetworkLedger({
       if (armed && nextBusinessIndex !== 0) {
         return violate("TASK51_NETWORK_STATIC_AFTER_BUSINESS");
       }
-      if (startedStaticUrls.has(descriptor.url)) {
+      if (
+        (startedStaticUrls.get(descriptor.url) ?? 0) >=
+        allowedStaticCounts.get(descriptor.url)
+      ) {
         retryCount += 1;
         return violate("TASK51_NETWORK_DUPLICATE_STATIC_REQUEST");
       }
@@ -386,7 +461,10 @@ export function createTask51NetworkLedger({
       });
       started.set(descriptor.id, record);
       transcript.push(transcriptEntry);
-      startedStaticUrls.add(descriptor.url);
+      startedStaticUrls.set(
+        descriptor.url,
+        (startedStaticUrls.get(descriptor.url) ?? 0) + 1
+      );
       staticRequestCount += 1;
       return Object.freeze({ allowed: true, category: "static" });
     }
@@ -559,7 +637,10 @@ export function createTask51NetworkLedger({
     return Object.freeze({
       armed,
       expectedBusinessRequestCount: TASK51_EXPECTED_BUSINESS_REQUEST_COUNT,
-      expectedStaticRequestCount: staticAllowlist.size,
+      expectedStaticRequestCount: [...allowedStaticCounts.values()].reduce(
+        (sum, count) => sum + count,
+        0
+      ),
       startedBusinessRequestCount: nextBusinessIndex,
       terminalBusinessRequestCount: businessTerminalCount,
       activeBusinessRequestCount: businessActiveCount,
