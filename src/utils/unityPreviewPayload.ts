@@ -98,10 +98,16 @@ const normalizeLegacyUnityPreviewAssetUrl = (value: string): string => {
   }
 };
 
+export type UnityPreviewUrlOptions = {
+  /** Match the built-in runner's CSP/SW allowlist without expanding other callers. */
+  restrictToRuntimeOrigins?: boolean;
+};
+
 const toUnityPreviewDirectAssetUrl = (
   value: string,
   legacyProxyOrigin: string,
-  assetBaseOrigin: string
+  assetBaseOrigin: string,
+  options: UnityPreviewUrlOptions
 ): string => {
   const normalizedValue = value.replace(/\\\//g, "/");
   const candidate = normalizeLegacyUnityPreviewAssetUrl(
@@ -132,8 +138,10 @@ const toUnityPreviewDirectAssetUrl = (
 
   const assetBase = readUnityPreviewOrigin(assetBaseOrigin);
   const allowedOrigins = new Set(UNITY_PREVIEW_ASSET_ORIGINS);
-  if (assetBase) allowedOrigins.add(assetBase);
+  if (assetBase && !options.restrictToRuntimeOrigins)
+    allowedOrigins.add(assetBase);
   const localDevelopment =
+    !options.restrictToRuntimeOrigins &&
     isUnityPreviewLocalDevelopment() &&
     url.protocol === "http:" &&
     isUnityPreviewLoopback(url.hostname);
@@ -156,7 +164,8 @@ const toUnityPreviewDirectAssetUrl = (
 const rewriteUnityPreviewStringUrls = (
   value: string,
   proxyOrigin: string,
-  assetBaseOrigin: string
+  assetBaseOrigin: string,
+  options: UnityPreviewUrlOptions
 ): string => {
   const trimmed = value.trim();
   if (
@@ -172,7 +181,7 @@ const rewriteUnityPreviewStringUrls = (
     if (parsed !== undefined) {
       // Keep recursive validation outside the JSON parse catch. A denied URL
       // must propagate instead of falling back to the original encoded text.
-      rewriteUnityPreviewUrls(parsed, proxyOrigin, assetBaseOrigin);
+      rewriteUnityPreviewUrls(parsed, proxyOrigin, assetBaseOrigin, options);
       return JSON.stringify(parsed);
     }
   }
@@ -180,21 +189,23 @@ const rewriteUnityPreviewStringUrls = (
   const direct = toUnityPreviewDirectAssetUrl(
     value,
     proxyOrigin,
-    assetBaseOrigin
+    assetBaseOrigin,
+    options
   );
   if (direct !== value) {
     return direct;
   }
 
   return value.replace(/https?:\\?\/\\?\/[^\s"'<>]+/gi, (url) =>
-    toUnityPreviewDirectAssetUrl(url, proxyOrigin, assetBaseOrigin)
+    toUnityPreviewDirectAssetUrl(url, proxyOrigin, assetBaseOrigin, options)
   );
 };
 
 export const rewriteUnityPreviewUrls = (
   value: unknown,
   proxyOrigin: string,
-  assetBaseOrigin: string
+  assetBaseOrigin: string,
+  options: UnityPreviewUrlOptions = {}
 ): void => {
   if (!value || typeof value !== "object") return;
 
@@ -204,10 +215,11 @@ export const rewriteUnityPreviewUrls = (
         value[index] = rewriteUnityPreviewStringUrls(
           item,
           proxyOrigin,
-          assetBaseOrigin
+          assetBaseOrigin,
+          options
         );
       } else {
-        rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin);
+        rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin, options);
       }
     });
     return;
@@ -219,10 +231,11 @@ export const rewriteUnityPreviewUrls = (
       record[key] = rewriteUnityPreviewStringUrls(
         item,
         proxyOrigin,
-        assetBaseOrigin
+        assetBaseOrigin,
+        options
       );
     } else {
-      rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin);
+      rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin, options);
     }
   });
 };

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "protocolVersion": 1,
+  "unityBaseImage": "hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5",
+  "buildId": "sha256:7bee87bbf1c044802841b46489638cb5069eac5b51fb0637714a3b826b092f33",
+  "sourceRevision": "f3fbe0dda98e6f9255339c0c880ff2015d021199",
+  "files": [
+    {
+      "role": "loader",
+      "url": "Build/public.loader.js",
+      "size": 19430,
+      "sha256": "d0a6c2292cbe44f0762747d32f4381a9b7fa3c8473717beb545925d50e177c01",
+      "contentEncoding": "identity",
+      "contentType": "application/javascript"
+    },
+    {
+      "role": "data",
+      "url": "Build/public.data.gz",
+      "size": 175522254,
+      "sha256": "b3e261ecbd8a6eabac45fb39991ca3a394f8af48cb99a63e7ebe0382e1b3cdb6",
+      "contentEncoding": "gzip",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "role": "framework",
+      "url": "Build/public.framework.js.gz",
+      "size": 100721,
+      "sha256": "5f553cc83c90263896865f71941f475f9a4ba0754054f20a93ee700a78e477cc",
+      "contentEncoding": "gzip",
+      "contentType": "application/javascript"
+    },
+    {
+      "role": "wasm",
+      "url": "Build/public.wasm.gz",
+      "size": 23475045,
+      "sha256": "e2cadd8f38c950580dece80087bbf8c46a9b37b61f8d7f69aac15fe40d44999e",
+      "contentEncoding": "gzip",
+      "contentType": "application/wasm"
+    }
+  ]
+}

@@ -7,13 +7,6 @@
 # the nearest checked-in white-label config and unknown hosts use default.json.
 include /usr/share/nginx/html/config/domains/white-label-nginx-map.conf;
 
-proxy_cache_path /var/cache/nginx/webgl-preview
-    levels=1:2
-    keys_zone=webgl_preview_cache:256m
-    max_size=20g
-    inactive=30d
-    use_temp_path=off;
-
 server {
     listen 80;
     server_name localhost;
@@ -59,32 +52,57 @@ server {
         proxy_send_timeout 120s;
     }
 
-    # ============ 反向代理 - Unity WebGL 运行器（同域入口，便于主站/CDN 缓存） ============
+    # Unity is part of this image. Missing assets never reach the SPA or a plugin.
+    location = /webgl-preview/active.json {
+        default_type application/json;
+        add_header Cache-Control "no-store" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
     location ^~ /webgl-preview/ {
-        proxy_pass ${APP_UNITY_PREVIEW_UPSTREAM}/;
+        gzip off;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "no-referrer" always;
+        try_files $uri =404;
 
-        proxy_ssl_server_name on;
-        proxy_http_version 1.1;
-        proxy_set_header Host $proxy_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Connection "";
-        proxy_set_header Range $http_range;
-        proxy_set_header If-Range $http_if_range;
-        proxy_buffering on;
-        proxy_cache webgl_preview_cache;
-        proxy_cache_lock on;
-        proxy_cache_revalidate on;
-        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
-        proxy_cache_valid 200 206 1y;
-        proxy_cache_valid 404 1m;
-        add_header X-WebGL-Preview-Cache $upstream_cache_status always;
-        proxy_intercept_errors off;
-
-        proxy_connect_timeout 60s;
-        proxy_read_timeout 300s;
-        proxy_send_timeout 300s;
+        location ~ \.wasm\.gz$ {
+            types { } default_type application/wasm;
+            add_header Content-Encoding gzip;
+            add_header Cache-Control "public, max-age=31536000, immutable";
+            add_header X-Content-Type-Options "nosniff" always;
+            try_files $uri =404;
+        }
+        location ~ \.data\.gz$ {
+            types { } default_type application/octet-stream;
+            add_header Content-Encoding gzip;
+            add_header Cache-Control "public, max-age=31536000, immutable";
+            add_header X-Content-Type-Options "nosniff" always;
+            try_files $uri =404;
+        }
+        location ~ \.framework\.js\.gz$ {
+            types { } default_type application/javascript;
+            add_header Content-Encoding gzip;
+            add_header Cache-Control "public, max-age=31536000, immutable";
+            add_header X-Content-Type-Options "nosniff" always;
+            try_files $uri =404;
+        }
+        # SW has no Service-Worker-Allowed override: its maximum scope is its
+        # own release directory. HTML/metadata are always revalidated.
+        location ~ \.html$ {
+            add_header Cache-Control "no-cache, must-revalidate" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header Referrer-Policy "no-referrer" always;
+            add_header Content-Security-Policy "connect-src 'self' https://data.7dgame.com https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com https://mrpp-1257979353.cos.ap-chengdu.myqcloud.com blob:; frame-src 'self' blob:; worker-src 'self' blob:" always;
+            try_files $uri =404;
+        }
+        location ~ (?:/sw\.js|\.json)$ {
+            add_header Cache-Control "no-cache, must-revalidate" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header Referrer-Policy "no-referrer" always;
+            try_files $uri =404;
+        }
     }
 
     location = /__xrugc_proxy__ {
@@ -195,7 +213,6 @@ server {
         try_files $uri /index.html;
     }
 
-    error_page 404 /index.html;
     location = /index.html {
         internal;
     }
