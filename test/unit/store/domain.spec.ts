@@ -293,6 +293,30 @@ describe("useDomainStore", () => {
       expect(store.voxelEnabled).toBe(false);
     });
 
+    it("刷新期间保留已确认的体素开关，直到新配置返回", async () => {
+      getDomainDefault.mockResolvedValue({
+        data: makeDefaultInfo({ features: { voxel: true } }),
+      });
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+      expect(store.voxelEnabled).toBe(true);
+
+      let resolveConfig!: (response: {
+        data: ReturnType<typeof makeDefaultInfo>;
+      }) => void;
+      getDomainDefault.mockReturnValue(
+        new Promise((resolve) => {
+          resolveConfig = resolve;
+        })
+      );
+
+      const pending = store.fetchDefaultInfo();
+      expect(store.voxelEnabled).toBe(true);
+      resolveConfig({ data: makeDefaultInfo({ features: { voxel: false } }) });
+      await pending;
+      expect(store.voxelEnabled).toBe(false);
+    });
+
     it("配置刷新失败时关闭曾经开启的功能", async () => {
       const store = useDomainStore();
       store.defaultInfo = makeDefaultInfo({ features: { voxel: true } });

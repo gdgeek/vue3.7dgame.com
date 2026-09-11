@@ -131,9 +131,10 @@ export const useDomainStore = defineStore("domain", {
 
     async loadDefaultInfo(options: FetchDefaultInfoOptions) {
       // Try cookie cache first
-      const cachedData = options.forceRefresh
-        ? null
-        : getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
+      const cachedData =
+        options.forceRefresh || this.defaultInfo !== null
+          ? null
+          : getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
       if (cachedData) {
         try {
           this.defaultInfo = {
