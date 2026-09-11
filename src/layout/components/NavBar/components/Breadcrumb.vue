@@ -434,7 +434,7 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 
 @container app-navbar (width <= 1120px) {
   .breadcrumb-nav {
-    gap: 0;
+    gap: 8px;
   }
 
   .crumb-link:not(.is-primary),
@@ -452,6 +452,12 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 
   .crumb-unsaved-dot--compact {
     display: inline-block;
+  }
+}
+
+@container app-navbar (width <= 640px) {
+  .breadcrumb-nav:has(.editor-mode-tag) .crumb-link.is-primary {
+    display: none;
   }
 }
 </style>

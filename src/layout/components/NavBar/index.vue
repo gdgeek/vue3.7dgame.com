@@ -93,6 +93,19 @@ function toggleSideBar() {
   }
 }
 
+@container app-navbar (width <= 640px) {
+  .navbar-left,
+  .navbar-right {
+    gap: 4px;
+  }
+
+  .hamburger-container {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+}
+
 @media (width <= 1320px) {
   .navbar-container {
     gap: 8px;
@@ -103,6 +116,13 @@ function toggleSideBar() {
 @media (width <= 820px) {
   .navbar-container {
     padding: 0 12px;
+  }
+}
+
+@media (width <= 640px) {
+  .navbar-container {
+    gap: 4px;
+    padding: 0 8px;
   }
 }
 </style>
