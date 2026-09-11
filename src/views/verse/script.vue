@@ -246,6 +246,8 @@ import {
 } from "@/composables/useEditorVersionToolbar";
 import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
+import { registerWebMcpTools } from "@/services/webmcp/model-context";
+import { createSceneRuntimePreviewTools } from "@/services/webmcp/scene-runtime-preview-tools";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
 import { normalizeUnityPreviewVerseLua } from "@/utils/unityPreviewLua";
@@ -255,6 +257,27 @@ import {
   normalizeUnityPreviewMetas,
   UNITY_PREVIEW_VERSE_EXPAND,
 } from "@/utils/unityPreviewPayload";
+
+import {
+  registerVerseScriptWebMcpTools,
+  type VerseScriptReplaceCompletion,
+  type VerseScriptReplacePreview,
+  type VerseScriptSnapshot,
+} from "@/services/webmcp/verse-script-tools";
+import {
+  registerScriptBlockWebMcpTools,
+  type ScriptBlockBatchCompletion,
+  type ScriptBlockBatchPreview,
+} from "@/services/webmcp/script-block-tools";
+let webMcpLifecycle: AbortController | null = null;
+let scriptBlockWebMcpLifecycle: AbortController | null = null;
+import {
+  formatBlockOperationResults,
+  formatScriptWarnings,
+  hasGeneratedScriptErrors,
+} from "@/utils/webMcpConfirmation";
+import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
+import { createIframeRpc } from "@/utils/iframeRpc";
 
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
@@ -575,7 +598,7 @@ const {
   beginEditorSession,
   initializeSavedSnapshot,
   getEditorInitState,
-  save,
+  save: persistScript,
   openVersionDialog,
   clearDraftHistory,
   restoreDraftVersion,
@@ -604,6 +627,8 @@ const {
   onRestoreDraft: () => reloadEditorFrame(),
 });
 
+const save = persistScript;
+
 const toolbarOwner = "verse-script-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
   useEditorVersionToolbar();
@@ -618,6 +643,394 @@ const toolbarStatus = computed<EditorToolbarStatus>(() => {
 const editorContentLoading = computed(
   () => loading.value || !editorContentReady.value
 );
+
+const requireSuccessfulWebMcpResponse = (response: Record<string, unknown>) => {
+  if (response.ok !== true) {
+    throw new Error(
+      typeof response.error === "string"
+        ? response.error
+        : "Blockly 编辑器操作失败"
+    );
+  }
+  return response;
+};
+
+const webMcpRpc = createIframeRpc({
+  frame: () => editor.value,
+  session: () => getEditorInitState()?.hostSessionId,
+  send: (action, data) => postMessage("REQUEST", { action, ...data }),
+});
+const requestBlocklyEditor = webMcpRpc.request;
+const handleWebMcpEditorMessage = webMcpRpc.handleMessage;
+
+const formatVerseScriptReplaceConfirmation = (
+  preview: VerseScriptReplacePreview
+) =>
+  [
+    `确认替换场景“${preview.sceneTitle}”的 Blockly 脚本吗？`,
+    `块数量：${preview.current.blockCount} → ${preview.proposed.blockCount}`,
+    `顶层流程：${preview.current.topLevelBlockCount} → ${preview.proposed.topLevelBlockCount}`,
+    `变量数量：${preview.current.variableCount} → ${preview.proposed.variableCount}`,
+    `JavaScript：${preview.current.generatedJavaScriptBytes} → ${preview.proposed.generatedJavaScriptBytes} 字节`,
+    `Lua：${preview.current.generatedLuaBytes} → ${preview.proposed.generatedLuaBytes} 字节`,
+    "候选工作区已完成 Blockly 反序列化与双语言代码生成检查",
+    ...formatScriptWarnings(preview.warnings),
+    "确认后将更新可见工作区并保存脚本；平台仍会单独询问是否发布场景",
+  ].join("\n");
+
+const registerVerseScriptTools = () => {
+  const ownerId = id.value;
+  const ownerSession = getEditorInitState()?.hostSessionId;
+  let registration: AbortController | null = null;
+  const assertActive = () => {
+    if (
+      registration?.signal.aborted ||
+      !isScriptViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getEditorInitState()?.hostSessionId
+    ) {
+      throw new Error("Blockly 会话已经切换，请重新预览");
+    }
+  };
+  const requestBlocklyEditor = (
+    ...args: Parameters<typeof webMcpRpc.request>
+  ) => {
+    assertActive();
+    return webMcpRpc.request(...args);
+  };
+  const save = (...args: Parameters<typeof persistScript>) => {
+    assertActive();
+    return persistScript(...args);
+  };
+
+  webMcpLifecycle?.abort();
+  registration = webMcpLifecycle = registerVerseScriptWebMcpTools({
+    getContext: () => ({
+      sceneId: Number.isFinite(id.value) ? id.value : null,
+      sceneTitle: verse.value?.name ?? "未命名场景",
+      editable: Boolean(verse.value?.editable),
+      ready: isScriptViewActive && editorContentReady.value,
+      dirty: hasUnsavedChanges.value,
+      saving: isSaving.value,
+    }),
+    getVerseScript: async ({ includeWorkspace, includeGeneratedCode }) => {
+      if (!verse.value || !Number.isFinite(verse.value.id)) {
+        throw new Error("场景脚本尚未加载完成");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-scene-script", {
+          includeWorkspace,
+          includeGeneratedCode,
+        })
+      );
+      return {
+        sceneId: verse.value.id,
+        sceneTitle: verse.value.name,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+        valid: Boolean(response.valid),
+        issue: response.issue,
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+        workspace: response.workspace,
+        generatedCode: response.generatedCode,
+      } as VerseScriptSnapshot;
+    },
+    validateVerseScript: async (focusIssue) => {
+      if (!verse.value || !Number.isFinite(verse.value.id)) {
+        throw new Error("场景脚本尚未加载完成");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-validate-scene-script", {
+          focusIssue,
+        })
+      );
+      return {
+        sceneId: verse.value.id,
+        sceneTitle: verse.value.name,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+        valid: Boolean(response.valid),
+        issue: response.issue,
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+      } as VerseScriptSnapshot;
+    },
+    stageVerseScriptReplace: async (workspace) => {
+      if (!verse.value || !Number.isFinite(verse.value.id)) {
+        throw new Error("场景脚本尚未加载完成");
+      }
+      if (!verse.value.editable) {
+        throw new Error("当前账号没有修改此场景脚本的权限");
+      }
+      if (!editorContentReady.value) {
+        throw new Error("Blockly 工作区尚未准备完成");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      if (hasUnsavedChanges.value) {
+        throw new Error("当前脚本存在未保存修改，请先保存后再创建替换预览");
+      }
+
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-stage-scene-script-replace",
+          { workspace },
+          30000
+        )
+      );
+      return {
+        sceneId: verse.value.id,
+        sceneTitle: verse.value.name,
+        workspaceVersion: String(response.workspaceVersion),
+        current: response.current,
+        proposed: response.proposed,
+        proposedWorkspace: response.proposedWorkspace,
+        changed: Boolean(response.changed),
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+      } as VerseScriptReplacePreview;
+    },
+    confirmVerseScriptReplace: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatVerseScriptReplaceConfirmation(preview),
+          "WebMCP Blockly 场景脚本替换",
+          {
+            confirmButtonText: t("verse.view.script.save"),
+            cancelButtonText: t("verse.view.script.leave.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeVerseScriptReplace: async (preview) => {
+      if (!verse.value || verse.value.id !== preview.sceneId) {
+        throw new Error("当前场景已经切换，请重新创建脚本预览");
+      }
+      if (!verse.value.editable) {
+        throw new Error("当前账号没有修改此场景脚本的权限");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-complete-scene-script-replace",
+          {
+            workspaceVersion: preview.workspaceVersion,
+            workspace: preview.proposedWorkspace,
+          },
+          30000
+        )
+      );
+      if (!response.noChange) {
+        try {
+          await save("manual", { suppressNoChangeInfo: true });
+        } catch {
+          throw new WebMcpCompletionError(
+            {
+              status: "partial",
+              editorApplied: true,
+              persistence: "unverified",
+              retry: "read_state_before_retry",
+              ownerId,
+              workspaceVersion: response.workspaceVersion,
+            },
+            "Blockly 工作区已应用修改，保存结果未确认，请先读取状态"
+          );
+        }
+      }
+      return {
+        editorApplied: !response.noChange,
+        persistence: response.noChange ? "unchanged" : "server_acknowledged",
+        editorAcknowledged: false,
+        noChange: Boolean(response.noChange),
+        sceneId: verse.value.id,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+      } as VerseScriptReplaceCompletion;
+    },
+    onRegistrationError: (toolName, error) => {
+      logger.warn(`WebMCP tool registration failed: ${toolName}`, error);
+    },
+  });
+};
+
+const formatScriptBlockBatchConfirmation = (preview: ScriptBlockBatchPreview) =>
+  [
+    `确认修改场景“${preview.ownerTitle}”的 Blockly 积木吗？`,
+    `批量操作：${preview.operationCount} 项`,
+    ...formatBlockOperationResults(preview.results),
+    `块数量：${preview.current.blockCount} → ${preview.proposed.blockCount}`,
+    `顶层流程：${preview.current.topLevelBlockCount} → ${preview.proposed.topLevelBlockCount}`,
+    `JavaScript：${preview.current.generatedJavaScriptBytes} → ${preview.proposed.generatedJavaScriptBytes} 字节`,
+    `Lua：${preview.current.generatedLuaBytes} → ${preview.proposed.generatedLuaBytes} 字节`,
+    "全部操作已在临时 Blockly 工作区执行并完成代码生成检查",
+    ...formatScriptWarnings(preview.warnings),
+    "确认后将更新可见工作区并保存脚本；平台仍会单独询问是否发布场景",
+  ].join("\n");
+
+const registerScriptBlockTools = () => {
+  const ownerId = id.value;
+  const ownerSession = getEditorInitState()?.hostSessionId;
+  let registration: AbortController | null = null;
+  const assertActive = () => {
+    if (
+      registration?.signal.aborted ||
+      !isScriptViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getEditorInitState()?.hostSessionId
+    ) {
+      throw new Error("Blockly 会话已经切换，请重新预览");
+    }
+  };
+  const requestBlocklyEditor = (
+    ...args: Parameters<typeof webMcpRpc.request>
+  ) => {
+    assertActive();
+    return webMcpRpc.request(...args);
+  };
+  const save = (...args: Parameters<typeof persistScript>) => {
+    assertActive();
+    return persistScript(...args);
+  };
+
+  scriptBlockWebMcpLifecycle?.abort();
+  registration = scriptBlockWebMcpLifecycle = registerScriptBlockWebMcpTools({
+    getContext: () => ({
+      ownerKind: "scene",
+      ownerId: Number.isFinite(id.value) ? id.value : null,
+      ownerTitle: verse.value?.name ?? "未命名场景",
+      editable: Boolean(verse.value?.editable),
+      ready: isScriptViewActive && editorContentReady.value,
+      dirty: hasUnsavedChanges.value,
+      saving: isSaving.value,
+    }),
+    getBlockCatalog: async (filters) =>
+      requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-script-block-catalog", filters)
+      ),
+    getBlockStructure: async (filters) =>
+      requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-script-block-structure", filters)
+      ),
+    stageBlockBatch: async (operations) => {
+      if (!verse.value || !Number.isFinite(verse.value.id)) {
+        throw new Error("场景脚本尚未加载完成");
+      }
+      if (!verse.value.editable) {
+        throw new Error("当前账号没有修改此场景脚本的权限");
+      }
+      if (!editorContentReady.value) {
+        throw new Error("Blockly 工作区尚未准备完成");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      if (hasUnsavedChanges.value) {
+        throw new Error("当前脚本存在未保存修改，请先保存后再创建积木预览");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-stage-script-block-batch",
+          { operations },
+          30000
+        )
+      );
+      return {
+        ownerKind: "scene",
+        ownerId: verse.value.id,
+        ownerTitle: verse.value.name,
+        workspaceVersion: String(response.workspaceVersion),
+        current: response.current,
+        proposed: response.proposed,
+        proposedWorkspace: response.proposedWorkspace,
+        changed: Boolean(response.changed),
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+        operationCount: Number(response.operationCount),
+        results: response.results,
+      } as ScriptBlockBatchPreview;
+    },
+    confirmBlockBatch: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatScriptBlockBatchConfirmation(preview),
+          "WebMCP Blockly 积木批量修改",
+          {
+            confirmButtonText: t("verse.view.script.save"),
+            cancelButtonText: t("verse.view.script.leave.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeBlockBatch: async (preview) => {
+      if (!verse.value || verse.value.id !== preview.ownerId) {
+        throw new Error("当前场景已经切换，请重新创建积木预览");
+      }
+      if (!verse.value.editable) {
+        throw new Error("当前账号没有修改此场景脚本的权限");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-complete-script-block-batch",
+          {
+            workspaceVersion: preview.workspaceVersion,
+            workspace: preview.proposedWorkspace,
+          },
+          30000
+        )
+      );
+      if (!response.noChange) {
+        try {
+          await save("manual", { suppressNoChangeInfo: true });
+        } catch {
+          throw new WebMcpCompletionError(
+            {
+              status: "partial",
+              editorApplied: true,
+              persistence: "unverified",
+              retry: "read_state_before_retry",
+              ownerId,
+              workspaceVersion: response.workspaceVersion,
+            },
+            "Blockly 工作区已应用修改，保存结果未确认，请先读取状态"
+          );
+        }
+      }
+      return {
+        editorApplied: !response.noChange,
+        persistence: response.noChange ? "unchanged" : "server_acknowledged",
+        editorAcknowledged: false,
+        noChange: Boolean(response.noChange),
+        ownerKind: "scene",
+        ownerId: verse.value.id,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+      } as ScriptBlockBatchCompletion;
+    },
+    onRegistrationError: (toolName, error) => {
+      logger.warn(`WebMCP tool registration failed: ${toolName}`, error);
+    },
+  });
+};
 
 const activateToolbar = () => {
   isScriptViewActive = true;
@@ -830,6 +1243,93 @@ watch(id, (nextId, previousId) => {
     nextId !== previousId
   ) {
     void loadVerseScriptSession();
+  }
+});
+
+let runtimeWebMcpLifecycle: AbortController | null = null;
+const getSceneRuntimePreviewStatus = () => {
+  const visible = unityPreview.visible.value;
+  const status = visible ? unityPreview.status.value : "预览已关闭";
+  return {
+    sceneId: verse.value?.id ?? null,
+    sceneName: verse.value?.name ?? null,
+    visible,
+    frameVisible: unityPreview.frameVisible.value,
+    ready: unityPreview.ready.value,
+    phase: !visible
+      ? "closed"
+      : unityPreview.failure.value || status.includes("若画面为空")
+        ? "attention"
+        : status.includes("已在 Unity 中运行")
+          ? "running"
+          : unityPreview.ready.value
+            ? "ready"
+            : "loading",
+    status,
+    failure: unityPreview.failure.value,
+  };
+};
+const registerRuntimeTools = () => {
+  runtimeWebMcpLifecycle?.abort();
+  const session = getEditorInitState()?.hostSessionId;
+  runtimeWebMcpLifecycle = registerWebMcpTools(
+    createSceneRuntimePreviewTools({
+      getPreviewStatus: getSceneRuntimePreviewStatus,
+      startPreview: async () => {
+        if (!isScriptViewActive || !editorContentReady.value || !verse.value)
+          throw new Error("场景脚本尚未准备完成");
+        if (hasUnsavedChanges.value || isSaving.value)
+          throw new Error("请先保存当前 Blockly 工作区，再启动场景运行预览");
+        const response = requireSuccessfulWebMcpResponse(
+          await requestBlocklyEditor("webmcp-validate-scene-script", {
+            focusIssue: false,
+          })
+        );
+        if (
+          response.canSave === false ||
+          hasGeneratedScriptErrors(response.warnings)
+        )
+          throw new Error("脚本包含阻塞错误，请先修复");
+        if (
+          !isScriptViewActive ||
+          session !== getEditorInitState()?.hostSessionId
+        )
+          throw new Error("编辑器会话已经切换");
+        await unityPreview.open();
+        return getSceneRuntimePreviewStatus();
+      },
+      stopPreview: async () => {
+        unityPreview.close();
+        return getSceneRuntimePreviewStatus();
+      },
+    })
+  );
+};
+const stopWebMcpTools = () => {
+  runtimeWebMcpLifecycle?.abort();
+  unityPreview.close();
+  webMcpLifecycle?.abort();
+  scriptBlockWebMcpLifecycle?.abort();
+  webMcpRpc.cancel();
+};
+onMounted(() => window.addEventListener("message", handleWebMcpEditorMessage));
+onActivated(() => {
+  isScriptViewActive = true;
+  registerVerseScriptTools();
+  registerScriptBlockTools();
+  registerRuntimeTools();
+});
+onDeactivated(stopWebMcpTools);
+onBeforeUnmount(() => {
+  stopWebMcpTools();
+  window.removeEventListener("message", handleWebMcpEditorMessage);
+});
+watch([id, editorFrameKey, editorContentReady], () => {
+  stopWebMcpTools();
+  if (isScriptViewActive && editorContentReady.value) {
+    registerVerseScriptTools();
+    registerScriptBlockTools();
+    registerRuntimeTools();
   }
 });
 </script>

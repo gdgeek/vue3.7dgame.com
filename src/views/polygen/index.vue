@@ -235,6 +235,7 @@ import {
 } from "@/utils/utilityFunctions";
 import { toHttps } from "@/utils/helper";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
+import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import { useFileStore } from "@/store/modules/config";
 import { generateModelThumbnailFromUrl } from "@/utils/modelProcessor";
 import {
@@ -408,6 +409,7 @@ const detailProperties = computed(() => {
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
+useWebMcpUploadIntent(openUploadDialog);
 
 const getQueryResourceId = () => {
   const rawResourceId = Array.isArray(route.query.resourceId)

@@ -143,6 +143,7 @@ import {
   postParticle,
 } from "@/api/v1/resources/index";
 import { usePageData } from "@/composables/usePageData";
+import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
@@ -169,6 +170,7 @@ const fileType = ref(".json");
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
+useWebMcpUploadIntent(openUploadDialog);
 const handleUploadSuccess = async () => {
   uploadDialogVisible.value = false;
   refresh();

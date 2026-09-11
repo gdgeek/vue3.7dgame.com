@@ -5,7 +5,11 @@ vi.mock("@/utils/logger", () => ({
 }));
 
 const createAudioMock = () => {
+  const events = new EventTarget();
   const audio = {
+    addEventListener: events.addEventListener.bind(events),
+    removeEventListener: events.removeEventListener.bind(events),
+    dispatchEvent: events.dispatchEvent.bind(events),
     src: "https://example.com/audio.mp3",
     currentTime: 0,
     duration: 10,
@@ -118,5 +122,35 @@ describe("useSceneAudio", () => {
       expect(audio.pause).toHaveBeenCalled();
       expect(audio.load).toHaveBeenCalled();
     });
+  });
+});
+
+describe("audio cancellation", () => {
+  it("stopping active playback releases the queue and starts its next item", async () => {
+    const { useSceneAudio } = await import(
+      "@/components/ScenePlayer/composables/useSceneAudio"
+    );
+    const { playQueuedAudio } = useSceneAudio(new Map());
+    const first = createAudioMock();
+    const second = createAudioMock();
+    const p1 = playQueuedAudio(first);
+    const p2 = playQueuedAudio(second);
+    first.dispatchEvent(new Event("xrugc-audio-stop"));
+    await p1;
+    expect(second.play).toHaveBeenCalledOnce();
+    second.onended?.(new Event("ended"));
+    await p2;
+  });
+  it("cleanup also stops direct playback and settles its promise", async () => {
+    const { useSceneAudio } = await import(
+      "@/components/ScenePlayer/composables/useSceneAudio"
+    );
+    const { playQueuedAudio, cleanup } = useSceneAudio(new Map());
+    const audio = createAudioMock();
+    const pending = playQueuedAudio(audio, true);
+    cleanup();
+    await pending;
+    expect(audio.pause).toHaveBeenCalledOnce();
+    expect(audio.onended).toBeNull();
   });
 });
