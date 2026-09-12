@@ -6,7 +6,7 @@ export const WORKFLOW_GUIDE_TOPICS = [
   {
     id: "overview",
     title: "场景制作总览",
-    description: "需求、场景与脚本抽屉切换和完整制作流程",
+    description: "需求、实体／场景脚本抽屉切换和完整制作流程",
   },
   {
     id: "assets",

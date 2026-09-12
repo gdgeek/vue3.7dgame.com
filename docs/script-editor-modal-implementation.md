@@ -1,10 +1,12 @@
-# 场景脚本抽屉
+# 场景与实体脚本抽屉
 
-`/verse/scene` 的「脚本」菜单与顶部「脚本编辑」按钮均打开右侧抽屉，原场景 iframe 和 URL 保持不变。顶部按钮位于「运行场景」「版本管理」之后，沿用按钮组的响应式样式；仅场景页注册此入口。上线状态应以实际部署版本为准。
+`/verse/scene` 的「脚本」菜单与顶部「脚本编辑」按钮均打开右侧抽屉，原场景 iframe 和 URL 保持不变。顶部按钮位于「运行场景」「版本管理」之后，沿用按钮组的响应式样式。上线状态应以实际部署版本为准。
+
+`/meta/scene` 的「脚本」菜单和顶部「脚本编辑」按钮同样打开右侧抽屉，保留原实体编辑器、相机和 URL。两个入口使用同一抽屉布局和关闭生命周期；实体顶部按钮位于版本管理之后。
 
 ## 实现
 
-- `src/components/VerseScriptDrawer.vue` 使用 Element Plus Drawer，按需加载 `src/views/verse/script.vue`。
+- `src/components/EditorScriptDrawer.vue` 统一管理 Element Plus Drawer、保存／版本历史按钮组及关闭生命周期。`VerseScriptDrawer.vue` 与 `MetaScriptDrawer.vue` 分别按需加载对应的完整脚本页。
 - 脚本页支持 `embedded`、`verseId`、`sceneData`、`beforePublish` 参数。独立 `/verse/script` 路由继续可用。
 - 抽屉复用当前脚本页，包含 Blockly、Lua/JavaScript 查看和复制、保存、自动保存、版本恢复及 WebMCP。标题栏使用「保存＋版本历史」连体图标按钮组；正文仅保留「逻辑编辑／代码查看」标签页。运行场景和实体跳转使用外部场景编辑器的已有入口。
 - 标题栏直接调用脚本组件公开的保存和版本历史动作，不另建持久化流程。保存权限、编辑器加载状态和保存中状态控制按钮可用性。
@@ -36,15 +38,25 @@
 | `xrugc_open_scene_script_editor` | 先关闭运行预览，再读取实时场景快照并打开抽屉。场景未加载完成时拒绝打开，不隐式保存。 |
 | `xrugc_close_scene_script_editor` | 沿用未保存修改确认；取消时返回 `cancelled`，成功时等待关闭动画完成并恢复场景工具后返回 `closed`。 |
 
-三个工具仅接受空对象。`opened` 只表示抽屉已打开，调用脚本编辑工具前仍需确认 `script.ready`。打开或关闭后必须重新发现工具，即使 URL 没有变化；工作流指南版本为 `1.0.2`。
+三个工具仅接受空对象。`opened` 只表示抽屉已打开，调用脚本编辑工具前仍需确认 `script.ready`。打开或关闭后必须重新发现工具，即使 URL 没有变化；工作流指南版本为 `1.0.3`。
 
 抽屉内注册脚本工具，不注册 Unity 运行工具；运行场景时先关闭抽屉，再调用恢复后的场景运行工具。独立 `/verse/script` 页保留原有运行能力。
 
 并发关闭共用一次未保存确认，过期确认不会关闭新会话。路由导航也等待抽屉关闭完成后再切换场景，避免重开时使用上一场景的快照。
 
+## 实体脚本衔接
+
+实体脚本页支持 `embedded`、`metaId` 和 `metaData`。打开前通过 `webmcp-get-entity-state` 读取当前未保存的实体结构与事件，再按实时结构补齐新增的资源信息并剔除已删除引用，确保新模型的动画也可用于脚本。资源读取完成后重新检查实体会话及保存状态。脚本页重新读取最新服务端代码、权限和版本号，仅合并传入的实体结构、资源和事件，不改写原快照。实体正在保存或插件未就绪时暂不打开抽屉。
+
+实体与脚本共用保存版本号。抽屉打开期间暂停外层实体自动保存；脚本保存仍调用 `putMetaCode`。成功回执只在实体 ID 和保存前版本号均匹配时更新外层版本号与脚本缓存，不重置实体未保存标记、不发送 INIT，也不刷新实体 iframe。旧会话或其他版本的回执不会覆盖当前状态。
+
+实体工作区提供 `xrugc_get_entity_workspace_context`、`xrugc_open_entity_script_editor`、`xrugc_close_entity_script_editor` 三个常驻工具。打开抽屉时暂停实体主工具，关闭完成后恢复；取消关闭保留脚本工具。与场景一样，每次开关后都要重新发现工具。两类工作区共享通用的工具实现和会话生命周期，工作流指南版本为 `1.0.3`。
+
+实体抽屉标题栏仅保留保存和版本历史，正文为逻辑编辑／代码查看标签页。嵌入脚本使用独立 `meta-script-editor` iframe ID，不覆盖外层工具栏；独立 `/meta/script` 页继续可用。
+
 ## 旧模态组件
 
-`ScriptEditorModal.vue`、`MetaScriptEditorModal.vue`、`ScriptEditorModalProvider.vue` 和 `useScriptEditorModal.ts` 是旧实现，本次未全局启用。Meta 场景的行为未改变。
+`ScriptEditorModal.vue`、`MetaScriptEditorModal.vue`、`ScriptEditorModalProvider.vue` 和 `useScriptEditorModal.ts` 是旧实现，本次未全局启用。
 
 ## 验证
 
@@ -52,7 +64,9 @@
 
 WebMCP 重构另覆盖 `scene-workspace-tools.spec.ts`、`useSceneWorkspaceWebMcp.spec.ts` 及工作流指南测试，检查空参数校验、工具集切换、关闭取消、场景 ID 变化和 KeepAlive 停用后的旧请求失效。2026-09-12 相关测试共 35 个文件、302 项通过，类型检查和生产构建通过。本轮浏览器确认三个新工具可发现、未就绪时拒绝打开、已关闭时重复关闭成功；完整的已加载场景开关抽屉流程因线上场景 iframe 尚未就绪而未完成复验。
 
-真实浏览器验收清单：在本地登录后，进入可编辑场景，修改对象位置但不保存，打开脚本，检查 URL/相机/对象状态保持；检查 Blockly、代码、保存和版本历史；修改脚本后分别验证取消关闭、保存关闭和放弃关闭。已完成范围及未验证项见 `../design-qa.md`。
+实体扩展验证：2026-09-12 在基于 `eb6034d7` 的独立检出中覆盖本次改动，排除工作区内无关的未提交修改，全量测试 403 个文件、5400 项通过、3 项跳过，覆盖率 83.4%；类型检查和生产构建通过。新增实体主页面 10 项集成测试覆盖实时未保存快照、资源补齐、工具切换、关闭取消、保存版本回执及过期请求；另有实体抽屉、嵌入脚本和工作区工具测试。
+
+Chrome 本地实体 3642 验收通过：顶部按钮和插件内脚本菜单均打开同一右侧抽屉；Blockly、Lua／JavaScript 标签页与版本历史可显示；关闭后原实体编辑器仍可见，URL 和 iframe 地址保持不变。未执行真实保存、恢复或发布，也未实测修改后的相机状态及窄屏布局。已完成范围及未验证项见 `../design-qa.md`。
 
 ## 连接线上后端进行本地验收
 
