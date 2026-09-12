@@ -291,7 +291,7 @@ import {
   formatScriptWarnings,
   hasGeneratedScriptErrors,
 } from "@/utils/webMcpConfirmation";
-import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
+import { sceneWriteFailure } from "@/services/webmcp/scene-write-failure";
 import { createIframeRpc } from "@/utils/iframeRpc";
 
 // ---------- Verse 专有状态 ----------
@@ -874,17 +874,14 @@ const registerVerseScriptTools = () => {
             suppressNoChangeInfo: true,
             write: writeOptionsForPreview(preview, verse.value?.serverRevision),
           });
-        } catch {
-          throw new WebMcpCompletionError(
+        } catch (error) {
+          throw sceneWriteFailure(
+            error,
             {
-              status: "partial",
-              editorApplied: true,
-              persistence: "unverified",
-              retry: "read_state_before_retry",
               ownerId,
               workspaceVersion: response.workspaceVersion,
             },
-            "Blockly 工作区已应用修改，保存结果未确认，请先读取状态"
+            "Blockly 工作区已应用修改"
           );
         }
       }
@@ -1052,17 +1049,14 @@ const registerScriptBlockTools = () => {
             suppressNoChangeInfo: true,
             write: writeOptionsForPreview(preview, verse.value?.serverRevision),
           });
-        } catch {
-          throw new WebMcpCompletionError(
+        } catch (error) {
+          throw sceneWriteFailure(
+            error,
             {
-              status: "partial",
-              editorApplied: true,
-              persistence: "unverified",
-              retry: "read_state_before_retry",
               ownerId,
               workspaceVersion: response.workspaceVersion,
             },
-            "Blockly 工作区已应用修改，保存结果未确认，请先读取状态"
+            "Blockly 工作区已应用修改"
           );
         }
       }

@@ -243,6 +243,54 @@ describe("queryable WebMCP completion", () => {
     expect(reloaded.complete).not.toHaveBeenCalled();
   });
 
+  it("does not cancel a submitted operation and recovers a lost response by its original id", async () => {
+    const x = await setup();
+    const { writeOptionsForPreview } = await import(
+      "@/services/webmcp/operation-context"
+    );
+    const reply = deferred<void>();
+    let committedReceipt: Record<string, unknown> | undefined;
+    x.complete.mockImplementationOnce(async (preview: object) => {
+      const write = writeOptionsForPreview(preview, revision);
+      x.writes.push(write);
+      write.onSubmitting?.();
+      // Model a committed backend transaction whose response never reaches the client.
+      committedReceipt = {
+        operationId: write.operationId,
+        targetType: "verse",
+        targetId: 2329,
+        action: "publish",
+        serverRevision: nextRevision,
+        status: "completed",
+      };
+      await reply.promise;
+      throw new Error("response lost after commit");
+    });
+    const { draftId } = await x.stage();
+    await x.call("xrugc_complete_scene_publication", { draftId });
+    x.confirmation.resolve(true);
+    await flush();
+    expect(
+      await x.call("xrugc_cancel_operation", { operationId: draftId })
+    ).toMatchObject({ status: "not_cancellable" });
+    reply.resolve();
+    await flush();
+    expect(
+      await x.call("xrugc_get_operation_status", { operationId: draftId })
+    ).toMatchObject({ status: "unknown" });
+    // Repeating complete cannot submit a second write while the result is unknown.
+    await x.call("xrugc_complete_scene_publication", { draftId });
+    expect(x.complete).toHaveBeenCalledTimes(1);
+    x.readReceipt.mockResolvedValue(committedReceipt);
+    expect(
+      await x.call("xrugc_get_operation_status", { operationId: draftId })
+    ).toMatchObject({
+      status: "completed",
+      writeReceipt: { operationId: draftId, serverRevision: nextRevision },
+    });
+    expect(x.writes).toHaveLength(1);
+  });
+
   it("keeps an unobserved server operation unknown", async () => {
     const x = await setup();
     expect(
