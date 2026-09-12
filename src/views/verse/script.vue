@@ -57,14 +57,6 @@
                       class="script-action-button"
                       type="primary"
                       size="small"
-                      :disabled="!editorContentReady || unityPreviewVisible"
-                      @click="runSceneRuntimePreview"
-                      >运行场景</el-button
-                    >
-                    <el-button
-                      class="script-action-button"
-                      type="primary"
-                      size="small"
                       :title="$t('route.project.sceneEditor')"
                       :aria-label="$t('route.project.sceneEditor')"
                       @click="goBackToSceneEditor"
