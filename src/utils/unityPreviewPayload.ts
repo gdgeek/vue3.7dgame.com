@@ -19,12 +19,35 @@ const UNITY_PREVIEW_ASSET_ORIGINS = new Set([
   `https://${UNITY_PREVIEW_CDN_HOST}`,
   `https://${UNITY_PREVIEW_MRPP_COS_HOST}`,
 ]);
-// Display metadata can contain colons (e.g. "Polygen:model.glb") or links.
-// These strings are not resource locations and must retain their exact text.
-const UNITY_PREVIEW_TEXT_FIELDS = new Set(["name", "title", "description"]);
+// API labels, identifiers and content fingerprints are opaque text, not URLs.
+// In particular ContentRevision::hash returns "sha256:<digest>" for both metas
+// and verses. Never interpret that prefix as a resource protocol.
+const UNITY_PREVIEW_TEXT_FIELDS = new Set([
+  "name",
+  "title",
+  "description",
+  "serverRevision",
+  "uuid",
+  "md5",
+  "type",
+  "created_at",
+  "updated_at",
+]);
 // File API records carry a storage key and original filename alongside url.
 // A key such as "/ai/polygen/model.glb" is not a relative download address.
 const UNITY_PREVIEW_FILE_TEXT_FIELDS = new Set(["key", "filename"]);
+const UNITY_PREVIEW_CODE_FIELDS = new Set([
+  "code",
+  "metaCode",
+  "verseCode",
+  "script",
+  "lua",
+  "js",
+  "javascript",
+  "metasJavaScript",
+  "blockly",
+  "workspace",
+]);
 
 export class UnityPreviewAssetError extends Error {
   readonly fields: string[] = [];
@@ -242,6 +265,32 @@ const rewriteUnityPreviewStringUrls = (
   );
 };
 
+const rewriteUnityPreviewCodeUrls = (
+  value: string,
+  field: string,
+  proxyOrigin: string,
+  assetBaseOrigin: string,
+  options: UnityPreviewUrlOptions
+): string => {
+  // Source code may start with a Lua method call or a JavaScript label. Do not
+  // treat the whole program as a URL. Keep checking its embedded HTTP(S) URLs.
+  // Blockly's xmlns attributes identify XML namespaces; they are never fetched.
+  const pattern =
+    field === "blockly" || field === "workspace"
+      ? /\bxmlns(?::[\w.-]+)?\s*=\s*(?:"[^"]*"|'[^']*')|https?:\\?\/\\?\/[^\s"'<>]+/gi
+      : /https?:\\?\/\\?\/[^\s"'<>]+/gi;
+  return value.replace(pattern, (match) =>
+    /^xmlns\b/.test(match)
+      ? match
+      : toUnityPreviewDirectAssetUrl(
+          match,
+          proxyOrigin,
+          assetBaseOrigin,
+          options
+        )
+  );
+};
+
 export const rewriteUnityPreviewUrls = (
   value: unknown,
   proxyOrigin: string,
@@ -278,6 +327,26 @@ export const rewriteUnityPreviewUrls = (
             UNITY_PREVIEW_FILE_TEXT_FIELDS.has(key))
         )
           return;
+        if (UNITY_PREVIEW_CODE_FIELDS.has(key)) {
+          record[key] = rewriteUnityPreviewCodeUrls(
+            item,
+            key,
+            proxyOrigin,
+            assetBaseOrigin,
+            options
+          );
+          return;
+        }
+        if (key === "info") {
+          // The API accepts both plain text and JSON in info. Structured info
+          // still uses the recursive validator, including encoded file URLs.
+          try {
+            const info: unknown = JSON.parse(item);
+            if (!info || typeof info !== "object") return;
+          } catch {
+            return;
+          }
+        }
         record[key] = rewriteUnityPreviewStringUrls(
           item,
           proxyOrigin,
