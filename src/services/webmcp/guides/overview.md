@@ -6,6 +6,8 @@
 
 ## 操作步骤
 
+**封面是交付项：强烈建议创建场景、实体后主动补齐清晰贴题的展示图片。** 有生图能力优先生成，否则网络找图或从实际场景／实体截图；已有合格封面可保留。读取 `cover` 主题完成选图、设置和卡片显示核验，避免空图；无法完成时明确报告剩余步骤，尊重用户明确留空的要求。
+
 1. 确定目标场景、模型尺寸、观察方向、按钮功能、媒体顺序、运行端及发布范围。承接已有工作时先检查保存状态和已有验收结果。
 2. 按当前编辑上下文发现工具并读取 schema。实体页用 `xrugc_get_editor_context`，实体脚本页用 `xrugc_get_meta_script`。场景工作区先用常驻辅助工具 `xrugc_get_scene_workspace_context` 确认目标对象与 `scene.ready`；场景编辑工具就绪后再用 `xrugc_get_scene_editor_context` 读取内容。
 3. 编辑场景脚本时，在场景工作区调用常驻辅助工具 `xrugc_open_scene_script_editor`，在同一 URL 打开右侧抽屉并保留场景。返回 `opened` 只表示抽屉已打开，不代表 Blockly 已就绪；再次读取 `xrugc_get_scene_workspace_context`，确认 `script.ready` 后重新发现脚本工具，再用 `xrugc_get_scene_script` 读取工作区。独立 `/verse/script` 路由仍受支持，进入后按该页面实际工具操作。

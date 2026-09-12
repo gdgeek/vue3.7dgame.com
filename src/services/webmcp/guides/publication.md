@@ -6,6 +6,8 @@
 
 ## 操作步骤
 
+交付或发布前，强烈建议按 `cover` 主题检查场景及相关实体的封面，补齐空图并核验卡片实际显示。AI 可生图时优先生成，否则网络找图或从实际内容截图；尊重用户明确留空的要求。封面待补与保存／发布回执分别报告，不能为补图盲目再次发布。
+
 1. 检查各修改工具的状态、`persistence` 与 `editorAcknowledged`。`server_acknowledged` 表示服务器已响应；仍需通过页面重载或受支持的独立读取核对保存内容。切页前处理未保存修改。
 2. 回到场景编辑页并重新发现工具。用 `xrugc_get_scene_editor_context` 确认目标，再读取 `xrugc_check_scene_resource_readiness` 和 `xrugc_check_scene_publication_readiness`，处理缺失引用与阻塞项。
 3. 调用 `xrugc_stage_scene_publication`，核对具体场景和警告；用返回的 `draftId` 调用 `xrugc_complete_scene_publication`，等待页面用户确认；工具先返回 `operationId` 时，用 `xrugc_get_operation_status` 查询最终回执。不得将 `awaiting_confirmation` 或 `submitting` 当作成功。

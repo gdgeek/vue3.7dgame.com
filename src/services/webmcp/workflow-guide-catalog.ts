@@ -1,4 +1,4 @@
-export const WORKFLOW_GUIDE_VERSION = "1.0.2";
+export const WORKFLOW_GUIDE_VERSION = "1.0.4";
 export const WORKFLOW_GUIDE_ID = "xrugc-scene-studio";
 export const WORKFLOW_GUIDE_TOOL_NAME = "xrugc_get_workflow_guide";
 
@@ -12,6 +12,12 @@ export const WORKFLOW_GUIDE_TOPICS = [
     id: "assets",
     title: "模型与素材",
     description: "模型动画、资源上传和外部制作工具",
+  },
+  {
+    id: "cover",
+    title: "封面与展示图片",
+    description:
+      "强烈建议补齐缺失封面、保留合格旧图：可生图则优先生成，否则网络找图或实际截图；上传后须核验封面显示",
   },
   {
     id: "layout",

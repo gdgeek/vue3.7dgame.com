@@ -13,6 +13,7 @@ import {
 const guideLoaders = {
   overview: () => import("./guides/overview.md?raw"),
   assets: () => import("./guides/assets.md?raw"),
+  cover: () => import("./guides/cover.md?raw"),
   layout: () => import("./guides/layout.md?raw"),
   interaction: () => import("./guides/interaction.md?raw"),
   audio: () => import("./guides/audio.md?raw"),
@@ -30,6 +31,9 @@ const contextTools: Record<WorkflowGuidePage, string> = {
 
 const siteUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
+const coverRecommendation =
+  "强烈建议：新建或展示场景、实体时，补齐清晰贴题的封面，避免空图；已有合格封面保留。AI 有生图能力时优先生成，否则查找可使用的网络图片，或从实际场景／实体截图。素材上传不等于封面设置，须按实际可用工具或页面入口关联到目标并核验卡片显示，不假定客户端具备生图或自动设封面能力。未完成时明确报告待补；这不是保存／发布门禁，尊重用户明确留空的选择。";
+
 export const getWorkflowGuideEntry = (page: WorkflowGuidePage) => ({
   tool: WORKFLOW_GUIDE_TOOL_NAME,
   guideId: WORKFLOW_GUIDE_ID,
@@ -38,6 +42,12 @@ export const getWorkflowGuideEntry = (page: WorkflowGuidePage) => ({
   input: { topic: "overview" },
   indexUrl: siteUrl(WORKFLOW_GUIDE_INDEX_PATH),
   documentationUrl: siteUrl(workflowGuidePath("overview")),
+  coverGuidance: {
+    priority: "strong_recommendation",
+    recommendation: coverRecommendation,
+    input: { topic: "cover" },
+    documentationUrl: siteUrl(workflowGuidePath("cover")),
+  },
 });
 
 /** Add exactly once to the primary tool set, never to secondary iframe tools. */
@@ -47,12 +57,18 @@ export const withWorkflowGuide = (
 ): WebMcpTool[] => {
   const primaryTools = tools.map(({ name }) => name);
   return [
-    ...tools,
+    ...tools.map((tool) =>
+      tool.name === contextTools[page]
+        ? {
+            ...tool,
+            description: `${tool.description} ${coverRecommendation} 详见 ${WORKFLOW_GUIDE_TOOL_NAME} 的 cover 主题。`,
+          }
+        : tool
+    ),
     {
       name: WORKFLOW_GUIDE_TOOL_NAME,
       title: "读取 XRUGC 场景制作指南",
-      description:
-        "制作或修改 XRUGC 场景时，按主题读取本站维护的操作流程、前置条件和验收方法。首次可读取 overview，再按需读取布局、交互、音频、保存发布或排障指南；无需在客户端安装场景制作 Skill。只返回参考资料，不编辑、上传、安装软件或发布场景。",
+      description: `制作或修改 XRUGC 场景、实体时，先读取 overview，再按需读取 cover 封面、素材、布局、交互、音频、保存发布或排障指南；无需在客户端安装场景制作 Skill。${coverRecommendation} 只返回参考资料，不编辑、上传、安装软件或发布场景。`,
       inputSchema: {
         type: "object",
         properties: {

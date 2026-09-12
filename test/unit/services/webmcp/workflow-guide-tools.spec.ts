@@ -37,10 +37,10 @@ describe("site workflow guide", () => {
       expect(result).toMatchObject({
         topic: id,
         title,
-        version: "1.0.2",
+        version: "1.0.4",
         page: "entity",
         language: "zh-CN",
-        documentationUrl: `/webmcp/scene-studio/1.0.2/${id}.md`,
+        documentationUrl: `/webmcp/scene-studio/1.0.4/${id}.md`,
         primaryPageTools: ["example_edit"],
         content: expect.stringMatching(/^# /),
       });
@@ -95,6 +95,58 @@ describe("site workflow guide", () => {
       expect(result).toMatchObject({
         ...getWorkflowGuideEntry(page),
         contextTool,
+      });
+    }
+  );
+
+  it.each([
+    ["entity", "xrugc_get_editor_context"],
+    ["scene", "xrugc_get_scene_editor_context"],
+    ["entity-script", "xrugc_get_meta_script"],
+    ["scene-script", "xrugc_get_scene_script"],
+  ] as const)(
+    "surfaces cover guidance at %s discovery without changing tool execution",
+    async (page, name) => {
+      const result = { workflowGuide: getWorkflowGuideEntry(page) };
+      const execute = vi.fn().mockResolvedValue(result);
+      const context: WebMcpTool = {
+        name,
+        description: "Read current context.",
+        inputSchema: { type: "object", additionalProperties: false },
+        annotations: { readOnlyHint: true },
+        execute,
+      };
+      const edit: WebMcpTool = {
+        name: "example_edit",
+        description: "Keep existing confirmation.",
+        inputSchema: {},
+        execute: vi.fn(),
+      };
+      const [reader, unchangedEdit, guide] = withWorkflowGuide(
+        [context, edit],
+        page
+      );
+      expect(reader.description).toContain("强烈建议");
+      expect(reader.description).toContain("生图能力时优先生成");
+      expect(reader.description).toContain("网络图片");
+      expect(reader.description).toContain("截图");
+      expect(guide.description).toContain("cover");
+      expect(context.description).toBe("Read current context.");
+      expect(reader.inputSchema).toBe(context.inputSchema);
+      expect(reader.annotations).toBe(context.annotations);
+      expect(unchangedEdit).toBe(edit);
+      const input = {};
+      const execution = { signal: new AbortController().signal };
+      await expect(reader.execute(input, execution)).resolves.toBe(result);
+      expect(execute).toHaveBeenCalledOnce();
+      expect(execute).toHaveBeenCalledWith(input, execution);
+      expect(edit.execute).not.toHaveBeenCalled();
+      const metadata = result.workflowGuide.coverGuidance;
+      expect(metadata.priority).toBe("strong_recommendation");
+      const cover = await guide.execute(metadata.input);
+      expect(cover).toMatchObject({
+        topic: "cover",
+        documentationUrl: metadata.documentationUrl,
       });
     }
   );
