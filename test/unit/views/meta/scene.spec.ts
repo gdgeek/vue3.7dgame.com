@@ -13,6 +13,7 @@ const mockPostStandardMessage = vi.fn();
 const mockSendRequest = vi.fn();
 let mockHostSession = "test-session";
 const mockGetMeta = vi.fn();
+const mockGetPolygen = vi.fn();
 const mockPutMeta = vi.fn();
 const mockGetVerse = vi.fn();
 const mockPutVerse = vi.fn();
@@ -24,6 +25,17 @@ const mockGetVerses = vi.fn();
 const mockRegisterToolbar = vi.fn();
 const mockUpdateToolbarStatus = vi.fn();
 const mockUnregisterToolbar = vi.fn();
+const mockDrawerOpen = vi.fn();
+const mockDrawerAllowClose = ref(true);
+const mockDrawerState = reactive({
+  open: false,
+  ready: false,
+  dirty: false,
+  saving: false,
+  tab: null as "blockly" | "script" | null,
+});
+let mockReadDrawerData: () => unknown = () => undefined;
+let mockEmitDrawerSaved: (result: unknown) => void = () => {};
 
 vi.mock("vue-router", () => ({
   createRouter: vi.fn(() => ({
@@ -81,7 +93,7 @@ vi.mock("@/api/v1/verse", () => ({
 vi.mock("@/api/v1/resources", () => ({
   getAudio: vi.fn(),
   getParticle: vi.fn(),
-  getPolygen: vi.fn(),
+  getPolygen: mockGetPolygen,
   getPicture: vi.fn(),
   getResources: vi.fn(),
   getVideo: vi.fn(),
@@ -224,6 +236,54 @@ vi.mock("@/components/ScriptDraftDialog.vue", () => ({
   }),
 }));
 
+vi.mock("@/components/VerseScriptDrawer.vue", () => ({
+  default: defineComponent({
+    name: "VerseScriptDrawerStub",
+    template: "<div class='verse-script-drawer-stub'></div>",
+  }),
+}));
+
+vi.mock("@/components/MetaScriptDrawer.vue", () => ({
+  default: defineComponent({
+    name: "MetaScriptDrawerStub",
+    props: {
+      metaId: Number,
+      title: String,
+      metaData: Object,
+    },
+    emits: ["closed", "saved"],
+    setup(props, { expose, emit }) {
+      mockReadDrawerData = () => props.metaData;
+      mockEmitDrawerSaved = (result) => emit("saved", result);
+      expose({
+        open: () => {
+          mockDrawerOpen();
+          mockDrawerState.open = true;
+          mockDrawerState.tab = "blockly";
+        },
+        close: async (assertActive: () => void = () => {}) => {
+          assertActive();
+          if (!mockDrawerAllowClose.value) return false;
+          mockDrawerState.open = false;
+          mockDrawerState.ready = false;
+          mockDrawerState.tab = null;
+          emit("closed");
+          return true;
+        },
+        getState: () => ({ ...mockDrawerState }),
+        resolveBeforeLeave: async () => mockDrawerAllowClose.value,
+        closeAfterNavigation: async () => {
+          mockDrawerState.open = false;
+          emit("closed");
+          return true;
+        },
+      });
+      return {};
+    },
+    template: "<div class='meta-script-drawer-stub'></div>",
+  }),
+}));
+
 vi.mock("@/components/MrPP/MetaDialog.vue", () => ({
   default: defineComponent({ template: "<div />" }),
 }));
@@ -329,6 +389,15 @@ async function mountSceneView(kind: "meta" | "verse" = "meta") {
 
   return {
     el,
+    get metaDetail() {
+      return (
+        app._instance!.setupState as {
+          metaDetail: ReturnType<typeof makeMetaResponse>["data"] & {
+            metaCode?: { blockly: string; lua?: string; js?: string };
+          };
+        }
+      ).metaDetail;
+    },
     get saving() {
       return (app._instance!.setupState as { isSavingVersion: boolean })
         .isSavingVersion;
@@ -392,6 +461,7 @@ describe("views/meta/scene.vue", () => {
     mockSendRequest.mockReset();
     mockSendRequest.mockReturnValue("webmcp-request");
     mockGetMeta.mockReset();
+    mockGetPolygen.mockReset();
     mockPutMeta.mockReset();
     mockPutMeta.mockResolvedValue({
       data: { serverRevision: `sha256:${"b".repeat(64)}` },
@@ -400,6 +470,17 @@ describe("views/meta/scene.vue", () => {
     mockRegisterToolbar.mockReset();
     mockUpdateToolbarStatus.mockReset();
     mockUnregisterToolbar.mockReset();
+    mockDrawerOpen.mockReset();
+    mockDrawerAllowClose.value = true;
+    Object.assign(mockDrawerState, {
+      open: false,
+      ready: false,
+      dirty: false,
+      saving: false,
+      tab: null,
+    });
+    mockReadDrawerData = () => undefined;
+    mockEmitDrawerSaved = () => {};
 
     mockGetMeta.mockImplementation(async (id: number) => makeMetaResponse(id));
     mockGetVerses.mockResolvedValue({
@@ -417,6 +498,324 @@ describe("views/meta/scene.vue", () => {
     vi.useRealTimers();
     delete (document as Document & { modelContext?: unknown }).modelContext;
     vi.resetModules();
+  });
+
+  describe("entity script drawer host", () => {
+    const workspaceTool = "xrugc_get_entity_workspace_context";
+    const openTool = "xrugc_open_entity_script_editor";
+    const closeTool = "xrugc_close_entity_script_editor";
+    const contextTool = "xrugc_get_editor_context";
+    const previousRevision = `sha256:${"a".repeat(64)}`;
+    const nextRevision = `sha256:${"c".repeat(64)}`;
+    const scriptCode = {
+      blockly: "<xml><block type='entity_action'/></xml>",
+      lua: "print('entity')",
+      js: "console.log('entity')",
+    };
+    const liveData = {
+      parameters: { uuid: "meta-1", name: "Unsaved 3D edits" },
+      children: { entities: [{ parameters: { uuid: "live-node" } }] },
+    };
+    const liveEvents = [{ id: "unsaved-event", action: "show" }];
+    const respondToSnapshot = (
+      overrides: Record<string, unknown> = {},
+      source = document.querySelector("iframe")?.contentWindow
+    ) => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          source,
+          origin: "https://editor.example.test",
+          data: {
+            type: "RESPONSE",
+            requestId: "webmcp-request",
+            payload: {
+              action: "webmcp-get-entity-state",
+              hostSessionId: "test-session",
+              ok: true,
+              entityId: 1,
+              meta: liveData,
+              events: liveEvents,
+              changed: true,
+              loading: false,
+              entityVersion: "entity-live",
+              contextGeneration: 1,
+              ...overrides,
+            },
+          },
+        })
+      );
+    };
+    const openReadyDrawer = async () => {
+      const registry = registerTools();
+      const page = await mountSceneView();
+      sendReady("entity-drawer-document");
+      await flushAsync();
+      const opening = registry.get(openTool)!.execute({});
+      respondToSnapshot();
+      await opening;
+      await nextTick();
+      return { registry, page };
+    };
+
+    it("rejects opening until the entity editor has initialized", async () => {
+      const registry = registerTools();
+      await mountSceneView();
+      await expect(
+        registry.get(workspaceTool)!.execute({})
+      ).resolves.toMatchObject({
+        entityId: 1,
+        entity: { ready: false },
+        script: { open: false },
+      });
+      await expect(registry.get(openTool)!.execute({})).rejects.toThrow(
+        "实体编辑器尚未加载完成"
+      );
+      expect(mockDrawerOpen).not.toHaveBeenCalled();
+      expect(mockSendRequest).not.toHaveBeenCalled();
+      expect(mockPutMeta).not.toHaveBeenCalled();
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it("passes a live unsaved snapshot to the drawer without navigation, saving or reinitialization", async () => {
+      const { registry } = await openReadyDrawer();
+      expect(mockSendRequest).toHaveBeenCalledWith(
+        "webmcp-get-entity-state",
+        {}
+      );
+      expect(mockReadDrawerData()).toMatchObject({
+        id: 1,
+        serverRevision: previousRevision,
+        data: liveData,
+        events: liveEvents,
+      });
+      expect((mockReadDrawerData() as { data: unknown }).data).not.toBe(
+        liveData
+      );
+      expect(mockDrawerOpen).toHaveBeenCalledOnce();
+      expect(mockDirty.value).toBe(true);
+      expect(mockPutMeta).not.toHaveBeenCalled();
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockGetMeta).toHaveBeenCalledOnce();
+      expect(initCalls()).toHaveLength(1);
+      await expect(
+        registry.get(workspaceTool)!.execute({})
+      ).resolves.toMatchObject({
+        activeEditor: "entity-script",
+        entity: { ready: true, dirty: true },
+        script: { open: true, ready: false, tab: "blockly" },
+      });
+    });
+
+    it("hydrates newly added unsaved resources and excludes deleted references without changing the host snapshot", async () => {
+      const keptResource = { id: 101, type: "polygen", name: "Kept model" };
+      const addedResource = { id: 202, type: "polygen", name: "New model" };
+      const deletedResource = {
+        id: 303,
+        type: "polygen",
+        name: "Deleted model",
+      };
+      mockGetMeta.mockResolvedValueOnce({
+        data: {
+          ...makeMetaResponse(1).data,
+          resources: [keptResource, deletedResource],
+        },
+      });
+      mockGetPolygen.mockResolvedValueOnce({ data: addedResource });
+      const registry = registerTools();
+      const page = await mountSceneView();
+      sendReady("entity-drawer-document");
+      await flushAsync();
+      const opening = registry.get(openTool)!.execute({});
+      respondToSnapshot({
+        meta: {
+          ...liveData,
+          children: {
+            entities: [
+              { type: "Polygen", parameters: { resource: 101 } },
+              { type: "Polygen", parameters: { resource: 202 } },
+              { type: "Polygen", parameters: { resource: 202 } },
+            ],
+          },
+        },
+      });
+      await opening;
+      await nextTick();
+      expect(mockGetPolygen).toHaveBeenCalledOnce();
+      expect(mockGetPolygen).toHaveBeenCalledWith(202);
+      expect(mockReadDrawerData()).toMatchObject({
+        resources: [keptResource, addedResource],
+      });
+      expect(page.metaDetail.resources).toEqual([
+        keptResource,
+        deletedResource,
+      ]);
+      expect(mockDirty.value).toBe(true);
+      expect(mockPutMeta).not.toHaveBeenCalled();
+      expect(initCalls()).toHaveLength(1);
+    });
+
+    it("does not open a stale drawer when the owner changes while resource hydration is pending", async () => {
+      const addedResource = { id: 202, type: "polygen", name: "New model" };
+      let resolveResource!: (value: { data: typeof addedResource }) => void;
+      mockGetPolygen.mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveResource = resolve;
+        })
+      );
+      const registry = registerTools();
+      await mountSceneView();
+      sendReady("entity-drawer-document");
+      await flushAsync();
+      const opening = registry.get(openTool)!.execute({});
+      const rejected = expect(opening).rejects.toThrow(/工作区已切换|会话/);
+      respondToSnapshot({
+        meta: {
+          ...liveData,
+          children: {
+            entities: [{ type: "Polygen", parameters: { resource: 202 } }],
+          },
+        },
+      });
+      await flushAsync();
+      expect(mockGetPolygen).toHaveBeenCalledOnce();
+      expect(mockGetPolygen).toHaveBeenCalledWith(202);
+      expect(mockDrawerOpen).not.toHaveBeenCalled();
+      mockRoute.query.id = "2";
+      await nextTick();
+      resolveResource({ data: addedResource });
+      await rejected;
+      expect(mockDrawerOpen).not.toHaveBeenCalled();
+      expect(mockReadDrawerData()).toBeUndefined();
+      expect(mockPutMeta).not.toHaveBeenCalled();
+      await expect(
+        registry.get(workspaceTool)!.execute({})
+      ).resolves.toMatchObject({
+        entityId: 2,
+        activeEditor: "entity",
+        script: { open: false },
+      });
+    });
+
+    it("pauses entity tools while keeping workspace helpers and restores them on close", async () => {
+      const registry = registerTools();
+      await mountSceneView();
+      sendReady("entity-drawer-document");
+      await flushAsync();
+      const staleContext = registry.get(contextTool)!;
+      const helpers = [workspaceTool, openTool, closeTool].map((name) =>
+        registry.get(name)
+      );
+      const opening = registry.get(openTool)!.execute({});
+      respondToSnapshot();
+      await opening;
+      expect(registry.has(contextTool)).toBe(false);
+      await expect(staleContext.execute({})).rejects.toThrow();
+      expect(
+        [workspaceTool, openTool, closeTool].map((name) => registry.get(name))
+      ).toEqual(helpers);
+      await expect(registry.get(closeTool)!.execute({})).resolves.toMatchObject(
+        {
+          status: "closed",
+          context: { activeEditor: "entity", script: { open: false } },
+        }
+      );
+      expect(registry.has(contextTool)).toBe(true);
+      expect(registry.get(contextTool)).not.toBe(staleContext);
+      expect(
+        [workspaceTool, openTool, closeTool].map((name) => registry.get(name))
+      ).toEqual(helpers);
+      expect(mockPutMeta).not.toHaveBeenCalled();
+      expect(initCalls()).toHaveLength(1);
+    });
+
+    it("keeps the drawer active and entity tools paused when closing is cancelled", async () => {
+      const { registry } = await openReadyDrawer();
+      mockDrawerAllowClose.value = false;
+      mockDrawerState.dirty = true;
+      await expect(registry.get(closeTool)!.execute({})).resolves.toMatchObject(
+        {
+          status: "cancelled",
+          rediscoverTools: false,
+          context: {
+            activeEditor: "entity-script",
+            script: { open: true, dirty: true },
+          },
+        }
+      );
+      expect(registry.has(contextTool)).toBe(false);
+      expect(mockPutMeta).not.toHaveBeenCalled();
+    });
+
+    it("adopts a matching script revision and code without clearing unsaved entity edits", async () => {
+      const { page } = await openReadyDrawer();
+      const before = JSON.parse(JSON.stringify(page.metaDetail));
+      mockUnconfirmedPersistence.value = true;
+      mockEmitDrawerSaved({
+        entityId: 1,
+        previousRevision,
+        serverRevision: nextRevision,
+        metaCode: scriptCode,
+      });
+      await nextTick();
+      expect(page.metaDetail).toEqual({
+        ...before,
+        serverRevision: nextRevision,
+        metaCode: scriptCode,
+      });
+      expect(mockDirty.value).toBe(true);
+      expect(mockUnconfirmedPersistence.value).toBe(true);
+      expect(mockPutMeta).not.toHaveBeenCalled();
+      expect(initCalls()).toHaveLength(1);
+    });
+
+    it.each([
+      { entityId: 2, previousRevision },
+      { entityId: 1, previousRevision: `sha256:${"b".repeat(64)}` },
+    ])(
+      "ignores a script save from a different owner or revision: %j",
+      async (saved) => {
+        const { page } = await openReadyDrawer();
+        const before = JSON.parse(JSON.stringify(page.metaDetail));
+        mockEmitDrawerSaved({
+          ...saved,
+          serverRevision: nextRevision,
+          metaCode: scriptCode,
+        });
+        await nextTick();
+        expect(page.metaDetail).toEqual(before);
+        expect(mockDirty.value).toBe(true);
+        expect(mockPutMeta).not.toHaveBeenCalled();
+        expect(initCalls()).toHaveLength(1);
+      }
+    );
+
+    it("invalidates a pending snapshot when the owner changes before its response", async () => {
+      const registry = registerTools();
+      await mountSceneView();
+      sendReady("entity-drawer-document");
+      await flushAsync();
+      const oldFrame = document.querySelector("iframe")?.contentWindow;
+      const opening = registry.get(openTool)!.execute({});
+      const rejected =
+        expect(opening).rejects.toThrow(/目标已改变|工作区已切换|会话/);
+      mockRoute.query.id = "2";
+      await nextTick();
+      respondToSnapshot({}, oldFrame);
+      await rejected;
+      expect(mockDrawerOpen).not.toHaveBeenCalled();
+      expect(mockReadDrawerData()).toBeUndefined();
+      expect(mockPutMeta).not.toHaveBeenCalled();
+      sendReady("next-entity-document");
+      await flushAsync();
+      await expect(
+        registry.get(workspaceTool)!.execute({})
+      ).resolves.toMatchObject({
+        entityId: 2,
+        activeEditor: "entity",
+        entity: { ready: true, dirty: false },
+        script: { open: false },
+      });
+    });
   });
 
   it("reloads meta data when the route id changes and the iframe becomes ready again", async () => {

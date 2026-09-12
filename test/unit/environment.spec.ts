@@ -1,15 +1,34 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { runInNewContext } from "node:vm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("runtime deployment environment", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     Reflect.deleteProperty(window, "__ENV__");
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     Reflect.deleteProperty(window, "__ENV__");
+  });
+
+  it("lets the selected Vite mode provide plugin URLs through the development runtime placeholder", async () => {
+    const runtimeWindow: Record<string, unknown> = {};
+    runInNewContext(
+      readFileSync(resolve(process.cwd(), "public/__env.js"), "utf8"),
+      { window: runtimeWindow }
+    );
+    Reflect.set(window, "__ENV__", runtimeWindow.__ENV__);
+    vi.stubEnv("VITE_APP_BLOCKLY_URL", "https://blockly.plugins.xrugc.com");
+    vi.stubEnv("VITE_APP_EDITOR_URL", "https://editor.plugins.xrugc.com");
+    const env = (await import("@/environment")).default;
+    expect(env.blockly).toBe("https://blockly.plugins.xrugc.com");
+    expect(env.editor).toBe("https://editor.plugins.xrugc.com");
   });
 
   it("defaults to cloud when no runtime config is loaded", async () => {

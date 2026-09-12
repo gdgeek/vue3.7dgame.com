@@ -306,6 +306,7 @@ export default {
         coverUploadFailed: "อัปโหลดรูปปกล้มเหลว",
       },
       script: {
+        drawer: { versions: "ประวัติเวอร์ชัน", preview: "เรียกใช้ฉาก" },
         title: "สคริปต์",
         save: "บันทึก",
         error1: "ไม่มีข้อมูล",

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
+    "dev:online": "vite --mode online",
     "build": "vue-tsc --noEmit && vite build --mode production",
     "build:staging": "vue-tsc --noEmit && vite build --mode staging",
     "build:mrpp_com": "vue-tsc --noEmit && vite build --mode mrpp_com",

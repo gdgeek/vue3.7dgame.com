@@ -1,11 +1,11 @@
 <template>
-  <div class="script">
+  <div class="script" :class="{ 'script--embedded': embedded }">
     <el-container>
       <el-main>
         <el-card class="box-card">
           <el-container>
             <div class="script-tabs-wrapper">
-              <div class="script-editor-toolbar">
+              <div v-if="!embedded" class="script-editor-toolbar">
                 <div
                   class="script-mode-tabs"
                   role="tablist"
@@ -90,7 +90,7 @@
               <el-tabs
                 v-model="activeName"
                 class="script-main-tabs"
-                type="card"
+                :type="embedded ? '' : 'card'"
                 style="width: 100%"
               >
                 <el-tab-pane
@@ -111,7 +111,7 @@
                       style="width: 100%; height: 100%; padding: 0; margin: 0"
                       class="blockly-editor-frame"
                       scrolling="no"
-                      id="editor"
+                      :id="embedded ? 'verse-script-editor' : 'editor'"
                       ref="editor"
                       :src="src"
                       @load="handleEditorFrameLoad"
@@ -294,6 +294,17 @@ import {
 import { sceneWriteFailure } from "@/services/webmcp/scene-write-failure";
 import { createIframeRpc } from "@/utils/iframeRpc";
 
+const props = withDefaults(
+  defineProps<{
+    embedded?: boolean;
+    verseId?: number;
+    sceneData?: unknown;
+    beforePublish?: () => Promise<void>;
+  }>(),
+  { embedded: false }
+);
+const emit = defineEmits<{ close: []; saved: [] }>();
+
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
 const verse = ref<VerseData>();
@@ -301,7 +312,7 @@ const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const route = useRoute();
 const router = useRouter();
-const id = computed(() => parseInt(route.query.id as string));
+const id = computed(() => props.verseId ?? parseInt(route.query.id as string));
 const metasJavaScriptCode = ref("");
 let unityPreviewRuntimeVerseId: number | null = null;
 // map 用于记录每个 meta_id 在场景中对应的实体列表
@@ -350,6 +361,10 @@ const loadedMetaOptions = computed<LoadedMetaOption[]>(() => {
 });
 
 const goBackToSceneEditor = async () => {
+  if (props.embedded) {
+    emit("close");
+    return;
+  }
   const canLeave = await resolveUnsavedChangesBeforeLeave({
     showDiscardInfo: false,
   });
@@ -375,10 +390,12 @@ const goToLoadedMetaEditor = async (metaId: number, metaName?: string) => {
     `${sceneEditorTitle}【${metaName || fallbackName}】`
   );
 
-  router.push({
-    path: "/meta/scene",
-    query: { id: metaId, title },
-  });
+  const target = { path: "/meta/scene", query: { id: metaId, title } };
+  if (props.embedded) {
+    window.open(router.resolve(target).href, "_blank", "noopener");
+  } else {
+    router.push(target);
+  }
 };
 
 const handleLoadedMetaChange = async (metaId: number) => {
@@ -565,6 +582,7 @@ const postScript = async (
   );
   if (verse.value === savedOwner) applyWriteRevision(savedOwner, savedResponse);
 
+  emit("saved");
   if (context.trigger === "manual") {
     Message.success(t("verse.view.script.success"));
     if (!hasPublishableSceneContent(verse.value)) {
@@ -585,6 +603,7 @@ const postScript = async (
       }
     )
       .then(async () => {
+        await props.beforePublish?.();
         await takePhoto(
           id.value,
           createWriteOptions(verse.value?.serverRevision)
@@ -635,6 +654,7 @@ const {
   isReady,
   copyCode,
 } = useScriptEditorBase({
+  registerRouteGuard: !props.embedded,
   luaLocalVar: "verse",
   i18nKeys: {
     error1: "verse.view.script.error1",
@@ -1079,6 +1099,7 @@ const registerScriptBlockTools = () => {
 
 const activateToolbar = () => {
   isScriptViewActive = true;
+  if (props.embedded) return;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
@@ -1155,12 +1176,27 @@ const ensureUnityPreviewRuntimeData = async (signal?: AbortSignal) => {
     getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "lua", signal),
     getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "js", signal),
   ]);
-  if (signal?.aborted || requestedId !== id.value) return;
+  if (signal?.aborted || !isScriptViewActive || requestedId !== id.value)
+    return;
 
   verseMetasWithLuaCodeData.value =
     responseLua.data as unknown as VerseMetasWithJsCode;
   verseMetasWithJsCodeData.value =
     responseJs.data as unknown as VerseMetasWithJsCode;
+  if (props.embedded && props.sceneData) {
+    // Include newly placed instances and exclude deleted ones without saving/reloading the scene.
+    for (const runtime of [
+      verseMetasWithLuaCodeData.value,
+      verseMetasWithJsCodeData.value,
+    ]) {
+      const savedMetas = new Map(
+        (runtime.metas ?? []).map((meta) => [Number(meta.id), meta])
+      );
+      runtime.metas = (verse.value?.metas ?? []).map(
+        (meta) => savedMetas.get(Number(meta.id)) ?? meta
+      );
+    }
+  }
   const previewMetas = Array.isArray(verseMetasWithJsCodeData.value.metas)
     ? verseMetasWithJsCodeData.value.metas
     : [];
@@ -1185,7 +1221,7 @@ const buildUnityPreviewPayload = () => {
       name: verse.value?.name ?? "",
       description: verse.value?.description ?? "",
       data: normalizeUnityPreviewData(
-        runtimeData?.data ?? verse.value?.data ?? null
+        props.sceneData ?? runtimeData?.data ?? verse.value?.data ?? null
       ),
     },
     resources: cloneForUnityPreview(runtimeData?.resources ?? []),
@@ -1216,7 +1252,8 @@ const handleUnityPreviewClosed = unityPreview.handleClosed;
 
 // ---------- 加载 Verse 脚本会话 ----------
 const loadVerseScriptSession = async () => {
-  if (!isScriptViewActive || route.name !== "Script") return;
+  if (!isScriptViewActive || (!props.embedded && route.name !== "Script"))
+    return;
   if (!Number.isFinite(id.value)) return;
   const requestedId = id.value;
   const loadSequence = ++verseLoadSequence;
@@ -1233,6 +1270,32 @@ const loadVerseScriptSession = async () => {
     );
     if (loadSequence !== verseLoadSequence || requestedId !== id.value) return;
     verse.value = response.data;
+    if (props.embedded && props.sceneData) {
+      verse.value = { ...verse.value, data: props.sceneData };
+      const modules =
+        (props.sceneData as VerseEntityNode).children?.modules ?? [];
+      const metaIds = [
+        ...new Set(
+          modules
+            .map((item) => Number(item.parameters?.meta_id))
+            .filter((value) => value > 0)
+        ),
+      ];
+      const knownMetas = new Map(
+        (verse.value.metas ?? []).map((meta) => [Number(meta.id), meta])
+      );
+      const metas = await Promise.all(
+        metaIds.map(
+          async (metaId) =>
+            knownMetas.get(metaId) ??
+            (await getMeta(metaId, { expand: "events,metaCode,resources" }))
+              .data
+        )
+      );
+      if (loadSequence !== verseLoadSequence || requestedId !== id.value)
+        return;
+      verse.value = { ...verse.value, metas };
+    }
     logger.error(verse.value);
     logger.log("Verse", verse.value);
     if (verse.value && verse.value.data) {
@@ -1270,25 +1333,27 @@ onActivated(() => {
   }
 });
 
-onBeforeRouteUpdate(async (to, from, next) => {
-  if (to.path !== from.path || to.query.id === from.query.id) {
-    next();
-    return;
-  }
-  const canLeave = await resolveUnsavedChangesBeforeLeave({
-    showDiscardInfo: true,
+if (!props.embedded) {
+  onBeforeRouteUpdate(async (to, from, next) => {
+    if (to.path !== from.path || to.query.id === from.query.id) {
+      next();
+      return;
+    }
+    const canLeave = await resolveUnsavedChangesBeforeLeave({
+      showDiscardInfo: true,
+    });
+    if (canLeave) await unityPreview.close();
+    next(canLeave ? undefined : false);
   });
-  if (canLeave) await unityPreview.close();
-  next(canLeave ? undefined : false);
-});
-onBeforeRouteLeave(async () => {
-  await unityPreview.close();
-});
+  onBeforeRouteLeave(async () => {
+    await unityPreview.close();
+  });
+}
 
 watch(id, (nextId, previousId) => {
   if (
     isScriptViewActive &&
-    route.name === "Script" &&
+    (props.embedded || route.name === "Script") &&
     Number.isFinite(nextId) &&
     nextId !== previousId
   ) {
@@ -1304,6 +1369,8 @@ const getSceneRuntimePreviewStatus = () => ({
 });
 
 const startSceneRuntimePreview = async () => {
+  if (props.embedded)
+    throw new Error("请先关闭脚本编辑抽屉，再从场景编辑器运行场景");
   const session = getEditorInitState()?.hostSessionId;
   if (!isScriptViewActive || !editorContentReady.value || !verse.value)
     throw new Error("场景脚本尚未准备完成");
@@ -1331,6 +1398,8 @@ const runSceneRuntimePreview = () => {
 
 const registerRuntimeTools = () => {
   runtimeWebMcpLifecycle?.abort();
+  runtimeWebMcpLifecycle = null;
+  if (props.embedded) return;
   runtimeWebMcpLifecycle = registerWebMcpTools(
     createSceneRuntimePreviewTools({
       getPreviewStatus: getSceneRuntimePreviewStatus,
@@ -1358,6 +1427,8 @@ onActivated(() => {
 });
 onDeactivated(stopWebMcpTools);
 onBeforeUnmount(() => {
+  isScriptViewActive = false;
+  verseLoadSequence += 1;
   stopWebMcpTools();
   window.removeEventListener("message", handleWebMcpEditorMessage);
 });
@@ -1369,9 +1440,87 @@ watch([id, editorFrameKey, editorContentReady], () => {
     registerRuntimeTools();
   }
 });
+defineExpose({
+  save,
+  openVersionDialog,
+  saveable,
+  isSaving,
+  editorContentLoading,
+  hasUnsavedChanges,
+  activeName,
+  resolveBeforeClose: () =>
+    resolveUnsavedChangesBeforeLeave({ showDiscardInfo: true }),
+});
 </script>
 
 <style scoped>
+.script--embedded,
+.script--embedded > .el-container,
+.script--embedded > .el-container > .el-main > .box-card,
+.script--embedded
+  > .el-container
+  > .el-main
+  > .box-card
+  :deep(> .el-card__body),
+.script--embedded .script-tabs-wrapper,
+.script--embedded .script-main-tabs {
+  height: 100%;
+  min-height: 0;
+}
+
+.script--embedded > .el-container > .el-main {
+  padding: 0;
+}
+
+.script--embedded > .el-container > .el-main > .box-card {
+  border: 0;
+  box-shadow: none;
+}
+
+.script--embedded :deep(.el-card__body) {
+  padding: 16px 24px;
+}
+
+.script--embedded
+  > .el-container
+  > .el-main
+  > .box-card
+  :deep(> .el-card__body > .el-container) {
+  height: 100%;
+}
+
+.script--embedded .script-main-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__header) {
+  flex-shrink: 0;
+  order: -1;
+  margin: 0 0 12px;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__content) {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__content > .el-tab-pane) {
+  height: 100%;
+}
+
+.script--embedded .blockly-editor-main {
+  height: 100%;
+  min-height: 0;
+}
+
+@media (width <= 767px) {
+  .script--embedded :deep(.el-card__body) {
+    padding: 12px;
+  }
+}
+
 .icon {
   margin-right: 5px;
 }
@@ -1448,7 +1597,7 @@ watch([id, editorFrameKey, editorContentReady], () => {
   background: transparent !important;
 }
 
-.script-tabs-wrapper :deep(.el-tabs__header) {
+.script:not(.script--embedded) .script-tabs-wrapper :deep(.el-tabs__header) {
   display: none !important;
 }
 

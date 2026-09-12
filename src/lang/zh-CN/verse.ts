@@ -233,6 +233,7 @@ export default {
         coverUploadFailed: "封面图片上传失败",
       },
       script: {
+        drawer: { versions: "版本历史", preview: "运行场景" },
         title: "脚本",
         save: "保存",
         error1: "没有信息",

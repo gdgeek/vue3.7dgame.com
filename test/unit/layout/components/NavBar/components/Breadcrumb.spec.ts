@@ -103,7 +103,7 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
     ["/verse/script", "测试场景", "route.project.scriptEditor"],
     ["/verse/scene", "测试场景", "route.project.sceneEditor"],
   ])(
-    "keeps the breadcrumb chain and renders the current mode as a tag for %s",
+    "keeps the breadcrumb chain and the expected mode tag for %s",
     async (path, name, modeLabel) => {
       mockRoute.meta = { title: "编辑器" };
       mockRoute.path = path;
@@ -119,11 +119,16 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
       expect(el.querySelector(".crumb-link.is-primary")?.textContent).toContain(
         name
       );
-      expect(modeTag?.textContent).toContain(modeLabel);
-      expect(modeTag?.getAttribute("aria-current")).toBe("page");
-      expect(modeTag?.previousElementSibling?.classList).not.toContain(
-        "crumb-separator"
-      );
+      if (path === "/verse/scene") {
+        expect(modeTag).toBeNull();
+      } else {
+        expect(modeTag?.getAttribute("aria-label")).toBe(modeLabel);
+        expect(modeTag?.textContent).toContain(modeLabel);
+        expect(modeTag?.getAttribute("aria-current")).toBe("page");
+        expect(modeTag?.previousElementSibling?.classList).not.toContain(
+          "crumb-separator"
+        );
+      }
     }
   );
 
