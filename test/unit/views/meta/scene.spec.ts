@@ -11,10 +11,14 @@ const mockRoute = reactive({
 const mockPush = vi.fn();
 const mockPostStandardMessage = vi.fn();
 const mockSendRequest = vi.fn();
+let mockHostSession = "test-session";
 const mockGetMeta = vi.fn();
 const mockPutMeta = vi.fn();
 const mockGetVerse = vi.fn();
+const mockPutVerse = vi.fn();
 const mockDirty = ref(false);
+const mockUnconfirmedPersistence = ref(false);
+const mockResolveLeaveSave = vi.fn();
 const mockAppStore = reactive({ language: "zh-CN" });
 const mockGetVerses = vi.fn();
 const mockRegisterToolbar = vi.fn();
@@ -70,7 +74,7 @@ vi.mock("@/api/v1/files", () => ({
 vi.mock("@/api/v1/verse", () => ({
   getVerses: mockGetVerses,
   getVerse: mockGetVerse,
-  putVerse: vi.fn(),
+  putVerse: mockPutVerse,
   takePhoto: vi.fn(),
 }));
 
@@ -170,15 +174,28 @@ vi.mock("@/composables/useIframeMessaging", () => ({
     postStandardMessage: mockPostStandardMessage,
     sendRequest: mockSendRequest,
     pendingRequests: new Map(),
-    getHostSessionId: () => "test-session",
+    getHostSessionId: () => mockHostSession,
   }),
 }));
 
 vi.mock("@/composables/useSceneSaveGuard", () => ({
   useSceneSaveGuard: () => ({
     hasUnsavedChangesBeforeUnload: mockDirty,
+    hasUnconfirmedPersistence: mockUnconfirmedPersistence,
+    markPersistenceUnverified: () => {
+      mockUnconfirmedPersistence.value = true;
+      mockDirty.value = true;
+    },
+    markPersistenceAcknowledged: () => {
+      mockUnconfirmedPersistence.value = false;
+      mockDirty.value = false;
+    },
+    resetUnsavedState: () => {
+      mockUnconfirmedPersistence.value = false;
+      mockDirty.value = false;
+    },
     syncUnsavedChangesForBeforeUnload: vi.fn(),
-    resolveLeaveSave: vi.fn(),
+    resolveLeaveSave: mockResolveLeaveSave,
     requestSceneSave: vi.fn(),
     resolveUnsavedBeforeLeave: vi.fn(async () => true),
     handleBeforeUnload: vi.fn(),
@@ -312,6 +329,20 @@ async function mountSceneView(kind: "meta" | "verse" = "meta") {
 
   return {
     el,
+    persistSceneMutation: (response: Record<string, unknown>) =>
+      (
+        app._instance!.setupState as {
+          persistWebMcpSceneMutation: (
+            response: Record<string, unknown>,
+            messages: { success: string; failure: string },
+            preview: object
+          ) => Promise<unknown>;
+        }
+      ).persistWebMcpSceneMutation(
+        response,
+        { success: "saved", failure: "not saved" },
+        {}
+      ),
     saveMeta: (...args: unknown[]) =>
       (
         app._instance!.setupState as {
@@ -331,7 +362,11 @@ describe("views/meta/scene.vue", () => {
     mockPush.mockReset();
     mockPostStandardMessage.mockReset();
     mockPostStandardMessage.mockReturnValue("init-request");
+    mockHostSession = "test-session";
     mockGetVerse.mockReset();
+    mockPutVerse.mockReset();
+    mockResolveLeaveSave.mockReset();
+    mockUnconfirmedPersistence.value = false;
     mockAppStore.language = "zh-CN";
     mockDirty.value = false;
     mockGetVerse.mockImplementation(async (id: number) => makeMetaResponse(id));
@@ -441,6 +476,166 @@ describe("views/meta/scene.vue", () => {
     mockPutMeta.mockRejectedValueOnce({ response: { status: 409 } });
     expect(await view.saveMeta(payload)).toBe(false);
     expect(mockPutMeta).toHaveBeenCalledTimes(3);
+  });
+
+  it("keeps rejected scene edits unsaved and refuses a later no-change save acknowledgment", async () => {
+    vi.stubGlobal("ElMessage", { error: vi.fn(), info: vi.fn() });
+    const view = await mountSceneView("verse");
+    sendReady("conflict-document");
+    await flushAsync();
+    mockPutVerse.mockRejectedValueOnce({
+      isAxiosError: true,
+      response: { status: 409 },
+    });
+    await expect(
+      view.persistSceneMutation({
+        verse: makeMetaResponse(1).data.data,
+        moduleId: "test-module",
+        sceneVersion: "local-b",
+      })
+    ).rejects.toMatchObject({
+      result: {
+        status: "partial",
+        persistence: "server_rejected",
+        errorCode: "write_conflict",
+        httpStatus: 409,
+        retry: "review_server_state_before_retry",
+      },
+    });
+    expect(mockDirty.value).toBe(true);
+    expect(mockUnconfirmedPersistence.value).toBe(true);
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        source: document.querySelector("iframe")?.contentWindow,
+        origin: "https://editor.example.test",
+        data: {
+          type: "RESPONSE",
+          payload: { action: "save-before-leave", noChange: true },
+        },
+      })
+    );
+    await flushAsync();
+    expect(mockResolveLeaveSave).toHaveBeenLastCalledWith(false);
+    expect(mockUnconfirmedPersistence.value).toBe(true);
+    expect(mockPutVerse).toHaveBeenCalledTimes(1);
+  });
+
+  const acknowledgeSceneSave = () => {
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        source: document.querySelector("iframe")?.contentWindow,
+        origin: "https://editor.example.test",
+        data: {
+          type: "RESPONSE",
+          requestId: "webmcp-request",
+          payload: {
+            action: "webmcp-mark-scene-saved",
+            hostSessionId: "test-session",
+            ok: true,
+          },
+        },
+      })
+    );
+  };
+
+  it("clears an unconfirmed scene save only after server and editor acknowledge it", async () => {
+    const view = await mountSceneView("verse");
+    sendReady("save-document");
+    await flushAsync();
+    mockPutVerse.mockResolvedValueOnce({
+      data: { serverRevision: `sha256:${"b".repeat(64)}` },
+    });
+    const pending = view.persistSceneMutation({
+      verse: makeMetaResponse(1).data.data,
+      moduleId: "test-module",
+      sceneVersion: "saved-scene",
+    });
+    await flushAsync();
+    expect(mockSendRequest).toHaveBeenLastCalledWith(
+      "webmcp-mark-scene-saved",
+      { expectedSceneVersion: "saved-scene" }
+    );
+    expect(mockDirty.value).toBe(true);
+    expect(mockUnconfirmedPersistence.value).toBe(true);
+
+    acknowledgeSceneSave();
+    await expect(pending).resolves.toMatchObject({
+      persistence: "server_acknowledged",
+      editorAcknowledged: true,
+    });
+    expect(mockDirty.value).toBe(false);
+    expect(mockUnconfirmedPersistence.value).toBe(false);
+  });
+
+  it("does not clear a replacement scene's dirty state when the old server save returns", async () => {
+    const view = await mountSceneView("verse");
+    sendReady("old-save-document");
+    await flushAsync();
+    let finishSave!: (response: { data: { serverRevision: string } }) => void;
+    mockPutVerse.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishSave = resolve;
+        })
+    );
+    const pending = view.persistSceneMutation({
+      verse: makeMetaResponse(1).data.data,
+      moduleId: "old-module",
+      sceneVersion: "old-scene",
+    });
+    expect(mockUnconfirmedPersistence.value).toBe(true);
+
+    mockRoute.query.id = "2";
+    await nextTick();
+    expect(mockUnconfirmedPersistence.value).toBe(false);
+    sendReady("replacement-document");
+    await flushAsync();
+    mockDirty.value = true;
+    mockUnconfirmedPersistence.value = true;
+    finishSave({ data: { serverRevision: `sha256:${"b".repeat(64)}` } });
+
+    await expect(pending).resolves.toMatchObject({
+      persistence: "server_acknowledged",
+      editorAcknowledged: false,
+      ownerId: 1,
+    });
+    expect(mockSendRequest).not.toHaveBeenCalledWith(
+      "webmcp-mark-scene-saved",
+      expect.anything()
+    );
+    expect(mockDirty.value).toBe(true);
+    expect(mockUnconfirmedPersistence.value).toBe(true);
+  });
+
+  it("does not clear new session edits if the session changes before a received editor acknowledgment resumes", async () => {
+    const view = await mountSceneView("verse");
+    sendReady("ack-document");
+    await flushAsync();
+    mockPutVerse.mockResolvedValueOnce({
+      data: { serverRevision: `sha256:${"b".repeat(64)}` },
+    });
+    const pending = view.persistSceneMutation({
+      verse: makeMetaResponse(1).data.data,
+      moduleId: "test-module",
+      sceneVersion: "saved-scene",
+    });
+    await flushAsync();
+    expect(mockSendRequest).toHaveBeenLastCalledWith(
+      "webmcp-mark-scene-saved",
+      { expectedSceneVersion: "saved-scene" }
+    );
+
+    acknowledgeSceneSave();
+    // The RPC has resolved, but its awaiting save continuation has not resumed.
+    mockHostSession = "replacement-session";
+    mockDirty.value = true;
+    mockUnconfirmedPersistence.value = true;
+    await expect(pending).resolves.toMatchObject({
+      persistence: "server_acknowledged",
+      editorAcknowledged: true,
+    });
+    expect(mockDirty.value).toBe(true);
+    expect(mockUnconfirmedPersistence.value).toBe(true);
   });
 
   it("reads unsaved entity content from the current iframe and aborts the old tools on route changes", async () => {
