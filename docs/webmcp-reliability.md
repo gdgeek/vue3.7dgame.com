@@ -26,6 +26,8 @@ iframe RPC 关联 requestId、当前 frame、精确 origin 和 hostSessionId。�
 - `status: completed` 携带保存回执；`persistence: server_acknowledged` 表示服务端保存请求已成功返回。
 - `editorAcknowledged` 独立表示编辑器保存标记的确认。实体/场景标记失败不会把已成功保存的数据报告为保存失败；dirty 状态保留以便重新读取。
 - 编辑器已应用但保存未确认时返回 `status: partial`、`editorApplied: true`、`persistence: unverified`，并提示 `read_state_before_retry`。不能盲目重放原修改。
+- 场景保存收到 HTTP 409 时，保留 `partial` 和本地修改，明确返回 `persistence: server_rejected`、`errorCode: write_conflict`、`httpStatus: 409`，下一步为 `review_server_state_before_retry`。网络超时或服务不可用仍为 `unverified`，不能据此认定服务器已拒绝写入。
+- 场景保存未确认时锁存 dirty；轮询超时、编辑器返回无新增修改都不能清掉该状态，也不能让离开前保存误报成功。只有当前场景的保存确认或切换场景才清除锁存；迟到的旧场景、旧会话确认不清除新修改。
 - 发布成功返回 snapshotId 和持久化操作回执，页面刷新失败保留回执并返回 refreshWarning。P1 使用现有可变 Snapshot，`readBackVerified` 保持 false；当次发布成功不代表能读回当时的固定内容。
 
 后端配套提供保存/脚本保存/发布的 UUID 幂等键和 `If-Match` 乐观锁。编辑器人工保存也使用加载时的服务器版本，409 后保留本地内容，不自动覆盖新版本。缺少服务器版本或匹配回执时不能视为保存成功。后端仅新增操作回执表 webmcp_operation，schema 和路由必须先部署，详细迁移见后端 `docs/webmcp-p1.md`。主站运行器整合与可靠性增强分别交付。
