@@ -26,6 +26,108 @@ const withWindowLocation = <T>(
 };
 
 describe("unityPreviewPayload", () => {
+  const rewriteRuntime = (payload: unknown) =>
+    rewriteUnityPreviewUrls(
+      payload,
+      "https://d.xrugc.com",
+      "https://d.xrugc.com",
+      { restrictToRuntimeOrigins: true }
+    );
+
+  it("preserves content revisions on scene 408 and nested entities", () => {
+    const serverRevision = `sha256:${"a".repeat(64)}`;
+    const payload = {
+      scene: { id: 408, serverRevision },
+      metas: [{ serverRevision, data: JSON.stringify({ serverRevision }) }],
+    };
+    const expected = structuredClone(payload);
+    rewriteRuntime(payload);
+    expect(payload).toEqual(expected);
+  });
+
+  it("preserves API identifiers, file fingerprints and plain text info", () => {
+    const payload = {
+      uuid: "urn:uuid:example",
+      info: "备注: 详情见 https://example.org/model.glb",
+      file: {
+        type: "model/gltf-binary",
+        md5: "md5:0123456789abcdef",
+        url: "https://data.7dgame.com/model.glb",
+      },
+    };
+    const expected = structuredClone(payload);
+    rewriteRuntime(payload);
+    expect(payload).toEqual(expected);
+  });
+
+  it("does not mistake Lua method calls or JavaScript labels for URL schemes", () => {
+    const payload = {
+      metas: [
+        {
+          code: "self:initialize()",
+          script: "self:initialize()",
+          metaCode: "self:initialize()",
+        },
+      ],
+      verseCode: "self:initialize()",
+      script: {
+        lua: "self:initialize()",
+        javascript: "start: for (;;) break start;",
+      },
+    };
+    const expected = structuredClone(payload);
+    rewriteRuntime(payload);
+    expect(payload).toEqual(expected);
+  });
+
+  it("preserves Blockly namespaces and still normalizes embedded asset URLs", () => {
+    const url =
+      "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/model.glb?sign=a%26b&part=1&part=2";
+    const payload = {
+      metas: [
+        {
+          metaCode: {
+            blockly: `<xml xmlns="https://developers.google.com/blockly/xml"><field name="URL">${url}</field></xml>`,
+            lua: `self:load("${url}")`,
+            js: `load("${url}")`,
+          },
+        },
+      ],
+    };
+    rewriteRuntime(payload);
+    const code = payload.metas[0].metaCode;
+    expect(code.blockly).toContain(
+      'xmlns="https://developers.google.com/blockly/xml"'
+    );
+    for (const value of Object.values(code)) {
+      expect(value).toContain(
+        "https://data.7dgame.com/model.glb?sign=a%26b&part=1&part=2"
+      );
+    }
+  });
+
+  it.each([
+    "https://private.example/model.glb",
+    "http://data.7dgame.com/model.glb",
+    "https://user:password@data.7dgame.com/model.glb",
+  ])("still rejects actual URLs in code and structured metadata: %s", (url) => {
+    for (const payload of [
+      { serverRevision: "sha256:abc", resources: [{ file: { url } }] },
+      { serverRevision: { file: { url } } },
+      { uuid: { url } },
+      { info: JSON.stringify({ file: { url } }) },
+      { info: { file: { url } } },
+      { metas: [{ metaCode: { lua: `self:load("${url}")` } }] },
+      { script: { javascript: `load("${url}")` } },
+      {
+        blockly: `<xml xmlns="https://developers.google.com/blockly/xml"><field name="URL">${url}</field></xml>`,
+      },
+      { data: JSON.stringify({ code: { file: { url } } }) },
+    ]) {
+      expect(() => rewriteRuntime(payload)).toThrow("WGP-ASSET-DENIED");
+    }
+  });
+
   it("preserves scene 506 file storage keys and filenames while validating download URLs", () => {
     const file = {
       key: "/ai/polygen/model.glb",
