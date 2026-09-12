@@ -1,4 +1,4 @@
-import { ref, type Ref } from "vue";
+import { computed, ref, type Ref } from "vue";
 import type { ScriptSaveTrigger } from "@/composables/useScriptEditorBase";
 
 export interface UseSceneSaveGuardOptions {
@@ -24,42 +24,80 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
   } = options;
 
   let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
-  const hasUnsavedChangesBeforeUnload = ref(false);
-  let isPollingUnsavedChanges = false;
+  const editorDirty = ref(false);
+  const persistenceUnverified = ref(false);
+  const hasUnconfirmedPersistence = computed(() => persistenceUnverified.value);
+  const hasUnsavedChangesBeforeUnload = computed({
+    get: () =>
+      editorDirty.value ||
+      persistenceUnverified.value ||
+      Boolean(pendingRestorePayload.value),
+    // Legacy editor notifications may clear editor state, never a failed save.
+    set: (changed: boolean) => {
+      editorDirty.value = changed;
+    },
+  });
+  let stateVersion = 0;
+  let pollingRequest: symbol | null = null;
   let pendingSceneSavePromise: Promise<boolean> | null = null;
 
+  const markPersistenceUnverified = () => {
+    stateVersion += 1;
+    persistenceUnverified.value = true;
+  };
+
+  const markPersistenceAcknowledged = () => {
+    stateVersion += 1;
+    persistenceUnverified.value = false;
+    editorDirty.value = false;
+  };
+
+  const resetUnsavedState = () => {
+    markPersistenceAcknowledged();
+    // A new target can poll immediately; old responses cannot update its state.
+    pollingRequest = null;
+  };
+
   const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
+    const queryVersion = stateVersion;
     return new Promise((resolve) => {
       const requestId = sendRequest("check-unsaved-changes");
       if (!requestId) {
-        resolve(false);
+        resolve(hasUnsavedChangesBeforeUnload.value);
         return;
       }
 
       const timeout = window.setTimeout(() => {
         pendingRequests.delete(requestId);
-        resolve(false);
+        resolve(hasUnsavedChangesBeforeUnload.value);
       }, 1200);
 
       pendingRequests.set(requestId, (payload) => {
         window.clearTimeout(timeout);
         pendingRequests.delete(requestId);
-        resolve(pendingRestorePayload.value ? true : Boolean(payload.changed));
+        resolve(
+          queryVersion !== stateVersion || typeof payload.changed !== "boolean"
+            ? hasUnsavedChangesBeforeUnload.value
+            : persistenceUnverified.value ||
+                Boolean(pendingRestorePayload.value) ||
+                payload.changed
+        );
       });
     });
   };
 
   const syncUnsavedChangesForBeforeUnload = async () => {
-    if (isPollingUnsavedChanges) return;
+    if (pollingRequest) return;
 
-    isPollingUnsavedChanges = true;
+    const request = Symbol("unsaved-query");
+    const queryVersion = stateVersion;
+    pollingRequest = request;
     try {
       const changed = await queryUnsavedChangesBeforeLeave();
-      hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-        ? true
-        : changed;
+      if (queryVersion === stateVersion)
+        hasUnsavedChangesBeforeUnload.value = changed;
     } finally {
-      isPollingUnsavedChanges = false;
+      if (pollingRequest === request) pollingRequest = null;
     }
   };
 
@@ -100,15 +138,12 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
   };
 
   const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
-    if (pendingRestorePayload.value) {
-      hasUnsavedChangesBeforeUnload.value = true;
-    }
+    const queryVersion = stateVersion;
     const changed = await queryUnsavedChangesBeforeLeave();
-    hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-      ? true
-      : changed;
+    if (queryVersion === stateVersion)
+      hasUnsavedChangesBeforeUnload.value = changed;
 
-    if (!changed) {
+    if (!hasUnsavedChangesBeforeUnload.value) {
       return true;
     }
 
@@ -139,6 +174,10 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
 
   return {
     hasUnsavedChangesBeforeUnload,
+    hasUnconfirmedPersistence,
+    markPersistenceUnverified,
+    markPersistenceAcknowledged,
+    resetUnsavedState,
     queryUnsavedChangesBeforeLeave,
     syncUnsavedChangesForBeforeUnload,
     waitForLeaveSaveResult,

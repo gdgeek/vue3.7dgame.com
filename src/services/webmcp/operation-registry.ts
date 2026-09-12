@@ -92,9 +92,14 @@ const publicState = (entry: Entry) => ({
   status: entry.status,
   ...(entry.receipt ? { writeReceipt: entry.receipt } : {}),
   ...(entry.result === undefined ? {} : { result: entry.result }),
-  nextAction: ["completed", "cancelled", "failed"].includes(entry.status)
-    ? "inspect_result"
-    : "query_operation_before_retry",
+  nextAction:
+    entry.status === "partial" &&
+    (entry.result as { persistence?: string })?.persistence ===
+      "server_rejected"
+      ? "review_server_state_before_retry"
+      : ["completed", "cancelled", "failed"].includes(entry.status)
+        ? "inspect_result"
+        : "query_operation_before_retry",
 });
 
 export function withOperationReceipts(

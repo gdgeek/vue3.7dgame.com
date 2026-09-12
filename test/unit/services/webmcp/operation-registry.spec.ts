@@ -105,6 +105,37 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe("queryable WebMCP completion", () => {
+  it("retains a known conflict and advises review even when no success receipt exists", async () => {
+    const x = await setup();
+    const { sceneWriteFailure } = await import(
+      "@/services/webmcp/scene-write-failure"
+    );
+    x.complete.mockRejectedValueOnce(
+      sceneWriteFailure(
+        { isAxiosError: true, response: { status: 409 } },
+        { ownerId: 2329 },
+        "保存失败"
+      )
+    );
+    const { draftId } = await x.stage();
+    await x.call("xrugc_complete_scene_publication", { draftId });
+    x.confirmation.resolve(true);
+    await flush();
+    expect(
+      await x.call("xrugc_get_operation_status", { operationId: draftId })
+    ).toMatchObject({
+      status: "partial",
+      result: {
+        persistence: "server_rejected",
+        errorCode: "write_conflict",
+        httpStatus: 409,
+      },
+      nextAction: "review_server_state_before_retry",
+    });
+    await x.call("xrugc_complete_scene_publication", { draftId });
+    expect(x.complete).toHaveBeenCalledTimes(1);
+  });
+
   it("returns before a long human confirmation, then exposes exactly one durable write", async () => {
     vi.useFakeTimers();
     const x = await setup();
