@@ -313,6 +313,7 @@ export default {
         coverUploadFailed: "Failed to upload cover image",
       },
       script: {
+        drawer: { versions: "Version history", preview: "Run scene" },
         title: "Script",
         save: "Save",
         error1: "No information",

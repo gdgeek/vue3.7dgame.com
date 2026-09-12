@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createApp, defineComponent, h, markRaw } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
 
 // --- 提升 mock 变量，确保在工厂函数中可用 ---
 const { mockInflate, mockJsBeautify, mockMessage, mockMessageBox } = vi.hoisted(
@@ -127,6 +128,17 @@ function makeOptions(
 describe("useScriptEditorBase", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("lets an embedded host own route protection without adding a duplicate guard", () => {
+    const embedded = withSetup(() =>
+      useScriptEditorBase(makeOptions({ registerRouteGuard: false }))
+    );
+    expect(onBeforeRouteLeave).not.toHaveBeenCalled();
+    embedded.unmount();
+    const page = withSetup(() => useScriptEditorBase(makeOptions()));
+    expect(onBeforeRouteLeave).toHaveBeenCalledOnce();
+    page.unmount();
   });
 
   // ----------------------------------------------------------------
@@ -734,6 +746,7 @@ describe("useScriptEditorBase", () => {
       } as MockIframe as HTMLIFrameElement;
 
       const savePromise = result.save();
+      const leavePromise = result.resolveUnsavedChangesBeforeLeave();
       const saveExpectation =
         expect(savePromise).rejects.toThrow("network failed");
       await result.handleMessage({
@@ -751,6 +764,8 @@ describe("useScriptEditorBase", () => {
       } as MockMessageEvent as MessageEvent);
 
       await saveExpectation;
+      await expect(leavePromise).resolves.toBe(false);
+      expect(mockMessageBox.confirm).not.toHaveBeenCalled();
       expect(
         mockPost.mock.calls.some(
           ([message]) =>

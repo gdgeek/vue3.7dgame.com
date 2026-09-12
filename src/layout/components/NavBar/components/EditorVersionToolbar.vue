@@ -32,15 +32,34 @@
         <span class="entry-label">{{ t("common.scriptDraft.entry") }}</span>
       </el-button>
     </el-tooltip>
+    <el-tooltip
+      v-if="editorVersionToolbarState.onOpenScript"
+      :content="t('route.project.scriptEditor')"
+      placement="bottom"
+    >
+      <el-button
+        class="toolbar-entry-btn"
+        size="small"
+        v-bind="{ 'aria-label': t('route.project.scriptEditor') }"
+        @click="openScript"
+      >
+        <font-awesome-icon
+          class="entry-icon"
+          :icon="faCode"
+        ></font-awesome-icon>
+        <span class="entry-label">{{ t("route.project.scriptEditor") }}</span>
+      </el-button>
+    </el-tooltip>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { faCode } from "@fortawesome/free-solid-svg-icons";
 import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
 
 const { t } = useI18n();
-const { editorVersionToolbarState, openDialog, runPreview } =
+const { editorVersionToolbarState, openDialog, runPreview, openScript } =
   useEditorVersionToolbar();
 </script>
 

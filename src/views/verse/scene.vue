@@ -17,6 +17,15 @@
         ></iframe>
       </el-main>
     </el-container>
+    <VerseScriptDrawer
+      ref="scriptDrawer"
+      :verse-id="id"
+      :title="verse?.name || ''"
+      :scene-data="scriptSceneData"
+      :before-publish="saveSceneBeforeScriptPublish"
+      @closed="handleScriptDrawerClosed"
+      @saved="invalidateScriptPreview"
+    ></VerseScriptDrawer>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"
       :versions="draftVersions"
@@ -91,7 +100,8 @@ import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import { translateRouteTitle } from "@/utils/i18n";
+import VerseScriptDrawer from "@/components/VerseScriptDrawer.vue";
+import { useSceneWorkspaceWebMcp } from "@/composables/useSceneWorkspaceWebMcp";
 import env from "@/environment";
 import { useFileStore } from "@/store/modules/config";
 import {
@@ -180,6 +190,7 @@ const activateToolbar = () => {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
     onRunPreview: runSceneRuntimePreview,
+    onOpenScript: openScriptDrawer,
   });
 };
 const toolbarStatus = computed<EditorToolbarStatus>(() => {
@@ -216,28 +227,109 @@ const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
 //const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
 
-const decodeRouteText = (value: string): string => {
-  let decoded = value;
-  for (let i = 0; i < 2; i += 1) {
-    try {
-      const next = decodeURIComponent(decoded);
-      if (next === decoded) break;
-      decoded = next;
-    } catch {
-      break;
-    }
+const scriptDrawer = ref<InstanceType<typeof VerseScriptDrawer>>();
+const scriptSceneData = ref<unknown>();
+const scriptDrawerActive = ref(false);
+let sceneViewActive = true;
+let openingScriptDrawer: Promise<void> | null = null;
+const invalidateScriptPreview = () => {
+  verseMetasWithLuaCodeData.value = undefined;
+  verseMetasWithJsCodeData.value = undefined;
+};
+const saveSceneBeforeScriptPublish = async () => {
+  const live = await getLiveSceneState();
+  if (live.loading) throw new Error("场景仍在加载，请稍后重试");
+  if (live.changed || pendingRestorePayload.value) {
+    if (!(await requestSceneSave("manual")))
+      throw new Error("场景保存失败，已取消发布");
   }
-  return decoded;
+};
+const openScriptDrawerOrThrow = (assertActive: () => void = () => {}) => {
+  assertActive();
+  if (openingScriptDrawer) return openingScriptDrawer.then(assertActive);
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const assertOwner = () => {
+    assertActive();
+    if (
+      !sceneViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getHostSessionId()
+    )
+      throw new Error("场景工作区已切换，请重新发现工具");
+  };
+  openingScriptDrawer = (async () => {
+    assertOwner();
+    if (!scriptDrawer.value) throw new Error("场景工作区尚未准备完成");
+    if (scriptDrawerActive.value) {
+      scriptDrawer.value.open();
+      return;
+    }
+    await unityPreview.close();
+    assertOwner();
+    const live = await getLiveSceneState();
+    assertOwner();
+    if (live.loading) throw new Error("场景仍在加载，请稍后重试");
+    scriptSceneData.value = safeClone(live.verse);
+    scriptDrawerActive.value = true;
+    webMcpLifecycle?.abort();
+    webMcpRpc.cancel();
+    scriptDrawer.value.open();
+  })().finally(() => {
+    openingScriptDrawer = null;
+  });
+  return openingScriptDrawer;
+};
+const openScriptDrawer = () => {
+  return openScriptDrawerOrThrow().catch((error) => {
+    ElMessage.error(error instanceof Error ? error.message : String(error));
+  });
+};
+const handleScriptDrawerClosed = () => {
+  scriptDrawerActive.value = false;
+  invalidateScriptPreview();
+  registerPageWebMcpTools();
 };
 
-// 计算属性
-const title = computed(() => {
-  const decodedTitle = decodeRouteText((route.query.title as string) || "");
-  const match = decodedTitle.match(/【(.*?)】/);
-  return match ? match[0] : "";
-});
-
 const id = computed(() => parseInt(route.query.id as string));
+
+useSceneWorkspaceWebMcp({
+  ownerId: () => id.value,
+  getContext: () => ({
+    sceneId: Number.isFinite(id.value) ? id.value : null,
+    sceneName: verse.value?.id === id.value ? (verse.value.name ?? null) : null,
+    activeEditor: scriptDrawerActive.value ? "scene-script" : "scene",
+    scene: {
+      ready:
+        sceneViewActive &&
+        verse.value?.id === id.value &&
+        editorContentReady.value,
+      dirty:
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value),
+      saving: isSavingVersion.value,
+    },
+    script: scriptDrawer.value?.getState() ?? {
+      open: false,
+      ready: false,
+      dirty: false,
+      saving: false,
+      tab: null,
+    },
+  }),
+  openScriptEditor: openScriptDrawerOrThrow,
+  closeScriptEditor: async (assertActive) => {
+    if (openingScriptDrawer) await openingScriptDrawer;
+    assertActive();
+    return (await scriptDrawer.value?.close(assertActive)) ?? true;
+  },
+  onRegistrationError: (toolName, error) => {
+    logger.warn(
+      `WebMCP workspace tool registration failed: ${toolName}`,
+      error
+    );
+  },
+});
 
 const src = computed(() => {
   const query: Record<string, string | number> = {
@@ -1516,21 +1608,7 @@ const handleMessage = async (e: MessageEvent) => {
         releaseVerse(payload);
       } else if (event === "goto") {
         if (payload.target === "blockly.js") {
-          const scriptRoute = router
-            .getRoutes()
-            .find((route) => route.path === "/verse/script");
-
-          if (scriptRoute && scriptRoute.meta.title) {
-            const metaTitle = translateRouteTitle(scriptRoute.meta.title);
-
-            router.push({
-              path: "/verse/script",
-              query: {
-                id: id.value,
-                title: metaTitle + title.value,
-              },
-            });
-          }
+          await openScriptDrawer();
         }
       } else if (event === "upload-cover") {
         handleUploadCover(payload);
@@ -1674,6 +1752,19 @@ onMounted(() => {
 });
 
 const startSceneRuntimePreview = async () => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const assertSceneActive = () => {
+    if (
+      !sceneViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getHostSessionId()
+    )
+      throw new Error("场景工作区已切换，请重新发现工具");
+    if (scriptDrawerActive.value || openingScriptDrawer)
+      throw new Error("请先关闭脚本编辑抽屉，再运行场景");
+  };
+  assertSceneActive();
   const scene = verse.value;
   if (!scene || !Number.isFinite(scene.id)) {
     throw new Error("场景数据尚未加载完成");
@@ -1683,6 +1774,7 @@ const startSceneRuntimePreview = async () => {
   }
 
   const liveState = await getLiveSceneState();
+  assertSceneActive();
   const hasUnsavedChanges =
     liveState.changed ||
     hasUnsavedChangesBeforeUnload.value ||
@@ -1716,12 +1808,15 @@ const runSceneRuntimePreview = () => {
 };
 
 const registerPageWebMcpTools = () => {
+  if (!sceneViewActive || scriptDrawerActive.value) return;
   const ownerId = id.value;
   const ownerSession = getHostSessionId();
   let registration: AbortController | null = null;
   const assertActive = () => {
     if (
       registration?.signal.aborted ||
+      !sceneViewActive ||
+      scriptDrawerActive.value ||
       ownerId !== id.value ||
       ownerSession !== getHostSessionId()
     ) {
@@ -2389,22 +2484,39 @@ const registerPageWebMcpTools = () => {
 };
 
 onActivated(() => {
+  sceneViewActive = true;
   activateToolbar();
   registerPageWebMcpTools();
 });
 onDeactivated(() => {
+  sceneViewActive = false;
   unregisterToolbar(toolbarOwner);
   webMcpLifecycle?.abort();
   webMcpRpc.cancel();
 });
 
 onBeforeRouteLeave(async (_to, _from, next) => {
+  if (!((await scriptDrawer.value?.resolveBeforeLeave()) ?? true)) {
+    next(false);
+    return;
+  }
   const canLeave = await resolveUnsavedBeforeLeave();
-  if (canLeave) await unityPreview.close();
+  if (canLeave) {
+    await unityPreview.close();
+    await scriptDrawer.value?.closeAfterNavigation();
+  }
   next(canLeave);
 });
 onBeforeRouteUpdate(async (to, from) => {
   if (to.query.id !== from.query.id) await unityPreview.close();
+});
+
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.query.id === from.query.id) return true;
+  if (!((await scriptDrawer.value?.resolveBeforeLeave()) ?? true)) return false;
+  if (!(await resolveUnsavedBeforeLeave())) return false;
+  await scriptDrawer.value?.closeAfterNavigation();
+  return true;
 });
 
 watch(toolbarStatus, (status) => {
@@ -2427,6 +2539,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  sceneViewActive = false;
   editorInitialization.reset();
   webMcpLifecycle?.abort();
   webMcpLifecycle = null;

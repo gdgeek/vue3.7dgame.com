@@ -36,6 +36,14 @@
         ></iframe>
       </el-main>
     </el-container>
+    <MetaScriptDrawer
+      ref="scriptDrawer"
+      :meta-id="id"
+      :title="entityTitle"
+      :meta-data="scriptMetaData"
+      @closed="handleScriptDrawerClosed"
+      @saved="handleScriptSaved"
+    ></MetaScriptDrawer>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"
       :versions="draftVersions"
@@ -227,16 +235,22 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
     }
   });
 };
-import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
+import {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useRoute,
+  useRouter,
+} from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PhototypeDialog from "@/components/MrPP/PhototypeDialog.vue";
 import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
+import MetaScriptDrawer from "@/components/MetaScriptDrawer.vue";
+import { useEntityWorkspaceWebMcp } from "@/composables/useEntityWorkspaceWebMcp";
 import { Message } from "@/components/Dialog";
 import { putMeta, getMeta, type metaInfo } from "@/api/v1/meta";
 import type { UpdateMetaRequest } from "@/api/v1/types/meta";
 import { getVerse, getVerses, type VerseData } from "@/api/v1/verse";
 import { useAppStore } from "@/store/modules/app";
-import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
 import { safeAtob } from "@/utils/base64";
 import { useFileStore } from "@/store/modules/config";
@@ -339,6 +353,96 @@ const pendingRestorePayload = ref<{
 let currentSaveTrigger: ScriptSaveTrigger = "manual";
 let autoSaveTimer: number | null = null;
 let webMcpLifecycle: AbortController | null = null;
+const scriptDrawer = ref<InstanceType<typeof MetaScriptDrawer>>();
+const scriptMetaData = ref<metaInfo>();
+const scriptDrawerActive = ref(false);
+let entityViewActive = true;
+let openingScriptDrawer: Promise<void> | null = null;
+const entityTitle = computed(
+  () => (metaDetail.value as metaInfo | null)?.title ?? ""
+);
+
+const handleScriptSaved = (result: unknown) => {
+  const entity = metaDetail.value as metaInfo | null;
+  if (
+    !entityViewActive ||
+    !scriptDrawerActive.value ||
+    !entity ||
+    !isRecord(result) ||
+    result.entityId !== id.value ||
+    entity.id !== id.value ||
+    typeof result.previousRevision !== "string" ||
+    result.previousRevision !== entity.serverRevision ||
+    typeof result.serverRevision !== "string"
+  )
+    return;
+  // A script write advances the same entity revision without saving its 3D edits.
+  entity.serverRevision = result.serverRevision;
+  if (
+    isRecord(result.metaCode) &&
+    typeof result.metaCode.blockly === "string"
+  ) {
+    entity.metaCode = {
+      blockly: result.metaCode.blockly,
+      ...(typeof result.metaCode.lua === "string"
+        ? { lua: result.metaCode.lua }
+        : {}),
+      ...(typeof result.metaCode.js === "string"
+        ? { js: result.metaCode.js }
+        : {}),
+    };
+  }
+};
+
+const openScriptDrawerOrThrow = (assertActive: () => void = () => {}) => {
+  assertActive();
+  if (openingScriptDrawer) return openingScriptDrawer.then(assertActive);
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const assertOwner = () => {
+    assertActive();
+    if (
+      !entityViewActive ||
+      id.value !== ownerId ||
+      getHostSessionId() !== ownerSession
+    )
+      throw new Error("实体工作区已切换，请重新发现工具");
+  };
+  openingScriptDrawer = (async () => {
+    assertOwner();
+    if (!scriptDrawer.value) throw new Error("实体工作区尚未准备完成");
+    if (scriptDrawerActive.value) {
+      scriptDrawer.value.open();
+      return;
+    }
+    if (isSavingVersion.value) throw new Error("实体正在保存，请稍后重试");
+    const live = await getLiveEntityState(assertOwner);
+    assertOwner();
+    if (live.loading) throw new Error("实体仍在加载，请稍后重试");
+    const resources = await hydrateMetaResources(
+      live.entity.data,
+      live.entity.resources
+    );
+    assertOwner();
+    if (isSavingVersion.value) throw new Error("实体正在保存，请稍后重试");
+    scriptMetaData.value = safeClone({ ...live.entity, resources });
+    scriptDrawerActive.value = true;
+    webMcpLifecycle?.abort();
+    webMcpRpc.cancel();
+    scriptDrawer.value.open();
+  })().finally(() => {
+    openingScriptDrawer = null;
+  });
+  return openingScriptDrawer;
+};
+const openScriptDrawer = () =>
+  openScriptDrawerOrThrow().catch((error) => {
+    ElMessage.error(error instanceof Error ? error.message : String(error));
+  });
+const handleScriptDrawerClosed = () => {
+  scriptDrawerActive.value = false;
+  registerPageWebMcpTools();
+};
 
 const toolbarOwner = "meta-scene-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
@@ -348,6 +452,7 @@ const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
+    onOpenScript: openScriptDrawer,
   });
 };
 const toolbarStatus = computed<EditorToolbarStatus>(() => {
@@ -834,6 +939,7 @@ const restartAutoSaveTimer = () => {
   if (!autoSaveEnabled.value || !buildSceneDraftStorageKey.value) return;
 
   autoSaveTimer = window.setInterval(async () => {
+    if (scriptDrawerActive.value || openingScriptDrawer) return;
     if (hasUnconfirmedPersistence.value) return;
     if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
       return;
@@ -938,32 +1044,48 @@ const findSceneIdByName = async (sceneName: string): Promise<number | null> => {
   }
 };
 
-const decodeRouteText = (value: string): string => {
-  let decoded = value;
-  for (let i = 0; i < 2; i += 1) {
-    try {
-      const next = decodeURIComponent(decoded);
-      if (next === decoded) break;
-      decoded = next;
-    } catch {
-      break;
-    }
-  }
-  return decoded;
-};
-
-const extractBracketTitle = (value: string): string => {
-  const decoded = decodeRouteText(value).trim();
-  if (!decoded) return "";
-  const match = decoded.match(/【[^】]+】/);
-  return match ? match[0] : "";
-};
-
 // 计算属性
 const id = computed(() => parseInt(route.query.id as string));
-const title = computed(() =>
-  extractBracketTitle((route.query.title as string) || "")
-);
+useEntityWorkspaceWebMcp({
+  ownerId: () => id.value,
+  getContext: () => ({
+    entityId: Number.isFinite(id.value) ? id.value : null,
+    entityTitle:
+      (metaDetail.value as metaInfo | null)?.id === id.value
+        ? entityTitle.value
+        : null,
+    activeEditor: scriptDrawerActive.value ? "entity-script" : "entity",
+    entity: {
+      ready:
+        entityViewActive &&
+        (metaDetail.value as metaInfo | null)?.id === id.value &&
+        editorInitialization.isReady(),
+      dirty:
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value),
+      saving: isSavingVersion.value,
+    },
+    script: scriptDrawer.value?.getState() ?? {
+      open: false,
+      ready: false,
+      dirty: false,
+      saving: false,
+      tab: null,
+    },
+  }),
+  openScriptEditor: openScriptDrawerOrThrow,
+  closeScriptEditor: async (assertActive) => {
+    if (openingScriptDrawer) await openingScriptDrawer;
+    assertActive();
+    return (await scriptDrawer.value?.close(assertActive)) ?? true;
+  },
+  onRegistrationError: (toolName, error) => {
+    logger.warn(
+      `WebMCP workspace tool registration failed: ${toolName}`,
+      error
+    );
+  },
+});
 const src = computed(() => {
   const query: Record<string, string | number> = {
     language: appStore.language,
@@ -1067,6 +1189,40 @@ const requireSuccessfulEditorResponse = (response: Record<string, unknown>) => {
     );
   }
   return response;
+};
+
+const getLiveEntityState = async (assertActive: () => void = () => {}) => {
+  assertActive();
+  const entity = metaDetail.value as metaInfo | null;
+  const ownerSession = getHostSessionId();
+  if (!entity || !editorInitialization.isReady())
+    throw new Error("实体编辑器尚未加载完成");
+  const response = requireSuccessfulEditorResponse(
+    await requestEditor("webmcp-get-entity-state")
+  );
+  assertActive();
+  if (
+    !entityViewActive ||
+    entity.id !== id.value ||
+    (metaDetail.value as metaInfo | null)?.id !== entity.id ||
+    ownerSession !== getHostSessionId() ||
+    Number(response.entityId) !== entity.id
+  )
+    throw new Error("当前实体已切换，请重新读取");
+  hasUnsavedChangesBeforeUnload.value = Boolean(response.changed);
+  return {
+    entity: {
+      ...entity,
+      data: response.meta,
+      events: response.events,
+    } as metaInfo,
+    dirty: Boolean(response.changed),
+    loading: Boolean(response.loading),
+    sceneNames: entityScenes.value.map((scene) => scene.name),
+    source: "live-editor" as const,
+    entityVersion: String(response.entityVersion),
+    contextGeneration: Number(response.contextGeneration),
+  };
 };
 
 const formatTransformVector = (value: { x: number; y: number; z: number }) =>
@@ -1968,21 +2124,7 @@ const handleMessage = async (e: MessageEvent) => {
         replaceResource(payload);
       } else if (event === "goto") {
         if (payload.target === "blockly.js") {
-          const scriptRoute = router
-            .getRoutes()
-            .find((route) => route.path === "/meta/script");
-
-          if (scriptRoute && scriptRoute.meta.title) {
-            const metaTitle = translateRouteTitle(scriptRoute.meta.title);
-
-            router.push({
-              path: "/meta/script",
-              query: {
-                id: id.value,
-                title: metaTitle + title.value,
-              },
-            });
-          }
+          await openScriptDrawer();
         } else if (payload.target === "verse.scene") {
           const rawSceneId = payload.sceneId;
           let sceneId =
@@ -2117,12 +2259,15 @@ onMounted(() => {
 });
 
 const registerPageWebMcpTools = () => {
+  if (!entityViewActive || scriptDrawerActive.value) return;
   const ownerId = id.value;
   const ownerSession = getHostSessionId();
   let registration: AbortController | null = null;
   const assertActive = () => {
     if (
       registration?.signal.aborted ||
+      !entityViewActive ||
+      scriptDrawerActive.value ||
       ownerId !== id.value ||
       ownerSession !== getHostSessionId()
     ) {
@@ -2172,33 +2317,7 @@ const registerPageWebMcpTools = () => {
       loading: !editorInitialization.isReady() || metaDetail.value === null,
       sceneNames: entityScenes.value.map((scene) => scene.name),
     }),
-    getLiveContext: async () => {
-      const entity = metaDetail.value as metaInfo | null;
-      if (!entity) throw new Error("实体尚未加载完成");
-      const response = requireSuccessfulEditorResponse(
-        await requestEditor("webmcp-get-entity-state")
-      );
-      if (
-        (metaDetail.value as metaInfo | null)?.id !== entity.id ||
-        Number(response.entityId) !== entity.id
-      ) {
-        throw new Error("当前实体已切换，请重新读取");
-      }
-      hasUnsavedChangesBeforeUnload.value = Boolean(response.changed);
-      return {
-        entity: {
-          ...entity,
-          data: response.meta,
-          events: response.events,
-        } as metaInfo,
-        dirty: Boolean(response.changed),
-        loading: Boolean(response.loading),
-        sceneNames: entityScenes.value.map((scene) => scene.name),
-        source: "live-editor",
-        entityVersion: String(response.entityVersion),
-        contextGeneration: Number(response.contextGeneration),
-      };
-    },
+    getLiveContext: () => getLiveEntityState(assertActive),
     searchAssets: async ({ type, query, page, pageSize }) => {
       const response = await getResources(
         type,
@@ -3338,18 +3457,33 @@ const registerPageWebMcpTools = () => {
 };
 
 onActivated(() => {
+  entityViewActive = true;
   activateToolbar();
   registerPageWebMcpTools();
 });
 onDeactivated(() => {
+  entityViewActive = false;
   unregisterToolbar(toolbarOwner);
   webMcpLifecycle?.abort();
   webMcpRpc.cancel();
 });
 
 onBeforeRouteLeave(async (_to, _from, next) => {
+  if (!((await scriptDrawer.value?.resolveBeforeLeave()) ?? true)) {
+    next(false);
+    return;
+  }
   const canLeave = await resolveUnsavedBeforeLeave();
+  if (canLeave) await scriptDrawer.value?.closeAfterNavigation();
   next(canLeave);
+});
+
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.query.id === from.query.id) return true;
+  if (!((await scriptDrawer.value?.resolveBeforeLeave()) ?? true)) return false;
+  if (!(await resolveUnsavedBeforeLeave())) return false;
+  await scriptDrawer.value?.closeAfterNavigation();
+  return true;
 });
 
 watch(toolbarStatus, (status) => {
@@ -3372,6 +3506,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  entityViewActive = false;
   editorInitialization.reset();
   webMcpLifecycle?.abort();
   webMcpLifecycle = null;
