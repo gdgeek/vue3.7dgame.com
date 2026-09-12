@@ -90,7 +90,7 @@ export const withWorkflowGuide = (
           contextTool: contextTools[page],
           primaryPageTools: [...primaryTools],
           toolAvailability:
-            "这里列出当前页面主工具集的定义，不包含另行注册的辅助工具，也不证明注册、登录或编辑器已就绪。使用前读取上下文并以浏览器实际发现的工具及 schema 为准；切换页面后重新发现。",
+            "primaryPageTools 只列出当前编辑上下文的主工具集定义，不包含另行注册的辅助工具，也不证明注册、登录或编辑器已就绪。场景工作区常驻的 xrugc_get_scene_workspace_context、xrugc_open_scene_script_editor、xrugc_close_scene_script_editor 须独立发现；这些工具不适用于独立脚本路由。使用前读取上下文并以浏览器实际发现的工具及 schema 为准。切换页面或打开、关闭脚本抽屉后，即使 URL 不变也需重新发现；抽屉内场景主工具暂停，关闭后脚本工具注销。",
           content,
           guidanceScope:
             "本站工作流参考资料，不授予上传、覆盖或发布权限。按用户当前任务和既有权限执行；Blender、Qwen 配音与头显验收需要相应外部环境。",

@@ -92,6 +92,8 @@ export type ScriptEditorI18nKeys = {
 };
 
 export type UseScriptEditorBaseOptions = {
+  /** Embedded editors delegate navigation guards to their host. */
+  registerRouteGuard?: boolean;
   /** Lua 前缀变量名，"meta" 或 "verse" */
   luaLocalVar: string;
   /** i18n 键映射 */
@@ -1087,6 +1089,13 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const resolveUnsavedChangesBeforeLeave = async (
     leaveOptions: ResolveUnsavedChangesOptions = {}
   ): Promise<boolean> => {
+    if (pendingSavePromise) {
+      try {
+        await pendingSavePromise;
+      } catch {
+        return false;
+      }
+    }
     if (!hasUnsavedChanges.value) {
       return true;
     }
@@ -1553,34 +1562,37 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   });
 
   // ---- 离开路由守卫（未保存变更提示） ----
-  onBeforeRouteLeave(async (to, from, next) => {
-    const canLeave = await resolveUnsavedChangesBeforeLeave({
-      showDiscardInfo: true,
+  if (options.registerRouteGuard !== false)
+    onBeforeRouteLeave(async (to, from, next) => {
+      const canLeave = await resolveUnsavedChangesBeforeLeave({
+        showDiscardInfo: true,
+      });
+      if (canLeave) {
+        next();
+        return;
+      }
+      next(false);
     });
-    if (canLeave) {
-      next();
-      return;
-    }
-    next(false);
-  });
 
   // Register the iframe bridge during setup, before Vue mounts the iframe.
   // A cached plugin can emit PLUGIN_READY before the parent's onMounted hook;
   // installing this listener here makes the READY → INIT handshake lossless.
   window.addEventListener("message", handleMessage);
 
+  const handleDocumentKeydown = (event: KeyboardEvent) => {
+    if (event.key === "Escape" && showCodeDialog.value)
+      showCodeDialog.value = false;
+  };
+  const handleFullscreenChange = () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  };
+
   // ---- onMounted：注册其余共享事件监听 ----
   onMounted(() => {
     loadHighlightStyle(isDark.value);
     window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && showCodeDialog.value) {
-        showCodeDialog.value = false;
-      }
-    });
-    document.addEventListener("fullscreenchange", () => {
-      isFullscreen.value = !!document.fullscreenElement;
-    });
+    document.addEventListener("keydown", handleDocumentKeydown);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
   });
 
   // ---- onBeforeUnmount：注销事件监听 ----
@@ -1590,14 +1602,8 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     clearEditorInitRetry();
     window.removeEventListener("message", handleMessage);
     window.removeEventListener("beforeunload", handleBeforeUnload);
-    document.removeEventListener("keydown", (e) => {
-      if (e.key === "Escape" && showCodeDialog.value) {
-        showCodeDialog.value = false;
-      }
-    });
-    document.removeEventListener("fullscreenchange", () => {
-      isFullscreen.value = !!document.fullscreenElement;
-    });
+    document.removeEventListener("keydown", handleDocumentKeydown);
+    document.removeEventListener("fullscreenchange", handleFullscreenChange);
   });
 
   return {

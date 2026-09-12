@@ -115,6 +115,18 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           target: wechatAuthProxyTarget,
           rewrite: (path) => path.replace(/^\/wechat-auth/, ""),
         },
+        ...(env.VITE_APP_REMOTE_ORIGIN
+          ? Object.fromEntries(
+              ["/api", "/api-auth", "/api-config"].map((prefix) => [
+                prefix,
+                {
+                  target: normalizeDevProxyTarget(env.VITE_APP_REMOTE_ORIGIN),
+                  changeOrigin: true,
+                  // Preserve the deployed frontend's API prefixes and TLS verification.
+                },
+              ])
+            )
+          : {}),
       },
     },
     plugins: [

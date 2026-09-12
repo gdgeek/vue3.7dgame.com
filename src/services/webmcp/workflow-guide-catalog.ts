@@ -1,4 +1,4 @@
-export const WORKFLOW_GUIDE_VERSION = "1.0.1";
+export const WORKFLOW_GUIDE_VERSION = "1.0.2";
 export const WORKFLOW_GUIDE_ID = "xrugc-scene-studio";
 export const WORKFLOW_GUIDE_TOOL_NAME = "xrugc_get_workflow_guide";
 
@@ -6,7 +6,7 @@ export const WORKFLOW_GUIDE_TOPICS = [
   {
     id: "overview",
     title: "场景制作总览",
-    description: "需求、页面选择和完整制作流程",
+    description: "需求、场景与脚本抽屉切换和完整制作流程",
   },
   {
     id: "assets",

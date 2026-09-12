@@ -224,6 +224,13 @@ vi.mock("@/components/ScriptDraftDialog.vue", () => ({
   }),
 }));
 
+vi.mock("@/components/VerseScriptDrawer.vue", () => ({
+  default: defineComponent({
+    name: "VerseScriptDrawerStub",
+    template: "<div class='verse-script-drawer-stub'></div>",
+  }),
+}));
+
 vi.mock("@/components/MrPP/MetaDialog.vue", () => ({
   default: defineComponent({ template: "<div />" }),
 }));

@@ -1,180 +1,61 @@
-# 脚本编辑器模态窗口实现说明
+# 场景脚本抽屉
 
-## 状态
+`/verse/scene` 的「脚本」菜单与顶部「脚本编辑」按钮均打开右侧抽屉，原场景 iframe 和 URL 保持不变。顶部按钮位于「运行场景」「版本管理」之后，沿用按钮组的响应式样式；仅场景页注册此入口。上线状态应以实际部署版本为准。
 
-✅ 已实现但未启用
+## 实现
 
-模态窗口功能已完全实现，但当前系统仍使用原有的路由跳转方式打开脚本编辑器。
+- `src/components/VerseScriptDrawer.vue` 使用 Element Plus Drawer，按需加载 `src/views/verse/script.vue`。
+- 脚本页支持 `embedded`、`verseId`、`sceneData`、`beforePublish` 参数。独立 `/verse/script` 路由继续可用。
+- 抽屉复用当前脚本页，包含 Blockly、Lua/JavaScript 查看和复制、保存、自动保存、版本恢复及 WebMCP。标题栏使用「保存＋版本历史」连体图标按钮组；正文仅保留「逻辑编辑／代码查看」标签页。运行场景和实体跳转使用外部场景编辑器的已有入口。
+- 标题栏直接调用脚本组件公开的保存和版本历史动作，不另建持久化流程。保存权限、编辑器加载状态和保存中状态控制按钮可用性。
+- 桌面为右侧 92% 宽（最大 1800px），保留左侧场景背景；小屏占满宽度。使用现有主题颜色、圆角和关闭按钮。
 
-## 已实现的组件
+## 场景及脚本状态
 
-1. **ScriptEditorModal.vue** - Verse 脚本编辑器模态窗口
-2. **MetaScriptEditorModal.vue** - Meta 脚本编辑器模态窗口
-3. **ScriptEditorModalProvider.vue** - 全局模态窗口提供者
-4. **useScriptEditorModal.ts** - Composable API
+打开时只读取当前场景快照，不保存或重新初始化场景。脚本使用该快照中的实例 UUID 和实体引用，包含尚未保存的放置与删除。缺失的实体元数据按需读取。
 
-## 当前行为
+关闭按钮与路由导航走同一个未保存判断：保存成功或明确放弃后关闭，取消/保存失败则保留编辑器；保存正在进行时先等待回执。遮罩点击和 Escape 不会误关编辑器。
 
-- 在场景编辑器中点击"编辑脚本"按钮会通过 `router.push()` 跳转到脚本编辑器页面
-- URL 会改变，浏览器历史会记录
-- 这是原有的实现方式
+离开场景路由时，父页面依次检查脚本和场景未保存状态，避免重复脚本路由守卫。逻辑与代码标签切换时保留 Blockly iframe，不重新加载工作区。
 
-## 如何启用模态窗口
+脚本保存只更新脚本接口。用户选择继续发布时，先确保场景保存成功，再创建发布快照。保存及关闭抽屉会使场景运行预览缓存失效，下次预览读取新脚本，不刷新场景编辑器。
 
-如果将来需要启用模态窗口功能，需要进行以下修改：
+## 生命周期
 
-### 1. 在 App.vue 中添加全局提供者
+抽屉首次打开才挂载脚本页，关闭后销毁。脚本 iframe 有独立 DOM ID；消息仍按来源窗口、origin 与会话检查。反复打开会清理旧脚本监听器、请求及 WebMCP 注册。
 
-```vue
-<template>
-  <router-view v-slot="{ Component, route }">
-    <transition name="page" mode="out-in" :key="route.fullPath">
-      <component :is="Component"></component>
-    </transition>
-  </router-view>
+抽屉打开期间暂停场景页 WebMCP 注册，避免两个编辑器的同名工具竞争；关闭后恢复。抽屉标题栏按钮不注册全局工具栏，不覆盖场景页顶部按钮。
 
-  <!-- 添加这一行 -->
-  <ScriptEditorModalProvider />
-</template>
+## WebMCP 工作区入口
 
-<script setup>
-// ... 其他导入
-import ScriptEditorModalProvider from "@/components/ScriptEditorModalProvider.vue";
-</script>
-```
+`useSceneWorkspaceWebMcp.ts` 独立管理场景工作区工具。在同一场景中打开或关闭抽屉时，以下三个辅助工具保持可用；离开场景或切换场景 ID 后，旧会话的请求失效：
 
-### 2. 修改 verse/scene.vue
+| 工具 | 行为 |
+| --- | --- |
+| `xrugc_get_scene_workspace_context` | 返回场景 ID、名称、活动编辑器，以及场景与脚本的就绪、未保存修改和保存中状态；包括抽屉开关及当前标签页。 |
+| `xrugc_open_scene_script_editor` | 先关闭运行预览，再读取实时场景快照并打开抽屉。场景未加载完成时拒绝打开，不隐式保存。 |
+| `xrugc_close_scene_script_editor` | 沿用未保存修改确认；取消时返回 `cancelled`，成功时等待关闭动画完成并恢复场景工具后返回 `closed`。 |
 
-```typescript
-// 添加导入
-import { useScriptEditorModal } from "@/composables/useScriptEditorModal";
+三个工具仅接受空对象。`opened` 只表示抽屉已打开，调用脚本编辑工具前仍需确认 `script.ready`。打开或关闭后必须重新发现工具，即使 URL 没有变化；工作流指南版本为 `1.0.2`。
 
-// 在组件中使用
-const { openScriptEditor } = useScriptEditorModal();
+抽屉内注册脚本工具，不注册 Unity 运行工具；运行场景时先关闭抽屉，再调用恢复后的场景运行工具。独立 `/verse/script` 页保留原有运行能力。
 
-// 修改 goto 处理
-case "goto":
-  if (isRecord(data) && data.target === "blockly.js") {
-    const scriptRoute = router
-      .getRoutes()
-      .find((route) => route.path === "/verse/script");
+并发关闭共用一次未保存确认，过期确认不会关闭新会话。路由导航也等待抽屉关闭完成后再切换场景，避免重开时使用上一场景的快照。
 
-    if (scriptRoute && scriptRoute.meta.title) {
-      const metaTitle = translateRouteTitle(scriptRoute.meta.title);
+## 旧模态组件
 
-      // 使用模态窗口替代路由跳转
-      openScriptEditor({
-        type: "verse",
-        verseId: id.value,
-        title: metaTitle + title.value,
-      });
-    }
-  }
-  break;
-```
+`ScriptEditorModal.vue`、`MetaScriptEditorModal.vue`、`ScriptEditorModalProvider.vue` 和 `useScriptEditorModal.ts` 是旧实现，本次未全局启用。Meta 场景的行为未改变。
 
-### 3. 修改 meta/scene.vue
+## 验证
 
-```typescript
-// 添加导入
-import { useScriptEditorModal } from "@/composables/useScriptEditorModal";
+自动测试：`VerseScriptDrawer.spec.ts`、`useScriptEditorBase.spec.ts`、`scriptRuntimeInjection.spec.ts`。覆盖懒加载、重复开关、取消关闭、并发关闭与导航、标题栏动作转发及加载／只读／保存中禁用、保存失败阻止离开及原有脚本协议。
 
-// 在组件中使用
-const { openScriptEditor } = useScriptEditorModal();
+WebMCP 重构另覆盖 `scene-workspace-tools.spec.ts`、`useSceneWorkspaceWebMcp.spec.ts` 及工作流指南测试，检查空参数校验、工具集切换、关闭取消、场景 ID 变化和 KeepAlive 停用后的旧请求失效。2026-09-12 相关测试共 35 个文件、302 项通过，类型检查和生产构建通过。本轮浏览器确认三个新工具可发现、未就绪时拒绝打开、已关闭时重复关闭成功；完整的已加载场景开关抽屉流程因线上场景 iframe 尚未就绪而未完成复验。
 
-// 修改 goto 处理
-case "goto":
-  if (data.target === "blockly.js") {
-    const scriptRoute = router
-      .getRoutes()
-      .find((route) => route.path === "/meta/script");
+真实浏览器验收清单：在本地登录后，进入可编辑场景，修改对象位置但不保存，打开脚本，检查 URL/相机/对象状态保持；检查 Blockly、代码、保存和版本历史；修改脚本后分别验证取消关闭、保存关闭和放弃关闭。已完成范围及未验证项见 `../design-qa.md`。
 
-    if (scriptRoute && scriptRoute.meta.title) {
-      const metaTitle = translateRouteTitle(scriptRoute.meta.title);
+## 连接线上后端进行本地验收
 
-      // 使用模态窗口替代路由跳转
-      openScriptEditor({
-        type: "meta",
-        metaId: id.value,
-        title: metaTitle + title.value,
-      });
-    }
-  }
-  break;
-```
+运行 `corepack pnpm run dev:online --host 127.0.0.1`。`.env.online` 使本地 `/api`、`/api-auth` 和 `/api-config` 保持原路径转发到 `https://d.xrugc.com`，使用 identity 认证及线上 Blockly/场景插件。无需本地 8081、3000、3002 服务，TLS 校验保持开启。此模式中的保存会更新线上账号数据，不会部署本地前端代码。
 
-## 模态窗口 vs 路由跳转对比
-
-| 特性 | 路由跳转（当前） | 模态窗口 |
-|------|----------------|---------|
-| URL 变化 | ✅ 会改变 | ❌ 不会改变 |
-| 浏览器历史 | ✅ 会记录 | ❌ 不会记录 |
-| 页面切换 | ✅ 完整切换 | ❌ 叠加显示 |
-| 上下文保持 | ❌ 会丢失 | ✅ 保持原页面状态 |
-| 返回按钮 | ✅ 可用 | ❌ 需要关闭模态窗口 |
-| 多标签页支持 | ✅ 支持 | ⚠️ 受限 |
-
-## 使用建议
-
-- **保持路由跳转**：如果用户习惯使用浏览器的前进/后退按钮，或需要在多个标签页中打开不同的脚本编辑器
-- **使用模态窗口**：如果希望提供更流畅的编辑体验，保持场景编辑器的状态，快速切换编辑和预览
-
-## 技术细节
-
-### 组件结构
-
-```
-web/src/
-├── components/
-│   ├── ScriptEditorModal.vue          # Verse 模态窗口
-│   ├── MetaScriptEditorModal.vue      # Meta 模态窗口
-│   └── ScriptEditorModalProvider.vue  # 全局提供者
-├── composables/
-│   └── useScriptEditorModal.ts        # Composable API
-└── views/
-    ├── verse/
-    │   ├── scene.vue                   # 场景编辑器（调用方）
-    │   └── script.vue                  # 脚本编辑器页面（路由模式）
-    └── meta/
-        ├── scene.vue                   # 场景编辑器（调用方）
-        └── script.vue                  # 脚本编辑器页面（路由模式）
-```
-
-### API 接口
-
-```typescript
-interface ScriptEditorModalOptions {
-  type: "verse" | "meta";  // 编辑器类型
-  verseId?: number;        // verse 类型时必填
-  metaId?: number;         // meta 类型时必填
-  title?: string;          // 可选：模态窗口标题
-  onSaved?: () => void;    // 可选：保存成功后的回调
-}
-
-// 使用方法
-const { openScriptEditor } = useScriptEditorModal();
-
-openScriptEditor({
-  type: "verse",
-  verseId: 627,
-  title: "脚本编辑器",
-  onSaved: () => {
-    console.log("保存成功");
-  },
-});
-```
-
-## 相关文档
-
-- [script-editor-modal-usage.md](./script-editor-modal-usage.md) - 详细使用指南
-- [plugin-development-guide.md](./plugin-development-guide.md) - 插件开发指南
-
-## 维护说明
-
-模态窗口组件已经完整实现并经过测试，可以随时启用。如果决定启用，只需要按照上述步骤修改调用方代码即可。
-
-原有的路由页面（`/verse/script` 和 `/meta/script`）会继续保留，以支持：
-- 直接通过 URL 访问
-- 浏览器书签
-- 外部链接
-- 向后兼容
+原有 `pnpm dev` 仍使用 `.env.development` 的本地后端配置。

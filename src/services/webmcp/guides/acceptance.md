@@ -9,7 +9,7 @@
 1. 检查素材数量、引用、贴图、动画名称、尺寸和初始状态。使用对应页面的 `xrugc_validate_entity` 或 `xrugc_validate_scene`，结合资源检查清理悬空引用。
 2. 重载实体、场景和改动的脚本，核对位置、比例、组件及工作区。仅从实时编辑器读取到新内容，不能证明服务器持久化。
 3. 检查画面中模型、按钮和说明文字是否清晰、无遮挡；展开或移动后仍应可操作。按钮高度和触达范围按用户及设备实际验证。
-4. 在场景编辑或场景脚本页重新发现工具，调用 `xrugc_start_scene_runtime_preview`；持续读取 `xrugc_get_scene_runtime_preview_status`。结束后用 `xrugc_stop_scene_runtime_preview` 关闭。
+4. 场景脚本抽屉不提供运行工具。先调用 `xrugc_close_scene_script_editor`，按原未保存确认选择；工具不自动保存或放弃，返回 `cancelled` 时保留抽屉且不能继续启动运行。关闭成功后用常驻 `xrugc_get_scene_workspace_context` 确认 `scene.ready`，即使 URL 不变也重新发现 `xrugc_start_scene_runtime_preview` 再调用；持续读取 `xrugc_get_scene_runtime_preview_status`。结束后用 `xrugc_stop_scene_runtime_preview` 关闭。独立 `/verse/script` 保留运行工具兼容，以实际发现的 schema 和前置条件为准。
 5. 测试本次改动的每个动作、快速连点、动画结束、旁白顺序、停止后重启和退出清理。实体脚本需在包含该实体的场景中验证。
 6. 已授权发布时记录快照回执和独立读回结果。交付场景入口、改动摘要、验证版本、实际通过项与未通过项，不共享凭据或签名资源链接。
 

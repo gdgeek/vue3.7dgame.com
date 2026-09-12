@@ -310,11 +310,6 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       { label: workspace, to: HOME_PATH, clickable: true },
       { label: scene, to: SCENE_LIST_PATH, clickable: true },
       { label: name, primary: true },
-      {
-        label: String(t("route.project.sceneEditor")),
-        kind: "mode",
-        mode: "scene",
-      },
     ]);
   }
 
@@ -446,7 +441,7 @@ const handleNavigate = (item: BreadcrumbSegment) => {
     max-width: 100%;
   }
 
-  .crumb-unsaved-dot--current {
+  .breadcrumb-nav:has(.editor-mode-tag) .crumb-unsaved-dot--current {
     display: none;
   }
 
