@@ -52,7 +52,10 @@ import { getScenePublication } from "@/api/v1/write-protocol";
 import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
 import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
-import { sceneWriteFailure } from "@/services/webmcp/scene-write-failure";
+import {
+  sceneWriteFailure,
+  writeFailureMessageKey,
+} from "@/services/webmcp/scene-write-failure";
 import { createIframeRpc } from "@/utils/iframeRpc";
 import {
   useIframeInitialization,
@@ -729,6 +732,7 @@ const restartAutoSaveTimer = () => {
   if (!autoSaveEnabled.value || !buildSceneDraftStorageKey.value) return;
 
   autoSaveTimer = window.setInterval(async () => {
+    if (hasUnconfirmedPersistence.value) return;
     if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
       return;
     }
@@ -873,16 +877,20 @@ const saveVerse = async (
   data: unknown,
   trigger: ScriptSaveTrigger = "manual"
 ) => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const isCurrentSave = () =>
+    ownerId === id.value && ownerSession === getHostSessionId();
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
-    return;
+    return false;
   }
 
   const verse = payload.verse;
 
   if (!saveable.value) {
     ElMessage.info(t("verse.view.sceneEditor.info3"));
-    return;
+    return false;
   }
 
   // 处理重复标题，确保标题唯一
@@ -914,11 +922,12 @@ const saveVerse = async (
     retitleVerses(verse.children.modules);
   }
   await saveScenePayload(verse as unknown as JsonValue);
+  if (!isCurrentSave()) return false;
 
   if (trigger === "manual") {
     if (!hasPublishableSceneContent(verse)) {
       ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
-      return;
+      return true;
     }
 
     ElMessageBox.confirm(
@@ -931,6 +940,7 @@ const saveVerse = async (
       }
     )
       .then(async () => {
+        if (!isCurrentSave()) return;
         await takePhoto(
           id.value,
           createWriteOptions(getSceneServerModel()?.serverRevision)
@@ -947,6 +957,7 @@ const saveVerse = async (
         });
       });
   }
+  return true;
 };
 
 const saveVerseBeforeLeave = async (
@@ -954,6 +965,10 @@ const saveVerseBeforeLeave = async (
   trigger: ScriptSaveTrigger = currentSaveTrigger,
   showSuccess = true
 ): Promise<boolean> => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const isCurrentSave = () =>
+    ownerId === id.value && ownerSession === getHostSessionId();
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
     return false;
@@ -963,7 +978,7 @@ const saveVerseBeforeLeave = async (
 
   if (!saveable.value) {
     ElMessage.info(t("verse.view.sceneEditor.info3"));
-    return true;
+    return false;
   }
 
   const retitleVerses = (verses: VerseModule[]) => {
@@ -993,12 +1008,13 @@ const saveVerseBeforeLeave = async (
 
   try {
     await saveScenePayload(verse as unknown as JsonValue);
+    if (!isCurrentSave()) return false;
     if (trigger === "manual" && showSuccess) {
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
     }
     return true;
-  } catch {
-    ElMessage.error(t("verse.view.sceneEditor.error1"));
+  } catch (error) {
+    if (isCurrentSave()) ElMessage.error(t(writeFailureMessageKey(error)));
     return false;
   }
 };
@@ -1215,7 +1231,8 @@ const persistWebMcpSceneMutation = async (
         messages.failure
       );
   } finally {
-    isSavingVersion.value = false;
+    if (ownerId === id.value && ownerSession === getHostSessionId())
+      isSavingVersion.value = false;
   }
   return {
     editorApplied: true,
@@ -1299,6 +1316,7 @@ const handleMessage = async (e: MessageEvent) => {
   switch (msg.type) {
     case "PLUGIN_READY":
       if (!editorInitialization.acceptReady(payload)) break;
+      isSavingVersion.value = false;
       webMcpRpc.cancel("编辑器文档已重新加载");
       webMcpLifecycle?.abort();
       registerPageWebMcpTools();
@@ -1313,6 +1331,10 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "RESPONSE": {
+      const responseOwner = id.value;
+      const responseSession = getHostSessionId();
+      const isCurrentResponse = () =>
+        responseOwner === id.value && responseSession === getHostSessionId();
       const action = payload.action as string | undefined;
       const requestId =
         typeof msg.requestId === "string" ? msg.requestId : undefined;
@@ -1331,7 +1353,22 @@ const handleMessage = async (e: MessageEvent) => {
         // Original save-verse logic
         currentSaveTrigger = "manual";
         isSavingVersion.value = true;
-        await saveVerse(payload, currentSaveTrigger);
+        try {
+          const saved = await saveVerse(payload, currentSaveTrigger);
+          if (!isCurrentResponse()) break;
+          if (!saved) {
+            isSavingVersion.value = false;
+            resolveLeaveSave(false);
+            break;
+          }
+        } catch (error) {
+          if (isCurrentResponse()) {
+            isSavingVersion.value = false;
+            resolveLeaveSave(false);
+            ElMessage.error(t(writeFailureMessageKey(error)));
+          }
+          break;
+        }
         if (payload.verse) {
           const savedAt = addSceneDraftVersion(
             payload as VerseEditorPayload,
@@ -1349,14 +1386,24 @@ const handleMessage = async (e: MessageEvent) => {
         if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
           isSavingVersion.value = false;
           resolveLeaveSave(false);
-          ElMessage.error(
-            "仍有未确认保存的修改，请先核对服务器版本；编辑器无新增修改不代表保存成功"
-          );
+          ElMessage.error(t("common.editorSave.pending"));
           break;
         }
         if (pendingRestorePayload.value) {
           const restoredPayload = pendingRestorePayload.value;
-          await saveVerse(restoredPayload, currentSaveTrigger);
+          let result = false;
+          try {
+            result = await saveVerse(restoredPayload, currentSaveTrigger);
+          } catch (error) {
+            if (isCurrentResponse())
+              ElMessage.error(t(writeFailureMessageKey(error)));
+          }
+          if (!isCurrentResponse()) break;
+          if (!result) {
+            isSavingVersion.value = false;
+            resolveLeaveSave(false);
+            break;
+          }
           const savedAt = addSceneDraftVersion(
             restoredPayload,
             currentSaveTrigger
@@ -1379,6 +1426,7 @@ const handleMessage = async (e: MessageEvent) => {
         // Original save-verse-before-leave logic
         isSavingVersion.value = true;
         const result = await saveVerseBeforeLeave(payload, currentSaveTrigger);
+        if (!isCurrentResponse()) break;
         if (result && payload.verse) {
           const savedAt = addSceneDraftVersion(
             payload as VerseEditorPayload,
@@ -1399,9 +1447,7 @@ const handleMessage = async (e: MessageEvent) => {
         if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
           isSavingVersion.value = false;
           resolveLeaveSave(false);
-          ElMessage.error(
-            "仍有未确认保存的修改，请先核对服务器版本；编辑器无新增修改不代表保存成功"
-          );
+          ElMessage.error(t("common.editorSave.pending"));
           break;
         }
         if (pendingRestorePayload.value) {
@@ -1410,6 +1456,7 @@ const handleMessage = async (e: MessageEvent) => {
             restoredPayload,
             currentSaveTrigger
           );
+          if (!isCurrentResponse()) break;
           if (result) {
             const savedAt = addSceneDraftVersion(
               restoredPayload,
@@ -1602,6 +1649,7 @@ watch(id, (nextId, previousId) => {
   pendingRestorePayload.value = null;
   isRestoringDraft.value = false;
   resetUnsavedState();
+  isSavingVersion.value = false;
   verseMetasWithLuaCodeData.value = undefined;
   verseMetasWithJsCodeData.value = undefined;
   editorFrameKey.value += 1;

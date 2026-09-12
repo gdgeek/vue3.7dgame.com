@@ -1,6 +1,14 @@
 // 通用翻译
 export default {
   common: {
+    editorSave: {
+      conflict:
+        "服务器拒绝了版本冲突写入。本地修改仍未保存，请保留内容并核对服务器最新版本后再操作。",
+      unverified:
+        "保存结果尚未确认。本地修改已保留，请先查询原操作回执和服务器状态。",
+      pending:
+        "仍有未确认保存的修改，请先核对服务器版本；编辑器无新增修改不代表保存成功。",
+    },
     confirm: "确认",
     cancel: "取消",
     selectUser: "选择用户",

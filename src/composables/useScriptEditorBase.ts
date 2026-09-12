@@ -1,4 +1,5 @@
 import type { WriteOptions } from "@/api/v1/write-contract";
+import { writeFailureMessageKey } from "@/services/webmcp/scene-write-failure";
 /**
  * 共享编辑器基础 composable，供 meta/script.vue 和 verse/script.vue 共用。
  * 包含所有与领域无关的状态管理、消息通信、全屏控制、代码格式化、
@@ -148,7 +149,14 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const currentCodeType = ref("");
   const codeDialogTitle = ref("");
   const unsavedBlocklyData = ref<unknown>(null);
-  const hasUnsavedChanges = ref<boolean>(false);
+  const editorDirty = ref(false);
+  const persistenceUnverified = ref(false);
+  const hasUnsavedChanges = computed({
+    get: () => editorDirty.value || persistenceUnverified.value,
+    set: (dirty: boolean) => {
+      editorDirty.value = dirty;
+    },
+  });
   const draftVersions = ref<ScriptDraftVersion[]>([]);
   const versionDialogVisible = ref(false);
   const autoSaveEnabled = ref(true);
@@ -217,10 +225,13 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     data: EditorPostPayload,
     trigger: ScriptSaveTrigger
   ) => {
+    if (!canSaveCurrentScript()) throw new Error(SAVE_NOT_ALLOWED_ERROR);
     if (persistenceInFlight) {
       throw new Error("script persistence is already in progress");
     }
     persistenceInFlight = true;
+    const ownerRevision = snapshotRevision;
+    persistenceUnverified.value = true;
     try {
       await options.onPost(data, {
         trigger,
@@ -228,6 +239,12 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           ? { write: currentSaveOptions.write }
           : {}),
       });
+      if (ownerRevision === snapshotRevision)
+        persistenceUnverified.value = false;
+    } catch (error) {
+      if (ownerRevision === snapshotRevision)
+        Message.error(t(writeFailureMessageKey(error)));
+      throw error;
     } finally {
       persistenceInFlight = false;
     }
@@ -271,7 +288,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const buildRuntimeLua = (lua: string) =>
     `local ${options.luaLocalVar} = {}\nlocal index = ''\n${lua}`;
 
-  const clearPendingSaveSession = (reason?: Error) => {
+  const clearPendingSaveSession = (reason?: unknown) => {
     const pendingPromise = pendingSavePromise;
     const reject = saveReject;
 
@@ -354,6 +371,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       blocklyData: safeClone(payload.blocklyData),
     };
     hasInitializedSavedSnapshot = true;
+    persistenceUnverified.value = false;
     hasUnsavedChanges.value = false;
     savedSnapshotPayload = {
       lua: payload.lua,
@@ -763,7 +781,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     if (!getDraftStorageKey()) return;
 
     saveTimer = window.setInterval(async () => {
-      if (!hasUnsavedChanges.value) return;
+      if (!hasUnsavedChanges.value || persistenceUnverified.value) return;
       if (!canSaveCurrentScript()) return;
       if (isSaving.value) return;
       try {
@@ -1096,8 +1114,8 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     try {
       await save();
       return true;
-    } catch (_error) {
-      Message.error(t(options.i18nKeys.leaveError));
+    } catch (error) {
+      Message.error(t(writeFailureMessageKey(error)));
       return false;
     }
   };
@@ -1271,6 +1289,27 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           resolve?.();
         } else if (payload.noChange === true) {
           // --- 无变更的保存响应 ---
+          // The iframe baseline is not proof that the last server write succeeded.
+          if (persistenceUnverified.value) {
+            if (typeof payload.saveId === "string")
+              postMessage("SAVE_NACK", { saveId: payload.saveId });
+            Message.error(t("common.editorSave.pending"));
+            throw new Error(
+              "save result must be verified before accepting noChange"
+            );
+          }
+          const persistNoChangePayload = async (data: EditorPostPayload) => {
+            try {
+              await persistEditorPayload(data, currentSaveTrigger);
+            } catch (error) {
+              if (
+                messageSnapshotRevision === snapshotRevision &&
+                typeof payload.saveId === "string"
+              )
+                postMessage("SAVE_NACK", { saveId: payload.saveId });
+              throw error;
+            }
+          };
           const noChangeSnapshot =
             isEditorPostPayload(payload) &&
             Object.prototype.hasOwnProperty.call(payload, "data")
@@ -1326,6 +1365,8 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
             if (pendingRestorePayload === restorePayload) {
               pendingRestorePayload = null;
             }
+            if (typeof payload.saveId === "string")
+              postMessage("SAVE_ACK", { saveId: payload.saveId });
             const resolve = saveResolve;
             clearPendingSaveSession();
             resolve?.();
@@ -1345,15 +1386,29 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
               lua: requestedPayload.lua,
               js: requestedPayload.js,
             };
-            await persistEditorPayload(postData, responseTrigger);
+            await persistNoChangePayload(postData);
             if (messageSnapshotRevision !== snapshotRevision) return;
             const savedAt = addDraftVersion(postData, responseTrigger);
             markCurrentPayloadAsSaved(requestedPayload);
             lastSaveTrigger.value = responseTrigger;
             lastSavedAt.value = savedAt || new Date().toISOString();
           } else if (noChangeSnapshot) {
+            if (
+              buildSnapshotSignature(noChangeSnapshot) !== lastSavedSignature
+            ) {
+              const postData = {
+                data: noChangeSnapshot.blocklyData,
+                lua: noChangeSnapshot.lua,
+                js: noChangeSnapshot.js,
+              };
+              await persistNoChangePayload(postData);
+              if (messageSnapshotRevision !== snapshotRevision) return;
+              addDraftVersion(postData, currentSaveTrigger);
+            }
             markCurrentPayloadAsSaved(noChangeSnapshot);
           }
+          if (typeof payload.saveId === "string")
+            postMessage("SAVE_ACK", { saveId: payload.saveId });
           lastSaveTrigger.value = currentSaveTrigger;
           lastSavedAt.value = new Date().toISOString();
           const hasWarnings = showSaveWarnings(payload.warnings);
@@ -1427,9 +1482,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     } catch (error) {
       if (messageSnapshotRevision === snapshotRevision) {
         hasUnsavedChanges.value = true;
-        clearPendingSaveSession(
-          error instanceof Error ? error : new Error(String(error))
-        );
+        clearPendingSaveSession(error);
       }
       logger.log("ex:" + String(error));
     } finally {

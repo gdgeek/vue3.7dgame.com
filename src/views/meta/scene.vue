@@ -257,6 +257,10 @@ import type {
 } from "@/composables/useScriptEditorBase";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
+import {
+  sceneWriteFailure,
+  writeFailureMessageKey,
+} from "@/services/webmcp/scene-write-failure";
 import { registerEntityEditorWebMcpTools } from "@/services/webmcp/entity-editor-tools";
 import type {
   NodeTransformPreview,
@@ -830,6 +834,7 @@ const restartAutoSaveTimer = () => {
   if (!autoSaveEnabled.value || !buildSceneDraftStorageKey.value) return;
 
   autoSaveTimer = window.setInterval(async () => {
+    if (hasUnconfirmedPersistence.value) return;
     if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
       return;
     }
@@ -1429,6 +1434,10 @@ const confirmSaveCurrentEntity = () =>
 
 const {
   hasUnsavedChangesBeforeUnload,
+  hasUnconfirmedPersistence,
+  markPersistenceUnverified,
+  markPersistenceAcknowledged,
+  resetUnsavedState,
   syncUnsavedChangesForBeforeUnload,
   resolveLeaveSave,
   requestSceneSave,
@@ -1474,10 +1483,12 @@ const saveMeta = async (
   },
   trigger: ScriptSaveTrigger = "manual",
   onServerSaved?: () => void,
-  write?: WriteOptions
+  write?: WriteOptions,
+  rethrowFailure = false
 ): Promise<boolean> => {
   const savedOwnerId = id.value;
   const savedOwner = metaDetail.value;
+  const savedSession = getHostSessionId();
   if (!metaDetail.value || !saveable(metaDetail.value as metaInfo)) {
     ElMessage.info(t("meta.scene.info"));
     return false;
@@ -1513,6 +1524,7 @@ const saveMeta = async (
     renameEntities(meta.children.entities);
   }
 
+  markPersistenceUnverified();
   try {
     const savedResponse = await putMeta(
       savedOwnerId,
@@ -1526,8 +1538,12 @@ const saveMeta = async (
         )
     );
     onServerSaved?.();
-    if (id.value !== savedOwnerId || metaDetail.value !== savedOwner)
-      return true;
+    if (
+      id.value !== savedOwnerId ||
+      metaDetail.value !== savedOwner ||
+      getHostSessionId() !== savedSession
+    )
+      return false;
     applyWriteRevision(metaDetail.value as metaInfo, savedResponse);
     if (metaDetail.value) {
       const currentMetaDetail = metaDetail.value as metaInfo;
@@ -1540,12 +1556,15 @@ const saveMeta = async (
       ) as import("@/api/v1/types/meta").Events | null;
       metaDetail.value = nextMetaDetail;
     }
+    if (!onServerSaved) markPersistenceAcknowledged();
     if (trigger === "manual") {
       Message.success(t("meta.scene.success"));
     }
     return true;
   } catch (error) {
-    ElMessage.error(t("meta.scene.saveError"));
+    if (rethrowFailure) throw error;
+    if (id.value === savedOwnerId && getHostSessionId() === savedSession)
+      ElMessage.error(t(writeFailureMessageKey(error)));
     return false;
   }
 };
@@ -1558,6 +1577,7 @@ const persistWebMcpMutation = async (
   if (response.noChange)
     return { editorApplied: false, persistence: "unchanged" };
   const ownerId = id.value;
+  markPersistenceUnverified();
   if (response.readBackVerified === false || !isRecord(response.meta)) {
     throw new WebMcpCompletionError(
       {
@@ -1590,7 +1610,8 @@ const persistWebMcpMutation = async (
       writeOptionsForPreview(
         preview,
         (metaDetail.value as metaInfo | null)?.serverRevision
-      )
+      ),
+      true
     );
     if (!saved && !serverSaved) {
       throw new WebMcpCompletionError(
@@ -1606,7 +1627,8 @@ const persistWebMcpMutation = async (
         failureMessage
       );
     }
-    if (ownerId === id.value && ownerSession === getHostSessionId()) {
+    if (saved && ownerId === id.value && ownerSession === getHostSessionId()) {
+      const savedModel = metaDetail.value;
       try {
         requireSuccessfulEditorResponse(
           await requestEditor("webmcp-mark-entity-saved", {
@@ -1617,7 +1639,18 @@ const persistWebMcpMutation = async (
       } catch {
         /* The backend receipt remains valid even if the editor changed. */
       }
-      hasUnsavedChangesBeforeUnload.value = !editorAcknowledged;
+      if (
+        ownerId !== id.value ||
+        ownerSession !== getHostSessionId() ||
+        savedModel !== metaDetail.value
+      )
+        return {
+          editorApplied: true,
+          persistence: "server_acknowledged",
+          editorAcknowledged,
+          ownerId,
+        };
+      if (editorAcknowledged) markPersistenceAcknowledged();
       const savedAt = addSceneDraftVersion(saveData, currentSaveTrigger);
       pendingRestorePayload.value = null;
       lastSaveTrigger.value = currentSaveTrigger;
@@ -1630,7 +1663,16 @@ const persistWebMcpMutation = async (
       ownerId,
     };
   } catch (error) {
-    if (!serverSaved) throw error;
+    if (!serverSaved)
+      throw sceneWriteFailure(
+        error,
+        {
+          ownerId,
+          nodeId: response.nodeId,
+          entityVersion: response.entityVersion,
+        },
+        failureMessage
+      );
     return {
       editorApplied: true,
       persistence: "server_acknowledged",
@@ -1639,7 +1681,8 @@ const persistWebMcpMutation = async (
       refreshWarning: "实体已保存，但页面状态刷新未完成，请重新读取",
     };
   } finally {
-    isSavingVersion.value = false;
+    if (ownerId === id.value && ownerSession === getHostSessionId())
+      isSavingVersion.value = false;
   }
 };
 
@@ -1747,6 +1790,7 @@ const handleMessage = async (e: MessageEvent) => {
   switch (msg.type) {
     case "PLUGIN_READY":
       if (!editorInitialization.acceptReady(payload)) break;
+      isSavingVersion.value = false;
       webMcpRpc.cancel("编辑器文档已重新加载");
       webMcpLifecycle?.abort();
       registerPageWebMcpTools();
@@ -1762,6 +1806,10 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "RESPONSE": {
+      const responseOwner = id.value;
+      const responseSession = getHostSessionId();
+      const isCurrentResponse = () =>
+        responseOwner === id.value && responseSession === getHostSessionId();
       const action = payload.action as string | undefined;
       const requestId =
         typeof msg.requestId === "string" ? msg.requestId : undefined;
@@ -1785,6 +1833,7 @@ const handleMessage = async (e: MessageEvent) => {
           events: unknown;
         };
         const result = await saveMeta(saveData, currentSaveTrigger);
+        if (!isCurrentResponse()) break;
         if (result) {
           const savedAt = addSceneDraftVersion(saveData, currentSaveTrigger);
           hasUnsavedChangesBeforeUnload.value = false;
@@ -1795,6 +1844,12 @@ const handleMessage = async (e: MessageEvent) => {
         isSavingVersion.value = false;
         resolveLeaveSave(result);
       } else if (action === "save" && payload.noChange) {
+        if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
+          isSavingVersion.value = false;
+          resolveLeaveSave(false);
+          ElMessage.error(t("common.editorSave.pending"));
+          break;
+        }
         // Original save-meta-none logic
         if (pendingRestorePayload.value) {
           const restoredPayload = pendingRestorePayload.value;
@@ -1805,6 +1860,7 @@ const handleMessage = async (e: MessageEvent) => {
             },
             currentSaveTrigger
           );
+          if (!isCurrentResponse()) break;
           if (result) {
             const savedAt = addSceneDraftVersion(
               {
@@ -1836,6 +1892,7 @@ const handleMessage = async (e: MessageEvent) => {
           events: unknown;
         };
         const result = await saveMeta(saveData, currentSaveTrigger);
+        if (!isCurrentResponse()) break;
         if (result) {
           const savedAt = addSceneDraftVersion(saveData, currentSaveTrigger);
           hasUnsavedChangesBeforeUnload.value = false;
@@ -1849,6 +1906,12 @@ const handleMessage = async (e: MessageEvent) => {
         isSavingVersion.value = false;
         resolveLeaveSave(result);
       } else if (action === "save-before-leave" && payload.noChange) {
+        if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
+          isSavingVersion.value = false;
+          resolveLeaveSave(false);
+          ElMessage.error(t("common.editorSave.pending"));
+          break;
+        }
         // Original save-meta-before-leave-none logic
         if (pendingRestorePayload.value) {
           const restoredPayload = pendingRestorePayload.value;
@@ -1859,6 +1922,7 @@ const handleMessage = async (e: MessageEvent) => {
             },
             currentSaveTrigger
           );
+          if (!isCurrentResponse()) break;
           if (result) {
             const savedAt = addSceneDraftVersion(
               {
@@ -2009,7 +2073,8 @@ const refresh = async () => {
 const resetEditorStateForSceneChange = () => {
   isRestoringDraft.value = false;
   pendingRestorePayload.value = null;
-  hasUnsavedChangesBeforeUnload.value = false;
+  resetUnsavedState();
+  isSavingVersion.value = false;
   metaDetail.value = null;
   entityScenes.value = [];
   loadSceneDraftState();
@@ -2163,6 +2228,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -2250,6 +2316,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -2340,6 +2407,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -2459,6 +2527,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -2548,6 +2617,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -2641,6 +2711,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -2727,6 +2798,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -2822,6 +2894,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -3057,6 +3130,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
@@ -3161,6 +3235,7 @@ const registerPageWebMcpTools = () => {
 
       const unsavedResponse = await requestEditor("check-unsaved-changes");
       const hasUnsavedChanges =
+        hasUnsavedChangesBeforeUnload.value ||
         Boolean(unsavedResponse.changed) ||
         Boolean(pendingRestorePayload.value);
       hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;

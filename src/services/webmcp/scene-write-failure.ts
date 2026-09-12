@@ -1,13 +1,21 @@
 import { isAxiosError } from "axios";
 import { WebMcpCompletionError } from "./completion-result";
 
+export const isWriteConflict = (error: unknown) =>
+  isAxiosError(error) && error.response?.status === 409;
+
+export const writeFailureMessageKey = (error: unknown) =>
+  isWriteConflict(error)
+    ? "common.editorSave.conflict"
+    : "common.editorSave.unverified";
+
 /** Preserve local edits while distinguishing a rejected write from a lost reply. */
 export function sceneWriteFailure(
   error: unknown,
   context: Record<string, unknown>,
   message: string
 ) {
-  const conflict = isAxiosError(error) && error.response?.status === 409;
+  const conflict = isWriteConflict(error);
   return new WebMcpCompletionError(
     {
       ...context,
