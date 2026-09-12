@@ -1,16 +1,16 @@
 <template>
   <EditorScriptDrawer
     ref="drawer"
-    class="verse-script-drawer"
-    :editor-component="VerseScriptEditor"
-    :editor-key="verseId"
-    :editor-props="{ embedded: true, verseId, sceneData, beforePublish }"
+    class="meta-script-drawer"
+    :editor-component="MetaScriptEditor"
+    :editor-key="metaId"
+    :editor-props="{ embedded: true, metaId, metaData }"
     :title="title"
-    editor-label-key="route.project.scriptEditor"
-    save-label-key="verse.view.script.save"
-    versions-label-key="verse.view.script.drawer.versions"
+    editor-label-key="route.meta.scriptEditor"
+    save-label-key="meta.script.save"
+    versions-label-key="common.scriptDraft.entry"
     @closed="$emit('closed')"
-    @saved="$emit('saved')"
+    @saved="$emit('saved', $event)"
   ></EditorScriptDrawer>
 </template>
 
@@ -19,17 +19,16 @@ import { defineAsyncComponent, ref } from "vue";
 import EditorScriptDrawer from "./EditorScriptDrawer.vue";
 import type { ScriptDrawerHandle } from "./script-drawer-types";
 
-const VerseScriptEditor = defineAsyncComponent(() =>
-  import("@/views/verse/script.vue").then((module) => module.default)
+const MetaScriptEditor = defineAsyncComponent(() =>
+  import("@/views/meta/script.vue").then((module) => module.default)
 );
 
 defineProps<{
-  verseId: number;
+  metaId: number;
   title: string;
-  sceneData?: unknown;
-  beforePublish?: () => Promise<void>;
+  metaData?: unknown;
 }>();
-defineEmits<{ closed: []; saved: [] }>();
+defineEmits<{ closed: []; saved: [payload: unknown] }>();
 const drawer = ref<ScriptDrawerHandle>();
 
 defineExpose({

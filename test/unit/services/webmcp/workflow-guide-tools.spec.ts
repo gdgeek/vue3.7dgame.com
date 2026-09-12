@@ -37,10 +37,10 @@ describe("site workflow guide", () => {
       expect(result).toMatchObject({
         topic: id,
         title,
-        version: "1.0.2",
+        version: "1.0.3",
         page: "entity",
         language: "zh-CN",
-        documentationUrl: `/webmcp/scene-studio/1.0.2/${id}.md`,
+        documentationUrl: `/webmcp/scene-studio/1.0.3/${id}.md`,
         primaryPageTools: ["example_edit"],
         content: expect.stringMatching(/^# /),
       });
@@ -148,6 +148,9 @@ describe("site workflow guide", () => {
       "xrugc_get_scene_workspace_context",
       "xrugc_open_scene_script_editor",
       "xrugc_close_scene_script_editor",
+      "xrugc_get_entity_workspace_context",
+      "xrugc_open_entity_script_editor",
+      "xrugc_close_entity_script_editor",
     ]) {
       expect(result.primaryPageTools).not.toContain(helper);
       expect(result.toolAvailability).toContain(helper);
@@ -161,6 +164,24 @@ describe("site workflow guide", () => {
     expect(result.content).toContain("server_acknowledged");
   });
 
+  it.each(["overview", "interaction", "audio", "troubleshooting"])(
+    "describes the entity drawer without routing away in %s",
+    async (topic) => {
+      const { content } = (await createGuide("entity").guide.execute({
+        topic,
+      })) as { content: string };
+      expect(content).toContain("xrugc_open_entity_script_editor");
+      expect(content).toContain("xrugc_get_entity_workspace_context");
+      expect(content).toContain("script.ready");
+      expect(content).toContain("xrugc_close_entity_script_editor");
+      expect(content).toContain("不自动保存或放弃");
+      expect(content).toContain("`cancelled` 时保留抽屉");
+      expect(content).toContain("entity.ready");
+      expect(content).toContain("/meta/script");
+      expect(content).toMatch(/即使 URL 不变[^。；]*重新发现/);
+    }
+  );
+
   it("requires returning to the scene before starting runtime from a drawer", async () => {
     const { content } = (await createGuide("scene-script").guide.execute({
       topic: "acceptance",
@@ -172,44 +193,50 @@ describe("site workflow guide", () => {
     );
   });
 
-  it("unregisters and rejects stale calls when the page lifecycle ends", async () => {
-    const registry = new Map<string, WebMcpTool>();
-    const doc = {
-      modelContext: {
-        registerTool(tool: WebMcpTool, options: { signal: AbortSignal }) {
-          expect(registry.has(tool.name)).toBe(false);
-          registry.set(tool.name, tool);
-          options.signal.addEventListener("abort", () =>
-            registry.delete(tool.name)
-          );
+  it.each(["scene", "entity"] as const)(
+    "unregisters and rejects stale calls when the %s editor lifecycle ends",
+    async (page) => {
+      const registry = new Map<string, WebMcpTool>();
+      const doc = {
+        modelContext: {
+          registerTool(tool: WebMcpTool, options: { signal: AbortSignal }) {
+            expect(registry.has(tool.name)).toBe(false);
+            registry.set(tool.name, tool);
+            options.signal.addEventListener("abort", () =>
+              registry.delete(tool.name)
+            );
+          },
         },
-      },
-    } as unknown as Document;
-    const lifecycle = registerWebMcpTools(withWorkflowGuide([], "scene"), {
-      document: doc,
-    });
-    const tool = registry.get("xrugc_get_workflow_guide")!;
-    await expect(tool.execute({})).resolves.toMatchObject({ page: "scene" });
-    lifecycle!.abort();
-    expect(registry.size).toBe(0);
-    await expect(tool.execute({})).rejects.toThrow();
-    const next = registerWebMcpTools(withWorkflowGuide([], "scene-script"), {
-      document: doc,
-    });
-    expect(registry.size).toBe(1);
-    await expect(
-      registry.get("xrugc_get_workflow_guide")!.execute({})
-    ).resolves.toMatchObject({ page: "scene-script" });
-    next!.abort();
-    const restored = registerWebMcpTools(withWorkflowGuide([], "scene"), {
-      document: doc,
-    });
-    expect(registry.size).toBe(1);
-    await expect(
-      registry.get("xrugc_get_workflow_guide")!.execute({})
-    ).resolves.toMatchObject({ page: "scene" });
-    restored!.abort();
-  });
+      } as unknown as Document;
+      const lifecycle = registerWebMcpTools(withWorkflowGuide([], page), {
+        document: doc,
+      });
+      const tool = registry.get("xrugc_get_workflow_guide")!;
+      await expect(tool.execute({})).resolves.toMatchObject({ page });
+      lifecycle!.abort();
+      expect(registry.size).toBe(0);
+      await expect(tool.execute({})).rejects.toThrow();
+      const next = registerWebMcpTools(
+        withWorkflowGuide([], `${page}-script`),
+        {
+          document: doc,
+        }
+      );
+      expect(registry.size).toBe(1);
+      await expect(
+        registry.get("xrugc_get_workflow_guide")!.execute({})
+      ).resolves.toMatchObject({ page: `${page}-script` });
+      next!.abort();
+      const restored = registerWebMcpTools(withWorkflowGuide([], page), {
+        document: doc,
+      });
+      expect(registry.size).toBe(1);
+      await expect(
+        registry.get("xrugc_get_workflow_guide")!.execute({})
+      ).resolves.toMatchObject({ page });
+      restored!.abort();
+    }
+  );
 
   it("does not return a guide after disposal during loading", async () => {
     const lifecycle = new AbortController();

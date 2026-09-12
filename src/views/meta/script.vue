@@ -1,11 +1,11 @@
 <template>
-  <div class="verse-code">
+  <div class="verse-code" :class="{ 'script--embedded': embedded }">
     <el-container>
       <el-main>
         <el-card class="box-card">
           <el-container>
             <div class="script-tabs-wrapper">
-              <div class="script-editor-toolbar">
+              <div v-if="!embedded" class="script-editor-toolbar">
                 <div
                   class="script-mode-tabs"
                   role="tablist"
@@ -87,7 +87,7 @@
               <el-tabs
                 v-model="activeName"
                 class="script-main-tabs"
-                type="card"
+                :type="embedded ? '' : 'card'"
                 style="width: 100%"
               >
                 <el-tab-pane
@@ -108,7 +108,7 @@
                       style="width: 100%; height: 100%; padding: 0; margin: 0"
                       class="blockly-editor-frame"
                       scrolling="no"
-                      id="editor"
+                      :id="embedded ? 'meta-script-editor' : 'editor'"
                       ref="editor"
                       :src="src"
                       @load="handleEditorFrameLoad"
@@ -222,6 +222,7 @@ import { logger } from "@/utils/logger";
 import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
+import type { MetaCode } from "@/api/v1/types/meta";
 import { getVerses } from "@/api/v1/verse";
 import { Message } from "@/components/Dialog";
 import pako from "pako";
@@ -263,12 +264,33 @@ import {
 import { sceneWriteFailure } from "@/services/webmcp/scene-write-failure";
 import { createIframeRpc } from "@/utils/iframeRpc";
 
+const props = withDefaults(
+  defineProps<{
+    embedded?: boolean;
+    metaId?: number;
+    metaData?: unknown;
+  }>(),
+  { embedded: false }
+);
+const emit = defineEmits<{
+  close: [];
+  saved: [
+    payload: {
+      entityId: number;
+      previousRevision?: string;
+      serverRevision?: string;
+      metaCode: MetaCode;
+    },
+  ];
+}>();
+
 // ---------- Meta 专有状态 ----------
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
 const route = useRoute();
 const router = useRouter();
-const id = computed(() => parseInt(route.query.id as string));
+const id = computed(() => props.metaId ?? parseInt(route.query.id as string));
+const saveable = computed(() => Boolean(meta.value?.editable));
 const loader = getConfiguredGLTFLoader();
 let metaLoadSequence = 0;
 let isScriptViewActive = true;
@@ -385,17 +407,31 @@ const postScript = async (
   }
 
   const savedOwner = meta.value;
+  const previousRevision = savedOwner.serverRevision;
+  const metaCode = {
+    blockly: blocklyData,
+    lua: message.lua,
+    js: message.js,
+  };
   const savedResponse = await putMetaCode(
     meta.value.id,
-    {
-      blockly: blocklyData,
-      lua: message.lua,
-      js: message.js,
-    },
+    metaCode,
     context.write ?? createWriteOptions(savedOwner?.serverRevision)
   );
   if (meta.value === savedOwner) applyWriteRevision(savedOwner, savedResponse);
 
+  if (
+    isScriptViewActive &&
+    meta.value === savedOwner &&
+    savedOwner.id === id.value
+  ) {
+    emit("saved", {
+      entityId: savedOwner.id,
+      previousRevision,
+      serverRevision: savedOwner.serverRevision,
+      metaCode,
+    });
+  }
   if (context.trigger === "manual") {
     Message.success(t("meta.script.success"));
   }
@@ -439,6 +475,7 @@ const {
   isReady,
   copyCode,
 } = useScriptEditorBase({
+  registerRouteGuard: !props.embedded,
   luaLocalVar: "meta",
   i18nKeys: {
     error1: "meta.script.error1",
@@ -882,6 +919,7 @@ const registerScriptBlockTools = () => {
 
 const activateToolbar = () => {
   isScriptViewActive = true;
+  if (props.embedded) return;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     onOpen: openVersionDialog,
@@ -893,15 +931,15 @@ onActivated(activateToolbar);
 onDeactivated(() => {
   isScriptViewActive = false;
   metaLoadSequence += 1;
-  unregisterToolbar(toolbarOwner);
+  if (!props.embedded) unregisterToolbar(toolbarOwner);
 });
 
 watch(toolbarStatus, (status) => {
-  updateToolbarStatus(toolbarOwner, status);
+  if (!props.embedded) updateToolbarStatus(toolbarOwner, status);
 });
 
 onBeforeUnmount(() => {
-  unregisterToolbar(toolbarOwner);
+  if (!props.embedded) unregisterToolbar(toolbarOwner);
 });
 
 const { t } = useI18n();
@@ -952,6 +990,10 @@ const sceneEditorLink = computed(() => {
 });
 
 const goBackToSceneEditor = async () => {
+  if (props.embedded) {
+    emit("close");
+    return;
+  }
   const canLeave = await resolveUnsavedChangesBeforeLeave({
     showDiscardInfo: false,
   });
@@ -1016,18 +1058,38 @@ const loadSceneNameMap = async () => {
 
 // ---------- 加载 Meta 脚本会话 ----------
 const loadMetaScriptSession = async () => {
-  if (!isScriptViewActive || route.name !== "MetaScript") return;
+  if (!isScriptViewActive || (!props.embedded && route.name !== "MetaScript"))
+    return;
   if (!Number.isFinite(id.value)) return;
   const requestedId = id.value;
   const loadSequence = ++metaLoadSequence;
   try {
     loading.value = true;
-    await loadSceneNameMap();
-    const response = await getMeta(id.value, {
+    if (!props.embedded) await loadSceneNameMap();
+    const response = await getMeta(requestedId, {
       expand: "cyber,event,share,metaCode,verseMetas",
     });
     if (loadSequence !== metaLoadSequence || requestedId !== id.value) return;
     logger.log("response数据", response);
+    const loadedMeta = { ...response.data };
+    if (
+      props.embedded &&
+      props.metaData &&
+      typeof props.metaData === "object" &&
+      !Array.isArray(props.metaData)
+    ) {
+      // Live editing supplies structure; code, permissions and write revision
+      // always come from the fresh server response.
+      const liveMeta = props.metaData as Partial<metaInfo>;
+      for (const key of ["data", "resources", "events"] as const) {
+        if (
+          Object.prototype.hasOwnProperty.call(liveMeta, key) &&
+          liveMeta[key] !== undefined
+        ) {
+          loadedMeta[key] = JSON.parse(JSON.stringify(liveMeta[key]));
+        }
+      }
+    }
 
     const assignAnimations = (
       entities: EntityNode[],
@@ -1047,13 +1109,10 @@ const loadMetaScriptSession = async () => {
       });
     };
 
-    if (response.data.resources.length > 0) {
+    if (loadedMeta.resources.length > 0) {
       try {
-        for (const model of response.data.resources) {
-          if (model.type !== "polygen") {
-            meta.value = response.data;
-            continue;
-          }
+        for (const model of loadedMeta.resources) {
+          if (model.type !== "polygen") continue;
           const modelUrl = convertToHttps(model.file.url);
           const modelId = model.id;
           await new Promise<void>((resolve, reject) => {
@@ -1061,7 +1120,7 @@ const loadMetaScriptSession = async () => {
               modelUrl,
               (gltf) => {
                 const animationNames = gltf.animations.map((clip) => clip.name);
-                const data = response.data.data as {
+                const data = loadedMeta.data as {
                   children?: { entities?: EntityNode[] };
                 };
                 if (data?.children?.entities) {
@@ -1071,7 +1130,7 @@ const loadMetaScriptSession = async () => {
                     animationNames
                   );
                 }
-                response.data.data = data;
+                loadedMeta.data = data;
                 resolve();
               },
               undefined,
@@ -1094,7 +1153,7 @@ const loadMetaScriptSession = async () => {
     }
 
     if (loadSequence !== metaLoadSequence || requestedId !== id.value) return;
-    meta.value = response.data;
+    meta.value = loadedMeta;
     const savedSnapshot = readSavedEditorSnapshot();
     if (savedSnapshot) {
       beginEditorSession(savedSnapshot, `meta:${meta.value!.id}`);
@@ -1116,21 +1175,23 @@ onActivated(() => {
   }
 });
 
-onBeforeRouteUpdate(async (to, from, next) => {
-  if (to.path !== from.path || to.query.id === from.query.id) {
-    next();
-    return;
-  }
-  const canLeave = await resolveUnsavedChangesBeforeLeave({
-    showDiscardInfo: true,
+if (!props.embedded) {
+  onBeforeRouteUpdate(async (to, from, next) => {
+    if (to.path !== from.path || to.query.id === from.query.id) {
+      next();
+      return;
+    }
+    const canLeave = await resolveUnsavedChangesBeforeLeave({
+      showDiscardInfo: true,
+    });
+    next(canLeave ? undefined : false);
   });
-  next(canLeave ? undefined : false);
-});
+}
 
 watch(id, (nextId, previousId) => {
   if (
     isScriptViewActive &&
-    route.name === "MetaScript" &&
+    (props.embedded || route.name === "MetaScript") &&
     Number.isFinite(nextId) &&
     nextId !== previousId
   ) {
@@ -1151,6 +1212,8 @@ onActivated(() => {
 });
 onDeactivated(stopWebMcpTools);
 onBeforeUnmount(() => {
+  isScriptViewActive = false;
+  metaLoadSequence += 1;
   stopWebMcpTools();
   window.removeEventListener("message", handleWebMcpEditorMessage);
 });
@@ -1161,9 +1224,87 @@ watch([id, editorFrameKey, editorContentReady], () => {
     registerScriptBlockTools();
   }
 });
+defineExpose({
+  save,
+  openVersionDialog,
+  saveable,
+  isSaving,
+  editorContentLoading,
+  hasUnsavedChanges,
+  activeName,
+  resolveBeforeClose: () =>
+    resolveUnsavedChangesBeforeLeave({ showDiscardInfo: true }),
+});
 </script>
 
 <style scoped>
+.script--embedded,
+.script--embedded > .el-container,
+.script--embedded > .el-container > .el-main > .box-card,
+.script--embedded
+  > .el-container
+  > .el-main
+  > .box-card
+  :deep(> .el-card__body),
+.script--embedded .script-tabs-wrapper,
+.script--embedded .script-main-tabs {
+  height: 100%;
+  min-height: 0;
+}
+
+.script--embedded > .el-container > .el-main {
+  padding: 0;
+}
+
+.script--embedded > .el-container > .el-main > .box-card {
+  border: 0;
+  box-shadow: none;
+}
+
+.script--embedded :deep(.el-card__body) {
+  padding: 16px 24px;
+}
+
+.script--embedded
+  > .el-container
+  > .el-main
+  > .box-card
+  :deep(> .el-card__body > .el-container) {
+  height: 100%;
+}
+
+.script--embedded .script-main-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__header) {
+  flex-shrink: 0;
+  order: -1;
+  margin: 0 0 12px;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__content) {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__content > .el-tab-pane) {
+  height: 100%;
+}
+
+.script--embedded .blockly-editor-main {
+  height: 100%;
+  min-height: 0;
+}
+
+@media (width <= 767px) {
+  .script--embedded :deep(.el-card__body) {
+    padding: 12px;
+  }
+}
+
 .icon {
   margin-right: 5px;
 }
@@ -1222,7 +1363,9 @@ watch([id, editorFrameKey, editorContentReady], () => {
   box-shadow: inset 0 0 0 1px var(--script-select-hover-ring) !important;
 }
 
-.script-tabs-wrapper :deep(.el-tabs__header) {
+.verse-code:not(.script--embedded)
+  .script-tabs-wrapper
+  :deep(.el-tabs__header) {
   display: none !important;
 }
 
