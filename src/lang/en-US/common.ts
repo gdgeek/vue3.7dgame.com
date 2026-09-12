@@ -1,6 +1,14 @@
 // common translations for en-US
 export default {
   common: {
+    editorSave: {
+      conflict:
+        "The server rejected a version conflict. Your local changes are still unsaved. Keep them and review the latest server version before continuing.",
+      unverified:
+        "The save result is not yet confirmed. Your local changes are retained. Check the original operation receipt and server state first.",
+      pending:
+        "A previous save is still unconfirmed. Check the server version first; no new editor changes do not prove that the save succeeded.",
+    },
     confirm: "Confirm",
     cancel: "Cancel",
     selectUser: "Select User",

@@ -26,8 +26,8 @@ iframe RPC 关联 requestId、当前 frame、精确 origin 和 hostSessionId。�
 - `status: completed` 携带保存回执；`persistence: server_acknowledged` 表示服务端保存请求已成功返回。
 - `editorAcknowledged` 独立表示编辑器保存标记的确认。实体/场景标记失败不会把已成功保存的数据报告为保存失败；dirty 状态保留以便重新读取。
 - 编辑器已应用但保存未确认时返回 `status: partial`、`editorApplied: true`、`persistence: unverified`，并提示 `read_state_before_retry`。不能盲目重放原修改。
-- 场景保存收到 HTTP 409 时，保留 `partial` 和本地修改，明确返回 `persistence: server_rejected`、`errorCode: write_conflict`、`httpStatus: 409`，下一步为 `review_server_state_before_retry`。网络超时或服务不可用仍为 `unverified`，不能据此认定服务器已拒绝写入。
-- 场景保存未确认时锁存 dirty；轮询超时、编辑器返回无新增修改都不能清掉该状态，也不能让离开前保存误报成功。只有当前场景的保存确认或切换场景才清除锁存；迟到的旧场景、旧会话确认不清除新修改。
+- 四个编辑页保存收到 HTTP 409 时，保留 `partial` 和本地修改，明确返回 `persistence: server_rejected`、`errorCode: write_conflict`、`httpStatus: 409`，下一步为 `review_server_state_before_retry`。网络超时或服务不可用仍为 `unverified`，不能据此认定服务器已拒绝写入。
+- 四个编辑页保存未确认时锁存 dirty，并暂停自动保存，避免自动生成新操作重试；轮询超时、编辑器返回无新增修改都不能清掉该状态，也不能让离开前保存误报成功。只有当前对象的实际保存确认或切换/明确放弃当前编辑会话才清除锁存；迟到的旧对象、旧会话确认不清除新修改。脚本页收到完整 noChange 快照时也必须与最后已保存内容比对，不能仅凭编辑器声明推进服务器保存基线。
 - 发布成功返回 snapshotId 和持久化操作回执，页面刷新失败保留回执并返回 refreshWarning。P1 使用现有可变 Snapshot，`readBackVerified` 保持 false；当次发布成功不代表能读回当时的固定内容。
 
 后端配套提供保存/脚本保存/发布的 UUID 幂等键和 `If-Match` 乐观锁。编辑器人工保存也使用加载时的服务器版本，409 后保留本地内容，不自动覆盖新版本。缺少服务器版本或匹配回执时不能视为保存成功。后端仅新增操作回执表 webmcp_operation，schema 和路由必须先部署，详细迁移见后端 `docs/webmcp-p1.md`。主站运行器整合与可靠性增强分别交付。
@@ -45,6 +45,12 @@ iframe RPC 关联 requestId、当前 frame、精确 origin 和 hostSessionId。�
 场景上下文的 published 来自独立后端 publication 查询。查询失败时保留未知，不猜测旧 verseRelease 字段。`xrugc_get_scene_publication` 只读取当前发布状态和快照标识（current_snapshot），不接受历史版本参数。固定历史发布快照和独立版本读回属于 P2。
 
 Unity 桥接接收 `WGP-UNITY-LOADER`、`WGP-UNITY-START`、`WGP-UNITY-TIMEOUT` 与 `SCENE_FORWARD_FAILED`，兼容旧 `UNITY_LOAD_FAILED`。启动前错误必须带当前 nonce，关闭后与旧会话消息被忽略。诊断只返回允许的错误码与阶段，不回传原始 token、签名 URL 或消息正文。启动工具返回可见预览的 loading 状态，随后读取状态直至运行器实际确认 running。
+
+## 四页一致性补修
+
+本次仅修改主前端：共用冲突分类、中英文恢复提示、实体页持久化锁存、脚本页保存证据与 noChange 检查，以及旧请求返回后的页面归属检查。保留最新 develop 移除脚本页运行按钮的改动，不新增后端接口/迁移，不修改 Blockly、Three.js 或原 WebGL 插件。
+
+测试区分自动化与线上证据：页面挂载测试覆盖实体/场景保存；共享脚本宿主按 meta/verse 分别测试失败、clean event、noChange、离页保护与旧请求；操作注册器模拟提交后丢响应并查回原回执。后者不是线上网络故障注入，生产验收仍按下列清单记录。
 
 ## 验证范围
 

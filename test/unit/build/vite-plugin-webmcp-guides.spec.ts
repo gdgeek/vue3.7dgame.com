@@ -103,8 +103,8 @@ describe("WebMCP workflow guide publishing", () => {
       [`/studio/${workflowGuidePath("unknown")}`, "GET"],
       [`/${workflowGuidePath("overview")}`, "GET"],
       [`/studio/${workflowGuidePath("overview")}`, "POST"],
-      ["/studio/webmcp/scene-studio/1.0.0/../../../../package.json", "GET"],
-      ["/studio/webmcp/scene-studio/1.0.0/%2e%2e%2fpackage.json", "GET"],
+      ["/studio/webmcp/scene-studio/1.0.1/../../../../package.json", "GET"],
+      ["/studio/webmcp/scene-studio/1.0.1/%2e%2e%2fpackage.json", "GET"],
     ]) {
       const result = request(url, method);
       expect(result.next).toHaveBeenCalledOnce();

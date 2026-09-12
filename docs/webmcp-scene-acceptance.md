@@ -1,11 +1,11 @@
 # WebMCP 联合验收
 
-本清单用于 web、Editor、Blockly 与 WebGL Preview 四端部署到同一测试环境后的验收。单元测试与生产构建通过并不等价于真实 Unity 或后端发布通过。
+本清单用于主 web（含内置 Unity runner）、Editor、Blockly 与后端部署到同一测试环境后的验收。原 WebGL 插件不作为主站运行依赖。单元测试与生产构建通过并不等价于真实 Unity 或后端发布通过。
 
 ## 准备
 
 1. 使用具备编辑权限的测试账号和可修改的独立场景/实体。
-2. 确认四端版本匹配，Editor/Blockly 能返回 `webmcp-get-capabilities`，且请求响应带 hostSessionId。
+2. 确认主 web、编辑器、后端及内置运行制品版本匹配，Editor/Blockly 能返回 `webmcp-get-capabilities`，且请求响应带 hostSessionId。
 3. 使用支持 `document.modelContext` 的浏览器；若使用测试 registry shim，仅标记为工具合同验收，不标记原生 WebMCP 验收。
 4. 先执行 `pnpm run test:run`、`pnpm run type-check`、`pnpm run build`。
 
@@ -15,7 +15,7 @@
 
 - 使用未安装 `xrugc-scene-studio`、未粘贴其正文的干净客户端会话，登录已部署指南功能的 XRUGC 页面。直接给出一个场景制作任务，记录客户端是否发现并调用 `xrugc_get_workflow_guide`；若需人工提示才读取，分别记录发现与任务使用结果。
 - 分别进入实体编辑、场景编辑、实体脚本、场景脚本页，检查各页恰有一个指南工具。四页的上下文或脚本读取结果应包含 `workflowGuide` 入口，返回的 `page` 和 `contextTool` 应与当前页面一致。
-- 用 `{}` 读取默认 `overview`，再读取 `assets`、`layout`、`interaction`、`audio`、`publication`、`acceptance`、`troubleshooting`。核对版本 `1.0.0`、主题目录、文档正文及链接；未知主题、路径式主题和额外参数应被拒绝。
+- 用 `{}` 读取默认 `overview`，再读取 `assets`、`layout`、`interaction`、`audio`、`publication`、`acceptance`、`troubleshooting`。核对版本 `1.0.1`、主题目录、文档正文及链接；未知主题、路径式主题和额外参数应被拒绝。
 - 指南返回的 `primaryPageTools` 只代表页面主工具集定义。对照浏览器实际发现的 schema，确认客户端没有据此假定辅助工具存在、已登录或编辑器已就绪。
 - 切页、退出或停用页面后，旧指南注册应释放，保存的旧调用应失败；新页面只注册一个当前指南。加载指南期间切页也不应返回旧页面的结果。
 - 读取指南前后核对 dirty、对象版本和网络写入，确认未编辑、上传或发布。使用现有素材跑通下面的实体/脚本/场景闭环，原 stage/complete 用户确认、过期检查、保存回执和发布授权均应保留。
@@ -86,3 +86,17 @@
 - 服务端保存成功后模拟编辑器 ACK 失败：保留 server_acknowledged，editorAcknowledged=false；不能声称已回滚服务端保存。
 
 `scripts/webmcp-scene-e2e.mjs` 是可选的本地只读/暂存取消辅助脚本。执行前审查环境变量、目标地址及账号权限；该脚本不替代上述真实写入、后端读回或原生 WebMCP 验收。
+
+## P1 四页一致性补修验收
+
+以下是部署后的验收清单，未勾选不表示线上已通过。按实体编辑、场景编辑、实体脚本、场景脚本分别记录实际版本与结果。
+
+- [ ] 人工保存和 WebMCP 保存都能正常完成，并收到匹配目标/操作/版本的回执。
+- [ ] 两标签提交旧版本：明确 409/write_conflict/server_rejected，服务器新版本不被覆盖，本地修改保留。
+- [ ] 冲突/结果未知后，轮询或 dirty=false/noChange 不清除未保存状态、不误报离页保存成功；自动保存不生成新请求重试。
+- [ ] 独立测试环境控制服务器提交成功后丢响应，按原 operationId 查回，不创建第二次写入；普通刷新测试不能替代。
+- [ ] 取消等待后再点旧确认框“确认”不写入；已提交操作不可取消，可继续查询。
+- [ ] 切对象/重建 iframe 后旧服务器回执及迟到编辑器 ACK 不清除新对象修改。
+- [ ] 现有中英文界面显示对应的冲突、未知结果和未确认保存提示。
+
+此批补修无需后端迁移，沿用已部署 P1 接口。发布历史与固定内容核验仍属于 P2。
