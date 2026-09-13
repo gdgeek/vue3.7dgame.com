@@ -1,6 +1,12 @@
 // common translations for zh-TW
 export default {
   common: {
+    editorLoading: {
+      message: "編輯器正在載入…",
+      hint: "載入完成後即可編輯、儲存、執行或開啟腳本。",
+      failed: "編輯器載入未完成，請重試。",
+      retry: "重新載入",
+    },
     confirm: "確認",
     cancel: "取消",
     selectUser: "選擇用戶",

@@ -1,6 +1,12 @@
 // common translations for ja-JP
 export default {
   common: {
+    editorLoading: {
+      message: "エディターを読み込み中…",
+      hint: "読み込み完了後に編集、保存、実行、スクリプトを利用できます。",
+      failed: "読み込みが完了しませんでした。再試行してください。",
+      retry: "再読み込み",
+    },
     confirm: "確認",
     cancel: "キャンセル",
     selectUser: "ユーザーを選択",

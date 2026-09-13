@@ -1,6 +1,12 @@
 // 通用翻译
 export default {
   common: {
+    editorLoading: {
+      message: "编辑器正在载入…",
+      hint: "载入完成后即可编辑、保存、运行或打开脚本。",
+      failed: "编辑器载入未完成，请重试。",
+      retry: "重新载入",
+    },
     editorSave: {
       conflict:
         "服务器拒绝了版本冲突写入。本地修改仍未保存，请保留内容并核对服务器最新版本后再操作。",

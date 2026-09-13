@@ -33,6 +33,14 @@ type WebMcpDocument = Document & {
 export type WebMcpRegistrationOptions = {
   document?: Document;
   operations?: OperationRegistration;
+  getEditorLoadingState?: () => {
+    ready: boolean;
+    loading: boolean;
+    blocked: boolean;
+    status: "loading" | "ready" | "error";
+    error: string | null;
+    retryAfterMs: number | null;
+  };
   onRegistrationError?: (toolName: string, error: unknown) => void;
 };
 
@@ -67,6 +75,24 @@ export const registerWebMcpTools = (
             ...tool,
             async execute(input) {
               lifecycle.signal.throwIfAborted();
+              const loading = options.getEditorLoadingState?.();
+              if (
+                loading?.blocked &&
+                ![
+                  "xrugc_get_scene_editor_context",
+                  "xrugc_get_editor_context",
+                  "xrugc_get_workflow_guide",
+                  "xrugc_get_operation_status",
+                  "xrugc_cancel_operation",
+                ].includes(tool.name)
+              ) {
+                return {
+                  ...loading,
+                  applied: false,
+                  nextStep:
+                    "请先读取工作区上下文，等待 ready=true 后再操作；status=error 时请用户重新载入。",
+                };
+              }
               const result = await tool.execute(input, {
                 signal: lifecycle.signal,
               });
