@@ -19,6 +19,7 @@ const mockGetVerse = vi.fn();
 const mockPutVerse = vi.fn();
 const mockDirty = ref(false);
 const mockUnconfirmedPersistence = ref(false);
+let mockUseActualSaveGuard = false;
 const mockResolveLeaveSave = vi.fn();
 const mockAppStore = reactive({ language: "zh-CN" });
 const mockGetVerses = vi.fn();
@@ -190,30 +191,39 @@ vi.mock("@/composables/useIframeMessaging", () => ({
   }),
 }));
 
-vi.mock("@/composables/useSceneSaveGuard", () => ({
-  useSceneSaveGuard: () => ({
-    hasUnsavedChangesBeforeUnload: mockDirty,
-    hasUnconfirmedPersistence: mockUnconfirmedPersistence,
-    markPersistenceUnverified: () => {
-      mockUnconfirmedPersistence.value = true;
-      mockDirty.value = true;
-    },
-    markPersistenceAcknowledged: () => {
-      mockUnconfirmedPersistence.value = false;
-      mockDirty.value = false;
-    },
-    resetUnsavedState: () => {
-      mockUnconfirmedPersistence.value = false;
-      mockDirty.value = false;
-    },
-    syncUnsavedChangesForBeforeUnload: vi.fn(),
-    resolveLeaveSave: mockResolveLeaveSave,
-    requestSceneSave: vi.fn(),
-    resolveUnsavedBeforeLeave: vi.fn(async () => true),
-    handleBeforeUnload: vi.fn(),
-    cleanupPendingResolver: vi.fn(),
-  }),
-}));
+vi.mock("@/composables/useSceneSaveGuard", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/composables/useSceneSaveGuard")>();
+  return {
+    useSceneSaveGuard: (
+      options: Parameters<typeof actual.useSceneSaveGuard>[0]
+    ) =>
+      mockUseActualSaveGuard
+        ? actual.useSceneSaveGuard(options)
+        : {
+            hasUnsavedChangesBeforeUnload: mockDirty,
+            hasUnconfirmedPersistence: mockUnconfirmedPersistence,
+            markPersistenceUnverified: () => {
+              mockUnconfirmedPersistence.value = true;
+              mockDirty.value = true;
+            },
+            markPersistenceAcknowledged: () => {
+              mockUnconfirmedPersistence.value = false;
+              mockDirty.value = false;
+            },
+            resetUnsavedState: () => {
+              mockUnconfirmedPersistence.value = false;
+              mockDirty.value = false;
+            },
+            syncUnsavedChangesForBeforeUnload: vi.fn(),
+            resolveLeaveSave: mockResolveLeaveSave,
+            requestSceneSave: vi.fn(),
+            resolveUnsavedBeforeLeave: vi.fn(async () => true),
+            handleBeforeUnload: vi.fn(),
+            cleanupPendingResolver: vi.fn(),
+          },
+  };
+});
 
 vi.mock("@/components/MrPP/ResourceDialog.vue", () => ({
   default: defineComponent({
@@ -239,6 +249,10 @@ vi.mock("@/components/ScriptDraftDialog.vue", () => ({
 vi.mock("@/components/VerseScriptDrawer.vue", () => ({
   default: defineComponent({
     name: "VerseScriptDrawerStub",
+    setup(_props, { expose }) {
+      expose({ getState: () => ({ ...mockDrawerState }) });
+      return {};
+    },
     template: "<div class='verse-script-drawer-stub'></div>",
   }),
 }));
@@ -455,6 +469,7 @@ describe("views/meta/scene.vue", () => {
     mockPutVerse.mockReset();
     mockResolveLeaveSave.mockReset();
     mockUnconfirmedPersistence.value = false;
+    mockUseActualSaveGuard = false;
     mockAppStore.language = "zh-CN";
     mockDirty.value = false;
     mockGetVerse.mockImplementation(async (id: number) => makeMetaResponse(id));
@@ -944,6 +959,135 @@ describe("views/meta/scene.vue", () => {
       expect(mockResolveLeaveSave).toHaveBeenLastCalledWith(false);
       expect(mockUnconfirmedPersistence.value).toBe(true);
       expect(put).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  describe.each(["meta", "verse"] as const)(
+    "%s read tools with the real persistence guard",
+    (kind) => {
+      it.each([409, "lost response"] as const)(
+        "keeps all dirty reports consistent after %s until acknowledgment or owner change",
+        async (failure) => {
+          mockUseActualSaveGuard = true;
+          vi.stubGlobal("ElMessage", { error: vi.fn(), info: vi.fn() });
+          const registry = registerTools();
+          const view = await mountSceneView(kind);
+          sendReady("read-dirty-document");
+          await flushAsync();
+          const put = kind === "meta" ? mockPutMeta : mockPutVerse;
+          put.mockResolvedValue({
+            data: { serverRevision: `sha256:${"b".repeat(64)}` },
+          });
+          const failSave = async () => {
+            put.mockRejectedValueOnce(
+              failure === 409
+                ? { isAxiosError: true, response: { status: 409 } }
+                : new Error("connection lost")
+            );
+            await expect(persist()).rejects.toMatchObject({
+              result: {
+                status: "partial",
+                persistence: failure === 409 ? "server_rejected" : "unverified",
+              },
+            });
+          };
+          const persist = () =>
+            (kind === "meta"
+              ? view.persistMetaMutation
+              : view.persistSceneMutation)({
+              meta: makeMetaResponse(1).data.data,
+              verse: makeMetaResponse(1).data.data,
+              events: null,
+              entityVersion: "local-entity",
+              sceneVersion: "local-scene",
+            });
+          const sendResponse = (payload: Record<string, unknown>) =>
+            window.dispatchEvent(
+              new MessageEvent("message", {
+                source: document.querySelector("iframe")?.contentWindow,
+                origin: "https://editor.example.test",
+                data: {
+                  type: "RESPONSE",
+                  requestId: "webmcp-request",
+                  payload: { hostSessionId: "test-session", ...payload },
+                },
+              })
+            );
+          const readTools: Array<[string, Record<string, unknown>]> =
+            kind === "meta"
+              ? [
+                  ["xrugc_get_editor_context", {}],
+                  ["xrugc_get_entity_tree", {}],
+                  ["xrugc_inspect_entity_node", { nodeId: "local-node" }],
+                  ["xrugc_validate_entity", {}],
+                  ["xrugc_get_entity_asset_usage", {}],
+                ]
+              : [
+                  ["xrugc_get_scene_editor_context", {}],
+                  ["xrugc_validate_scene", {}],
+                ];
+          const expectDirtyReports = async (dirty: boolean) => {
+            for (const [name, input] of readTools) {
+              const reading = registry.get(name)!.execute(input);
+              await flushAsync();
+              sendResponse({
+                action:
+                  kind === "meta"
+                    ? "webmcp-get-entity-state"
+                    : "webmcp-get-scene-state",
+                ok: true,
+                entityId: Number(mockRoute.query.id),
+                meta: {
+                  children: {
+                    entities: [
+                      {
+                        parameters: { uuid: "local-node", name: "Local edits" },
+                      },
+                    ],
+                  },
+                },
+                verse: makeMetaResponse(Number(mockRoute.query.id)).data.data,
+                events: null,
+                changed: false,
+                loading: false,
+                entityVersion: "local-entity",
+                sceneVersion: "local-scene",
+                contextGeneration: 1,
+              });
+              await expect(reading, name).resolves.toMatchObject({ dirty });
+            }
+            const owner = kind === "meta" ? "entity" : "scene";
+            await expect(
+              registry.get(`xrugc_get_${owner}_workspace_context`)!.execute({})
+            ).resolves.toMatchObject({ [owner]: { dirty } });
+          };
+
+          await failSave();
+          // The legacy iframe may reset its own baseline before the failed HTTP save returns.
+          sendResponse({ action: "check-unsaved-changes", changed: false });
+          sendResponse({ action: "save-before-leave", noChange: true });
+          await flushAsync();
+          await expectDirtyReports(true);
+          expect(put).toHaveBeenCalledTimes(1);
+
+          const saving = persist();
+          await flushAsync();
+          acknowledgeSceneSave(kind);
+          await expect(saving).resolves.toMatchObject({
+            persistence: "server_acknowledged",
+            editorAcknowledged: true,
+          });
+          await expectDirtyReports(false);
+
+          await failSave();
+          await expectDirtyReports(true);
+          mockRoute.query.id = "2";
+          await nextTick();
+          sendReady("replacement-read-document");
+          await flushAsync();
+          await expectDirtyReports(false);
+        }
+      );
     }
   );
 
