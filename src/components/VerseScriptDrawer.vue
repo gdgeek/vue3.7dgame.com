@@ -8,7 +8,6 @@
     :title="title"
     editor-label-key="route.project.scriptEditor"
     save-label-key="verse.view.script.save"
-    versions-label-key="verse.view.script.drawer.versions"
     @closed="$emit('closed')"
     @saved="$emit('saved')"
   ></EditorScriptDrawer>

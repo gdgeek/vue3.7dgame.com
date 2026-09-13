@@ -8,7 +8,6 @@
     :title="title"
     editor-label-key="route.meta.scriptEditor"
     save-label-key="meta.script.save"
-    versions-label-key="common.scriptDraft.entry"
     @closed="$emit('closed')"
     @saved="$emit('saved', $event)"
   ></EditorScriptDrawer>

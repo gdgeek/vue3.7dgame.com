@@ -235,7 +235,7 @@ export default {
       script: {
         drawer: { versions: "版本历史", preview: "运行场景" },
         title: "脚本",
-        save: "保存",
+        save: "保存脚本",
         error1: "没有信息",
         error2: "没有编辑权限",
         error3: "没有脚本编辑器",

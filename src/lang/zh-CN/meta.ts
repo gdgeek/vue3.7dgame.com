@@ -103,7 +103,7 @@ export default {
       title: "脚本",
       usedScenesPlaceholder: "跳转到已使用场景",
       entityEditor: "实体编辑",
-      save: "保存",
+      save: "保存脚本",
       error1: "没有实体信息",
       error2: "没有编辑权限",
       error3: "没有脚本编辑器",
