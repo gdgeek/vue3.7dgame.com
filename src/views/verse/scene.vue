@@ -1,19 +1,24 @@
 <template>
-  <div class="verse-scene" :aria-busy="!editorLoading.ready.value">
-    <EditorLoadingOverlay
-      :blocked="!editorLoading.ready.value"
-      :failed="editorLoading.status.value === 'error'"
-      @retry="editorFrameKey += 1"
-    ></EditorLoadingOverlay>
+  <div class="verse-scene">
     <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
     <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
-      <el-main style="padding: 0; overflow: hidden">
+      <el-main
+        class="editor-container"
+        v-bind="{ 'aria-busy': !editorLoading.ready.value }"
+      >
+        <EditorLoadingOverlay
+          :blocked="!editorLoading.ready.value"
+          :failed="editorLoading.status.value === 'error'"
+          @retry="editorFrameKey += 1"
+        ></EditorLoadingOverlay>
         <iframe
           :key="editorFrameKey"
           id="editor"
           ref="editor"
+          :inert="!editorLoading.ready.value"
+          :tabindex="editorLoading.ready.value ? 0 : -1"
           :src="src"
           class="content"
           height="100%"
@@ -31,8 +36,15 @@
       @closed="handleScriptDrawerClosed"
       @saved="invalidateScriptPreview"
     ></VerseScriptDrawer>
+    <PublicationHistoryDialog
+      v-model="publicationHistoryVisible"
+      :scene-id="id"
+      :actor-id="userStore.userInfo?.id"
+    ></PublicationHistoryDialog>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"
+      :editor-loading="editorLoading.getState().loading"
+      :editor-blocked="!editorLoading.ready.value"
       :versions="draftVersions"
       :auto-save-enabled="autoSaveEnabled"
       :auto-save-interval-seconds="autoSaveIntervalSeconds"
@@ -57,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import PublicationHistoryDialog from "@/components/MrPP/PublicationHistoryDialog.vue";
 import {
   createWriteOptions,
   applyWriteRevision,
@@ -65,6 +78,7 @@ import {
 import { getScenePublication } from "@/api/v1/write-protocol";
 import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
 import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
+import { useScenePublicationScope } from "@/composables/useScenePublicationScope";
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
 import {
   sceneWriteFailure,
@@ -122,6 +136,7 @@ import type {
 import type { MetaInfo } from "@/api/v1/types/meta";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
+import { confirmEditorSave } from "@/utils/confirmEditorSave";
 import { VERSE_SCENE_EXPAND, buildVerseEditorInitConfig } from "./sceneSpace";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
@@ -188,6 +203,7 @@ const pendingRestorePayload = ref<VerseEditorPayload | null>(null);
 let currentSaveTrigger: ScriptSaveTrigger = "manual";
 let autoSaveTimer: number | null = null;
 
+const publicationHistoryVisible = ref(false);
 const toolbarOwner = "verse-scene-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
   useEditorVersionToolbar();
@@ -195,6 +211,7 @@ const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
 const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getLoadingState: editorLoading.getState,
     onOpen: () => {
       if (editorLoading.ready.value) openVersionDialog();
     },
@@ -203,6 +220,9 @@ const activateToolbar = () => {
     },
     onOpenScript: () => {
       if (editorLoading.ready.value) void openScriptDrawer();
+    },
+    onOpenPublications: () => {
+      publicationHistoryVisible.value = true;
     },
   });
 };
@@ -876,6 +896,12 @@ const { postStandardMessage, sendRequest, pendingRequests, getHostSessionId } =
   useIframeMessaging(editor, {
     onError: () => ElMessage.error(t("verse.view.sceneEditor.error1")),
   });
+const capturePublicationScope = useScenePublicationScope(() => ({
+  sceneId: id.value,
+  sessionId: getHostSessionId(),
+  actorId: String(userStore.userInfo?.id ?? ""),
+  editorTarget: `${src.value}:${editorFrameKey.value}`,
+}));
 
 const editorInitialization = useIframeInitialization({
   frame: () => editor.value,
@@ -930,17 +956,21 @@ const getLiveSceneState = async (): Promise<SceneEditorLiveState> => {
 };
 
 const confirmSaveCurrentScene = () =>
-  ElMessageBox.confirm(t("common.sceneSaveConfirm.message"), "", {
-    showClose: true,
-    center: true,
-    distinguishCancelAndClose: true,
-    closeOnClickModal: false,
-    closeOnPressEscape: true,
-    showCancelButton: true,
-    customClass: "script-save-confirm-box",
-    confirmButtonText: t("common.sceneSaveConfirm.confirm"),
-    cancelButtonText: t("common.sceneSaveConfirm.cancel"),
-  });
+  confirmEditorSave(
+    t("common.sceneSaveConfirm.message"),
+    {
+      showClose: true,
+      center: true,
+      distinguishCancelAndClose: true,
+      closeOnClickModal: false,
+      closeOnPressEscape: true,
+      showCancelButton: true,
+      customClass: "script-save-confirm-box",
+      confirmButtonText: t("common.sceneSaveConfirm.confirm"),
+      cancelButtonText: t("common.sceneSaveConfirm.cancel"),
+    },
+    editorLoading.getState
+  );
 
 const {
   hasUnsavedChangesBeforeUnload,
@@ -960,6 +990,7 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentScene,
+  isEditorReady: () => editorLoading.ready.value,
   onBeforeSave: (trigger) => {
     currentSaveTrigger = trigger;
   },
@@ -1382,6 +1413,7 @@ const releaseVerse = async (data: unknown) => {
     return;
   }
 
+  const isCurrentPublication = capturePublicationScope();
   isPublishingVerse.value = true;
   try {
     await ElMessageBox.confirm(
@@ -1393,20 +1425,37 @@ const releaseVerse = async (data: unknown) => {
         type: "warning",
       }
     );
+    if (!isCurrentPublication()) return;
 
     const published = await saveThenPublishScene(
       payload,
       (currentPayload) => saveVerseBeforeLeave(currentPayload, "manual", false),
-      () =>
-        takePhoto(
-          id.value,
+      async () => {
+        if (!isCurrentPublication()) return;
+        const ownerId = id.value;
+        const response = await takePhoto(
+          ownerId,
           createWriteOptions(getSceneServerModel()?.serverRevision)
-        )
+        );
+        const result = await readBackScenePublication({
+          sceneId: ownerId,
+          snapshot: response.data,
+          refresh: () => getVerse(ownerId, VERSE_SCENE_EXPAND),
+          isCurrent: isCurrentPublication,
+          apply: (fresh) => {
+            if (verse.value?.id === ownerId) verse.value = fresh.data;
+          },
+        });
+        if (isCurrentPublication() && !result.readBackVerified)
+          ElMessage.warning(t("common.publicationHistory.pending"));
+        return response;
+      }
     );
-    if (!published) return;
+    if (!published || !isCurrentPublication()) return;
 
     ElMessage.success(t("verse.page.list.releaseConfirm.success"));
   } catch (error) {
+    if (!isCurrentPublication()) return;
     if (error === "cancel" || error === "close") {
       ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
     } else {
@@ -2445,6 +2494,7 @@ const registerPageWebMcpTools = () => {
       }
     },
     completeScenePublication: async (preview) => {
+      const isCurrentPublication = capturePublicationScope();
       const scene = verse.value;
       if (!scene || scene.id !== preview.sceneId) {
         throw new Error("当前场景已经切换，请重新执行发布前检查");
@@ -2480,6 +2530,8 @@ const registerPageWebMcpTools = () => {
         throw new Error("资源检查期间场景发生变化，请重新执行发布前检查");
       }
       assertActive();
+      if (!isCurrentPublication())
+        throw new Error("编辑器会话或账号已经切换，请重新执行发布前检查");
       const snapshotResponse = await takePhoto(
         scene.id,
         writeOptionsForPreview(preview, scene.serverRevision)
@@ -2491,11 +2543,13 @@ const registerPageWebMcpTools = () => {
         sceneId: scene.id,
         snapshot,
         refresh: () => getVerse(scene.id, VERSE_SCENE_EXPAND),
+        isCurrent: isCurrentPublication,
         apply: (response) => {
           if (verse.value?.id === scene.id) verse.value = response.data;
         },
       });
-      ElMessage.success(t("verse.page.list.releaseConfirm.success"));
+      if (isCurrentPublication())
+        ElMessage.success(t("verse.page.list.releaseConfirm.success"));
       return result;
     },
     readEntityForReadiness: async (entityId) =>
@@ -2605,6 +2659,12 @@ onBeforeUnmount(() => {
   :deep(.el-main) {
     position: relative;
   }
+}
+
+.editor-container {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
 }
 
 .content {

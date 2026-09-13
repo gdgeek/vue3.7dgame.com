@@ -10,7 +10,10 @@
         class="editor-action-button"
         :class="[action.class, { 'is-primary-action': action.primary }]"
         size="small"
-        v-bind="{ 'aria-label': action.label }"
+        v-bind="{
+          'aria-label': action.label,
+          'aria-busy': Boolean(action.loading),
+        }"
         :disabled="action.disabled"
         :loading="action.loading"
         @click="action.onClick()"
@@ -107,8 +110,15 @@ defineProps<{ label?: string; actions: EditorAction[] }>();
     opacity: 0.45;
   }
 
+  &.is-loading {
+    color: var(--editor-action-primary-color);
+    cursor: wait;
+    opacity: 1;
+  }
+
   :deep(.el-icon.is-loading) {
     margin: 0;
+    color: var(--editor-action-primary-color);
   }
 }
 

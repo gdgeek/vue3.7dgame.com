@@ -85,6 +85,8 @@
               <el-button
                 type="primary"
                 size="small"
+                :loading="editorLoading"
+                :disabled="editorBlocked"
                 @click="emit('restore', version.id)"
               >
                 {{ t("common.scriptDraft.restore") }}
@@ -107,6 +109,8 @@ const props = defineProps<{
   versions: ScriptDraftVersion[];
   autoSaveEnabled: boolean;
   autoSaveIntervalSeconds: number;
+  editorLoading?: boolean;
+  editorBlocked?: boolean;
 }>();
 const { modelValue, versions, autoSaveEnabled, autoSaveIntervalSeconds } =
   toRefs(props);
