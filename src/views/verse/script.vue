@@ -3,6 +3,7 @@
     <PublicationHistoryDialog
       v-model="publicationHistoryVisible"
       :scene-id="id"
+      :actor-id="userStore.userInfo?.id"
     ></PublicationHistoryDialog>
     <el-container>
       <el-main>
@@ -1440,7 +1441,10 @@ const registerRuntimeTools = () => {
   runtimeWebMcpLifecycle = null;
   if (props.embedded) return;
   runtimeWebMcpLifecycle = registerWebMcpTools([
-    ...createPublicationHistoryTools(() => verse.value?.id ?? null),
+    ...createPublicationHistoryTools(
+      () => verse.value?.id ?? null,
+      () => String(userStore.userInfo?.id ?? "")
+    ),
     ...createSceneRuntimePreviewTools({
       getPreviewStatus: getSceneRuntimePreviewStatus,
       startPreview: startSceneRuntimePreview,

@@ -39,6 +39,7 @@
     <el-table
       v-if="history && history.items.length"
       :data="history.items"
+      class="publication-table"
       v-bind="{ 'aria-label': t('common.publicationHistory.title') }"
     >
       <el-table-column
@@ -67,7 +68,7 @@
           ><code>{{ row.publicationVersionId }}</code></template
         >
       </el-table-column>
-      <el-table-column width="120">
+      <el-table-column width="140" fixed="right">
         <template #default="{ row }"
           ><el-button
             :loading="verifying === row.publicationVersionId"
@@ -114,7 +115,11 @@ import {
   type PublicationMetadata,
   type PublicationVersion,
 } from "@/api/v1/publication-history";
-const props = defineProps<{ modelValue: boolean; sceneId: number }>();
+const props = defineProps<{
+  modelValue: boolean;
+  sceneId: number;
+  actorId?: string | number | null;
+}>();
 const emit = defineEmits<{ "update:modelValue": [value: boolean] }>();
 const { t } = useI18n();
 const history = ref<PublicationHistory | null>(null);
@@ -126,7 +131,10 @@ let generation = 0;
 onBeforeUnmount(() => {
   generation++;
 });
-const formatBytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+const formatBytes = (bytes: number) =>
+  bytes < 1024 * 1024
+    ? `${(bytes / 1024).toFixed(1)} KiB`
+    : `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
 const failure = (cause: unknown) => {
   const status = (cause as { response?: { status?: number } })?.response
     ?.status;
@@ -188,7 +196,7 @@ async function inspect(row: PublicationMetadata) {
   }
 }
 watch(
-  () => [props.modelValue, props.sceneId] as const,
+  () => [props.modelValue, props.sceneId, props.actorId] as const,
   () => {
     generation++;
     history.value = null;
@@ -204,28 +212,32 @@ watch(
 <style scoped>
 .history-actions {
   display: flex;
-  align-items: center;
-  gap: 16px;
   flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
   margin: 16px 0;
 }
+
 .history-detail {
   margin-top: 24px;
 }
+
 code {
-  overflow-wrap: anywhere;
   font-size: 12px;
-}
-pre {
-  white-space: pre-wrap;
   overflow-wrap: anywhere;
-  max-height: 360px;
-  overflow: auto;
-  background: var(--el-fill-color-light);
-  padding: 16px;
 }
+
+pre {
+  max-height: 360px;
+  padding: 16px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  background: var(--el-fill-color-light);
+}
+
 summary {
-  cursor: pointer;
   margin: 12px 0;
+  cursor: pointer;
 }
 </style>

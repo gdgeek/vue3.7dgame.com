@@ -67,3 +67,17 @@ describe("publication history tools", () => {
     expect(api.read).not.toHaveBeenCalled();
   });
 });
+
+it("discards history when the account changes on the same scene", async () => {
+  let actor = "3";
+  api.read.mockImplementation(async () => {
+    actor = "4";
+    return { sceneId: 7 };
+  });
+  await expect(
+    createPublicationHistoryTools(
+      () => 7,
+      () => actor
+    )[1].execute({ publicationVersionId: version })
+  ).rejects.toThrow("账号已切换");
+});

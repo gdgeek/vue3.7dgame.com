@@ -5,15 +5,17 @@ import {
 import type { WebMcpTool } from "./model-context";
 
 export const createPublicationHistoryTools = (
-  getSceneId: () => number | null
+  getSceneId: () => number | null,
+  getActorId: () => string | null = () => null
 ): WebMcpTool[] => {
   const scope = () => {
     const id = getSceneId();
     if (!id) throw new Error("当前没有可读取的场景");
-    return id;
+    return { id, actorId: getActorId() };
   };
-  const current = (id: number) => {
+  const current = (id: number, actorId: string | null) => {
     if (getSceneId() !== id) throw new Error("场景已切换，请重新读取");
+    if (getActorId() !== actorId) throw new Error("账号已切换，请重新读取");
   };
   const params = (value: unknown): Record<string, unknown> => {
     if (!value || typeof value !== "object" || Array.isArray(value))
@@ -41,7 +43,7 @@ export const createPublicationHistoryTools = (
           Object.keys(value).some((key) => !["limit", "before"].includes(key))
         )
           throw new Error("未知历史参数");
-        const id = scope();
+        const { id, actorId } = scope();
         const result = (
           await listScenePublications(
             id,
@@ -50,7 +52,7 @@ export const createPublicationHistoryTools = (
           )
         ).data;
         execution?.signal.throwIfAborted();
-        current(id);
+        current(id, actorId);
         if (result.sceneId !== id) throw new Error("场景历史不匹配");
         return result;
       },
@@ -76,13 +78,13 @@ export const createPublicationHistoryTools = (
           typeof value.publicationVersionId !== "string"
         )
           throw new Error("需要 publicationVersionId");
-        const id = scope();
+        const { id, actorId } = scope();
         const result = await readVerifiedPublication(
           id,
           value.publicationVersionId
         );
         execution?.signal.throwIfAborted();
-        current(id);
+        current(id, actorId);
         return result;
       },
     },

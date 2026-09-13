@@ -34,6 +34,7 @@
     <PublicationHistoryDialog
       v-model="publicationHistoryVisible"
       :scene-id="id"
+      :actor-id="userStore.userInfo?.id"
     ></PublicationHistoryDialog>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"

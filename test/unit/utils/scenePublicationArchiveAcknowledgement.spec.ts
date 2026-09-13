@@ -41,7 +41,12 @@ describe("publication acknowledgment versus read back", () => {
     read.mockRejectedValue(new Error("timeout"));
     const result = await readBackScenePublication({
       sceneId: 1,
-      snapshot: { id: 5, ...evidence },
+      snapshot: {
+        id: 5,
+        ...evidence,
+        data: "large runtime body",
+        resources: ["private URL"],
+      },
       refresh: async () => null,
       apply: vi.fn(),
     });
@@ -52,6 +57,8 @@ describe("publication acknowledgment versus read back", () => {
       refreshSucceeded: true,
     });
     expect(result.archiveWarning).toBeTruthy();
+    expect(result).not.toHaveProperty("data");
+    expect(result).not.toHaveProperty("resources");
     expect(read).toHaveBeenCalledTimes(1);
   });
   it("does not invent an archive for an old receipt", async () => {
@@ -64,4 +71,16 @@ describe("publication acknowledgment versus read back", () => {
     expect(result.readBackVerified).toBe(false);
     expect(read).not.toHaveBeenCalled();
   });
+});
+
+it("reports incomplete archive evidence without misclassifying the acknowledged write", async () => {
+  const result = await readBackScenePublication({
+    sceneId: 1,
+    snapshot: { id: 5, publicationVersionId: "invalid" },
+    refresh: async () => null,
+    apply: vi.fn(),
+  });
+  expect(result.verification).toBe("server_acknowledged");
+  expect(result.readBackVerified).toBe(false);
+  expect(result.archiveWarning).toContain("格式不完整");
 });

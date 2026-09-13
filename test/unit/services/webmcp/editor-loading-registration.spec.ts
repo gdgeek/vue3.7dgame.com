@@ -17,6 +17,8 @@ describe("editor loading WebMCP guard", () => {
       "xrugc_get_workflow_guide",
       "xrugc_get_operation_status",
       "xrugc_cancel_operation",
+      "xrugc_list_scene_publications",
+      "xrugc_get_scene_publication_version",
     ];
     const lifecycle = registerWebMcpTools(
       names.map((name) => ({
@@ -50,7 +52,7 @@ describe("editor loading WebMCP guard", () => {
     }
     expect(execute).not.toHaveBeenCalled();
     for (const name of names.slice(2)) await registry.get(name)!.execute({});
-    expect(execute).toHaveBeenCalledTimes(4);
+    expect(execute).toHaveBeenCalledTimes(6);
     failed = true;
     await expect(registry.get(names[0])!.execute({})).resolves.toMatchObject({
       status: "error",

@@ -614,7 +614,8 @@ export const registerSceneEditorWebMcpTools = (
       [
         ...createTools(options),
         ...createPublicationHistoryTools(
-          () => options.getContext().scene?.id ?? null
+          () => options.getContext().scene?.id ?? null,
+          () => options.operations?.getScope()?.actorId ?? null
         ),
         ...(options.readPublication
           ? [

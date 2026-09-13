@@ -40,10 +40,23 @@ export async function readBackScenePublication<T>(options: {
     }
   } else {
     archiveWarning =
-      "发布已成功；此回执没有可核验的历史归档（history_unavailable）";
+      evidence &&
+      typeof evidence === "object" &&
+      ["publicationVersionId", "contentHash", "schemaVersion", "language"].some(
+        (key) => key in evidence
+      )
+        ? "发布已成功；历史归档回执格式不完整，请核对服务器版本并重试读取，不要再次发布"
+        : "发布已成功；此回执没有可核验的历史归档（history_unavailable）";
   }
   return {
-    ...(hasPublicationEvidence(evidence) ? evidence : {}),
+    ...(hasPublicationEvidence(evidence)
+      ? {
+          publicationVersionId: evidence.publicationVersionId,
+          contentHash: evidence.contentHash,
+          schemaVersion: evidence.schemaVersion,
+          language: evidence.language,
+        }
+      : {}),
     ...(archiveWarning ? { archiveWarning } : {}),
     resourceVerification: "not_checked" as const,
     sceneId: options.sceneId,
