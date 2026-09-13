@@ -28,6 +28,13 @@ const {
   openScript,
   openPublications,
 } = useEditorVersionToolbar();
+const loadingState = computed(
+  () =>
+    editorVersionToolbarState.getLoadingState?.() ?? {
+      loading: false,
+      blocked: false,
+    }
+);
 const actions = computed<EditorAction[]>(() => [
   ...(editorVersionToolbarState.onRunPreview
     ? [
@@ -38,6 +45,8 @@ const actions = computed<EditorAction[]>(() => [
           primary: true,
           class: "toolbar-entry-btn toolbar-entry-btn--run",
           onClick: runPreview,
+          loading: loadingState.value.loading,
+          disabled: loadingState.value.blocked,
         },
       ]
     : []),
@@ -58,6 +67,8 @@ const actions = computed<EditorAction[]>(() => [
     icon: faClockRotateLeft,
     class: "toolbar-entry-btn",
     onClick: openDialog,
+    loading: loadingState.value.loading,
+    disabled: loadingState.value.blocked,
   },
   ...(editorVersionToolbarState.onOpenScript
     ? [
@@ -67,6 +78,8 @@ const actions = computed<EditorAction[]>(() => [
           icon: faCode,
           class: "toolbar-entry-btn",
           onClick: openScript,
+          loading: loadingState.value.loading,
+          disabled: loadingState.value.blocked,
         },
       ]
     : []),

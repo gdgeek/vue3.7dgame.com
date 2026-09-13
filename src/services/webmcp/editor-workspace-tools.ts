@@ -32,7 +32,7 @@ export const createEditorWorkspaceTools = <T extends object>(
   {
     name: `xrugc_get_${kind}_workspace_context`,
     title: `读取 XRUGC ${label}工作区上下文`,
-    description: `读取当前${label}、活动编辑器、脚本抽屉及双方的就绪、修改和保存状态。加载期间页面显示操作遮罩；ready=false 或 blocked=true 时须等待 retryAfterMs 后重读本工具，status=error 时需用户重试。不会打开、关闭、保存或放弃修改。可用编辑工具以实际工具发现结果为准；每次切换编辑器后都应重新发现工具。`,
+    description: `读取当前${label}、活动编辑器、脚本抽屉及双方的就绪、修改和保存状态。加载期间对应 iframe 显示局部遮罩、依赖编辑内容的按钮分别 loading/禁用；页面导航与服务器发布历史仍可使用。ready=false 或 blocked=true 时须等待 retryAfterMs 后重读本工具，status=error 时需用户重试。不会打开、关闭、保存或放弃修改。可用编辑工具以实际工具发现结果为准；每次切换编辑器后都应重新发现工具。`,
     inputSchema: emptyInputSchema,
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     execute(input, execution) {

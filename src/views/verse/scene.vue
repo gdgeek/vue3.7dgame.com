@@ -1,19 +1,24 @@
 <template>
-  <div class="verse-scene" :aria-busy="!editorLoading.ready.value">
-    <EditorLoadingOverlay
-      :blocked="!editorLoading.ready.value"
-      :failed="editorLoading.status.value === 'error'"
-      @retry="editorFrameKey += 1"
-    ></EditorLoadingOverlay>
+  <div class="verse-scene">
     <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
     <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
-      <el-main style="padding: 0; overflow: hidden">
+      <el-main
+        class="editor-container"
+        v-bind="{ 'aria-busy': !editorLoading.ready.value }"
+      >
+        <EditorLoadingOverlay
+          :blocked="!editorLoading.ready.value"
+          :failed="editorLoading.status.value === 'error'"
+          @retry="editorFrameKey += 1"
+        ></EditorLoadingOverlay>
         <iframe
           :key="editorFrameKey"
           id="editor"
           ref="editor"
+          :inert="!editorLoading.ready.value"
+          :tabindex="editorLoading.ready.value ? 0 : -1"
           :src="src"
           class="content"
           height="100%"
@@ -38,6 +43,8 @@
     ></PublicationHistoryDialog>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"
+      :editor-loading="editorLoading.getState().loading"
+      :editor-blocked="!editorLoading.ready.value"
       :versions="draftVersions"
       :auto-save-enabled="autoSaveEnabled"
       :auto-save-interval-seconds="autoSaveIntervalSeconds"
@@ -203,6 +210,7 @@ const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
 const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getLoadingState: editorLoading.getState,
     onOpen: () => {
       if (editorLoading.ready.value) openVersionDialog();
     },
@@ -2645,6 +2653,12 @@ onBeforeUnmount(() => {
   :deep(.el-main) {
     position: relative;
   }
+}
+
+.editor-container {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
 }
 
 .content {

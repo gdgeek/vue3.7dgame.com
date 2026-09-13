@@ -6,6 +6,7 @@ type EditorVersionToolbarState = {
   active: boolean;
   owner: string | null;
   status: EditorToolbarStatus;
+  getLoadingState: (() => { loading: boolean; blocked: boolean }) | null;
   onRunPreview: (() => void) | null;
   onOpen: (() => void) | null;
   onOpenScript: (() => void) | null;
@@ -16,6 +17,7 @@ const state = reactive<EditorVersionToolbarState>({
   active: false,
   owner: null,
   status: "saved",
+  getLoadingState: null,
   onRunPreview: null,
   onOpen: null,
   onOpenScript: null,
@@ -26,6 +28,7 @@ const resetState = () => {
   state.active = false;
   state.owner = null;
   state.status = "saved";
+  state.getLoadingState = null;
   state.onRunPreview = null;
   state.onOpen = null;
   state.onOpenScript = null;
@@ -40,6 +43,7 @@ export const useEditorVersionToolbar = () => {
     state.active = true;
     state.owner = owner;
     state.status = payload.status || "saved";
+    state.getLoadingState = payload.getLoadingState || null;
     state.onRunPreview = payload.onRunPreview || null;
     state.onOpen = payload.onOpen || null;
     state.onOpenScript = payload.onOpenScript || null;
@@ -57,14 +61,17 @@ export const useEditorVersionToolbar = () => {
   };
 
   const openDialog = () => {
+    if (state.getLoadingState?.().blocked) return;
     state.onOpen?.();
   };
 
   const runPreview = () => {
+    if (state.getLoadingState?.().blocked) return;
     state.onRunPreview?.();
   };
 
   const openScript = () => {
+    if (state.getLoadingState?.().blocked) return;
     state.onOpenScript?.();
   };
 

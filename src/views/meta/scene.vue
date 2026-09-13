@@ -1,10 +1,5 @@
 <template>
-  <div class="verse-scene" :aria-busy="!editorLoading.ready.value">
-    <EditorLoadingOverlay
-      :blocked="!editorLoading.ready.value"
-      :failed="editorLoading.status.value === 'error'"
-      @retry="editorFrameKey += 1"
-    ></EditorLoadingOverlay>
+  <div class="verse-scene">
     <phototype-dialog
       @selected="selectedPhototype"
       ref="phototypeDialogRef"
@@ -29,10 +24,20 @@
       </template>
     </resource-dialog>
     <el-container class="editor-wrapper">
-      <el-main class="editor-container">
+      <el-main
+        class="editor-container"
+        v-bind="{ 'aria-busy': !editorLoading.ready.value }"
+      >
+        <EditorLoadingOverlay
+          :blocked="!editorLoading.ready.value"
+          :failed="editorLoading.status.value === 'error'"
+          @retry="editorFrameKey += 1"
+        ></EditorLoadingOverlay>
         <iframe
           :key="editorFrameKey"
           ref="editor"
+          :inert="!editorLoading.ready.value"
+          :tabindex="editorLoading.ready.value ? 0 : -1"
           id="editor"
           :src="src"
           class="content"
@@ -51,6 +56,8 @@
     ></MetaScriptDrawer>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"
+      :editor-loading="editorLoading.getState().loading"
+      :editor-blocked="!editorLoading.ready.value"
       :versions="draftVersions"
       :auto-save-enabled="autoSaveEnabled"
       :auto-save-interval-seconds="autoSaveIntervalSeconds"
@@ -461,6 +468,7 @@ const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
 const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getLoadingState: editorLoading.getState,
     onOpen: () => {
       if (editorLoading.ready.value) openVersionDialog();
     },
@@ -3572,6 +3580,7 @@ onBeforeUnmount(() => {
 }
 
 .editor-container {
+  position: relative;
   flex: 1;
   padding: 0 !important;
   overflow: hidden;

@@ -29,7 +29,7 @@
 
 ## 编辑器载入与操作遮罩
 
-场景和实体工作区在 iframe 初始化、模型资源载入、切换目标和恢复版本期间显示载入动画遮罩，顶部操作与编辑区一起等待就绪。发送 INIT 不代表内容已载入。
+场景和实体工作区在 iframe 初始化、模型资源载入、切换目标和恢复版本期间，仅在对应 iframe 内显示局部载入遮罩；依赖编辑内容的按钮分别显示 loading 并禁用。页面导航和只读取服务器归档的发布历史仍可使用，外围页面不受遮罩阻挡。发送 INIT 不代表内容已载入。
 
 操作前先调用 `xrugc_get_scene_workspace_context` 或 `xrugc_get_entity_workspace_context`，检查 `scene` / `entity` 的 `ready`、`loading`、`blocked` 和 `status`。`blocked=true` 时不要执行编辑、保存、发布、运行、恢复版本或打开脚本；按 `retryAfterMs` 等待后重读上下文。`status=error` 表示载入失败或超时，应让用户使用页面「重新载入」按钮重试，不要自动重放写操作。脚本抽屉另检查 `script.ready`。
 

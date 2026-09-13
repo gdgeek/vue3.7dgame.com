@@ -30,7 +30,10 @@
               !scriptEditor?.saveable ||
               scriptEditor.editorContentLoading ||
               scriptEditor.isSaving,
-            loading: scriptEditor?.isSaving,
+            loading:
+              !scriptEditor ||
+              scriptEditor.editorContentLoading ||
+              scriptEditor.isSaving,
             onClick: () => scriptEditor?.save(),
           },
           {
@@ -42,6 +45,7 @@
               !scriptEditor ||
               scriptEditor.editorContentLoading ||
               scriptEditor.isSaving,
+            loading: !scriptEditor || scriptEditor.editorContentLoading,
             onClick: () => scriptEditor?.openVersionDialog(),
           },
         ]"

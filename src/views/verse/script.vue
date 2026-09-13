@@ -21,9 +21,17 @@
                     class="script-mode-tab"
                     :class="{ 'is-active': activeName === 'blockly' }"
                     role="tab"
+                    :disabled="editorContentLoading"
+                    :aria-busy="editorContentLoading"
                     :aria-selected="activeName === 'blockly'"
                     @click="activeName = 'blockly'"
                   >
+                    <el-icon
+                      v-if="editorContentLoading"
+                      class="is-loading script-action-icon"
+                    >
+                      <Loading></Loading>
+                    </el-icon>
                     {{ $t("verse.view.script.edit") }}
                   </button>
                   <button
@@ -31,9 +39,17 @@
                     class="script-mode-tab"
                     :class="{ 'is-active': activeName === 'script' }"
                     role="tab"
+                    :disabled="editorContentLoading"
+                    :aria-busy="editorContentLoading"
                     :aria-selected="activeName === 'script'"
                     @click="activeName = 'script'"
                   >
+                    <el-icon
+                      v-if="editorContentLoading"
+                      class="is-loading script-action-icon"
+                    >
+                      <Loading></Loading>
+                    </el-icon>
                     {{ $t("verse.view.script.code") }}
                   </button>
                 </div>
@@ -86,10 +102,13 @@
                       size="small"
                       :title="$t('verse.view.script.save')"
                       :aria-label="$t('verse.view.script.save')"
+                      :loading="editorContentLoading || isSaving"
+                      :disabled="!saveable || editorContentLoading || isSaving"
                       @click="save"
                     >
                       <font-awesome-icon
                         class="script-action-icon"
+                        v-if="!editorContentLoading && !isSaving"
                         icon="save"
                       ></font-awesome-icon>
                       <span>{{ $t("verse.view.script.save") }}</span>
@@ -107,10 +126,15 @@
                   :label="$t('verse.view.script.edit')"
                   name="blockly"
                 >
-                  <el-main class="blockly-editor-main">
+                  <el-main
+                    class="blockly-editor-main"
+                    :aria-busy="editorContentLoading"
+                  >
                     <div
                       v-if="editorContentLoading"
                       class="script-editor-loading-indicator"
+                      role="status"
+                      :aria-label="$t('common.editorLoading.message')"
                     >
                       <el-icon class="script-editor-loading-spinner is-loading">
                         <Loading></Loading>
@@ -123,6 +147,8 @@
                       scrolling="no"
                       :id="embedded ? 'verse-script-editor' : 'editor'"
                       ref="editor"
+                      :inert="editorContentLoading"
+                      :tabindex="editorContentLoading ? -1 : 0"
                       :src="src"
                       @load="handleEditorFrameLoad"
                     ></iframe>
@@ -149,6 +175,8 @@
                           <div class="code-container">
                             <el-button
                               class="copy-button"
+                              :loading="editorContentLoading"
+                              :disabled="editorContentLoading"
                               text
                               @click="copyCode(LuaCode)"
                               ><el-icon class="icon">
@@ -174,6 +202,8 @@
                           <div class="code-container">
                             <el-button
                               class="copy-button"
+                              :loading="editorContentLoading"
+                              :disabled="editorContentLoading"
                               text
                               @click="copyCode(JavaScriptCode)"
                               ><el-icon class="icon">
@@ -195,6 +225,8 @@
         </el-card>
         <ScriptDraftDialog
           :model-value="versionDialogVisible"
+          :editor-loading="editorContentLoading"
+          :editor-blocked="editorContentLoading || isSaving"
           :versions="draftVersions"
           :auto-save-enabled="autoSaveEnabled"
           :auto-save-interval-seconds="autoSaveIntervalSeconds"
@@ -1141,6 +1173,10 @@ const activateToolbar = () => {
   if (props.embedded) return;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getLoadingState: () => ({
+      loading: editorContentLoading.value,
+      blocked: editorContentLoading.value,
+    }),
     onOpen: openVersionDialog,
   });
 };
@@ -1677,7 +1713,8 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  cursor: wait;
+  background: var(--el-mask-color, rgb(255 255 255 / 90%));
 }
 
 .script-editor-loading-spinner {
