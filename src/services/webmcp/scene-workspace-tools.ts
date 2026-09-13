@@ -5,6 +5,11 @@ export type SceneWorkspaceContext = {
   sceneName: string | null;
   activeEditor: "scene" | "scene-script";
   scene: {
+    loading?: boolean;
+    status?: "loading" | "ready" | "error";
+    blocked?: boolean;
+    error?: string | null;
+    retryAfterMs?: number | null;
     ready: boolean;
     dirty: boolean;
     saving: boolean;

@@ -341,6 +341,26 @@ const sendReady = (
     })
   );
 };
+// Confirm the content probe separately from the PLUGIN_READY / INIT handshake.
+const finishEditorLoading = async () => {
+  await vi.advanceTimersByTimeAsync(0);
+  window.dispatchEvent(
+    new MessageEvent("message", {
+      source: document.querySelector("iframe")?.contentWindow,
+      origin: "https://editor.example.test",
+      data: {
+        type: "RESPONSE",
+        requestId: "webmcp-request",
+        payload: {
+          hostSessionId: mockHostSession,
+          ok: true,
+          loading: false,
+        },
+      },
+    })
+  );
+  await flushAsync();
+};
 const initCalls = () =>
   mockPostStandardMessage.mock.calls.filter(([type]) => type === "INIT");
 const registerTools = () => {
@@ -565,6 +585,7 @@ describe("views/meta/scene.vue", () => {
       const page = await mountSceneView();
       sendReady("entity-drawer-document");
       await flushAsync();
+      await finishEditorLoading();
       const opening = registry.get(openTool)!.execute({});
       respondToSnapshot();
       await opening;
@@ -572,7 +593,7 @@ describe("views/meta/scene.vue", () => {
       return { registry, page };
     };
 
-    it("rejects opening until the entity editor has initialized", async () => {
+    it("reports loading without opening until the entity editor has initialized", async () => {
       const registry = registerTools();
       await mountSceneView();
       await expect(
@@ -582,9 +603,11 @@ describe("views/meta/scene.vue", () => {
         entity: { ready: false },
         script: { open: false },
       });
-      await expect(registry.get(openTool)!.execute({})).rejects.toThrow(
-        "实体编辑器尚未加载完成"
-      );
+      await expect(registry.get(openTool)!.execute({})).resolves.toMatchObject({
+        status: "loading",
+        applied: false,
+        retryAfterMs: 500,
+      });
       expect(mockDrawerOpen).not.toHaveBeenCalled();
       expect(mockSendRequest).not.toHaveBeenCalled();
       expect(mockPutMeta).not.toHaveBeenCalled();
@@ -640,6 +663,7 @@ describe("views/meta/scene.vue", () => {
       const page = await mountSceneView();
       sendReady("entity-drawer-document");
       await flushAsync();
+      await finishEditorLoading();
       const opening = registry.get(openTool)!.execute({});
       respondToSnapshot({
         meta: {
@@ -681,6 +705,7 @@ describe("views/meta/scene.vue", () => {
       await mountSceneView();
       sendReady("entity-drawer-document");
       await flushAsync();
+      await finishEditorLoading();
       const opening = registry.get(openTool)!.execute({});
       const rejected = expect(opening).rejects.toThrow(/工作区已切换|会话/);
       respondToSnapshot({
@@ -720,6 +745,7 @@ describe("views/meta/scene.vue", () => {
       const helpers = [workspaceTool, openTool, closeTool].map((name) =>
         registry.get(name)
       );
+      await finishEditorLoading();
       const opening = registry.get(openTool)!.execute({});
       respondToSnapshot();
       await opening;
@@ -810,6 +836,7 @@ describe("views/meta/scene.vue", () => {
       sendReady("entity-drawer-document");
       await flushAsync();
       const oldFrame = document.querySelector("iframe")?.contentWindow;
+      await finishEditorLoading();
       const opening = registry.get(openTool)!.execute({});
       const rejected =
         expect(opening).rejects.toThrow(/目标已改变|工作区已切换|会话/);
@@ -822,6 +849,7 @@ describe("views/meta/scene.vue", () => {
       expect(mockPutMeta).not.toHaveBeenCalled();
       sendReady("next-entity-document");
       await flushAsync();
+      await finishEditorLoading();
       await expect(
         registry.get(workspaceTool)!.execute({})
       ).resolves.toMatchObject({
@@ -1027,6 +1055,7 @@ describe("views/meta/scene.vue", () => {
                   ["xrugc_validate_scene", {}],
                 ];
           const expectDirtyReports = async (dirty: boolean) => {
+            await finishEditorLoading();
             for (const [name, input] of readTools) {
               const reading = registry.get(name)!.execute(input);
               await flushAsync();
@@ -1354,6 +1383,7 @@ describe("views/meta/scene.vue", () => {
     await Promise.resolve();
     const tool = registry.get("xrugc_get_entity_tree")!;
     expect(tool).toBeDefined();
+    await finishEditorLoading();
     const result = tool.execute({});
     expect(mockSendRequest).toHaveBeenCalledWith("webmcp-get-entity-state", {});
     window.dispatchEvent(
@@ -1420,7 +1450,7 @@ describe("views/meta/scene.vue", () => {
     expect(mockGetVerses).toHaveBeenCalledOnce();
     await expect(
       registry.get("xrugc_get_editor_context")!.execute({})
-    ).rejects.toThrow();
+    ).resolves.toMatchObject({ ready: false });
     expect(mockSendRequest).not.toHaveBeenCalled();
     expect(initCalls()).toHaveLength(0);
     release({
@@ -1452,11 +1482,15 @@ describe("views/meta/scene.vue", () => {
             })
         );
         await mountSceneView(kind);
-        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow();
+        await expect(
+          registry.get(contextTool)!.execute({})
+        ).resolves.toMatchObject({ ready: false });
         sendReady("document-one");
         await flushAsync();
         expect(initCalls()).toHaveLength(0);
-        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow();
+        await expect(
+          registry.get(contextTool)!.execute({})
+        ).resolves.toMatchObject({ ready: false });
         expect(registry.has("xrugc_get_workflow_guide")).toBe(true);
         await expect(
           registry.get("xrugc_get_workflow_guide")!.execute({})
@@ -1470,6 +1504,7 @@ describe("views/meta/scene.vue", () => {
           kind === "meta"
             ? "webmcp-get-entity-state"
             : "webmcp-get-scene-state";
+        await finishEditorLoading();
         const context = registry.get(contextTool)!.execute({});
         expect(mockSendRequest).toHaveBeenCalledWith(action, {});
         window.dispatchEvent(
@@ -1599,6 +1634,7 @@ describe("views/meta/scene.vue", () => {
           kind === "meta"
             ? "webmcp-get-entity-state"
             : "webmcp-get-scene-state";
+        await finishEditorLoading();
         const context = registry.get(contextTool)!.execute({});
         expect(mockSendRequest).toHaveBeenCalledWith(action, {});
         window.dispatchEvent(
@@ -1650,7 +1686,9 @@ describe("views/meta/scene.vue", () => {
         await mountSceneView(kind);
         sendReady("document-one");
         await flushAsync();
-        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow();
+        await expect(
+          registry.get(contextTool)!.execute({})
+        ).resolves.toMatchObject({ ready: false });
         expect(initCalls()).toHaveLength(0);
         expect(mockSendRequest).not.toHaveBeenCalled();
       });
@@ -1662,15 +1700,16 @@ describe("views/meta/scene.vue", () => {
           const page = await mountSceneView(kind);
           sendReady("document-one");
           await flushAsync();
+          mockSendRequest.mockClear();
           if (failure === "throws")
             mockPostStandardMessage.mockImplementationOnce(() => {
               throw new Error("Post failed after session rotation");
             });
           else mockPostStandardMessage.mockReturnValueOnce(undefined);
           await page.refresh();
-          await expect(registry.get(contextTool)!.execute({})).rejects.toThrow(
-            /准备|加载/
-          );
+          await expect(
+            registry.get(contextTool)!.execute({})
+          ).resolves.toMatchObject({ ready: false });
           expect(mockSendRequest).not.toHaveBeenCalled();
         }
       );
@@ -1680,6 +1719,7 @@ describe("views/meta/scene.vue", () => {
         const page = await mountSceneView(kind);
         sendReady("document-one");
         await flushAsync();
+        mockSendRequest.mockClear();
         let rejectOld!: (error: Error) => void;
         fetchData().mockImplementationOnce(
           () =>
@@ -1699,9 +1739,9 @@ describe("views/meta/scene.vue", () => {
         await flushAsync();
         rejectOld(new Error("Old API failure"));
         await oldRefresh;
-        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow(
-          /准备|加载/
-        );
+        await expect(
+          registry.get(contextTool)!.execute({})
+        ).resolves.toMatchObject({ ready: false });
         expect(mockSendRequest).not.toHaveBeenCalled();
         resolveNew(makeMetaResponse(1));
         await flushAsync();
@@ -1714,9 +1754,9 @@ describe("views/meta/scene.vue", () => {
         await mountSceneView(kind);
         sendReady("document-one");
         await flushAsync();
-        await expect(registry.get(contextTool)!.execute({})).rejects.toThrow(
-          /准备|加载/
-        );
+        await expect(
+          registry.get(contextTool)!.execute({})
+        ).resolves.toMatchObject({ ready: false });
         expect(mockSendRequest).not.toHaveBeenCalled();
       });
     }

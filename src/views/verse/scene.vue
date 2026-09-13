@@ -1,5 +1,10 @@
 <template>
-  <div class="verse-scene">
+  <div class="verse-scene" :aria-busy="!editorLoading.ready.value">
+    <EditorLoadingOverlay
+      :blocked="!editorLoading.ready.value"
+      :failed="editorLoading.status.value === 'error'"
+      @retry="editorFrameKey += 1"
+    ></EditorLoadingOverlay>
     <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
     <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
@@ -70,6 +75,8 @@ import {
   sceneWriteFailure,
   writeFailureMessageKey,
 } from "@/services/webmcp/scene-write-failure";
+import EditorLoadingOverlay from "@/components/EditorLoadingOverlay.vue";
+import { useEditorLoading } from "@/composables/useEditorLoading";
 import { createIframeRpc } from "@/utils/iframeRpc";
 import {
   useIframeInitialization,
@@ -194,9 +201,15 @@ const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
 const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
-    onOpen: openVersionDialog,
-    onRunPreview: runSceneRuntimePreview,
-    onOpenScript: openScriptDrawer,
+    onOpen: () => {
+      if (editorLoading.ready.value) openVersionDialog();
+    },
+    onRunPreview: () => {
+      if (editorLoading.ready.value) runSceneRuntimePreview();
+    },
+    onOpenScript: () => {
+      if (editorLoading.ready.value) void openScriptDrawer();
+    },
     onOpenPublications: () => {
       publicationHistoryVisible.value = true;
     },
@@ -290,7 +303,9 @@ const openScriptDrawerOrThrow = (assertActive: () => void = () => {}) => {
   return openingScriptDrawer;
 };
 const openScriptDrawer = () => {
+  if (!editorLoading.ready.value) return;
   return openScriptDrawerOrThrow().catch((error) => {
+    if (!editorLoading.ready.value) return;
     ElMessage.error(error instanceof Error ? error.message : String(error));
   });
 };
@@ -309,10 +324,11 @@ useSceneWorkspaceWebMcp({
     sceneName: verse.value?.id === id.value ? (verse.value.name ?? null) : null,
     activeEditor: scriptDrawerActive.value ? "scene-script" : "scene",
     scene: {
+      ...editorLoading.getState(),
       ready:
         sceneViewActive &&
         verse.value?.id === id.value &&
-        editorContentReady.value,
+        editorLoading.ready.value,
       dirty:
         hasUnsavedChangesBeforeUnload.value ||
         Boolean(pendingRestorePayload.value),
@@ -433,8 +449,8 @@ const checkPublicationResources = async () => {
       dirty:
         hasUnsavedChangesBeforeUnload.value ||
         Boolean(pendingRestorePayload.value),
-      loading: verse.value === null,
-      ready: editorContentReady.value,
+      loading: !editorLoading.ready.value,
+      ready: editorLoading.ready.value,
     }),
     getLiveState: getLiveSceneState,
     readEntityForReadiness: async (entityId: number) =>
@@ -486,7 +502,11 @@ const refresh = async () => {
     if (verse.value) pushVerseToEditor(verse.value, ticket);
   } catch (error) {
     editorInitialization.fail(ticket);
-    if (editorInitialization.isCurrent(ticket)) logger.error(error);
+    if (editorInitialization.isCurrent(ticket)) {
+      logger.error(error);
+      if (!editorInitialization.isReady())
+        editorLoading.fail("data-load-failed");
+    }
   }
 };
 
@@ -837,7 +857,7 @@ const restartAutoSaveTimer = () => {
     if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
       return;
     }
-    if (isSavingVersion.value) return;
+    if (isSavingVersion.value || !editorLoading.ready.value) return;
     if (!verse.value?.editable) return;
     try {
       await requestSceneSave("auto");
@@ -882,6 +902,11 @@ const webMcpRpc = createIframeRpc({
   send: sendRequest,
 });
 const requestEditor = webMcpRpc.request;
+const editorLoading = useEditorLoading({
+  initialized: editorInitialization.isReady,
+  target: () => `${id.value}:${src.value}:${editorFrameKey.value}`,
+  probe: () => requestEditor("webmcp-get-scene-state"),
+});
 
 const requireSuccessfulEditorResponse = (response: Record<string, unknown>) => {
   if (response.ok !== true) {
@@ -899,6 +924,8 @@ const getLiveSceneState = async (): Promise<SceneEditorLiveState> => {
   const response = requireSuccessfulEditorResponse(
     await requestEditor("webmcp-get-scene-state")
   );
+  if (response.loading === true && editorLoading.ready.value)
+    editorLoading.restart();
   return {
     verse: response.verse,
     sceneVersion: String(response.sceneVersion || ""),
@@ -1823,7 +1850,9 @@ const startSceneRuntimePreview = async () => {
   return getSceneRuntimePreviewStatus();
 };
 const runSceneRuntimePreview = () => {
+  if (!editorLoading.ready.value) return;
   void startSceneRuntimePreview().catch((error) => {
+    if (!editorLoading.ready.value) return;
     ElMessage.error(
       error instanceof Error ? error.message : "无法启动场景运行"
     );
@@ -1874,6 +1903,7 @@ const registerPageWebMcpTools = () => {
 
   webMcpLifecycle?.abort();
   registration = webMcpLifecycle = registerSceneEditorWebMcpTools({
+    getEditorLoadingState: editorLoading.getState,
     readPublication: async () => {
       assertActive();
       return (await getScenePublication(ownerId)).data;
@@ -1891,8 +1921,8 @@ const registerPageWebMcpTools = () => {
       dirty:
         hasUnsavedChangesBeforeUnload.value ||
         Boolean(pendingRestorePayload.value),
-      loading: verse.value === null,
-      ready: editorContentReady.value,
+      loading: !editorLoading.ready.value,
+      ready: editorLoading.ready.value,
     }),
     getLiveState: getLiveSceneState,
     searchEntities: async ({ query, page, pageSize }) => {

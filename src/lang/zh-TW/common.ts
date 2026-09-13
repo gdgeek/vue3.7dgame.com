@@ -26,6 +26,12 @@ export default {
       failed:
         "读取或核验未通过。可重试读取；不会再次发布或用当前快照代替历史。",
     },
+    editorLoading: {
+      message: "編輯器正在載入…",
+      hint: "載入完成後即可編輯、儲存、執行或開啟腳本。",
+      failed: "編輯器載入未完成，請重試。",
+      retry: "重新載入",
+    },
     confirm: "確認",
     cancel: "取消",
     selectUser: "選擇用戶",
