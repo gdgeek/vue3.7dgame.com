@@ -63,7 +63,7 @@ export default {
       cancel: "否",
     },
     scriptDraft: {
-      title: "版本管理",
+      title: "版本历史",
       autoSave: "自动保存",
       interval: "保存间隔",
       minutes: "分钟",
@@ -83,7 +83,7 @@ export default {
       summaryAdded: "新增 {items}",
       summaryRemoved: "删除 {items}",
       summaryModified: "修改 {items}",
-      entry: "版本管理",
+      entry: "版本历史",
     },
     unityPreview: {
       entry: "运行场景",
