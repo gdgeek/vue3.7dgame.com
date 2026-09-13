@@ -71,6 +71,7 @@ import {
 import { getScenePublication } from "@/api/v1/write-protocol";
 import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
 import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
+import { useScenePublicationScope } from "@/composables/useScenePublicationScope";
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
 import {
   sceneWriteFailure,
@@ -886,6 +887,12 @@ const { postStandardMessage, sendRequest, pendingRequests, getHostSessionId } =
   useIframeMessaging(editor, {
     onError: () => ElMessage.error(t("verse.view.sceneEditor.error1")),
   });
+const capturePublicationScope = useScenePublicationScope(() => ({
+  sceneId: id.value,
+  sessionId: getHostSessionId(),
+  actorId: String(userStore.userInfo?.id ?? ""),
+  editorTarget: `${src.value}:${editorFrameKey.value}`,
+}));
 
 const editorInitialization = useIframeInitialization({
   frame: () => editor.value,
@@ -1392,6 +1399,7 @@ const releaseVerse = async (data: unknown) => {
     return;
   }
 
+  const isCurrentPublication = capturePublicationScope();
   isPublishingVerse.value = true;
   try {
     await ElMessageBox.confirm(
@@ -1403,11 +1411,13 @@ const releaseVerse = async (data: unknown) => {
         type: "warning",
       }
     );
+    if (!isCurrentPublication()) return;
 
     const published = await saveThenPublishScene(
       payload,
       (currentPayload) => saveVerseBeforeLeave(currentPayload, "manual", false),
       async () => {
+        if (!isCurrentPublication()) return;
         const ownerId = id.value;
         const response = await takePhoto(
           ownerId,
@@ -1417,19 +1427,21 @@ const releaseVerse = async (data: unknown) => {
           sceneId: ownerId,
           snapshot: response.data,
           refresh: () => getVerse(ownerId, VERSE_SCENE_EXPAND),
+          isCurrent: isCurrentPublication,
           apply: (fresh) => {
             if (verse.value?.id === ownerId) verse.value = fresh.data;
           },
         });
-        if (id.value === ownerId && !result.readBackVerified)
+        if (isCurrentPublication() && !result.readBackVerified)
           ElMessage.warning(t("common.publicationHistory.pending"));
         return response;
       }
     );
-    if (!published) return;
+    if (!published || !isCurrentPublication()) return;
 
     ElMessage.success(t("verse.page.list.releaseConfirm.success"));
   } catch (error) {
+    if (!isCurrentPublication()) return;
     if (error === "cancel" || error === "close") {
       ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
     } else {
@@ -2468,6 +2480,7 @@ const registerPageWebMcpTools = () => {
       }
     },
     completeScenePublication: async (preview) => {
+      const isCurrentPublication = capturePublicationScope();
       const scene = verse.value;
       if (!scene || scene.id !== preview.sceneId) {
         throw new Error("当前场景已经切换，请重新执行发布前检查");
@@ -2503,6 +2516,8 @@ const registerPageWebMcpTools = () => {
         throw new Error("资源检查期间场景发生变化，请重新执行发布前检查");
       }
       assertActive();
+      if (!isCurrentPublication())
+        throw new Error("编辑器会话或账号已经切换，请重新执行发布前检查");
       const snapshotResponse = await takePhoto(
         scene.id,
         writeOptionsForPreview(preview, scene.serverRevision)
@@ -2514,11 +2529,13 @@ const registerPageWebMcpTools = () => {
         sceneId: scene.id,
         snapshot,
         refresh: () => getVerse(scene.id, VERSE_SCENE_EXPAND),
+        isCurrent: isCurrentPublication,
         apply: (response) => {
           if (verse.value?.id === scene.id) verse.value = response.data;
         },
       });
-      ElMessage.success(t("verse.page.list.releaseConfirm.success"));
+      if (isCurrentPublication())
+        ElMessage.success(t("verse.page.list.releaseConfirm.success"));
       return result;
     },
     readEntityForReadiness: async (entityId) =>

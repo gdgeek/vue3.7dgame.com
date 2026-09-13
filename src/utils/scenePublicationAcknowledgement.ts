@@ -9,6 +9,7 @@ export async function readBackScenePublication<T>(options: {
   snapshot: Record<string, unknown>;
   refresh: () => Promise<T>;
   apply: (result: T) => void;
+  isCurrent?: () => boolean;
 }) {
   const snapshotId = Number(options.snapshot.id);
   if (!Number.isSafeInteger(snapshotId) || snapshotId <= 0) {
@@ -18,8 +19,11 @@ export async function readBackScenePublication<T>(options: {
   }
   let refreshSucceeded = false;
   try {
-    options.apply(await options.refresh());
-    refreshSucceeded = true;
+    const fresh = await options.refresh();
+    if (options.isCurrent?.() !== false) {
+      options.apply(fresh);
+      refreshSucceeded = true;
+    }
   } catch {
     // Preserve the receipt; callers may retry reading, never publishing this draft.
   }
