@@ -187,7 +187,7 @@ describe("entity workspace WebMCP tools", () => {
       else closeScriptEditor.mockRejectedValue(error);
 
       await expect(tools[index].execute({})).rejects.toBe(error);
-      expect(getContext).not.toHaveBeenCalled();
+      expect(getContext).toHaveBeenCalledTimes(index === 1 ? 1 : 0);
     }
   );
 

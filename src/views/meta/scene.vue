@@ -1,5 +1,10 @@
 <template>
-  <div class="verse-scene">
+  <div class="verse-scene" :aria-busy="!editorLoading.ready.value">
+    <EditorLoadingOverlay
+      :blocked="!editorLoading.ready.value"
+      :failed="editorLoading.status.value === 'error'"
+      @retry="editorFrameKey += 1"
+    ></EditorLoadingOverlay>
     <phototype-dialog
       @selected="selectedPhototype"
       ref="phototypeDialogRef"
@@ -66,6 +71,8 @@ import {
 } from "@/api/v1/write-contract";
 import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
+import EditorLoadingOverlay from "@/components/EditorLoadingOverlay.vue";
+import { useEditorLoading } from "@/composables/useEditorLoading";
 import { createIframeRpc } from "@/utils/iframeRpc";
 import {
   useIframeInitialization,
@@ -435,10 +442,13 @@ const openScriptDrawerOrThrow = (assertActive: () => void = () => {}) => {
   });
   return openingScriptDrawer;
 };
-const openScriptDrawer = () =>
-  openScriptDrawerOrThrow().catch((error) => {
+const openScriptDrawer = () => {
+  if (!editorLoading.ready.value) return;
+  return openScriptDrawerOrThrow().catch((error) => {
+    if (!editorLoading.ready.value) return;
     ElMessage.error(error instanceof Error ? error.message : String(error));
   });
+};
 const handleScriptDrawerClosed = () => {
   scriptDrawerActive.value = false;
   registerPageWebMcpTools();
@@ -451,8 +461,12 @@ const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
 const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
-    onOpen: openVersionDialog,
-    onOpenScript: openScriptDrawer,
+    onOpen: () => {
+      if (editorLoading.ready.value) openVersionDialog();
+    },
+    onOpenScript: () => {
+      if (editorLoading.ready.value) void openScriptDrawer();
+    },
   });
 };
 const toolbarStatus = computed<EditorToolbarStatus>(() => {
@@ -944,7 +958,7 @@ const restartAutoSaveTimer = () => {
     if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
       return;
     }
-    if (isSavingVersion.value) return;
+    if (isSavingVersion.value || !editorLoading.ready.value) return;
     if (!metaDetail.value || !saveable(metaDetail.value as metaInfo)) return;
     try {
       await requestSceneSave("auto");
@@ -1056,10 +1070,11 @@ useEntityWorkspaceWebMcp({
         : null,
     activeEditor: scriptDrawerActive.value ? "entity-script" : "entity",
     entity: {
+      ...editorLoading.getState(),
       ready:
         entityViewActive &&
         (metaDetail.value as metaInfo | null)?.id === id.value &&
-        editorInitialization.isReady(),
+        editorLoading.ready.value,
       dirty:
         hasUnsavedChangesBeforeUnload.value ||
         Boolean(pendingRestorePayload.value),
@@ -1181,6 +1196,11 @@ const webMcpRpc = createIframeRpc({
   send: sendRequest,
 });
 const requestEditor = webMcpRpc.request;
+const editorLoading = useEditorLoading({
+  initialized: editorInitialization.isReady,
+  target: () => `${id.value}:${src.value}:${editorFrameKey.value}`,
+  probe: () => requestEditor("webmcp-get-entity-state"),
+});
 
 const requireSuccessfulEditorResponse = (response: Record<string, unknown>) => {
   if (response.ok !== true) {
@@ -1200,6 +1220,8 @@ const getLiveEntityState = async (assertActive: () => void = () => {}) => {
   const response = requireSuccessfulEditorResponse(
     await requestEditor("webmcp-get-entity-state")
   );
+  if (response.loading === true && editorLoading.ready.value)
+    editorLoading.restart();
   assertActive();
   if (
     !entityViewActive ||
@@ -2209,7 +2231,11 @@ const refresh = async () => {
     pushMetaToEditor(nextMetaDetail, ticket);
   } catch (error) {
     editorInitialization.fail(ticket);
-    if (editorInitialization.isCurrent(ticket)) logger.error(error);
+    if (editorInitialization.isCurrent(ticket)) {
+      logger.error(error);
+      if (!editorInitialization.isReady())
+        editorLoading.fail("data-load-failed");
+    }
   }
 };
 
@@ -2303,6 +2329,7 @@ const registerPageWebMcpTools = () => {
 
   webMcpLifecycle?.abort();
   registration = webMcpLifecycle = registerEntityEditorWebMcpTools({
+    getEditorLoadingState: editorLoading.getState,
     operations: {
       getScope: () => ({
         actorId: String(userStore.userInfo?.id ?? ""),
@@ -2315,7 +2342,7 @@ const registerPageWebMcpTools = () => {
     getContext: () => ({
       entity: metaDetail.value as metaInfo | null,
       dirty: hasUnsavedChangesBeforeUnload.value,
-      loading: !editorInitialization.isReady() || metaDetail.value === null,
+      loading: !editorLoading.ready.value || metaDetail.value === null,
       sceneNames: entityScenes.value.map((scene) => scene.name),
     }),
     getLiveContext: () => getLiveEntityState(assertActive),

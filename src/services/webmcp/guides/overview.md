@@ -25,3 +25,12 @@
 ## 验证与限制
 
 草稿有效期为五分钟，确认前即被消费；取消、过期、切页或切换抽屉编辑上下文后需重新读取并暂存。`partial` 时先读取状态，避免重复写入。`server_acknowledged` 表示服务器响应成功，仍需重载核对。未获得发布授权时保留已保存成果；网页预览、Unity 和头显分别记录验收。
+
+
+## 编辑器载入与操作遮罩
+
+场景和实体工作区在 iframe 初始化、模型资源载入、切换目标和恢复版本期间显示载入动画遮罩，顶部操作与编辑区一起等待就绪。发送 INIT 不代表内容已载入。
+
+操作前先调用 `xrugc_get_scene_workspace_context` 或 `xrugc_get_entity_workspace_context`，检查 `scene` / `entity` 的 `ready`、`loading`、`blocked` 和 `status`。`blocked=true` 时不要执行编辑、保存、发布、运行、恢复版本或打开脚本；按 `retryAfterMs` 等待后重读上下文。`status=error` 表示载入失败或超时，应让用户使用页面「重新载入」按钮重试，不要自动重放写操作。脚本抽屉另检查 `script.ready`。
+
+载入期间编辑器上下文工具返回 `ready=false`、`loading=true`，不把尚未读取的内容当作空场景；工作区工具提供具体载入或失败状态。打开脚本工具受阻时返回 `applied=false` 及当前状态。遮罩消失只表示编辑内容载入完成，保存、发布和运行验收仍需各自回执。
