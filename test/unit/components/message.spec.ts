@@ -2,6 +2,7 @@
  * Unit tests for src/components/Dialog/message.ts
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { useZIndex } from "element-plus";
 
 // Mock the Vue component and rendering
 vi.mock("@/components/Dialog/Message.vue", () => ({
@@ -56,6 +57,23 @@ describe("Message()", () => {
     expect(props.message).toBe("test");
     expect(props.type).toBe("error");
   });
+
+  it.each(["warning", "error", "success", "info"] as const)(
+    "shows %s above overlays after repeated drawer and dialog opens",
+    (type) => {
+      const { nextZIndex } = useZIndex();
+      for (let i = 0; i < 30; i++) nextZIndex();
+      const drawerLayer = nextZIndex();
+      Message[type]("Visible above the script drawer");
+      expect(createVNode.mock.calls[0][1].zIndex).toBeGreaterThan(drawerLayer);
+
+      const nestedDialogLayer = nextZIndex();
+      Message[type]("Visible above version history too");
+      expect(createVNode.mock.calls[1][1].zIndex).toBeGreaterThan(
+        nestedDialogLayer
+      );
+    }
+  );
 
   it("returns an object with a close function", () => {
     const result = Message("test");
