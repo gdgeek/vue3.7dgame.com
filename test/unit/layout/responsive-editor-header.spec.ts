@@ -19,6 +19,10 @@ describe("responsive editor header regression", () => {
   const versionToolbarSource = readSource(
     "src/layout/components/NavBar/components/EditorVersionToolbar.vue"
   );
+  const editorActionSource = readSource("src/components/EditorActionGroup.vue");
+  const scriptDrawerSource = readSource(
+    "src/components/EditorScriptDrawer.vue"
+  );
   const verseScriptSource = readSource("src/views/verse/script.vue");
   const toolbarStyles = readSource("src/styles/script-editor-toolbar.css");
   const metaScriptSource = readSource("src/views/meta/script.vue");
@@ -64,11 +68,19 @@ describe("responsive editor header regression", () => {
     }
   });
 
-  it("continues to compact version controls by available navbar width", () => {
-    expect(versionToolbarSource).toContain('class="entry-label"');
-    expect(versionToolbarSource).toContain(
-      "@container app-navbar (width <= 900px)"
+  it("compacts shared navbar and drawer controls by available container width", () => {
+    expect(versionToolbarSource).toContain("<EditorActionGroup");
+    expect(scriptDrawerSource).toContain("<EditorActionGroup");
+    expect(scriptDrawerSource).toContain(
+      "container: script-drawer / inline-size"
     );
+    expect(editorActionSource).toContain('class="editor-action-label"');
+    expect(editorActionSource).toContain("@container (width <= 900px)");
+    expect(editorActionSource).toMatch(/@container[^}]+width:\s*40px/s);
+    expect(editorActionSource).toMatch(
+      /\.editor-action-label\s*\{[^}]*display:\s*none/s
+    );
+    expect(editorActionSource).toContain("'aria-label': action.label");
   });
 
   it.each([

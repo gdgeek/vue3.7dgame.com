@@ -16,44 +16,36 @@
       <h2 :id="titleId" :class="titleClass">
         {{ $t(editorLabelKey) }}{{ title ? ` · ${title}` : "" }}
       </h2>
-      <div
+      <EditorActionGroup
         class="script-drawer-actions"
-        role="group"
-        :aria-label="$t(editorLabelKey)"
-      >
-        <el-tooltip :content="$t(saveLabelKey)" placement="bottom">
-          <el-button
-            class="script-drawer-action script-drawer-action--save"
-            v-bind="{ 'aria-label': $t(saveLabelKey) }"
-            :disabled="
+        :label="$t(editorLabelKey)"
+        :actions="[
+          {
+            id: 'save',
+            label: $t(saveLabelKey),
+            icon: faFloppyDisk,
+            class: 'script-drawer-action script-drawer-action--save',
+            primary: true,
+            disabled:
               !scriptEditor?.saveable ||
               scriptEditor.editorContentLoading ||
-              scriptEditor.isSaving
-            "
-            :loading="scriptEditor?.isSaving"
-            @click="scriptEditor?.save()"
-          >
-            <font-awesome-icon
-              v-if="!scriptEditor?.isSaving"
-              :icon="faFloppyDisk"
-            ></font-awesome-icon>
-          </el-button>
-        </el-tooltip>
-        <el-tooltip :content="$t(versionsLabelKey)" placement="bottom">
-          <el-button
-            class="script-drawer-action"
-            v-bind="{ 'aria-label': $t(versionsLabelKey) }"
-            :disabled="
+              scriptEditor.isSaving,
+            loading: scriptEditor?.isSaving,
+            onClick: () => scriptEditor?.save(),
+          },
+          {
+            id: 'versions',
+            label: $t('common.scriptDraft.entry'),
+            icon: faClockRotateLeft,
+            class: 'script-drawer-action',
+            disabled:
               !scriptEditor ||
               scriptEditor.editorContentLoading ||
-              scriptEditor.isSaving
-            "
-            @click="scriptEditor?.openVersionDialog()"
-          >
-            <font-awesome-icon :icon="faClockRotateLeft"></font-awesome-icon>
-          </el-button>
-        </el-tooltip>
-      </div>
+              scriptEditor.isSaving,
+            onClick: () => scriptEditor?.openVersionDialog(),
+          },
+        ]"
+      ></EditorActionGroup>
     </template>
     <component
       :is="editorComponent"
@@ -69,6 +61,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, ref, type Component } from "vue";
+import EditorActionGroup from "./EditorActionGroup.vue";
 import type {
   ScriptDrawerEditor,
   ScriptDrawerState,
@@ -85,7 +78,6 @@ defineProps<{
   title: string;
   editorLabelKey: string;
   saveLabelKey: string;
-  versionsLabelKey: string;
 }>();
 const emit = defineEmits<{ closed: []; saved: [payload: unknown] }>();
 const visible = ref(false);
@@ -199,8 +191,7 @@ defineExpose({
 
 <style lang="scss">
 .editor-script-drawer.el-drawer {
-  --script-save-color: var(--primary-dark);
-
+  container: script-drawer / inline-size;
   max-width: 1800px;
   height: calc(100% - 16px);
   margin-top: 8px;
@@ -208,14 +199,6 @@ defineExpose({
   background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 20px 0 0 20px;
-
-  .dark & {
-    --script-save-color: color-mix(
-      in srgb,
-      var(--primary-color) 70%,
-      var(--text-primary)
-    );
-  }
 
   .el-drawer__header {
     gap: 16px;
@@ -237,55 +220,6 @@ defineExpose({
   .el-drawer__body {
     min-height: 0;
     padding: 0;
-  }
-
-  .script-drawer-actions {
-    display: flex;
-    flex: 0 0 auto;
-    overflow: hidden;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-  }
-
-  .script-drawer-action.el-button {
-    width: 40px;
-    height: 38px;
-    padding: 0;
-    margin: 0;
-    font-size: 14px;
-    color: var(--text-secondary);
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-
-    & + .script-drawer-action {
-      border-left: 1px solid var(--border-color);
-    }
-
-    &:hover:not(:disabled) {
-      color: var(--primary-color);
-      background: var(--bg-hover);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--primary-color);
-      outline-offset: -3px;
-    }
-
-    &.script-drawer-action--save {
-      color: var(--script-save-color);
-      background: var(--primary-light);
-    }
-
-    &.is-disabled {
-      opacity: 0.45;
-    }
-
-    .el-icon.is-loading {
-      margin: 0;
-    }
   }
 
   @media (width <= 767px) {
