@@ -67,6 +67,16 @@ pnpm run build
 
 ### 场景／实体载入遮罩
 
-宿主页现在区分 INIT 已发送与内容就绪：在当前 iframe/session 下读取实时编辑器状态，直到 `ok=true && loading=false` 才开放操作。初次进入、刷新、切换目标与恢复版本均重置载入状态；过期响应不撤销当前遮罩。60 秒未完成或首次数据请求失败时提供重新载入入口。遮罩覆盖编辑区和顶部操作，并阻止后台焦点操作。
+宿主页现在区分 INIT 已发送与内容就绪：在当前 iframe/session 下读取实时编辑器状态，直到 `ok=true && loading=false` 才开放操作。初次进入、刷新、切换目标与恢复版本均重置载入状态；过期响应不撤销当前遮罩。60 秒未完成或首次数据请求失败时提供重新载入入口。遮罩仅覆盖各自的 iframe，依赖内容的顶部和抽屉按钮分别显示 loading 并禁用；页面导航、账号等外围操作及服务器发布历史仍可使用，不禁用整个页面或抢占焦点。恢复版本仍在载入时选择离开，确认弹窗中的保存请求会等待编辑器就绪；明确放弃修改离开或取消导航会立即停止等待，载入失败时不会旋转等待或向 iframe 发送保存。
 
 WebMCP 请先读取场景／实体工作区上下文的 `ready/loading/status/blocked/error/retryAfterMs`。加载未完成时等候并重读；失败时交由用户重试。编辑器上下文工具在尚未就绪时返回载入状态而不读取半成品快照；打开脚本工具返回未应用状态。
+
+## P2 固定发布历史（2026-09-13 开发完成，待部署）
+
+场景编辑和场景脚本页新增独立“服务器发布历史”，包含分页、容量、指定版本正文及核验结果。它与 localStorage 草稿版本管理分开。WebMCP 新增只读 `xrugc_list_scene_publications` 和 `xrugc_get_scene_publication_version`，可在编辑器加载期间查询服务器历史；切页、切场景、切账号后不采用迟到响应。
+
+发布成功后独立 GET publicationVersionId，核对 sceneId、版本、schemaVersion、language、回执哈希、原文 UTF-8 SHA256、字节数及结构。仅全部通过才为 readBackVerified=true；读失败保留 server_acknowledged，提示重试读取，不重发发布。返回摘要只包含四个归档证据字段，不扩散整个 Snapshot 载荷。
+
+网站 publication 指南升至 1.1.0。旧后端回执没有归档时仍兼容并提示 history_unavailable；新字段部分损坏时提示合同不完整。资源为引用，未存储资源二进制，正文核验通过不证明资源仍可运行或工程可恢复。
+
+上线必须先完成后端精确 P2 迁移、双后端权限/历史核验，再部署前端。详细后端合同见对应 server 仓库 docs/webmcp-p2-publication-history.md。

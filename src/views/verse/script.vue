@@ -1,5 +1,10 @@
 <template>
   <div class="script" :class="{ 'script--embedded': embedded }">
+    <PublicationHistoryDialog
+      v-model="publicationHistoryVisible"
+      :scene-id="id"
+      :actor-id="userStore.userInfo?.id"
+    ></PublicationHistoryDialog>
     <el-container>
       <el-main>
         <el-card class="box-card">
@@ -16,9 +21,17 @@
                     class="script-mode-tab"
                     :class="{ 'is-active': activeName === 'blockly' }"
                     role="tab"
+                    :disabled="editorContentLoading"
+                    :aria-busy="editorContentLoading"
                     :aria-selected="activeName === 'blockly'"
                     @click="activeName = 'blockly'"
                   >
+                    <el-icon
+                      v-if="editorContentLoading"
+                      class="is-loading script-action-icon"
+                    >
+                      <Loading></Loading>
+                    </el-icon>
                     {{ $t("verse.view.script.edit") }}
                   </button>
                   <button
@@ -26,9 +39,17 @@
                     class="script-mode-tab"
                     :class="{ 'is-active': activeName === 'script' }"
                     role="tab"
+                    :disabled="editorContentLoading"
+                    :aria-busy="editorContentLoading"
                     :aria-selected="activeName === 'script'"
                     @click="activeName = 'script'"
                   >
+                    <el-icon
+                      v-if="editorContentLoading"
+                      class="is-loading script-action-icon"
+                    >
+                      <Loading></Loading>
+                    </el-icon>
                     {{ $t("verse.view.script.code") }}
                   </button>
                 </div>
@@ -54,6 +75,11 @@
                   </el-select>
                   <div class="script-primary-actions">
                     <el-button
+                      size="small"
+                      @click="publicationHistoryVisible = true"
+                      >{{ $t("common.publicationHistory.title") }}</el-button
+                    >
+                    <el-button
                       class="script-action-button"
                       type="primary"
                       size="small"
@@ -76,10 +102,13 @@
                       size="small"
                       :title="$t('verse.view.script.save')"
                       :aria-label="$t('verse.view.script.save')"
+                      :loading="editorContentLoading || isSaving"
+                      :disabled="!saveable || editorContentLoading || isSaving"
                       @click="save"
                     >
                       <font-awesome-icon
                         class="script-action-icon"
+                        v-if="!editorContentLoading && !isSaving"
                         icon="save"
                       ></font-awesome-icon>
                       <span>{{ $t("verse.view.script.save") }}</span>
@@ -97,10 +126,15 @@
                   :label="$t('verse.view.script.edit')"
                   name="blockly"
                 >
-                  <el-main class="blockly-editor-main">
+                  <el-main
+                    class="blockly-editor-main"
+                    :aria-busy="editorContentLoading"
+                  >
                     <div
                       v-if="editorContentLoading"
                       class="script-editor-loading-indicator"
+                      role="status"
+                      :aria-label="$t('common.editorLoading.message')"
                     >
                       <el-icon class="script-editor-loading-spinner is-loading">
                         <Loading></Loading>
@@ -113,6 +147,8 @@
                       scrolling="no"
                       :id="embedded ? 'verse-script-editor' : 'editor'"
                       ref="editor"
+                      :inert="editorContentLoading"
+                      :tabindex="editorContentLoading ? -1 : 0"
                       :src="src"
                       @load="handleEditorFrameLoad"
                     ></iframe>
@@ -139,6 +175,8 @@
                           <div class="code-container">
                             <el-button
                               class="copy-button"
+                              :loading="editorContentLoading"
+                              :disabled="editorContentLoading"
                               text
                               @click="copyCode(LuaCode)"
                               ><el-icon class="icon">
@@ -164,6 +202,8 @@
                           <div class="code-container">
                             <el-button
                               class="copy-button"
+                              :loading="editorContentLoading"
+                              :disabled="editorContentLoading"
                               text
                               @click="copyCode(JavaScriptCode)"
                               ><el-icon class="icon">
@@ -185,6 +225,8 @@
         </el-card>
         <ScriptDraftDialog
           :model-value="versionDialogVisible"
+          :editor-loading="editorContentLoading"
+          :editor-blocked="editorContentLoading || isSaving"
           :versions="draftVersions"
           :auto-save-enabled="autoSaveEnabled"
           :auto-save-interval-seconds="autoSaveIntervalSeconds"
@@ -212,6 +254,9 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
+import PublicationHistoryDialog from "@/components/MrPP/PublicationHistoryDialog.vue";
+import { createPublicationHistoryTools } from "@/services/webmcp/publication-history-tools";
 import {
   createWriteOptions,
   applyWriteRevision,
@@ -619,10 +664,19 @@ const postScript = async (
         if (!isCurrentSave() || !savedOwner.editable) return;
         await props.beforePublish?.();
         if (!isCurrentSave() || !savedOwner.editable) return;
-        await takePhoto(
+        const publication = await takePhoto(
           savedOwnerId,
           createWriteOptions(savedOwner.serverRevision)
         );
+        const verification = await readBackScenePublication({
+          sceneId: savedOwnerId,
+          snapshot: publication.data,
+          refresh: () =>
+            getVerse(savedOwnerId, "metas, module, share, verseCode"),
+          apply: () => {},
+        });
+        if (isCurrentSave() && !verification.readBackVerified)
+          ElMessage.warning(t("common.publicationHistory.pending"));
         if (isCurrentSave())
           ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
       })
@@ -1119,6 +1173,10 @@ const activateToolbar = () => {
   if (props.embedded) return;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getLoadingState: () => ({
+      loading: editorContentLoading.value,
+      blocked: editorContentLoading.value,
+    }),
     onOpen: openVersionDialog,
   });
 };
@@ -1413,20 +1471,25 @@ const runSceneRuntimePreview = () => {
   });
 };
 
+const publicationHistoryVisible = ref(false);
 const registerRuntimeTools = () => {
   runtimeWebMcpLifecycle?.abort();
   runtimeWebMcpLifecycle = null;
   if (props.embedded) return;
-  runtimeWebMcpLifecycle = registerWebMcpTools(
-    createSceneRuntimePreviewTools({
+  runtimeWebMcpLifecycle = registerWebMcpTools([
+    ...createPublicationHistoryTools(
+      () => verse.value?.id ?? null,
+      () => String(userStore.userInfo?.id ?? "")
+    ),
+    ...createSceneRuntimePreviewTools({
       getPreviewStatus: getSceneRuntimePreviewStatus,
       startPreview: startSceneRuntimePreview,
       stopPreview: async () => {
         await unityPreview.close();
         return getSceneRuntimePreviewStatus();
       },
-    })
-  );
+    }),
+  ]);
 };
 const stopWebMcpTools = () => {
   runtimeWebMcpLifecycle?.abort();
@@ -1650,7 +1713,8 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  cursor: wait;
+  background: var(--el-mask-color, rgb(255 255 255 / 90%));
 }
 
 .script-editor-loading-spinner {
