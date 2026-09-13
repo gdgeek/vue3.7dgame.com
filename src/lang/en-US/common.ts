@@ -1,6 +1,12 @@
 // common translations for en-US
 export default {
   common: {
+    editorLoading: {
+      message: "Loading editor…",
+      hint: "Editing, saving, running and scripts will be available when loading completes.",
+      failed: "The editor could not finish loading. Please retry.",
+      retry: "Reload editor",
+    },
     editorSave: {
       conflict:
         "The server rejected a version conflict. Your local changes are still unsaved. Keep them and review the latest server version before continuing.",

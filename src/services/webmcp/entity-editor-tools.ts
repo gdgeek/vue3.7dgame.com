@@ -519,6 +519,23 @@ const createTools = (
     },
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     execute: async () => {
+      const initial = options.getContext();
+      if (initial.loading) {
+        return {
+          editor: "entity",
+          workflowGuide: getWorkflowGuideEntry("entity"),
+          ready: false,
+          loading: true,
+          dirty: initial.dirty,
+          retryAfterMs: 500,
+          ...options.getEditorLoadingState?.(),
+          entity: initial.entity
+            ? { id: initial.entity.id, title: initial.entity.title }
+            : null,
+          nextStep:
+            "等待后重读 xrugc_get_entity_workspace_context；ready=true 后再执行编辑操作。",
+        };
+      }
       const context = await (options.getLiveContext?.() ??
         options.getContext());
       const entity = context.entity;
@@ -742,6 +759,7 @@ export const registerEntityEditorWebMcpTools = (
     ),
     {
       document: options.document,
+      getEditorLoadingState: options.getEditorLoadingState,
       operations: options.operations,
       onRegistrationError: options.onRegistrationError,
     }

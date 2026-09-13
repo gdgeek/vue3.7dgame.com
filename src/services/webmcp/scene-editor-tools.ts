@@ -447,6 +447,22 @@ const createTools = (
     async execute(input) {
       requireRecordInput(input);
       const context = options.getContext();
+      if (!context.ready || context.loading) {
+        return {
+          editor: "scene",
+          workflowGuide: getWorkflowGuideEntry("scene"),
+          ready: false,
+          loading: true,
+          dirty: context.dirty,
+          retryAfterMs: 500,
+          ...options.getEditorLoadingState?.(),
+          scene: context.scene
+            ? { id: context.scene.id, name: context.scene.name }
+            : null,
+          nextStep:
+            "等待后重读 xrugc_get_scene_workspace_context；ready=true 后再执行编辑操作。",
+        };
+      }
       const liveState = await options.getLiveState();
       const scene = context.scene;
       let publication: ScenePublicationState | null = null;
@@ -660,6 +676,7 @@ export const registerSceneEditorWebMcpTools = (
     ),
     {
       document: options.document,
+      getEditorLoadingState: options.getEditorLoadingState,
       operations: options.operations,
       onRegistrationError: options.onRegistrationError,
     }

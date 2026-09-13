@@ -5,6 +5,11 @@ export type EntityWorkspaceContext = {
   entityTitle: string | null;
   activeEditor: "entity" | "entity-script";
   entity: {
+    loading?: boolean;
+    status?: "loading" | "ready" | "error";
+    blocked?: boolean;
+    error?: string | null;
+    retryAfterMs?: number | null;
     ready: boolean;
     dirty: boolean;
     saving: boolean;

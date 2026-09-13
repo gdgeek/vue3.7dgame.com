@@ -1,6 +1,12 @@
 // common translations for th-TH
 export default {
   common: {
+    editorLoading: {
+      message: "กำลังโหลดตัวแก้ไข…",
+      hint: "แก้ไข บันทึก เรียกใช้ และเปิดสคริปต์ได้เมื่อโหลดเสร็จ",
+      failed: "โหลดตัวแก้ไขไม่สำเร็จ โปรดลองอีกครั้ง",
+      retry: "โหลดใหม่",
+    },
     confirm: "ยืนยัน",
     cancel: "ยกเลิก",
     selectUser: "เลือกผู้ใช้",
