@@ -136,6 +136,7 @@ import type {
 import type { MetaInfo } from "@/api/v1/types/meta";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
+import { confirmEditorSave } from "@/utils/confirmEditorSave";
 import { VERSE_SCENE_EXPAND, buildVerseEditorInitConfig } from "./sceneSpace";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
@@ -955,17 +956,21 @@ const getLiveSceneState = async (): Promise<SceneEditorLiveState> => {
 };
 
 const confirmSaveCurrentScene = () =>
-  ElMessageBox.confirm(t("common.sceneSaveConfirm.message"), "", {
-    showClose: true,
-    center: true,
-    distinguishCancelAndClose: true,
-    closeOnClickModal: false,
-    closeOnPressEscape: true,
-    showCancelButton: true,
-    customClass: "script-save-confirm-box",
-    confirmButtonText: t("common.sceneSaveConfirm.confirm"),
-    cancelButtonText: t("common.sceneSaveConfirm.cancel"),
-  });
+  confirmEditorSave(
+    t("common.sceneSaveConfirm.message"),
+    {
+      showClose: true,
+      center: true,
+      distinguishCancelAndClose: true,
+      closeOnClickModal: false,
+      closeOnPressEscape: true,
+      showCancelButton: true,
+      customClass: "script-save-confirm-box",
+      confirmButtonText: t("common.sceneSaveConfirm.confirm"),
+      cancelButtonText: t("common.sceneSaveConfirm.cancel"),
+    },
+    editorLoading.getState
+  );
 
 const {
   hasUnsavedChangesBeforeUnload,
@@ -985,6 +990,7 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentScene,
+  isEditorReady: () => editorLoading.ready.value,
   onBeforeSave: (trigger) => {
     currentSaveTrigger = trigger;
   },

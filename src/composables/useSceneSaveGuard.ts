@@ -10,6 +10,7 @@ export interface UseSceneSaveGuardOptions {
   pendingRestorePayload: Ref<unknown>;
   isSavingVersion: Ref<boolean>;
   confirmDialog: () => Promise<unknown>;
+  isEditorReady?: () => boolean;
   onBeforeSave?: (trigger: ScriptSaveTrigger) => void;
 }
 
@@ -20,6 +21,7 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
     pendingRestorePayload,
     isSavingVersion,
     confirmDialog,
+    isEditorReady,
     onBeforeSave,
   } = options;
 
@@ -59,6 +61,8 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
   };
 
   const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
+    if (isEditorReady?.() === false)
+      return Promise.resolve(hasUnsavedChangesBeforeUnload.value);
     const queryVersion = stateVersion;
     return new Promise((resolve) => {
       const requestId = sendRequest("check-unsaved-changes");
@@ -127,6 +131,7 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
 
   const requestSceneSave = (trigger: ScriptSaveTrigger) => {
     if (pendingSceneSavePromise) return pendingSceneSavePromise;
+    if (isEditorReady?.() === false) return Promise.resolve(false);
     onBeforeSave?.(trigger);
     isSavingVersion.value = true;
     sendRequest("save-before-leave");

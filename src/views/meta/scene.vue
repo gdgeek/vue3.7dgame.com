@@ -285,6 +285,7 @@ import type {
 } from "@/composables/useScriptEditorBase";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
+import { confirmEditorSave } from "@/utils/confirmEditorSave";
 import {
   sceneWriteFailure,
   writeFailureMessageKey,
@@ -1607,17 +1608,21 @@ const formatSignalBatchConfirmation = (preview: SignalBatchPreview) =>
   ].join("\n");
 
 const confirmSaveCurrentEntity = () =>
-  ElMessageBox.confirm(t("common.entitySaveConfirm.message"), "", {
-    showClose: true,
-    center: true,
-    distinguishCancelAndClose: true,
-    closeOnClickModal: false,
-    closeOnPressEscape: true,
-    showCancelButton: true,
-    customClass: "script-save-confirm-box",
-    confirmButtonText: t("common.entitySaveConfirm.confirm"),
-    cancelButtonText: t("common.entitySaveConfirm.cancel"),
-  });
+  confirmEditorSave(
+    t("common.entitySaveConfirm.message"),
+    {
+      showClose: true,
+      center: true,
+      distinguishCancelAndClose: true,
+      closeOnClickModal: false,
+      closeOnPressEscape: true,
+      showCancelButton: true,
+      customClass: "script-save-confirm-box",
+      confirmButtonText: t("common.entitySaveConfirm.confirm"),
+      cancelButtonText: t("common.entitySaveConfirm.cancel"),
+    },
+    editorLoading.getState
+  );
 
 const {
   hasUnsavedChangesBeforeUnload,
@@ -1637,6 +1642,7 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentEntity,
+  isEditorReady: () => editorLoading.ready.value,
   onBeforeSave: (trigger) => {
     currentSaveTrigger = trigger;
   },
