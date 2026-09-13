@@ -18,6 +18,13 @@
         <span class="entry-label">{{ t("common.unityPreview.entry") }}</span>
       </el-button>
     </el-tooltip>
+    <el-button
+      v-if="editorVersionToolbarState.onOpenPublications"
+      class="toolbar-entry-btn"
+      size="small"
+      @click="openPublications"
+      >{{ t("common.publicationHistory.title") }}</el-button
+    >
     <el-tooltip :content="t('common.scriptDraft.entry')" placement="bottom">
       <el-button
         class="toolbar-entry-btn"
@@ -59,8 +66,13 @@ import { faCode } from "@fortawesome/free-solid-svg-icons";
 import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
 
 const { t } = useI18n();
-const { editorVersionToolbarState, openDialog, runPreview, openScript } =
-  useEditorVersionToolbar();
+const {
+  editorVersionToolbarState,
+  openDialog,
+  runPreview,
+  openScript,
+  openPublications,
+} = useEditorVersionToolbar();
 </script>
 
 <style lang="scss" scoped>

@@ -1,3 +1,4 @@
+import { createPublicationHistoryTools } from "./publication-history-tools";
 import type { ScenePublicationState } from "@/api/v1/write-protocol";
 import {
   getWorkflowGuideEntry,
@@ -596,6 +597,9 @@ export const registerSceneEditorWebMcpTools = (
     withWorkflowGuide(
       [
         ...createTools(options),
+        ...createPublicationHistoryTools(
+          () => options.getContext().scene?.id ?? null
+        ),
         ...(options.readPublication
           ? [
               {

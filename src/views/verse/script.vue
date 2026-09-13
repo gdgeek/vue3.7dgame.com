@@ -1,5 +1,9 @@
 <template>
   <div class="script" :class="{ 'script--embedded': embedded }">
+    <PublicationHistoryDialog
+      v-model="publicationHistoryVisible"
+      :scene-id="id"
+    ></PublicationHistoryDialog>
     <el-container>
       <el-main>
         <el-card class="box-card">
@@ -53,6 +57,11 @@
                     ></el-option>
                   </el-select>
                   <div class="script-primary-actions">
+                    <el-button
+                      size="small"
+                      @click="publicationHistoryVisible = true"
+                      >{{ $t("common.publicationHistory.title") }}</el-button
+                    >
                     <el-button
                       class="script-action-button"
                       type="primary"
@@ -212,6 +221,9 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
+import PublicationHistoryDialog from "@/components/MrPP/PublicationHistoryDialog.vue";
+import { createPublicationHistoryTools } from "@/services/webmcp/publication-history-tools";
 import {
   createWriteOptions,
   applyWriteRevision,
@@ -619,10 +631,19 @@ const postScript = async (
         if (!isCurrentSave() || !savedOwner.editable) return;
         await props.beforePublish?.();
         if (!isCurrentSave() || !savedOwner.editable) return;
-        await takePhoto(
+        const publication = await takePhoto(
           savedOwnerId,
           createWriteOptions(savedOwner.serverRevision)
         );
+        const verification = await readBackScenePublication({
+          sceneId: savedOwnerId,
+          snapshot: publication.data,
+          refresh: () =>
+            getVerse(savedOwnerId, "metas, module, share, verseCode"),
+          apply: () => {},
+        });
+        if (isCurrentSave() && !verification.readBackVerified)
+          ElMessage.warning(t("common.publicationHistory.pending"));
         if (isCurrentSave())
           ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
       })
@@ -1413,20 +1434,22 @@ const runSceneRuntimePreview = () => {
   });
 };
 
+const publicationHistoryVisible = ref(false);
 const registerRuntimeTools = () => {
   runtimeWebMcpLifecycle?.abort();
   runtimeWebMcpLifecycle = null;
   if (props.embedded) return;
-  runtimeWebMcpLifecycle = registerWebMcpTools(
-    createSceneRuntimePreviewTools({
+  runtimeWebMcpLifecycle = registerWebMcpTools([
+    ...createPublicationHistoryTools(() => verse.value?.id ?? null),
+    ...createSceneRuntimePreviewTools({
       getPreviewStatus: getSceneRuntimePreviewStatus,
       startPreview: startSceneRuntimePreview,
       stopPreview: async () => {
         await unityPreview.close();
         return getSceneRuntimePreviewStatus();
       },
-    })
-  );
+    }),
+  ]);
 };
 const stopWebMcpTools = () => {
   runtimeWebMcpLifecycle?.abort();

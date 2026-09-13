@@ -26,6 +26,10 @@
       @closed="handleScriptDrawerClosed"
       @saved="invalidateScriptPreview"
     ></VerseScriptDrawer>
+    <PublicationHistoryDialog
+      v-model="publicationHistoryVisible"
+      :scene-id="id"
+    ></PublicationHistoryDialog>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"
       :versions="draftVersions"
@@ -52,6 +56,7 @@
 </template>
 
 <script setup lang="ts">
+import PublicationHistoryDialog from "@/components/MrPP/PublicationHistoryDialog.vue";
 import {
   createWriteOptions,
   applyWriteRevision,
@@ -181,6 +186,7 @@ const pendingRestorePayload = ref<VerseEditorPayload | null>(null);
 let currentSaveTrigger: ScriptSaveTrigger = "manual";
 let autoSaveTimer: number | null = null;
 
+const publicationHistoryVisible = ref(false);
 const toolbarOwner = "verse-scene-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
   useEditorVersionToolbar();
@@ -191,6 +197,9 @@ const activateToolbar = () => {
     onOpen: openVersionDialog,
     onRunPreview: runSceneRuntimePreview,
     onOpenScript: openScriptDrawer,
+    onOpenPublications: () => {
+      publicationHistoryVisible.value = true;
+    },
   });
 };
 const toolbarStatus = computed<EditorToolbarStatus>(() => {
@@ -1370,11 +1379,24 @@ const releaseVerse = async (data: unknown) => {
     const published = await saveThenPublishScene(
       payload,
       (currentPayload) => saveVerseBeforeLeave(currentPayload, "manual", false),
-      () =>
-        takePhoto(
-          id.value,
+      async () => {
+        const ownerId = id.value;
+        const response = await takePhoto(
+          ownerId,
           createWriteOptions(getSceneServerModel()?.serverRevision)
-        )
+        );
+        const result = await readBackScenePublication({
+          sceneId: ownerId,
+          snapshot: response.data,
+          refresh: () => getVerse(ownerId, VERSE_SCENE_EXPAND),
+          apply: (fresh) => {
+            if (verse.value?.id === ownerId) verse.value = fresh.data;
+          },
+        });
+        if (id.value === ownerId && !result.readBackVerified)
+          ElMessage.warning(t("common.publicationHistory.pending"));
+        return response;
+      }
     );
     if (!published) return;
 

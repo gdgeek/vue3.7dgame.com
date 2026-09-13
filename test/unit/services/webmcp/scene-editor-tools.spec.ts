@@ -150,6 +150,8 @@ describe("scene editor WebMCP tools", () => {
       "xrugc_inspect_scene_module",
       "xrugc_validate_scene",
       "xrugc_search_entities",
+      "xrugc_list_scene_publications",
+      "xrugc_get_scene_publication_version",
       "xrugc_check_scene_resource_readiness",
       "xrugc_check_scene_publication_readiness",
       "xrugc_get_scene_runtime_diagnostics",
