@@ -1,0 +1,90 @@
+[
+    {
+        "name": "numeric",
+        "input": {
+            "schemaVersion": 1,
+            "language": "lua",
+            "scene": {
+                "id": 1
+            },
+            "runtime": {
+                "data": "{}",
+                "code": "",
+                "metas": [],
+                "resources": [],
+                "managers": [],
+                "sample": {
+                    "z": 1.0,
+                    "integer": 1,
+                    "negativeZero": -0.0
+                }
+            },
+            "dependencies": {
+                "resourceBytesArchived": false
+            }
+        },
+        "canonicalBody": "{\"dependencies\":{\"resourceBytesArchived\":false},\"language\":\"lua\",\"runtime\":{\"code\":\"\",\"data\":\"{}\",\"managers\":[],\"metas\":[],\"resources\":[],\"sample\":{\"integer\":1,\"negativeZero\":-0.0,\"z\":1.0}},\"scene\":{\"id\":1},\"schemaVersion\":1}",
+        "contentHash": "sha256:76bda3b59aabfe5c1044cfbdd9c58107a0f8e17148a2a8a6e148a2129dd4230f",
+        "byteLength": 225
+    },
+    {
+        "name": "shapes",
+        "input": {
+            "schemaVersion": 1,
+            "language": "lua",
+            "scene": {
+                "id": 1
+            },
+            "runtime": {
+                "data": "{}",
+                "code": "",
+                "metas": [],
+                "resources": [],
+                "managers": [],
+                "sample": {
+                    "object": {},
+                    "array": [],
+                    "null": null
+                }
+            },
+            "dependencies": {
+                "resourceBytesArchived": false
+            }
+        },
+        "canonicalBody": "{\"dependencies\":{\"resourceBytesArchived\":false},\"language\":\"lua\",\"runtime\":{\"code\":\"\",\"data\":\"{}\",\"managers\":[],\"metas\":[],\"resources\":[],\"sample\":{\"array\":[],\"null\":null,\"object\":{}}},\"scene\":{\"id\":1},\"schemaVersion\":1}",
+        "contentHash": "sha256:d89ae454fd7c7f1d013501fe0f3a6cf45ff0373a49f9e763dab41f008366931e",
+        "byteLength": 220
+    },
+    {
+        "name": "unicode",
+        "input": {
+            "schemaVersion": 1,
+            "language": "lua",
+            "scene": {
+                "id": 1
+            },
+            "runtime": {
+                "data": "{}",
+                "code": "",
+                "metas": [],
+                "resources": [],
+                "managers": [],
+                "sample": {
+                    "字符": "场景 😀\nnext",
+                    "slash": "a/b",
+                    "array": [
+                        3,
+                        2,
+                        1
+                    ]
+                }
+            },
+            "dependencies": {
+                "resourceBytesArchived": false
+            }
+        },
+        "canonicalBody": "{\"dependencies\":{\"resourceBytesArchived\":false},\"language\":\"lua\",\"runtime\":{\"code\":\"\",\"data\":\"{}\",\"managers\":[],\"metas\":[],\"resources\":[],\"sample\":{\"array\":[3,2,1],\"slash\":\"a/b\",\"字符\":\"场景 😀\\nnext\"}},\"scene\":{\"id\":1},\"schemaVersion\":1}",
+        "contentHash": "sha256:84c7cfdcb5581b76714334099807d93b9e754fe1affb9631ba2c5499df982a31",
+        "byteLength": 244
+    }
+]

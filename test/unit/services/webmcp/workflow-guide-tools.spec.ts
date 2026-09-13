@@ -37,10 +37,10 @@ describe("site workflow guide", () => {
       expect(result).toMatchObject({
         topic: id,
         title,
-        version: "1.0.4",
+        version: "1.1.0",
         page: "entity",
         language: "zh-CN",
-        documentationUrl: `/webmcp/scene-studio/1.0.4/${id}.md`,
+        documentationUrl: `/webmcp/scene-studio/1.1.0/${id}.md`,
         primaryPageTools: ["example_edit"],
         content: expect.stringMatching(/^# /),
       });

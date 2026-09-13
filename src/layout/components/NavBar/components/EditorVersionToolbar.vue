@@ -13,6 +13,7 @@ import {
   faCode,
   faPlay,
   faClockRotateLeft,
+  faBoxArchive,
 } from "@fortawesome/free-solid-svg-icons";
 import EditorActionGroup, {
   type EditorAction,
@@ -20,8 +21,13 @@ import EditorActionGroup, {
 import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
 
 const { t } = useI18n();
-const { editorVersionToolbarState, openDialog, runPreview, openScript } =
-  useEditorVersionToolbar();
+const {
+  editorVersionToolbarState,
+  openDialog,
+  runPreview,
+  openScript,
+  openPublications,
+} = useEditorVersionToolbar();
 const actions = computed<EditorAction[]>(() => [
   ...(editorVersionToolbarState.onRunPreview
     ? [
@@ -32,6 +38,17 @@ const actions = computed<EditorAction[]>(() => [
           primary: true,
           class: "toolbar-entry-btn toolbar-entry-btn--run",
           onClick: runPreview,
+        },
+      ]
+    : []),
+  ...(editorVersionToolbarState.onOpenPublications
+    ? [
+        {
+          id: "publications",
+          label: t("common.publicationHistory.title"),
+          icon: faBoxArchive,
+          class: "toolbar-entry-btn",
+          onClick: openPublications,
         },
       ]
     : []),

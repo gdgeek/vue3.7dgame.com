@@ -212,7 +212,7 @@ beforeEach(() => {
   mocks.putVerseCode.mockResolvedValue({
     data: { serverRevision: nextRevision },
   });
-  mocks.takePhoto.mockResolvedValue({ data: {} });
+  mocks.takePhoto.mockResolvedValue({ data: { id: 1 } });
   mocks.confirm.mockReturnValue(new Promise(() => {}));
   mocks.useBase.mockImplementation((options: UseScriptEditorBaseOptions) => {
     const base = createBase(options);

@@ -1,6 +1,34 @@
 // common translations for en-US
 export default {
   common: {
+    publicationHistory: {
+      pending:
+        "Publication succeeded; the archived body is not yet verified. Retry reading in publication history, without republishing.",
+      title: "Publication history",
+      boundary:
+        "Fixed server publication versions, separate from local drafts. Reading history does not replace the current scene.",
+      refresh: "Refresh list",
+      capacity: "{count} versions · {used} / {budget} used",
+      capacityWarning:
+        "Archive capacity is approaching its limit. Contact an administrator.",
+      empty:
+        "No fixed publication history. Earlier publications are not retroactively archived.",
+      date: "Published",
+      language: "Language",
+      actor: "Actor ID",
+      version: "Version",
+      inspect: "Read and verify",
+      more: "Load more",
+      detail: "Version details",
+      verified: "Archived body verified",
+      resources:
+        "Only the archived body is verified. Resource files are not copied or checked; editor project recovery is not guaranteed.",
+      body: "View fixed body",
+      forbidden:
+        "You do not have current permission to read this scene history.",
+      failed:
+        "Reading or verification failed. Retry reading only; this does not republish or substitute the current snapshot.",
+    },
     editorLoading: {
       message: "Loading editor…",
       hint: "Editing, saving, running and scripts will be available when loading completes.",

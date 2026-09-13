@@ -1,6 +1,31 @@
 // 通用翻译
 export default {
   common: {
+    publicationHistory: {
+      pending:
+        "发布已成功，历史正文尚未核验。可在发布历史中重试读取，请勿重复发布。",
+      title: "发布历史",
+      boundary:
+        "服务器保存的固定发布版本，与本机草稿独立。查看历史不会覆盖当前场景。",
+      refresh: "刷新列表",
+      capacity: "{count} 个版本 · 已用 {used} / {budget}",
+      capacityWarning: "归档容量接近上限，请联系管理员规划容量。",
+      empty: "暂无固定发布历史。旧发布不会被自动补录为历史原件。",
+      date: "发布时间",
+      language: "语言",
+      actor: "发布人 ID",
+      version: "版本",
+      inspect: "读取并核验",
+      more: "加载更多",
+      detail: "版本详情",
+      verified: "历史正文核验通过",
+      resources:
+        "只核验已归档正文；资源文件未复制，可用性尚未检查，也不保证能恢复编辑工程。",
+      body: "查看固定正文",
+      forbidden: "当前账号没有读取此场景历史的权限。",
+      failed:
+        "读取或核验未通过。可重试读取；不会再次发布或用当前快照代替历史。",
+    },
     editorLoading: {
       message: "编辑器正在载入…",
       hint: "载入完成后即可编辑、保存、运行或打开脚本。",

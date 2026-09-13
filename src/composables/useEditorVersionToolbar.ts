@@ -9,6 +9,7 @@ type EditorVersionToolbarState = {
   onRunPreview: (() => void) | null;
   onOpen: (() => void) | null;
   onOpenScript: (() => void) | null;
+  onOpenPublications: (() => void) | null;
 };
 
 const state = reactive<EditorVersionToolbarState>({
@@ -18,6 +19,7 @@ const state = reactive<EditorVersionToolbarState>({
   onRunPreview: null,
   onOpen: null,
   onOpenScript: null,
+  onOpenPublications: null,
 });
 
 const resetState = () => {
@@ -27,6 +29,7 @@ const resetState = () => {
   state.onRunPreview = null;
   state.onOpen = null;
   state.onOpenScript = null;
+  state.onOpenPublications = null;
 };
 
 export const useEditorVersionToolbar = () => {
@@ -40,6 +43,7 @@ export const useEditorVersionToolbar = () => {
     state.onRunPreview = payload.onRunPreview || null;
     state.onOpen = payload.onOpen || null;
     state.onOpenScript = payload.onOpenScript || null;
+    state.onOpenPublications = payload.onOpenPublications || null;
   };
 
   const updateToolbarStatus = (owner: string, status: EditorToolbarStatus) => {
@@ -72,5 +76,6 @@ export const useEditorVersionToolbar = () => {
     openDialog,
     runPreview,
     openScript,
+    openPublications: () => state.onOpenPublications?.(),
   };
 };
