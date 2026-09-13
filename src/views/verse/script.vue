@@ -571,8 +571,17 @@ const postScript = async (
   }
 
   const savedOwner = verse.value;
+  const savedOwnerId = savedOwner.id;
+  const savedSession = getEditorInitState()?.hostSessionId;
+  const savedLoadSequence = verseLoadSequence;
+  const isCurrentSave = () =>
+    isScriptViewActive &&
+    id.value === savedOwnerId &&
+    verse.value === savedOwner &&
+    verseLoadSequence === savedLoadSequence &&
+    getEditorInitState()?.hostSessionId === savedSession;
   const savedResponse = await putVerseCode(
-    verse.value!.id,
+    savedOwnerId,
     {
       blockly: blocklyData,
       js: message.js,
@@ -580,9 +589,13 @@ const postScript = async (
     },
     context.write ?? createWriteOptions(savedOwner?.serverRevision)
   );
-  if (verse.value === savedOwner) applyWriteRevision(savedOwner, savedResponse);
+  // A late receipt belongs to the original editor session, including when the
+  // same scene has been reopened. It must not start UI work in its replacement.
+  if (!isCurrentSave()) return;
+  applyWriteRevision(savedOwner, savedResponse);
 
   emit("saved");
+  if (!isCurrentSave()) return;
   if (context.trigger === "manual") {
     Message.success(t("verse.view.script.success"));
     if (!hasPublishableSceneContent(verse.value)) {
@@ -603,15 +616,19 @@ const postScript = async (
       }
     )
       .then(async () => {
+        if (!isCurrentSave() || !savedOwner.editable) return;
         await props.beforePublish?.();
+        if (!isCurrentSave() || !savedOwner.editable) return;
         await takePhoto(
-          id.value,
-          createWriteOptions(verse.value?.serverRevision)
+          savedOwnerId,
+          createWriteOptions(savedOwner.serverRevision)
         );
-        ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
+        if (isCurrentSave())
+          ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
       })
       .catch(() => {
-        ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
+        if (isCurrentSave())
+          ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
       });
   }
 };
