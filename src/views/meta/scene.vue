@@ -1216,7 +1216,8 @@ const getLiveEntityState = async (assertActive: () => void = () => {}) => {
       data: response.meta,
       events: response.events,
     } as metaInfo,
-    dirty: Boolean(response.changed),
+    // An iframe baseline reset does not acknowledge a rejected or lost save.
+    dirty: hasUnsavedChangesBeforeUnload.value,
     loading: Boolean(response.loading),
     sceneNames: entityScenes.value.map((scene) => scene.name),
     source: "live-editor" as const,

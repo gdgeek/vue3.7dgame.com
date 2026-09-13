@@ -893,7 +893,8 @@ const getLiveSceneState = async (): Promise<SceneEditorLiveState> => {
   return {
     verse: response.verse,
     sceneVersion: String(response.sceneVersion || ""),
-    changed: Boolean(response.changed),
+    // Include writes whose persistence has not been acknowledged by the host.
+    changed: Boolean(response.changed) || hasUnsavedChangesBeforeUnload.value,
     loading: Boolean(response.loading),
     selectedModuleIds: Array.isArray(response.selectedModuleIds)
       ? response.selectedModuleIds.map(String)
