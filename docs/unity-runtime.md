@@ -28,6 +28,8 @@ corepack pnpm dev
 
 不需要后端账号的本地运行器检查页是 `/tests/manual/unity-runtime.html`，仅在 Vite 开发服务中使用。它挂载实际主站控制器与实际 Unity，通过自带 Lua 创建并变换一个立方体；不能代替线上原生 WebMCP、业务场景或头显验收。此页面不会进入主站生产 bundle。
 
+加上 `?resourceFailure=1` 可检查真实失败链路：场景运行后，从受控 iframe 请求一个固定的不存在音频，确认显示 HTTP 404 资源诊断并释放运行器。点击重试会建立新会话；本页每次加载只注入一次失败请求。
+
 ## 版本与发布
 
 主站镜像包含前端、runner、SW、清单及锁定 Unity 文件。`/webgl-preview/active.json` 以 `no-store` 返回当前版本；每个会话固定 `/webgl-preview/releases/<runtimeReleaseId>/embed.html`。release identity 覆盖 runner/SW 内容、Unity buildId 和制品哈希。大文件使用不可变路径，HTML、SW 和元数据重新验证。
@@ -47,6 +49,8 @@ corepack pnpm unity:smoke xrugc-main-unity:local
 
 发布遵循 develop 测试及镜像门禁通过后，main / publish 一起推进并发检查的仓库约定。升级构建用 `UNITY_PREVIOUS_IMAGE` 锁定上一主站镜像 digest，仅继承其 active 指向的运行器 release，使上一版会话仍可读取原版本文件；具体命令见 [制品工具说明](../scripts/unity/README.md)。首发默认不继承旧插件静态入口。回滚恢复已验证的完整主站镜像及对应配置，不静默切回旧插件地址。实际发布结果以验收记录为准。
 
+2026-09-14 本次修复发布前，已将 GitHub Actions 仓库变量 `UNITY_PREVIOUS_IMAGE` 设置为 `hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:ad2d96747787b6fced0a00986805b4777e3568be30744936e5d1e113d1e504e2`。该不可变镜像经核验是上一版 `publish` / `latest`，其 active release 为 `c2816fc3523ab85d07097cac`。后续升级仍须在新 CI 触发前核对并更新此变量，最终镜像须同时验证新 active release 和继承的上一版 release。
+
 ## SW 与资源边界
 
 每个 release 的 SW 只注册在自己的目录，不控制主站根路径、登录或业务 API，也不强制升级正在运行的旧 worker。缓存名称隔离旧插件和不同 release；清理旧版本须确认没有使用该版本的客户端，不能无条件清空全站缓存。
@@ -54,6 +58,30 @@ corepack pnpm unity:smoke xrugc-main-unity:local
 Unity 固定制品中的 `__xrugc_proxy__` 历史路径由当前 iframe 的 SW 做受限兼容：仅允许既有 HTTPS 资源域名和资源类型，拒绝重定向和任意 URL 代理，不向资源域名转发主站 Cookie 或 Authorization。Nginx 不提供开放资源代理。
 
 当前资源来源限于 HTTPS 的 `data.7dgame.com`、`7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com` 和 `mrpp-1257979353.cos.ap-chengdu.myqcloud.com`。已支持 CDN 的签名查询保持原样；既有旧 COS 地址仍按既有规则转到 CDN。`localhost`、独立 API origin、本地存储相对资源及其他来源会在准备阶段返回 `SCENE_ASSET_ORIGIN_DENIED`，不会先下载 Unity 后才因 CSP 失败。主站不会为这些来源新增通用代理，也不会自动转发登录凭据。普通 API 请求和其他消费者的 URL 规则不受该运行器约束影响。
+
+### 资源读取失败与 CORS
+
+Service Worker 仍通过浏览器跨域读取场景资源；历史 `__xrugc_proxy__` 地址不绕过 CORS。源站返回 HTTP 200 也不代表浏览器允许读取。不要用 `no-cors`、空的成功响应或随机查询参数掩盖失败。
+
+前台资源失败通过当前受控 iframe 的版本与会话协议报告，主站停止并释放运行器，保留可重试的错误状态：
+
+| 错误码 | 含义 |
+| --- | --- |
+| `SCENE_RESOURCE_FETCH_FAILED` | 网络、CORS、重定向拒绝或响应流中断；浏览器无法可靠区分这些原因 |
+| `SCENE_RESOURCE_HTTP_ERROR` | 资源服务器返回错误 HTTP 状态 |
+| `SCENE_RESOURCE_EMPTY` | 普通成功响应实际没有数据 |
+
+失败界面的“资源诊断”和 WebMCP `failure.resource` 只包含校验后的资源来源、路径、类型、原因与可获得的 HTTP 状态，不保存签名查询串或原始异常文本。用户取消和可选后台预热失败不报告致命场景错误；Range、304 和 opaque 媒体保留原有处理边界。此防护不能代替 Unity 源工程对下载失败、空 buffer 和音频解码结果的检查。
+
+CDN 由 COS 决定跨域头时，须透传请求 Origin 和源站 CORS 响应，并让 CDN 尊重 `Vary: Origin`。仅返回 Vary 头而未启用 CDN 对应功能，仍可能混用无 Origin 与带 Origin 的缓存。若改由 CDN 统一设置跨域头，使用覆盖设置，避免追加出重复的 Allow-Origin；保留原有资源授权范围。
+
+2026-09-14 已在 EdgeOne 站点 `7dgame.com` 的现有“网站加速-data.7dgame.com”规则中启用 **Vary 特性**。规则仍仅匹配 `data.7dgame.com`，保留原有 30 天节点缓存、完整查询参数和图片浏览器缓存设置，未变更 COS 权限或上传方法。14:31:21 提交的故障音频 URL 缓存刷新已在控制台确认成功。
+
+复发时先核对这条规则，再按实际失败 URL 刷新缓存。验收应使用原始地址，依次覆盖无 Origin 请求、业务 Origin 的首次 GET 与再次 HIT、其他业务 Origin、Range 206，以及条件请求触发的 OPTIONS。2026-09-14 14:32 的音频抽测已通过这些响应头检查。命令行检查不能代替浏览器场景的加载、开始探索、音频与退出验收；权限错误和 Unity 独立错误应分别记录。
+
+本次本地 Chrome 实测原始音频两次 GET 均为 `200 / cors / 512012 bytes`，Range 为 `206 / cors / 16 bytes`，Web Audio 成功解码约 10.67 秒单声道音频。修复版真实 Unity 运行器完成 Lua 执行及退出（`cleanup: disposed`）；实际 SW 音频 404 请求显示正确资源诊断。线上场景 2325 在此次 Chrome 登录账号下返回 API 403，完整业务场景复测仍须使用有访问权限的账号，不能将局部验证写成场景全部恢复。
+
+参考：[EdgeOne CORS 配置](https://edgeone.ai/document/71623)、[COS 跨域配置](https://cloud.tencent.com/document/product/436/13318)。
 
 ## 原生 WebMCP
 

@@ -651,6 +651,102 @@ const responseForSceneClient = (response) => {
   });
 };
 
+// Only a real resource request from this release's controlled runner may
+// report a scene failure. Optional cache warming calls fetchSceneTarget directly.
+const reportSceneResourceFailure = async (event, targetUrl, reason, status) => {
+  if (!event.clientId || event.request.signal.aborted) return;
+  try {
+    const clients = await self.clients.matchAll({ type: "window" });
+    const client = clients.find((candidate) => candidate.id === event.clientId);
+    if (!client || client.type !== "window") return;
+    const clientUrl = new URL(client.url);
+    const runnerUrl = scopeUrl("embed.html");
+    if (clientUrl.origin !== runnerUrl.origin || clientUrl.pathname !== runnerUrl.pathname) return;
+    const manifest = await getBuildManifest();
+    if (event.request.signal.aborted) return;
+    const url = new URL(targetUrl);
+    const kind = /\.(?:mp3|wav|ogg|m4a)$/i.test(url.pathname) ? "audio"
+      : /\.(?:glb|gltf|fbx|obj|vox)$/i.test(url.pathname) ? "model"
+      : /\.(?:png|jpe?g|gif|webp|bmp|svg)$/i.test(url.pathname) ? "image" : "asset";
+    const code = {
+      network: "SCENE_RESOURCE_FETCH_FAILED",
+      http: "SCENE_RESOURCE_HTTP_ERROR",
+      empty: "SCENE_RESOURCE_EMPTY",
+    }[reason];
+    client.postMessage({
+      type: "webgl-preview-scene-resource-error",
+      protocolVersion: 1,
+      runtimeReleaseId: RELEASE_ID,
+      buildId: manifest.buildId,
+      code,
+      resource: {
+        origin: url.origin,
+        path: url.pathname.replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 512),
+        kind,
+        reason,
+        ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      },
+    });
+  } catch {
+    // Diagnostics must neither replace the original failure nor leak URLs or
+    // exception messages that may contain signed query parameters.
+  }
+};
+
+const fetchForegroundSceneTarget = async (event, targetUrl) => {
+  const report = (reason, status) => reportSceneResourceFailure(event, targetUrl, reason, status);
+  let response;
+  try {
+    response = await fetchSceneTarget(event.request, targetUrl);
+  } catch (error) {
+    await report("network");
+    throw error;
+  }
+  // Opaque media and conditional/Range semantics keep their existing path.
+  // A browser TypeError alone cannot distinguish CORS from another network fault.
+  if (response.type === "opaque" || event.request.mode === "no-cors" || response.status === 304) return response;
+  if (!response.ok) {
+    await report("http", response.status);
+    return response;
+  }
+  if (event.request.headers.has("range")) return response;
+
+  const reader = response.body && response.body.getReader();
+  let first;
+  try {
+    if (reader) {
+      do { first = await reader.read(); } while (!first.done && !first.value.byteLength);
+    }
+  } catch (error) {
+    await report("network");
+    throw error;
+  }
+  if (!first || first.done) {
+    if (reader) reader.releaseLock();
+    await report("empty", response.status);
+    throw new TypeError("Scene resource response is empty");
+  }
+  // Inspect only the first nonempty chunk, then preserve streaming and back
+  // pressure. Never materialize a model/audio file to test whether it is empty.
+  let cancelled = false;
+  return new Response(new ReadableStream({
+    start(controller) { controller.enqueue(first.value); },
+    async pull(controller) {
+      try {
+        const chunk = await reader.read();
+        if (cancelled) return;
+        if (chunk.done) { reader.releaseLock(); controller.close(); }
+        else controller.enqueue(chunk.value);
+      } catch (error) {
+        if (cancelled) return;
+        await report("network");
+        controller.error(error);
+      }
+    },
+    cancel(reason) { cancelled = true; return reader.cancel(reason); },
+  }), { status: response.status, statusText: response.statusText, headers: response.headers });
+};
+
 const handleSceneResourceRequest = async (event, targetUrl) => {
   const request = event.request;
 
@@ -658,7 +754,7 @@ const handleSceneResourceRequest = async (event, targetUrl) => {
   // response. A Range request and every oversized/unknown-size response goes
   // directly upstream and is not written to Cache Storage.
   if (request.headers.has("range") || request.mode === "no-cors") {
-    return responseForSceneClient(await fetchSceneTarget(request, targetUrl));
+    return responseForSceneClient(await fetchForegroundSceneTarget(event, targetUrl));
   }
 
   let cache = null;
@@ -670,7 +766,7 @@ const handleSceneResourceRequest = async (event, targetUrl) => {
     console.warn("[WebPreview] Scene cache unavailable; using network.", error);
   }
 
-  const upstream = await fetchSceneTarget(request, targetUrl);
+  const upstream = await fetchForegroundSceneTarget(event, targetUrl);
   if (cache && isSceneResponseCacheCandidate(upstream)) {
     const candidate = upstream.clone();
     event.waitUntil(

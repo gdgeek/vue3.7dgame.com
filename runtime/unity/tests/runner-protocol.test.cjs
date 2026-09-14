@@ -245,6 +245,179 @@ test("runner source parses and contains no time-derived fake progress", () => {
   );
   assert.doesNotMatch(script, /confirmSceneStarted\s*=/);
 });
+
+function resourceFailureFixture() {
+  const html = fs.readFileSync(
+    path.join(__dirname, "../public/embed.html"),
+    "utf8"
+  );
+  const source = html.slice(
+    html.indexOf("      function postWebPreviewParent(message)"),
+    html.indexOf("      // All fetches belong to this iframe.")
+  );
+  const { protocol, messages } = fixture();
+  const controller = {};
+  const state = createRuntimeState({
+    post: (message) => protocol.post(message),
+    setTimeout: () => 1,
+    clearTimeout() {},
+  });
+  state.sceneForwarded();
+  messages.length = 0;
+  const context = vm.createContext({
+    webPreviewDisposed: false,
+    webPreviewRuntimeRelease: identity,
+    webPreviewServiceWorkerController: controller,
+    webPreviewAbortController: new AbortController(),
+    webPreviewParentProtocol: protocol,
+    webPreviewRuntimeState: state,
+    navigator: { serviceWorker: { controller } },
+  });
+  vm.runInContext(source, context);
+  const data = {
+    type: "webgl-preview-scene-resource-error",
+    protocolVersion: 1,
+    runtimeReleaseId: identity.runtimeReleaseId,
+    buildId: identity.buildId,
+    code: "SCENE_RESOURCE_FETCH_FAILED",
+    resource: {
+      origin: "https://data.7dgame.com",
+      path: "/audio/clip.wav",
+      kind: "audio",
+      reason: "network",
+    },
+  };
+  return {
+    context,
+    controller,
+    state,
+    messages,
+    data,
+    receive: (event = { source: controller, data }) =>
+      context.handleWebPreviewSceneResourceFailure(event),
+  };
+}
+
+test("verified resource failures reuse the existing error bridge and immutable parent identity", () => {
+  const h = resourceFailureFixture();
+  h.data.resource.url = "https://data.7dgame.com/audio/clip.wav?sign=secret";
+  h.receive();
+  assert.equal(h.messages.length, 2);
+  for (const { message, origin } of h.messages) {
+    assert.equal(origin, "https://main.test");
+    for (const [key, value] of Object.entries(identity))
+      assert.equal(message[key], value);
+    const failure = message.failure || message;
+    assert.equal(failure.code, "SCENE_RESOURCE_FETCH_FAILED");
+    assert.deepEqual(JSON.parse(JSON.stringify(failure.resource)), {
+      origin: "https://data.7dgame.com",
+      path: "/audio/clip.wav",
+      kind: "audio",
+      reason: "network",
+    });
+  }
+  assert.equal(h.messages[0].message.stage, "error");
+  assert.equal(h.messages[1].message.type, "unity-web-preview-error");
+  assert.doesNotMatch(JSON.stringify(h.messages), /secret|sign=/);
+  h.receive();
+  assert.equal(
+    h.messages.length,
+    2,
+    "later resource failures cannot repeat the terminal transition"
+  );
+});
+
+test("resource errors reject stale controllers, identities, invalid diagnostics and stopped sessions", () => {
+  const changes = [
+    (h) => ({ source: {}, data: h.data }),
+    (h) => {
+      h.context.navigator.serviceWorker.controller = {};
+    },
+    (h) => {
+      h.data.buildId = `sha256:${"c".repeat(64)}`;
+    },
+    (h) => {
+      h.data.runtimeReleaseId = "d".repeat(24);
+    },
+    (h) => {
+      h.data.protocolVersion = 0;
+    },
+    (h) => {
+      h.data.type = "webgl-preview-scene-cache-status";
+    },
+    (h) => {
+      h.data.code = "__proto__";
+    },
+    (h) => {
+      h.data.resource.reason = "CORS";
+    },
+    (h) => {
+      h.data.resource.kind = "script";
+    },
+    (h) => {
+      h.data.resource.origin = "https://evil.test";
+    },
+    (h) => {
+      h.data.resource.origin = "https://user:secret@data.7dgame.com";
+    },
+    (h) => {
+      h.data.resource.path += "?signature=private";
+    },
+    (h) => {
+      h.data.resource.path += "#private";
+    },
+    (h) => {
+      h.data.resource.path += "\nprivate";
+    },
+    (h) => {
+      h.data.resource.path = `/${"x".repeat(512)}`;
+    },
+    (h) => {
+      h.data.resource.status = 200;
+    },
+    (h) => {
+      h.data.code = "SCENE_RESOURCE_HTTP_ERROR";
+      h.data.resource.reason = "http";
+      h.data.resource.status = 200;
+    },
+    (h) => {
+      h.data.code = "SCENE_RESOURCE_EMPTY";
+      h.data.resource.reason = "empty";
+      h.data.resource.status = 500;
+    },
+    (h) => {
+      h.context.webPreviewDisposed = true;
+    },
+    (h) => {
+      h.context.webPreviewAbortController.abort();
+    },
+    (h) => {
+      h.state.emit("preparing");
+      h.messages.length = 0;
+    },
+  ];
+  for (const change of changes) {
+    const h = resourceFailureFixture();
+    h.receive(change(h));
+    assert.deepEqual(h.messages, [], String(change));
+  }
+});
+
+test("HTTP and empty diagnostics preserve validated status through the runner bridge", () => {
+  for (const [code, reason, status] of [
+    ["SCENE_RESOURCE_HTTP_ERROR", "http", 403],
+    ["SCENE_RESOURCE_EMPTY", "empty", 200],
+  ]) {
+    const h = resourceFailureFixture();
+    h.data.code = code;
+    h.data.resource.reason = reason;
+    h.data.resource.status = status;
+    h.receive();
+    assert.equal(h.messages[0].message.failure.code, code);
+    assert.equal(h.messages[0].message.failure.resource.status, status);
+  }
+});
+
 test("dispose aborts downloads, removes listeners and acknowledges a never-resolving Quit after a bound", async () => {
   const html = fs.readFileSync(
     path.join(__dirname, "../public/embed.html"),

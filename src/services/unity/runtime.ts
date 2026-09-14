@@ -23,6 +23,87 @@ export type UnityRuntimeFailure = {
   stage: UnityRuntimeStage;
   message: string;
   asset?: { field: string; origin: string | null; reason: string };
+  resource?: UnityRuntimeResourceFailure;
+};
+
+export type UnityRuntimeResourceFailure = {
+  origin: string;
+  path: string;
+  kind: "audio" | "model" | "image" | "asset";
+  reason: "network" | "http" | "empty";
+  status?: number;
+};
+
+const resourceFailureReasons: Record<
+  string,
+  UnityRuntimeResourceFailure["reason"]
+> = {
+  SCENE_RESOURCE_FETCH_FAILED: "network",
+  SCENE_RESOURCE_HTTP_ERROR: "http",
+  SCENE_RESOURCE_EMPTY: "empty",
+};
+// Keep diagnostics restricted to the same HTTPS origins as the scene validator
+// and runtime CSP. Never retain a URL supplied by an arbitrary message sender.
+const resourceOrigins = new Set([
+  "https://data.7dgame.com",
+  "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com",
+  "https://mrpp-1257979353.cos.ap-chengdu.myqcloud.com",
+]);
+
+export const readUnityRuntimeResourceFailure = (
+  code: string,
+  value: unknown
+): UnityRuntimeResourceFailure | undefined => {
+  if (
+    !Object.hasOwn(resourceFailureReasons, code) ||
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  )
+    return undefined;
+  const resource = value as Record<string, unknown>;
+  if (
+    typeof resource.origin !== "string" ||
+    !resourceOrigins.has(resource.origin) ||
+    typeof resource.path !== "string" ||
+    resource.path.length > 512 ||
+    typeof resource.kind !== "string" ||
+    !["audio", "model", "image", "asset"].includes(resource.kind) ||
+    resource.reason !== resourceFailureReasons[code]
+  )
+    return undefined;
+
+  const path = resource.path.split(/[?#]/, 1)[0];
+  if (!path.startsWith("/") || path.startsWith("//")) return undefined;
+  try {
+    // Reject escaped query strings, credentials and control characters as well
+    // as nested encoding. A rejected diagnostic never exposes the original.
+    const decoded = decodeURIComponent(path);
+    if (/[\\\\?#&=%\u0000-\u001f\u007f]/.test(decoded)) return undefined;
+    const parsed = new URL(path, resource.origin);
+    if (parsed.origin !== resource.origin || parsed.pathname !== path)
+      return undefined;
+  } catch {
+    return undefined;
+  }
+  const status = resource.status;
+  if (
+    status !== undefined &&
+    (typeof status !== "number" ||
+      !Number.isInteger(status) ||
+      status < 100 ||
+      status > 599 ||
+      resource.reason === "network" ||
+      (resource.reason === "http" && status >= 200 && status < 300))
+  )
+    return undefined;
+  return {
+    origin: resource.origin,
+    path,
+    kind: resource.kind as UnityRuntimeResourceFailure["kind"],
+    reason: resource.reason as UnityRuntimeResourceFailure["reason"],
+    ...(typeof status === "number" ? { status } : {}),
+  };
 };
 
 export type UnityRuntimeRelease = {
@@ -68,6 +149,11 @@ export const unityRuntimeFailures: Record<string, string> = {
   SCENE_CONFIRMATION_TIMEOUT:
     "未收到明确的场景运行确认；资源或脚本可能仍未完成",
   SCENE_PAYLOAD_FAILED: "场景数据准备失败，请刷新场景数据后重试",
+  SCENE_RESOURCE_FETCH_FAILED:
+    "场景资源读取失败，请检查资源服务的跨域设置与网络后重试",
+  SCENE_RESOURCE_HTTP_ERROR:
+    "场景资源服务返回错误，请检查资源是否存在及访问权限后重试",
+  SCENE_RESOURCE_EMPTY: "场景资源内容为空，请检查原始资源后重试",
   SCENE_ASSET_ORIGIN_DENIED:
     "当前运行器仅支持 HTTPS 资源来源 data.7dgame.com、7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com、mrpp-1257979353.cos.ap-chengdu.myqcloud.com；localhost、独立 API 和其他来源暂不支持，不会自动转发登录凭据。",
   SCENE_FORWARD_FAILED: "场景数据未能传入 Unity，请重试",

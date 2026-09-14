@@ -1,6 +1,6 @@
 // Local Vite harness: real host controller + real digest-acquired Unity.
 // No login, platform data, WebMCP shim or production route is supplied here.
-import { createApp, h } from "vue";
+import { createApp, h, watch } from "vue";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import "uno.css";
@@ -29,6 +29,30 @@ const app = createApp({
       }),
       notifyError: (message) => window.alert(message),
     });
+    // Opt-in local regression check: perform a real failing request from the
+    // controlled runner, rather than manufacturing a protocol error message.
+    let resourceProbeStarted = false;
+    watch(
+      () => bridge.runtimeState.value.stage,
+      (stage) => {
+        if (
+          stage !== "running" ||
+          resourceProbeStarted ||
+          new URLSearchParams(location.search).get("resourceFailure") !== "1"
+        )
+          return;
+        const runner = document.querySelector<HTMLIFrameElement>(
+          'iframe[title="Unity 场景运行器"]'
+        )?.contentWindow;
+        if (!runner) return;
+        resourceProbeStarted = true;
+        const target =
+          "https://data.7dgame.com/audio/xrugc-missing-resource-acceptance.wav";
+        void (runner as Window & typeof globalThis)
+          .fetch(`/__xrugc_proxy__?url=${encodeURIComponent(target)}`)
+          .catch(() => undefined);
+      }
+    );
     return () =>
       h("main", { style: "font:16px system-ui;padding:24px" }, [
         h("h1", "主站 Unity 独立运行验收"),
