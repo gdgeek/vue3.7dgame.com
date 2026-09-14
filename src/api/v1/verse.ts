@@ -96,7 +96,10 @@ export const getVerse = (
   // Visibility is a Yii extraField: omitting it makes public scenes appear
   // private when a detail panel reloads with its own expansion list.
   const fields = new Set(
-    expand.split(",").map((field) => field.trim()).filter(Boolean)
+    expand
+      .split(",")
+      .map((field) => field.trim())
+      .filter(Boolean)
   );
   fields.add("public");
   return request<VerseData>({

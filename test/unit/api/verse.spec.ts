@@ -71,34 +71,32 @@ describe("Verse API", () => {
       "image,author,verseTags",
       "",
       "image,public",
-    ])(
-      "reloads saved visibility with expand=%s",
-      async (expand) => {
-        let isPublic = false;
-        request.mockImplementation(async ({ url, method }) => {
-          if (url.endsWith("/public")) {
-            isPublic = method === "post";
-            return { data: { success: true } };
-          }
-          const fields =
-            new URL(url, "https://example.test").searchParams
-              .get("expand")?.split(",") ?? [];
-          return {
-            data: {
-              id: 42,
-              ...(fields.includes("public") ? { public: isPublic } : {}),
-            },
-          };
-        });
+    ])("reloads saved visibility with expand=%s", async (expand) => {
+      let isPublic = false;
+      request.mockImplementation(async ({ url, method }) => {
+        if (url.endsWith("/public")) {
+          isPublic = method === "post";
+          return { data: { success: true } };
+        }
+        const fields =
+          new URL(url, "https://example.test").searchParams
+            .get("expand")
+            ?.split(",") ?? [];
+        return {
+          data: {
+            id: 42,
+            ...(fields.includes("public") ? { public: isPublic } : {}),
+          },
+        };
+      });
 
-        await verseApi.addPublic(42);
-        expect((await verseApi.getVerse(42, expand)).data.public).toBe(true);
-        // Reopening the panel must still read persisted visibility.
-        expect((await verseApi.getVerse(42, expand)).data.public).toBe(true);
-        await verseApi.removePublic(42);
-        expect((await verseApi.getVerse(42, expand)).data.public).toBe(false);
-      }
-    );
+      await verseApi.addPublic(42);
+      expect((await verseApi.getVerse(42, expand)).data.public).toBe(true);
+      // Reopening the panel must still read persisted visibility.
+      expect((await verseApi.getVerse(42, expand)).data.public).toBe(true);
+      await verseApi.removePublic(42);
+      expect((await verseApi.getVerse(42, expand)).data.public).toBe(false);
+    });
 
     it("calls GET /v1/verses/{id}", async () => {
       await verseApi.getVerse(42);
