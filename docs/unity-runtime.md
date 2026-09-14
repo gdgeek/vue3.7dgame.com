@@ -49,6 +49,8 @@ corepack pnpm unity:smoke xrugc-main-unity:local
 
 发布遵循 develop 测试及镜像门禁通过后，main / publish 一起推进并发检查的仓库约定。升级构建用 `UNITY_PREVIOUS_IMAGE` 锁定上一主站镜像 digest，仅继承其 active 指向的运行器 release，使上一版会话仍可读取原版本文件；具体命令见 [制品工具说明](../scripts/unity/README.md)。首发默认不继承旧插件静态入口。回滚恢复已验证的完整主站镜像及对应配置，不静默切回旧插件地址。实际发布结果以验收记录为准。
 
+2026-09-14 本次修复发布前，已将 GitHub Actions 仓库变量 `UNITY_PREVIOUS_IMAGE` 设置为 `hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:ad2d96747787b6fced0a00986805b4777e3568be30744936e5d1e113d1e504e2`。该不可变镜像经核验是上一版 `publish` / `latest`，其 active release 为 `c2816fc3523ab85d07097cac`。后续升级仍须在新 CI 触发前核对并更新此变量，最终镜像须同时验证新 active release 和继承的上一版 release。
+
 ## SW 与资源边界
 
 每个 release 的 SW 只注册在自己的目录，不控制主站根路径、登录或业务 API，也不强制升级正在运行的旧 worker。缓存名称隔离旧插件和不同 release；清理旧版本须确认没有使用该版本的客户端，不能无条件清空全站缓存。
