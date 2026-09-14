@@ -10,11 +10,13 @@ import {
 import {
   readUnityRuntimeProgress,
   readUnityRuntimeRelease,
+  readUnityRuntimeResourceFailure,
   unityRuntimeFailures,
   unityRuntimeStageLabels,
   type UnityRuntimeFailure,
   type UnityRuntimeProgress,
   type UnityRuntimeRelease,
+  type UnityRuntimeResourceFailure,
   type UnityRuntimeStage,
 } from "@/services/unity/runtime";
 import type UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
@@ -131,7 +133,11 @@ export const useUnityPreviewBridge = ({
     if (elapsedTimer !== undefined) window.clearInterval(elapsedTimer);
     elapsedTimer = undefined;
   };
-  const fail = (code: string, error?: unknown) => {
+  const fail = (
+    code: string,
+    error?: unknown,
+    resource?: UnityRuntimeResourceFailure
+  ) => {
     if (["closed", "stopping", "error"].includes(stage.value)) return;
     const safeCode = Object.hasOwn(unityRuntimeFailures, code)
       ? code
@@ -140,6 +146,7 @@ export const useUnityPreviewBridge = ({
       code: safeCode,
       stage: stage.value,
       message: unityRuntimeFailures[safeCode],
+      ...(resource ? { resource } : {}),
       ...(error instanceof Error &&
       error.cause instanceof UnityPreviewAssetError
         ? {
@@ -309,10 +316,19 @@ export const useUnityPreviewBridge = ({
       message.type === "unity-web-preview-error" ||
       (message.type === "unity-web-preview-state" && message.stage === "error")
     ) {
-      fail(
+      const code =
         typeof message.failure?.code === "string"
           ? message.failure.code
-          : String(message.code)
+          : typeof message.code === "string"
+            ? message.code
+            : "RUNTIME_ERROR";
+      fail(
+        code,
+        undefined,
+        readUnityRuntimeResourceFailure(
+          code,
+          message.failure?.resource ?? message.resource
+        )
       );
       return;
     }

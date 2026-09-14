@@ -67,6 +67,14 @@
               : (state?.status ?? "正在准备运行器")
           }}
         </p>
+        <details v-if="resourceFailure" class="unity-preview-resource">
+          <summary>资源诊断</summary>
+          <p>{{ resourceKind }} · {{ resourceReason }}</p>
+          <p>{{ resourceFailure.origin }}{{ resourceFailure.path }}</p>
+          <p v-if="resourceFailure.status !== undefined">
+            HTTP {{ resourceFailure.status }}
+          </p>
+        </details>
         <button
           v-if="state?.failure"
           class="unity-preview-retry"
@@ -82,7 +90,10 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import type { UnityRuntimeViewState } from "@/services/unity/runtime";
+import {
+  readUnityRuntimeResourceFailure,
+  type UnityRuntimeViewState,
+} from "@/services/unity/runtime";
 import { useI18n } from "vue-i18n";
 import { Close, QuestionFilled } from "@element-plus/icons-vue";
 
@@ -110,6 +121,24 @@ const failureMessage = computed(() =>
     ? "当前场景资源来源暂不支持，请使用已支持的 CDN 资源。"
     : (props.state?.failure?.message ?? "场景运行失败，请重试")
 );
+const resourceFailure = computed(() =>
+  readUnityRuntimeResourceFailure(
+    props.state?.failure?.code ?? "",
+    props.state?.failure?.resource
+  )
+);
+const resourceKind = computed(() => {
+  const labels = { audio: "音频", model: "模型", image: "图片", asset: "资源" };
+  return resourceFailure.value ? labels[resourceFailure.value.kind] : "";
+});
+const resourceReason = computed(() => {
+  const labels = {
+    network: "网络或跨域读取失败",
+    http: "资源服务错误",
+    empty: "内容为空",
+  };
+  return resourceFailure.value ? labels[resourceFailure.value.reason] : "";
+});
 
 defineExpose({
   isFrameSource(source: MessageEventSource | null): boolean {
@@ -265,6 +294,17 @@ defineExpose({
 
 .unity-preview-placeholder p {
   margin: 0;
+}
+
+.unity-preview-resource {
+  max-width: 100%;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c5d2e1;
+}
+
+.unity-preview-resource summary {
+  cursor: pointer;
 }
 
 .unity-preview-retry {

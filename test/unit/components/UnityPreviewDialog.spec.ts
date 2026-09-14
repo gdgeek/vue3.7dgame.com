@@ -155,4 +155,52 @@ describe("Unity preview modal", () => {
       expect(Boolean(target.querySelector("iframe"))).toBe(frameVisible);
     }
   );
+
+  it("offers resource diagnostics with a safe path and HTTP status after a failed download", () => {
+    const state = stateFor("error");
+    state.failure = {
+      code: "SCENE_RESOURCE_HTTP_ERROR",
+      stage: "loading_scene",
+      message: "场景资源服务返回错误，请检查资源是否存在及访问权限后重试",
+      resource: {
+        origin: "https://data.7dgame.com",
+        path: "/audio/theme.mp3?token=secret#fragment",
+        kind: "audio",
+        reason: "http",
+        status: 403,
+      },
+    };
+    const { onRetry } = mountPreview(state, false);
+    const diagnostics = target.querySelector("details");
+    expect(diagnostics?.textContent).toContain("资源诊断");
+    expect(diagnostics?.textContent).toContain("音频 · 资源服务错误");
+    expect(diagnostics?.textContent).toContain(
+      "https://data.7dgame.com/audio/theme.mp3"
+    );
+    expect(diagnostics?.textContent).toContain("HTTP 403");
+    expect(target.textContent).not.toContain("secret");
+    expect(target.textContent).not.toContain("fragment");
+    expect(target.textContent).not.toContain("raw-session-id");
+    target.querySelector<HTMLButtonElement>(".unity-preview-retry")?.click();
+    expect(onRetry).toHaveBeenCalledOnce();
+  });
+
+  it("keeps recovery available when untrusted resource diagnostics are rejected", () => {
+    const state = stateFor("error");
+    state.failure = {
+      code: "SCENE_RESOURCE_FETCH_FAILED",
+      stage: "loading_scene",
+      message: "场景资源读取失败，请检查资源服务的跨域设置与网络后重试",
+      resource: {
+        origin: "https://attacker.example?token=secret",
+        path: "/audio/theme.mp3",
+        kind: "audio",
+        reason: "network",
+      },
+    };
+    mountPreview(state, false);
+    expect(target.querySelector("details")).toBeNull();
+    expect(target.textContent).not.toContain("secret");
+    expect(target.querySelector(".unity-preview-retry")).not.toBeNull();
+  });
 });

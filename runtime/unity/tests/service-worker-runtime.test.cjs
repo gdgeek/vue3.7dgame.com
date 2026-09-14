@@ -478,6 +478,310 @@ const scopeCases = [
   },
 ];
 
+function sceneFailureFixture(fetchAsset, options = {}) {
+  const scope = scopeCases[0].scope;
+  const messages = [];
+  const storage = new MemoryCacheStorage();
+  const activeClients = options.activeClients ?? [
+    {
+      id: "preview-client",
+      type: "window",
+      url: new URL("embed.html?sessionId=scene-session-123456", scope).href,
+      postMessage(message) {
+        messages.push(message);
+      },
+    },
+  ];
+  const runtime = loadServiceWorker({
+    scope,
+    caches: storage,
+    postedMessages: messages,
+    activeClients,
+    fetchImpl: (input, init) => {
+      if (
+        (input.url || String(input)) ===
+        new URL("build-manifest.json", scope).href
+      ) {
+        return Promise.resolve(
+          new Response(JSON.stringify(runtimeManifest()), {
+            headers: { "content-type": "application/json" },
+          })
+        );
+      }
+      return fetchAsset(input, init);
+    },
+  });
+  return { runtime, messages, storage, scope };
+}
+
+const failingSceneUrl =
+  "https://data.7dgame.com/audio/clip.wav?sign=secret-signature#private-fragment";
+
+test("foreground scene fetch failure reports immutable identity and a query-free resource", async () => {
+  const requests = [];
+  const { runtime, messages, storage, scope } = sceneFailureFixture(
+    async (url, options) => {
+      requests.push({ url, options });
+      throw new TypeError(
+        "simulated fetch failure containing secret-signature"
+      );
+    }
+  );
+  const alias = new URL("/__xrugc_proxy__", scope);
+  alias.searchParams.set("url", failingSceneUrl);
+  const request = new Request(alias, {
+    headers: { Authorization: "Bearer private", Cookie: "private=1" },
+  });
+  await assert.rejects(
+    runtime.dispatchFetch(request),
+    /simulated fetch failure/
+  );
+  assert.deepEqual(JSON.parse(JSON.stringify(messages)), [
+    {
+      type: "webgl-preview-scene-resource-error",
+      protocolVersion: 1,
+      runtimeReleaseId: "1".repeat(24),
+      buildId: runtimeManifest().buildId,
+      code: "SCENE_RESOURCE_FETCH_FAILED",
+      resource: {
+        origin: "https://data.7dgame.com",
+        path: "/audio/clip.wav",
+        kind: "audio",
+        reason: "network",
+      },
+    },
+  ]);
+  assert.doesNotMatch(
+    JSON.stringify(messages),
+    /secret|signature|fragment|CORS/
+  );
+  assert.equal(requests[0].options.credentials, "omit");
+  assert.equal(requests[0].options.redirect, "error");
+  assert.equal(requests[0].options.referrerPolicy, "no-referrer");
+  assert.equal(requests[0].options.mode, "cors");
+  assert.equal(requests[0].options.signal, request.signal);
+  assert.equal(requests[0].options.headers.has("authorization"), false);
+  assert.equal(requests[0].options.headers.has("cookie"), false);
+  assert.equal(
+    (await storage.open(`${cachePrefix(scope)}scene-v2-resources`)).entries
+      .size,
+    0
+  );
+});
+
+test("HTTP scene failures retain their status and body without entering the scene cache", async () => {
+  const { runtime, messages, storage, scope } = sceneFailureFixture(
+    async () =>
+      new Response("missing", {
+        status: 404,
+        headers: { "content-length": "7" },
+      })
+  );
+  const response = await runtime.dispatchFetch(new Request(failingSceneUrl));
+  assert.equal(response.status, 404);
+  assert.equal(await response.text(), "missing");
+  assert.equal(messages[0].code, "SCENE_RESOURCE_HTTP_ERROR");
+  assert.equal(messages[0].resource.reason, "http");
+  assert.equal(messages[0].resource.status, 404);
+  assert.equal(
+    (await storage.open(`${cachePrefix(scope)}scene-v2-resources`)).entries
+      .size,
+    0
+  );
+});
+
+test("empty successful scene responses fail even when Content-Length is missing or misleading", async () => {
+  for (const makeResponse of [
+    () => new Response(null, { status: 204 }),
+    () => new Response("", { headers: { "content-length": "0" } }),
+    () => new Response("", { headers: { "content-length": "100" } }),
+    () =>
+      new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(new Uint8Array(0));
+            controller.close();
+          },
+        })
+      ),
+  ]) {
+    const { runtime, messages, storage, scope } = sceneFailureFixture(
+      async () => makeResponse()
+    );
+    await assert.rejects(
+      runtime.dispatchFetch(new Request(failingSceneUrl)),
+      /Scene resource response is empty/
+    );
+    assert.equal(messages.length, 1);
+    assert.equal(messages[0].code, "SCENE_RESOURCE_EMPTY");
+    assert.equal(messages[0].resource.reason, "empty");
+    assert.ok([200, 204].includes(messages[0].resource.status));
+    assert.equal(
+      (await storage.open(`${cachePrefix(scope)}scene-v2-resources`)).entries
+        .size,
+      0
+    );
+  }
+});
+
+test("scene validation preserves streaming and cancellation without buffering the whole resource", async () => {
+  let cancelled = false;
+  const { runtime, messages } = sceneFailureFixture(
+    async () =>
+      new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(new Uint8Array([1, 2, 3]));
+          },
+          cancel() {
+            cancelled = true;
+          },
+        })
+      )
+  );
+  const response = await runtime.dispatchFetch(new Request(failingSceneUrl));
+  const reader = response.body.getReader();
+  assert.deepEqual([...(await reader.read()).value], [1, 2, 3]);
+  await reader.cancel();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(cancelled, true);
+  assert.deepEqual(messages, []);
+});
+
+test("a failed scene response stream reports network failure after its first chunk", async () => {
+  let upstream;
+  const { runtime, messages } = sceneFailureFixture(
+    async () =>
+      new Response(
+        new ReadableStream({
+          start(controller) {
+            upstream = controller;
+            controller.enqueue(new Uint8Array([1]));
+          },
+        })
+      )
+  );
+  const response = await runtime.dispatchFetch(new Request(failingSceneUrl));
+  const reader = response.body.getReader();
+  assert.equal((await reader.read()).value.byteLength, 1);
+  upstream.error(new Error("stream interrupted"));
+  await assert.rejects(reader.read(), /stream interrupted/);
+  assert.equal(messages[0].code, "SCENE_RESOURCE_FETCH_FAILED");
+});
+
+test("Range, conditional responses and opaque media keep their existing semantics", async () => {
+  for (const [response, init] of [
+    [
+      new Response("a", {
+        status: 206,
+        headers: { "content-range": "bytes 0-0/20" },
+      }),
+      { headers: { range: "bytes=0-0" } },
+    ],
+    [
+      new Response(null, { status: 304 }),
+      { headers: { "if-none-match": "etag" } },
+    ],
+    [
+      Object.defineProperty(new Response(null), "type", { value: "opaque" }),
+      { mode: "no-cors" },
+    ],
+  ]) {
+    const { runtime, messages } = sceneFailureFixture(async () => response);
+    const result = await runtime.dispatchFetch(
+      new Request(failingSceneUrl, init)
+    );
+    assert.equal(result.status, response.status);
+    assert.equal(
+      result.headers.get("content-range"),
+      response.headers.get("content-range")
+    );
+    if (result.body) await result.body.cancel();
+    assert.deepEqual(messages, []);
+  }
+});
+
+test("aborted requests and uncontrolled or foreign clients never emit a terminal resource error", async () => {
+  for (const activeClients of [
+    [],
+    [
+      {
+        id: "preview-client",
+        type: "window",
+        url: "https://preview.test/",
+        postMessage() {
+          assert.fail("main page notified");
+        },
+      },
+    ],
+    [
+      {
+        id: "preview-client",
+        type: "window",
+        url: `${scopeCases[1].scope}embed.html`,
+        postMessage() {
+          assert.fail("foreign release notified");
+        },
+      },
+    ],
+  ]) {
+    const { runtime, messages } = sceneFailureFixture(
+      async () => {
+        throw new TypeError("network failed");
+      },
+      { activeClients }
+    );
+    await assert.rejects(
+      runtime.dispatchFetch(new Request(failingSceneUrl)),
+      /network failed/
+    );
+    assert.deepEqual(messages, []);
+  }
+  const abort = new AbortController();
+  abort.abort();
+  const { runtime, messages } = sceneFailureFixture(async () => {
+    throw new DOMException("cancelled", "AbortError");
+  });
+  await assert.rejects(
+    runtime.dispatchFetch(
+      new Request(failingSceneUrl, { signal: abort.signal })
+    ),
+    { name: "AbortError" }
+  );
+  assert.deepEqual(messages, []);
+});
+
+test("optional cache warming failures never report a terminal scene failure", async () => {
+  const { runtime, messages } = sceneFailureFixture(async () => {
+    throw new TypeError("optional warm failed");
+  });
+  await runtime.dispatchMessage({
+    type: "warm-webgl-scene-resource-cache",
+    resources: [failingSceneUrl],
+  });
+  assert.equal(
+    messages.some(
+      (message) => message.type === "webgl-preview-scene-resource-error"
+    ),
+    false
+  );
+  assert.equal(messages.at(-1).status, "complete");
+});
+
+test("resource diagnostics bound path length and retain no URL query", async () => {
+  const { runtime, messages } = sceneFailureFixture(
+    async () => new Response("denied", { status: 403 })
+  );
+  await runtime.dispatchFetch(
+    new Request(
+      `https://data.7dgame.com/${"long/".repeat(200)}clip.glb?signature=hidden`
+    )
+  );
+  assert.equal(messages[0].resource.path.length, 512);
+  assert.equal(messages[0].resource.kind, "model");
+  assert.doesNotMatch(JSON.stringify(messages), /signature|hidden|\?/);
+});
+
 for (const { label, scope } of scopeCases) {
   test(`${label}: Platform API alias bypasses every Service Worker cache`, async () => {
     const storage = new MemoryCacheStorage();

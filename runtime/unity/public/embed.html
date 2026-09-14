@@ -67,10 +67,49 @@
       function postWebPreviewParent(message) {
         if (message.type === "unity-web-preview-error") {
           webPreviewRuntimeState.emit("error", { kind: "indeterminate" }, {
-            failure: { code: message.code, message: message.message }
+            failure: { code: message.code, message: message.message, ...(message.resource ? { resource: message.resource } : {}) }
           });
         }
         return webPreviewParentProtocol.post(message);
+      }
+      function handleWebPreviewSceneResourceFailure(event) {
+        var message = event.data || {};
+        if (webPreviewDisposed || webPreviewAbortController.signal.aborted ||
+            !webPreviewRuntimeRelease || !webPreviewServiceWorkerController ||
+            event.source !== webPreviewServiceWorkerController ||
+            event.source !== navigator.serviceWorker.controller ||
+            message.type !== "webgl-preview-scene-resource-error" ||
+            message.protocolVersion !== 1 ||
+            message.runtimeReleaseId !== webPreviewRuntimeRelease.runtimeReleaseId ||
+            message.buildId !== webPreviewRuntimeRelease.buildId ||
+            !["loading_scene", "running"].includes(webPreviewRuntimeState.stage)) return;
+        var resource = message.resource;
+        var reasons = {
+          SCENE_RESOURCE_FETCH_FAILED: "network",
+          SCENE_RESOURCE_HTTP_ERROR: "http",
+          SCENE_RESOURCE_EMPTY: "empty"
+        };
+        if (!Object.prototype.hasOwnProperty.call(reasons, message.code) ||
+            !resource || typeof resource !== "object" || Array.isArray(resource) ||
+            reasons[message.code] !== resource.reason ||
+            !["https://data.7dgame.com", "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com", "https://mrpp-1257979353.cos.ap-chengdu.myqcloud.com"].includes(resource.origin) ||
+            typeof resource.path !== "string" || !resource.path.startsWith("/") ||
+            resource.path.length > 512 || /[?#\u0000-\u001f\u007f]/.test(resource.path) ||
+            !["audio", "model", "image", "asset"].includes(resource.kind) ||
+            (resource.status !== undefined && (!Number.isInteger(resource.status) || resource.status < 100 || resource.status > 599)) ||
+            (resource.reason === "network" && resource.status !== undefined) ||
+            (resource.reason === "http" && (!Number.isInteger(resource.status) || resource.status < 300)) ||
+            (resource.reason === "empty" && (!Number.isInteger(resource.status) || resource.status < 200 || resource.status > 299))) return;
+        var diagnostic = {
+          origin: resource.origin, path: resource.path, kind: resource.kind, reason: resource.reason
+        };
+        if (resource.status !== undefined) diagnostic.status = resource.status;
+        postWebPreviewParent({
+          type: "unity-web-preview-error",
+          code: message.code,
+          message: "A scene resource failed to load.",
+          resource: diagnostic
+        });
       }
       // All fetches belong to this iframe. Cancellation never touches the host.
       var originalWebPreviewFetch = window.fetch.bind(window);
@@ -1348,6 +1387,8 @@
         }
         navigator.serviceWorker.addEventListener("message", handleVerifiedCacheFailure);
         webPreviewCleanups.push(function() { navigator.serviceWorker.removeEventListener("message", handleVerifiedCacheFailure); });
+        navigator.serviceWorker.addEventListener("message", handleWebPreviewSceneResourceFailure);
+        webPreviewCleanups.push(function() { navigator.serviceWorker.removeEventListener("message", handleWebPreviewSceneResourceFailure); });
         return loadWebPreviewBuildManifest();
       }).then(function(byRole) {
         return prepareLargeUnityDataCache(byRole).then(function(cacheReady) {

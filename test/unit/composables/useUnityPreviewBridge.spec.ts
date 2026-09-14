@@ -32,6 +32,12 @@ const release = {
     "sha256:7bee87bbf1c044802841b46489638cb5069eac5b51fb0637714a3b826b092f33",
   entrypoint: "/webgl-preview/releases/abcdef0123456789abcdef01/embed.html",
 };
+const audioResource = {
+  origin: "https://data.7dgame.com",
+  path: "/audio/scene-theme.mp3",
+  kind: "audio",
+  reason: "network",
+};
 
 describe("built-in Unity controller", () => {
   let app: App<Element>;
@@ -215,6 +221,203 @@ describe("built-in Unity controller", () => {
     );
     expect(() => structuredClone(bridge.runtimeState.value)).not.toThrow();
     await bridge.close();
+    expect(bridge.runtimeState.value.failure).toBeNull();
+  });
+
+  it.each([
+    {
+      code: "SCENE_RESOURCE_FETCH_FAILED",
+      reason: "network",
+      status: undefined,
+    },
+    { code: "SCENE_RESOURCE_HTTP_ERROR", reason: "http", status: 403 },
+    { code: "SCENE_RESOURCE_EMPTY", reason: "empty", status: 200 },
+  ])(
+    "retains safe $reason resource diagnostics through Quit and exposes cloneable WebMCP state",
+    async ({ code, reason, status }) => {
+      await bridge.open();
+      ready();
+      const resource = {
+        ...audioResource,
+        reason,
+        ...(status !== undefined ? { status } : {}),
+      };
+      dispatch(
+        envelope("unity-web-preview-error", {
+          code,
+          message: "https://data.7dgame.com/audio/scene-theme.mp3?token=secret",
+          resource: {
+            ...resource,
+            path: `${audioResource.path}?token=secret#private`,
+            url: "https://private.example/?signature=secret",
+          },
+        })
+      );
+      expect(bridge.runtimeState.value).toMatchObject({
+        stage: "error",
+        failure: { code, stage: "loading_scene", resource },
+      });
+      expect(bridge.failure.value?.resource).toEqual(resource);
+      expect(JSON.stringify(bridge.runtimeState.value)).not.toContain("secret");
+      expect(() => structuredClone(bridge.runtimeState.value)).not.toThrow();
+      expect(postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "unity-web-preview-dispose" }),
+        window.location.origin
+      );
+      dispatch(envelope("unity-web-preview-disposed"));
+      await flush();
+      expect(bridge.runtimeState.value).toMatchObject({
+        frameVisible: false,
+        cleanup: "disposed",
+        failure: { resource },
+      });
+      expect(vi.getTimerCount()).toBe(0);
+    }
+  );
+
+  it("reads the same validated resource from runtime error state envelopes", async () => {
+    await bridge.open();
+    ready();
+    const resource = { ...audioResource, reason: "http", status: 404 };
+    dispatch(
+      envelope("unity-web-preview-state", {
+        stage: "error",
+        failure: {
+          code: "SCENE_RESOURCE_HTTP_ERROR",
+          message: "signed-url-secret",
+          resource,
+        },
+      })
+    );
+    expect(bridge.failure.value).toMatchObject({
+      code: "SCENE_RESOURCE_HTTP_ERROR",
+      resource,
+    });
+    expect(bridge.failure.value?.message).not.toContain("signed-url-secret");
+  });
+
+  it.each([
+    { origin: "https://attacker.example" },
+    { origin: "http://data.7dgame.com" },
+    { origin: "https://data.7dgame.com.evil.example" },
+    { origin: "https://user:secret@data.7dgame.com" },
+    { origin: "https://data.7dgame.com?token=secret" },
+    { path: "https://data.7dgame.com/audio.mp3?token=secret" },
+    { path: "//attacker.example/secret" },
+    { path: "/audio%3Ftoken%3Dsecret.mp3" },
+    { path: "/audio%253Ftoken%253Dsecret.mp3" },
+    { path: "/audio%00secret.mp3" },
+    { path: "/audio/../secret.mp3" },
+    { path: `/${"secret".repeat(100)}` },
+    { kind: "secret" },
+    { reason: "secret" },
+    { status: 0 },
+    { status: 403 },
+  ])(
+    "omits malformed or sensitive resource fields %j without losing the safe failure",
+    async (fields) => {
+      await bridge.open();
+      ready();
+      dispatch(
+        envelope("unity-web-preview-error", {
+          code: "SCENE_RESOURCE_FETCH_FAILED",
+          message: "raw-secret-message",
+          resource: { ...audioResource, ...fields },
+        })
+      );
+      expect(bridge.failure.value?.code).toBe("SCENE_RESOURCE_FETCH_FAILED");
+      expect(bridge.failure.value?.resource).toBeUndefined();
+      expect(JSON.stringify(bridge.runtimeState.value)).not.toContain("secret");
+    }
+  );
+
+  it.each([0, 99, 200, 206, 600, 404.5, "404", Number.NaN])(
+    "rejects invalid HTTP failure status %j",
+    async (status) => {
+      await bridge.open();
+      ready();
+      dispatch(
+        envelope("unity-web-preview-error", {
+          code: "SCENE_RESOURCE_HTTP_ERROR",
+          resource: { ...audioResource, reason: "http", status },
+        })
+      );
+      expect(bridge.failure.value?.code).toBe("SCENE_RESOURCE_HTTP_ERROR");
+      expect(bridge.failure.value?.resource).toBeUndefined();
+    }
+  );
+
+  it("uses a fixed generic message for unknown codes and ignores their diagnostics", async () => {
+    await bridge.open();
+    ready();
+    dispatch(
+      envelope("unity-web-preview-error", {
+        code: "https://data.7dgame.com/audio.mp3?token=secret",
+        message: "raw-secret-message",
+        resource: audioResource,
+      })
+    );
+    expect(bridge.failure.value?.code).toBe("RUNTIME_ERROR");
+    expect(bridge.failure.value?.resource).toBeUndefined();
+    expect(JSON.stringify(bridge.runtimeState.value)).not.toContain("secret");
+  });
+
+  it("ignores resource failures from other sessions, releases, builds, frames and origins", async () => {
+    await bridge.open();
+    ready();
+    const fields = {
+      code: "SCENE_RESOURCE_FETCH_FAILED",
+      resource: audioResource,
+    };
+    for (const identity of [
+      { sessionId: "stale" },
+      { buildId: "sha256:wrong" },
+      { runtimeReleaseId: "old-release" },
+      { protocolVersion: 0 },
+    ]) {
+      dispatch(envelope("unity-web-preview-error", { ...fields, ...identity }));
+    }
+    dispatch(
+      envelope("unity-web-preview-error", fields),
+      "https://attacker.example"
+    );
+    dispatch(
+      envelope("unity-web-preview-error", fields),
+      window.location.origin,
+      {} as Window
+    );
+    expect(bridge.stage.value).toBe("loading_scene");
+    expect(bridge.failure.value).toBeNull();
+  });
+
+  it("clears resource diagnostics on retry and does not accept errors from the disposed iframe", async () => {
+    await bridge.open();
+    ready();
+    const oldFrame = frameSource;
+    const oldError = envelope("unity-web-preview-error", {
+      code: "SCENE_RESOURCE_FETCH_FAILED",
+      resource: audioResource,
+    });
+    dispatch(oldError);
+    const retrying = bridge.retry();
+    dispatch(envelope("unity-web-preview-disposed"));
+    frameSource = {} as Window;
+    await retrying;
+    ready();
+    dispatch(oldError);
+    dispatch(
+      envelope("unity-web-preview-error", {
+        code: "SCENE_RESOURCE_FETCH_FAILED",
+        resource: audioResource,
+      }),
+      window.location.origin,
+      oldFrame
+    );
+    expect(bridge.failure.value).toBeNull();
+    expect(bridge.stage.value).toBe("loading_scene");
+    forwarded();
+    dispatch({ type: "unity-web-preview-scene-running" });
+    expect(bridge.stage.value).toBe("running");
     expect(bridge.runtimeState.value.failure).toBeNull();
   });
 
