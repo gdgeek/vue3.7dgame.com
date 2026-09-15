@@ -324,7 +324,7 @@ describe("unityPreviewPayload", () => {
     expect(payload.model).toBe(target);
   });
 
-  it("upgrades the known legacy COS host without changing its signed query", () => {
+  it("upgrades legacy COS to HTTPS without moving its signed query to the CDN", () => {
     const legacyUrl =
       "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/model.glb?token=a%26b%3Dc&part=1&part=2";
     const payload = { model: legacyUrl };
@@ -336,8 +336,46 @@ describe("unityPreviewPayload", () => {
     );
 
     expect(payload.model).toBe(
-      "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2"
+      "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/model.glb?token=a%26b%3Dc&part=1&part=2"
     );
+  });
+
+  it("reads public hash-named CDN audio from COS including nested serialized data", () => {
+    const path = "/audio/d03660c8c37eff4ffc5983d6ee4dc8df.wav";
+    const audio = `https://data.7dgame.com${path}`;
+    const payload = {
+      resources: [{ url: audio }],
+      data: JSON.stringify({ audio }),
+      proxy: `https://xrugc.com/__xrugc_proxy__?url=${encodeURIComponent(audio)}`,
+    };
+    rewriteUnityPreviewUrls(
+      payload,
+      "https://xrugc.com",
+      "https://api.xrugc.com"
+    );
+    const expected = `https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com${path}`;
+    expect(payload.resources[0].url).toBe(expected);
+    expect(JSON.parse(payload.data).audio).toBe(expected);
+    expect(payload.proxy).toBe(expected);
+  });
+
+  it("does not bypass CDN queries, other paths, or other buckets", () => {
+    const audio =
+      "https://data.7dgame.com/audio/d03660c8c37eff4ffc5983d6ee4dc8df.wav";
+    const urls = [
+      `${audio}?sign=a%26b&part=1&part=2`,
+      `${audio}?`,
+      "https://data.7dgame.com/audio/background.wav",
+      "https://data.7dgame.com/model/d03660c8c37eff4ffc5983d6ee4dc8df.glb",
+      "https://mrpp-1257979353.cos.ap-chengdu.myqcloud.com/audio/d03660c8c37eff4ffc5983d6ee4dc8df.wav",
+    ];
+    const payload = { urls: [...urls] };
+    rewriteUnityPreviewUrls(
+      payload,
+      "https://xrugc.com",
+      "https://api.xrugc.com"
+    );
+    expect(payload.urls).toEqual(urls);
   });
 
   it("rejects insecure, credentialed and non-allowlisted asset origins", () => {
