@@ -1403,24 +1403,6 @@ for (const { label, scope } of scopeCases) {
     const request = buildRequest(scope, dataFile, fixture.manifest.buildId);
 
     assert.equal(runtime.isDirectStreamBuildRequest(request.url), true);
-    assert.equal(
-      runtime.isDirectStreamBuildRequest(
-        new URL(
-          "Build/23374217cb0db2456a9a8a1d5cc1447a.data.br",
-          scope
-        ).toString()
-      ),
-      true
-    );
-    assert.equal(
-      runtime.isDirectStreamBuildRequest(
-        new URL(
-          "Build/23374217cb0db2456a9a8a1d5cc1447a.wasm.br",
-          scope
-        ).toString()
-      ),
-      false
-    );
     assert.equal(runtime.dispatchFetchIsIntercepted(request), false);
 
     const response = await runtime.handleBuildRequest({ request });

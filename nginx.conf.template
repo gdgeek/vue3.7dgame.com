@@ -88,27 +88,6 @@ server {
             add_header X-Content-Type-Options "nosniff" always;
             try_files $uri =404;
         }
-        location ~ \.wasm\.br$ {
-            types { } default_type application/wasm;
-            add_header Content-Encoding br;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-            add_header X-Content-Type-Options "nosniff" always;
-            try_files $uri =404;
-        }
-        location ~ \.data\.br$ {
-            types { } default_type application/octet-stream;
-            add_header Content-Encoding br;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-            add_header X-Content-Type-Options "nosniff" always;
-            try_files $uri =404;
-        }
-        location ~ \.framework\.js\.br$ {
-            types { } default_type application/javascript;
-            add_header Content-Encoding br;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-            add_header X-Content-Type-Options "nosniff" always;
-            try_files $uri =404;
-        }
         # SW has no Service-Worker-Allowed override: its maximum scope is its
         # own release directory. HTML/metadata are always revalidated.
         location ~ \.html$ {

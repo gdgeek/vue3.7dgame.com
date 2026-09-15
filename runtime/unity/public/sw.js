@@ -258,10 +258,7 @@ const hasVerifiedLargeBuildFile = async (cache, manifest, file) => {
 
 const isDirectStreamBuildRequest = (requestUrl) => {
   const pathname = new URL(requestUrl).pathname;
-  const buildPath = scopeUrl("Build/").pathname;
-  if (!pathname.startsWith(buildPath)) return false;
-  const fileName = pathname.slice(buildPath.length);
-  return /^[^/]+\.data(?:\.br|\.gz)?$/.test(fileName);
+  return scopeUrl("Build/public.data.gz").pathname === pathname;
 };
 
 const isOwnedBuildCache = (name) =>

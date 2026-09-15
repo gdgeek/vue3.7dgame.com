@@ -1,6 +1,6 @@
 # 主站 Unity runner 协议与实际二进制证据
 
-本目录是主 `web` 独立维护的运行器。旧插件保持不变。运行界面采用主站模态窗口内的 iframe；主站及本副本均不提供全屏控件或全屏调用。一个 iframe 仅接收一次场景数据，每次重试创建新 iframe 和 session。
+本目录是主 `web` 独立维护的运行器。旧插件保持不变。运行界面采用主站模态窗口内的 iframe；主站及本副本均不提供全屏控件或全屏调用，Unity 原始二进制保持不变。一个 iframe 仅接收一次场景数据，每次重试创建新 iframe 和 session。
 
 ## 固定版本和消息边界
 
@@ -12,13 +12,13 @@
 
 主站发送 `unity-web-preview-dispose` 后，runner 取消属于此 iframe 的 fetch、计时器、消息监听，尝试 Quit，最多等待 2 秒后发送 `unity-web-preview-disposed`，quit 为 completed、timeout 或 failed。主站还有独立处置时间上限并最终销毁 iframe；旧 iframe 的消息 source 不能匹配新会话。
 
-## 锁定 Unity 的原生 running 回调（2026-09-15 实物核对）
+## 锁定 Unity 的原生 running 回调（2026-09-11 实物核对）
 
-输入镜像：`hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:2a4c191153dbbe614f5ebed7a3e23e6e6f141cffdbec6baa1bd4dc51e470926e`。
+输入镜像：`hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5`。
 
-Unity buildId：`sha256:20035a0899c00b11b636b6c6448680203aa8011048d05a54e2f5d909d77e8a55`。
+Unity buildId：`sha256:7bee87bbf1c044802841b46489638cb5069eac5b51fb0637714a3b826b092f33`。
 
-从该镜像提取并按清单校验的 framework 解压后包含以下实际函数：
+从该镜像提取并按原清单校验的 framework 解压后包含以下实际函数（本任务没有改写二进制）：
 
 ```js
 function _XrugcWebPreviewPostMessage(typePtr,messagePtr){

@@ -29,7 +29,7 @@ const release = {
   protocolVersion: 1,
   runtimeReleaseId: "abcdef0123456789abcdef01",
   buildId:
-    "sha256:20035a0899c00b11b636b6c6448680203aa8011048d05a54e2f5d909d77e8a55",
+    "sha256:7bee87bbf1c044802841b46489638cb5069eac5b51fb0637714a3b826b092f33",
   entrypoint: "/webgl-preview/releases/abcdef0123456789abcdef01/embed.html",
 };
 const audioResource = {

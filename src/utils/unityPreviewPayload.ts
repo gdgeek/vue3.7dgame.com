@@ -142,29 +142,18 @@ const normalizeLegacyUnityPreviewAssetUrl = (value: string): string => {
     const parsed = value.startsWith("//")
       ? new URL(`${window.location.protocol}${value}`)
       : new URL(value);
-    if (parsed.username || parsed.password || parsed.port) {
+    if (
+      parsed.hostname !== UNITY_PREVIEW_LEGACY_COS_HOST ||
+      parsed.username ||
+      parsed.password
+    ) {
       return value;
     }
 
-    // Keep COS resources on their original host: the CDN can contain cached
-    // responses without CORS headers even when COS itself allows the request.
+    // Replace only the scheme/authority. Keeping the remainder byte-for-byte
+    // preserves signed query ordering, repeated parameters and percent escapes.
     const remainder = value.replace(/^(?:https?:)?\/\/[^/?#]*/i, "");
-    if (parsed.hostname === UNITY_PREVIEW_LEGACY_COS_HOST) {
-      if (/^https:\/\//i.test(value)) return value;
-      return `https://${UNITY_PREVIEW_LEGACY_COS_HOST}${remainder}`;
-    }
-
-    // Temporary recovery for public, content-addressed WAVs in that same
-    // bucket. Never move query-bearing URLs (signatures/transform parameters)
-    // or arbitrary CDN paths to a different origin.
-    if (
-      parsed.origin === `https://${UNITY_PREVIEW_CDN_HOST}` &&
-      !value.includes("?") &&
-      /^\/audio\/[a-f0-9]{32}\.wav$/.test(parsed.pathname)
-    ) {
-      return `https://${UNITY_PREVIEW_LEGACY_COS_HOST}${remainder}`;
-    }
-    return value;
+    return `https://${UNITY_PREVIEW_CDN_HOST}${remainder}`;
   } catch {
     return value;
   }
