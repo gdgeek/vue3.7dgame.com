@@ -286,7 +286,7 @@ export const useUnityPreviewBridge = ({
         (key) => key === "type" || key === "message"
       ) &&
       release.value.buildId ===
-        "sha256:78c774aa364edc7d99058c710da9e56b7bfd4fb006bafd3605b2bafa73aee7c3" &&
+        "sha256:20035a0899c00b11b636b6c6448680203aa8011048d05a54e2f5d909d77e8a55" &&
       stage.value === "loading_scene" &&
       ready.value &&
       payloadSent

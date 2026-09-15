@@ -1,39 +1,39 @@
 {
   "schemaVersion": 1,
   "protocolVersion": 1,
-  "unityBaseImage": "hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:3ed042f825436d0d98edacf3d14353a4766338c58a9ac3aa4d6eb7622bf1006f",
-  "buildId": "sha256:78c774aa364edc7d99058c710da9e56b7bfd4fb006bafd3605b2bafa73aee7c3",
+  "unityBaseImage": "hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:2a4c191153dbbe614f5ebed7a3e23e6e6f141cffdbec6baa1bd4dc51e470926e",
+  "buildId": "sha256:20035a0899c00b11b636b6c6448680203aa8011048d05a54e2f5d909d77e8a55",
   "sourceRevision": "f3fbe0dda98e6f9255339c0c880ff2015d021199",
   "files": [
     {
       "role": "loader",
-      "url": "Build/public.loader.js",
+      "url": "Build/9eb8cd065b41cddd98902a3de710bfcf.loader.js",
       "size": 26982,
-      "sha256": "e5e08ae0690d34853bfba30e6876c297839fe876417647b069420c3a80338cbb",
+      "sha256": "c96f81d71c3dbeb56328e8c400692f86877d9b7231638d7c33e164be596c4244",
       "contentEncoding": "identity",
       "contentType": "application/javascript"
     },
     {
       "role": "data",
-      "url": "Build/23374217cb0db2456a9a8a1d5cc1447a.data.br",
-      "size": 114592423,
-      "sha256": "6696012c9a5298b352984a2aba8414be8b5822ab9b054f2a3434ce9cf0e05ca1",
+      "url": "Build/7e6cf9d287dd75ec324804e36de42155.data.br",
+      "size": 114442452,
+      "sha256": "9359627243232ebd6413b02d9193bca22bddd0203aa32787fbb3b38dd166b91b",
       "contentEncoding": "br",
       "contentType": "application/octet-stream"
     },
     {
       "role": "framework",
-      "url": "Build/7b88fa480d87dcc6cd14c97f1ea21573.framework.js.br",
-      "size": 84334,
-      "sha256": "d7c34f495bad5204f63fd0a18bd830c1a472d5e83c4dac81117d31ab16d7cd35",
+      "url": "Build/9b9e535f17c2fe035ae9cf19ae150da4.framework.js.br",
+      "size": 84248,
+      "sha256": "4931115f32f5ebf1ad8449f95a03833be1ba06796311aa6c69c9971760106c29",
       "contentEncoding": "br",
       "contentType": "application/javascript"
     },
     {
       "role": "wasm",
-      "url": "Build/80cf5fe50fb617ad94ec847f08c2ecad.wasm.br",
-      "size": 10646751,
-      "sha256": "f351958ece028f88644c8b75a90c7c71d27965939b85b2599e42db2aa61c3bea",
+      "url": "Build/d77af484d0e4fcbf7927ae8774f82ff9.wasm.br",
+      "size": 10685846,
+      "sha256": "af8465ccea244715e4d926b6e5c92e59f634885d9508b69953ccfbaa014ac364",
       "contentEncoding": "br",
       "contentType": "application/wasm"
     }

@@ -14,9 +14,9 @@
 
 ## 锁定 Unity 的原生 running 回调（2026-09-15 实物核对）
 
-输入镜像：`hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:3ed042f825436d0d98edacf3d14353a4766338c58a9ac3aa4d6eb7622bf1006f`。
+输入镜像：`hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:2a4c191153dbbe614f5ebed7a3e23e6e6f141cffdbec6baa1bd4dc51e470926e`。
 
-Unity buildId：`sha256:78c774aa364edc7d99058c710da9e56b7bfd4fb006bafd3605b2bafa73aee7c3`。
+Unity buildId：`sha256:20035a0899c00b11b636b6c6448680203aa8011048d05a54e2f5d909d77e8a55`。
 
 从该镜像提取并按清单校验的 framework 解压后包含以下实际函数：
 
