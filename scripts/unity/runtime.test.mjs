@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
+import { randomBytes } from "node:crypto";
 import { mkdtemp, mkdir, writeFile, rm, readFile } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import test from "node:test";
-import { gzipSync } from "node:zlib";
+import { brotliCompressSync, gzipSync } from "node:zlib";
 import manifestTools from "./build-manifest.cjs";
 import {
   assertLockedBuild,
@@ -46,20 +47,22 @@ test("a substituted well-formed build cannot satisfy the pinned binary identity"
   const root = await mkdtemp(path.join(os.tmpdir(), "unity-substitute-test-"));
   try {
     await mkdir(path.join(root, "Build"));
-    const bytes = Buffer.alloc(4096);
-    for (let i = 0; i < bytes.length; i++)
-      bytes[i] = (i * 19 + Math.floor(i / 7)) % 256;
+    const bytes = randomBytes(4096);
     for (const file of lock.files)
       await writeFile(
         path.join(root, file.url),
         file.contentEncoding === "gzip"
           ? gzipSync(Buffer.concat(Array.from({ length: 50 }, () => bytes)))
-          : bytes
+          : file.contentEncoding === "br"
+            ? brotliCompressSync(
+                Buffer.concat(Array.from({ length: 50 }, () => bytes))
+              )
+            : bytes
       );
     const manifest = await manifestTools.createBuildManifest({ rootDir: root });
     assert.throws(() => assertLockedBuild(manifest), /buildId/);
     await writeFile(
-      path.join(root, "Build/public.wasm.gz"),
+      path.join(root, lock.files.find((file) => file.role === "wasm").url),
       Buffer.alloc(4096, 0xff)
     );
     await assert.rejects(

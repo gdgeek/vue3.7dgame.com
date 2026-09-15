@@ -1,7 +1,7 @@
 ARG UNITY_PREVIOUS_IMAGE=hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5
 
 # The Unity input is immutable and independent of adjacent superproject modules.
-FROM --platform=linux/amd64 hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5 AS unity-source
+FROM --platform=linux/amd64 hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:3ed042f825436d0d98edacf3d14353a4766338c58a9ac3aa4d6eb7622bf1006f AS unity-source
 
 # First built-in deployment uses the same locked source (no previous runtime).
 # Upgrades pin the previous verified MAIN WEB image to retain its active release.
@@ -51,6 +51,6 @@ ENV PLUGIN_USER_MANAGEMENT_URL=http://localhost:3003
 ENV PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005
 COPY --from=final-verifier /html /usr/share/nginx/html
 COPY public/config/plugins.json.template /usr/share/nginx/html/config/plugins.json
-LABEL io.xrugc.unity.source="hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5"
+LABEL io.xrugc.unity.source="hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:3ed042f825436d0d98edacf3d14353a4766338c58a9ac3aa4d6eb7622bf1006f"
 EXPOSE 80
 ENTRYPOINT ["/docker-entrypoint.sh"]
