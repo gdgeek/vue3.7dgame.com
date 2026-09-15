@@ -101,7 +101,7 @@ describe("unityPreviewPayload", () => {
     );
     for (const value of Object.values(code)) {
       expect(value).toContain(
-        "https://data.7dgame.com/model.glb?sign=a%26b&part=1&part=2"
+        "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/model.glb?sign=a%26b&part=1&part=2"
       );
     }
   });
@@ -155,10 +155,7 @@ describe("unityPreviewPayload", () => {
     );
     const expectedFile = {
       ...file,
-      url: file.url.replace(
-        "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com",
-        "data.7dgame.com"
-      ),
+      url: file.url,
     };
     expect(payload.resources[0].file).toEqual(expectedFile);
     expect(payload.resources[0].image).toEqual(image);
@@ -531,10 +528,7 @@ describe("unityPreviewPayload", () => {
       expect(payload.metas[0].resources[0]).toEqual({
         name: title,
         file: {
-          url: legacyModel.replace(
-            "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com",
-            "data.7dgame.com"
-          ),
+          url: legacyModel,
         },
       });
     });
