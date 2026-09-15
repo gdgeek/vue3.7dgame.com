@@ -194,6 +194,7 @@ describe("nginx.conf.template — static proxy location blocks", () => {
     expect(block).toContain("default_type application/javascript");
     expect(block).toContain("default_type application/octet-stream");
     expect(block).toContain("add_header Content-Encoding gzip");
+    expect(block).toContain("add_header Content-Encoding br");
     expect(block).toContain("max-age=31536000, immutable");
     expect(block).toContain("connect-src 'self'");
     expect(nginxConfig).not.toContain("error_page 404 /index.html");
