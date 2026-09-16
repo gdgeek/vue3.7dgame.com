@@ -21,12 +21,10 @@ function mount() {
 }
 describe("safe update notice", () => {
   it("shows an informational notice without a reload action", async () => {
-    const fetch = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({ schemaVersion: 1, buildTimestamp: 1 }),
-      });
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ schemaVersion: 1, buildTimestamp: 1 }),
+    });
     vi.stubGlobal("fetch", fetch);
     mount();
     await flush();
