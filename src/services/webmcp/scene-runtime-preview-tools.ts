@@ -30,7 +30,7 @@ export const createSceneRuntimePreviewTools = (
     name: "xrugc_get_scene_runtime_preview_status",
     title: "读取 XRUGC 场景运行预览状态",
     description:
-      "读取当前页面可见 Unity 场景运行预览的打开、加载、就绪或运行状态。不会启动、停止、保存或发布场景。",
+      "读取当前页面可见 Unity 场景运行预览的打开、加载、就绪或运行状态。首次下载可能持续数分钟；AI 应每 10–15 秒查询本工具，进度推进时继续等待，不得因单次工具调用结束或短暂未就绪而重启、刷新或停止。ready 仅表示桥接就绪，phase=running 才表示运行确认；明确 failure 时才排障。不会启动、停止、保存或发布场景。",
     inputSchema: {
       type: "object",
       properties: {},
@@ -46,7 +46,7 @@ export const createSceneRuntimePreviewTools = (
     name: "xrugc_start_scene_runtime_preview",
     title: "启动 XRUGC 场景运行预览",
     description:
-      "确认场景已保存且可用后，打开页面内可见 Unity 运行预览并开始加载当前场景、实体、资源和脚本。不会保存或发布场景；用状态工具继续检查是否运行成功。",
+      "确认场景已保存且可用后，打开页面内可见 Unity 运行预览并开始加载当前场景、实体、资源和脚本。不会保存或发布场景。首次需下载较大 Unity 文件，可能耗时数分钟；启动返回不等于运行成功。AI 必须保留当前会话，每 10–15 秒查询 xrugc_get_scene_runtime_preview_status，进度推进就继续等待并向用户报告，禁止反复启动、刷新或清缓存；只有 phase=running 才确认启动成功。下载停滞或明确 failure 时先报告诊断，重试由用户决定。",
     inputSchema: {
       type: "object",
       properties: {},

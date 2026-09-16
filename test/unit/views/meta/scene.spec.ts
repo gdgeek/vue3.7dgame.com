@@ -707,7 +707,10 @@ describe("views/meta/scene.vue", () => {
       await flushAsync();
       await finishEditorLoading();
       const opening = registry.get(openTool)!.execute({});
-      const rejected = expect(opening).rejects.toThrow(/工作区已切换|会话/);
+      const rejected = expect(opening).resolves.toMatchObject({
+        isError: true,
+        errorCode: "session_closed",
+      });
       respondToSnapshot({
         meta: {
           ...liveData,
@@ -750,7 +753,10 @@ describe("views/meta/scene.vue", () => {
       respondToSnapshot();
       await opening;
       expect(registry.has(contextTool)).toBe(false);
-      await expect(staleContext.execute({})).rejects.toThrow();
+      await expect(staleContext.execute({})).resolves.toMatchObject({
+        isError: true,
+        errorCode: "session_closed",
+      });
       expect(
         [workspaceTool, openTool, closeTool].map((name) => registry.get(name))
       ).toEqual(helpers);
@@ -838,8 +844,10 @@ describe("views/meta/scene.vue", () => {
       const oldFrame = document.querySelector("iframe")?.contentWindow;
       await finishEditorLoading();
       const opening = registry.get(openTool)!.execute({});
-      const rejected =
-        expect(opening).rejects.toThrow(/目标已改变|工作区已切换|会话/);
+      const rejected = expect(opening).resolves.toMatchObject({
+        isError: true,
+        errorCode: "session_closed",
+      });
       mockRoute.query.id = "2";
       await nextTick();
       respondToSnapshot({}, oldFrame);
@@ -1429,7 +1437,10 @@ describe("views/meta/scene.vue", () => {
     await nextTick();
     mockRoute.query.id = "1";
     await nextTick();
-    await expect(tool.execute({})).rejects.toThrow();
+    await expect(tool.execute({})).resolves.toMatchObject({
+      isError: true,
+      errorCode: "session_closed",
+    });
   });
   it("keeps entity live reads blocked while referenced scene names are loading", async () => {
     const registry = registerTools();

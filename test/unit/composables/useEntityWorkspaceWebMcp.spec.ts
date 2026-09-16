@@ -177,11 +177,17 @@ describe("entity workspace WebMCP lifecycle", () => {
     const oldContext = registry.get(CONTEXT)!;
     const pending = registry.get(OPEN)!.execute({});
     ownerId.value = 810;
-    const failed = expect(pending).rejects.toThrow("实体工作区已切换");
+    const failed = expect(pending).resolves.toMatchObject({
+      isError: true,
+      errorCode: "session_closed",
+    });
     gate.resolve();
     await failed;
     expect(opened).not.toHaveBeenCalled();
-    await expect(oldContext.execute({})).rejects.toThrow();
+    await expect(oldContext.execute({})).resolves.toMatchObject({
+      isError: true,
+      errorCode: "session_closed",
+    });
     expect(await registry.get(CONTEXT)!.execute({})).toMatchObject({
       entityId: 810,
     });
@@ -195,7 +201,10 @@ describe("entity workspace WebMCP lifecycle", () => {
     closeGate.value = gate;
     const pending = registry.get(CLOSE)!.execute({});
     ownerId.value = 810;
-    const failed = expect(pending).rejects.toThrow("实体工作区已切换");
+    const failed = expect(pending).resolves.toMatchObject({
+      isError: true,
+      errorCode: "session_closed",
+    });
     gate.resolve();
     await failed;
     expect(closed).not.toHaveBeenCalled();
@@ -210,7 +219,10 @@ describe("entity workspace WebMCP lifecycle", () => {
     expect(registry.has(OPEN)).toBe(false);
     expect(registry.has(CLOSE)).toBe(false);
     expect(registry.has(CONTEXT)).toBe(false);
-    await expect(oldOpen.execute({})).rejects.toThrow();
+    await expect(oldOpen.execute({})).resolves.toMatchObject({
+      isError: true,
+      errorCode: "session_closed",
+    });
     visible.value = true;
     await nextTick();
     expect(registry.get(OPEN)).toBeDefined();

@@ -108,11 +108,17 @@ describe("entity drafts through registered page tools", () => {
     const s = await setup();
     const first = s.run();
     s.lifecycle.abort();
-    await expect(first).rejects.toMatchObject({ name: "AbortError" });
+    await expect(first).resolves.toMatchObject({
+      isError: true,
+      errorCode: "session_closed",
+    });
     s.decide();
     await Promise.resolve();
     expect(s.complete).not.toHaveBeenCalled();
-    await expect(s.run()).rejects.toMatchObject({ name: "AbortError" });
+    await expect(s.run()).resolves.toMatchObject({
+      isError: true,
+      errorCode: "session_closed",
+    });
   });
   it("protects the approved data from mutations of the public stage result", async () => {
     const s = await setup();

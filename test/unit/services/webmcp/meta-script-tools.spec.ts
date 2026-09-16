@@ -157,7 +157,7 @@ describe("meta script WebMCP tools", () => {
     const { registered, options } = register();
     await expect(
       registered[2].execute({ workspace: { title: "实".repeat(180000) } })
-    ).rejects.toThrow("不能超过");
+    ).resolves.toMatchObject({ isError: true, errorCode: "invalid_input" });
     expect(options.stageMetaScriptReplace).not.toHaveBeenCalled();
   });
 
@@ -165,12 +165,12 @@ describe("meta script WebMCP tools", () => {
     const { registered, options } = register();
     await expect(
       registered[2].execute({ workspace: "not-an-object" })
-    ).rejects.toThrow("必须是对象");
+    ).resolves.toMatchObject({ isError: true, errorCode: "invalid_input" });
     await expect(
       registered[2].execute({
         workspace: { data: "x".repeat(513 * 1024) },
       })
-    ).rejects.toThrow("不能超过");
+    ).resolves.toMatchObject({ isError: true, errorCode: "invalid_input" });
     expect(options.stageMetaScriptReplace).not.toHaveBeenCalled();
   });
 });

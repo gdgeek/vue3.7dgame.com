@@ -1,3 +1,4 @@
+import { appReleasePlugin } from "./build/vite-plugin-app-release";
 import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import { UserConfig, ConfigEnv, loadEnv, defineConfig } from "vite";
@@ -130,6 +131,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       },
     },
     plugins: [
+      appReleasePlugin(__APP_INFO__.buildTimestamp),
       vue(),
       // jsx、tsx语法支持
       vueJsx(),

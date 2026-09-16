@@ -1,3 +1,9 @@
+vi.mock("@/components/AppUpdateNotice.vue", () => ({
+  default: { render: () => null },
+}));
+vi.mock("@/components/ConflictRecovery.vue", () => ({
+  default: { render: () => null },
+}));
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,

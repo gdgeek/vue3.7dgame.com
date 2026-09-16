@@ -1,7 +1,32 @@
 // common translations for en-US
 export default {
   common: {
+    appUpdate: {
+      available:
+        "A new version is available. Save or export local edits, resolve pending operations and close the runtime before reloading manually. Rediscover WebMCP tools afterwards.",
+      dismiss: "Later",
+    },
+    recovery: {
+      summary: "Save conflict: local edits remain unsaved.",
+      open: "Review conflict and keep a copy",
+      boundary:
+        "This is the rejected submission, not later edits. Previews show up to 12,000 characters; export includes the full submission. Reading the server never changes your editor or save baseline. Export first, review the latest version, then re-edit.",
+      export: "Export rejected submission",
+      read: "Read latest server content",
+      keep: "Keep local edits",
+      local: "Rejected submission",
+      server: "Current server content (read-only)",
+      failed: "Read failed or access changed. Server content is not displayed.",
+    },
     publicationHistory: {
+      from: "From version",
+      to: "To version",
+      compare: "Compare publications",
+      identical: "Canonical bodies are identical",
+      different: "Canonical bodies differ; structural summary follows",
+      truncated:
+        "Diff limit reached; export both versions to inspect the complete content.",
+      export: "Export body and resource references",
       pending:
         "Publication succeeded; the archived body is not yet verified. Retry reading in publication history, without republishing.",
       title: "Publication history",

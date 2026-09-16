@@ -632,7 +632,7 @@ export const registerSceneEditorWebMcpTools = (
                 annotations: { readOnlyHint: true, untrustedContentHint: true },
                 execute: (input: unknown) => {
                   if (Object.keys(requireRecordInput(input)).length > 0)
-                    throw new Error(
+                    throw new TypeError(
                       "当前仅支持读取当前发布状态，不接受历史版本参数"
                     );
                   return options.readPublication!();

@@ -1,3 +1,4 @@
+import { webMcpToolError } from "./tool-error";
 import {
   withOperationReceipts,
   type OperationRegistration,
@@ -74,32 +75,41 @@ export const registerWebMcpTools = (
           {
             ...tool,
             async execute(input) {
-              lifecycle.signal.throwIfAborted();
-              const loading = options.getEditorLoadingState?.();
-              if (
-                loading?.blocked &&
-                ![
-                  "xrugc_get_scene_editor_context",
-                  "xrugc_get_editor_context",
-                  "xrugc_get_workflow_guide",
-                  "xrugc_get_operation_status",
-                  "xrugc_cancel_operation",
-                  "xrugc_list_scene_publications",
-                  "xrugc_get_scene_publication_version",
-                ].includes(tool.name)
-              ) {
-                return {
-                  ...loading,
-                  applied: false,
-                  nextStep:
-                    "请先读取工作区上下文，等待 ready=true 后再操作；status=error 时请用户重新载入。",
-                };
+              try {
+                lifecycle.signal.throwIfAborted();
+                const loading = options.getEditorLoadingState?.();
+                if (
+                  loading?.blocked &&
+                  ![
+                    "xrugc_get_scene_editor_context",
+                    "xrugc_get_editor_context",
+                    "xrugc_get_workflow_guide",
+                    "xrugc_get_operation_status",
+                    "xrugc_cancel_operation",
+                    "xrugc_list_scene_publications",
+                    "xrugc_get_scene_publication_version",
+                    "xrugc_compare_scene_publications",
+                    "xrugc_export_scene_publication",
+                  ].includes(tool.name)
+                ) {
+                  return {
+                    ...loading,
+                    applied: false,
+                    nextStep:
+                      "请先读取工作区上下文，等待 ready=true 后再操作；status=error 时请用户重新载入。",
+                  };
+                }
+                const result = await tool.execute(input, {
+                  signal: lifecycle.signal,
+                });
+                // Preserve a known commit acknowledgment even if disposal races its delivery.
+                return result;
+              } catch (error) {
+                return webMcpToolError(
+                  error,
+                  tool.annotations?.readOnlyHint === true
+                );
               }
-              const result = await tool.execute(input, {
-                signal: lifecycle.signal,
-              });
-              // Preserve a known commit acknowledgment even if disposal races its delivery.
-              return result;
             },
           },
           { signal: lifecycle.signal }

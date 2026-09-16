@@ -23,3 +23,9 @@
 ## 验证与限制
 
 元数据就绪不证明资源实际可加载。`readBackVerified: false` 不能解释为已独立核实发布；普通场景读取成功也不证明发布指针正确。不要仅凭快照编号是否变化判断版本。发布、保存和编辑器本地撤销不构成跨系统事务。草稿过期、取消或上下文变化后需重新暂存；`partial` 时先核对已经生效的部分。操作查询返回 `unknown`、`not_observed` 或网络错误时，不证明服务器没有执行，禁止盲目重放写入。
+
+## 比较与导出固定版本（P3 首期）
+
+先列出可访问的版本，再调用 `xrugc_compare_scene_publications({from,to})`。两侧每次都重新读取并校验原始正文哈希；返回 JSON Pointer 差异路径、有限的值摘要及 `identicalBytes`。最多 200 处变化、20,000 个节点、64 层；`truncated=true` 表示未展示全部差异，空差异列表也不等同于原始字节一致。数组按位置比较，不保证识别移动；场景/实体运行 data 中的 JSON 会展开比较，代码按文本比较。
+
+`xrugc_export_scene_publication({publicationVersionId})` 返回 `xrugc-publication-export` 格式 JSON；页面“发布历史”核验详情也可导出。包含原样 canonicalBody、版本、UTF-8 SHA-256、字节数及资源引用清单，每次导出前重新读取核验。客户端保存返回内容需要遵循用户指定的目标。该包不含资源文件字节或完整 Blockly 工程，`restorableEditorProject=false`，不承诺文件未来可下载，没有恢复、应用差异或再次发布操作。

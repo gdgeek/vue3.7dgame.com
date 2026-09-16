@@ -313,7 +313,11 @@ describe("queryable WebMCP completion", () => {
     x.readReceipt.mockRejectedValue({ response: { status: 403 } });
     await expect(
       x.call("xrugc_get_operation_status", { operationId: draftId })
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).resolves.toMatchObject({
+      isError: true,
+      errorCode: "permission_denied",
+      httpStatus: 403,
+    });
   });
 
   it("aborts an outstanding confirmation when the page is disposed", async () => {

@@ -11,9 +11,9 @@
 3. 在实体编辑页搜索现有音频；缺少时使用 `xrugc_start_asset_upload` 打开界面，由用户选择文件。上传后重新查询资源 ID，按 `assets` 主题放入并保存。
 4. 实体脚本用 `xrugc_open_entity_script_editor` 打开抽屉，读取 `xrugc_get_entity_workspace_context` 确认 `script.ready`；场景脚本用 `xrugc_open_scene_script_editor` 在原场景 URL 打开抽屉。返回 `opened` 只表示抽屉打开，再读 `xrugc_get_scene_workspace_context` 确认 `script.ready` 并重新发现工具，读取真实 JS/Lua 和积木目录。互斥旁白先停后播，章节用等待完成的任务顺序播放；效果声与动画按支持的并行任务同步。
 5. 点击按钮应立即给短反馈；停止需要结束当前声音并取消后续章节。检查任务创建与执行是否导致重复播放，以及音频队列是否把并行效果声拖到长旁白之后。
-6. 场景音频运行验收先用 `xrugc_close_scene_script_editor` 关闭抽屉。按原未保存确认选择；工具不自动保存或放弃，`cancelled` 时保留抽屉。关闭成功后读 `scene.ready` 并重新发现 `xrugc_start_scene_runtime_preview`。抽屉开关即使不改 URL 也会切换工具；独立 `/verse/script` 保留运行工具兼容。
+6. 场景音频运行验收先用 `xrugc_close_scene_script_editor` 关闭抽屉。按原未保存确认选择；工具不自动保存或放弃，`cancelled` 时保留抽屉。关闭成功后读 `scene.ready` 并重新发现 `xrugc_start_scene_runtime_preview`。抽屉开关即使不改 URL 也会切换工具；正常流程只使用场景内脚本抽屉，不导航到旧 `/verse/script` 独立页。
 
-返回实体时调用 `xrugc_close_entity_script_editor`，沿用未保存确认，不自动保存或放弃修改；`cancelled` 时保留抽屉。关闭成功后重新检查 `entity.ready`，即使 URL 不变也需重新发现实体工具。独立 `/meta/script` 路由仍受支持。
+返回实体时调用 `xrugc_close_entity_script_editor`，沿用未保存确认，不自动保存或放弃修改；`cancelled` 时保留抽屉。关闭成功后重新检查 `entity.ready`，即使 URL 不变也需重新发现实体工具。旧 `/meta/script` 仅保留链接兼容，正常编辑使用实体内的脚本抽屉。
 
 ## 验证与限制
 
