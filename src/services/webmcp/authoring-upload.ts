@@ -5,6 +5,7 @@ type Session = {
   actor: string;
   resourceType: AssetKind;
   status:
+    | "awaiting_confirmation"
     | "opening"
     | "awaiting_file_selection"
     | "collecting"

@@ -1,3 +1,4 @@
+import { createAdvancedAuthoringTools } from "./authoringAdvancedTools";
 import { onMounted, onBeforeUnmount, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAbility } from "@casl/vue";
@@ -47,6 +48,7 @@ export const authoringObject = (
     name?: string;
     editable?: boolean;
     image_id?: number | null;
+    image?: { id?: number } | null;
     serverRevision?: string;
   }
 ): AuthoringObject => ({
@@ -55,7 +57,9 @@ export const authoringObject = (
   kind,
   name: String(data.title ?? data.name ?? "").slice(0, 200),
   editable: data.editable === true,
-  imageId: idOrNull(data.image_id),
+  imageId: idOrNull(
+    data.image_id === undefined ? data.image?.id : data.image_id
+  ),
   serverRevision: data.serverRevision,
 });
 export const authoringAsset = (data: ResourceInfo): AuthoringAsset => {
@@ -70,11 +74,36 @@ export const authoringAsset = (data: ResourceInfo): AuthoringAsset => {
       metadata = data.info;
     }
   }
+  const animationValues =
+    metadata && typeof metadata === "object" && !Array.isArray(metadata)
+      ? (metadata as Record<string, unknown>).animations
+      : undefined;
+  const animationNames = Array.isArray(animationValues)
+    ? animationValues
+        .slice(0, 100)
+        .map((value) =>
+          typeof value === "string"
+            ? value
+            : value && typeof value === "object"
+              ? (value as Record<string, unknown>).name
+              : null
+        )
+        .filter(
+          (name): name is string =>
+            typeof name === "string" && name.length <= 200
+        )
+    : [];
   return {
+    animationNames,
+    animationSource: Array.isArray(animationValues)
+      ? "stored_metadata"
+      : "unknown",
     id: data.id,
     type: data.type as AuthoringAsset["type"],
     name: String(data.name ?? "").slice(0, 200),
-    imageId: idOrNull(data.image_id),
+    imageId: idOrNull(
+      data.image_id === undefined ? data.image?.id : data.image_id
+    ),
     fileId: idOrNull(data.file?.id),
     mimeType: data.file?.type ?? null,
     size: typeof data.file?.size === "number" ? data.file.size : null,
@@ -256,15 +285,7 @@ export function useAuthoringWebMcp() {
     async startUpload(type) {
       const owner = actor();
       const initial = context();
-      if (
-        !owner ||
-        !(await confirm(
-          "打开素材上传页面，请选择本地文件。离开当前页仍受未保存提示保护。"
-        )) ||
-        context() !== initial ||
-        actor() !== owner
-      )
-        return { opened: false };
+      if (!owner) return { opened: false };
       const path = `/resource/${type}/index`;
       // Existing upload composables mount once. Avoid claiming a session in a reused page.
       if (route.path === path)
@@ -274,29 +295,65 @@ export function useAuthoringWebMcp() {
           nextStep: "请使用当前页面上传按钮，或先切换页面再启动可跟踪上传。",
         };
       const uploadId = beginAuthoringUpload(owner, type);
-      try {
-        await router.push({
-          path,
-          query: {
-            webmcpUpload: "1",
-            webmcpUploadId: uploadId,
-            lang: route.query.lang,
-            theme: route.query.theme,
-          },
-        });
-        const opened = route.path === path && actor() === owner;
-        if (!opened) setAuthoringUploadState(uploadId, owner, "not_opened");
-        return { opened, uploadId, uploaded: false };
-      } catch {
-        setAuthoringUploadState(uploadId, owner, "not_opened");
-        return { opened: false, uploadId, uploaded: false };
-      }
+      setAuthoringUploadState(uploadId, owner, "awaiting_confirmation");
+      // Return the ID before showing confirmation so native callers can poll without timing out.
+      void (async () => {
+        try {
+          if (
+            !(await confirm(
+              "打开素材上传页面，请选择本地文件。离开当前页仍受未保存提示保护。"
+            )) ||
+            context() !== initial ||
+            actor() !== owner
+          ) {
+            setAuthoringUploadState(uploadId, owner, "not_opened");
+            return;
+          }
+          setAuthoringUploadState(uploadId, owner, "opening");
+          await router.push({
+            path,
+            query: {
+              webmcpUpload: "1",
+              webmcpUploadId: uploadId,
+              lang: route.query.lang,
+              theme: route.query.theme,
+            },
+          });
+          if (route.path !== path || actor() !== owner)
+            setAuthoringUploadState(uploadId, owner, "not_opened");
+        } catch {
+          setAuthoringUploadState(uploadId, owner, "not_opened");
+        }
+      })();
+      return {
+        status: "awaiting_confirmation",
+        opened: false,
+        uploadId,
+        uploaded: false,
+      };
     },
     uploadStatus: (id) => authoringUploadStatus(id, actor()),
     confirm,
   });
+  const advanced = createAdvancedAuthoringTools({
+    actor,
+    context,
+    confirm,
+    canCreate: (kind) =>
+      ability.can("user", "all") &&
+      ability.can("goto", new AbilityRouter(listPath(kind))),
+    getTarget: () => {
+      const kind = ["/meta/scene", "/meta/script"].includes(route.path)
+        ? "entity"
+        : ["/verse/scene", "/verse/script"].includes(route.path)
+          ? "scene"
+          : null;
+      const id = Number(route.query.id);
+      return kind && Number.isSafeInteger(id) && id > 0 ? { kind, id } : null;
+    },
+  });
   onMounted(() => {
-    lifecycle = registerWebMcpTools(tools);
+    lifecycle = registerWebMcpTools([...tools, ...advanced]);
   });
   onBeforeUnmount(() => {
     generation++;

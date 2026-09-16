@@ -53,6 +53,7 @@ const inventories = new WeakMap<
     {
       owner: AbortController;
       order: number;
+      tool: WebMcpTool;
       descriptor: RegisteredDescriptor;
     }
   >
@@ -103,10 +104,11 @@ export const registerWebMcpTools = (
     : tools;
   for (const tool of registeredTools) {
     const order = ++registrationOrder;
+    let registeredTool: WebMcpTool;
     try {
       void Promise.resolve(
         modelContext.registerTool(
-          {
+          (registeredTool = {
             ...tool,
             async execute(input) {
               try {
@@ -145,7 +147,7 @@ export const registerWebMcpTools = (
                 );
               }
             },
-          },
+          }),
           { signal: lifecycle.signal }
         )
       )
@@ -158,6 +160,7 @@ export const registerWebMcpTools = (
           inventory.set(tool.name, {
             owner: lifecycle,
             order,
+            tool: registeredTool,
             descriptor: {
               name: tool.name,
               title: tool.title,
@@ -172,4 +175,29 @@ export const registerWebMcpTools = (
   }
 
   return lifecycle;
+};
+
+/** Internal orchestration uses exactly the registered wrapper and its lifecycle/receipt guards. */
+export const invokeRegisteredWebMcpTool = async (
+  name: string,
+  input: unknown,
+  target: Document = document
+) => {
+  const entry = inventories.get(target)?.get(name);
+  if (!entry || entry.owner.signal.aborted)
+    throw new Error("当前页面工具不可用");
+  return entry.tool.execute(input);
+};
+export const getRegisteredWebMcpSchema = (
+  name: string,
+  target: Document = document
+) => {
+  const entry = inventories.get(target)?.get(name);
+  if (!entry || entry.owner.signal.aborted) return null;
+  return structuredClone({
+    name: entry.tool.name,
+    description: entry.tool.description,
+    inputSchema: entry.tool.inputSchema,
+    annotations: entry.tool.annotations,
+  });
 };

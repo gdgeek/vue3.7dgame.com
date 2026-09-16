@@ -3,6 +3,8 @@ import { describe, it, expect, vi } from "vitest";
 import {
   registerWebMcpTools,
   getRegisteredWebMcpTools,
+  invokeRegisteredWebMcpTool,
+  getRegisteredWebMcpSchema,
   type WebMcpTool,
 } from "@/services/webmcp/model-context";
 const tool: WebMcpTool = {
@@ -12,6 +14,40 @@ const tool: WebMcpTool = {
   execute: () => ({}),
 };
 describe("registered tool inventory", () => {
+  it("internal invocation keeps the native loading and lifetime guards", async () => {
+    const doc = {
+      modelContext: { registerTool: vi.fn() },
+    } as unknown as Document;
+    const execute = vi.fn(() => ({ saved: true }));
+    let blocked = true;
+    const owner = registerWebMcpTools([{ ...tool, execute }], {
+      document: doc,
+      getEditorLoadingState: () => ({
+        ready: !blocked,
+        loading: blocked,
+        blocked,
+        status: blocked ? "loading" : "ready",
+        error: null,
+        retryAfterMs: null,
+      }),
+    });
+    await Promise.resolve();
+    expect(await invokeRegisteredWebMcpTool("test", {}, doc)).toMatchObject({
+      status: "loading",
+      applied: false,
+    });
+    expect(execute).not.toHaveBeenCalled();
+    const schema = getRegisteredWebMcpSchema("test", doc)!;
+    schema.inputSchema.mutated = true;
+    expect(getRegisteredWebMcpSchema("test", doc)!.inputSchema).toEqual({});
+    blocked = false;
+    expect(await invokeRegisteredWebMcpTool("test", {}, doc)).toEqual({
+      saved: true,
+    });
+    owner?.abort();
+    expect(getRegisteredWebMcpSchema("test", doc)).toBeNull();
+    await expect(invokeRegisteredWebMcpTool("test", {}, doc)).rejects.toThrow();
+  });
   it("omits failed registrations and removes disposed tools", async () => {
     const doc = {
       modelContext: { registerTool: vi.fn() },

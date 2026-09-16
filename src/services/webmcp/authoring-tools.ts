@@ -29,6 +29,8 @@ export type AuthoringAsset = {
   mimeType: string | null;
   size: number | null;
   metadata: unknown;
+  animationNames?: string[];
+  animationSource?: "stored_metadata" | "unknown";
 };
 type Operation = {
   operationId: string;
@@ -369,7 +371,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
       [],
       true,
       () => ({
-        contractVersion: "1.0.0",
+        contractVersion: "1.1.0",
         ...d.capabilities(),
         authenticated: Boolean(d.actor()),
         createKinds: (["entity", "scene"] as const).filter(
@@ -583,6 +585,40 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
           }
         }
         assertActor(owner);
+        return publicOp(op);
+      }
+    ),
+    tool(
+      "xrugc_reconcile_authoring_creation",
+      "新建结果 unknown 时，通过搜索得到的对象 ID 与该操作 creationUuid 精确对照；只核对，不重建或覆盖对象。",
+      { operationId: { type: "string" }, id: fields.id },
+      ["operationId", "id"],
+      true,
+      async (input) => {
+        const owner = actor();
+        const op = operations.get(string(input.operationId));
+        if (
+          !op ||
+          op.actor !== owner ||
+          op.action !== "create" ||
+          op.status !== "unknown" ||
+          !op.uuid
+        )
+          throw new Error("当前操作不需要新建核对");
+        const found = await d.read(op.kind, positive(input.id));
+        assertActor(owner);
+        if (found.uuid !== op.uuid)
+          throw new Error("对象 UUID 与创建操作不匹配");
+        op.targetId = found.id;
+        op.status = "completed";
+        op.result = {
+          id: found.id,
+          uuid: found.uuid,
+          verification: "uuid_readback",
+          coverImageId: found.imageId,
+          coverDisplayVerified: false,
+        };
+        persist();
         return publicOp(op);
       }
     ),

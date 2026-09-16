@@ -124,6 +124,7 @@ export interface PostVerseData {
 
 /** 更新场景请求（部分字段） */
 export interface PutVerseData {
+  info?: string | null;
   image_id?: number;
   description?: string;
   name?: string;

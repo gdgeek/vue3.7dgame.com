@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Dynamic tool payloads and deliberately malformed mock inputs. */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { webcrypto } from "node:crypto";
 import { reactive, defineComponent, createApp, type App } from "vue";
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 const mount = (component: Parameters<typeof createApp>[0]) => {
@@ -21,6 +22,7 @@ const state = vi.hoisted(() => ({
   getMetas: vi.fn(),
   postMeta: vi.fn(),
   putMeta: vi.fn(),
+  putMetaCode: vi.fn(),
   getVerse: vi.fn(),
   getVerses: vi.fn(),
   postVerse: vi.fn(),
@@ -46,6 +48,7 @@ vi.mock("@/api/v1/meta", () => ({
   getMetas: state.getMetas,
   postMeta: state.postMeta,
   putMeta: state.putMeta,
+  putMetaCode: state.putMetaCode,
 }));
 vi.mock("@/api/v1/verse", () => ({
   getVerse: state.getVerse,
@@ -66,11 +69,14 @@ vi.mock("@/services/webmcp/model-context", () => ({
     state.tools = tools;
     return state.register();
   },
+  getRegisteredWebMcpSchema: vi.fn(),
+  invokeRegisteredWebMcpTool: vi.fn(),
   getRegisteredWebMcpTools: () => [{ name: "actual_registered_tool" }],
 }));
 import {
   useAuthoringWebMcp,
   authoringAsset,
+  authoringObject,
 } from "@/composables/useAuthoringWebMcp";
 const revision = `sha256:${"b".repeat(64)}`;
 let wrapper: App;
@@ -122,9 +128,40 @@ afterEach(() => {
   wrapper.unmount();
 });
 describe("authoring app adapter", () => {
+  it("returns a pollable upload ID before confirmation and guards delayed navigation", async () => {
+    let confirm!: () => void;
+    state.confirm.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          confirm = resolve;
+        })
+    );
+    const result = await call("start_authoring_upload", {
+      resourceType: "picture",
+    });
+    expect(result).toMatchObject({
+      status: "awaiting_confirmation",
+      opened: false,
+      uploadId: expect.any(String),
+    });
+    expect(
+      await call("get_authoring_upload", { uploadId: result.uploadId })
+    ).toMatchObject({
+      status: "awaiting_confirmation",
+      completedResourceIds: [],
+    });
+    expect(state.push).not.toHaveBeenCalled();
+    state.route.fullPath = "/another-page";
+    confirm();
+    await flushPromises();
+    expect(state.push).not.toHaveBeenCalled();
+    expect(
+      await call("get_authoring_upload", { uploadId: result.uploadId })
+    ).toMatchObject({ status: "not_opened" });
+  });
   it("provides actual registered tools and actor permissions", async () => {
     expect(await call("get_authoring_capabilities")).toMatchObject({
-      contractVersion: "1.0.0",
+      contractVersion: "1.1.0",
       tools: [{ name: "actual_registered_tool" }],
       createKinds: ["entity", "scene"],
     });
@@ -254,4 +291,91 @@ describe("authoring app adapter", () => {
         .metadata
     ).toBeNull();
   });
+});
+
+it("uses the normalized readback revision after creating a restored object", async () => {
+  vi.stubGlobal("crypto", webcrypto);
+  const source = {
+    id: 1,
+    uuid: "original",
+    title: "Source",
+    serverRevision: revision,
+    data: null,
+    info: null,
+    events: null,
+    image_id: null,
+    resources: [],
+    metaCode: { blockly: "{}", lua: "old", js: "old" },
+  };
+  state.getMeta.mockResolvedValue({ data: source });
+  const backup = await call("export_editable_project", {
+    kind: "entity",
+    id: 1,
+  });
+  const restore = await call("stage_project_restore", {
+    backupId: backup.backupId,
+    namePrefix: "Copy ",
+  });
+  const normalizedRevision = `sha256:${"c".repeat(64)}`;
+  state.postMeta.mockImplementation(async (input) => ({
+    data: { ...source, id: 100, title: input.title, uuid: input.uuid },
+  }));
+  state.getMeta.mockImplementation(async (id) => ({
+    data: {
+      ...source,
+      id,
+      title: "Copy Source",
+      uuid: restore.steps[0].uuid,
+      serverRevision: normalizedRevision,
+    },
+  }));
+  state.putMetaCode.mockImplementation(async (id, payload, options) => {
+    options.onAcknowledged({
+      targetId: id,
+      targetType: "meta",
+      action: "save_code",
+      status: "completed",
+      operationId: options.operationId,
+      serverRevision: normalizedRevision,
+    });
+    return { data: payload };
+  });
+  await call("advance_project_restore", { restoreId: restore.restoreId });
+  await flushPromises();
+  const created = await call("get_project_restore", {
+    restoreId: restore.restoreId,
+  });
+  expect(created.index).toBe(1);
+  expect(created.objects[0].serverRevision).toBe(normalizedRevision);
+  await call("advance_project_restore", { restoreId: restore.restoreId });
+  await flushPromises();
+  expect(state.putMetaCode).toHaveBeenCalledWith(
+    100,
+    { blockly: "{}", lua: "", js: "" },
+    expect.objectContaining({ expectedRevision: normalizedRevision })
+  );
+  expect(
+    (await call("get_project_restore", { restoreId: restore.restoreId })).status
+  ).toBe("completed");
+  vi.unstubAllGlobals();
+});
+
+it("reads scene covers from the expanded image when image_id is omitted", async () => {
+  state.getVerse.mockResolvedValue({
+    data: {
+      id: 5,
+      uuid: "scene",
+      name: "scene",
+      image: { id: 80 },
+      editable: true,
+      serverRevision: revision,
+    },
+  });
+  expect(
+    await call("get_object_cover", { kind: "scene", id: 5 })
+  ).toMatchObject({ hasCover: true, object: { imageId: 80 } });
+  expect(
+    authoringObject("scene", { id: 5, image_id: null, image: { id: 80 } })
+      .imageId
+  ).toBeNull();
 });
