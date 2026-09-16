@@ -364,7 +364,10 @@ const detailProperties = computed(() => {
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
-useWebMcpUploadIntent(openUploadDialog);
+const trackWebMcpUpload = useWebMcpUploadIntent(
+  openUploadDialog,
+  () => uploadDialogVisible.value
+);
 
 const openViewDialog = async (id: number) => {
   currentVideoId.value = id;
@@ -455,7 +458,7 @@ const saveVideo = async (
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;
     else data.image_id = file_id;
-    const response = await postVideo(data);
+    const response = await trackWebMcpUpload(() => postVideo(data));
     if (response.data.id) callback(response.data.id);
   } catch (err) {
     logger.error("Failed to save video:", err);

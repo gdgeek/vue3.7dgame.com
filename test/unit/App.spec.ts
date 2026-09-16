@@ -1,3 +1,6 @@
+vi.mock("@/composables/useAuthoringWebMcp", () => ({
+  useAuthoringWebMcp: vi.fn(),
+}));
 vi.mock("@/components/AppUpdateNotice.vue", () => ({
   default: { render: () => null },
 }));

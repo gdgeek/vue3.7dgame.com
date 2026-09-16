@@ -1,4 +1,4 @@
-export const WORKFLOW_GUIDE_VERSION = "1.2.0";
+export const WORKFLOW_GUIDE_VERSION = "1.3.0";
 export const WORKFLOW_GUIDE_ID = "xrugc-scene-studio";
 export const WORKFLOW_GUIDE_TOOL_NAME = "xrugc_get_workflow_guide";
 

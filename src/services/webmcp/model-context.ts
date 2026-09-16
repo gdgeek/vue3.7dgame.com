@@ -45,6 +45,28 @@ export type WebMcpRegistrationOptions = {
   onRegistrationError?: (toolName: string, error: unknown) => void;
 };
 
+type RegisteredDescriptor = Pick<WebMcpTool, "name" | "title" | "annotations">;
+const inventories = new WeakMap<
+  Document,
+  Map<
+    string,
+    {
+      owner: AbortController;
+      order: number;
+      descriptor: RegisteredDescriptor;
+    }
+  >
+>();
+
+let registrationOrder = 0;
+
+/** Only tools whose registration succeeded and whose lifetime is still active. */
+export const getRegisteredWebMcpTools = (target: Document = document) =>
+  [...(inventories.get(target)?.values() ?? [])].map(({ descriptor }) => ({
+    ...descriptor,
+    annotations: { ...descriptor.annotations },
+  }));
+
 /**
  * Register a page-scoped set of WebMCP tools.
  *
@@ -64,11 +86,23 @@ export const registerWebMcpTools = (
   if (!modelContext?.registerTool) return null;
 
   const lifecycle = new AbortController();
+  const inventory = inventories.get(targetDocument!) ?? new Map();
+  inventories.set(targetDocument!, inventory);
+  lifecycle.signal.addEventListener(
+    "abort",
+    () => {
+      for (const [name, entry] of inventory) {
+        if (entry.owner === lifecycle) inventory.delete(name);
+      }
+    },
+    { once: true }
+  );
 
   const registeredTools = options.operations
     ? withOperationReceipts(tools, options.operations, lifecycle.signal)
     : tools;
   for (const tool of registeredTools) {
+    const order = ++registrationOrder;
     try {
       void Promise.resolve(
         modelContext.registerTool(
@@ -114,7 +148,24 @@ export const registerWebMcpTools = (
           },
           { signal: lifecycle.signal }
         )
-      ).catch((error) => options.onRegistrationError?.(tool.name, error));
+      )
+        .then(() => {
+          if (
+            lifecycle.signal.aborted ||
+            (inventory.get(tool.name)?.order ?? 0) > order
+          )
+            return;
+          inventory.set(tool.name, {
+            owner: lifecycle,
+            order,
+            descriptor: {
+              name: tool.name,
+              title: tool.title,
+              annotations: tool.annotations,
+            },
+          });
+        })
+        .catch((error) => options.onRegistrationError?.(tool.name, error));
     } catch (error) {
       options.onRegistrationError?.(tool.name, error);
     }
