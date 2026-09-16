@@ -125,6 +125,32 @@ describe("built-in Unity controller", () => {
     vi.useRealTimers();
   });
 
+  it("coalesces concurrent starts and preserves a downloading or running session", async () => {
+    const first = bridge.open();
+    const second = bridge.open();
+    expect(first).toBe(second);
+    await first;
+    const session = bridge.sessionId.value;
+    const key = bridge.frameKey.value;
+    await bridge.open();
+    expect(bridge.sessionId.value).toBe(session);
+    expect(bridge.frameKey.value).toBe(key);
+    ready();
+    forwarded();
+    dispatch({
+      type: "unity-web-preview-scene-running",
+      message: "Scene is running",
+    });
+    await bridge.open();
+    expect(bridge.sessionId.value).toBe(session);
+    expect(buildPayload).toHaveBeenCalledTimes(1);
+    expect(
+      postMessage.mock.calls.some(
+        ([m]) => m.type === "unity-web-preview-dispose"
+      )
+    ).toBe(false);
+  });
+
   it("pins the same-origin entry to active metadata and sends one payload per iframe", async () => {
     await bridge.open();
     const url = new URL(bridge.src.value);
@@ -718,6 +744,22 @@ describe("built-in Unity controller", () => {
       message: { attacker: true },
     });
     expect(bridge.stage.value).toBe("loading_scene");
+  });
+
+  it("waits through a long first download while byte progress continues", async () => {
+    await bridge.open();
+    for (let i = 1; i <= 10; i++) {
+      await vi.advanceTimersByTimeAsync(60000);
+      dispatch(
+        envelope("unity-web-preview-state", {
+          stage: "downloading_runtime",
+          progress: { kind: "bytes", loaded: i * 1000, total: 20000 },
+        })
+      );
+      expect(bridge.failure.value).toBeNull();
+    }
+    expect(bridge.stage.value).toBe("downloading_runtime");
+    expect(bridge.elapsedSeconds.value).toBe(600);
   });
 
   it("tracks measured bytes, rejects invalid totals, and does not extend timeout for repeated values", async () => {

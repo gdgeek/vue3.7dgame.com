@@ -36,6 +36,58 @@
       v-if="history && history.total === 0"
       :description="t('common.publicationHistory.empty')"
     ></el-empty>
+    <div v-if="history?.items.length" class="history-actions">
+      <el-select
+        v-model="fromVersion"
+        v-bind="{ 'aria-label': t('common.publicationHistory.from') }"
+        :placeholder="t('common.publicationHistory.from')"
+      >
+        <el-option
+          v-for="row in history.items"
+          :key="row.publicationVersionId"
+          :label="`${new Date(row.createdAt * 1000).toLocaleString()} · ${row.language} · ${row.publicationVersionId.slice(0, 8)}`"
+          :value="row.publicationVersionId"
+        ></el-option>
+      </el-select>
+      <el-select
+        v-model="toVersion"
+        v-bind="{ 'aria-label': t('common.publicationHistory.to') }"
+        :placeholder="t('common.publicationHistory.to')"
+      >
+        <el-option
+          v-for="row in history.items"
+          :key="row.publicationVersionId"
+          :label="`${new Date(row.createdAt * 1000).toLocaleString()} · ${row.language} · ${row.publicationVersionId.slice(0, 8)}`"
+          :value="row.publicationVersionId"
+        ></el-option>
+      </el-select>
+      <el-button
+        :disabled="!fromVersion || !toVersion"
+        :loading="comparing"
+        @click="compare"
+        >{{ t("common.publicationHistory.compare") }}</el-button
+      >
+    </div>
+    <section
+      v-if="comparison"
+      :aria-label="t('common.publicationHistory.compare')"
+    >
+      <p>{{ comparison.from }} → {{ comparison.to }}</p>
+      <p>
+        {{
+          comparison.identicalBytes
+            ? t("common.publicationHistory.identical")
+            : t("common.publicationHistory.different")
+        }}
+      </p>
+      <el-alert
+        v-if="comparison.truncated"
+        type="warning"
+        :closable="false"
+        :title="t('common.publicationHistory.truncated')"
+      ></el-alert>
+      <pre>{{ JSON.stringify(comparison.changes, null, 2) }}</pre>
+    </section>
     <el-table
       v-if="history && history.items.length"
       :data="history.items"
@@ -98,6 +150,9 @@
         <code>{{ selected.contentHash }}</code>
       </p>
       <p>{{ t("common.publicationHistory.resources") }}</p>
+      <el-button :loading="exporting" @click="exportSelected">{{
+        t("common.publicationHistory.export")
+      }}</el-button>
       <details>
         <summary>{{ t("common.publicationHistory.body") }}</summary>
         <pre>{{ selected.canonicalBody }}</pre>
@@ -115,6 +170,10 @@ import {
   type PublicationMetadata,
   type PublicationVersion,
 } from "@/api/v1/publication-history";
+import {
+  comparePublicationBodies,
+  exportPublicationArtifact,
+} from "@/services/webmcp/publication-artifacts";
 const props = defineProps<{
   modelValue: boolean;
   sceneId: number;
@@ -127,6 +186,83 @@ const selected = ref<PublicationVersion | null>(null);
 const loading = ref(false);
 const verifying = ref<string | null>(null);
 const error = ref("");
+const fromVersion = ref("");
+const toVersion = ref("");
+const comparing = ref(false);
+const exporting = ref(false);
+const comparison = ref<ReturnType<typeof comparePublicationBodies> | null>(
+  null
+);
+const clearBodies = () => {
+  selected.value = null;
+  comparison.value = null;
+};
+const beginRead = () => {
+  const owner = ++generation;
+  loading.value = false;
+  verifying.value = null;
+  comparing.value = false;
+  exporting.value = false;
+  error.value = "";
+  return owner;
+};
+const failRead = (cause: unknown, owner: number) => {
+  if (owner !== generation) return;
+  clearBodies();
+  history.value = null;
+  fromVersion.value = "";
+  toVersion.value = "";
+  error.value = failure(cause);
+};
+async function compare() {
+  if (!props.modelValue || !fromVersion.value || !toVersion.value) return;
+  const owner = beginRead();
+  clearBodies();
+  comparing.value = true;
+  const scene = props.sceneId;
+  const from = fromVersion.value;
+  const to = toVersion.value;
+  try {
+    const left = await readVerifiedPublication(scene, from);
+    if (owner !== generation) return;
+    const right = await readVerifiedPublication(scene, to);
+    if (owner === generation)
+      comparison.value = comparePublicationBodies(left, right);
+  } catch (cause) {
+    failRead(cause, owner);
+  } finally {
+    if (owner === generation) comparing.value = false;
+  }
+}
+async function exportSelected() {
+  if (!selected.value || !props.modelValue) return;
+  const version = selected.value.publicationVersionId;
+  const scene = props.sceneId;
+  const owner = beginRead();
+  exporting.value = true;
+  try {
+    const fresh = await readVerifiedPublication(scene, version);
+    if (owner !== generation) return;
+    const content = JSON.stringify(exportPublicationArtifact(fresh), null, 2);
+    const url = URL.createObjectURL(
+      new Blob([content], { type: "application/json" })
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `scene-${scene}-publication-${version}.json`;
+    document.body.append(link);
+    try {
+      link.click();
+    } finally {
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  } catch (cause) {
+    failRead(cause, owner);
+  } finally {
+    if (owner === generation) exporting.value = false;
+  }
+}
 let generation = 0;
 onBeforeUnmount(() => {
   generation++;
@@ -146,7 +282,8 @@ const failure = (cause: unknown) => {
 };
 async function load(more: boolean) {
   if (loading.value || !props.modelValue || !props.sceneId) return;
-  const owner = generation;
+  const owner = beginRead();
+  clearBodies();
   const sceneId = props.sceneId;
   loading.value = true;
   error.value = "";
@@ -167,18 +304,14 @@ async function load(more: boolean) {
         : result.items,
     };
   } catch (cause) {
-    if (owner === generation) {
-      error.value = failure(cause);
-      selected.value = null;
-      history.value = null;
-    }
+    failRead(cause, owner);
   } finally {
     if (owner === generation) loading.value = false;
   }
 }
 async function inspect(row: PublicationMetadata) {
-  const owner = ++generation;
-  loading.value = false;
+  const owner = beginRead();
+  clearBodies();
   verifying.value = row.publicationVersionId;
   selected.value = null;
   error.value = "";
@@ -190,15 +323,26 @@ async function inspect(row: PublicationMetadata) {
     );
     if (owner === generation) selected.value = result;
   } catch (cause) {
-    if (owner === generation) error.value = failure(cause);
+    failRead(cause, owner);
   } finally {
     if (owner === generation) verifying.value = null;
   }
 }
 watch(
+  [fromVersion, toVersion],
+  () => {
+    beginRead();
+    clearBodies();
+  },
+  { flush: "sync" }
+);
+watch(
   () => [props.modelValue, props.sceneId, props.actorId] as const,
   () => {
-    generation++;
+    beginRead();
+    clearBodies();
+    fromVersion.value = "";
+    toVersion.value = "";
     history.value = null;
     selected.value = null;
     loading.value = false;
@@ -206,7 +350,7 @@ watch(
     error.value = "";
     if (props.modelValue) void load(false);
   },
-  { immediate: true }
+  { immediate: true, flush: "sync" }
 );
 </script>
 <style scoped>
@@ -216,6 +360,11 @@ watch(
   gap: 16px;
   align-items: center;
   margin: 16px 0;
+}
+
+.history-actions :deep(.el-select) {
+  flex: 1 1 260px;
+  width: 260px;
 }
 
 .history-detail {

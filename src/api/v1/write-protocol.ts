@@ -1,3 +1,8 @@
+import {
+  captureConflictScope,
+  recordConflict,
+  clearConflict,
+} from "@/services/webmcp/conflict-recovery";
 import request from "@/utils/request";
 
 import {
@@ -22,6 +27,12 @@ export async function guardedWrite<T>(
     !validRevision(options.expectedRevision)
   )
     throw new Error("写入缺少有效操作 ID 或服务器版本，未提交");
+  const recoveryScope = captureConflictScope(target);
+  // Capture the submitted payload, not a later mutable editor reference.
+  const localJson =
+    recoveryScope !== null && action !== "publish"
+      ? JSON.stringify(data)
+      : null;
   options.onSubmitting?.();
   const response = await request<
     T & { serverRevision: string; writeReceipt: WriteReceipt }
@@ -33,6 +44,19 @@ export async function guardedWrite<T>(
       "Idempotency-Key": options.operationId,
       "If-Match": `"${options.expectedRevision}"`,
     },
+  }).catch((error: unknown) => {
+    if (
+      localJson &&
+      (error as { response?: { status?: number } })?.response?.status === 409
+    )
+      recordConflict(recoveryScope, {
+        ...target,
+        action,
+        operationId: options.operationId,
+        expectedRevision: options.expectedRevision,
+        localJson,
+      });
+    throw error;
   });
   const receipt = response.data?.writeReceipt;
   if (
@@ -48,6 +72,7 @@ export async function guardedWrite<T>(
       `服务器未返回匹配的写入回执；请查询操作 ${options.operationId}，不要重复提交`
     );
   }
+  clearConflict(recoveryScope, options.operationId);
   options.onAcknowledged?.(receipt);
   return response;
 }

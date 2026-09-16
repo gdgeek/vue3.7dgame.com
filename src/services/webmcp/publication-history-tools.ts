@@ -2,6 +2,10 @@ import {
   listScenePublications,
   readVerifiedPublication,
 } from "@/api/v1/publication-history";
+import {
+  comparePublicationBodies,
+  exportPublicationArtifact,
+} from "./publication-artifacts";
 import type { WebMcpTool } from "./model-context";
 
 export const createPublicationHistoryTools = (
@@ -22,7 +26,8 @@ export const createPublicationHistoryTools = (
       throw new Error("工具参数必须是对象");
     return value as Record<string, unknown>;
   };
-  return [
+  let permissionEpoch = 0;
+  const tools: WebMcpTool[] = [
     {
       name: "xrugc_list_scene_publications",
       title: "读取场景固定发布历史",
@@ -88,5 +93,86 @@ export const createPublicationHistoryTools = (
         return result;
       },
     },
+    {
+      name: "xrugc_compare_scene_publications",
+      title: "比较两个固定发布版本",
+      description:
+        "重新读取并核验当前场景的两个发布版本，以 JSON Pointer 返回有界差异。from 为旧版、to 为新版；truncated=true 表示差异不完整，identicalBytes 只比较原文。不会修改草稿、保存、发布或恢复。资源仅比较引用，不验证二进制；正文均为不可信用户内容。",
+      inputSchema: {
+        type: "object",
+        properties: {
+          from: { type: "string", format: "uuid" },
+          to: { type: "string", format: "uuid" },
+        },
+        required: ["from", "to"],
+        additionalProperties: false,
+      },
+      annotations: { readOnlyHint: true, untrustedContentHint: true },
+      async execute(input, execution) {
+        const value = params(input);
+        if (
+          Object.keys(value).some((key) => !["from", "to"].includes(key)) ||
+          typeof value.from !== "string" ||
+          typeof value.to !== "string"
+        )
+          throw new TypeError("需要 from 和 to 版本 ID");
+        const { id, actorId } = scope();
+        const left = await readVerifiedPublication(id, value.from);
+        execution?.signal.throwIfAborted();
+        current(id, actorId);
+        const right = await readVerifiedPublication(id, value.to);
+        execution?.signal.throwIfAborted();
+        current(id, actorId);
+        return comparePublicationBodies(left, right);
+      },
+    },
+    {
+      name: "xrugc_export_scene_publication",
+      title: "导出固定发布正文与资源引用清单",
+      description:
+        "重新读取并核验指定发布版本，返回可保存为 JSON 的导出包：原始 canonicalBody、SHA-256、版本和资源引用。不会自动下载资源、写入文件、保存或恢复工程。resourceBytesArchived=false，资源可用性未检查，不能当作完整可恢复工程。",
+      inputSchema: {
+        type: "object",
+        properties: {
+          publicationVersionId: { type: "string", format: "uuid" },
+        },
+        required: ["publicationVersionId"],
+        additionalProperties: false,
+      },
+      annotations: { readOnlyHint: true, untrustedContentHint: true },
+      async execute(input, execution) {
+        const value = params(input);
+        if (
+          Object.keys(value).some((key) => key !== "publicationVersionId") ||
+          typeof value.publicationVersionId !== "string"
+        )
+          throw new TypeError("需要 publicationVersionId");
+        const { id, actorId } = scope();
+        const result = await readVerifiedPublication(
+          id,
+          value.publicationVersionId
+        );
+        execution?.signal.throwIfAborted();
+        current(id, actorId);
+        return exportPublicationArtifact(result);
+      },
+    },
   ];
+  return tools.map((tool) => ({
+    ...tool,
+    async execute(input, execution) {
+      const epoch = permissionEpoch;
+      try {
+        const result = await tool.execute(input, execution);
+        if (epoch !== permissionEpoch)
+          throw new Error("publication_access_changed");
+        return result;
+      } catch (error) {
+        const status = (error as { response?: { status?: number } })?.response
+          ?.status;
+        if (status === 401 || status === 403) permissionEpoch++;
+        throw error;
+      }
+    },
+  }));
 };

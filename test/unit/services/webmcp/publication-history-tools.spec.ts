@@ -81,3 +81,30 @@ it("discards history when the account changes on the same scene", async () => {
     )[1].execute({ publicationVersionId: version })
   ).rejects.toThrow("账号已切换");
 });
+
+it("withholds an old successful read after a concurrent permission denial", async () => {
+  let resolve!: (value: unknown) => void;
+  api.read.mockImplementationOnce(
+    () =>
+      new Promise((r) => {
+        resolve = r;
+      })
+  );
+  api.list.mockRejectedValueOnce({ response: { status: 403 } });
+  const tools = createPublicationHistoryTools(() => 7);
+  const pending = tools[1].execute({ publicationVersionId: version });
+  await expect(tools[0].execute({})).rejects.toMatchObject({
+    response: { status: 403 },
+  });
+  resolve({ sceneId: 7, canonicalBody: "private" });
+  await expect(pending).rejects.toThrow("publication_access_changed");
+});
+it("does not return a one-sided comparison when the second read fails", async () => {
+  api.read
+    .mockResolvedValueOnce({ sceneId: 7, canonicalBody: "private" })
+    .mockRejectedValueOnce({ response: { status: 403 } });
+  const tools = createPublicationHistoryTools(() => 7);
+  await expect(
+    tools[2].execute({ from: version, to: version })
+  ).rejects.toMatchObject({ response: { status: 403 } });
+});

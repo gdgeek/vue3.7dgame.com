@@ -37,10 +37,10 @@ describe("site workflow guide", () => {
       expect(result).toMatchObject({
         topic: id,
         title,
-        version: "1.1.0",
+        version: "1.2.0",
         page: "entity",
         language: "zh-CN",
-        documentationUrl: `/webmcp/scene-studio/1.1.0/${id}.md`,
+        documentationUrl: `/webmcp/scene-studio/1.2.0/${id}.md`,
         primaryPageTools: ["example_edit"],
         content: expect.stringMatching(/^# /),
       });
@@ -174,7 +174,7 @@ describe("site workflow guide", () => {
     "acceptance",
     "troubleshooting",
   ])(
-    "preserves the unsaved decision and standalone runtime compatibility in %s",
+    "preserves the unsaved decision and drawer-only workflow in %s",
     async (topic) => {
       const result = (await createGuide("scene-script").guide.execute({
         topic,
@@ -185,7 +185,7 @@ describe("site workflow guide", () => {
       expect(result.content).toMatch(/`cancelled` 时(?:保留抽屉|抽屉保持打开)/);
       expect(result.content).toContain("关闭成功后");
       expect(result.content).toContain("scene.ready");
-      expect(result.content).toContain("独立 `/verse/script` 保留运行工具兼容");
+      expect(result.content).toContain("正常流程只使用场景内脚本抽屉");
     }
   );
 
@@ -267,7 +267,10 @@ describe("site workflow guide", () => {
       await expect(tool.execute({})).resolves.toMatchObject({ page });
       lifecycle!.abort();
       expect(registry.size).toBe(0);
-      await expect(tool.execute({})).rejects.toThrow();
+      await expect(tool.execute({})).resolves.toMatchObject({
+        isError: true,
+        errorCode: "session_closed",
+      });
       const next = registerWebMcpTools(
         withWorkflowGuide([], `${page}-script`),
         {

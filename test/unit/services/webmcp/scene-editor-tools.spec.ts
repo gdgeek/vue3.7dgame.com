@@ -152,6 +152,8 @@ describe("scene editor WebMCP tools", () => {
       "xrugc_search_entities",
       "xrugc_list_scene_publications",
       "xrugc_get_scene_publication_version",
+      "xrugc_compare_scene_publications",
+      "xrugc_export_scene_publication",
       "xrugc_check_scene_resource_readiness",
       "xrugc_check_scene_publication_readiness",
       "xrugc_get_scene_runtime_diagnostics",
@@ -310,7 +312,10 @@ describe("scene editor WebMCP tools", () => {
     ).toMatchObject({ found: false });
 
     const { registered } = register();
-    await expect(registered[2].execute({})).rejects.toThrow("至少需要提供一个");
+    await expect(registered[2].execute({})).resolves.toMatchObject({
+      isError: true,
+      errorCode: "invalid_input",
+    });
   });
 });
 
@@ -337,7 +342,7 @@ it("reads authoritative publication metadata instead of a legacy field", async (
     tool.execute({
       publicationRevision: "85da37e3-12ad-423e-b31d-4d50fd344001",
     })
-  ).rejects.toThrow("不接受历史版本参数");
+  ).resolves.toMatchObject({ isError: true, errorCode: "invalid_input" });
   expect(readPublication).not.toHaveBeenCalled();
   await expect(tool.execute({})).resolves.toMatchObject({
     verification: "current_snapshot",

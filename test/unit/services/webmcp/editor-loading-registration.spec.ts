@@ -64,6 +64,9 @@ describe("editor loading WebMCP guard", () => {
       applied: true,
     });
     lifecycle!.abort();
-    await expect(registry.get(names[0])!.execute({})).rejects.toThrow();
+    await expect(registry.get(names[0])!.execute({})).resolves.toMatchObject({
+      isError: true,
+      errorCode: "session_closed",
+    });
   });
 });
