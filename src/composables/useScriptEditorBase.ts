@@ -287,6 +287,19 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     blocklyData: unknown;
   }) => safeStringify(payload);
 
+  // Blockly serializes an unused backpack as [], even when persisted JSON
+  // omits it. Compare that representation only; never rewrite the saved source
+  // or adopt the first iframe update as a new persistence baseline.
+  const withoutEmptyBackpack = (data: unknown) => {
+    if (!data || typeof data !== "object" || Array.isArray(data)) return data;
+    const value = data as Record<string, unknown>;
+    if (!Array.isArray(value.backpack) || value.backpack.length !== 0)
+      return data;
+    const copy = { ...value };
+    delete copy.backpack;
+    return copy;
+  };
+
   const buildRuntimeLua = (lua: string) =>
     `local ${options.luaLocalVar} = {}\nlocal index = ''\n${lua}`;
 
@@ -330,8 +343,20 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       js: payload.js,
       blocklyData: clonedBlocklyData,
     };
-    hasUnsavedChanges.value =
-      typeof payload.dirty === "boolean"
+    const onlyEmptyBackpackChanged =
+      savedSnapshotPayload !== null &&
+      nextSignature !== lastSavedSignature &&
+      buildSnapshotSignature({
+        ...latestEditorPayload,
+        blocklyData: withoutEmptyBackpack(clonedBlocklyData),
+      }) ===
+        buildSnapshotSignature({
+          ...savedSnapshotPayload,
+          blocklyData: withoutEmptyBackpack(savedSnapshotPayload.blocklyData),
+        });
+    hasUnsavedChanges.value = onlyEmptyBackpackChanged
+      ? false
+      : typeof payload.dirty === "boolean"
         ? payload.dirty
         : nextSignature !== lastSavedSignature;
   };
