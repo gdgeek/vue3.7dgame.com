@@ -977,6 +977,83 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
 
+    it.each(["meta", "verse"] as const)(
+      "%s ignores only empty backpack serialization and preserves real edits",
+      async (from) => {
+        const postScript = vi.fn();
+        const { result, unmount } = withSetup(() =>
+          useScriptEditorBase(
+            makeOptions({ luaLocalVar: from, onPost: postScript })
+          )
+        );
+        result.beginEditorSession({ lua: "", js: "", blocklyData: {} });
+        const hostSessionId = result.getEditorInitState()!.hostSessionId;
+        let revision = 0;
+        const update = (blocklyData: unknown, lua = "", js = "") =>
+          result.handleMessage({
+            data: {
+              type: "EVENT",
+              payload: {
+                event: "update",
+                hostSessionId,
+                dirty: true,
+                workspaceRevision: revision++,
+                blocklyData,
+                lua,
+                js,
+              },
+            },
+          } as unknown as MessageEvent);
+
+        await update({ backpack: [] });
+        expect(result.hasUnsavedChanges.value).toBe(false);
+        expect(result.getEditorInitState()!.persisted.data).toEqual({});
+        for (const data of [
+          { backpack: [{ type: "text" }] },
+          { backpack: [], variables: [{ name: "x", id: "v" }] },
+          { backpack: [], blocks: { blocks: [{ type: "text", id: "b" }] } },
+          { backpack: [], unknownExtension: true },
+        ]) {
+          await update(data);
+          expect(result.hasUnsavedChanges.value).toBe(true);
+        }
+        await update({ backpack: [] }, "changed()");
+        expect(result.hasUnsavedChanges.value).toBe(true);
+        await update({ backpack: [] }, "", "changed();");
+        expect(result.hasUnsavedChanges.value).toBe(true);
+        await update({ backpack: [] });
+        expect(result.hasUnsavedChanges.value).toBe(false);
+        expect(postScript).not.toHaveBeenCalled();
+
+        result.beginEditorSession(
+          {
+            lua: "",
+            js: "",
+            blocklyData: { backpack: [{ type: "text" }] },
+          },
+          "another-object"
+        );
+        await update({ backpack: [] }); // old session must not affect new owner
+        expect(result.hasUnsavedChanges.value).toBe(false);
+        await result.handleMessage({
+          data: {
+            type: "EVENT",
+            payload: {
+              event: "update",
+              hostSessionId: result.getEditorInitState()!.hostSessionId,
+              dirty: true,
+              workspaceRevision: 0,
+              blocklyData: { backpack: [] },
+              lua: "",
+              js: "",
+            },
+          },
+        } as unknown as MessageEvent);
+        expect(result.hasUnsavedChanges.value).toBe(true);
+        unmount();
+      }
+    );
+
     it("EVENT update：Blockly 数据不变但生成代码升级时标记为待保存", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
