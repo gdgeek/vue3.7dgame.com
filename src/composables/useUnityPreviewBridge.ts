@@ -455,7 +455,7 @@ export const useUnityPreviewBridge = ({
     requestId += 1;
     await disposeActive();
   };
-  const open = async () => {
+  const restart = async () => {
     const openResult = canOpen?.() ?? true;
     if (openResult !== true) {
       notifyError(openResult);
@@ -508,6 +508,17 @@ export const useUnityPreviewBridge = ({
       );
     }
   };
+  // Repeated start is idempotent; only an explicit retry replaces the session.
+  let opening: Promise<void> | null = null;
+  const open = (): Promise<void> => {
+    if (opening) return opening;
+    if (visible.value && !["closed", "error", "stopping"].includes(stage.value))
+      return Promise.resolve();
+    opening = restart().finally(() => {
+      opening = null;
+    });
+    return opening;
+  };
   const handleLoad = () => {
     /* iframe load alone does not prove Unity readiness. */
   };
@@ -540,7 +551,7 @@ export const useUnityPreviewBridge = ({
     runtimeState,
     phase,
     open,
-    retry: open,
+    retry: restart,
     close,
     send,
     handleLoad,
