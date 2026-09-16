@@ -1,7 +1,31 @@
 // common translations for zh-TW
 export default {
   common: {
+    appUpdate: {
+      available:
+        "網站有新版本。請先保存或匯出未保存內容、確認待處理操作並關閉執行場景，再手動重新整理；之後重新發現 WebMCP 工具。",
+      dismiss: "稍後",
+    },
+    recovery: {
+      summary: "保存衝突：本地修改仍未保存。",
+      open: "查看衝突與保留副本",
+      boundary:
+        "這裡保留的是被伺服器拒絕的提交副本，可能不含之後的編輯。預覽最多顯示 12,000 字元，匯出包含完整副本。讀取伺服器不會覆蓋編輯器或更新保存基線；請先匯出，再核對最新版並重新編輯。",
+      export: "匯出被拒絕的提交",
+      read: "唯讀查看伺服器最新版",
+      keep: "保留本地並繼續編輯",
+      local: "本次提交副本",
+      server: "伺服器目前內容（唯讀）",
+      failed: "讀取失敗或權限已變化，未顯示伺服器內容。",
+    },
     publicationHistory: {
+      from: "比較起始版本",
+      to: "比較目標版本",
+      compare: "比較發布版本",
+      identical: "原始正文完全相同",
+      different: "原始正文不同；以下為結構差異摘要",
+      truncated: "差異達到上限，結果不完整；請分別匯出核對。",
+      export: "匯出正文與資源引用",
       pending:
         "發佈已成功，歷史正文尚未核驗。可在發佈歷史中重試讀取，請勿重複發佈。",
       title: "發佈歷史",

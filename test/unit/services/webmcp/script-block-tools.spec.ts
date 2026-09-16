@@ -157,14 +157,14 @@ describe("script block WebMCP tools", () => {
 
   it("rejects invalid batches and protects owner changes", async () => {
     const { registered, options } = register();
-    await expect(registered[2].execute({ operations: [] })).rejects.toThrow(
-      "非空数组"
-    );
+    await expect(
+      registered[2].execute({ operations: [] })
+    ).resolves.toMatchObject({ isError: true, errorCode: "invalid_input" });
     await expect(
       registered[2].execute({
         operations: Array.from({ length: 101 }, () => ({ op: "delete" })),
       })
-    ).rejects.toThrow("最多执行 100");
+    ).resolves.toMatchObject({ isError: true, errorCode: "invalid_input" });
 
     const staged = (await registered[2].execute({
       operations: [{ op: "delete", blockId: "old" }],

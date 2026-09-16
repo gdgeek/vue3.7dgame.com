@@ -17,9 +17,13 @@
       </transition>
     </router-view>
   </el-config-provider>
+  <AppUpdateNotice></AppUpdateNotice>
+  <ConflictRecovery></ConflictRecovery>
   <span class="global-version">v{{ appVersion }}</span>
 </template>
 <script setup>
+import AppUpdateNotice from "@/components/AppUpdateNotice.vue";
+import ConflictRecovery from "@/components/ConflictRecovery.vue";
 import { UpdateAbility } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { ElConfigProvider } from "element-plus";
@@ -169,10 +173,10 @@ canvas {
   position: fixed;
   right: 12px;
   bottom: 8px;
+  z-index: 9999;
   font-size: 11px;
   color: #ccc;
   pointer-events: none;
-  z-index: 9999;
   user-select: none;
 }
 </style>
