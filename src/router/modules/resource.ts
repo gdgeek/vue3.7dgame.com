@@ -38,6 +38,7 @@ export const resourceRoutes: RouteRecordRaw = {
           name: "",
           component: () => import("@/views/voxel/index.vue"),
           meta: {
+            preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
             title: "resourceManagement.voxelManagement.voxelList",
             icon: "el-icon-list",
             hidden: true,
@@ -95,6 +96,7 @@ export const resourceRoutes: RouteRecordRaw = {
       name: "",
       component: () => import("@/views/picture/index.vue"),
       meta: {
+        preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
         title: "resourceManagement.pictureManagement.title",
         icon: "el-icon-picture",
         hidden: true,
@@ -122,6 +124,7 @@ export const resourceRoutes: RouteRecordRaw = {
       name: "VideoIndex",
       component: () => import("@/views/video/index.vue"),
       meta: {
+        preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
         title: "resourceManagement.videoManagement.title",
         icon: "el-icon-video-camera",
         hidden: true,
@@ -149,6 +152,7 @@ export const resourceRoutes: RouteRecordRaw = {
       name: "",
       component: () => import("@/views/audio/index.vue"),
       meta: {
+        preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
         title: "resourceManagement.audioManagement.title",
         icon: "el-icon-headset",
         hidden: true,
@@ -190,6 +194,7 @@ export const resourceRoutes: RouteRecordRaw = {
           name: "ParticleIndex",
           component: () => import("@/views/particle/index.vue"),
           meta: {
+            preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
             title: "resourceManagement.particleManagement.particleList",
             icon: "el-icon-list",
             hidden: true,

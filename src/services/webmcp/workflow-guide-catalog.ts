@@ -1,4 +1,4 @@
-export const WORKFLOW_GUIDE_VERSION = "1.2.0";
+export const WORKFLOW_GUIDE_VERSION = "1.4.0";
 export const WORKFLOW_GUIDE_ID = "xrugc-scene-studio";
 export const WORKFLOW_GUIDE_TOOL_NAME = "xrugc_get_workflow_guide";
 
@@ -7,6 +7,12 @@ export const WORKFLOW_GUIDE_TOPICS = [
     id: "overview",
     title: "场景制作总览",
     description: "需求、实体／场景脚本抽屉切换和完整制作流程",
+  },
+  {
+    id: "authoring",
+    title: "AI 创作与工程恢复",
+    description:
+      "对象创建、封面素材、依赖影响、逐步任务、脚本模板和可编辑工程备份恢复",
   },
   {
     id: "assets",

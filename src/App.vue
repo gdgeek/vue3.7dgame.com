@@ -22,6 +22,7 @@
   <span class="global-version">v{{ appVersion }}</span>
 </template>
 <script setup>
+import { useAuthoringWebMcp } from "@/composables/useAuthoringWebMcp";
 import AppUpdateNotice from "@/components/AppUpdateNotice.vue";
 import ConflictRecovery from "@/components/ConflictRecovery.vue";
 import { UpdateAbility } from "@/utils/ability";
@@ -48,6 +49,7 @@ const userStore = useUserStore();
 const domainStore = useDomainStore();
 const ability = useAbility(); // 提取到 setup 顶层
 const appStore = useAppStore();
+useAuthoringWebMcp();
 
 const elementLocaleMap = {
   "zh-CN": zhCn,

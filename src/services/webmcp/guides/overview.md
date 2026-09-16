@@ -36,3 +36,15 @@
 载入期间编辑器上下文工具返回 `ready=false`、`loading=true`，不把尚未读取的内容当作空场景；工作区工具提供具体载入或失败状态。打开脚本工具受阻时返回 `applied=false` 及当前状态。遮罩消失只表示编辑内容载入完成，保存、发布和运行验收仍需各自回执。
 
 载入状态的 `progress` 包含当前阶段（连接、读取数据、初始化、载入资源、整理、就绪或失败）、已完成/总项目数及当前项目名称。百分比仅表示已完成载入项目占比，不表示下载字节或剩余时间；旧版编辑器未提供计数时显示不定进度。资源项目全部完成后仍需等待 `ready=true`，不能用百分比代替操作就绪守卫。
+
+
+## 主站创作工具（契约 1.0.0）
+
+先调用 `xrugc_get_authoring_capabilities`，以返回的实际工具清单为准。全局创作工具可在列表页、编辑页和脚本抽屉所在页面使用；编辑器专用工具仍依赖对应页面就绪。
+
+- 查找/打开：`xrugc_search_authoring_objects`（kind 为 scene 或 entity），`xrugc_open_authoring_object`。跨页保留未保存内容确认；opened=false 时不要声称已经切换。
+- 新建：`xrugc_stage_authoring_creation` → `xrugc_complete_authoring_draft` → `xrugc_get_authoring_operation`。新建空对象后，再用目标编辑器已有工具添加内容。
+- 封面：`xrugc_get_object_cover` → `xrugc_stage_object_cover` → 同一完成/状态工具。操作结果明确区分封面关联与页面显示。
+- 素材：`xrugc_search_authoring_assets` / `xrugc_get_asset_metadata`；`xrugc_start_authoring_upload` → 用户选择文件 → `xrugc_get_authoring_upload` 取得真正的资源 ID。跟踪限当前标签页，刷新后不保留。
+
+完成调用先返回 awaiting_confirmation 或 submitting，不能立即当作成功。新建 POST 不具备服务端持久幂等，unknown 时先搜索核对，禁止自动重建。草稿 5 分钟过期，切页或切换账号后重新预览。结果中的 retrySafe=false 表示不要另建写请求来重试；同一草稿重复完成只返回原操作。
