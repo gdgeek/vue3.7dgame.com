@@ -1,4 +1,9 @@
 import {
+  emptyEditorProgress,
+  parseEditorLoadProgress,
+  type EditorLoadPhase,
+} from "@/utils/editorLoadProgress";
+import {
   computed,
   onActivated,
   onDeactivated,
@@ -16,6 +21,7 @@ export function useEditorLoading(options: {
 }) {
   const status = ref<"loading" | "ready" | "error">("loading");
   const error = ref<string | null>(null);
+  const progress = ref(emptyEditorProgress("connecting"));
   let generation = 0;
   let active = true;
   let poll: ReturnType<typeof setTimeout> | undefined;
@@ -29,12 +35,16 @@ export function useEditorLoading(options: {
     stop();
     error.value = message;
     status.value = "error";
+    progress.value = { ...progress.value, phase: "error" };
   };
   const start = () => {
     stop();
     if (!active) return;
     status.value = "loading";
     error.value = null;
+    progress.value = emptyEditorProgress(
+      options.initialized() ? "initializing" : "connecting"
+    );
     const current = generation;
     deadline = setTimeout(() => fail("timeout"), options.timeoutMs ?? 60000);
     const check = async () => {
@@ -42,9 +52,25 @@ export function useEditorLoading(options: {
       try {
         const state = await options.probe();
         if (current !== generation) return;
-        if (state.ok === true && state.loading === false) {
+        const reported =
+          state.ok === true
+            ? parseEditorLoadProgress(state.loadProgress)
+            : null;
+        if (reported) progress.value = reported;
+        else if (state.ok === true && state.loading === true)
+          progress.value = emptyEditorProgress("assets");
+        if (reported?.phase === "error") {
+          fail("asset-load-failed");
+          return;
+        }
+        if (
+          state.ok === true &&
+          state.loading === false &&
+          (!reported || reported.phase === "ready")
+        ) {
           stop();
           status.value = "ready";
+          progress.value = { ...progress.value, phase: "ready" };
           return;
         }
         // INIT handlers can still be setting up loaders when the first RPC arrives.
@@ -68,6 +94,7 @@ export function useEditorLoading(options: {
         : ("loading" as const),
     blocked: !ready.value,
     error: error.value,
+    progress: { ...progress.value },
     retryAfterMs: status.value === "error" || ready.value ? null : 500,
   });
   watch([options.initialized, options.target], start, {
@@ -88,5 +115,17 @@ export function useEditorLoading(options: {
     active = false;
     stop();
   });
-  return { ready, status, error, getState, fail, restart: start };
+  const setPhase = (phase: EditorLoadPhase) => {
+    progress.value = emptyEditorProgress(phase);
+  };
+  return {
+    ready,
+    status,
+    error,
+    progress,
+    setPhase,
+    getState,
+    fail,
+    restart: start,
+  };
 }

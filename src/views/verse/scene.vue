@@ -11,6 +11,7 @@
         <EditorLoadingOverlay
           :blocked="!editorLoading.ready.value"
           :failed="editorLoading.status.value === 'error'"
+          :progress="editorLoading.progress.value"
           @retry="editorFrameKey += 1"
         ></EditorLoadingOverlay>
         <iframe
@@ -504,6 +505,7 @@ const pushVerseToEditor = (
 const refresh = async () => {
   const ticket = editorInitialization.begin();
   if (!ticket) return;
+  editorLoading.setPhase("data");
   webMcpRpc.cancel("编辑器正在重新初始化");
   try {
     const response = await getVerse(ticket.owner, VERSE_SCENE_EXPAND);

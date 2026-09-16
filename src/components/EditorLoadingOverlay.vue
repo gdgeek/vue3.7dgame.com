@@ -12,6 +12,24 @@
         ><Loading></Loading
       ></el-icon>
       <p>{{ message }}</p>
+      <p class="editor-loading-work">{{ currentWork }}</p>
+      <template v-if="!failed">
+        <progress
+          class="editor-loading-progress"
+          :value="percentage ?? undefined"
+          max="100"
+          :aria-label="t('common.editorLoading.progressLabel')"
+        ></progress>
+        <p v-if="percentage !== null" class="editor-loading-count">
+          {{
+            t("common.editorLoading.count", {
+              completed: progress?.completed,
+              total: progress?.total,
+            })
+          }}
+          · {{ percentage }}%
+        </p>
+      </template>
       <p class="editor-loading-hint">{{ t("common.editorLoading.hint") }}</p>
       <button v-if="failed" type="button" @click="$emit('retry')">
         {{ t("common.editorLoading.retry") }}
@@ -24,7 +42,12 @@
 import { computed, onActivated, onDeactivated, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Loading } from "@element-plus/icons-vue";
-const props = defineProps<{ blocked: boolean; failed: boolean }>();
+import type { EditorLoadProgress } from "@/utils/editorLoadProgress";
+const props = defineProps<{
+  blocked: boolean;
+  failed: boolean;
+  progress?: EditorLoadProgress;
+}>();
 defineEmits<{ retry: [] }>();
 const { t } = useI18n();
 const active = ref(true);
@@ -36,6 +59,25 @@ const message = computed(() =>
       : "common.editorLoading.message"
   )
 );
+const percentage = computed(() => {
+  const p = props.progress;
+  return p?.phase === "assets" &&
+    p.total !== null &&
+    p.total > 0 &&
+    p.completed !== null
+    ? Math.floor((p.completed / p.total) * 100)
+    : null;
+});
+const currentWork = computed(() => {
+  const p = props.progress;
+  if (props.failed) return t("common.editorLoading.workFailed");
+  const phase = p?.phase ?? "connecting";
+  const key = phase === "assets" && p?.currentKind ? p.currentKind : phase;
+  const work = t(`common.editorLoading.stages.${key}`);
+  return phase === "assets" && p?.currentItem
+    ? `${work}：${p.currentItem}`
+    : work;
+});
 onActivated(() => {
   active.value = true;
 });
@@ -66,6 +108,26 @@ onDeactivated(() => {
 .editor-loading-spinner {
   color: var(--el-color-primary);
   animation: editor-loading-spin 1s linear infinite;
+}
+
+.editor-loading-work {
+  margin: 12px 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.editor-loading-progress {
+  display: block;
+  width: 100%;
+  height: 8px;
+  accent-color: var(--el-color-primary);
+}
+
+.editor-loading-count {
+  margin: 8px 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--el-text-color-secondary);
 }
 
 .editor-loading-hint {
