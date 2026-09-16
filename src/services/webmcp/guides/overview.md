@@ -34,3 +34,5 @@
 操作前先调用 `xrugc_get_scene_workspace_context` 或 `xrugc_get_entity_workspace_context`，检查 `scene` / `entity` 的 `ready`、`loading`、`blocked` 和 `status`。`blocked=true` 时不要执行编辑、保存、发布、运行、恢复版本或打开脚本；按 `retryAfterMs` 等待后重读上下文。`status=error` 表示载入失败或超时，应让用户使用页面「重新载入」按钮重试，不要自动重放写操作。脚本抽屉另检查 `script.ready`。
 
 载入期间编辑器上下文工具返回 `ready=false`、`loading=true`，不把尚未读取的内容当作空场景；工作区工具提供具体载入或失败状态。打开脚本工具受阻时返回 `applied=false` 及当前状态。遮罩消失只表示编辑内容载入完成，保存、发布和运行验收仍需各自回执。
+
+载入状态的 `progress` 包含当前阶段（连接、读取数据、初始化、载入资源、整理、就绪或失败）、已完成/总项目数及当前项目名称。百分比仅表示已完成载入项目占比，不表示下载字节或剩余时间；旧版编辑器未提供计数时显示不定进度。资源项目全部完成后仍需等待 `ready=true`，不能用百分比代替操作就绪守卫。
