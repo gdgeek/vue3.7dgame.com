@@ -43,6 +43,19 @@ vi.mock("@/services/auth/authClient", () => ({
 vi.mock("@/components/Dialog", () => ({
   MessageBox: { confirm: state.confirm },
 }));
+vi.mock("@/services/webmcp/authoring-task-store", () => ({
+  serverTaskStore: {},
+}));
+vi.mock("@/api/v1/authoring-create", () => ({
+  createAuthoringObject: async (
+    kind: string,
+    _operation: string,
+    body: unknown
+  ) =>
+    (await (kind === "entity" ? state.postMeta(body) : state.postVerse(body)))
+      .data,
+  getAuthoringCreation: vi.fn(),
+}));
 vi.mock("@/api/v1/meta", () => ({
   getMeta: state.getMeta,
   getMetas: state.getMetas,
@@ -161,7 +174,7 @@ describe("authoring app adapter", () => {
   });
   it("provides actual registered tools and actor permissions", async () => {
     expect(await call("get_authoring_capabilities")).toMatchObject({
-      contractVersion: "1.1.0",
+      contractVersion: "1.2.0",
       tools: [{ name: "actual_registered_tool" }],
       createKinds: ["entity", "scene"],
     });
