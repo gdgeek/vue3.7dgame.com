@@ -409,7 +409,10 @@ const detailProperties = computed(() => {
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
-useWebMcpUploadIntent(openUploadDialog);
+const trackWebMcpUpload = useWebMcpUploadIntent(
+  openUploadDialog,
+  () => uploadDialogVisible.value
+);
 
 const getQueryResourceId = () => {
   const rawResourceId = Array.isArray(route.query.resourceId)
@@ -752,7 +755,7 @@ const savePolygen = async (
     };
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;
-    const response = await postPolygen(data);
+    const response = await trackWebMcpUpload(() => postPolygen(data));
     if (response.data.id) callback(response.data.id);
   } catch (err) {
     logger.error("Failed to save polygen:", err);

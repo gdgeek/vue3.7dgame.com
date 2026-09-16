@@ -19,3 +19,13 @@
 3. `xrugc_start_asset_upload` 只打开素材上传界面，不等于设置封面；图片成为素材、出现在场景里或文件上传成功，都不能证明已绑定为目标对象封面。通过当前可用封面入口完成关联和保存，沿用实际确认流程。
 4. 保存后重新读取或刷新目标卡片／详情页，确认图片能加载且已关联正确对象，再检查缩略图裁切：主体可辨、不变形、不模糊、不被裁掉关键内容。图片比例和文件限制以当前页面为准，不依靠放大小图凑清晰度。
 5. 交付时说明采用了生成图、网络图还是实际截图，以及封面是否已保存并显示。若只能准备图片而未能设置、或保存后未能核实显示，明确报告“封面待设置”或“封面待核验”和剩余步骤；不要声称已经完成。封面不合适或能力不足时保留已完成的内容，报告缺口，不擅自覆盖已有合格图片或再次发布场景。
+
+
+## 已提供的封面工具
+
+1. 调用 `xrugc_get_object_cover({kind, id})` 读取已保存封面。
+2. 用 `xrugc_search_authoring_assets({resourceType:"picture", query})` 找到图片素材，必要时读取 `xrugc_get_asset_metadata`。图片生成和网络搜索仍由 AI 客户端提供。
+3. `xrugc_stage_object_cover({kind, id, pictureResourceId})` 生成预览；`xrugc_complete_authoring_draft({draftId})` 请求确认；`xrugc_get_authoring_operation({operationId})` 等待 completed。素材 ID 与图片文件 ID 不是一回事，工具会解析图片原始文件。
+4. `bindingVerified=true` 仅表示回读到封面关联；`coverDisplayVerified=false` 时还需检查页面显示。封面保存后编辑器旧版本可能过期，不要直接继续用旧版本保存，也不要刷新丢失未保存内容。
+
+需要上传时优先使用可跟踪的 `xrugc_start_authoring_upload` 与 `xrugc_get_authoring_upload`；旧的 `xrugc_start_asset_upload` 仍只提供上传入口。`completedResourceIds` 才是本次拿到回执的素材，不代表自动设为封面。

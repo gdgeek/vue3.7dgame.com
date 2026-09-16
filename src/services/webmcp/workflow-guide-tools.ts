@@ -11,6 +11,7 @@ import {
 } from "./workflow-guide-catalog";
 
 const guideLoaders = {
+  authoring: () => import("./guides/authoring.md?raw"),
   overview: () => import("./guides/overview.md?raw"),
   assets: () => import("./guides/assets.md?raw"),
   cover: () => import("./guides/cover.md?raw"),
