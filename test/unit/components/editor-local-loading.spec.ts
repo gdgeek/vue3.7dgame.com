@@ -59,6 +59,47 @@ describe("local editor loading", () => {
     expect(document.activeElement).toBe(navigation);
   });
 
+  it("shows counted progress and escapes item names, with indeterminate initialization", async () => {
+    const container = document.createElement("div");
+    const state = reactive({
+      blocked: true,
+      failed: false,
+      progress: {
+        phase: "assets" as const,
+        completed: 2,
+        total: 5,
+        currentKind: "model",
+        currentItem: "<script>bad</script>",
+      },
+    });
+    const app = createApp({ render: () => h(EditorLoadingOverlay, state) });
+    app.component(
+      "ElIcon",
+      defineComponent({
+        setup:
+          (_, { slots }) =>
+          () =>
+            h("span", slots.default?.()),
+      })
+    );
+    app.mount(container);
+    cleanups.push(() => app.unmount());
+    expect(container.querySelector("progress")?.getAttribute("value")).toBe(
+      "40"
+    );
+    expect(container.textContent).toContain("40%");
+    expect(container.textContent).toContain("<script>bad</script>");
+    expect(container.querySelector("script")).toBeNull();
+    state.progress.total = 0;
+    await nextTick();
+    expect(container.querySelector("progress")?.hasAttribute("value")).toBe(
+      false
+    );
+    state.failed = true;
+    await nextTick();
+    expect(container.querySelector("progress")).toBeNull();
+  });
+
   it("loads dependent toolbar buttons independently while server history stays usable", async () => {
     const state = reactive({ loading: true, blocked: true });
     const onRun = vi.fn();

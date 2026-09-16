@@ -2,6 +2,22 @@
 export default {
   common: {
     editorLoading: {
+      progressLabel: "リソースの読み込み状況",
+      count: "{total} 件中 {completed} 件完了",
+      workFailed: "読み込みが完了しませんでした。再読み込みしてください。",
+      stages: {
+        connecting: "エディターに接続中",
+        data: "シーン／エンティティのデータを取得中",
+        initializing: "エディターを初期化中",
+        assets: "リソースを読み込み中",
+        finishing: "シーンと編集状態を準備中",
+        ready: "読み込み完了",
+        error: "読み込み失敗",
+        model: "モデルを読み込み中",
+        module: "シーンのエンティティを読み込み中",
+        anchor: "アンカーを読み込み中",
+        space: "空間背景を読み込み中",
+      },
       message: "エディターを読み込み中…",
       hint: "読み込み完了後に編集、保存、実行、スクリプトを利用できます。",
       failed: "読み込みが完了しませんでした。再試行してください。",

@@ -31,6 +31,7 @@
         <EditorLoadingOverlay
           :blocked="!editorLoading.ready.value"
           :failed="editorLoading.status.value === 'error'"
+          :progress="editorLoading.progress.value"
           @retry="editorFrameKey += 1"
         ></EditorLoadingOverlay>
         <iframe
@@ -2233,6 +2234,7 @@ const pushMetaToEditor = (
 const refresh = async () => {
   const ticket = editorInitialization.begin();
   if (!ticket) return;
+  editorLoading.setPhase("data");
   webMcpRpc.cancel("编辑器正在重新初始化");
   try {
     const metaResponse = await getMeta(ticket.owner, { expand: "verseMetas" });
