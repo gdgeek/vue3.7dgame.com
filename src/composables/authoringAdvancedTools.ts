@@ -1,3 +1,7 @@
+import {
+  createAuthoringObject,
+  getAuthoringCreation,
+} from "@/api/v1/authoring-create";
 import type { WebMcpTool } from "@/services/webmcp/model-context";
 import {
   getRegisteredWebMcpTools,
@@ -5,6 +9,7 @@ import {
   invokeRegisteredWebMcpTool,
 } from "@/services/webmcp/model-context";
 import { createAuthoringDependencyTools } from "@/services/webmcp/authoring-dependencies";
+import { serverTaskStore } from "@/services/webmcp/authoring-task-store";
 import { createAuthoringTaskTools } from "@/services/webmcp/authoring-task-tools";
 import { createAuthoringScriptAssistanceTools } from "@/services/webmcp/authoring-script-assistance";
 import {
@@ -12,8 +17,8 @@ import {
   type EditableSource,
 } from "@/services/webmcp/authoring-project-tools";
 import type { ObjectKind } from "@/services/webmcp/authoring-tools";
-import { getMeta, postMeta, putMetaCode } from "@/api/v1/meta";
-import { getVerse, postVerse, putVerse, putVerseCode } from "@/api/v1/verse";
+import { getMeta, putMetaCode } from "@/api/v1/meta";
+import { getVerse, putVerse, putVerseCode } from "@/api/v1/verse";
 import { getResource } from "@/api/v1/resources";
 import {
   getWriteReceipt,
@@ -112,6 +117,51 @@ export function createAdvancedAuthoringTools(d: Options): WebMcpTool[] {
     ...createAuthoringDependencyTools({ ...d, read, asset }),
     ...createAuthoringTaskTools({
       ...d,
+      store: serverTaskStore,
+      queryAuthoringOperation: async (operationId, preview) => {
+        const kind = preview.kind;
+        if (kind !== "entity" && kind !== "scene")
+          throw new Error("创作目标类型不可用");
+        // A live confirmation may be cancelled or still pending. Preserve its local state.
+        const local = (await invokeRegisteredWebMcpTool(
+          "xrugc_get_authoring_operation",
+          { operationId, kind }
+        )) as { status?: string };
+        if (
+          local &&
+          !["unknown", "not_found", "not_observed"].includes(
+            String(local.status)
+          )
+        )
+          return local;
+        if (preview.action === "create") {
+          const ack = await getAuthoringCreation(kind, operationId);
+          return {
+            operationId,
+            status: "completed",
+            kind,
+            targetId: ack.id,
+            result: { id: ack.id, uuid: ack.uuid, receipt: ack.writeReceipt },
+            verification: "server_acknowledged",
+          };
+        }
+        const target = preview.target as { id?: number } | undefined;
+        if (preview.action !== "cover" || !target?.id)
+          throw new Error("封面目标不可用");
+        const receipt = await readReceipt(kind, target.id, operationId);
+        return {
+          operationId,
+          status: "completed",
+          kind,
+          targetId: target.id,
+          result: {
+            receipt,
+            bindingVerified: false,
+            coverDisplayVerified: false,
+          },
+          verification: "server_acknowledged",
+        };
+      },
       getAvailableTools: availableTools,
       invokeTool: invokeRegisteredWebMcpTool,
     }),
@@ -148,26 +198,24 @@ export function createAdvancedAuthoringTools(d: Options): WebMcpTool[] {
           md5: detail.md5,
         };
       },
-      async create(source, uuid, name) {
-        // Restore editable content into a new draft only; cover IDs are rebound through the guarded cover tools.
-        const data =
+      async create(source, uuid, name, operationId) {
+        const data = await createAuthoringObject(
+          source.kind,
+          operationId,
           source.kind === "entity"
-            ? (
-                await postMeta({
-                  title: name,
-                  uuid,
-                  data: source.data as JsonValue,
-                  info: source.info as string | null,
-                  events: source.events as Events | null,
-                })
-              ).data
-            : (
-                await postVerse({
-                  name,
-                  uuid,
-                  description: (source.description ?? "").slice(0, 255),
-                })
-              ).data;
+            ? {
+                title: name,
+                uuid,
+                data: source.data as JsonValue,
+                info: source.info as string | null,
+                events: source.events as Events | null,
+              }
+            : {
+                name,
+                uuid,
+                description: (source.description ?? "").slice(0, 255),
+              }
+        );
         if (!validRevision(data.serverRevision))
           throw new Error("创建响应缺少服务器版本；请通过 UUID 核对");
         // Creation responses can precede the backend's JSON/default normalization.
@@ -229,7 +277,7 @@ export function createAdvancedAuthoringTools(d: Options): WebMcpTool[] {
         if (typeof name !== "string" || name.length > 120)
           throw new Error("工具名无效");
         return {
-          contractVersion: "1.1.0",
+          contractVersion: "1.2.0",
           tool: getRegisteredWebMcpSchema(name),
           available: availableTools().includes(name),
           nextStep:

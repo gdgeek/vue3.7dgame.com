@@ -1,3 +1,7 @@
+import {
+  createAuthoringObject,
+  getAuthoringCreation,
+} from "@/api/v1/authoring-create";
 import { createAdvancedAuthoringTools } from "./authoringAdvancedTools";
 import { onMounted, onBeforeUnmount, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
@@ -6,8 +10,8 @@ import { useUserStore } from "@/store/modules/user";
 import authClient from "@/services/auth/authClient";
 import { AbilityRouter, AbilityEdit } from "@/utils/ability";
 import { MessageBox } from "@/components/Dialog";
-import { getMeta, getMetas, postMeta, putMeta } from "@/api/v1/meta";
-import { getVerse, getVerses, postVerse, putVerse } from "@/api/v1/verse";
+import { getMeta, getMetas, putMeta } from "@/api/v1/meta";
+import { getVerse, getVerses, putVerse } from "@/api/v1/verse";
 import { getResource, getResources } from "@/api/v1/resources";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import {
@@ -223,26 +227,26 @@ export function useAuthoringWebMcp() {
         .filter((item) => item.type === type)
         .map((item) => ({ ...authoringAsset(item), metadata: null }));
     },
+    creationReceipt: getAuthoringCreation,
     async create(draft) {
-      const data =
+      const data = await createAuthoringObject(
+        draft.kind,
+        draft.operationId,
         draft.kind === "entity"
-          ? (
-              await postMeta({
-                title: draft.name,
-                info: draft.description,
-                uuid: draft.uuid,
-                image_id: draft.imageId,
-              })
-            ).data
-          : (
-              await postVerse({
-                name: draft.name,
-                description: draft.description,
-                uuid: draft.uuid,
-                image_id: draft.imageId,
-              })
-            ).data;
-      return { id: data.id, uuid: data.uuid };
+          ? {
+              title: draft.name,
+              info: draft.description,
+              uuid: draft.uuid,
+              image_id: draft.imageId,
+            }
+          : {
+              name: draft.name,
+              description: draft.description,
+              uuid: draft.uuid,
+              image_id: draft.imageId,
+            }
+      );
+      return { id: data.id, uuid: data.uuid, receipt: data.writeReceipt };
     },
     async cover(draft) {
       let receipt: WriteReceipt | undefined;

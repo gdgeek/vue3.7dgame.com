@@ -44,7 +44,8 @@ export type ProjectDependencies = {
   create: (
     source: EditableSource,
     uuid: string,
-    name: string
+    name: string,
+    operationId: string
   ) => Promise<{ id: number; uuid: string; serverRevision: string }>;
   write: (
     target: {
@@ -359,7 +360,8 @@ export function createAuthoringProjectTools(
           const result = await d.create(
             source,
             step.uuid!,
-            `${r.prefix}${source.name}`.slice(0, 200)
+            `${r.prefix}${source.name}`.slice(0, 200),
+            step.operationId
           );
           positive(result.id);
           if (
