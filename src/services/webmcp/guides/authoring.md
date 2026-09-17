@@ -16,9 +16,13 @@
 
 ## 逐步任务
 
-`xrugc_preview_authoring_task` 最多 30 步，只预览；`xrugc_advance_authoring_task` 每次执行一步或查询原操作。输入引用例如 `{"$ref":"draft.draftId"}`，新建完成结果可引用 `{"$ref":"create.result.id"}`。只能引用已经完成的前序步骤；页面编辑步骤必须指定目标 kind/id。工具缺失、目标不符或编辑器加载时等待。
+`xrugc_preview_authoring_task` 最多 30 步，保存服务端计划并返回 taskId，不执行对象修改；`xrugc_advance_authoring_task` 每次执行一步或查询原操作。输入引用例如 `{"$ref":"draft.draftId"}`，新建完成结果可引用 `{"$ref":"create.result.id"}`。只能引用已经完成的前序步骤；页面编辑步骤必须指定目标 kind/id。工具缺失、目标不符或编辑器加载时等待。
 
-已确认写入仍保留原页面确认与服务端版本检查。任务是部分提交，不是跨对象事务；失败后先核对哪些步骤已完成。unknown 必须查原操作，禁止重跑创建；创建响应丢失时，搜索对象并用 `xrugc_reconcile_authoring_creation` 对照原 UUID。任务跨 SPA 页面保留，但刷新不保留；请把对象 ID 和回执记录在会话中。
+已确认写入仍保留原页面确认与服务端版本检查。任务是部分提交，不是跨对象事务；失败后先核对哪些步骤已完成。unknown 必须查原操作，禁止重跑创建；创建响应丢失时，用原 operationId 和 kind 查询 `xrugc_get_authoring_operation`，无需先知道对象 ID。同一账号、同一键和相同内容的重试由服务端返回原对象；更换键不是重试，会创建新对象。
+
+任务计划、步骤和结果保存在服务端；刷新或重新登录后使用 `xrugc_list_authoring_tasks` 查找，再 `xrugc_get_authoring_task` 和 advance。每次推进先取得有期限的执行租约，并用进度版本防止旧标签页覆盖。失去租约时重新读取，不绕过冲突。过期但未提交的草稿会重新预览并保留页面确认；已记录操作 ID 的步骤先查询回执。没有查到回执仍为 unknown，不能证明从未提交，也不会自动新建。
+
+任务记录属于原账号，最多保留 200 条，每条计划 256 KB、进度 1 MB。进度中的结果是客户端记录，正式保存以服务端回执为准；对象数据和写权限仍需重新读取核对。后端接口或存储不可用会报错，不降级为内存成功。它不是后台执行队列，浏览器退出时暂停，需 AI 或用户再次推进。工程恢复的独立 advance_project_restore 暂不在这个持久任务协议内。
 
 ## 脚本模板与诊断
 

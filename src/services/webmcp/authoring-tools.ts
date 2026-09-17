@@ -1,3 +1,4 @@
+import type { CreationAck } from "@/api/v1/authoring-create";
 import type { WebMcpTool } from "./model-context";
 import { validRevision, type WriteReceipt } from "@/api/v1/write-contract";
 
@@ -89,8 +90,17 @@ export type AuthoringDependencies = {
     name: string;
     description: string;
     uuid: string;
+    operationId: string;
     imageId?: number;
-  }) => Promise<{ id: number; uuid: string }>;
+  }) => Promise<{
+    id: number;
+    uuid: string;
+    receipt?: CreationAck["writeReceipt"];
+  }>;
+  creationReceipt?: (
+    kind: ObjectKind,
+    operationId: string
+  ) => Promise<CreationAck>;
   cover: (draft: {
     kind: ObjectKind;
     id: number;
@@ -212,7 +222,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
     retrySafe: false,
     nextStep:
       op.status === "unknown"
-        ? "不要重新提交创建。封面可再次查询回执；创建请搜索核对对象。"
+        ? "查询原 operationId 的服务端回执；跨会话新建查询加 kind。unknown 不代表失败，不换键重新创建。"
         : undefined,
   });
   const remember = (draft: Draft) => {
@@ -277,6 +287,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
           name: draft.name!,
           description: draft.description ?? "",
           uuid: draft.uuid!,
+          operationId: op.operationId,
           imageId: draft.imageId,
         });
         positive(result.id);
@@ -286,6 +297,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
         op.result = {
           id: result.id,
           uuid: result.uuid,
+          receipt: result.receipt,
           coverImageId: draft.imageId ?? null,
           coverDisplayVerified: false,
         };
@@ -371,7 +383,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
       [],
       true,
       () => ({
-        contractVersion: "1.1.0",
+        contractVersion: "1.2.0",
         ...d.capabilities(),
         authenticated: Boolean(d.actor()),
         createKinds: (["entity", "scene"] as const).filter(
@@ -379,7 +391,11 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
         ),
         uploadTypes: ASSET_TYPES.filter((k) => d.actor() && d.canUpload(k)),
         limitations: {
-          durableCreateIdempotency: false,
+          durableCreateIdempotency: Boolean(d.creationReceipt),
+          durableBackendRequired:
+            "authoring-tasks-v1; unavailable endpoints fail closed",
+          idempotencyScope:
+            "authenticated actor + original operation ID + identical body",
           uploadNeedsUserFileSelection: true,
           generatedImagesProvidedByClient: true,
           runtimeAcceptanceIncluded: false,
@@ -556,14 +572,44 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
     ),
     tool(
       "xrugc_get_authoring_operation",
-      "查询本会话创作操作；unknown 封面尝试读取服务端回执，新建绝不自动重试。",
-      { operationId: { type: "string" } },
+      "查询创作操作的服务端回执；跨会话查询新建需 kind。unknown 不代表失败，不自动重试。",
+      { operationId: { type: "string" }, kind: fields.kind },
       ["operationId"],
       true,
       async (input) => {
         const owner = actor();
-        const op = operations.get(string(input.operationId));
-        if (!op || op.actor !== owner) return { status: "not_found" };
+        const id = string(input.operationId);
+        const op = operations.get(id);
+        if (op && op.actor !== owner) return { status: "not_found" };
+        if (
+          d.creationReceipt &&
+          ((!op && input.kind !== undefined) ||
+            (op?.action === "create" && op.status === "unknown"))
+        ) {
+          try {
+            const k = op?.kind ?? kind(input.kind);
+            const ack = await d.creationReceipt(k, id);
+            assertActor(owner);
+            const recovered: Operation = {
+              operationId: id,
+              actor: owner,
+              action: "create",
+              kind: k,
+              targetId: ack.id,
+              status: "completed",
+              createdAt: now(),
+              uuid: ack.uuid,
+              result: { id: ack.id, uuid: ack.uuid, receipt: ack.writeReceipt },
+            };
+            operations.set(id, recovered);
+            persist();
+            return publicOp(recovered);
+          } catch {
+            assertActor(owner);
+            return op ? publicOp(op) : { status: "unknown", operationId: id };
+          }
+        }
+        if (!op) return { status: "not_found" };
         if (op.status === "unknown" && op.action === "cover" && op.targetId) {
           try {
             const receipt = await d.receipt(
