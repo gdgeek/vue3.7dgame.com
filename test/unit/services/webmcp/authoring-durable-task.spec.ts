@@ -67,6 +67,7 @@ function setup() {
     if (name === "xrugc_stage_authoring_creation")
       return {
         draftId: `draft-${++drafts}`,
+        operationId: `draft-${drafts}`,
         preview: { kind: "entity", action: "create", name: input.name },
       };
     if (name === "xrugc_complete_authoring_draft") {
@@ -153,6 +154,11 @@ describe("durable authoring regression", () => {
     const done = await c("get_authoring_task", { taskId: t.taskId });
     expect(done.status).toBe("completed");
     expect(done.steps[1].result.result.id).toBe(1);
+    expect(done.steps[0].operationId).toBe("draft-2");
+    expect(done.steps[0].result.operationId).toBe("draft-2");
+    expect(done.steps[1].operationId).toBe("draft-2");
+    const loaded = await s.client()("get_authoring_task", { taskId: t.taskId });
+    expect(loaded.steps[0].operationId).toBe("draft-2");
     expect(s.invoke.mock.calls.map((x) => x[0])).toEqual([
       "xrugc_stage_authoring_creation",
       "xrugc_stage_authoring_creation",
@@ -160,6 +166,22 @@ describe("durable authoring regression", () => {
     ]);
     expect(s.count()).toBe(1);
     expect(done.persistence).toBe("server");
+  });
+  it("clears a previous preview operation ID when the restaged tool omits it", async () => {
+    const s = setup();
+    const first = s.client();
+    const task = await first("preview_authoring_task", s.plan);
+    await s.advance(first, task.taskId);
+    s.invoke.mockImplementationOnce(async () => ({
+      draftId: "replacement",
+      preview: { kind: "entity", action: "create" },
+    }));
+    const restored = s.client();
+    await s.advance(restored, task.taskId);
+    const saved = await restored("get_authoring_task", { taskId: task.taskId });
+    expect(saved.steps[0].operationId).toBeUndefined();
+    expect(saved.steps[0].result.draftId).toBe("replacement");
+    expect(saved.steps[1].operationId).toBe("replacement");
   });
   it("recovers a committed creation after response loss without issuing a second create", async () => {
     const s = setup();

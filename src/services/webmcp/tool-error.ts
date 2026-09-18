@@ -1,5 +1,18 @@
+import { ResourceDiagnosticError } from "./resource-diagnostic";
+
 /** Return plain, redacted errors across the native structured-clone boundary. */
 export function webMcpToolError(cause: unknown, readOnly: boolean) {
+  if (cause instanceof ResourceDiagnosticError) {
+    return {
+      ...cause.result(),
+      ...(readOnly
+        ? {}
+        : {
+            persistence: "unverified",
+            nextStep: `若已有 operationId，先查询原操作回执；不要自动重放写入。${cause.result().nextStep}`,
+          }),
+    };
+  }
   const value = cause as {
     response?: { status?: number };
     name?: string;

@@ -417,7 +417,12 @@ export function createAuthoringTaskTools(
           typeof record(result).draftId !== "string"
         )
           throw new Error("重新预览失败");
-        task.states[parentIndex].result = structuredClone(result);
+        const previewState = task.states[parentIndex];
+        previewState.result = structuredClone(result);
+        previewState.operationId =
+          typeof record(result).operationId === "string"
+            ? String(record(result).operationId)
+            : undefined;
         await checkpoint(task);
       }
       const isPoll = Boolean(current.operationId);

@@ -1,3 +1,4 @@
+import { webMcpToolError } from "@/services/webmcp/tool-error";
 /* eslint-disable @typescript-eslint/no-explicit-any -- Dynamic tool payloads and deliberately malformed mock inputs. */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { webcrypto } from "node:crypto";
@@ -391,4 +392,101 @@ it("reads scene covers from the expanded image when image_id is omitted", async 
     authoringObject("scene", { id: 5, image_id: null, image: { id: 80 } })
       .imageId
   ).toBeNull();
+});
+
+// Exercise the real adapter that previously reduced missing MD5 to tool_failed.
+it.each([
+  { file: { id: 77 }, fields: ["md5"], fileId: 77 },
+  { file: null, fields: ["fileId", "md5"], fileId: undefined },
+])(
+  "reports the exact incomplete resource and repair guidance: $fields",
+  async ({ file, fields, fileId }) => {
+    state.getMeta.mockResolvedValue({
+      data: {
+        id: 1,
+        uuid: "entity",
+        title: "source",
+        serverRevision: revision,
+        data: null,
+        resources: [{ id: 7, type: "picture" }],
+      },
+    });
+    state.getResource.mockResolvedValue({
+      data: { id: 7, type: "picture", file, privateField: "secret" },
+    });
+    const result = await call("export_editable_project", {
+      kind: "entity",
+      id: 1,
+    }).catch((error) => webMcpToolError(error, true));
+    expect(result).toMatchObject({
+      isError: true,
+      errorCode: "resource_version_incomplete",
+      details: {
+        resource: { id: 7, type: "picture" },
+        fields,
+        referencedBy: { kind: "entity", id: 1 },
+      },
+    });
+    expect(result.details.resource.fileId).toBe(fileId);
+    expect(result.nextStep).toContain("不要编造 MD5");
+    expect(result.backupId).toBeUndefined();
+    expect(JSON.stringify(result)).not.toContain("secret");
+  }
+);
+it("keeps inaccessible resources distinct from missing version metadata", async () => {
+  state.getMeta.mockResolvedValue({
+    data: {
+      id: 1,
+      uuid: "entity",
+      title: "source",
+      serverRevision: revision,
+      data: null,
+      resources: [{ id: 7, type: "picture" }],
+    },
+  });
+  state.getResource.mockRejectedValue({
+    response: { status: 403, data: "private" },
+    config: { headers: { Authorization: "secret" } },
+  });
+  const result = await call("export_editable_project", {
+    kind: "entity",
+    id: 1,
+  }).catch((error) => webMcpToolError(error, true));
+  expect(result).toMatchObject({
+    errorCode: "resource_unavailable",
+    httpStatus: 403,
+    details: { fields: [], resource: { id: 7, type: "picture" } },
+  });
+  expect(JSON.stringify(result)).not.toMatch(/secret|private|Authorization/);
+});
+it("includes the same diagnostic in dependency analysis", async () => {
+  state.getMeta.mockResolvedValue({
+    data: {
+      id: 1,
+      uuid: "entity",
+      title: "source",
+      serverRevision: revision,
+      data: { children: { entities: [{ parameters: { resource: 7 } }] } },
+      resources: [{ id: 7, type: "picture" }],
+    },
+  });
+  state.getResource.mockResolvedValue({
+    data: { id: 7, type: "picture", file: { id: 77 } },
+  });
+  const result = await call("inspect_authoring_dependencies", {
+    kind: "entity",
+    id: 1,
+  });
+  expect(result.issues).toContainEqual(
+    expect.objectContaining({
+      code: "RESOURCE_UNAVAILABLE",
+      diagnostic: expect.objectContaining({
+        errorCode: "resource_version_incomplete",
+        details: {
+          resource: { id: 7, type: "picture", fileId: 77 },
+          fields: ["md5"],
+        },
+      }),
+    })
+  );
 });

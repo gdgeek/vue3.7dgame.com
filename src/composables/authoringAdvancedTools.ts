@@ -1,4 +1,8 @@
 import {
+  resourceReadError,
+  validateResourcePin,
+} from "@/services/webmcp/resource-diagnostic";
+import {
   createAuthoringObject,
   getAuthoringCreation,
 } from "@/api/v1/authoring-create";
@@ -84,20 +88,26 @@ export function createAdvancedAuthoringTools(d: Options): WebMcpTool[] {
     };
   };
   const asset = async (type: string, id: number) => {
-    const data = (await getResource(type, id, "file")).data;
-    if (
-      data.id !== id ||
-      data.type !== type ||
-      !data.file?.id ||
-      !data.file.md5
-    )
-      throw new Error("素材文件或版本不可用");
+    const data = await getResource(type, id, "file")
+      .then((response) => response.data)
+      .catch((cause) => {
+        throw resourceReadError(cause, type, id);
+      });
+    validateResourcePin(
+      {
+        id: data.id,
+        type: data.type,
+        fileId: data.file?.id,
+        md5: data.file?.md5,
+      },
+      { id, type }
+    );
     return {
       id,
       type,
       name: (data.name ?? "").slice(0, 200),
-      fileId: data.file.id,
-      md5: data.file.md5,
+      fileId: data.file!.id,
+      md5: data.file!.md5!,
     };
   };
   const availableTools = () => getRegisteredWebMcpTools().map((t) => t.name);

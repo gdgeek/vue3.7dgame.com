@@ -623,6 +623,91 @@ describe("editable project backup and new-draft restore", () => {
     await expect(s.stage(good)).rejects.toThrow("改变");
     expect(s.create).not.toHaveBeenCalled();
   });
+  it("blocks incomplete backups instead of issuing an apparently valid backup", async () => {
+    const s = setup();
+    s.resource.mockResolvedValue({
+      id: 7,
+      type: "picture",
+      fileId: 77,
+      md5: " ",
+    });
+    await expect(s.backup()).rejects.toMatchObject({
+      errorCode: "resource_version_incomplete",
+      details: { fields: ["md5"], referencedBy: { kind: "entity", id: 1 } },
+    });
+  });
+  it("reports changed version fields without returning the actual hashes", async () => {
+    const s = setup();
+    const backup = await s.backup();
+    s.resource.mockResolvedValue({
+      id: 7,
+      type: "picture",
+      fileId: 88,
+      md5: "private-hash",
+    });
+    await expect(s.stage(backup)).rejects.toMatchObject({
+      errorCode: "resource_version_changed",
+      details: { fields: ["fileId", "md5"] },
+    });
+    expect(s.create).not.toHaveBeenCalled();
+  });
+  it("rejects a backup with an omitted resource pin before creating objects", async () => {
+    const s = setup();
+    const backup = await s.backup();
+    backup.body.resources = [];
+    backup.hash = await hashEditableProject(backup.body);
+    await expect(s.stage(backup)).rejects.toMatchObject({
+      errorCode: "resource_pin_missing",
+      details: {
+        resource: { id: 7, type: "picture" },
+        fields: ["resourcePin"],
+      },
+    });
+    expect(s.create).not.toHaveBeenCalled();
+  });
+  it("rejects mismatched resource responses without exposing another resource's file", async () => {
+    const s = setup();
+    s.resource.mockResolvedValue({
+      id: 9,
+      type: "audio",
+      fileId: 999,
+      md5: "other-resource",
+    });
+    await expect(s.backup()).rejects.toMatchObject({
+      errorCode: "resource_response_mismatch",
+      details: { resource: { id: 7, type: "picture" }, fields: ["id", "type"] },
+    });
+    const result = await s.backup().catch((error) => error.result());
+    expect(JSON.stringify(result)).not.toMatch(/999|other-resource/);
+  });
+  it("retains resource diagnostics if a dependency changes after preview, without creating objects", async () => {
+    const s = setup();
+    const restore = await s.stage();
+    s.resource.mockResolvedValue({
+      id: 7,
+      type: "picture",
+      fileId: 77,
+      md5: "",
+    });
+    const state = await s.advance(restore);
+    expect(state).toMatchObject({
+      status: "blocked",
+      error: {
+        errorCode: "resource_version_incomplete",
+        details: { fields: ["md5"] },
+      },
+    });
+    expect(state.error.nextStep).toContain("不要编造 MD5");
+    expect(s.create).not.toHaveBeenCalled();
+  });
+  it("does not expose resource diagnostics after the account changes during failure", async () => {
+    const s = setup();
+    s.resource.mockImplementation(async () => {
+      s.changeActor();
+      throw new Error("private response");
+    });
+    await expect(s.backup()).rejects.toThrow("账号或页面改变");
+  });
   it("restores entities first, rewrites only scene references and returns receipts", async () => {
     const s = setup();
     const r = await s.stage();
@@ -666,6 +751,7 @@ describe("editable project backup and new-draft restore", () => {
       createdId: 100,
     });
     expect(state.index).toBe(1);
+    expect(state.error).toBeUndefined();
     expect(state.objects[0].id).toBe(100);
   });
   it("hides restore tasks from other accounts", async () => {
