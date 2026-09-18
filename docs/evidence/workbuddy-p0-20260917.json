@@ -1,0 +1,409 @@
+{
+  "scope": "Isolated local WorkBuddy scene acceptance; not production or full four-editor certification",
+  "recordedTimezone": "Asia/Shanghai",
+  "versions": {
+    "workbuddy": "5.5.2",
+    "chrome": "152.0.7977.83",
+    "bridgePackage": "@jason.today/webmcp@0.1.13",
+    "webBase": "c9a5fbd0 + uncommitted workspace changes",
+    "webUi": "v2026.09.16-2309",
+    "apiCommit": "966514522fc1236da24c721a40c98dd216da32f6",
+    "editorBase": "b6b5027 + pre-existing workspace changes"
+  },
+  "page": "http://127.0.0.1:3102/verse/scene?id=665",
+  "registeredPageToolCount": 28,
+  "baseline": {
+    "observedAt": "2026-09-16T16:04:39+00:00",
+    "database": "xrugc_webmcp_p0_20260916",
+    "sceneId": 665,
+    "metaId": 1090,
+    "ownerId": 896,
+    "instanceId": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+    "transform": {
+      "scale": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "rotate": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "moduleCount": 1,
+    "sceneDataSha256": "12a81108c0be466ec2af0e9e1d0a9371f013acc027b84aa346fbba86d286f894",
+    "metaDataSha256": "197dbea60d2ac15c709323e5dc446f7d5a04578f9df2484d3595172c750c26c7",
+    "operationCount": 0
+  },
+  "finalDatabaseRead": {
+    "observedAt": "2026-09-16T16:06:30+00:00",
+    "database": "xrugc_webmcp_p0_20260916",
+    "sceneId": 665,
+    "metaId": 1090,
+    "ownerId": 896,
+    "instanceId": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+    "transform": {
+      "scale": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "rotate": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "position": {
+        "x": 0.25,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "moduleCount": 1,
+    "sceneDataSha256": "92b6dc096cfde27dccfbb270fc68a512ac9d08fa9aabca11cec45882160b38a7",
+    "metaDataSha256": "197dbea60d2ac15c709323e5dc446f7d5a04578f9df2484d3595172c750c26c7",
+    "operationCount": 1,
+    "snapshotCount": 0,
+    "published": false,
+    "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+    "matchingOperationCount": 1,
+    "operations": [
+      {
+        "actor_id": 896,
+        "operation_id": "357200bb-58f6-41cc-86b1-81083d06f980",
+        "target_type": "verse",
+        "target_id": 665,
+        "action": "save",
+        "receipt": {
+          "action": "save",
+          "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+          "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+          "status": "completed",
+          "targetId": 665,
+          "targetType": "verse"
+        },
+        "created_at": 1789574753
+      }
+    ],
+    "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+    "metaDataUnchanged": true,
+    "operationCountDelta": 1,
+    "receiptRevisionMatches": true
+  },
+  "clientTiming": [
+    {
+      "tool": "xrugc_stage_scene_module_transform",
+      "startedAtUtc": "2026-09-16T16:04:11.358Z",
+      "returnedAtUtc": "2026-09-16T16:04:12.696Z",
+      "durationMs": 1338,
+      "status": "staged"
+    },
+    {
+      "tool": "xrugc_complete_scene_module_transform",
+      "startedAtUtc": "2026-09-16T16:04:24.162Z",
+      "returnedAtUtc": "2026-09-16T16:04:24.493Z",
+      "durationMs": 331,
+      "status": "awaiting_confirmation"
+    }
+  ],
+  "confirmation": {
+    "operator": "Codex acting through the visible website confirmation dialog for the user-authorized isolated acceptance test",
+    "observedPendingAtUtc": "2026-09-16T16:04:49Z",
+    "clickStartedAfterUtc": "2026-09-16T16:05:36Z",
+    "observedPendingWaitAtLeastSeconds": 47
+  },
+  "reloadReadback": {
+    "status": "passed",
+    "evidence": {
+      "kind": "real-workbuddy-post-reload-readback",
+      "capturedAt": "2026-09-16T16:24:51.571818+00:00",
+      "taskId": "ffbbbe30-b9b5-4447-8dac-d0c113b29aa8",
+      "source": {
+        "kind": "same-task-jsonl-actual-function-results",
+        "startLine": 131,
+        "endLine": 152,
+        "startTime": "2026-09-16T16:21:56.691000+00:00",
+        "daemonCompletedAt": "2026-09-16T16:22:49.416Z",
+        "assistantNarrativeUsedAsEvidence": false,
+        "finalResponseStatus": "cancelled after all four tool results during acceptance UI operation; not evidence of business-call failure"
+      },
+      "discovery": {
+        "callLine": 139,
+        "resultLine": 140,
+        "startedAt": "2026-09-16T16:22:14.422000+00:00",
+        "completedAt": "2026-09-16T16:22:14.514000+00:00",
+        "toolCount": 28,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_editor_context",
+          "xrugc_get_scene_modules",
+          "xrugc_inspect_scene_module",
+          "xrugc_validate_scene",
+          "xrugc_search_entities",
+          "xrugc_get_scene_publication",
+          "xrugc_check_scene_resource_readiness",
+          "xrugc_check_scene_publication_readiness",
+          "xrugc_get_scene_runtime_diagnostics",
+          "xrugc_stage_scene_entity_placement",
+          "xrugc_complete_scene_entity_placement",
+          "xrugc_stage_scene_module_transform",
+          "xrugc_complete_scene_module_transform",
+          "xrugc_stage_scene_module_properties",
+          "xrugc_complete_scene_module_properties",
+          "xrugc_stage_scene_module_deletion",
+          "xrugc_complete_scene_module_deletion",
+          "xrugc_stage_scene_publication",
+          "xrugc_complete_scene_publication",
+          "xrugc_get_scene_runtime_preview_status",
+          "xrugc_start_scene_runtime_preview",
+          "xrugc_stop_scene_runtime_preview",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation"
+        ],
+        "freshContextComparedWithEarlierList": true,
+        "contextValueOmitted": true
+      },
+      "businessCalls": [
+        {
+          "toolName": "xrugc_get_operation_status",
+          "callLine": 143,
+          "resultLine": 144,
+          "startedAt": "2026-09-16T16:22:22.982000+00:00",
+          "completedAt": "2026-09-16T16:22:24.060000+00:00",
+          "clientToolStatus": "completed",
+          "arguments": {
+            "operationId": "357200bb-58f6-41cc-86b1-81083d06f980"
+          },
+          "usedLatestDiscoveredContext": true,
+          "readOnlyHint": true,
+          "actualToolResult": {
+            "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+            "toolName": "xrugc_complete_scene_module_transform",
+            "targetType": "verse",
+            "targetId": 665,
+            "status": "completed",
+            "nextAction": "inspect_result",
+            "writeReceipt": {
+              "action": "save",
+              "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+              "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+              "status": "completed",
+              "targetId": 665,
+              "targetType": "verse"
+            },
+            "verification": "server_acknowledged"
+          },
+          "omittedExplanatoryFields": []
+        },
+        {
+          "toolName": "xrugc_get_scene_modules",
+          "callLine": 146,
+          "resultLine": 147,
+          "startedAt": "2026-09-16T16:22:31.503000+00:00",
+          "completedAt": "2026-09-16T16:22:31.758000+00:00",
+          "clientToolStatus": "completed",
+          "arguments": {
+            "limit": 500,
+            "query": ""
+          },
+          "usedLatestDiscoveredContext": true,
+          "readOnlyHint": true,
+          "actualToolResult": {
+            "moduleCount": 1,
+            "matchedCount": 1,
+            "truncated": false,
+            "modules": [
+              {
+                "id": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+                "path": "0",
+                "title": "P0 movable cube instance",
+                "entityId": 1090,
+                "active": true,
+                "transform": {
+                  "position": {
+                    "x": 0.25,
+                    "y": 0,
+                    "z": 0
+                  },
+                  "rotate": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                  },
+                  "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                  }
+                }
+              }
+            ]
+          },
+          "omittedExplanatoryFields": []
+        },
+        {
+          "toolName": "xrugc_get_scene_workspace_context",
+          "callLine": 148,
+          "resultLine": 149,
+          "startedAt": "2026-09-16T16:22:35.515000+00:00",
+          "completedAt": "2026-09-16T16:22:36.818000+00:00",
+          "clientToolStatus": "completed",
+          "arguments": {},
+          "usedLatestDiscoveredContext": true,
+          "readOnlyHint": true,
+          "actualToolResult": {
+            "sceneId": 665,
+            "sceneName": "WorkBuddy P0 — dedicated local acceptance",
+            "activeEditor": "scene",
+            "scene": {
+              "ready": true,
+              "loading": false,
+              "status": "ready",
+              "blocked": false,
+              "error": null,
+              "retryAfterMs": null,
+              "dirty": false,
+              "saving": false
+            },
+            "script": {
+              "open": false,
+              "ready": false,
+              "dirty": false,
+              "saving": false,
+              "tab": null
+            }
+          },
+          "omittedExplanatoryFields": ["toolDiscoveryHint"]
+        },
+        {
+          "toolName": "xrugc_get_scene_editor_context",
+          "callLine": 150,
+          "resultLine": 151,
+          "startedAt": "2026-09-16T16:22:40.262000+00:00",
+          "completedAt": "2026-09-16T16:22:40.787000+00:00",
+          "clientToolStatus": "completed",
+          "arguments": {},
+          "usedLatestDiscoveredContext": true,
+          "readOnlyHint": true,
+          "actualToolResult": {
+            "editor": "scene",
+            "ready": true,
+            "loading": false,
+            "dirty": false,
+            "scene": {
+              "id": 665,
+              "uuid": "a34e9708-e9c7-4628-b3a9-7646a4b73e47",
+              "name": "WorkBuddy P0 — dedicated local acceptance",
+              "editable": true,
+              "viewable": true,
+              "published": false,
+              "publication": {
+                "sceneId": 665,
+                "published": false,
+                "snapshotId": null,
+                "snapshotUuid": null,
+                "verification": "current_snapshot"
+              },
+              "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+              "moduleCount": 1,
+              "space": null
+            },
+            "selectedModuleIds": []
+          },
+          "omittedExplanatoryFields": ["workflowGuide"]
+        }
+      ],
+      "nonMcpCalls": [
+        {
+          "name": "ToolSearch",
+          "callLine": 135,
+          "resultLine": 136,
+          "startedAt": "2026-09-16T16:22:07.239000+00:00",
+          "completedAt": "2026-09-16T16:22:07.244000+00:00",
+          "status": "completed",
+          "classification": "client tool discovery",
+          "argumentKeys": ["queries", "top_k"]
+        }
+      ],
+      "observations": {
+        "allBusinessCallsReadOnly": true,
+        "mutatingBusinessCallCount": 0,
+        "allBusinessCallsFollowedFreshList": true,
+        "actualExecutionOrder": "sequential",
+        "sceneId": 665,
+        "moduleId": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+        "position": {
+          "x": 0.25,
+          "y": 0,
+          "z": 0
+        },
+        "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+        "operationStatus": "completed",
+        "operationVerification": "server_acknowledged",
+        "sceneReady": true,
+        "sceneDirty": false,
+        "workspaceReady": true,
+        "workspaceDirty": false,
+        "published": false,
+        "operationRevisionMatchesCurrentScene": true,
+        "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+        "limits": [
+          "This record verifies real tool results after the observed page reload and re-pairing; it does not independently perform a browser refresh.",
+          "The conversation includes one non-MCP ToolSearch call for client discovery; no other non-MCP tool calls occurred in this recorded turn."
+        ]
+      }
+    },
+    "browserObservation": {
+      "pageFullyReloaded": true,
+      "rePaired": true,
+      "visiblePosition": {
+        "x": 0.25,
+        "y": 0,
+        "z": 0
+      },
+      "visibleRotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "visibleScale": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      }
+    }
+  },
+  "clientLimitations": [
+    "WorkBuddy invoked shell and wrote its task memory despite the MCP-only instruction; business calls were still executed through the WebMCP connector.",
+    "First registration token after reload was rejected; generating another fresh token restored pairing without modifying the bridge."
+  ],
+  "clientInstructionFollowingAudit": {
+    "nonMcpCallCount": 3,
+    "nonMcpTools": ["Bash(ls)", "Bash(mkdir)", "Write(task memory)"],
+    "memoryWriteConfirmed": true,
+    "credentialPatternScan": {
+      "jwtShapedValuePresent": false,
+      "registrationTokenPresent": false,
+      "credentialAssignmentFieldsPresent": false
+    },
+    "scope": "Only the receipt-verification round and its memory file; content and private paths omitted."
+  },
+  "rePairing": {
+    "firstNewToken": "rejected",
+    "secondNewToken": "connected; 28 page tools available",
+    "upstreamSourceObservation": "In 0.1.13, stdio token generation and daemon delayed channel cleanup can each overwrite the entire token map from process memory. The cleanup path does not reload it first.",
+    "causality": "Race is possible by source inspection; no daemon cleanup timestamp proving this was the unique cause of this rejection.",
+    "bridgeModified": false,
+    "saveReplayed": false
+  },
+  "acceptanceStatus": "P0 isolated local scene edit loop passed; broader real-client acceptance pending"
+}

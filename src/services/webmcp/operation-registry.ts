@@ -140,7 +140,7 @@ export function withOperationReceipts(
     return {
       ...tool,
       description: `${tool.description} 此调用快速返回 operationId 和当前状态；页面确认仍需完成。之后调用 xrugc_get_operation_status 查询最终结果，不能把等待状态当作成功，也不要重复提交。`,
-      execute(input: unknown) {
+      execute(input: unknown, execution?: { signal: AbortSignal }) {
         const scope = requireScope();
         const draftId = (input as { draftId?: unknown })?.draftId;
         if (!validOperationId(draftId))
@@ -208,9 +208,17 @@ export function withOperationReceipts(
             persist();
           },
         });
-        const abort = () => controller.abort(lifecycle.reason);
-        lifecycle.addEventListener("abort", abort, { once: true });
-        if (lifecycle.aborted) abort();
+        // A replaced tool loses its individual registration signal before the
+        // rest of its page owner is disposed. Revoke that pending confirmation
+        // too, while retaining the existing receipt semantics after submission.
+        const signals = new Set([lifecycle]);
+        if (execution?.signal) signals.add(execution.signal);
+        const abortListeners = [...signals].map((signal) => {
+          const abort = () => controller.abort(signal.reason);
+          signal.addEventListener("abort", abort, { once: true });
+          if (signal.aborted) abort();
+          return { signal, abort };
+        });
         persist();
         void Promise.resolve()
           .then(() => tool.execute(input, { signal: controller.signal }))
@@ -245,7 +253,8 @@ export function withOperationReceipts(
             }
           )
           .finally(() => {
-            lifecycle.removeEventListener("abort", abort);
+            for (const { signal, abort } of abortListeners)
+              signal.removeEventListener("abort", abort);
             entry.controller = undefined;
           });
         return publicState(entry);

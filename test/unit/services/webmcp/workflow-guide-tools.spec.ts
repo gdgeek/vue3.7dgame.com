@@ -304,10 +304,10 @@ describe("site workflow guide", () => {
   });
 
   it("keeps ordinary pages functional without browser WebMCP support", () => {
-    expect(
-      registerWebMcpTools(withWorkflowGuide([], "scene"), {
-        document: {} as Document,
-      })
-    ).toBeNull();
+    const lifecycle = registerWebMcpTools(withWorkflowGuide([], "scene"), {
+      document: {} as Document,
+    });
+    expect(lifecycle).toBeInstanceOf(AbortController);
+    lifecycle?.abort();
   });
 });

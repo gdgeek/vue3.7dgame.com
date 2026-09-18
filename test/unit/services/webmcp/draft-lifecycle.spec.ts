@@ -205,6 +205,8 @@ describe("draft failure lifecycle", () => {
     });
   });
   it("does not require a polyfill on unsupported browsers", () => {
-    expect(registerWebMcpTools([], { document: {} as Document })).toBeNull();
+    const lifecycle = registerWebMcpTools([], { document: {} as Document });
+    expect(lifecycle).toBeInstanceOf(AbortController);
+    lifecycle?.abort();
   });
 });

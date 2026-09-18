@@ -48,7 +48,7 @@ describe("registered tool inventory", () => {
     expect(getRegisteredWebMcpSchema("test", doc)).toBeNull();
     await expect(invokeRegisteredWebMcpTool("test", {}, doc)).rejects.toThrow();
   });
-  it("omits failed registrations and removes disposed tools", async () => {
+  it("retains the shared inventory after native registration failure and removes disposed tools", async () => {
     const doc = {
       modelContext: { registerTool: vi.fn() },
     } as unknown as Document;
@@ -60,9 +60,12 @@ describe("registered tool inventory", () => {
     (doc as any).modelContext.registerTool.mockRejectedValue(
       new Error("unsupported")
     );
-    registerWebMcpTools([tool], { document: doc });
+    const fallback = registerWebMcpTools([tool], { document: doc });
     await Promise.resolve();
     await Promise.resolve();
+    expect(getRegisteredWebMcpTools(doc).map((t) => t.name)).toEqual(["test"]);
+    expect(await invokeRegisteredWebMcpTool("test", {}, doc)).toEqual({});
+    fallback?.abort();
     expect(getRegisteredWebMcpTools(doc)).toEqual([]);
   });
   it("does not resurrect a tool whose registration resolves after disposal", async () => {
