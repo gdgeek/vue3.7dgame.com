@@ -110,3 +110,36 @@ describe("publication history privacy and export", () => {
     expect(document.body.textContent).not.toContain("sha256:abc");
   });
 });
+
+it("shows retention policy and an explicit expired-version message", async () => {
+  api.list.mockResolvedValueOnce({
+    data: {
+      sceneId: 1,
+      items: [row],
+      total: 1,
+      totalBytes: 100,
+      sceneBudgetBytes: 512000000,
+      retention: {
+        maxVersions: 20,
+        expiredVersions: 1,
+        policy: "latest_versions",
+        expiredVersionHttpStatus: 410,
+      },
+    },
+  });
+  click("common.publicationHistory.refresh");
+  await flush();
+  expect(document.body.textContent).toContain(
+    "common.publicationHistory.retention"
+  );
+  api.read.mockRejectedValueOnce({
+    response: { status: 410, data: { message: "publication_version_expired" } },
+  });
+  click("common.publicationHistory.inspect");
+  await flush();
+  expect(document.body.textContent).toContain(
+    "common.publicationHistory.expired"
+  );
+  expect(document.body.textContent).not.toContain("sha256:abc");
+  expect(api.read).toHaveBeenCalledTimes(1);
+});

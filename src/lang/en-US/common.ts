@@ -19,6 +19,10 @@ export default {
       failed: "Read failed or access changed. Server content is not displayed.",
     },
     publicationHistory: {
+      retention:
+        "Keeps the latest {count} publication bodies. Older bodies are automatically removed; the current publication is unaffected.",
+      expired:
+        "This version body has expired under the retention policy. Refresh the list to choose a retained version; do not republish.",
       from: "From version",
       to: "To version",
       compare: "Compare publications",

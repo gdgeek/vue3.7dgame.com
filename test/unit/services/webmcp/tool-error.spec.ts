@@ -116,3 +116,29 @@ it("preserves allowlisted resource diagnostics across the native tool boundary",
   });
   expect(structuredClone(result)).toEqual(result);
 });
+
+it("reports expired publication bodies without leaking the backend response or advising retry", async () => {
+  const { webMcpToolError } = await import("@/services/webmcp/tool-error");
+  const result = webMcpToolError(
+    {
+      response: {
+        status: 410,
+        data: {
+          message: "publication_version_expired",
+          canonicalBody: "private",
+          token: "secret",
+        },
+      },
+    },
+    true
+  );
+  expect(result).toMatchObject({
+    isError: true,
+    errorCode: "publication_version_expired",
+    httpStatus: 410,
+  });
+  expect(result.nextStep).toContain("xrugc_list_scene_publications");
+  expect(result.nextStep).toContain("不要重试");
+  expect(JSON.stringify(result)).not.toMatch(/private|secret|canonicalBody/);
+  expect(structuredClone(result)).toEqual(result);
+});
