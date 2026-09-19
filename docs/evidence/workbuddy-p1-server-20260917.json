@@ -1,0 +1,2233 @@
+{
+  "scope": "Dedicated local database only; actual persisted models and receipts",
+  "snapshots": {
+    "p1-after-cancel": {
+      "observedAt": "2026-09-16T16:47:42+00:00",
+      "database": "xrugc_webmcp_p0_20260916",
+      "objects": [
+        {
+          "type": "verse",
+          "id": 665,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+                    "title": "P0 movable cube instance",
+                    "active": true,
+                    "meta_id": 1090,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.25,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a34e9708-e9c7-4628-b3a9-7646a4b73e47"
+            }
+          },
+          "dataSha256": "dbf2331eb1608fbb72e230835c897dfa47b053aa49718abf7bfd8de6fd0f8683",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": [
+            {
+              "operation_id": "357200bb-58f6-41cc-86b1-81083d06f980",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+                "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+                "status": "completed",
+                "targetId": 665,
+                "targetType": "verse"
+              },
+              "created_at": 1789574753
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 666,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "f8aa4641-7013-484d-829b-53d329816b2f"
+            }
+          },
+          "dataSha256": "b9bfb44245a87907b9c838d38794945f8f1c74dad38e191192d2c6f98f7b438c",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "verse",
+          "id": 667,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "bc11f53b-d715-4671-8015-aa5b0a14f2e3",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a4f3dfb5-b1ff-4a74-9d18-9cea67557f04"
+            }
+          },
+          "dataSha256": "decb8d64cc788142807f91bc0246baf8d2900b0eb5113956cb418c0f2d4b7105",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1090,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P0 Acceptance Cube",
+                    "uuid": "1b78ef5b-8f0e-473c-a726-a14c9e261cd0",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "031809f1-829f-41f2-b115-1e48640fed22"
+            }
+          },
+          "dataSha256": "273a55fb306dd07393ecb215de9825068e55fa6be0e87cc8319a38e763b66d5e",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1091,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P1 cube node",
+                    "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "631f5e7a-4317-4cd0-9c08-f729837d3e66"
+            }
+          },
+          "dataSha256": "7017efef0cfdf38b4d46b2f854b509d2290e35d483ddddc23197d6ae0b12ae7a",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        }
+      ]
+    },
+    "p1-after-disconnected-confirm": {
+      "observedAt": "2026-09-16T16:52:01+00:00",
+      "database": "xrugc_webmcp_p0_20260916",
+      "objects": [
+        {
+          "type": "verse",
+          "id": 665,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+                    "title": "P0 movable cube instance",
+                    "active": true,
+                    "meta_id": 1090,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.25,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a34e9708-e9c7-4628-b3a9-7646a4b73e47"
+            }
+          },
+          "dataSha256": "dbf2331eb1608fbb72e230835c897dfa47b053aa49718abf7bfd8de6fd0f8683",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": [
+            {
+              "operation_id": "357200bb-58f6-41cc-86b1-81083d06f980",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+                "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+                "status": "completed",
+                "targetId": 665,
+                "targetType": "verse"
+              },
+              "created_at": 1789574753
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 666,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.2,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "f8aa4641-7013-484d-829b-53d329816b2f"
+            }
+          },
+          "dataSha256": "0ad851fb8d0ed051f28ab72b5037605468f5b606948fdad93f15d53c81d7f180",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": [
+            {
+              "operation_id": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+                "serverRevision": "sha256:a2ff79e53d225c02b99a4844c180c23f9bd17a43f88fe5f6d4e737dfb117c792",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577447
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 667,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "bc11f53b-d715-4671-8015-aa5b0a14f2e3",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a4f3dfb5-b1ff-4a74-9d18-9cea67557f04"
+            }
+          },
+          "dataSha256": "decb8d64cc788142807f91bc0246baf8d2900b0eb5113956cb418c0f2d4b7105",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1090,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P0 Acceptance Cube",
+                    "uuid": "1b78ef5b-8f0e-473c-a726-a14c9e261cd0",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "031809f1-829f-41f2-b115-1e48640fed22"
+            }
+          },
+          "dataSha256": "273a55fb306dd07393ecb215de9825068e55fa6be0e87cc8319a38e763b66d5e",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1091,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P1 cube node",
+                    "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "631f5e7a-4317-4cd0-9c08-f729837d3e66"
+            }
+          },
+          "dataSha256": "7017efef0cfdf38b4d46b2f854b509d2290e35d483ddddc23197d6ae0b12ae7a",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        }
+      ]
+    },
+    "p1-after-scene-script": {
+      "observedAt": "2026-09-16T17:03:48+00:00",
+      "database": "xrugc_webmcp_p0_20260916",
+      "objects": [
+        {
+          "type": "verse",
+          "id": 665,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+                    "title": "P0 movable cube instance",
+                    "active": true,
+                    "meta_id": 1090,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.25,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a34e9708-e9c7-4628-b3a9-7646a4b73e47"
+            }
+          },
+          "dataSha256": "dbf2331eb1608fbb72e230835c897dfa47b053aa49718abf7bfd8de6fd0f8683",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": [
+            {
+              "operation_id": "357200bb-58f6-41cc-86b1-81083d06f980",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+                "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+                "status": "completed",
+                "targetId": 665,
+                "targetType": "verse"
+              },
+              "created_at": 1789574753
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 666,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.2,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "f8aa4641-7013-484d-829b-53d329816b2f"
+            }
+          },
+          "dataSha256": "0ad851fb8d0ed051f28ab72b5037605468f5b606948fdad93f15d53c81d7f180",
+          "code": {
+            "blockly": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"controls_if\",\"id\":\"p1s1_if_001\",\"x\":20,\"y\":20,\"inputs\":{\"IF0\":{\"block\":{\"type\":\"logic_boolean\",\"id\":\"p1s1_bool_001\",\"fields\":{\"BOOL\":\"FALSE\"}}}}}]},\"backpack\":[]}",
+            "lua": "if false then\nend\n",
+            "js": "if (false) {\n}\n"
+          },
+          "codeSha256": "46a19d4b70d762f68762f2489eeec4e316bf53942a4b808123b4e39b846f66a3",
+          "operations": [
+            {
+              "operation_id": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+                "serverRevision": "sha256:a2ff79e53d225c02b99a4844c180c23f9bd17a43f88fe5f6d4e737dfb117c792",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577447
+            },
+            {
+              "operation_id": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+                "serverRevision": "sha256:90a33ff84fc521c7f8e92f117786599af7c540b892929703ced1adfe68091f70",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577976
+            },
+            {
+              "operation_id": "f7a325ba-d753-4898-a616-168cdfdd4209",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+                "serverRevision": "sha256:66fae68da3400a1124c8f275beedc893cd6de4a667eecc90df18f07f27121924",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578181
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 667,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "bc11f53b-d715-4671-8015-aa5b0a14f2e3",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a4f3dfb5-b1ff-4a74-9d18-9cea67557f04"
+            }
+          },
+          "dataSha256": "decb8d64cc788142807f91bc0246baf8d2900b0eb5113956cb418c0f2d4b7105",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1090,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P0 Acceptance Cube",
+                    "uuid": "1b78ef5b-8f0e-473c-a726-a14c9e261cd0",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "031809f1-829f-41f2-b115-1e48640fed22"
+            }
+          },
+          "dataSha256": "273a55fb306dd07393ecb215de9825068e55fa6be0e87cc8319a38e763b66d5e",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1091,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P1 cube node",
+                    "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "631f5e7a-4317-4cd0-9c08-f729837d3e66"
+            }
+          },
+          "dataSha256": "7017efef0cfdf38b4d46b2f854b509d2290e35d483ddddc23197d6ae0b12ae7a",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        }
+      ]
+    },
+    "p1-after-lost-response": {
+      "observedAt": "2026-09-16T17:07:40+00:00",
+      "database": "xrugc_webmcp_p0_20260916",
+      "objects": [
+        {
+          "type": "verse",
+          "id": 665,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+                    "title": "P0 movable cube instance",
+                    "active": true,
+                    "meta_id": 1090,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.25,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a34e9708-e9c7-4628-b3a9-7646a4b73e47"
+            }
+          },
+          "dataSha256": "dbf2331eb1608fbb72e230835c897dfa47b053aa49718abf7bfd8de6fd0f8683",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": [
+            {
+              "operation_id": "357200bb-58f6-41cc-86b1-81083d06f980",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+                "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+                "status": "completed",
+                "targetId": 665,
+                "targetType": "verse"
+              },
+              "created_at": 1789574753
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 666,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.2,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "f8aa4641-7013-484d-829b-53d329816b2f"
+            }
+          },
+          "dataSha256": "0ad851fb8d0ed051f28ab72b5037605468f5b606948fdad93f15d53c81d7f180",
+          "code": {
+            "blockly": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"controls_if\",\"id\":\"p1s1_if_001\",\"x\":20,\"y\":20,\"inputs\":{\"IF0\":{\"block\":{\"type\":\"logic_boolean\",\"id\":\"p1s1_bool_001\",\"fields\":{\"BOOL\":\"FALSE\"}}}}}]},\"backpack\":[]}",
+            "lua": "if false then\nend\n",
+            "js": "if (false) {\n}\n"
+          },
+          "codeSha256": "46a19d4b70d762f68762f2489eeec4e316bf53942a4b808123b4e39b846f66a3",
+          "operations": [
+            {
+              "operation_id": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+                "serverRevision": "sha256:a2ff79e53d225c02b99a4844c180c23f9bd17a43f88fe5f6d4e737dfb117c792",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577447
+            },
+            {
+              "operation_id": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+                "serverRevision": "sha256:90a33ff84fc521c7f8e92f117786599af7c540b892929703ced1adfe68091f70",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577976
+            },
+            {
+              "operation_id": "f7a325ba-d753-4898-a616-168cdfdd4209",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+                "serverRevision": "sha256:66fae68da3400a1124c8f275beedc893cd6de4a667eecc90df18f07f27121924",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578181
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 667,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "bc11f53b-d715-4671-8015-aa5b0a14f2e3",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a4f3dfb5-b1ff-4a74-9d18-9cea67557f04"
+            }
+          },
+          "dataSha256": "decb8d64cc788142807f91bc0246baf8d2900b0eb5113956cb418c0f2d4b7105",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1090,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P0 Acceptance Cube",
+                    "uuid": "1b78ef5b-8f0e-473c-a726-a14c9e261cd0",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "031809f1-829f-41f2-b115-1e48640fed22"
+            }
+          },
+          "dataSha256": "273a55fb306dd07393ecb215de9825068e55fa6be0e87cc8319a38e763b66d5e",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1091,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P1 cube node",
+                    "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "631f5e7a-4317-4cd0-9c08-f729837d3e66"
+            }
+          },
+          "dataSha256": "7017efef0cfdf38b4d46b2f854b509d2290e35d483ddddc23197d6ae0b12ae7a",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        }
+      ]
+    },
+    "p1-after-manual-scene": {
+      "observedAt": "2026-09-16T17:11:53+00:00",
+      "database": "xrugc_webmcp_p0_20260916",
+      "objects": [
+        {
+          "type": "verse",
+          "id": 665,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+                    "title": "P0 movable cube instance",
+                    "active": true,
+                    "meta_id": 1090,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.25,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a34e9708-e9c7-4628-b3a9-7646a4b73e47"
+            }
+          },
+          "dataSha256": "dbf2331eb1608fbb72e230835c897dfa47b053aa49718abf7bfd8de6fd0f8683",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": [
+            {
+              "operation_id": "357200bb-58f6-41cc-86b1-81083d06f980",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+                "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+                "status": "completed",
+                "targetId": 665,
+                "targetType": "verse"
+              },
+              "created_at": 1789574753
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 666,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.4,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "f8aa4641-7013-484d-829b-53d329816b2f"
+            }
+          },
+          "dataSha256": "214e77b54a4f07a1b801f9429c6a83e5af3e0ebea873a6777742c5a2ac1d99d6",
+          "code": {
+            "blockly": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"controls_if\",\"id\":\"p1s1_if_001\",\"x\":20,\"y\":20,\"inputs\":{\"IF0\":{\"block\":{\"type\":\"logic_boolean\",\"id\":\"p1s1_bool_001\",\"fields\":{\"BOOL\":\"FALSE\"}}}}}]},\"backpack\":[]}",
+            "lua": "if false then\nend\n",
+            "js": "if (false) {\n}\n"
+          },
+          "codeSha256": "46a19d4b70d762f68762f2489eeec4e316bf53942a4b808123b4e39b846f66a3",
+          "operations": [
+            {
+              "operation_id": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+                "serverRevision": "sha256:a2ff79e53d225c02b99a4844c180c23f9bd17a43f88fe5f6d4e737dfb117c792",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577447
+            },
+            {
+              "operation_id": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+                "serverRevision": "sha256:90a33ff84fc521c7f8e92f117786599af7c540b892929703ced1adfe68091f70",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577976
+            },
+            {
+              "operation_id": "f7a325ba-d753-4898-a616-168cdfdd4209",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+                "serverRevision": "sha256:66fae68da3400a1124c8f275beedc893cd6de4a667eecc90df18f07f27121924",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578181
+            },
+            {
+              "operation_id": "7f5cbfdd-9af5-4bc7-a3f1-69474d65dbc7",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "7f5cbfdd-9af5-4bc7-a3f1-69474d65dbc7",
+                "serverRevision": "sha256:155e17666f86394eb3a4ae5bd64585c9236dde404a59d4e08f5c9a20bdff1757",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578570
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 667,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "bc11f53b-d715-4671-8015-aa5b0a14f2e3",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a4f3dfb5-b1ff-4a74-9d18-9cea67557f04"
+            }
+          },
+          "dataSha256": "decb8d64cc788142807f91bc0246baf8d2900b0eb5113956cb418c0f2d4b7105",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1090,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P0 Acceptance Cube",
+                    "uuid": "1b78ef5b-8f0e-473c-a726-a14c9e261cd0",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "031809f1-829f-41f2-b115-1e48640fed22"
+            }
+          },
+          "dataSha256": "273a55fb306dd07393ecb215de9825068e55fa6be0e87cc8319a38e763b66d5e",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1091,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P1 cube node",
+                    "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "631f5e7a-4317-4cd0-9c08-f729837d3e66"
+            }
+          },
+          "dataSha256": "7017efef0cfdf38b4d46b2f854b509d2290e35d483ddddc23197d6ae0b12ae7a",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        }
+      ]
+    },
+    "p1-after-conflict": {
+      "observedAt": "2026-09-16T17:21:45+00:00",
+      "database": "xrugc_webmcp_p0_20260916",
+      "objects": [
+        {
+          "type": "verse",
+          "id": 665,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+                    "title": "P0 movable cube instance",
+                    "active": true,
+                    "meta_id": 1090,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.25,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a34e9708-e9c7-4628-b3a9-7646a4b73e47"
+            }
+          },
+          "dataSha256": "dbf2331eb1608fbb72e230835c897dfa47b053aa49718abf7bfd8de6fd0f8683",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": [
+            {
+              "operation_id": "357200bb-58f6-41cc-86b1-81083d06f980",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+                "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+                "status": "completed",
+                "targetId": 665,
+                "targetType": "verse"
+              },
+              "created_at": 1789574753
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 666,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.4,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "f8aa4641-7013-484d-829b-53d329816b2f"
+            }
+          },
+          "dataSha256": "214e77b54a4f07a1b801f9429c6a83e5af3e0ebea873a6777742c5a2ac1d99d6",
+          "code": {
+            "blockly": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"controls_if\",\"id\":\"p1s1_if_001\",\"x\":20,\"y\":20,\"inputs\":{\"IF0\":{\"block\":{\"type\":\"logic_boolean\",\"id\":\"p1s1_bool_001\",\"fields\":{\"BOOL\":\"TRUE\"}}}}}]},\"backpack\":[]}",
+            "lua": "if true then\nend\n",
+            "js": "if (true) {\n}\n"
+          },
+          "codeSha256": "d8b25d80d4dc105e9083324a756f28de06fe7cd3f9011c0347f3a8e9f0c16e56",
+          "operations": [
+            {
+              "operation_id": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+                "serverRevision": "sha256:a2ff79e53d225c02b99a4844c180c23f9bd17a43f88fe5f6d4e737dfb117c792",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577447
+            },
+            {
+              "operation_id": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+                "serverRevision": "sha256:90a33ff84fc521c7f8e92f117786599af7c540b892929703ced1adfe68091f70",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577976
+            },
+            {
+              "operation_id": "f7a325ba-d753-4898-a616-168cdfdd4209",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+                "serverRevision": "sha256:66fae68da3400a1124c8f275beedc893cd6de4a667eecc90df18f07f27121924",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578181
+            },
+            {
+              "operation_id": "7f5cbfdd-9af5-4bc7-a3f1-69474d65dbc7",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "7f5cbfdd-9af5-4bc7-a3f1-69474d65dbc7",
+                "serverRevision": "sha256:155e17666f86394eb3a4ae5bd64585c9236dde404a59d4e08f5c9a20bdff1757",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578570
+            },
+            {
+              "operation_id": "ba345808-7b4d-4083-8409-c1d12f4b0473",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "ba345808-7b4d-4083-8409-c1d12f4b0473",
+                "serverRevision": "sha256:f12d987106d7bfde14bb44bf22378e30cdaea2a04633ee9a04bcfd0d5bfea2c6",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578811
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 667,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "bc11f53b-d715-4671-8015-aa5b0a14f2e3",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a4f3dfb5-b1ff-4a74-9d18-9cea67557f04"
+            }
+          },
+          "dataSha256": "decb8d64cc788142807f91bc0246baf8d2900b0eb5113956cb418c0f2d4b7105",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1090,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P0 Acceptance Cube",
+                    "uuid": "1b78ef5b-8f0e-473c-a726-a14c9e261cd0",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "031809f1-829f-41f2-b115-1e48640fed22"
+            }
+          },
+          "dataSha256": "273a55fb306dd07393ecb215de9825068e55fa6be0e87cc8319a38e763b66d5e",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1091,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P1 cube node",
+                    "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "631f5e7a-4317-4cd0-9c08-f729837d3e66"
+            }
+          },
+          "dataSha256": "7017efef0cfdf38b4d46b2f854b509d2290e35d483ddddc23197d6ae0b12ae7a",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        }
+      ]
+    },
+    "p1-after-200-response-lost": {
+      "observedAt": "2026-09-16T17:27:17+00:00",
+      "database": "xrugc_webmcp_p0_20260916",
+      "objects": [
+        {
+          "type": "verse",
+          "id": 665,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "d17d2e3a-db87-4f52-b9a3-734b8475aa09",
+                    "title": "P0 movable cube instance",
+                    "active": true,
+                    "meta_id": 1090,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.25,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a34e9708-e9c7-4628-b3a9-7646a4b73e47"
+            }
+          },
+          "dataSha256": "dbf2331eb1608fbb72e230835c897dfa47b053aa49718abf7bfd8de6fd0f8683",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": [
+            {
+              "operation_id": "357200bb-58f6-41cc-86b1-81083d06f980",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "357200bb-58f6-41cc-86b1-81083d06f980",
+                "serverRevision": "sha256:0cdce0852729e24ddf472b274b1c6af8d200c7fdcce89c086b35b692947fd54a",
+                "status": "completed",
+                "targetId": 665,
+                "targetType": "verse"
+              },
+              "created_at": 1789574753
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 666,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0.5,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "f8aa4641-7013-484d-829b-53d329816b2f"
+            }
+          },
+          "dataSha256": "3639504ce54ca8cca2d010c6af75f640ed4a8902602ce8887bd164bbaf9a239b",
+          "code": {
+            "blockly": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"controls_if\",\"id\":\"p1s1_if_001\",\"x\":20,\"y\":20,\"inputs\":{\"IF0\":{\"block\":{\"type\":\"logic_boolean\",\"id\":\"p1s1_bool_001\",\"fields\":{\"BOOL\":\"TRUE\"}}}}}]},\"backpack\":[]}",
+            "lua": "if true then\nend\n",
+            "js": "if (true) {\n}\n"
+          },
+          "codeSha256": "d8b25d80d4dc105e9083324a756f28de06fe7cd3f9011c0347f3a8e9f0c16e56",
+          "operations": [
+            {
+              "operation_id": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+                "serverRevision": "sha256:a2ff79e53d225c02b99a4844c180c23f9bd17a43f88fe5f6d4e737dfb117c792",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577447
+            },
+            {
+              "operation_id": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "5a064fe5-2909-4fa3-b1f8-4e797fc8476f",
+                "serverRevision": "sha256:90a33ff84fc521c7f8e92f117786599af7c540b892929703ced1adfe68091f70",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789577976
+            },
+            {
+              "operation_id": "f7a325ba-d753-4898-a616-168cdfdd4209",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+                "serverRevision": "sha256:66fae68da3400a1124c8f275beedc893cd6de4a667eecc90df18f07f27121924",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578181
+            },
+            {
+              "operation_id": "7f5cbfdd-9af5-4bc7-a3f1-69474d65dbc7",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "7f5cbfdd-9af5-4bc7-a3f1-69474d65dbc7",
+                "serverRevision": "sha256:155e17666f86394eb3a4ae5bd64585c9236dde404a59d4e08f5c9a20bdff1757",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578570
+            },
+            {
+              "operation_id": "ba345808-7b4d-4083-8409-c1d12f4b0473",
+              "action": "save_code",
+              "receipt": {
+                "action": "save_code",
+                "operationId": "ba345808-7b4d-4083-8409-c1d12f4b0473",
+                "serverRevision": "sha256:f12d987106d7bfde14bb44bf22378e30cdaea2a04633ee9a04bcfd0d5bfea2c6",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789578811
+            },
+            {
+              "operation_id": "5c33525d-0012-4728-9a3d-5f8e7567f249",
+              "action": "save",
+              "receipt": {
+                "action": "save",
+                "operationId": "5c33525d-0012-4728-9a3d-5f8e7567f249",
+                "serverRevision": "sha256:235054ba487329e04bc10b7ebdc54e3d42e733367aea34be9dbcde4f5bc9857a",
+                "status": "completed",
+                "targetId": 666,
+                "targetType": "verse"
+              },
+              "created_at": 1789579617
+            }
+          ]
+        },
+        {
+          "type": "verse",
+          "id": 667,
+          "data": {
+            "type": "Verse",
+            "children": {
+              "modules": [
+                {
+                  "type": "Module",
+                  "parameters": {
+                    "uuid": "bc11f53b-d715-4671-8015-aa5b0a14f2e3",
+                    "title": "P1 cube instance",
+                    "active": true,
+                    "meta_id": 1091,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "a4f3dfb5-b1ff-4a74-9d18-9cea67557f04"
+            }
+          },
+          "dataSha256": "decb8d64cc788142807f91bc0246baf8d2900b0eb5113956cb418c0f2d4b7105",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1090,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P0 Acceptance Cube",
+                    "uuid": "1b78ef5b-8f0e-473c-a726-a14c9e261cd0",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "031809f1-829f-41f2-b115-1e48640fed22"
+            }
+          },
+          "dataSha256": "273a55fb306dd07393ecb215de9825068e55fa6be0e87cc8319a38e763b66d5e",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        },
+        {
+          "type": "meta",
+          "id": 1091,
+          "data": {
+            "type": "MetaRoot",
+            "children": {
+              "addons": [],
+              "entities": [
+                {
+                  "type": "Polygen",
+                  "children": {
+                    "commands": [],
+                    "entities": [],
+                    "components": []
+                  },
+                  "parameters": {
+                    "name": "P1 cube node",
+                    "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+                    "active": true,
+                    "resource": 5495,
+                    "transform": {
+                      "scale": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      },
+                      "rotate": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    },
+                    "isCollider": false
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "uuid": "631f5e7a-4317-4cd0-9c08-f729837d3e66"
+            }
+          },
+          "dataSha256": "7017efef0cfdf38b4d46b2f854b509d2290e35d483ddddc23197d6ae0b12ae7a",
+          "code": {
+            "blockly": "{}",
+            "lua": "",
+            "js": ""
+          },
+          "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+          "operations": []
+        }
+      ]
+    }
+  },
+  "faults": [
+    {
+      "at": "2026-09-16T17:07:23.639Z",
+      "mode": "drop-write-response",
+      "method": "PUT",
+      "path": "/api/v1/verses/666",
+      "upstreamStatus": 409,
+      "operationId": "537669e2-2848-4c07-ab8b-590dab52027f"
+    },
+    {
+      "at": "2026-09-16T17:26:57.430Z",
+      "mode": "drop-write-response",
+      "method": "PUT",
+      "path": "/api/v1/verses/666",
+      "upstreamStatus": 200,
+      "operationId": "5c33525d-0012-4728-9a3d-5f8e7567f249"
+    }
+  ]
+}

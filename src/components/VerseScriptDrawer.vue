@@ -9,7 +9,7 @@
     editor-label-key="route.project.scriptEditor"
     save-label-key="verse.view.script.save"
     @closed="$emit('closed')"
-    @saved="$emit('saved')"
+    @saved="$emit('saved', $event)"
   ></EditorScriptDrawer>
 </template>
 
@@ -28,7 +28,7 @@ defineProps<{
   sceneData?: unknown;
   beforePublish?: () => Promise<void>;
 }>();
-defineEmits<{ closed: []; saved: [] }>();
+defineEmits<{ closed: []; saved: [payload: unknown] }>();
 const drawer = ref<ScriptDrawerHandle>();
 
 defineExpose({

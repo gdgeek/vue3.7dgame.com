@@ -24,6 +24,18 @@
           ></font-awesome-icon>
           <span>{{ t("ui.personalSettings") }}</span>
         </router-link>
+        <button
+          v-if="webMcpDevEnabled"
+          type="button"
+          class="dropdown-item"
+          @click="openAiConnection"
+        >
+          <font-awesome-icon
+            :icon="['fas', 'robot']"
+            class="dropdown-icon"
+          ></font-awesome-icon>
+          <span>{{ webMcpDevLabel(locale) }}</span>
+        </button>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item danger" @click="handleLogout">
           <font-awesome-icon
@@ -46,18 +58,40 @@
       :cancel-text="t('common.cancel')"
       @confirm="confirmLogout"
     ></ConfirmDialog>
+    <WebMcpDevDialog
+      v-if="showAiConnection"
+      v-model="showAiConnection"
+    ></WebMcpDevDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import {
+  ref,
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  onUnmounted,
+} from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import ConfirmDialog from "@/components/Dialog/ConfirmDialog.vue";
 import { useUserStore } from "@/store";
 import { getUserAvatarUrl } from "@/utils/avatar";
+import {
+  webMcpDevEnabled,
+  webMcpDevLabel,
+} from "@/services/webmcp/dev-feature";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const WebMcpDevDialog = defineAsyncComponent(
+  () => import("@/components/WebMcpDevDialog.vue")
+);
+const showAiConnection = ref(false);
+const openAiConnection = () => {
+  isMenuOpen.value = false;
+  showAiConnection.value = true;
+};
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -182,6 +216,13 @@ onUnmounted(() => {
   width: 14px;
   height: 14px;
   margin-right: 8px;
+}
+
+button.dropdown-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
 }
 
 @media (width <= 1280px) {

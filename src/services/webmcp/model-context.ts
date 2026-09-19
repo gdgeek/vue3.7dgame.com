@@ -3,6 +3,7 @@ import {
   withOperationReceipts,
   type OperationRegistration,
 } from "./operation-registry";
+import { getWebMcpToolRegistry } from "./tool-registry";
 export type WebMcpToolAnnotations = {
   readOnlyHint?: boolean;
   untrustedContentHint?: boolean;
@@ -45,34 +46,11 @@ export type WebMcpRegistrationOptions = {
   onRegistrationError?: (toolName: string, error: unknown) => void;
 };
 
-type RegisteredDescriptor = Pick<WebMcpTool, "name" | "title" | "annotations">;
-const inventories = new WeakMap<
-  Document,
-  Map<
-    string,
-    {
-      owner: AbortController;
-      order: number;
-      tool: WebMcpTool;
-      descriptor: RegisteredDescriptor;
-    }
-  >
->();
-
-let registrationOrder = 0;
-
-/** Only tools whose registration succeeded and whose lifetime is still active. */
-export const getRegisteredWebMcpTools = (target: Document = document) =>
-  [...(inventories.get(target)?.values() ?? [])].map(({ descriptor }) => ({
-    ...descriptor,
-    annotations: { ...descriptor.annotations },
-  }));
-
 /**
  * Register a page-scoped set of WebMCP tools.
  *
- * Unsupported browsers are intentionally a no-op. Aborting the returned
- * controller unregisters every tool registered by this call.
+ * Tools remain available to optional transports without native browser support.
+ * Aborting the returned controller unregisters this call's tools.
  */
 export const registerWebMcpTools = (
   tools: WebMcpTool[],
@@ -83,63 +61,59 @@ export const registerWebMcpTools = (
     | WebMcpDocument
     | undefined;
   const modelContext = targetDocument?.modelContext;
-
-  if (!modelContext?.registerTool) return null;
+  const registry = getWebMcpToolRegistry(targetDocument);
+  if (!registry) return null;
 
   const lifecycle = new AbortController();
-  const inventory = inventories.get(targetDocument!) ?? new Map();
-  inventories.set(targetDocument!, inventory);
-  lifecycle.signal.addEventListener(
-    "abort",
-    () => {
-      for (const [name, entry] of inventory) {
-        if (entry.owner === lifecycle) inventory.delete(name);
-      }
-    },
-    { once: true }
-  );
 
-  const registeredTools = options.operations
+  const businessTools = options.operations
     ? withOperationReceipts(tools, options.operations, lifecycle.signal)
     : tools;
-  for (const tool of registeredTools) {
-    const order = ++registrationOrder;
-    let registeredTool: WebMcpTool;
+  const registeredTools = registry.register(
+    businessTools.map((tool) => ({
+      ...tool,
+      async execute(input: unknown, execution?: { signal: AbortSignal }) {
+        lifecycle.signal.throwIfAborted();
+        const loading = options.getEditorLoadingState?.();
+        if (
+          loading?.blocked &&
+          ![
+            "xrugc_get_scene_editor_context",
+            "xrugc_get_editor_context",
+            "xrugc_get_workflow_guide",
+            "xrugc_get_operation_status",
+            "xrugc_cancel_operation",
+            "xrugc_list_scene_publications",
+            "xrugc_get_scene_publication_version",
+            "xrugc_compare_scene_publications",
+            "xrugc_export_scene_publication",
+          ].includes(tool.name)
+        ) {
+          return {
+            ...loading,
+            applied: false,
+            nextStep:
+              "请先读取工作区上下文，等待 ready=true 后再操作；status=error 时请用户重新载入。",
+          };
+        }
+        return tool.execute(input, {
+          signal: execution?.signal ?? lifecycle.signal,
+        });
+      },
+    })),
+    lifecycle
+  );
+  if (!modelContext?.registerTool) return lifecycle;
+
+  for (const { tool, signal } of registeredTools) {
     try {
       void Promise.resolve(
         modelContext.registerTool(
-          (registeredTool = {
+          {
             ...tool,
             async execute(input) {
               try {
-                lifecycle.signal.throwIfAborted();
-                const loading = options.getEditorLoadingState?.();
-                if (
-                  loading?.blocked &&
-                  ![
-                    "xrugc_get_scene_editor_context",
-                    "xrugc_get_editor_context",
-                    "xrugc_get_workflow_guide",
-                    "xrugc_get_operation_status",
-                    "xrugc_cancel_operation",
-                    "xrugc_list_scene_publications",
-                    "xrugc_get_scene_publication_version",
-                    "xrugc_compare_scene_publications",
-                    "xrugc_export_scene_publication",
-                  ].includes(tool.name)
-                ) {
-                  return {
-                    ...loading,
-                    applied: false,
-                    nextStep:
-                      "请先读取工作区上下文，等待 ready=true 后再操作；status=error 时请用户重新载入。",
-                  };
-                }
-                const result = await tool.execute(input, {
-                  signal: lifecycle.signal,
-                });
-                // Preserve a known commit acknowledgment even if disposal races its delivery.
-                return result;
+                return await tool.execute(input);
               } catch (error) {
                 return webMcpToolError(
                   error,
@@ -147,28 +121,10 @@ export const registerWebMcpTools = (
                 );
               }
             },
-          }),
-          { signal: lifecycle.signal }
+          },
+          { signal }
         )
-      )
-        .then(() => {
-          if (
-            lifecycle.signal.aborted ||
-            (inventory.get(tool.name)?.order ?? 0) > order
-          )
-            return;
-          inventory.set(tool.name, {
-            owner: lifecycle,
-            order,
-            tool: registeredTool,
-            descriptor: {
-              name: tool.name,
-              title: tool.title,
-              annotations: tool.annotations,
-            },
-          });
-        })
-        .catch((error) => options.onRegistrationError?.(tool.name, error));
+      ).catch((error) => options.onRegistrationError?.(tool.name, error));
     } catch (error) {
       options.onRegistrationError?.(tool.name, error);
     }
@@ -177,27 +133,36 @@ export const registerWebMcpTools = (
   return lifecycle;
 };
 
-/** Internal orchestration uses exactly the registered wrapper and its lifecycle/receipt guards. */
+/** Shared inventory remains usable without a native browser API. */
+export const getRegisteredWebMcpTools = (target: Document = document) =>
+  (getWebMcpToolRegistry(target)?.snapshot().tools ?? []).map(
+    ({ name, title, annotations }) => ({ name, title, annotations })
+  );
+
 export const invokeRegisteredWebMcpTool = async (
   name: string,
   input: unknown,
   target: Document = document
 ) => {
-  const entry = inventories.get(target)?.get(name);
-  if (!entry || entry.owner.signal.aborted)
-    throw new Error("当前页面工具不可用");
-  return entry.tool.execute(input);
+  const tool = getWebMcpToolRegistry(target)?.lookup(name);
+  if (!tool) throw new Error("当前页面工具不可用");
+  try {
+    return await tool.execute(input);
+  } catch (error) {
+    return webMcpToolError(error, tool.annotations?.readOnlyHint === true);
+  }
 };
+
 export const getRegisteredWebMcpSchema = (
   name: string,
   target: Document = document
 ) => {
-  const entry = inventories.get(target)?.get(name);
-  if (!entry || entry.owner.signal.aborted) return null;
+  const tool = getWebMcpToolRegistry(target)?.lookup(name);
+  if (!tool) return null;
   return structuredClone({
-    name: entry.tool.name,
-    description: entry.tool.description,
-    inputSchema: entry.tool.inputSchema,
-    annotations: entry.tool.annotations,
+    name: tool.name,
+    description: tool.description,
+    inputSchema: tool.inputSchema,
+    annotations: tool.annotations,
   });
 };

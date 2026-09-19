@@ -510,6 +510,7 @@ fi
 # --- 8. 生成运行时环境变量注入文件 ---
 ENV_JS="/usr/share/nginx/html/__env.js"
 echo "[entrypoint] Generating runtime env injection at $ENV_JS"
+WEBMCP_DEV_ENABLED_JSON=$(json_encode "${APP_WEBMCP_DEV_ENABLED:-false}")
 BLOCKLY_URL_JSON=$(json_encode "${APP_BLOCKLY_URL:-}")
 EDITOR_URL_JSON=$(json_encode "${APP_EDITOR_URL:-}")
 AUTH_PROVIDER_JSON=$(json_encode "${AUTH_PROVIDER:-}")
@@ -522,6 +523,7 @@ IDENTITY_OIDC_REDIRECT_URI_JSON=$(json_encode "${IDENTITY_OIDC_REDIRECT_URI:-${V
 IDENTITY_OIDC_SCOPE_JSON=$(json_encode "${IDENTITY_OIDC_SCOPE:-${VITE_IDENTITY_OIDC_SCOPE:-}}")
 cat > "$ENV_JS" <<EOF
 window.__ENV__ = {
+  WEBMCP_DEV_ENABLED: ${WEBMCP_DEV_ENABLED_JSON},
   BLOCKLY_URL: ${BLOCKLY_URL_JSON},
   EDITOR_URL: ${EDITOR_URL_JSON},
   AUTH_PROVIDER: ${AUTH_PROVIDER_JSON},

@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-09-17T01:44:40.661630+00:00",
+  "taskId": "dc9b9993-cf1a-4e5f-bff6-70fe2a5e8c27",
+  "websiteConnected": true,
+  "websiteToolCount": 37,
+  "searches": [
+    {
+      "at": 1789609428097,
+      "discoveredToolNames": [
+        "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+        "mcp__xrugc-webmcp-dev___webmcp_get-token"
+      ]
+    },
+    {
+      "at": 1789609428350,
+      "discoveredToolNames": [
+        "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+        "mcp__xrugc-webmcp-dev___webmcp_get-token"
+      ]
+    }
+  ],
+  "siteBusinessCalls": 0,
+  "outcome": "site tools unavailable in WorkBuddy discovery; read not executed",
+  "note": "Client narrative claiming no website tools exist is not supported; independent bridge list previously showed both site tools."
+}
