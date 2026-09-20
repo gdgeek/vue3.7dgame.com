@@ -1,4 +1,4 @@
-export const WORKFLOW_GUIDE_VERSION = "1.5.2";
+export const WORKFLOW_GUIDE_VERSION = "1.6.0";
 export const WORKFLOW_GUIDE_ID = "xrugc-scene-studio";
 export const WORKFLOW_GUIDE_TOOL_NAME = "xrugc_get_workflow_guide";
 
@@ -38,7 +38,7 @@ export const WORKFLOW_GUIDE_TOPICS = [
   {
     id: "audio",
     title: "讲解与音效",
-    description: "旁白制作、播放顺序和停止重启",
+    description: "剪映配音、音效与音乐、播放顺序和停止重启",
   },
   {
     id: "publication",
