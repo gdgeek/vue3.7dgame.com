@@ -13,7 +13,18 @@ type Dependencies = {
   confirm: (preview: EntityAuthoringPreview) => Promise<boolean>;
   save: (response: Json, message: string, preview: object) => Promise<Json>;
 };
-const checked = (response: Json) => {
+const verifyAction = (response: Json, action: string) => {
+  if (response.action !== action)
+    throw Object.assign(
+      new Error("编辑器响应动作不匹配，请读取当前状态后再继续"),
+      {
+        code: "EDITOR_RESPONSE_MISMATCH",
+      }
+    );
+  return response;
+};
+const checked = (response: Json, action: string) => {
+  verifyAction(response, action);
   if (response.ok !== true)
     throw Object.assign(
       new Error(String(response.error ?? "编辑器扩展操作失败")),
@@ -22,12 +33,27 @@ const checked = (response: Json) => {
   return response;
 };
 const stripSnapshot = (value: Json) => {
-  // Full scene bodies and signed resource URLs are not needed in tool results.
-  const { meta, events, resources, ...result } = value;
-  void meta;
-  void events;
-  void resources;
-  return result;
+  // Nested item/error receipts may contain complete resource records too.
+  const sanitize = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(sanitize);
+    if (!value || typeof value !== "object") return value;
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(
+          ([key]) =>
+            ![
+              "meta",
+              "events",
+              "resources",
+              "resource",
+              "file",
+              "url",
+            ].includes(key)
+        )
+        .map(([key, item]) => [key, sanitize(item)])
+    );
+  };
+  return sanitize(value) as Json;
 };
 const summaryItems = (items: unknown) =>
   Array.isArray(items)
@@ -35,7 +61,7 @@ const summaryItems = (items: unknown) =>
         const { resource, ...rest } = item as Json;
         const r = resource as Json | undefined;
         return {
-          ...rest,
+          ...stripSnapshot(rest),
           ...(r ? { resourceId: r.id, resourceType: r.type } : {}),
         };
       })
@@ -45,7 +71,10 @@ export function createEntityAuthoringAdapter(
   d: Dependencies
 ): EntityAuthoringExtensions {
   const request = async (action: string, input: Json) => {
-    const capabilities = checked(await d.request("webmcp-get-capabilities"));
+    const capabilities = checked(
+      await d.request("webmcp-get-capabilities"),
+      "webmcp-get-capabilities"
+    );
     if (
       action !== "webmcp-get-capabilities" &&
       (!Array.isArray(capabilities.capabilities) ||
@@ -58,8 +87,8 @@ export function createEntityAuthoringAdapter(
     if (action === "webmcp-get-capabilities") return capabilities;
     const result = await d.request(action, input, 120000);
     return action === "webmcp-get-node-creation-operation"
-      ? result
-      : checked(result);
+      ? verifyAction(result, action)
+      : checked(result, action);
   };
   const resources = async (input: Json) => {
     const items = input.items as Json[];
@@ -150,9 +179,24 @@ export function createEntityAuthoringAdapter(
     async complete(action, preview) {
       await d.assertWritable();
       const creation = action === "webmcp-complete-node-creation-batch";
-      let payload: Json = { ...preview };
+      // A preview is a response envelope, never a request body. In particular,
+      // its action must not replace the complete action at the iframe boundary.
+      let payload: Json = creation
+        ? {
+            operationId: preview.operationId,
+            expectedEntityVersion: preview.expectedEntityVersion,
+            contextGeneration: preview.contextGeneration,
+            items: preview.items,
+          }
+        : {
+            nodeId: preview.nodeId,
+            proposed: preview.proposed,
+            propertiesVersion: preview.propertiesVersion,
+            entityVersion: preview.entityVersion,
+            contextGeneration: preview.contextGeneration,
+          };
       if (creation) {
-        payload = await resources({ ...preview, items: preview.items });
+        payload = await resources(payload);
         const versions = preview.resourceVersions as Json[];
         for (const item of payload.items as Json[]) {
           if (!item.resource) continue;
@@ -171,6 +215,31 @@ export function createEntityAuthoringAdapter(
       let response: Json;
       try {
         response = await request(action, payload);
+        const applied = creation
+          ? response.status === "applied" &&
+            response.operationId === preview.operationId &&
+            Array.isArray(response.items) &&
+            Array.isArray(preview.items) &&
+            response.items.length === preview.items.length &&
+            new Set(response.items.map((item: Json) => item.nodeId)).size ===
+              response.items.length &&
+            response.items.every(
+              (item: Json, index: number) =>
+                item.clientKey === (preview.items as Json[])[index].clientKey &&
+                item.status === "applied" &&
+                typeof item.nodeId === "string" &&
+                item.nodeId.length > 0
+            )
+          : response.nodeId === preview.nodeId &&
+            typeof response.noChange === "boolean" &&
+            response.saved === false;
+        if (!applied || typeof response.readBackVerified !== "boolean")
+          throw Object.assign(
+            new Error("编辑器未返回有效的应用回执，请先读取当前状态"),
+            {
+              code: "INVALID_EDITOR_MUTATION_RECEIPT",
+            }
+          );
       } catch (error) {
         const failed = (error as { bridgeResult?: Json })?.bridgeResult;
         const rejectedBeforeWrite = [
@@ -217,22 +286,22 @@ export function createEntityAuthoringAdapter(
                 retry: "read_state_before_retry",
               };
         throw new WebMcpCompletionError(
-          {
+          stripSnapshot({
             ...stripSnapshot(response),
             editorApplied: true,
             editorStatus: response.status,
             operationId: preview.operationId,
             ...prior,
-          },
+          }),
           "编辑器变更已应用，保存尚未核实；保留节点 UUID 并查询原保存回执，不要重建。"
         );
       }
-      return {
+      return stripSnapshot({
         ...stripSnapshot(response),
         editorStatus: response.status,
         ...saved,
         status: "completed",
-      };
+      });
     },
   };
 }

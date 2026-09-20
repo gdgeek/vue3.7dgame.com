@@ -1,4 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { ref } from "vue";
+import { useIframeMessaging } from "@/composables/useIframeMessaging";
+import { createIframeRpc } from "@/utils/iframeRpc";
 import { createEntityAuthoringAdapter } from "@/services/webmcp/entity-authoring-adapter";
 import { createEntityAuthoringExtensionTools } from "@/services/webmcp/entity-authoring-extension-tools";
 import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
@@ -12,7 +15,11 @@ const actions = [
   "webmcp-get-editor-animation-preview",
   "webmcp-control-editor-animation-preview",
 ];
-function fixture() {
+type Json = Record<string, unknown>;
+const cleanups: (() => void)[] = [];
+afterEach(() => cleanups.splice(0).forEach((cleanup) => cleanup()));
+
+function fixture(throughIframe = false) {
   let entityId = 7;
   const resource = {
     id: 12,
@@ -23,11 +30,12 @@ function fixture() {
   };
   const save = vi.fn(async () => ({ persistence: "server_acknowledged" }));
   const request = vi.fn(
-    async (action: string, input: Record<string, unknown> = {}) => {
+    async (action: string, input: Json = {}): Promise<Json> => {
       if (action === "webmcp-get-capabilities")
-        return { ok: true, capabilities: actions };
+        return { action, ok: true, capabilities: actions };
       if (action.includes("preview-node-creation"))
         return {
+          action,
           ok: true,
           items: input.items,
           expectedEntityVersion: "v1",
@@ -35,21 +43,31 @@ function fixture() {
         };
       if (action.includes("stage-node-authoring"))
         return {
+          action,
           ok: true,
           nodeId: input.nodeId,
           current: { loop: false },
           proposed: input.properties,
           entityVersion: "v1",
+          propertiesVersion: "p1",
+          contextGeneration: 1,
         };
       if (action.includes("complete-"))
         return {
+          action,
           ok: true,
-          items: [{ clientKey: "a", nodeId: "saved-node" }],
+          status: "applied",
+          operationId: input.operationId,
+          nodeId: input.nodeId,
+          noChange: false,
+          saved: false,
+          items: [{ clientKey: "a", nodeId: "saved-node", status: "applied" }],
           meta: { secret: "body" },
           events: [],
           readBackVerified: true,
         };
       return {
+        action,
         ok: true,
         scope: "editor-preview",
         persisted: false,
@@ -60,10 +78,57 @@ function fixture() {
   );
   const confirm = vi.fn(async () => true);
   const fetchResource = vi.fn(async () => structuredClone(resource));
+  const messages: { id: string; type: string; payload: Json }[] = [];
+  let sendRequest: ReturnType<typeof useIframeMessaging>["sendRequest"];
+  let transport: (
+    action: string,
+    input?: Json,
+    timeout?: number
+  ) => Promise<Json> = request;
+  if (throughIframe) {
+    const frame = document.createElement("iframe");
+    frame.src = "https://editor.example.test/three.js/editor/meta-editor.html";
+    document.body.append(frame);
+    const messaging = useIframeMessaging(ref(frame));
+    sendRequest = messaging.sendRequest;
+    const rpc = createIframeRpc({
+      frame: () => frame,
+      session: messaging.getHostSessionId,
+      send: messaging.sendRequest,
+    });
+    const post = vi
+      .spyOn(frame.contentWindow!, "postMessage")
+      .mockImplementation((message) => {
+        messages.push(message);
+        // Dispatch by the actual serialized iframe action, not the adapter argument.
+        queueMicrotask(async () => {
+          const payload = message.payload;
+          const result = await request(payload.action, payload);
+          const event = new MessageEvent("message", {
+            origin: "https://editor.example.test",
+            data: {
+              type: "RESPONSE",
+              requestId: message.id,
+              payload: { ...result, hostSessionId: payload.hostSessionId },
+            },
+          });
+          Object.defineProperty(event, "source", {
+            value: frame.contentWindow,
+          });
+          rpc.handleMessage(event);
+        });
+      });
+    transport = rpc.request;
+    cleanups.push(() => {
+      rpc.cancel();
+      post.mockRestore();
+      frame.remove();
+    });
+  }
   const adapter = createEntityAuthoringAdapter({
     getEntityId: () => entityId,
     assertWritable: vi.fn(async () => {}),
-    request,
+    request: transport,
     fetchResource,
     confirm,
     save,
@@ -94,12 +159,155 @@ function fixture() {
     call,
     stage,
     tools,
+    messages,
+    sendRequest: (...args: Parameters<messagingSend>) => sendRequest(...args),
     setEntity: (id: number) => {
       entityId = id;
     },
   };
 }
+type messagingSend = ReturnType<typeof useIframeMessaging>["sendRequest"];
 describe("entity authoring extension contracts", () => {
+  it("completes batch and property drafts through the real serialized iframe request envelope", async () => {
+    const f = fixture(true),
+      draft = await f.stage();
+    expect((draft.preview as Json).action).toBe(
+      "webmcp-preview-node-creation-batch"
+    );
+    expect(
+      await f.call("xrugc_complete_node_creation_batch", {
+        draftId: draft.draftId,
+      })
+    ).toMatchObject({ status: "completed", editorStatus: "applied" });
+    const batch = f.messages.find(
+      (m) => m.payload.action === "webmcp-complete-node-creation-batch"
+    )!.payload;
+    expect(batch).toMatchObject({
+      operationId: draft.draftId,
+      expectedEntityVersion: "v1",
+    });
+    for (const key of [
+      "ok",
+      "summary",
+      "proposalType",
+      "entityId",
+      "resourceVersions",
+    ])
+      expect(batch).not.toHaveProperty(key);
+    const properties = await f.call("xrugc_stage_node_authoring_properties", {
+      nodeId: "sound",
+      properties: { loop: false },
+    });
+    expect(
+      await f.call("xrugc_complete_node_authoring_properties", {
+        draftId: properties.draftId,
+      })
+    ).toMatchObject({ status: "completed" });
+    const update = f.messages.find(
+      (m) => m.payload.action === "webmcp-complete-node-authoring-properties"
+    )!.payload;
+    expect(update).toMatchObject({
+      nodeId: "sound",
+      proposed: { loop: false },
+      propertiesVersion: "p1",
+      entityVersion: "v1",
+      contextGeneration: 1,
+    });
+    expect(update).not.toHaveProperty("current");
+    expect(f.save).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the host-selected action and session authoritative in serialized requests", () => {
+    const f = fixture(true);
+    f.sendRequest("webmcp-get-capabilities", {
+      action: "save-before-leave",
+      hostSessionId: "old-session",
+    });
+    expect(f.messages[0].payload.action).toBe("webmcp-get-capabilities");
+    expect(f.messages[0].payload.hostSessionId).not.toBe("old-session");
+  });
+
+  it.each([
+    { action: "webmcp-preview-node-creation-batch" },
+    { status: "preview" },
+    { operationId: "another-operation" },
+    { items: [{ clientKey: "a", status: "applied" }] },
+    {
+      items: [
+        { clientKey: "another-item", nodeId: "wrong-node", status: "applied" },
+      ],
+    },
+  ])(
+    "does not save or claim application for a mismatched mutation receipt: %j",
+    async (invalid) => {
+      const f = fixture(),
+        draft = await f.stage(),
+        original = f.request.getMockImplementation()!;
+      f.request.mockImplementation(async (action, input) => {
+        const result = await original(action, input);
+        return action === "webmcp-complete-node-creation-batch"
+          ? ({ ...result, ...invalid } as Json)
+          : result;
+      });
+      expect(
+        await f.call("xrugc_complete_node_creation_batch", {
+          draftId: draft.draftId,
+        })
+      ).toMatchObject({
+        status: "partial",
+        editorApplied: "unknown",
+        persistence: "unverified",
+      });
+      expect(f.save).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([false, true])(
+    "removes resource URLs and scene bodies from nested receipts, including save failure=%s",
+    async (failedSave) => {
+      const f = fixture(),
+        draft = await f.stage(),
+        original = f.request.getMockImplementation()!;
+      f.request.mockImplementation(async (action, input) => {
+        const result = await original(action, input);
+        return action === "webmcp-complete-node-creation-batch"
+          ? ({
+              ...result,
+              items: [
+                {
+                  clientKey: "a",
+                  nodeId: "saved-node",
+                  status: "applied",
+                  diagnostics: {
+                    resource: f.resource,
+                    nested: [
+                      { resources: [f.resource], meta: { secret: "hidden" } },
+                    ],
+                  },
+                },
+              ],
+            } as Json)
+          : result;
+      });
+      if (failedSave)
+        f.save.mockRejectedValueOnce(
+          new WebMcpCompletionError({
+            status: "partial",
+            persistence: "unverified",
+            details: { resource: f.resource },
+          })
+        );
+      const result = await f.call("xrugc_complete_node_creation_batch", {
+        draftId: draft.draftId,
+      });
+      expect(result).toMatchObject({
+        items: [{ clientKey: "a", nodeId: "saved-node" }],
+      });
+      expect(JSON.stringify(result)).not.toContain("private.example");
+      expect(JSON.stringify(result)).not.toContain("hidden");
+    }
+  );
+
   it("queries a repeated resource once per batch to keep signed references consistent", async () => {
     const f = fixture();
     await f.call("xrugc_stage_node_creation_batch", {
@@ -129,7 +337,7 @@ describe("entity authoring extension contracts", () => {
       original = f.request.getMockImplementation()!;
     f.request.mockImplementation(async (action, input) =>
       action === "webmcp-complete-node-creation-batch"
-        ? ({ ok: false, code: "ANIMATION_PREVIEW_ACTIVE" } as any)
+        ? ({ action, ok: false, code: "ANIMATION_PREVIEW_ACTIVE" } as Json)
         : original(action, input)
     );
     expect(
@@ -152,7 +360,7 @@ describe("entity authoring extension contracts", () => {
     expect(f.save).not.toHaveBeenCalled();
     expect(f.confirm).not.toHaveBeenCalled();
     expect(JSON.stringify(result)).not.toContain("private.example");
-    expect((result.preview as any).items[0].resourceId).toBe(12);
+    expect(((result.preview as Json).items as Json[])[0].resourceId).toBe(12);
   });
   it("confirms once, saves one batch, exposes stable node IDs without a full scene body", async () => {
     const f = fixture(),
@@ -224,14 +432,14 @@ describe("entity authoring extension contracts", () => {
   it("does not let a returned preview mutate the internally approved proposal", async () => {
     const f = fixture(),
       draft = await f.stage();
-    (draft.preview as any).items[0].resourceId = 999;
+    ((draft.preview as Json).items as Json[])[0].resourceId = 999;
     await f.call("xrugc_complete_node_creation_batch", {
       draftId: draft.draftId,
     });
     const input = f.request.mock.calls.find(
       ([name]) => name === "webmcp-complete-node-creation-batch"
     )![1];
-    expect((input.items as any[])[0].resourceId).toBe(12);
+    expect((input.items as Json[])[0].resourceId).toBe(12);
   });
   it("marks lost editor response unverified and prevents blind repeat", async () => {
     const f = fixture(),
@@ -256,7 +464,11 @@ describe("entity authoring extension contracts", () => {
   });
   it("refuses missing editor protocol before dispatching an unsupported command", async () => {
     const f = fixture();
-    f.request.mockResolvedValue({ ok: true, capabilities: [] } as any);
+    f.request.mockResolvedValue({
+      action: "webmcp-get-capabilities",
+      ok: true,
+      capabilities: [],
+    } as Json);
     await expect(
       f.call("xrugc_get_model_animation_metadata", { nodeId: "x" })
     ).rejects.toMatchObject({ code: "CAPABILITY_UNAVAILABLE" });
@@ -290,10 +502,11 @@ describe("entity authoring extension contracts", () => {
     f.request.mockImplementation(async (action, input) =>
       action === "webmcp-complete-node-creation-batch"
         ? ({
+            action,
             ok: false,
             status: "not_applied",
             code: "VERSION_CONFLICT",
-          } as any)
+          } as Json)
         : original(action, input)
     );
     expect(
