@@ -291,6 +291,7 @@ import {
   sceneWriteFailure,
   writeFailureMessageKey,
 } from "@/services/webmcp/scene-write-failure";
+import { createEntityAuthoringAdapter } from "@/services/webmcp/entity-authoring-adapter";
 import { registerEntityEditorWebMcpTools } from "@/services/webmcp/entity-editor-tools";
 import type {
   NodeTransformPreview,
@@ -2345,6 +2346,52 @@ const registerPageWebMcpTools = () => {
 
   webMcpLifecycle?.abort();
   registration = webMcpLifecycle = registerEntityEditorWebMcpTools({
+    authoringExtensions: createEntityAuthoringAdapter({
+      getEntityId: () => (metaDetail.value as metaInfo | null)?.id ?? null,
+      request: requestEditor,
+      assertWritable: async () => {
+        assertActive();
+        const entity = metaDetail.value as metaInfo | null;
+        if (!entity || !saveable(entity)) throw new Error("当前实体不可编辑");
+        const unsaved = await requestEditor("check-unsaved-changes");
+        if (
+          hasUnsavedChangesBeforeUnload.value ||
+          unsaved.changed ||
+          pendingRestorePayload.value
+        )
+          throw new Error("当前实体有未保存内容，请先保存再预览或完成操作");
+      },
+      fetchResource: async (type, resourceId) => {
+        if (!getAvailableResourceTypes().includes(type))
+          throw new Error("当前账号不能使用此素材类型");
+        const resource = await fetchResourceByRef({
+          id: resourceId,
+          type: type as RestorableResourceType,
+        });
+        if (!resource) throw new Error("找不到可访问的素材");
+        return resource as unknown as Record<string, unknown>;
+      },
+      confirm: async (preview) => {
+        try {
+          await ElMessageBox.confirm(
+            `确认修改实体 ${preview.entityId} 并保存吗？\n${JSON.stringify(preview.summary ?? { nodeId: preview.nodeId, current: preview.current, proposed: preview.proposed }, null, 2)}`,
+            "WebMCP",
+            {
+              confirmButtonText: t("common.entitySaveConfirm.confirm"),
+              cancelButtonText: t("common.entitySaveConfirm.cancel"),
+              distinguishCancelAndClose: true,
+              closeOnClickModal: false,
+              closeOnPressEscape: true,
+              showCancelButton: true,
+            }
+          );
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      save: saveWebMcpMutation,
+    }),
     getEditorLoadingState: editorLoading.getState,
     operations: {
       getScope: () => ({

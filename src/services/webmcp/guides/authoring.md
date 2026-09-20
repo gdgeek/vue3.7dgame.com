@@ -47,3 +47,9 @@
 - `resource_pin_missing`：备份缺少依赖版本记录，需重新导出完整工程。
 
 不完整备份仍被拒绝。恢复预览之后、首次写入前再次校验失败时，`get_project_restore` 的 `error` 会保留安全诊断。写入 unknown 仍须先查原回执，不能仅凭错误提示重放。重新预览的任务步骤 operationId 会与新结果同步；已经提交的步骤保留原 operationId 查询回执。
+
+## 历史创建结果恢复（creation-recovery-v1）
+
+`xrugc_get_authoring_operation` 可提供 kind、operationId、creationUuid（两个原标识至少一个）；跨会话不要求已知对象 ID。回执命中返回 verification=server_acknowledged。原回执不存在但当前作者的 UUID 唯一命中时，返回 candidate、verification=uuid_readback、operationVerified=false，原操作仍不可判定；确认 UUID 属于原请求后调用 `xrugc_reconcile_authoring_creation` 恢复对象引用，不发送新建请求。reconcile 的 completed 指对象引用恢复，operationStatus=indeterminate 仍表示没有原操作回执。
+
+响应 reason 区分权限、登录、查询不可用、冲突、证据缺失和响应不匹配。`not_observed` 或 HTTP 404 不等于未创建；老请求可能未发送幂等键，不能补造历史创建回执。客户端声明支持可靠创建，不表示当前后端已经部署或历史请求都受覆盖。禁止猜对象 ID、按同名结果认领对象、换键重建或自动重放 unknown。

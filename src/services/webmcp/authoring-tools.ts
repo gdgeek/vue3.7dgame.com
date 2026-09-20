@@ -1,4 +1,8 @@
-import type { CreationAck } from "@/api/v1/authoring-create";
+import {
+  creationQueryFailure,
+  type CreationAck,
+  type CreationLookup,
+} from "@/api/v1/authoring-create";
 import type { WebMcpTool } from "./model-context";
 import { validRevision, type WriteReceipt } from "@/api/v1/write-contract";
 
@@ -32,6 +36,8 @@ export type AuthoringAsset = {
   metadata: unknown;
   animationNames?: string[];
   animationSource?: "stored_metadata" | "unknown";
+  animationParseStatus?: "metadata_only" | "unknown";
+  hasAnimations?: boolean | null;
 };
 type Operation = {
   operationId: string;
@@ -101,6 +107,10 @@ export type AuthoringDependencies = {
     kind: ObjectKind,
     operationId: string
   ) => Promise<CreationAck>;
+  creationLookup?: (
+    kind: ObjectKind,
+    query: { operationId?: string; creationUuid?: string }
+  ) => Promise<CreationLookup>;
   cover: (draft: {
     kind: ObjectKind;
     id: number;
@@ -218,6 +228,13 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
     targetId: op.targetId,
     status: op.status,
     result: op.result,
+    ...(op.result?.verification === "uuid_readback"
+      ? {
+          verification: "uuid_readback",
+          operationVerified: false,
+          operationStatus: "indeterminate",
+        }
+      : {}),
     storageAvailable,
     retrySafe: false,
     nextStep:
@@ -245,6 +262,89 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
       },
       coverAdvice,
     };
+  };
+  const creationLookup = async (
+    owner: string,
+    k: ObjectKind,
+    operationId: string | undefined,
+    creationUuid: string | undefined,
+    op: Operation | undefined,
+    reconcile: boolean
+  ) => {
+    try {
+      if (!d.creationLookup) throw new Error("Creation lookup unavailable");
+      const evidence = await d.creationLookup(k, { operationId, creationUuid });
+      assertActor(owner);
+      const verified = evidence.status === "completed";
+      const observed = evidence.status === "observed";
+      const result = {
+        id: evidence.id,
+        uuid: evidence.uuid,
+        verification: evidence.verification,
+        operationVerified: evidence.operationVerified,
+        ...(verified ? { receipt: evidence.writeReceipt } : {}),
+        ...(observed ? { currentRevision: evidence.currentRevision } : {}),
+      };
+      if (verified || (reconcile && observed)) {
+        // UUID reconciliation resolves the object reference only. It does not certify the original write.
+        if (operationId) {
+          const recovered: Operation = {
+            operationId,
+            actor: owner,
+            action: "create",
+            kind: k,
+            targetId: evidence.id,
+            status: "completed",
+            createdAt: op?.createdAt ?? now(),
+            uuid: evidence.uuid,
+            result,
+          };
+          operations.set(operationId, recovered);
+          persist();
+        }
+        return {
+          operationId,
+          creationUuid: evidence.uuid,
+          action: "create",
+          kind: k,
+          targetId: evidence.id,
+          status: "completed",
+          result,
+          verification: evidence.verification,
+          operationVerified: verified,
+          operationStatus: verified ? "completed" : "indeterminate",
+          serverStatus: evidence.status,
+          reason: evidence.reason,
+          retrySafe: false,
+        };
+      }
+      return {
+        ...(op ? publicOp(op) : {}),
+        operationId,
+        creationUuid,
+        kind: k,
+        status: "unknown",
+        operationStatus: "indeterminate",
+        serverStatus: evidence.status,
+        reason: evidence.reason,
+        verification: evidence.verification,
+        operationVerified: false,
+        retrySafe: false,
+        ...(observed ? { candidate: result } : {}),
+        nextStep: observed
+          ? "UUID 对象已读回，但原创建回执未确认；核对原 creationUuid 后调用 reconcile，不重放创建。"
+          : "未确认原创建结果；检查查询原因和原标识，不把未观察到证据当作未创建。",
+      };
+    } catch (error) {
+      assertActor(owner);
+      return {
+        ...(op ? publicOp(op) : {}),
+        operationId,
+        creationUuid,
+        kind: k,
+        ...creationQueryFailure(error),
+      };
+    }
   };
   const resolvePicture = async (id: number) => {
     const resource = await d.asset("picture", id);
@@ -383,7 +483,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
       [],
       true,
       () => ({
-        contractVersion: "1.2.0",
+        contractVersion: "1.3.0",
         ...d.capabilities(),
         authenticated: Boolean(d.actor()),
         createKinds: (["entity", "scene"] as const).filter(
@@ -391,7 +491,14 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
         ),
         uploadTypes: ASSET_TYPES.filter((k) => d.actor() && d.canUpload(k)),
         limitations: {
-          durableCreateIdempotency: Boolean(d.creationReceipt),
+          // A registered client callback cannot establish the deployed server contract.
+          durableCreateIdempotency: null,
+          durableCreateClientSupported: Boolean(d.creationReceipt),
+          creationRecoveryClientSupported: Boolean(d.creationLookup),
+          backendCapabilityStatus: "unverified",
+          legacyCreationRecovery:
+            "owned_uuid_readback_without_operation_receipt",
+          notObservedProvesNotCreated: false,
           durableBackendRequired:
             "authoring-tasks-v1; unavailable endpoints fail closed",
           idempotencyScope:
@@ -572,16 +679,46 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
     ),
     tool(
       "xrugc_get_authoring_operation",
-      "查询创作操作的服务端回执；跨会话查询新建需 kind。unknown 不代表失败，不自动重试。",
-      { operationId: { type: "string" }, kind: fields.kind },
-      ["operationId"],
+      "只读查询原 operationId 或 creationUuid；跨会话需 kind，无需对象 ID。UUID 命中只提供候选对象证据；not_observed/unknown 不代表未创建，不自动重试。",
+      {
+        operationId: { type: "string", format: "uuid" },
+        kind: fields.kind,
+        creationUuid: { type: "string", format: "uuid" },
+      },
+      [],
       true,
       async (input) => {
         const owner = actor();
-        const id = string(input.operationId);
-        const op = operations.get(id);
+        const id =
+          input.operationId === undefined
+            ? undefined
+            : string(input.operationId);
+        const op = id ? operations.get(id) : undefined;
         if (op && op.actor !== owner) return { status: "not_found" };
+        const uuid =
+          input.creationUuid === undefined
+            ? op?.uuid
+            : string(input.creationUuid);
+        if (!id && !uuid) throw new Error("需要原 operationId 或 creationUuid");
+        if (op && input.kind !== undefined && input.kind !== op.kind)
+          throw new Error("对象种类与原操作不匹配");
+        if (op?.uuid && uuid?.toLowerCase() !== op.uuid.toLowerCase())
+          throw new Error("creationUuid 与原操作不匹配");
         if (
+          d.creationLookup &&
+          ((!op && input.kind !== undefined) ||
+            (op?.action === "create" && op.status === "unknown"))
+        )
+          return creationLookup(
+            owner,
+            op?.kind ?? kind(input.kind),
+            id,
+            uuid,
+            op,
+            false
+          );
+        if (
+          id &&
           d.creationReceipt &&
           ((!op && input.kind !== undefined) ||
             (op?.action === "create" && op.status === "unknown"))
@@ -604,12 +741,28 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
             operations.set(id, recovered);
             persist();
             return publicOp(recovered);
-          } catch {
+          } catch (error) {
             assertActor(owner);
-            return op ? publicOp(op) : { status: "unknown", operationId: id };
+            return {
+              ...(op ? publicOp(op) : {}),
+              operationId: id,
+              ...creationQueryFailure(error),
+            };
           }
         }
-        if (!op) return { status: "not_found" };
+        if (!op)
+          return {
+            status: "unknown",
+            operationId: id,
+            creationUuid: uuid,
+            reason:
+              input.kind === undefined
+                ? "kind_required"
+                : "creation_lookup_unavailable",
+            operationStatus: "indeterminate",
+            verification: "none",
+            retrySafe: false,
+          };
         if (op.status === "unknown" && op.action === "cover" && op.targetId) {
           try {
             const receipt = await d.receipt(
@@ -636,13 +789,42 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
     ),
     tool(
       "xrugc_reconcile_authoring_creation",
-      "新建结果 unknown 时，通过搜索得到的对象 ID 与该操作 creationUuid 精确对照；只核对，不重建或覆盖对象。",
-      { operationId: { type: "string" }, id: fields.id },
-      ["operationId", "id"],
+      "按原 creationUuid 只读核对当前账号对象，无需先知道对象 ID；跨会话提供 kind 与 creationUuid。UUID 回读仅恢复对象引用，不证明原操作执行，不生成创建回执，不重建。",
+      {
+        operationId: { type: "string", format: "uuid" },
+        kind: fields.kind,
+        creationUuid: { type: "string", format: "uuid" },
+        id: fields.id,
+      },
+      [],
       true,
       async (input) => {
         const owner = actor();
-        const op = operations.get(string(input.operationId));
+        const operationId =
+          input.operationId === undefined
+            ? undefined
+            : string(input.operationId);
+        const op = operationId ? operations.get(operationId) : undefined;
+        if (op && op.actor !== owner) return { status: "not_found" };
+        if (op && (op.action !== "create" || op.status !== "unknown"))
+          throw new Error("当前操作不需要新建核对");
+        if (op && input.kind !== undefined && input.kind !== op.kind)
+          throw new Error("对象种类与原操作不匹配");
+        const uuid =
+          input.creationUuid === undefined
+            ? op?.uuid
+            : string(input.creationUuid);
+        if (op?.uuid && uuid?.toLowerCase() !== op.uuid.toLowerCase())
+          throw new Error("creationUuid 与原操作不匹配");
+        if (d.creationLookup && uuid)
+          return creationLookup(
+            owner,
+            op?.kind ?? kind(input.kind),
+            operationId,
+            uuid,
+            op,
+            true
+          );
         if (
           !op ||
           op.actor !== owner ||
@@ -690,7 +872,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
     ),
     tool(
       "xrugc_get_asset_metadata",
-      "查询素材真实类型、文件 ID、大小及平台存储的有界元数据；未知字段不推测。",
+      "查询素材类型、文件 ID、大小及平台存储的有界元数据；动画字段仅为存储提示，不代表导入解析就绪。当前实体已加载模型的真实 clips 请调用 xrugc_get_model_animation_metadata；未知字段不推测。",
       assetFields,
       ["resourceType", "id"],
       true,

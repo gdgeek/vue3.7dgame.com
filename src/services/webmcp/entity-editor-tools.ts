@@ -1,4 +1,8 @@
 import {
+  createEntityAuthoringExtensionTools,
+  type EntityAuthoringExtensions,
+} from "./entity-authoring-extension-tools";
+import {
   getWorkflowGuideEntry,
   withWorkflowGuide,
 } from "./workflow-guide-tools";
@@ -101,6 +105,7 @@ export type AssetSearchResult = {
 };
 
 export type RegisterEntityEditorWebMcpOptions = WebMcpRegistrationOptions & {
+  authoringExtensions?: EntityAuthoringExtensions;
   getContext: () => EntityEditorContext;
   getLiveContext?: () => Promise<EntityEditorContext>;
   searchAssets: (input: AssetSearchInput) => Promise<AssetSearchResult>;
@@ -684,6 +689,9 @@ export const registerEntityEditorWebMcpTools = (
     withWorkflowGuide(
       [
         ...createTools(options),
+        ...(options.authoringExtensions
+          ? createEntityAuthoringExtensionTools(options.authoringExtensions)
+          : []),
         ...createEntityTransformTools({
           getEntityId: () => options.getContext().entity?.id ?? null,
           stageNodeTransform: options.stageNodeTransform,
