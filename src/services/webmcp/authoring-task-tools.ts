@@ -31,6 +31,7 @@ type Task = {
   approved: boolean;
   revision?: number;
   claimId?: string;
+  leaseUntil?: number;
   restored?: boolean;
 };
 export type AuthoringTaskDependencies = {
@@ -115,11 +116,16 @@ export function createAuthoringTaskTools(
   d: AuthoringTaskDependencies
 ): WebMcpTool[] {
   const tasks = new Map<string, Task>();
+  const leaseWait = (task: Task) =>
+    !task.busy && !task.claimId
+      ? Math.max(0, (task.leaseUntil ?? 0) * 1000 - Date.now())
+      : 0;
   const state = (task: Task) =>
     structuredClone({
       taskId: task.taskId,
       name: task.name,
-      status: task.status,
+      status: leaseWait(task) ? "waiting_lease" : task.status,
+      retryAfterMs: leaseWait(task) || null,
       index: task.index,
       steps: task.states,
       plan: task.steps,
@@ -129,8 +135,9 @@ export function createAuthoringTaskTools(
       resultEvidence:
         "client_recorded; verify writes with server operation receipts",
       reloadSupported: Boolean(d.store),
-      nextStep:
-        task.status === "unknown"
+      nextStep: leaseWait(task)
+        ? "其他会话或刷新前的执行租约尚未释放；等待 retryAfterMs 后查询原任务，不重新创建。"
+        : task.status === "unknown"
           ? "查询原操作回执；不要重跑写入步骤。"
           : "核对当前结果后调用 advance 执行下一步或查询待完成操作。",
     });
@@ -185,6 +192,7 @@ export function createAuthoringTaskTools(
       busy: false,
       approved: false,
       revision: saved.revision,
+      leaseUntil: saved.leaseUntil,
       restored: true,
     };
     // A lost client can still finish an in-flight write. Never replay it as a new operation.
@@ -219,6 +227,7 @@ export function createAuthoringTaskTools(
         task.status === "sync_required"
       )
         task = hydrate(saved);
+      task.leaseUntil = saved.leaseUntil;
     }
     if (!task || task.actor !== owner)
       throw new Error("任务不存在或账号已改变");
@@ -237,6 +246,7 @@ export function createAuthoringTaskTools(
     );
     assertActor(task);
     task.revision = saved.revision;
+    task.leaseUntil = saved.leaseUntil;
     if (release) task.claimId = undefined;
   };
   const assertActor = (task: Task) => {
@@ -330,13 +340,11 @@ export function createAuthoringTaskTools(
   const run = async (task: Task) => {
     try {
       if (d.store) {
-        task.claimId = crypto.randomUUID();
-        const saved = await d.store.claim(
-          task.taskId,
-          task.revision!,
-          task.claimId
-        );
+        const claimId = crypto.randomUUID();
+        const saved = await d.store.claim(task.taskId, task.revision!, claimId);
         assertActor(task);
+        task.claimId = claimId;
+        task.leaseUntil = saved.leaseUntil;
         task.revision = saved.revision;
       }
       if (!task.approved) {
@@ -464,6 +472,11 @@ export function createAuthoringTaskTools(
       assertActor(task);
       classify(task, result);
     } catch {
+      if (d.store && !task.claimId) {
+        // A failed claim owns no progress; reload before deciding whether to resume.
+        task.status = "sync_required";
+        return;
+      }
       const current = task.states[task.index];
       if (current?.status === "executing")
         current.status = task.status = "unknown";
@@ -604,6 +617,7 @@ export function createAuthoringTaskTools(
         const task = await owned(raw, true);
         if (
           !task.busy &&
+          !leaseWait(task) &&
           !["completed", "cancelled", "expired", "failed"].includes(
             task.status
           ) &&

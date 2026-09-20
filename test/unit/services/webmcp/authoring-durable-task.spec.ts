@@ -42,6 +42,7 @@ function setup() {
         throw new Error("conflict");
       leases.set(id, claim);
       s.revision++;
+      s.leaseUntil = Math.floor(Date.now() / 1000) + 120;
       return copy(s);
     }),
     checkpoint: vi.fn(async (id, revision, claim, progress, release) => {
@@ -50,7 +51,10 @@ function setup() {
         throw new Error("stale");
       s.progress = copy(progress);
       s.revision++;
-      if (release) leases.delete(id);
+      if (release) {
+        leases.delete(id);
+        s.leaseUntil = 0;
+      }
       return copy(s);
     }),
   };
@@ -238,11 +242,33 @@ describe("durable authoring regression", () => {
     await s.advance(first, t.taskId);
     await s.advance(second, t.taskId);
     expect(s.invoke).not.toHaveBeenCalled();
+    const waiting = await second("get_authoring_task", { taskId: t.taskId });
+    expect(waiting.status).toBe("waiting_lease");
+    expect(waiting.retryAfterMs).toBeGreaterThan(0);
+    expect(waiting.nextStep).toContain("租约");
+    expect(s.store.checkpoint).not.toHaveBeenCalled();
     accept(true);
     await flush();
     expect(s.invoke).toHaveBeenCalledTimes(1);
     expect(s.rows.get(t.taskId)?.progress.index).toBe(1);
   });
+  it("refreshes after a failed claim without writing an unowned checkpoint", async () => {
+    const s = setup();
+    const c = s.client();
+    const t = await c("preview_authoring_task", s.plan);
+    vi.mocked(s.store.claim).mockRejectedValueOnce(
+      new Error("connection lost")
+    );
+    await s.advance(c, t.taskId);
+    expect(s.store.checkpoint).not.toHaveBeenCalled();
+    expect(s.invoke).not.toHaveBeenCalled();
+    expect((await c("get_authoring_task", { taskId: t.taskId })).status).toBe(
+      "preview"
+    );
+    await s.advance(c, t.taskId);
+    expect((await c("get_authoring_task", { taskId: t.taskId })).index).toBe(1);
+  });
+
   it("uses the saved checkpoint after its response is lost instead of repeating a step", async () => {
     const s = setup();
     const c = s.client();
