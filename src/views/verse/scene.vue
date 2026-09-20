@@ -35,7 +35,7 @@
       :scene-data="scriptSceneData"
       :before-publish="saveSceneBeforeScriptPublish"
       @closed="handleScriptDrawerClosed"
-      @saved="invalidateScriptPreview"
+      @saved="handleScriptSaved"
     ></VerseScriptDrawer>
     <PublicationHistoryDialog
       v-model="publicationHistoryVisible"
@@ -70,6 +70,7 @@
 </template>
 
 <script setup lang="ts">
+import { applySceneScriptSave } from "@/utils/sceneScriptSave";
 import PublicationHistoryDialog from "@/components/MrPP/PublicationHistoryDialog.vue";
 import {
   createWriteOptions,
@@ -269,6 +270,15 @@ let openingScriptDrawer: Promise<void> | null = null;
 const invalidateScriptPreview = () => {
   verseMetasWithLuaCodeData.value = undefined;
   verseMetasWithJsCodeData.value = undefined;
+};
+const handleScriptSaved = (result: unknown) => {
+  if (
+    !sceneViewActive ||
+    !scriptDrawerActive.value ||
+    verse.value?.id !== id.value
+  )
+    return;
+  if (applySceneScriptSave(verse.value, result)) invalidateScriptPreview();
 };
 const saveSceneBeforeScriptPublish = async () => {
   const live = await getLiveSceneState();

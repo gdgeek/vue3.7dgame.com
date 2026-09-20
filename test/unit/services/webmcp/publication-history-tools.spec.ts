@@ -108,3 +108,22 @@ it("does not return a one-sided comparison when the second read fails", async ()
     tools[2].execute({ from: version, to: version })
   ).rejects.toMatchObject({ response: { status: 403 } });
 });
+
+it("does not leak expired-version details after an account switch", async () => {
+  let actor = "3";
+  api.read.mockImplementationOnce(async () => {
+    actor = "4";
+    throw {
+      response: {
+        status: 410,
+        data: { message: "publication_version_expired" },
+      },
+    };
+  });
+  await expect(
+    createPublicationHistoryTools(
+      () => 7,
+      () => actor
+    )[1].execute({ publicationVersionId: version })
+  ).rejects.toThrow("账号已切换");
+});

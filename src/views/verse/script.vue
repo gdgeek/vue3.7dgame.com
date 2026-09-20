@@ -348,7 +348,10 @@ const props = withDefaults(
   }>(),
   { embedded: false }
 );
-const emit = defineEmits<{ close: []; saved: [] }>();
+const emit = defineEmits<{
+  close: [];
+  saved: [payload: import("@/utils/sceneScriptSave").SceneScriptSaved];
+}>();
 
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
@@ -616,6 +619,8 @@ const postScript = async (
   }
 
   const savedOwner = verse.value;
+  const previousRevision = savedOwner.serverRevision;
+  const verseCode = { blockly: blocklyData, js: message.js, lua: message.lua };
   const savedOwnerId = savedOwner.id;
   const savedSession = getEditorInitState()?.hostSessionId;
   const savedLoadSequence = verseLoadSequence;
@@ -639,7 +644,12 @@ const postScript = async (
   if (!isCurrentSave()) return;
   applyWriteRevision(savedOwner, savedResponse);
 
-  emit("saved");
+  emit("saved", {
+    sceneId: savedOwnerId,
+    previousRevision,
+    serverRevision: savedOwner.serverRevision,
+    verseCode,
+  });
   if (!isCurrentSave()) return;
   if (context.trigger === "manual") {
     Message.success(t("verse.view.script.success"));

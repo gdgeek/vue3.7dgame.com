@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-09-17T00:02:44.234829+00:00",
+  "scope": "isolated local browser and API; not completed WorkBuddy entity acceptance",
+  "frontendVersion": "v2026.09.17-0111",
+  "logout896": {
+    "httpStatus": 200,
+    "at": "2026-09-16T23:59:14Z",
+    "returnedToAnonymousHomepage": true
+  },
+  "login897": {
+    "displayName": "WorkBuddy P1 Second Account",
+    "connectionState": "disconnected",
+    "toolCount": 0,
+    "registrationInputEmpty": true
+  },
+  "restoredActorId": 896,
+  "objectsUnchangedSinceSuccessfulResponseLossSnapshot": true,
+  "limitations": [
+    "Fresh page had no active bridge; connected-session revocation remains unverified.",
+    "WorkBuddy native input remains unresponsive after normal restart; manual token request pending.",
+    "Entity and entity-script real-client writes remain unverified."
+  ]
+}

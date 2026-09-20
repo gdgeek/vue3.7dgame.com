@@ -35,3 +35,15 @@
 `xrugc_stage_project_restore` 接收 backupId 或备份 JSON（二选一），校验哈希及素材可访问性、文件 ID 和 MD5；`xrugc_advance_project_restore` 逐步创建全新草稿。原对象不被覆盖；场景 meta_id 指向新实体，节点内部 ID 保留以维持 Blockly 引用。恢复保留 Blockly 源，清空派生 JS/Lua，需在原脚本抽屉重新生成并保存。封面须通过封面工具重新绑定，不能直接信任导入的旧文件 ID。
 
 恢复结果包括新旧对象映射与保存回执。unknown 新建只允许用 `xrugc_reconcile_project_restore` 对照已知 UUID；unknown 保存查询原回执，不自动重写。恢复进度仅存在当前标签页内存；中断后保留已创建的新草稿供核对，不自动删除或回滚。
+
+### 素材错误处理
+
+备份或恢复因素材失败时，读取 `errorCode`、`details.resource`（素材 id/type，已知时包含 fileId）、`details.fields` 和 `nextStep`。导出还会给出 `details.referencedBy`，定位引用它的实体或场景。依赖分析保留 `RESOURCE_UNAVAILABLE`，并在 `diagnostic` 内提供相同诊断。
+
+- `resource_version_incomplete`：fileId 或 md5 缺失/无效。先用 `xrugc_get_asset_metadata` 核对素材，选择已有完整版本的素材，或请素材管理方修复关联/校验信息；不要编造 MD5。
+- `resource_unavailable`：读取失败，可能涉及登录、权限、网络或目标不可访问，HTTP 错误附带 httpStatus；不能断言资源已删除，不能自动替换。
+- `resource_response_mismatch`：响应 ID/type 不匹配，不能采用该响应。
+- `resource_version_changed`：当前 fileId/md5 与备份不同，找回原版本，或在明确接受新版本后重新导出并预览；不要改备份哈希绕过校验。
+- `resource_pin_missing`：备份缺少依赖版本记录，需重新导出完整工程。
+
+不完整备份仍被拒绝。恢复预览之后、首次写入前再次校验失败时，`get_project_restore` 的 `error` 会保留安全诊断。写入 unknown 仍须先查原回执，不能仅凭错误提示重放。重新预览的任务步骤 operationId 会与新结果同步；已经提交的步骤保留原 operationId 查询回执。

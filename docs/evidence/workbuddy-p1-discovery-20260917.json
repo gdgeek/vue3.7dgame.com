@@ -1,0 +1,134 @@
+{
+  "bridgeList": {
+    "observedAt": "2026-09-17T00:11:41.773Z",
+    "scope": "independent fixed-version stdio tools/list; not WorkBuddy acceptance",
+    "toolNames": [
+      "127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "_webmcp_get-token",
+      "_webmcp_define-mcp-tool"
+    ]
+  },
+  "workbuddySearches": [
+    {
+      "at": 1789603691944,
+      "discoveredToolNames": [
+        "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+        "mcp__xrugc-webmcp-dev___webmcp_get-token",
+        "connect_open_platform",
+        "suggest_plugin_install",
+        "connect_cloud_service",
+        "conversation_search",
+        "search_plugins",
+        "workbuddy_sites_deploy",
+        "workbuddy_sites_unpublish",
+        "LSP"
+      ]
+    },
+    {
+      "at": 1789603699283,
+      "discoveredToolNames": ["mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool"]
+    },
+    {
+      "at": 1789603710857,
+      "discoveredToolNames": [
+        "mcp__xrugc-webmcp-dev___webmcp_get-token",
+        "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+        "workbuddy_sites_deploy",
+        "mcp__sheetagent__fill_formula",
+        "LSP",
+        "VideoGen",
+        "mcp__sheetagent__read_table",
+        "mcp__sheetagent__run_command",
+        "agentic_search",
+        "suggest_plugin_install",
+        "mcp__sheetagent__calculate_formulas"
+      ]
+    },
+    {
+      "at": 1789603952927,
+      "discoveredToolNames": ["mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool"]
+    },
+    {
+      "at": 1789603956689,
+      "discoveredToolNames": [
+        "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+        "mcp__xrugc-webmcp-dev___webmcp_get-token",
+        "search_plugins",
+        "workbuddy_sites_deploy",
+        "connect_open_platform",
+        "suggest_plugin_install",
+        "connect_cloud_service",
+        "conversation_search",
+        "LSP",
+        "workbuddy_sites_unpublish",
+        "agentic_search",
+        "mcp__sheetagent__resolve_local_excel",
+        "VideoGen"
+      ]
+    }
+  ],
+  "freshTask": {
+    "taskId": "dc9b9993-cf1a-4e5f-bff6-70fe2a5e8c27",
+    "searches": [
+      {
+        "at": 1789604003614,
+        "discoveredToolNames": [
+          "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+          "mcp__xrugc-webmcp-dev___webmcp_get-token"
+        ]
+      },
+      {
+        "at": 1789604030530,
+        "discoveredToolNames": [
+          "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+          "mcp__xrugc-webmcp-dev___webmcp_get-token",
+          "LSP",
+          "connect_cloud_service",
+          "conversation_search",
+          "connect_open_platform",
+          "workbuddy_sites_unpublish",
+          "suggest_plugin_install",
+          "workbuddy_sites_deploy",
+          "search_plugins",
+          "agentic_search"
+        ]
+      },
+      {
+        "at": 1789604092643,
+        "discoveredToolNames": [
+          "mcp__sheetagent__read_table",
+          "LSP",
+          "mcp__sheetagent__set_cell_range",
+          "search_plugins",
+          "workbuddy_sites_deploy"
+        ]
+      },
+      {
+        "at": 1789604109920,
+        "discoveredToolNames": [
+          "mcp__xrugc-webmcp-dev___webmcp_get-token",
+          "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+          "mcp__sheetagent__run_command",
+          "workbuddy_sites_deploy",
+          "mcp__weixinpay__weixinpay_feedback",
+          "mcp__weixinpay__weixinpay_register",
+          "mcp__sheetagent__calculate_formulas",
+          "mcp__sheetagent__fill_formula",
+          "mcp__sheetagent__read_table",
+          "mcp__sheetagent__search_data",
+          "mcp__weixinpay__weixinpay_retry_pay",
+          "mcp__sheetagent__calculate_single_formula",
+          "mcp__sheetagent__get_cell_ranges",
+          "mcp__sheetagent__resolve_local_excel",
+          "mcp__sheetagent__set_cell_range"
+        ]
+      }
+    ],
+    "attemptedDeferredTools": [
+      "mcp__xrugc-webmcp-dev___webmcp_get-token",
+      "mcp__xrugc-webmcp-dev"
+    ],
+    "successfulSiteBusinessCalls": 0
+  }
+}

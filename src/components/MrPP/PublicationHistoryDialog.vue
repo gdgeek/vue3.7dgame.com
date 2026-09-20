@@ -26,6 +26,13 @@
         })
       }}</span>
     </div>
+    <p v-if="history?.retention">
+      {{
+        t("common.publicationHistory.retention", {
+          count: history.retention.maxVersions,
+        })
+      }}
+    </p>
     <el-alert
       v-if="history?.capacityWarning"
       :title="t('common.publicationHistory.capacityWarning')"
@@ -277,7 +284,9 @@ const failure = (cause: unknown) => {
   return t(
     status === 401 || status === 403
       ? "common.publicationHistory.forbidden"
-      : "common.publicationHistory.failed"
+      : status === 410
+        ? "common.publicationHistory.expired"
+        : "common.publicationHistory.failed"
   );
 };
 async function load(more: boolean) {

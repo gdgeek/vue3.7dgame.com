@@ -1,0 +1,10 @@
+{
+  "observedAt": "2026-09-16T17:37:49.413323+00:00",
+  "scope": "real isolated API; not a WorkBuddy UI lifecycle test",
+  "actorId": 897,
+  "targetOwnerId": 896,
+  "targetId": 666,
+  "operationId": "5c33525d-0012-4728-9a3d-5f8e7567f249",
+  "httpStatus": 403,
+  "crossAccountReceiptDenied": true
+}

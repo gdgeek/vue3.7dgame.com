@@ -1,3 +1,4 @@
+import { ResourceDiagnosticError } from "./resource-diagnostic";
 import type { WebMcpTool } from "./model-context";
 import type { ObjectKind } from "./authoring-tools";
 
@@ -205,6 +206,10 @@ export function createAuthoringDependencyTools(
             }
           }
         } else entities.push(root);
+        const resourceErrors = new Map<
+          string,
+          ReturnType<ResourceDiagnosticError["result"]>
+        >();
         const resourceCache = new Map<
           string,
           {
@@ -253,8 +258,10 @@ export function createAuthoringDependencyTools(
                 reads++;
                 check();
                 resourceCache.set(key, detail);
-              } catch {
+              } catch (cause) {
                 check();
+                if (cause instanceof ResourceDiagnosticError)
+                  resourceErrors.set(key, cause.result());
                 resourceCache.set(key, null);
               }
             }
@@ -263,6 +270,9 @@ export function createAuthoringDependencyTools(
               unknown = true;
               issues.push({
                 code: "RESOURCE_UNAVAILABLE",
+                ...(resourceErrors.has(key)
+                  ? { diagnostic: resourceErrors.get(key) }
+                  : {}),
                 entityId: entity.id,
                 resourceId,
               });
