@@ -135,13 +135,20 @@ export function createAdvancedAuthoringTools(d: Options): WebMcpTool[] {
         // A live confirmation may be cancelled or still pending. Preserve its local state.
         const local = (await invokeRegisteredWebMcpTool(
           "xrugc_get_authoring_operation",
-          { operationId, kind }
-        )) as { status?: string };
+          {
+            operationId,
+            kind,
+            ...(typeof preview.creationUuid === "string"
+              ? { creationUuid: preview.creationUuid }
+              : {}),
+          }
+        )) as { status?: string; serverStatus?: string };
         if (
           local &&
-          !["unknown", "not_found", "not_observed"].includes(
-            String(local.status)
-          )
+          (local.serverStatus !== undefined ||
+            !["unknown", "not_found", "not_observed"].includes(
+              String(local.status)
+            ))
         )
           return local;
         if (preview.action === "create") {

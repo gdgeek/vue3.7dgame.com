@@ -64,7 +64,7 @@ export function useIframeMessaging(
     action: string,
     data?: Record<string, unknown>
   ): string | undefined => {
-    return postStandardMessage("REQUEST", { action, ...data });
+    return postStandardMessage("REQUEST", { ...data, action });
   };
 
   return {

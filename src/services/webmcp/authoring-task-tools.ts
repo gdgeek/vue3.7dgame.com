@@ -57,6 +57,12 @@ const GLOBAL = [
   "xrugc_get_asset_metadata",
 ];
 const EDITOR = [
+  "xrugc_get_model_animation_metadata",
+  "xrugc_get_node_authoring_properties",
+  "xrugc_stage_node_authoring_properties",
+  "xrugc_complete_node_authoring_properties",
+  "xrugc_stage_node_creation_batch",
+  "xrugc_complete_node_creation_batch",
   "xrugc_open_entity_script_editor",
   "xrugc_close_entity_script_editor",
   "xrugc_open_scene_script_editor",

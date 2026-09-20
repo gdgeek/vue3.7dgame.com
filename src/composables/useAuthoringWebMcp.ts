@@ -1,6 +1,7 @@
 import {
   createAuthoringObject,
   getAuthoringCreation,
+  lookupAuthoringCreation,
 } from "@/api/v1/authoring-create";
 import { createAdvancedAuthoringTools } from "./authoringAdvancedTools";
 import { onMounted, onBeforeUnmount, watch } from "vue";
@@ -80,7 +81,8 @@ export const authoringAsset = (data: ResourceInfo): AuthoringAsset => {
   }
   const animationValues =
     metadata && typeof metadata === "object" && !Array.isArray(metadata)
-      ? (metadata as Record<string, unknown>).animations
+      ? ((metadata as Record<string, unknown>).animations ??
+        (metadata as Record<string, unknown>).anim)
       : undefined;
   const animationNames = Array.isArray(animationValues)
     ? animationValues
@@ -102,6 +104,11 @@ export const authoringAsset = (data: ResourceInfo): AuthoringAsset => {
     animationSource: Array.isArray(animationValues)
       ? "stored_metadata"
       : "unknown",
+    animationParseStatus: Array.isArray(animationValues)
+      ? "metadata_only"
+      : "unknown",
+    // Empty stored hints do not establish that the imported model has no clips.
+    hasAnimations: animationNames.length ? true : null,
     id: data.id,
     type: data.type as AuthoringAsset["type"],
     name: String(data.name ?? "").slice(0, 200),
@@ -228,6 +235,7 @@ export function useAuthoringWebMcp() {
         .map((item) => ({ ...authoringAsset(item), metadata: null }));
     },
     creationReceipt: getAuthoringCreation,
+    creationLookup: lookupAuthoringCreation,
     async create(draft) {
       const data = await createAuthoringObject(
         draft.kind,
