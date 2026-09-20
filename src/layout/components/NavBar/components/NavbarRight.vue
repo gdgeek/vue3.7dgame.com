@@ -49,6 +49,12 @@
               $t("navbar.AccountSetting")
             }}</el-dropdown-item>
           </RouterLink>
+          <el-dropdown-item
+            v-if="webMcpDevEnabled"
+            @click="showAiConnection = true"
+          >
+            {{ webMcpDevLabel(locale) }}
+          </el-dropdown-item>
           <!-- <RouterLink to="/settings/account">
             <el-dropdown-item>{{
               $t("navbar.AccountSetting")
@@ -63,6 +69,10 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
+    <WebMcpDevDialog
+      v-if="showAiConnection"
+      v-model="showAiConnection"
+    ></WebMcpDevDialog>
     <!-- 设置 -->
     <template v-if="defaultSettings.showSettings">
       <div class="setting-item" @click="settingStore.settingsVisible = true">
@@ -75,6 +85,11 @@
 import { logger } from "@/utils/logger";
 import { useAppStore, useUserStore, useSettingsStore } from "@/store";
 import { getUserAvatarUrl } from "@/utils/avatar";
+import { defineAsyncComponent } from "vue";
+import {
+  webMcpDevEnabled,
+  webMcpDevLabel,
+} from "@/services/webmcp/dev-feature";
 
 import defaultSettings from "@/settings";
 import { DeviceEnum } from "@/enums/DeviceEnum";
@@ -84,7 +99,11 @@ const userStore = useUserStore();
 const settingStore = useSettingsStore();
 
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const showAiConnection = ref(false);
+const WebMcpDevDialog = defineAsyncComponent(
+  () => import("@/components/WebMcpDevDialog.vue")
+);
 
 const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE);
 const nickname = ref<string | null>(null);

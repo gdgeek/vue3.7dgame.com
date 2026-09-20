@@ -37,10 +37,10 @@ describe("site workflow guide", () => {
       expect(result).toMatchObject({
         topic: id,
         title,
-        version: "1.5.0",
+        version: "1.5.2",
         page: "entity",
         language: "zh-CN",
-        documentationUrl: `/webmcp/scene-studio/1.5.0/${id}.md`,
+        documentationUrl: `/webmcp/scene-studio/1.5.2/${id}.md`,
         primaryPageTools: ["example_edit"],
         content: expect.stringMatching(/^# /),
       });
@@ -304,10 +304,10 @@ describe("site workflow guide", () => {
   });
 
   it("keeps ordinary pages functional without browser WebMCP support", () => {
-    expect(
-      registerWebMcpTools(withWorkflowGuide([], "scene"), {
-        document: {} as Document,
-      })
-    ).toBeNull();
+    const lifecycle = registerWebMcpTools(withWorkflowGuide([], "scene"), {
+      document: {} as Document,
+    });
+    expect(lifecycle).toBeInstanceOf(AbortController);
+    lifecycle?.abort();
   });
 });

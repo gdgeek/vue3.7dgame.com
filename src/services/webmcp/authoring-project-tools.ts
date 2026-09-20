@@ -1,3 +1,9 @@
+import {
+  ResourceDiagnosticError,
+  resourceReadError,
+  validateResourcePin,
+} from "./resource-diagnostic";
+import { webMcpToolError } from "./tool-error";
 import type { WebMcpTool } from "./model-context";
 import { collectAuthoringReferences } from "./authoring-dependencies";
 import type { ObjectKind } from "./authoring-tools";
@@ -154,6 +160,7 @@ type Restore = {
   state: string;
   busy: boolean;
   approved: boolean;
+  error?: ReturnType<typeof webMcpToolError>;
   created: Map<number, { id: number; uuid: string; serverRevision: string }>;
 };
 export function createAuthoringProjectTools(
@@ -221,6 +228,25 @@ export function createAuthoringProjectTools(
     }
     return structuredClone(raw) as EditableBackup;
   };
+  const readResource = async (
+    type: string,
+    id: number,
+    check: () => void,
+    source?: EditableSource
+  ) => {
+    try {
+      const pin = await d.resource(type, id);
+      check();
+      validateResourcePin(pin, { type, id });
+      return pin;
+    } catch (cause) {
+      check(); // Account/context changes must never disclose the preceding account's facts.
+      const error = resourceReadError(cause, type, id);
+      if (source)
+        error.details.referencedBy = { kind: source.kind, id: source.id };
+      throw error;
+    }
+  };
   const preflight = async (backup: EditableBackup, check: () => void) => {
     for (const source of backup.body.objects)
       if (!d.canCreate(source.kind))
@@ -228,28 +254,26 @@ export function createAuthoringProjectTools(
     const pins = new Map<string, ResourcePin>();
     for (const pin of backup.body.resources) {
       positive(pin.id);
-      positive(pin.fileId);
-      if (
-        typeof pin.type !== "string" ||
-        typeof pin.md5 !== "string" ||
-        !pin.md5
-      )
-        throw new Error("素材版本信息无效");
-      const current = await d.resource(pin.type, pin.id);
-      check();
-      if (
-        current.fileId !== pin.fileId ||
-        current.md5 !== pin.md5 ||
-        current.id !== pin.id ||
-        current.type !== pin.type
-      )
-        throw new Error("素材已改变或无法读取，不能按原依赖恢复");
+      if (typeof pin.type !== "string") throw new Error("素材类型无效");
+      validateResourcePin(pin, pin);
+      const current = await readResource(pin.type, pin.id, check);
+      const changed = (["fileId", "md5"] as const).filter(
+        (field) => current[field] !== pin[field]
+      );
+      if (changed.length)
+        throw new ResourceDiagnosticError(
+          "resource_version_changed",
+          { id: pin.id, type: pin.type, fileId: current.fileId },
+          changed
+        );
       pins.set(`${pin.type}:${pin.id}`, pin);
     }
     for (const source of backup.body.objects) {
       for (const resource of source.resources)
         if (!pins.has(`${resource.type}:${resource.id}`))
-          throw new Error("备份缺少素材版本");
+          throw new ResourceDiagnosticError("resource_pin_missing", resource, [
+            "resourcePin",
+          ]);
       if (source.kind === "scene") {
         const refs = collectAuthoringReferences(source.data, "scene");
         if (
@@ -281,6 +305,7 @@ export function createAuthoringProjectTools(
     status: r.state,
     index: r.index,
     steps: structuredClone(r.steps),
+    ...(r.error ? { error: structuredClone(r.error) } : {}),
     objects: [...r.created].map(([source, o]) => ({
       sourceId: r.backup.body.objects[source].id,
       kind: r.backup.body.objects[source].kind,
@@ -306,6 +331,7 @@ export function createAuthoringProjectTools(
       if (d.actor() !== r.actor) throw new Error("账号改变");
     };
     try {
+      r.error = undefined;
       if (!r.approved) {
         if (r.context !== d.context() || r.expires < Date.now()) {
           r.state = "expired";
@@ -406,7 +432,8 @@ export function createAuthoringProjectTools(
       step.status = "completed";
       r.index++;
       r.state = r.index === r.steps.length ? "completed" : "ready";
-    } catch {
+    } catch (cause) {
+      r.error = webMcpToolError(cause, false);
       const step = r.steps[r.index];
       if (step?.status === "submitting" || step?.status === "unknown") {
         step.status = "unknown";
@@ -472,8 +499,12 @@ export function createAuthoringProjectTools(
             if (seen.has(key)) continue;
             if (seen.size >= 200) throw new Error("素材数量超过 200");
             seen.add(key);
-            const pin = await d.resource(resource.type, resource.id);
-            check();
+            const pin = await readResource(
+              resource.type,
+              resource.id,
+              check,
+              object
+            );
             resources.push(pin);
           }
         // A revision recheck prevents mixing changes observed during the read sequence.
@@ -677,6 +708,7 @@ export function createAuthoringProjectTools(
             uuid: current.uuid,
             serverRevision: current.serverRevision,
           });
+          r.error = undefined;
           step.status = "completed";
           r.index++;
           r.state = r.index === r.steps.length ? "completed" : "ready";

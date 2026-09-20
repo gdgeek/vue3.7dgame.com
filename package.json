@@ -48,7 +48,7 @@
     "unity:verify": "node scripts/unity/runtime.mjs verify",
     "unity:test": "node --test scripts/unity/runtime.test.mjs runtime/unity/tests/*.test.cjs",
     "unity:smoke": "node scripts/unity/container-smoke.mjs",
-    "webmcp:test:authoring": "vitest run test/unit/api/v1/authoring-create.spec.ts test/unit/api/v1/write-protocol.spec.ts test/unit/services/webmcp/authoring-tools.spec.ts test/unit/services/webmcp/authoring-advanced.spec.ts test/unit/services/webmcp/authoring-durable-task.spec.ts test/unit/services/webmcp/authoring-adapter.spec.ts test/unit/services/webmcp/authoring-upload.spec.ts test/unit/services/webmcp/authoring-upload-intent.spec.ts test/unit/services/webmcp/authoring-upload-route.spec.ts test/unit/services/webmcp/script-block-tools.spec.ts test/unit/services/webmcp/meta-script-tools.spec.ts test/unit/services/webmcp/verse-script-tools.spec.ts test/unit/services/webmcp/workflow-guide-tools.spec.ts"
+    "webmcp:test:authoring": "vitest run test/unit/services/webmcp/tool-error.spec.ts test/unit/api/v1/authoring-create.spec.ts test/unit/api/v1/write-protocol.spec.ts test/unit/services/webmcp/authoring-tools.spec.ts test/unit/services/webmcp/authoring-advanced.spec.ts test/unit/services/webmcp/authoring-durable-task.spec.ts test/unit/services/webmcp/authoring-adapter.spec.ts test/unit/services/webmcp/authoring-upload.spec.ts test/unit/services/webmcp/authoring-upload-intent.spec.ts test/unit/services/webmcp/authoring-upload-route.spec.ts test/unit/services/webmcp/script-block-tools.spec.ts test/unit/services/webmcp/meta-script-tools.spec.ts test/unit/services/webmcp/verse-script-tools.spec.ts test/unit/services/webmcp/workflow-guide-tools.spec.ts"
   },
   "config": {
     "commitizen": {

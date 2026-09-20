@@ -19,6 +19,10 @@ export default {
       failed: "讀取失敗或權限已變化，未顯示伺服器內容。",
     },
     publicationHistory: {
+      retention:
+        "最多保留最近 {count} 份發佈正文，超出後自動清理舊正文；目前發佈不受影響。",
+      expired:
+        "該版本正文已按保留策略清理。請重新整理列表選擇仍保留的版本，無需再次發佈。",
       from: "比較起始版本",
       to: "比較目標版本",
       compare: "比較發布版本",

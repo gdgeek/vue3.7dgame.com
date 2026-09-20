@@ -1,0 +1,91 @@
+{
+  "scope": "manual browser editing and fresh browser load; not WorkBuddy entity acceptance",
+  "observedAt": "2026-09-17T00:15:36+00:00",
+  "entity": {
+    "type": "meta",
+    "id": 1091,
+    "data": {
+      "type": "MetaRoot",
+      "children": {
+        "addons": [],
+        "entities": [
+          {
+            "type": "Polygen",
+            "children": {
+              "commands": [],
+              "entities": [],
+              "components": []
+            },
+            "parameters": {
+              "name": "P1 cube node",
+              "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+              "active": true,
+              "resource": 5495,
+              "transform": {
+                "scale": {
+                  "x": 1,
+                  "y": 1,
+                  "z": 1
+                },
+                "rotate": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "position": {
+                  "x": 0.05,
+                  "y": 0,
+                  "z": 0
+                }
+              },
+              "isCollider": false
+            }
+          }
+        ]
+      },
+      "parameters": {
+        "uuid": "631f5e7a-4317-4cd0-9c08-f729837d3e66"
+      }
+    },
+    "dataSha256": "f1e16f0abb14d0624617249e1194549258c6633413b99941748f7a9662a2b7f5",
+    "code": {
+      "blockly": "{}",
+      "lua": "",
+      "js": ""
+    },
+    "codeSha256": "4e1054c4eb1efcba047f2c1fb751a34c77831861ba73073fd032e785932551bd",
+    "operations": [
+      {
+        "operation_id": "16fc7a7b-82cc-46e4-b895-6f4d2f2dcaed",
+        "action": "save",
+        "receipt": {
+          "action": "save",
+          "operationId": "16fc7a7b-82cc-46e4-b895-6f4d2f2dcaed",
+          "serverRevision": "sha256:67e4131227281dff907ec56d52cf90cf40df90d6949c43b6e658876c6f48a255",
+          "status": "completed",
+          "targetId": 1091,
+          "targetType": "meta"
+        },
+        "created_at": 1789604107
+      }
+    ]
+  },
+  "freshPageReadback": {
+    "nodeName": "P1 cube node",
+    "position": {
+      "x": 0.05,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "scale": {
+      "x": 1,
+      "y": 1,
+      "z": 1
+    }
+  }
+}

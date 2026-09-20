@@ -37,6 +37,13 @@ export type PublicationHistory = {
   maxBodyBytes: number;
   sceneBudgetBytes: number;
   capacityWarning: boolean;
+  /** Optional while older backend instances are still running. */
+  retention?: {
+    maxVersions: number;
+    expiredVersions: number;
+    policy: "latest_versions";
+    expiredVersionHttpStatus: 410;
+  };
   resourceBytesArchived: false;
 };
 const scenePath = (id: number) => {
