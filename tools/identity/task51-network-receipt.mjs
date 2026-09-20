@@ -16,6 +16,19 @@ const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 const GIT_SHA_PATTERN = /^[a-f0-9]{40}$/;
 export const TASK51_EXECUTION_SOURCES_SCHEMA =
   "wp3-task51-stage-b-execution-sources-v1";
+export const TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA =
+  "wp3-task51-stage-b-execution-sources-v2";
+export const TASK51_HISTORY_EXCEPTION_SCHEMA =
+  "wp3-task51-stage-a-missing-evidence-exception-v1";
+export const TASK51_MISSING_HISTORY_DIGESTS = Object.freeze({
+  input: "23b5679407a177fb23c8078b085850a21730a35b2dc26b32aa7d645c63796ae2",
+  result: "51b016d75c6e590a4ebcf5afa505f88dc04ef954e1cf4c0eafc86e38882da838",
+  projection:
+    "a8660f859ac59eafa71e261358fc1dee0a8c59c5ef65eb639e8bdfac8d678098",
+  owner: "824d9430ed4596f1e2c3b6256ee8480412b36040cf70df46d0e087cbad3b3d6f",
+  anchors: "e65be4796d0b4f3133d6be0b488271af6cee4354a07b1577dd2e5a6d40272c45",
+  freeze: "271a6e540bb26d6c320c2cdd6a7c4222384bcfeff797e85e93007ae150f43ce3",
+});
 export const TASK51_CURRENT_NETWORK_RECEIPT_SCHEMA =
   "wp3-task51-safe-network-receipt-v3";
 export const TASK51_MAX_STATIC_RESPONSE_BYTES = 32 * 1024 * 1024;
@@ -351,6 +364,71 @@ function sourceCi(value) {
   );
 }
 
+// Structural parsing is NOT owner authentication, baseline verification or
+// execution authority. Missing originals remain missing in every consumer.
+export function parseTask51HistoricalEvidenceException(raw) {
+  const reject = () => {
+    throw new Error("TASK51_HISTORY_EXCEPTION_REJECTED");
+  };
+  let text;
+  let value;
+  try {
+    text =
+      typeof raw === "string"
+        ? raw
+        : new TextDecoder("utf-8", { fatal: true }).decode(raw);
+    if (Buffer.byteLength(text) > 32 * 1024) reject();
+    value = JSON.parse(text);
+  } catch {
+    reject();
+  }
+  if (
+    `${canonicalTask51Json(value)}\n` !== text ||
+    !/^[\x00-\x7f]*$/.test(text) ||
+    !hasExactKeys(value, [
+      "schema",
+      "exceptionId",
+      "issuedAt",
+      "scope",
+      "decision",
+      "missingOriginals",
+      "historicalReleaseRefSha",
+      "historicalEvidenceAvailable",
+      "historicalReplayPassed",
+      "originalsReconstructed",
+      "currentBaselineRequired",
+      "productionAuthorized",
+      "cleanupAuthorized",
+    ]) ||
+    value.schema !== TASK51_HISTORY_EXCEPTION_SCHEMA ||
+    !/^WP3-TASK51-HISTORY-EXCEPTION-[0-9]{8}-[A-Z0-9-]{1,48}$/.test(
+      value.exceptionId
+    ) ||
+    !validStageATimestamp(value.issuedAt) ||
+    value.scope !== "HISTORICAL_STAGE_A_EVIDENCE_ONLY" ||
+    value.decision !== "OWNER_ACCEPTS_MISSING_ORIGINALS" ||
+    value.historicalReleaseRefSha !==
+      "ca799deb9658149b4202e845567510fef165ce31" ||
+    !hasExactKeys(
+      value.missingOriginals,
+      Object.keys(TASK51_MISSING_HISTORY_DIGESTS)
+    ) ||
+    Object.entries(TASK51_MISSING_HISTORY_DIGESTS).some(
+      ([key, digest]) => value.missingOriginals[key] !== digest
+    ) ||
+    [
+      "historicalEvidenceAvailable",
+      "historicalReplayPassed",
+      "originalsReconstructed",
+      "productionAuthorized",
+      "cleanupAuthorized",
+    ].some((key) => value[key] !== false) ||
+    value.currentBaselineRequired !== true
+  )
+    reject();
+  return { raw: text, value, sha256: task51Sha256(text) };
+}
+
 /** Shared structural contract only. Git/CI/public-source authenticity and the
  * independent release-owner authority are separate mandatory preclaim gates. */
 export function parseTask51StageBExecutionSources(raw) {
@@ -369,6 +447,8 @@ export function parseTask51StageBExecutionSources(raw) {
   } catch {
     error();
   }
+  const exceptionRoute =
+    value?.schema === TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA;
   if (
     `${canonicalTask51Json(value)}\n` !== text ||
     !/^[\x00-\x7f]*$/.test(text) ||
@@ -378,7 +458,9 @@ export function parseTask51StageBExecutionSources(raw) {
       "executionId",
       "generatedAt",
       "historicalStageAFreezeSha256",
-      "historicalStageANetworkAttestor",
+      ...(exceptionRoute
+        ? ["historyException", "currentBaseline"]
+        : ["historicalStageANetworkAttestor"]),
       "currentWeb",
       "localTool",
       "browser",
@@ -386,12 +468,21 @@ export function parseTask51StageBExecutionSources(raw) {
       "publicSources",
       "observerSources",
     ]) ||
-    value.schema !== TASK51_EXECUTION_SOURCES_SCHEMA ||
+    (!exceptionRoute && value.schema !== TASK51_EXECUTION_SOURCES_SCHEMA) ||
     !APPROVAL_PATTERN.test(value.approvalRef) ||
     !EXECUTION_PATTERN.test(value.executionId) ||
     !validStageATimestamp(value.generatedAt) ||
     !SHA256_PATTERN.test(value.historicalStageAFreezeSha256) ||
-    !sourceBinding(value.historicalStageANetworkAttestor)
+    (exceptionRoute
+      ? value.historicalStageAFreezeSha256 !==
+          TASK51_MISSING_HISTORY_DIGESTS.freeze ||
+        !sourceBinding(value.historyException) ||
+        !sourceBinding(value.currentBaseline) ||
+        value.historyException.evidenceRef ===
+          value.currentBaseline.evidenceRef ||
+        value.historyException.evidenceSha256 ===
+          value.currentBaseline.evidenceSha256
+      : !sourceBinding(value.historicalStageANetworkAttestor))
   )
     error();
   const web = value.currentWeb;
@@ -596,9 +687,43 @@ function validPublicSourceUrl(value) {
 
 export function assertTask51StageBExecutionSourceBindings(
   parsed,
-  { approvalRef, executionId, historicalStageA }
+  {
+    approvalRef,
+    executionId,
+    historicalStageA,
+    historyException,
+    currentBaseline,
+  }
 ) {
   const reparsed = parseTask51StageBExecutionSources(parsed.raw);
+  // This establishes byte/identity bindings only. The root preflight must
+  // independently authenticate the accepted exception and verify today's
+  // baseline, production authority and recovery conditions. Never read old A
+  // bytes on this route, and never fall back to them for malformed v2 input.
+  if (reparsed.value.schema === TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA) {
+    let exception;
+    let baseline;
+    try {
+      exception = parseTask51HistoricalEvidenceException(historyException?.raw);
+      baseline = JSON.parse(currentBaseline?.raw);
+    } catch {
+      throw new Error("TASK51_EXECUTION_SOURCE_BINDING_REJECTED");
+    }
+    if (
+      parsed.sha256 !== reparsed.sha256 ||
+      reparsed.value.approvalRef !== approvalRef ||
+      reparsed.value.executionId !== executionId ||
+      exception.sha256 !== historyException.sha256 ||
+      exception.sha256 !== reparsed.value.historyException.evidenceSha256 ||
+      `${canonicalTask51Json(baseline)}\n` !== currentBaseline.raw ||
+      baseline?.schema !== "wp3-task51-stage-b-current-baseline-v1" ||
+      task51Sha256(currentBaseline.raw) !== currentBaseline.sha256 ||
+      currentBaseline.sha256 !== reparsed.value.currentBaseline.evidenceSha256
+    ) {
+      throw new Error("TASK51_EXECUTION_SOURCE_BINDING_REJECTED");
+    }
+    return reparsed;
+  }
   const historical = parseTask51NetworkAttestorReleaseEvidence(
     historicalStageA.raw
   );

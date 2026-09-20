@@ -25,6 +25,8 @@ import {
   assertTask51StageBExecutionSourceBindings,
   parseTask51NetworkAttestorReleaseEvidence,
   parseTask51StageBExecutionSources,
+  parseTask51HistoricalEvidenceException,
+  TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA,
   serializeTask51NetworkReceipt,
   TASK51_MAX_STATIC_RESPONSE_BYTES,
   TASK51_MAX_STATIC_TOTAL_BYTES,
@@ -65,6 +67,9 @@ function usage() {
     "",
     "Stage A remains immutable historical evidence. Current sources and the",
     "independent owner/readiness preflight are mandatory before any browser launch.",
+    "For the accepted missing-history route, replace --stage-a-attestor-artifact",
+    "with --trusted-history-exception-anchor <accepted-exception-anchor.json>.",
+    "The two routes are mutually exclusive; missing current evidence never falls back to history.",
     "Pass only the capability",
     "file path in argv; the capability value is never accepted in argv or env.",
   ].join("\n");
@@ -78,6 +83,7 @@ export function parseTask51AttestorArguments(argv) {
     ["--approval-ref", "approvalRef"],
     ["--execution-id", "executionId"],
     ["--stage-a-attestor-artifact", "stageAAttestorArtifactPath"],
+    ["--trusted-history-exception-anchor", "trustedHistoryExceptionAnchorPath"],
     ["--stage-b-artifact", "stageBArtifactPath"],
     ["--claim-capability-file", "claimCapabilityFilePath"],
     ["--claim-receipt-out", "claimReceiptOutPath"],
@@ -115,7 +121,6 @@ export function parseTask51AttestorArguments(argv) {
     "runnerUrl",
     "approvalRef",
     "executionId",
-    "stageAAttestorArtifactPath",
     "stageBArtifactPath",
     "claimCapabilityFilePath",
     "claimReceiptOutPath",
@@ -123,6 +128,12 @@ export function parseTask51AttestorArguments(argv) {
     "receiptOut",
   ]) {
     if (!values[key]) throw new Error(`Missing required argument: ${key}`);
+  }
+  if (
+    Boolean(values.stageAAttestorArtifactPath) ===
+    Boolean(values.trustedHistoryExceptionAnchorPath)
+  ) {
+    throw new Error("TASK51_HISTORY_INPUT_ROUTE_REJECTED");
   }
   const sourceKeys = [
     "executionSourcesPath",
@@ -144,7 +155,8 @@ export function parseTask51AttestorArguments(argv) {
     values.runnerUrl !== TASK51_RUNNER_URL ||
     new Set(
       [
-        values.stageAAttestorArtifactPath,
+        values.stageAAttestorArtifactPath ??
+          values.trustedHistoryExceptionAnchorPath,
         values.stageBArtifactPath,
         values.claimCapabilityFilePath,
         values.claimReceiptOutPath,
@@ -291,18 +303,36 @@ export function assertTask51ExecutingToolIdentity(localTool) {
 async function prepareExecutionSources(
   options,
   stageAAttestor,
-  preparedStageB
+  preparedStageB,
+  parsedSources
 ) {
-  const sources = assertTask51StageBExecutionSourceBindings(
-    parseTask51StageBExecutionSources(
-      readPreflightFile(options.executionSourcesPath, 512 * 1024)
-    ),
-    {
-      approvalRef: options.approvalRef,
-      executionId: options.executionId,
-      historicalStageA: stageAAttestor,
-    }
+  const artifactReader = createTask51EvidenceMapReader(
+    readPreflightFile(options.evidenceMapPath, 4 * 1024 * 1024),
+    options.evidenceRoots
   );
+  const exceptionRoute =
+    parsedSources.value.schema === TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA;
+  let historyException, currentBaseline, trustedHistoryExceptionAnchor;
+  if (exceptionRoute) {
+    historyException = parseTask51HistoricalEvidenceException(
+      artifactReader(parsedSources.value.historyException.evidenceRef)
+    );
+    const raw = artifactReader(parsedSources.value.currentBaseline.evidenceRef);
+    currentBaseline = {
+      raw: typeof raw === "string" ? raw : Buffer.from(raw).toString("utf8"),
+      sha256: task51Sha256(raw),
+    };
+    trustedHistoryExceptionAnchor = parsePreflightJson(
+      readPreflightFile(options.trustedHistoryExceptionAnchorPath, 64 * 1024)
+    );
+  }
+  const sources = assertTask51StageBExecutionSourceBindings(parsedSources, {
+    approvalRef: options.approvalRef,
+    executionId: options.executionId,
+    historicalStageA: stageAAttestor,
+    historyException,
+    currentBaseline,
+  });
   const manifestRaw = readPreflightFile(options.observerManifestPath);
   const authorizationRaw = readPreflightFile(options.observerAuthorizationPath);
   const readinessRaw = readPreflightFile(options.stageBReadinessPath);
@@ -332,10 +362,6 @@ async function prepareExecutionSources(
     readiness.policyAttestor?.validatorSourceSha256
   )
     throw new Error("TASK51_EXECUTION_PREFLIGHT_POLICY_REJECTED");
-  const artifactReader = createTask51EvidenceMapReader(
-    readPreflightFile(options.evidenceMapPath, 4 * 1024 * 1024),
-    options.evidenceRoots
-  );
   // The parent policy exists only in the execution checkout, not standalone Web CI.
   // Load its verified bytes at runtime; never resolve it during test collection.
   const validatorDirectoryUrl = pathToFileURL(
@@ -353,13 +379,14 @@ async function prepareExecutionSources(
     throw new Error("TASK51_EXECUTION_PREFLIGHT_POLICY_REJECTED");
   const result = await validator.verifyTask51StageBExecutionPreflight({
     executionSourcesRaw: sources.raw,
-    stageARaw: stageAAttestor.raw,
+    stageARaw: stageAAttestor?.raw,
     stageBRaw,
     manifestRaw,
     authorizationRaw,
     readinessRaw,
     artifactReader,
     trustedAuthorizationAnchor: anchor,
+    trustedHistoryExceptionAnchor,
   });
   if (
     !result.passed ||
@@ -644,10 +671,26 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
   }
   await assertPathAbsent(options.receiptOut);
   await assertPathAbsent(options.runnerFragmentPath);
-  const stageAAttestor = await readTask51StageAAttestorArtifact(
-    options.stageAAttestorArtifactPath
+  const parsedSources = parseTask51StageBExecutionSources(
+    readPreflightFile(options.executionSourcesPath, 512 * 1024)
   );
-  const attestorRelease = stageAAttestor.value.networkAttestorRelease;
+  const exceptionRoute =
+    parsedSources.value.schema === TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA;
+  if (
+    exceptionRoute
+      ? !options.trustedHistoryExceptionAnchorPath ||
+        options.stageAAttestorArtifactPath
+      : !options.stageAAttestorArtifactPath ||
+        options.trustedHistoryExceptionAnchorPath
+  ) {
+    throw new Error("TASK51_HISTORY_INPUT_ROUTE_REJECTED");
+  }
+  const stageAAttestor = exceptionRoute
+    ? null
+    : await readTask51StageAAttestorArtifact(
+        options.stageAAttestorArtifactPath
+      );
+  const attestorRelease = stageAAttestor?.value.networkAttestorRelease;
   const preparedStageB = await prepareTask51StageB(
     {
       approvalRef: options.approvalRef,
@@ -658,17 +701,25 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     },
     overrides.stageBDependencies
   );
-  assertTask51StageAAttestorStageBBinding(
-    stageAAttestor,
-    preparedStageB.stageB
-  );
+  if (!exceptionRoute)
+    assertTask51StageAAttestorStageBBinding(
+      stageAAttestor,
+      preparedStageB.stageB
+    );
   // This runs before launch, login/prewarm, quiet and the single-use claim.
   // Source declarations alone never grant the new prewarm request budget.
   const executionSources = await prepareExecutionSources(
     options,
     stageAAttestor,
-    preparedStageB
+    preparedStageB,
+    parsedSources
   );
+  // This field remains an approved historical identity reference, NOT a claim
+  // that the missing artifact was loaded or replayed. executionSourcesSha256
+  // binds the receipt to the explicit exception and current baseline instead.
+  const historicalAttestorSha256 =
+    stageAAttestor?.sha256 ??
+    preparedStageB.stageB.stageANetworkAttestorReleaseEvidenceSha256;
   const current = executionSources?.value ?? null;
   const provenance =
     current?.currentWeb.networkProvenance ?? attestorRelease.networkProvenance;
@@ -1145,13 +1196,13 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
               commitSha: current.localTool.commitSha,
               treeSha: current.localTool.treeSha,
               branch: current.localTool.branch,
-              releaseEvidenceSha256: stageAAttestor.sha256,
+              releaseEvidenceSha256: historicalAttestorSha256,
             }
           : {
               candidateContentSha256: attestorRelease.candidateContentSha256,
               publishCommitSha: attestorRelease.publishCommitSha,
               publishTreeSha: attestorRelease.publishTreeSha,
-              releaseEvidenceSha256: stageAAttestor.sha256,
+              releaseEvidenceSha256: historicalAttestorSha256,
             },
         browserRelease: observedBrowserRelease,
         executionId: preparedStageB.executionId,
@@ -1163,7 +1214,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
           imageDigest: provenance.servedWebImageDigest,
           ociRevision: provenance.servedWebOciRevision,
         },
-        stageANetworkAttestorReleaseEvidenceSha256: stageAAttestor.sha256,
+        stageANetworkAttestorReleaseEvidenceSha256: historicalAttestorSha256,
         stageBExecutionEvidenceSha256:
           preparedStageB.stageBExecutionEvidenceSha256,
         staticUrlManifestSha256: provenance.staticUrlManifestSha256,

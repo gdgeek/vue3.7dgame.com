@@ -19,6 +19,10 @@ import {
   parseTask51NetworkAttestorReleaseEvidence,
   parseTask51NetworkReceipt,
   parseTask51StageBExecutionSources,
+  parseTask51HistoricalEvidenceException,
+  TASK51_HISTORY_EXCEPTION_SCHEMA,
+  TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA,
+  TASK51_MISSING_HISTORY_DIGESTS,
   serializeTask51NetworkReceipt,
   task51Sha256,
   task51StaticResponseManifestSha256,
@@ -31,6 +35,7 @@ import {
   createTask51EvidenceMapReader,
   createTask51SafeRequestDescriptor,
   runTask51HeadedNetworkAttestor,
+  parseTask51AttestorArguments,
   task51RunnerFragmentBindings,
 } from "../../../tools/identity/run-task51-headed-network-attestor.mjs";
 
@@ -431,6 +436,180 @@ function executionSourcesFixture() {
 function rawSources(value = executionSourcesFixture()) {
   return `${canonicalTask51Json(value)}\n`;
 }
+
+describe("Task 5.1 accepted missing history is not historical replay", () => {
+  const cliBase = [
+    "--warm-url",
+    supervisorModule.TASK51_WARM_URL,
+    "--runner-url",
+    RUNNER_URL,
+    "--approval-ref",
+    "WP3-TASK51-MEMORY-RUNNER-STAGE-B-20260920",
+    "--execution-id",
+    "task51-stage-b-test-exception",
+    "--stage-b-artifact",
+    "/test-only/b.json",
+    "--claim-capability-file",
+    "/test-only/capability",
+    "--claim-receipt-out",
+    "/test-only/claim.json",
+    "--runner-fragment",
+    "/test-only/f.json",
+    "--receipt-out",
+    "/test-only/n.json",
+  ];
+  it("accepts an explicit exception route without a historical artifact path", () => {
+    const options = parseTask51AttestorArguments([
+      ...cliBase,
+      "--trusted-history-exception-anchor",
+      "/test-only/exception-anchor.json",
+    ]);
+    expect(options.stageAAttestorArtifactPath).toBeUndefined();
+    expect(options.trustedHistoryExceptionAnchorPath).toBe(
+      "/test-only/exception-anchor.json"
+    );
+  });
+  it("rejects ambiguous or missing history routes instead of guessing", () => {
+    expect(() => parseTask51AttestorArguments(cliBase)).toThrow(
+      "TASK51_HISTORY_INPUT_ROUTE_REJECTED"
+    );
+    expect(() =>
+      parseTask51AttestorArguments([
+        ...cliBase,
+        "--trusted-history-exception-anchor",
+        "/test-only/exception-anchor.json",
+        "--stage-a-attestor-artifact",
+        "/test-only/a.json",
+      ])
+    ).toThrow("TASK51_HISTORY_INPUT_ROUTE_REJECTED");
+  });
+  const fixture = () => ({
+    schema: TASK51_HISTORY_EXCEPTION_SCHEMA,
+    exceptionId: "WP3-TASK51-HISTORY-EXCEPTION-20260920-TEST",
+    issuedAt: "2026-09-20T08:00:00.000Z",
+    scope: "HISTORICAL_STAGE_A_EVIDENCE_ONLY",
+    decision: "OWNER_ACCEPTS_MISSING_ORIGINALS",
+    missingOriginals: { ...TASK51_MISSING_HISTORY_DIGESTS },
+    historicalReleaseRefSha: "ca799deb9658149b4202e845567510fef165ce31",
+    historicalEvidenceAvailable: false,
+    historicalReplayPassed: false,
+    originalsReconstructed: false,
+    currentBaselineRequired: true,
+    productionAuthorized: false,
+    cleanupAuthorized: false,
+  });
+  it("parses the exception without requiring lost files or another conversation proof", () => {
+    const raw = `${canonicalTask51Json(fixture())}\n`;
+    expect(parseTask51HistoricalEvidenceException(raw)).toEqual({
+      raw,
+      value: fixture(),
+      sha256: task51Sha256(raw),
+    });
+  });
+  it.each([
+    "historicalEvidenceAvailable",
+    "historicalReplayPassed",
+    "originalsReconstructed",
+    "productionAuthorized",
+    "cleanupAuthorized",
+  ])("rejects an exception claiming %s", (key) => {
+    expect(() =>
+      parseTask51HistoricalEvidenceException(
+        `${canonicalTask51Json({ ...fixture(), [key]: true })}\n`
+      )
+    ).toThrow("TASK51_HISTORY_EXCEPTION_REJECTED");
+  });
+  it("cannot waive current safety or silently select different history", () => {
+    for (const value of [
+      { ...fixture(), currentBaselineRequired: false },
+      {
+        ...fixture(),
+        missingOriginals: {
+          ...TASK51_MISSING_HISTORY_DIGESTS,
+          freeze: "0".repeat(64),
+        },
+      },
+      { ...fixture(), passed: true },
+      { ...fixture(), scope: "ALL_TASK51_EVIDENCE" },
+      { ...fixture(), decision: "HISTORICAL_REPLAY_PASS" },
+    ])
+      expect(() =>
+        parseTask51HistoricalEvidenceException(
+          `${canonicalTask51Json(value)}\n`
+        )
+      ).toThrow("TASK51_HISTORY_EXCEPTION_REJECTED");
+  });
+  it("binds current sources without accessing historical attestor bytes", () => {
+    const exception = parseTask51HistoricalEvidenceException(
+      `${canonicalTask51Json(fixture())}\n`
+    );
+    // Structural fixture only: this is deliberately NOT a verified baseline.
+    const baselineRaw = `${canonicalTask51Json({ schema: "wp3-task51-stage-b-current-baseline-v1" })}\n`;
+    const baseline = { raw: baselineRaw, sha256: task51Sha256(baselineRaw) };
+    const { historicalStageANetworkAttestor: old, ...existing } =
+      executionSourcesFixture();
+    const value = {
+      ...existing,
+      schema: TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA,
+      historicalStageAFreezeSha256: TASK51_MISSING_HISTORY_DIGESTS.freeze,
+      historyException: {
+        evidenceRef: "reports/history-exception.json",
+        evidenceSha256: exception.sha256,
+      },
+      currentBaseline: {
+        evidenceRef: "reports/current-baseline.json",
+        evidenceSha256: baseline.sha256,
+      },
+    };
+    const parsed = parseTask51StageBExecutionSources(
+      `${canonicalTask51Json(value)}\n`
+    );
+    // Do not supply even an accessor for the historical argument: the caller
+    // has no obligation to load it. A throwing raw getter detects regressions.
+    const noHistory = { raw: undefined };
+    Object.defineProperty(noHistory, "raw", {
+      get() {
+        throw new Error("OLD_HISTORY_MUST_NOT_BE_READ");
+      },
+    });
+    expect(
+      assertTask51StageBExecutionSourceBindings(parsed, {
+        approvalRef: value.approvalRef,
+        executionId: value.executionId,
+        historyException: exception,
+        currentBaseline: baseline,
+        historicalStageA: noHistory,
+      }).sha256
+    ).toBe(parsed.sha256);
+    for (const changed of [
+      { historyException: undefined, currentBaseline: baseline },
+      { historyException: exception, currentBaseline: undefined },
+      {
+        historyException: { ...exception, sha256: "0".repeat(64) },
+        currentBaseline: baseline,
+      },
+      {
+        historyException: exception,
+        currentBaseline: { ...baseline, raw: `${baseline.raw} ` },
+      },
+    ])
+      expect(() =>
+        assertTask51StageBExecutionSourceBindings(parsed, {
+          approvalRef: value.approvalRef,
+          executionId: value.executionId,
+          ...changed,
+        })
+      ).toThrow("TASK51_EXECUTION_SOURCE_BINDING_REJECTED");
+    for (const changed of [
+      { ...value, historicalStageANetworkAttestor: old },
+      { ...value, currentBaseline: value.historyException },
+      { ...value, historicalStageAFreezeSha256: "0".repeat(64) },
+    ])
+      expect(() =>
+        parseTask51StageBExecutionSources(`${canonicalTask51Json(changed)}\n`)
+      ).toThrow("TASK51_EXECUTION_SOURCES_REJECTED");
+  });
+});
 
 describe("Task 5.1 current execution sources (offline only)", () => {
   it("keeps current served Web, tool checkout and historical A identities distinct", () => {
