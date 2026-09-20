@@ -19,6 +19,34 @@ export function webMcpToolError(cause: unknown, readOnly: boolean) {
     message?: string;
     code?: string;
   } | null;
+  const editorMessages: Record<string, string> = {
+    ANIMATION_PREVIEW_ACTIVE:
+      "动画预览仍在进行；先用 stop 停止预览，再重新预览编辑或保存操作。",
+    CAPABILITY_UNAVAILABLE:
+      "当前编辑器未提供该协议，请更新编辑器后重新发现工具。",
+    UNSUPPORTED_NODE_TYPE:
+      "目标节点类型不支持该属性，先读取节点类型和字段约束。",
+    INVALID_REQUEST: "编辑器拒绝参数，请核对工具 schema 和字段约束。",
+    INVALID_RANGE: "字段超出支持范围，请读取当前节点或动画约束。",
+    ENTITY_CONFLICT: "实体版本已经变化，请重新读取并预览。",
+    VERSION_CONFLICT: "实体版本已经变化，请重新读取并预览。",
+    NODE_PROPERTIES_CONFLICT: "节点属性已经变化，请重新读取并预览。",
+    ANIMATION_CONFLICT: "导入动画版本已经变化，请重新查询 metadata。",
+    ANIMATION_NOT_READY: "尚未获得实际导入动画，请等待载入并重新读取。",
+    NO_ACTIVE_PREVIEW: "此动画尚未开始预览，无法暂停或恢复。",
+    NODE_NOT_FOUND: "当前编辑器找不到该节点，请读取节点树。",
+    READ_ONLY: "当前实体没有编辑权限。",
+    EDITOR_LOADING: "编辑器仍在加载，请等待 ready 后重试读取。",
+  };
+  if (value?.code && editorMessages[value.code])
+    return {
+      isError: true,
+      status: "failed",
+      errorCode: value.code.toLowerCase(),
+      message: editorMessages[value.code],
+      ...(readOnly ? {} : { persistence: "unverified" }),
+      nextStep: "先读取当前能力、节点状态与原操作回执；不要自动重放写入。",
+    };
   const httpStatus = value?.response?.status;
   const code =
     httpStatus === 410 &&

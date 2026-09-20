@@ -110,6 +110,134 @@ function setup() {
   };
 }
 describe("global authoring tools", () => {
+  const recoveryId = "8bfe365e-4faf-47b2-a7fd-cc3b7332b77d";
+  const recoveryUuid = "f41e25e2-0fe5-48db-a7a5-7bff772a9a99";
+  const evidence = () => ({
+    contractVersion: "creation-recovery-v1" as const,
+    targetType: "verse" as const,
+    operationId: recoveryId,
+    creationUuid: recoveryUuid,
+    status: "observed" as const,
+    reason: "uuid_match_without_receipt",
+    verification: "uuid_readback" as const,
+    operationVerified: false,
+    retrySafe: false as const,
+    id: 42,
+    uuid: recoveryUuid,
+    currentRevision: revision,
+  });
+  it("recovers a legacy object across sessions without known ID or replay, while preserving evidence level", async () => {
+    const s = setup();
+    s.d.creationLookup = vi.fn(async () => evidence());
+    const query = {
+      operationId: recoveryId,
+      creationUuid: recoveryUuid,
+      kind: "scene",
+    };
+    expect(await s.call("get_authoring_operation", query)).toMatchObject({
+      status: "unknown",
+      serverStatus: "observed",
+      operationVerified: false,
+      candidate: { id: 42, verification: "uuid_readback" },
+    });
+    const recovered = await s.call("reconcile_authoring_creation", query);
+    expect(recovered).toMatchObject({
+      status: "completed",
+      targetId: 42,
+      operationStatus: "indeterminate",
+      operationVerified: false,
+    });
+    expect(recovered.result.receipt).toBeUndefined();
+    s.reload();
+    expect(await s.status({ operationId: recoveryId })).toMatchObject({
+      status: "completed",
+      verification: "uuid_readback",
+      operationVerified: false,
+      operationStatus: "indeterminate",
+    });
+    expect(s.d.create).not.toHaveBeenCalled();
+    expect(s.d.read).not.toHaveBeenCalled();
+  });
+  it("supports UUID-only readback without inventing an operation ID", async () => {
+    const s = setup();
+    s.d.creationLookup = vi.fn(async () => ({
+      ...evidence(),
+      operationId: null,
+    }));
+    const result = await s.call("reconcile_authoring_creation", {
+      kind: "scene",
+      creationUuid: recoveryUuid,
+    });
+    expect(result).toMatchObject({ targetId: 42, operationVerified: false });
+    expect(result.operationId).toBeUndefined();
+    expect(s.d.create).not.toHaveBeenCalled();
+  });
+  it.each(["not_observed", "indeterminate", "conflict"] as const)(
+    "keeps %s lookup outcomes unknown and forbids replay",
+    async (status) => {
+      const s = setup();
+      s.d.creationLookup = vi.fn(async () => ({
+        contractVersion: "creation-recovery-v1",
+        targetType: "verse",
+        operationId: recoveryId,
+        creationUuid: recoveryUuid,
+        status,
+        reason: "no_accessible_creation_evidence",
+        verification: "none",
+        operationVerified: false,
+        retrySafe: false,
+      }));
+      const result = await s.call("get_authoring_operation", {
+        operationId: recoveryId,
+        kind: "scene",
+        creationUuid: recoveryUuid,
+      });
+      expect(result).toMatchObject({
+        status: "unknown",
+        serverStatus: status,
+        retrySafe: false,
+      });
+      expect(result.targetId).toBeUndefined();
+      expect(s.d.create).not.toHaveBeenCalled();
+    }
+  );
+  it("rejects UUID substitution and suppresses a lookup result after account changes", async () => {
+    const s = setup();
+    vi.mocked(s.d.create).mockRejectedValue(new Error("lost response"));
+    const draft = await s.stage();
+    await s.complete(draft);
+    await flush();
+    s.d.creationLookup = vi.fn(async () => evidence());
+    await expect(
+      s.call("reconcile_authoring_creation", {
+        operationId: draft.operationId,
+        creationUuid: recoveryUuid,
+      })
+    ).rejects.toThrow("不匹配");
+    expect(s.d.creationLookup).not.toHaveBeenCalled();
+    const gate = deferred<ReturnType<typeof evidence>>();
+    s.d.creationLookup = vi.fn(() => gate.promise);
+    const pending = s.call("get_authoring_operation", {
+      operationId: recoveryId,
+      kind: "scene",
+    });
+    s.changeActor("4");
+    gate.resolve(evidence());
+    await expect(pending).rejects.toThrow("账号");
+  });
+  it("does not advertise verified backend idempotency merely because client functions are registered", async () => {
+    const s = setup();
+    s.d.creationLookup = vi.fn();
+    s.d.creationReceipt = vi.fn();
+    expect(await s.call("get_authoring_capabilities")).toMatchObject({
+      limitations: {
+        durableCreateIdempotency: null,
+        durableCreateClientSupported: true,
+        backendCapabilityStatus: "unverified",
+        notObservedProvesNotCreated: false,
+      },
+    });
+  });
   it("stages without writes and returns a real created ID after confirmation", async () => {
     const s = setup();
     const draft = await s.stage();

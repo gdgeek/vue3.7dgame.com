@@ -1,4 +1,4 @@
-export const WORKFLOW_GUIDE_VERSION = "1.5.2";
+export const WORKFLOW_GUIDE_VERSION = "1.7.0";
 export const WORKFLOW_GUIDE_ID = "xrugc-scene-studio";
 export const WORKFLOW_GUIDE_TOOL_NAME = "xrugc_get_workflow_guide";
 
@@ -13,6 +13,12 @@ export const WORKFLOW_GUIDE_TOPICS = [
     title: "AI 创作与工程恢复",
     description:
       "对象创建、封面素材、依赖影响、逐步任务、脚本模板和可编辑工程备份恢复",
+  },
+  {
+    id: "editor-authoring",
+    title: "批量节点、声音文字与动画元数据",
+    description:
+      "批量资源／空分组／文字创建、节点属性、实际导入 clips 与编辑器预览边界",
   },
   {
     id: "assets",
@@ -38,7 +44,7 @@ export const WORKFLOW_GUIDE_TOPICS = [
   {
     id: "audio",
     title: "讲解与音效",
-    description: "旁白制作、播放顺序和停止重启",
+    description: "剪映配音、音效与音乐、播放顺序和停止重启",
   },
   {
     id: "publication",

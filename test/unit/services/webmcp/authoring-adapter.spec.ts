@@ -47,7 +47,9 @@ vi.mock("@/components/Dialog", () => ({
 vi.mock("@/services/webmcp/authoring-task-store", () => ({
   serverTaskStore: {},
 }));
-vi.mock("@/api/v1/authoring-create", () => ({
+vi.mock("@/utils/request", () => ({ default: vi.fn() }));
+vi.mock("@/api/v1/authoring-create", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/api/v1/authoring-create")>()),
   createAuthoringObject: async (
     kind: string,
     _operation: string,
@@ -56,6 +58,7 @@ vi.mock("@/api/v1/authoring-create", () => ({
     (await (kind === "entity" ? state.postMeta(body) : state.postVerse(body)))
       .data,
   getAuthoringCreation: vi.fn(),
+  lookupAuthoringCreation: vi.fn(),
 }));
 vi.mock("@/api/v1/meta", () => ({
   getMeta: state.getMeta,
@@ -175,7 +178,7 @@ describe("authoring app adapter", () => {
   });
   it("provides actual registered tools and actor permissions", async () => {
     expect(await call("get_authoring_capabilities")).toMatchObject({
-      contractVersion: "1.2.0",
+      contractVersion: "1.3.0",
       tools: [{ name: "actual_registered_tool" }],
       createKinds: ["entity", "scene"],
     });
@@ -304,6 +307,23 @@ describe("authoring app adapter", () => {
       authoringAsset({ type: "picture", info: "x".repeat(9000) } as any)
         .metadata
     ).toBeNull();
+  });
+  it("keeps empty stored animation metadata unknown and identifies legacy anim hints", () => {
+    expect(
+      authoringAsset({ type: "polygen", info: '{"animations":[]}' } as any)
+    ).toMatchObject({
+      animationParseStatus: "metadata_only",
+      hasAnimations: null,
+      animationNames: [],
+    });
+    expect(
+      authoringAsset({ type: "polygen", info: '{"anim":["Eye_full"]}' } as any)
+    ).toMatchObject({
+      animationParseStatus: "metadata_only",
+      hasAnimations: true,
+      animationNames: ["Eye_full"],
+      animationSource: "stored_metadata",
+    });
   });
 });
 
