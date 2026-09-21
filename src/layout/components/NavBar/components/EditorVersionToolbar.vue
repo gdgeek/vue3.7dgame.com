@@ -39,16 +39,17 @@ const SceneInfoDialog = defineAsyncComponent(
 );
 const { t } = useI18n();
 const route = useRoute();
-const isEntityEditor = computed(() => route.path === "/meta/scene");
-const isSceneEditor = computed(() => route.path === "/verse/scene");
+const routePath = computed(() => route?.path ?? "");
+const isEntityEditor = computed(() => routePath.value === "/meta/scene");
+const isSceneEditor = computed(() => routePath.value === "/verse/scene");
 const entityId = computed(() => {
-  const value = route.query.id;
+  const value = route?.query?.id;
   return Number(Array.isArray(value) ? value[0] : value);
 });
 const entityInfoVisible = ref(false);
 const sceneInfoVisible = ref(false);
 watch(
-  () => route.path,
+  routePath,
   () => {
     entityInfoVisible.value = false;
     sceneInfoVisible.value = false;
