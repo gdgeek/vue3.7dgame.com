@@ -48,13 +48,10 @@ const entityId = computed(() => {
 });
 const entityInfoVisible = ref(false);
 const sceneInfoVisible = ref(false);
-watch(
-  routePath,
-  () => {
-    entityInfoVisible.value = false;
-    sceneInfoVisible.value = false;
-  }
-);
+watch(routePath, () => {
+  entityInfoVisible.value = false;
+  sceneInfoVisible.value = false;
+});
 const {
   editorVersionToolbarState,
   openDialog,
