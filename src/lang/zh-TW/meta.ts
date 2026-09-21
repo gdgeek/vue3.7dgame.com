@@ -94,7 +94,7 @@ export default {
       },
     },
     scene: {
-      editorInfo: "編輯組件",
+      editorInfo: "編輯實體",
       infoLoadFailed: "無法載入實體資訊，請重試。",
       infoRetry: "重試",
       error: "沒有實體編輯器",
