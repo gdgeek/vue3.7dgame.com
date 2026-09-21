@@ -81,6 +81,10 @@ const actions = computed<EditorAction[]>(() => [
           iconOnly: true,
           class: sceneInfoButtonClass.value,
           onClick: () => {
+            if (editorVersionToolbarState.status === "dirty") {
+              editorVersionToolbarState.onSave?.();
+              return;
+            }
             sceneInfoVisible.value = true;
           },
         },

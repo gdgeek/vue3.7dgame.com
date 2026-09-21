@@ -220,6 +220,9 @@ const activateToolbar = () => {
     onRunPreview: () => {
       if (editorLoading.ready.value) runSceneRuntimePreview();
     },
+    onSave: () => {
+      if (editorLoading.ready.value) void requestSceneSave("manual");
+    },
     onOpenScript: () => {
       if (editorLoading.ready.value) void openScriptDrawer();
     },
