@@ -1,46 +1,46 @@
 {
   "schemaVersion": 1,
   "protocolVersion": 1,
-  "unityBaseImage": "hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:2991fe8dc1a856c64b083e4a4824ec137acb731c43ebada73e8d4e3322a17d3b",
-  "buildId": "sha256:02a9bed6561b6ff95a1701415108168c381367e7395743fce2a4e27943aa249f",
+  "unityBaseImage": "hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:0f0d9bf2c35cf46c3d37e9d55df313683d2af65b0bdf9011078b6c57d85c6a01",
+  "buildId": "sha256:f87c87f9a33799d61dda6dac165aff09887914699d952947b00efeb5c660c689",
   "sourceRevision": "f3fbe0dda98e6f9255339c0c880ff2015d021199",
   "files": [
     {
       "role": "loader",
       "url": "Build/public.loader.js",
       "size": 26983,
-      "sha256": "44b4bd1cede9d8edad38643480fe0823c07d0dc2c5fd288542fc6c6ddc5091ac",
+      "sha256": "777610d9d903539578cc15852a9fccd69c3761c69cbf4e446a127a8e35931c21",
       "contentEncoding": "identity",
       "contentType": "application/javascript"
     },
     {
       "role": "data",
       "url": "Build/public.data.gz",
-      "size": 123738778,
-      "sha256": "842c08af62aa11902ed26d1626a0e902667851bce2cc55b026744d03cf916e53",
+      "size": 123738707,
+      "sha256": "4ee890e0e4a3f313d674b3dedfc0bdccb3aa476f34b39ef06c03b6ef9501c70a",
       "contentEncoding": "gzip",
       "contentType": "application/octet-stream"
     },
     {
       "role": "framework",
       "url": "Build/public.framework.js.gz",
-      "size": 106080,
-      "sha256": "3115c3b32491859abc227cb09d43cd0f459f3af86be7763a37d82158eefadd8d",
+      "size": 106069,
+      "sha256": "3434b0524841f4a4788202f3e56df38ff9c638e06995e0280f7ecd259dcb5d42",
       "contentEncoding": "gzip",
       "contentType": "application/javascript"
     },
     {
       "role": "wasm",
       "url": "Build/public.wasm.gz",
-      "size": 21291877,
-      "sha256": "1f07976d7f8fd92dea740d62df30783c510a257391104ef97551216e58a45477",
+      "size": 21291978,
+      "sha256": "c491ec6c799b078d8d3ad84d45f1a1cf38ea94de9456570f0b7ce1553e915bd1",
       "contentEncoding": "gzip",
       "contentType": "application/wasm"
     }
   ],
   "unitySource": {
     "repository": "https://github.com/xrugc/iOS",
-    "revision": "9907129b55e5aca26c8b687fecb563f277e6ce24",
+    "revision": "4b791a9019e97f2a594a2daddcb73c093c877e97",
     "branch": "feature/webgl-preview",
     "unity": "6000.4.6f1",
     "gltfast": "6.18.0",
