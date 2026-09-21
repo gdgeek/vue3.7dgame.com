@@ -16,4 +16,4 @@
 
 Unity loader/data/framework/wasm 均不是源码副本的一部分；它们只从锁定 OCI digest 作为构建输入提取，详情见 PROTOCOL.md 和 ../../scripts/unity/artifact-lock.json。仓库中的 LFS 指针不能作为发布制品。
 
-2026-09-21 的 Unity 制品来自 `xrugc/iOS` 提交 `9907129b55e5aca26c8b687fecb563f277e6ce24`，Foundation 子模块为 `755b4da0e164de92562955e44688ffffae40f944`。二进制已迁至 `gdgeek/vue3` 制品镜像；不再从已退役插件的镜像提取新版运行器。
+2026-09-21 的当前 Unity 制品来自 `xrugc/iOS` 提交 `4b791a9019e97f2a594a2daddcb73c093c877e97`，Foundation 子模块为 `5b52edb23014f479dc95968a11409243cb3a6c5f`，buildId 为 `sha256:f87c87f9a33799d61dda6dac165aff09887914699d952947b00efeb5c660c689`。本次包含通用 Tooltip 中文字体兜底、Text 与背景在同一世界空间 Canvas 内排序，以及桌面点击交互修复。二进制位于 `gdgeek/vue3` 制品镜像；不从已退役插件的镜像提取新版运行器。
