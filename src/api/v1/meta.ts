@@ -40,9 +40,11 @@ export const putMetaCode = (
 export const getMeta = (
   id: string | number,
   params: Record<string, unknown> = {},
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  options: { skipErrorMessage?: boolean } = {}
 ) => {
   return request<MetaInfo>({
+    ...options,
     url: `/v1/metas/${id}${qs.stringify(params, true)}`,
     method: "get",
     signal,

@@ -119,7 +119,7 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
       expect(el.querySelector(".crumb-link.is-primary")?.textContent).toContain(
         name
       );
-      if (path === "/verse/scene") {
+      if (path === "/verse/scene" || path === "/meta/scene") {
         expect(modeTag).toBeNull();
       } else {
         expect(modeTag?.getAttribute("aria-label")).toBe(modeLabel);
