@@ -94,7 +94,10 @@ export default {
       },
     },
     scene: {
-      error: "沒有場景編輯器",
+      editorInfo: "編輯組件",
+      infoLoadFailed: "無法載入實體資訊，請重試。",
+      infoRetry: "重試",
+      error: "沒有實體編輯器",
       info: "沒有保存權限！",
       success: "實體保存成功",
       saveError: "實體保存失敗",

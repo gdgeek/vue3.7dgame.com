@@ -3,12 +3,18 @@
     <el-tooltip
       v-for="action in actions"
       :key="action.id"
-      :content="action.label"
+      :content="action.tooltip || action.label"
       placement="bottom"
     >
       <el-button
         class="editor-action-button"
-        :class="[action.class, { 'is-primary-action': action.primary }]"
+        :class="[
+          action.class,
+          {
+            'is-primary-action': action.primary,
+            'is-icon-only': action.iconOnly,
+          },
+        ]"
         size="small"
         v-bind="{
           'aria-label': action.label,
@@ -23,7 +29,9 @@
           class="editor-action-icon"
           :icon="action.icon"
         ></font-awesome-icon>
-        <span class="editor-action-label">{{ action.label }}</span>
+        <span v-if="!action.iconOnly" class="editor-action-label">{{
+          action.label
+        }}</span>
       </el-button>
     </el-tooltip>
   </div>
@@ -35,9 +43,11 @@ import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 export interface EditorAction {
   id: string;
   label: string;
+  tooltip?: string;
   icon: IconDefinition;
   class?: string;
   primary?: boolean;
+  iconOnly?: boolean;
   disabled?: boolean;
   loading?: boolean;
   onClick: () => unknown;
@@ -83,6 +93,11 @@ defineProps<{ label?: string; actions: EditorAction[] }>();
 
   & + .editor-action-button {
     border-left: 1px solid var(--border-color);
+  }
+
+  &.is-icon-only {
+    width: 40px;
+    padding: 0;
   }
 
   &:hover:not(:disabled) {

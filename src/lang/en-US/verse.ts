@@ -1,6 +1,15 @@
 // verse translations for en-US
 export default {
   verse: {
+    toolbar: {
+      run: "Run",
+      versions: "Versions",
+      history: "History",
+      script: "Script",
+      info: "Scene Editor",
+      infoLoadFailed: "Unable to load scene information. Please try again.",
+      retry: "Retry",
+    },
     create: {
       defaultName: "New Scene",
     },

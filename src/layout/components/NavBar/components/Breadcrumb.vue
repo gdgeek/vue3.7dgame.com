@@ -277,11 +277,6 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       { label: workspace, to: HOME_PATH, clickable: true },
       { label: entity, to: ENTITY_LIST_PATH, clickable: true },
       { label: name, primary: true },
-      {
-        label: String(t("route.meta.sceneEditor")),
-        kind: "mode",
-        mode: "entity",
-      },
     ]);
   }
 

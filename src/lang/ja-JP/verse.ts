@@ -1,6 +1,16 @@
 // verse translations for ja-JP
 export default {
   verse: {
+    toolbar: {
+      run: "実行",
+      versions: "バージョン",
+      history: "履歴",
+      script: "スクリプト",
+      info: "シーン編集",
+      infoLoadFailed:
+        "シーン情報を読み込めませんでした。もう一度お試しください。",
+      retry: "再試行",
+    },
     create: {
       defaultName: "新しいシーン",
     },

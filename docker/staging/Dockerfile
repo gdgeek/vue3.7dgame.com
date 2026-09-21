@@ -1,7 +1,7 @@
-ARG UNITY_PREVIOUS_IMAGE=hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:50f66e58d4571b831c896cfbf7445aeefdb32938a6d0409887a339aa4a213783
+ARG UNITY_PREVIOUS_IMAGE=hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:43db003cbbf69688a85a44d94ca3daee8ebe8483f11c2ab1734ba2e4006fe7d1
 
 # The Unity input is immutable and independent of adjacent superproject modules.
-FROM --platform=linux/amd64 hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:2991fe8dc1a856c64b083e4a4824ec137acb731c43ebada73e8d4e3322a17d3b AS unity-source
+FROM --platform=linux/amd64 hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:0f0d9bf2c35cf46c3d37e9d55df313683d2af65b0bdf9011078b6c57d85c6a01 AS unity-source
 
 # Preserve the previously verified main-site runtime across this upgrade.
 # Upgrades pin the previous verified MAIN WEB image to retain its active release.
@@ -51,6 +51,6 @@ ENV PLUGIN_USER_MANAGEMENT_URL=http://localhost:3003
 ENV PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005
 COPY --from=final-verifier /html /usr/share/nginx/html
 COPY public/config/plugins.json.template /usr/share/nginx/html/config/plugins.json
-LABEL io.xrugc.unity.source="hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:2991fe8dc1a856c64b083e4a4824ec137acb731c43ebada73e8d4e3322a17d3b"
+LABEL io.xrugc.unity.source="hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:0f0d9bf2c35cf46c3d37e9d55df313683d2af65b0bdf9011078b6c57d85c6a01"
 EXPOSE 80
 ENTRYPOINT ["/docker-entrypoint.sh"]

@@ -113,7 +113,7 @@ export default {
       systemDefault: "Prefabs",
       edit: "Edit",
       scriptEditor: "Script",
-      sceneEditor: "Scene",
+      sceneEditor: "Entity",
     },
     ai: {
       title: "AI",

@@ -91,7 +91,8 @@ export const getVerse = (
   id: number,
   expand = "metas,share",
   cl = "lua",
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  options: { skipErrorMessage?: boolean } = {}
 ) => {
   // Visibility is a Yii extraField: omitting it makes public scenes appear
   // private when a detail panel reloads with its own expansion list.
@@ -103,6 +104,7 @@ export const getVerse = (
   );
   fields.add("public");
   return request<VerseData>({
+    ...options,
     url: `/v1/verses/${id}${qs.stringify({ expand: [...fields].join(","), cl }, true)}`,
     method: "get",
     signal,

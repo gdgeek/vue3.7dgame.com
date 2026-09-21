@@ -1,6 +1,15 @@
 // verse translations for th-TH
 export default {
   verse: {
+    toolbar: {
+      run: "เรียกใช้",
+      versions: "เวอร์ชัน",
+      history: "ประวัติ",
+      script: "สคริปต์",
+      info: "แก้ไขฉาก",
+      infoLoadFailed: "ไม่สามารถโหลดข้อมูลฉากได้ โปรดลองอีกครั้ง",
+      retry: "ลองอีกครั้ง",
+    },
     create: {
       defaultName: "ฉากใหม่",
     },

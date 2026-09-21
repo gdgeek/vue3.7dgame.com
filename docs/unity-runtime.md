@@ -32,11 +32,13 @@ corepack pnpm dev
 
 ## 2026-09-21 Unity 制品升级
 
-当前制品由 `xrugc/iOS` 的 `feature/webgl-preview` 提交 `9907129b55e5aca26c8b687fecb563f277e6ce24` 完整构建，Unity 6000.4.6f1、glTFast 6.18.0、URP 17.4.0。制品镜像位于现有 `gdgeek/vue3` 仓库，仅作为主站构建输入，不运行独立插件服务。
+当前制品由 `xrugc/iOS` 的 `feature/webgl-preview` 提交 `4b791a9019e97f2a594a2daddcb73c093c877e97` 完整构建，Foundation 子模块为 `5b52edb23014f479dc95968a11409243cb3a6c5f`，Unity 6000.4.6f1、glTFast 6.18.0、URP 17.4.0。制品镜像位于现有 `gdgeek/vue3` 仓库，仅作为主站构建输入，不运行独立插件服务。
 
 构建保留托管异常处理和运行期 glTF Shader 变体，WebGL 启动场景包含桌面平台设置；没有 AR 图像库时跳过目标初始化。锁文件记录四个文件的实际哈希、大小与 Unity 源码版本。主站原生运行回调适配跟随锁定 buildId，仍严格校验当前 iframe、origin 和会话状态。
 
-本地真实浏览器已验证场景启动确认、Lua 创建物体、URP 材质画面及关闭。测试页显式使用 URP Lit；`CreatePrimitive` 默认 Standard 材质不适用于当前渲染管线。此验收不代表课程 2411、头显或线上发布验收；工程中历史自定义 ShaderGraph 的缺失子图及缺失组件警告仍需单独处理。
+本轮修复在通用 Tooltip 字体无法覆盖内容时使用运行期中文字体兜底，并只在内容、字体或布局发生变化时更新文字网格。通用 Text 使用同一世界空间 Canvas 内的文字与背景顺序，保留原有文字尺寸和无背景行为；同时修复桌面点击交互。当前 buildId 为 `sha256:f87c87f9a33799d61dda6dac165aff09887914699d952947b00efeb5c660c689`，压缩制品总计 145,163,737 字节。
+
+上一制品的本地真实浏览器已验证场景启动确认、Lua 创建物体、URP 材质画面及关闭。测试页显式使用 URP Lit；`CreatePrimitive` 默认 Standard 材质不适用于当前渲染管线。这些历史结果不代替本轮中文文字、提示和点击功能的线上开发环境验收，也不代表课程 2411、头显或生产发布验收。当前构建成功；构建中的 15 条 TourismHand 空引用与此前构建基线的类型、栈及次数一致，没有新增构建错误类别。工程中既有自定义 ShaderGraph 的缺失子图及缺失组件警告仍需单独处理。
 
 ## 版本与发布
 
@@ -58,6 +60,8 @@ corepack pnpm unity:smoke xrugc-main-unity:local
 发布遵循 develop 测试及镜像门禁通过后，main / publish 一起推进并发检查的仓库约定。升级构建用 `UNITY_PREVIOUS_IMAGE` 锁定上一主站镜像 digest，仅继承其 active 指向的运行器 release，使上一版会话仍可读取原版本文件；具体命令见 [制品工具说明](../scripts/unity/README.md)。首发默认不继承旧插件静态入口。回滚恢复已验证的完整主站镜像及对应配置，不静默切回旧插件地址。实际发布结果以验收记录为准。
 
 2026-09-14 本次修复发布前，已将 GitHub Actions 仓库变量 `UNITY_PREVIOUS_IMAGE` 设置为 `hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:ad2d96747787b6fced0a00986805b4777e3568be30744936e5d1e113d1e504e2`。该不可变镜像经核验是上一版 `publish` / `latest`，其 active release 为 `c2816fc3523ab85d07097cac`。后续升级仍须在新 CI 触发前核对并更新此变量，最终镜像须同时验证新 active release 和继承的上一版 release。
+
+2026-09-21 本轮中文文字与交互修复使用上一完整主站镜像 `hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:43db003cbbf69688a85a44d94ca3daee8ebe8483f11c2ab1734ba2e4006fe7d1` 作为 `UNITY_PREVIOUS_IMAGE`，保留 active release `7592710e42a95e6dd5ca85cc`。该值用于 Dockerfile、CI 默认值及 Actions 仓库变量；制品镜像不能代替这一完整主站回滚基线。
 
 ## SW 与资源边界
 
