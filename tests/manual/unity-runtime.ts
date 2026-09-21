@@ -23,6 +23,13 @@ const app = createApp({
           "cube.name = 'XRUGC acceptance cube'",
           "cube.transform.position = CS.UnityEngine.Vector3(0, 1, 0)",
           "cube.transform.localScale = CS.UnityEngine.Vector3(1, 2, 1)",
+          "local renderer = cube:GetComponent(typeof(CS.UnityEngine.Renderer))",
+          // CreatePrimitive defaults to the built-in Standard shader, which is not a URP material.
+          "local shader = CS.UnityEngine.Shader.Find('Universal Render Pipeline/Lit')",
+          "assert(shader ~= nil, 'URP Lit shader must be included in the runtime')",
+          "renderer.material = CS.UnityEngine.Material(shader)",
+          "renderer.material:SetColor('_BaseColor', CS.UnityEngine.Color(0.15, 0.7, 0.95, 1))",
+          "print('[XRUGC acceptance] cube active=' .. tostring(cube.activeInHierarchy) .. ', renderer=' .. tostring(renderer.enabled) .. ', shader=' .. renderer.sharedMaterial.shader.name .. ', mesh=' .. tostring(cube:GetComponent(typeof(CS.UnityEngine.MeshFilter)).sharedMesh))",
           "print('[XRUGC acceptance] scene Lua created and transformed cube')",
         ].join("\n"),
         source: "isolated-runtime-harness",

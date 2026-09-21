@@ -1,3 +1,4 @@
+import unityArtifactLock from "../../../scripts/unity/artifact-lock.json";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,
@@ -28,8 +29,7 @@ import {
 const release = {
   protocolVersion: 1,
   runtimeReleaseId: "abcdef0123456789abcdef01",
-  buildId:
-    "sha256:7bee87bbf1c044802841b46489638cb5069eac5b51fb0637714a3b826b092f33",
+  buildId: unityArtifactLock.buildId,
   entrypoint: "/webgl-preview/releases/abcdef0123456789abcdef01/embed.html",
 };
 const audioResource = {
