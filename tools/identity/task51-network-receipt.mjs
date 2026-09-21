@@ -18,6 +18,8 @@ export const TASK51_EXECUTION_SOURCES_SCHEMA =
   "wp3-task51-stage-b-execution-sources-v1";
 export const TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA =
   "wp3-task51-stage-b-execution-sources-v2";
+export const TASK51_DOCKER_LOAD_PUBLICATION_FORMAT =
+  "docker-load-verify-push-v1";
 export const TASK51_HISTORY_EXCEPTION_SCHEMA =
   "wp3-task51-stage-a-missing-evidence-exception-v1";
 export const TASK51_MISSING_HISTORY_DIGESTS = Object.freeze({
@@ -429,6 +431,26 @@ export function parseTask51HistoricalEvidenceException(raw) {
   return { raw: text, value, sha256: task51Sha256(text) };
 }
 
+// A docker-push result identifies the published object, but does not establish
+// its registry mediaType. Never relabel it as a verified manifest-list digest.
+export function task51StageBPublishedDigest(release) {
+  if (!isRecord(release)) return null;
+  if (!Object.hasOwn(release, "publication"))
+    return release.indexDigest ?? null;
+  const p = release.publication;
+  if (
+    Object.hasOwn(release, "indexDigest") ||
+    !hasExactKeys(p, ["format", "exportedManifestDigest", "pushedDigest"]) ||
+    p.format !== TASK51_DOCKER_LOAD_PUBLICATION_FORMAT ||
+    !/^sha256:[a-f0-9]{64}$/.test(p.exportedManifestDigest) ||
+    !/^sha256:[a-f0-9]{64}$/.test(p.pushedDigest) ||
+    p.exportedManifestDigest === release.configDigest ||
+    p.pushedDigest === release.configDigest
+  )
+    return null;
+  return p.pushedDigest;
+}
+
 /** Shared structural contract only. Git/CI/public-source authenticity and the
  * independent release-owner authority are separate mandatory preclaim gates. */
 export function parseTask51StageBExecutionSources(raw) {
@@ -505,6 +527,12 @@ export function parseTask51StageBExecutionSources(raw) {
     "jobsTranscript",
     "jobLog",
   ];
+  const publication = Object.hasOwn(web.publish ?? {}, "publication");
+  if (
+    publication !== Object.hasOwn(web.develop ?? {}, "publication") ||
+    (publication && !exceptionRoute)
+  )
+    error();
   for (const branch of ["develop", "publish"]) {
     const release = web[branch];
     if (
@@ -512,7 +540,7 @@ export function parseTask51StageBExecutionSources(raw) {
         "branch",
         "commitSha",
         "treeSha",
-        "indexDigest",
+        publication ? "publication" : "indexDigest",
         "configDigest",
         "commitTranscript",
         ...ciKeys,
@@ -520,9 +548,9 @@ export function parseTask51StageBExecutionSources(raw) {
       release.branch !== branch ||
       !GIT_SHA_PATTERN.test(release.commitSha) ||
       !GIT_SHA_PATTERN.test(release.treeSha) ||
-      !/^sha256:[a-f0-9]{64}$/.test(release.indexDigest) ||
+      !/^sha256:[a-f0-9]{64}$/.test(task51StageBPublishedDigest(release)) ||
       !/^sha256:[a-f0-9]{64}$/.test(release.configDigest) ||
-      release.indexDigest === release.configDigest ||
+      task51StageBPublishedDigest(release) === release.configDigest ||
       !sourceBinding(release.commitTranscript) ||
       !sourceCi(release) ||
       Date.parse(release.ciCompletedAt) > Date.parse(value.generatedAt)
@@ -574,7 +602,7 @@ export function parseTask51StageBExecutionSources(raw) {
     p.releaseProvenanceExact !== true ||
     p.servedWebRevision !== web.publish.commitSha ||
     p.servedWebOciRevision !== web.publish.commitSha ||
-    p.servedWebImageDigest !== web.publish.indexDigest ||
+    p.servedWebImageDigest !== task51StageBPublishedDigest(web.publish) ||
     p.staticUrlManifestHashAlgorithm !== "sha256-lf-utf8-url-list-v1" ||
     p.servedAssetManifestHashAlgorithm !==
       "sha256-canonical-static-response-manifest-v1" ||

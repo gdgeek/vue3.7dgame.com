@@ -22,6 +22,8 @@ import {
   parseTask51HistoricalEvidenceException,
   TASK51_HISTORY_EXCEPTION_SCHEMA,
   TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA,
+  TASK51_DOCKER_LOAD_PUBLICATION_FORMAT,
+  task51StageBPublishedDigest,
   TASK51_MISSING_HISTORY_DIGESTS,
   serializeTask51NetworkReceipt,
   task51Sha256,
@@ -436,6 +438,95 @@ function executionSourcesFixture() {
 function rawSources(value = executionSourcesFixture()) {
   return `${canonicalTask51Json(value)}\n`;
 }
+
+describe("Task 5.1 current docker-load publication identity", () => {
+  const fixture = () => {
+    const { historicalStageANetworkAttestor: _old, ...value } =
+      executionSourcesFixture();
+    const current: any = {
+      ...value,
+      schema: TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA,
+      historyException: {
+        evidenceRef: "reports/exception.json",
+        evidenceSha256: "a".repeat(64),
+      },
+      currentBaseline: {
+        evidenceRef: "reports/baseline.json",
+        evidenceSha256: "b".repeat(64),
+      },
+    };
+    for (const branch of ["develop", "publish"]) {
+      const release = current.currentWeb[branch];
+      release.publication = {
+        format: TASK51_DOCKER_LOAD_PUBLICATION_FORMAT,
+        exportedManifestDigest: `sha256:${"9".repeat(64)}`,
+        pushedDigest: release.indexDigest,
+      };
+      delete release.indexDigest;
+    }
+    return current;
+  };
+  it("preserves separate exported and pushed identities without claiming an index", () => {
+    const value = fixture();
+    const parsed = parseTask51StageBExecutionSources(rawSources(value));
+    expect(parsed.value).toEqual(value);
+    const release = parsed.value.currentWeb.publish;
+    expect(task51StageBPublishedDigest(release)).toBe(
+      value.currentWeb.networkProvenance.servedWebImageDigest
+    );
+    expect(release.indexDigest).toBeUndefined();
+    expect(release.publication.exportedManifestDigest).not.toBe(
+      release.publication.pushedDigest
+    );
+    // The unchanged historical shape remains accepted on its original route.
+    expect(parseTask51StageBExecutionSources(rawSources()).value.schema).toBe(
+      "wp3-task51-stage-b-execution-sources-v1"
+    );
+  });
+  it.each([
+    "index-alias",
+    "wrong-format",
+    "missing-export",
+    "missing-push",
+    "config-as-push",
+    "config-as-export",
+    "wrong-served",
+    "mixed-branches",
+    "media-type-claim",
+    "null-publication",
+    "historical-route",
+  ])("rejects %s without fallback to legacy identity", (fault) => {
+    const v = fixture(),
+      r = v.currentWeb.publish;
+    if (fault === "index-alias") r.indexDigest = r.publication.pushedDigest;
+    if (fault === "wrong-format") r.publication.format = "anything";
+    if (fault === "missing-export") delete r.publication.exportedManifestDigest;
+    if (fault === "missing-push") delete r.publication.pushedDigest;
+    if (fault === "config-as-push") r.publication.pushedDigest = r.configDigest;
+    if (fault === "config-as-export")
+      r.publication.exportedManifestDigest = r.configDigest;
+    if (fault === "wrong-served")
+      v.currentWeb.networkProvenance.servedWebImageDigest =
+        r.publication.exportedManifestDigest;
+    if (fault === "mixed-branches") {
+      v.currentWeb.develop.indexDigest =
+        v.currentWeb.develop.publication.pushedDigest;
+      delete v.currentWeb.develop.publication;
+    }
+    if (fault === "media-type-claim") r.publication.mediaTypeObserved = true;
+    if (fault === "null-publication") r.publication = null;
+    if (fault === "historical-route") {
+      v.schema = "wp3-task51-stage-b-execution-sources-v1";
+      v.historicalStageANetworkAttestor =
+        executionSourcesFixture().historicalStageANetworkAttestor;
+      delete v.historyException;
+      delete v.currentBaseline;
+    }
+    expect(() => parseTask51StageBExecutionSources(rawSources(v))).toThrow(
+      "TASK51_EXECUTION_SOURCES_REJECTED"
+    );
+  });
+});
 
 describe("Task 5.1 accepted missing history is not historical replay", () => {
   const cliBase = [
