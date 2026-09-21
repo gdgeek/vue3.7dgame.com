@@ -475,6 +475,9 @@ const activateToolbar = () => {
     onOpen: () => {
       if (editorLoading.ready.value) openVersionDialog();
     },
+    onSave: () => {
+      if (editorLoading.ready.value) void requestSceneSave("manual");
+    },
     onOpenScript: () => {
       if (editorLoading.ready.value) void openScriptDrawer();
     },

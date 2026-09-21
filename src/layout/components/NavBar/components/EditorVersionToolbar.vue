@@ -71,6 +71,11 @@ const sceneInfoButtonClass = computed(() =>
     ? "toolbar-entry-btn toolbar-entry-btn--scene-info is-dirty"
     : "toolbar-entry-btn toolbar-entry-btn--scene-info"
 );
+const entityInfoButtonClass = computed(() =>
+  !isSceneEditor.value && editorVersionToolbarState.status === "dirty"
+    ? "toolbar-entry-btn toolbar-entry-btn--entity-info is-dirty"
+    : "toolbar-entry-btn toolbar-entry-btn--entity-info"
+);
 const actions = computed<EditorAction[]>(() => [
   ...(isSceneEditor.value
     ? [
@@ -97,8 +102,12 @@ const actions = computed<EditorAction[]>(() => [
           label: t("meta.scene.editorInfo"),
           icon: faCube,
           iconOnly: true,
-          class: "toolbar-entry-btn toolbar-entry-btn--entity-info",
+          class: entityInfoButtonClass.value,
           onClick: () => {
+            if (editorVersionToolbarState.status === "dirty") {
+              editorVersionToolbarState.onSave?.();
+              return;
+            }
             entityInfoVisible.value = true;
           },
         },
@@ -191,6 +200,26 @@ const actions = computed<EditorAction[]>(() => [
 
 .editor-version-toolbar :deep(.toolbar-entry-btn--scene-info.is-dirty) {
   color: #d97706;
+}
+
+.editor-version-toolbar :deep(.toolbar-entry-btn--entity-info) {
+  color: #2f9e44;
+}
+
+.editor-version-toolbar
+  :deep(.toolbar-entry-btn--entity-info:hover:not(:disabled)) {
+  color: #2f9e44;
+  background: color-mix(in srgb, #2f9e44 12%, transparent);
+}
+
+.editor-version-toolbar :deep(.toolbar-entry-btn--entity-info.is-dirty) {
+  color: #d97706;
+}
+
+.editor-version-toolbar
+  :deep(.toolbar-entry-btn--entity-info.is-dirty:hover:not(:disabled)) {
+  color: #d97706;
+  background: color-mix(in srgb, #d97706 14%, transparent);
 }
 
 .editor-version-toolbar
