@@ -1,3 +1,4 @@
+import unityArtifactLock from "../../scripts/unity/artifact-lock.json";
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from "vue";
 import env from "@/environment";
 import { logger } from "@/utils/logger";
@@ -285,8 +286,7 @@ export const useUnityPreviewBridge = ({
       Object.keys(message).every(
         (key) => key === "type" || key === "message"
       ) &&
-      release.value.buildId ===
-        "sha256:7bee87bbf1c044802841b46489638cb5069eac5b51fb0637714a3b826b092f33" &&
+      release.value.buildId === unityArtifactLock.buildId &&
       stage.value === "loading_scene" &&
       ready.value &&
       payloadSent

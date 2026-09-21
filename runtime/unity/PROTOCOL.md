@@ -1,6 +1,6 @@
 # 主站 Unity runner 协议与实际二进制证据
 
-本目录是主 `web` 独立维护的运行器。旧插件保持不变。运行界面采用主站模态窗口内的 iframe；主站及本副本均不提供全屏控件或全屏调用，Unity 原始二进制保持不变。一个 iframe 仅接收一次场景数据，每次重试创建新 iframe 和 session。
+本目录是主 `web` 独立维护的运行器。独立插件已退役，以下旧制品核对记录保留作历史证据；当前 Unity 来源以制品锁文件为准。运行界面采用主站模态窗口内的 iframe；主站及本副本均不提供全屏控件或全屏调用，Unity 二进制由锁定的主站制品统一更新。一个 iframe 仅接收一次场景数据，每次重试创建新 iframe 和 session。
 
 ## 固定版本和消息边界
 
@@ -32,9 +32,13 @@ function _XrugcWebPreviewPostMessage(typePtr,messagePtr){
 
 其 WASM import 将 `ne` 指向 `_XrugcWebPreviewPostMessage`。解压 data 的全局元数据包含 `unity-web-preview-scene-running`、`[WebPreview] Scene is running`、`WebPreviewBootstrap`、`XrugcWebPreviewPostMessage`、`LoadSceneJson`。因此原 embed.html 找不到该 sender 不代表运行器不存在 running 回调；单查 wasm 字符串也不完整。
 
-这个原生事件直接发给主站，没有 session envelope。主站只为**上述锁定 buildId** 的 `unity-web-preview-scene-running` 做窄适配：精确当前 iframe source + 同域 origin + 本会话 ready + 本会话 typed scene-forwarded；原始消息不得夹带任何不匹配/缺失混合的 identity 字段。其他无 envelope 消息全部拒绝。一个 iframe 不复用第二个场景，所以 source 是该固定会话的能力边界；迟到的旧 iframe 消息仍被拒绝。业务 running 证据标为 `{kind:'unity-scene-started-callback',sceneAccepted:true,runtimeStarted:true}`。它说明 Unity 发出了场景启动生命周期确认，不代表画面、每个资源、每段脚本或目标头显验收通过。
+这个原生事件直接发给主站，没有 session envelope。主站只为**当前 `scripts/unity/artifact-lock.json` 锁定的 buildId** 的 `unity-web-preview-scene-running` 做窄适配：精确当前 iframe source + 同域 origin + 本会话 ready + 本会话 typed scene-forwarded；原始消息不得夹带任何不匹配/缺失混合的 identity 字段。其他无 envelope 消息全部拒绝。一个 iframe 不复用第二个场景，所以 source 是该固定会话的能力边界；迟到的旧 iframe 消息仍被拒绝。业务 running 证据标为 `{kind:'unity-scene-started-callback',sceneAccepted:true,runtimeStarted:true}`。它说明 Unity 发出了场景启动生命周期确认，不代表画面、每个资源、每段脚本或目标头显验收通过。
 
 主站随后发送完整 envelope 的 `unity-web-preview-runtime-confirmed` 与该 evidence；runner 取消场景确认 watchdog 并发回 typed running state。场景 120 秒没有明确确认则发 `UNITY_SCENE_CONFIRMATION_TIMEOUT`。下载 45 秒没有任何响应字节则发 `UNITY_DOWNLOAD_STALLED`。这些超时只产生可取消的诊断错误，永不制造成功。Unity 初始化仍受有界 loader timeout 保护。
+
+## 2026-09-21 更新
+
+完整 Unity 构建 `9907129b55e5aca26c8b687fecb563f277e6ce24` 的 buildId 为 `sha256:02a9bed6561b6ff95a1701415108168c381367e7395743fce2a4e27943aa249f`，继续使用上述原生回调契约。真实浏览器已收到 `unity-scene-started-callback`，执行了 Lua 测试并显示 URP 材质物体。主站从锁文件读取受信 buildId，升级时不再保留上一制品的硬编码例外。此记录不代替线上业务场景验收。
 
 ## Service Worker 与历史资源别名
 

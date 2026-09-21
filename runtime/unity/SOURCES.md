@@ -10,8 +10,10 @@
 - `tests/service-worker-runtime.test.cjs`：源 `tests/service-worker-runtime.test.js`，适配 release scope，并扩展主站边界用例。
 - `../../scripts/unity/build-manifest.cjs`：源 `scripts/build-manifest.js`，保留流式哈希/压缩校验，供主站独立打包使用。
 
-`runtime-state.js`、`download-progress.js`、本目录协议测试和主站打包代码为本次主站实现。没有复制插件的 index 场景选择壳、plugin-runner.js、插件 manifest、运行时插件地址配置或菜单注册；没有修改旧插件及其 gitlink。
+`runtime-state.js`、`download-progress.js`、本目录协议测试和主站打包代码为本次主站实现。没有复制插件的 index 场景选择壳、plugin-runner.js、插件 manifest、运行时插件地址配置或菜单注册；该描述对应 2026-09-11 的初始迁移。2026-09-21 用户决定退役独立插件，超级项目已移除其 gitlink；上述来源和权利归属记录继续保留。
 
 源提交未包含 LICENSE/COPYING 文件。本次同一产品仓库内的复制不赋予新的第三方再许可，保留原始权利归属；Unity 模板图片、loader 和二进制继续适用原有 Unity/项目授权。不要把主 web 中其他依赖的许可证自动套用在 Unity 制品上。
 
 Unity loader/data/framework/wasm 均不是源码副本的一部分；它们只从锁定 OCI digest 作为构建输入提取，详情见 PROTOCOL.md 和 ../../scripts/unity/artifact-lock.json。仓库中的 LFS 指针不能作为发布制品。
+
+2026-09-21 的 Unity 制品来自 `xrugc/iOS` 提交 `9907129b55e5aca26c8b687fecb563f277e6ce24`，Foundation 子模块为 `755b4da0e164de92562955e44688ffffae40f944`。二进制已迁至 `gdgeek/vue3` 制品镜像；不再从已退役插件的镜像提取新版运行器。

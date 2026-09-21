@@ -120,7 +120,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BUILD_MODE=production
-            UNITY_PREVIOUS_IMAGE=${{ vars.UNITY_PREVIOUS_IMAGE || 'hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5' }}
+            UNITY_PREVIOUS_IMAGE=${{ vars.UNITY_PREVIOUS_IMAGE || 'hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:50f66e58d4571b831c896cfbf7445aeefdb32938a6d0409887a339aa4a213783' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
