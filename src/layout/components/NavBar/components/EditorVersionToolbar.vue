@@ -66,6 +66,11 @@ const loadingState = computed(
       blocked: false,
     }
 );
+const sceneInfoButtonClass = computed(() =>
+  isSceneEditor.value && editorVersionToolbarState.status === "dirty"
+    ? "toolbar-entry-btn toolbar-entry-btn--scene-info is-dirty"
+    : "toolbar-entry-btn toolbar-entry-btn--scene-info"
+);
 const actions = computed<EditorAction[]>(() => [
   ...(isSceneEditor.value
     ? [
@@ -74,7 +79,7 @@ const actions = computed<EditorAction[]>(() => [
           label: t("verse.toolbar.info"),
           icon: faLayerGroup,
           iconOnly: true,
-          class: "toolbar-entry-btn toolbar-entry-btn--scene-info",
+          class: sceneInfoButtonClass.value,
           onClick: () => {
             sceneInfoVisible.value = true;
           },
@@ -168,6 +173,26 @@ const actions = computed<EditorAction[]>(() => [
   display: flex;
   align-items: center;
   margin-left: 4px;
+}
+
+.editor-version-toolbar :deep(.toolbar-entry-btn--scene-info) {
+  color: #2f9e44;
+}
+
+.editor-version-toolbar
+  :deep(.toolbar-entry-btn--scene-info:hover:not(:disabled)) {
+  color: #2f9e44;
+  background: color-mix(in srgb, #2f9e44 12%, transparent);
+}
+
+.editor-version-toolbar :deep(.toolbar-entry-btn--scene-info.is-dirty) {
+  color: #d97706;
+}
+
+.editor-version-toolbar
+  :deep(.toolbar-entry-btn--scene-info.is-dirty:hover:not(:disabled)) {
+  color: #d97706;
+  background: color-mix(in srgb, #d97706 14%, transparent);
 }
 
 @container app-navbar (width <= 900px) {
