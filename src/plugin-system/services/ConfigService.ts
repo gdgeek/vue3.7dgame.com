@@ -54,7 +54,10 @@ function normalizePlugin(plugin: PluginManifest): PluginManifest {
 function normalizeConfig(config: PluginsConfig): PluginsConfig {
   return {
     ...config,
-    plugins: config.plugins.map(normalizePlugin),
+    // Standalone WebGL preview is retired; scene playback is built into the host.
+    plugins: config.plugins
+      .filter((plugin) => plugin.id !== "webgl-preview")
+      .map(normalizePlugin),
   };
 }
 

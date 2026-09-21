@@ -1,9 +1,9 @@
-ARG UNITY_PREVIOUS_IMAGE=hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5
+ARG UNITY_PREVIOUS_IMAGE=hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:50f66e58d4571b831c896cfbf7445aeefdb32938a6d0409887a339aa4a213783
 
 # The Unity input is immutable and independent of adjacent superproject modules.
-FROM --platform=linux/amd64 hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5 AS unity-source
+FROM --platform=linux/amd64 hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:2991fe8dc1a856c64b083e4a4824ec137acb731c43ebada73e8d4e3322a17d3b AS unity-source
 
-# First built-in deployment uses the same locked source (no previous runtime).
+# Preserve the previously verified main-site runtime across this upgrade.
 # Upgrades pin the previous verified MAIN WEB image to retain its active release.
 FROM --platform=linux/amd64 ${UNITY_PREVIOUS_IMAGE} AS runtime-previous
 ARG UNITY_PREVIOUS_IMAGE
@@ -51,6 +51,6 @@ ENV PLUGIN_USER_MANAGEMENT_URL=http://localhost:3003
 ENV PLUGIN_SYSTEM_ADMIN_URL=http://localhost:3005
 COPY --from=final-verifier /html /usr/share/nginx/html
 COPY public/config/plugins.json.template /usr/share/nginx/html/config/plugins.json
-LABEL io.xrugc.unity.source="hkccr.ccs.tencentyun.com/plugins/webgl-preview@sha256:1e03190d0b44ca204869461862859198a801edb3b4c1bf00e8ee5e8da1d9bfe5"
+LABEL io.xrugc.unity.source="hkccr.ccs.tencentyun.com/gdgeek/vue3@sha256:2991fe8dc1a856c64b083e4a4824ec137acb731c43ebada73e8d4e3322a17d3b"
 EXPOSE 80
 ENTRYPOINT ["/docker-entrypoint.sh"]

@@ -27,11 +27,11 @@ docker build --platform linux/amd64 \
 corepack pnpm unity:smoke xrugc-main-unity:upgrade
 ```
 
-`UNITY_PREVIOUS_IMAGE` rejects floating tags. Its default is the locked Unity source image, used only to bootstrap the first deployment. CI reads the optional repository variable of the same name; set it to the previously verified **main web** digest before later upgrades. A selected previous main image that lacks `active.json`, has corrupt files or contains inconsistent metadata fails the build.
+`UNITY_PREVIOUS_IMAGE` rejects floating tags. Its default is the previously verified main-site image pinned in the Dockerfiles. The current Unity source image contains artifacts only and must not be used as a previous main-site deployment. CI reads the optional repository variable of the same name; set it to the previously verified **main web** digest before later upgrades. A selected previous main image that lacks `active.json`, has corrupt files or contains inconsistent metadata fails the build.
 
 The resulting image retains exactly its current release and the previous image's active release; it does not recursively inherit older retained releases. Both releases are fully verified. `/webgl-preview/retained-releases.json` records the previous image and retained identity. Previously opened iframes keep using their fixed release path; the new active pointer affects new sessions. Retention lasts until the next upgrade. Before a second subsequent upgrade removes that release, close its remaining sessions or wait for the operational session window to end. Local preparation keeps older local releases until explicitly removed during development.
 
-The final image contains the complete frontend/runner/SW/manifest/Unity deployment unit. Roll back by restoring the previously verified main web image digest and its deployment configuration. Do not replace only the active pointer or use a remote-plugin fallback. The old standalone plugin is unchanged and remains the user's responsibility to close manually.
+The final image contains the complete frontend/runner/SW/manifest/Unity deployment unit. Roll back by restoring the previously verified main web image digest and its deployment configuration. Do not replace only the active pointer or use a remote-plugin fallback. The standalone plugin is retired; the main-site runner is the only maintained playback path. Historical remote service shutdown is tracked separately from source changes.
 
 ## What the gates prove
 
