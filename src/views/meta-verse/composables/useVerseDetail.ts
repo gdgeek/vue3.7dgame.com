@@ -52,7 +52,7 @@ export function useVerseDetail({ refresh, canManage }: Options) {
     detailVisible.value = true;
     detailLoading.value = true;
     try {
-      const response = await getVerse(item.id, "image,author,verseTags");
+      const response = await getVerse(item.id, "image,author,tags");
       currentVerse.value = response.data;
       editingDescription.value = response.data.description || "";
       if (canManage.value) {
@@ -95,7 +95,7 @@ export function useVerseDetail({ refresh, canManage }: Options) {
   };
 
   const isTagSelected = (tagId: number) => {
-    return currentVerse.value?.verseTags?.some((t) => t.id === tagId);
+    return currentVerse.value?.tags?.some((t) => t.id === tagId);
   };
 
   const handleAddTag = async (tagId: number | undefined) => {
@@ -104,8 +104,8 @@ export function useVerseDetail({ refresh, canManage }: Options) {
       await addTag(currentVerse.value.id, tagId);
       const tag = allTags.value.find((t) => t.value === tagId);
       if (tag) {
-        if (!currentVerse.value.verseTags) currentVerse.value.verseTags = [];
-        currentVerse.value.verseTags.push({ id: tag.value, name: tag.label });
+        if (!currentVerse.value.tags) currentVerse.value.tags = [];
+        currentVerse.value.tags.push({ id: tag.value, name: tag.label });
       }
       selectedTag.value = undefined;
       Message.success(t("verse.listPage.tagAdded"));
@@ -119,8 +119,8 @@ export function useVerseDetail({ refresh, canManage }: Options) {
     if (!currentVerse.value) return;
     try {
       await removeTag(currentVerse.value.id, tagId);
-      currentVerse.value.verseTags =
-        currentVerse.value.verseTags?.filter((t) => t.id !== tagId) ?? [];
+      currentVerse.value.tags =
+        currentVerse.value.tags?.filter((t) => t.id !== tagId) ?? [];
       Message.success(t("verse.listPage.tagRemoved"));
       refresh();
     } catch {
