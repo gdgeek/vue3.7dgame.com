@@ -89,7 +89,7 @@ export default {
       image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" },
     },
     scene: {
-      editorInfo: "编辑组件",
+      editorInfo: "编辑实体",
       infoLoadFailed: "无法加载实体信息，请重试。",
       infoRetry: "重试",
       error: "没有实体编辑器",
