@@ -21,6 +21,10 @@ const mockDirty = ref(false);
 const mockUnconfirmedPersistence = ref(false);
 let mockUseActualSaveGuard = false;
 const mockResolveLeaveSave = vi.fn();
+const mockConfirmEditorSave = vi.fn();
+vi.mock("@/utils/confirmEditorSave", () => ({
+  confirmEditorSave: mockConfirmEditorSave,
+}));
 const mockAppStore = reactive({ language: "zh-CN" });
 const mockGetVerses = vi.fn();
 const mockRegisterToolbar = vi.fn();
@@ -218,6 +222,8 @@ vi.mock("@/composables/useSceneSaveGuard", async (importOriginal) => {
             syncUnsavedChangesForBeforeUnload: vi.fn(),
             resolveLeaveSave: mockResolveLeaveSave,
             requestSceneSave: vi.fn(),
+            requestManualSceneSave: vi.fn(),
+            isManualSavePending: () => false,
             resolveUnsavedBeforeLeave: vi.fn(async () => true),
             handleBeforeUnload: vi.fn(),
             cleanupPendingResolver: vi.fn(),
@@ -488,6 +494,8 @@ describe("views/meta/scene.vue", () => {
     mockGetVerse.mockReset();
     mockPutVerse.mockReset();
     mockResolveLeaveSave.mockReset();
+    mockConfirmEditorSave.mockReset();
+    mockConfirmEditorSave.mockResolvedValue("confirm");
     mockUnconfirmedPersistence.value = false;
     mockUseActualSaveGuard = false;
     mockAppStore.language = "zh-CN";
@@ -1129,9 +1137,84 @@ describe("views/meta/scene.vue", () => {
   );
 
   describe.each(["meta", "verse"] as const)(
+    "%s unified manual save entry points",
+    (kind) => {
+      it.each(["toolbar", "editor"])(
+        "confirms %s saves and preserves edits on cancellation",
+        async (entry) => {
+          mockUseActualSaveGuard = true;
+          vi.stubGlobal("ElMessage", {
+            error: vi.fn(),
+            info: vi.fn(),
+            success: vi.fn(),
+          });
+          await mountSceneView(kind);
+          sendReady("manual-confirmation");
+          await flushAsync();
+          await finishEditorLoading();
+          const put = kind === "meta" ? mockPutMeta : mockPutVerse;
+          const respond = (payload: object) =>
+            window.dispatchEvent(
+              new MessageEvent("message", {
+                source: document.querySelector("iframe")?.contentWindow,
+                origin: "https://editor.example.test",
+                data: { type: "RESPONSE", payload },
+              })
+            );
+          const data = {
+            meta: makeMetaResponse(1).data.data,
+            events: null,
+            verse: makeMetaResponse(1).data.data,
+          };
+          const save = () =>
+            entry === "toolbar"
+              ? mockRegisterToolbar.mock.calls.at(-1)![1].onSave()
+              : respond({ action: "save", ...data });
+          mockSendRequest.mockClear();
+          mockConfirmEditorSave.mockRejectedValueOnce("cancel");
+          save();
+          await flushAsync();
+          expect(mockConfirmEditorSave).toHaveBeenCalledOnce();
+          expect(mockConfirmEditorSave.mock.calls[0][1]).toMatchObject({
+            cancelButtonText: "common.cancel",
+            confirmButtonText: "common.button.save",
+          });
+          expect(mockSendRequest).not.toHaveBeenCalledWith("save-before-leave");
+          expect(put).not.toHaveBeenCalled();
+          if (entry === "editor")
+            expect(mockUpdateToolbarStatus).toHaveBeenLastCalledWith(
+              expect.anything(),
+              "dirty"
+            );
+          // After cancelling, either entry can confirm and request the same snapshot path.
+          save();
+          await flushAsync();
+          expect(mockSendRequest).toHaveBeenCalledWith("save-before-leave");
+          expect(put).not.toHaveBeenCalled();
+          put.mockRejectedValueOnce({
+            isAxiosError: true,
+            response: { status: 409 },
+          });
+          respond(
+            entry === "editor"
+              ? { action: "save-before-leave", noChange: true }
+              : { action: "save-before-leave", ...data }
+          );
+          await flushAsync();
+          expect(put).toHaveBeenCalledOnce();
+          expect(mockUpdateToolbarStatus).toHaveBeenLastCalledWith(
+            expect.anything(),
+            "dirty"
+          );
+        }
+      );
+    }
+  );
+
+  describe.each(["meta", "verse"] as const)(
     "%s manual save failures",
     (kind) => {
-      it.each(["save", "save-before-leave"])(
+      it.each(["save-before-leave"])(
         "reports a rejected %s and never acknowledges a noChange retry",
         async (action) => {
           const errorMessage = vi.fn();
