@@ -476,7 +476,7 @@ const activateToolbar = () => {
       if (editorLoading.ready.value) openVersionDialog();
     },
     onSave: () => {
-      if (editorLoading.ready.value) void requestSceneSave("manual");
+      if (editorLoading.ready.value) void requestManualSceneSave();
     },
     onOpenScript: () => {
       if (editorLoading.ready.value) void openScriptDrawer();
@@ -1612,7 +1612,7 @@ const formatSignalBatchConfirmation = (preview: SignalBatchPreview) =>
     "全部修改将作为一个可撤销操作执行，并且只保存一次",
   ].join("\n");
 
-const confirmSaveCurrentEntity = () =>
+const confirmSaveCurrentEntity = (manual = false) =>
   confirmEditorSave(
     t("common.entitySaveConfirm.message"),
     {
@@ -1623,8 +1623,12 @@ const confirmSaveCurrentEntity = () =>
       closeOnPressEscape: true,
       showCancelButton: true,
       customClass: "script-save-confirm-box",
-      confirmButtonText: t("common.entitySaveConfirm.confirm"),
-      cancelButtonText: t("common.entitySaveConfirm.cancel"),
+      confirmButtonText: t(
+        manual ? "common.button.save" : "common.entitySaveConfirm.confirm"
+      ),
+      cancelButtonText: t(
+        manual ? "common.cancel" : "common.entitySaveConfirm.cancel"
+      ),
     },
     editorLoading.getState
   );
@@ -1638,6 +1642,7 @@ const {
   syncUnsavedChangesForBeforeUnload,
   resolveLeaveSave,
   requestSceneSave,
+  requestManualSceneSave,
   resolveUnsavedBeforeLeave,
   handleBeforeUnload,
   cleanupPendingResolver,
@@ -1647,6 +1652,7 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentEntity,
+  confirmManualSaveDialog: () => confirmSaveCurrentEntity(true),
   isEditorReady: () => editorLoading.ready.value,
   onBeforeSave: (trigger) => {
     currentSaveTrigger = trigger;
@@ -2022,66 +2028,18 @@ const handleMessage = async (e: MessageEvent) => {
         break;
       }
 
-      if (action === "save" && !payload.noChange) {
-        // Original save-meta logic
-        currentSaveTrigger = "manual";
-        isSavingVersion.value = true;
-        const saveData = payload as unknown as {
-          meta: MetaPayload;
-          events: unknown;
-        };
-        const result = await saveMeta(saveData, currentSaveTrigger);
-        if (!isCurrentResponse()) break;
-        if (result) {
-          const savedAt = addSceneDraftVersion(saveData, currentSaveTrigger);
-          hasUnsavedChangesBeforeUnload.value = false;
-          pendingRestorePayload.value = null;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
+      if (action === "save") {
+        // The iframe updates its baseline when emitting save. Keep its snapshot
+        // until persistence succeeds, including when confirmation is cancelled.
+        if (!payload.noChange) {
+          pendingRestorePayload.value = payload as unknown as {
+            meta: MetaPayload;
+            events: unknown;
+          };
+          hasUnsavedChangesBeforeUnload.value = true;
         }
-        isSavingVersion.value = false;
-        resolveLeaveSave(result);
-      } else if (action === "save" && payload.noChange) {
-        if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
-          isSavingVersion.value = false;
-          resolveLeaveSave(false);
-          ElMessage.error(t("common.editorSave.pending"));
-          break;
-        }
-        // Original save-meta-none logic
-        if (pendingRestorePayload.value) {
-          const restoredPayload = pendingRestorePayload.value;
-          const result = await saveMeta(
-            {
-              meta: restoredPayload.meta as MetaPayload,
-              events: restoredPayload.events,
-            },
-            currentSaveTrigger
-          );
-          if (!isCurrentResponse()) break;
-          if (result) {
-            const savedAt = addSceneDraftVersion(
-              {
-                meta: restoredPayload.meta,
-                events: restoredPayload.events,
-              },
-              currentSaveTrigger
-            );
-            pendingRestorePayload.value = null;
-            hasUnsavedChangesBeforeUnload.value = false;
-            lastSaveTrigger.value = currentSaveTrigger;
-            lastSavedAt.value = savedAt || new Date().toISOString();
-          }
-          isSavingVersion.value = false;
-          resolveLeaveSave(result);
-        } else {
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = new Date().toISOString();
-          ElMessage.warning(t("meta.scene.noChanges"));
-          hasUnsavedChangesBeforeUnload.value = false;
-          isSavingVersion.value = false;
-          resolveLeaveSave(true);
-        }
+        void requestManualSceneSave();
+        break;
       } else if (action === "save-before-leave" && !payload.noChange) {
         // Original save-meta-before-leave logic
         isSavingVersion.value = true;

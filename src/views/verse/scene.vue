@@ -221,7 +221,7 @@ const activateToolbar = () => {
       if (editorLoading.ready.value) runSceneRuntimePreview();
     },
     onSave: () => {
-      if (editorLoading.ready.value) void requestSceneSave("manual");
+      if (editorLoading.ready.value) void requestManualSceneSave();
     },
     onOpenScript: () => {
       if (editorLoading.ready.value) void openScriptDrawer();
@@ -970,7 +970,7 @@ const getLiveSceneState = async (): Promise<SceneEditorLiveState> => {
   };
 };
 
-const confirmSaveCurrentScene = () =>
+const confirmSaveCurrentScene = (manual = false) =>
   confirmEditorSave(
     t("common.sceneSaveConfirm.message"),
     {
@@ -981,8 +981,12 @@ const confirmSaveCurrentScene = () =>
       closeOnPressEscape: true,
       showCancelButton: true,
       customClass: "script-save-confirm-box",
-      confirmButtonText: t("common.sceneSaveConfirm.confirm"),
-      cancelButtonText: t("common.sceneSaveConfirm.cancel"),
+      confirmButtonText: t(
+        manual ? "common.button.save" : "common.sceneSaveConfirm.confirm"
+      ),
+      cancelButtonText: t(
+        manual ? "common.cancel" : "common.sceneSaveConfirm.cancel"
+      ),
     },
     editorLoading.getState
   );
@@ -996,6 +1000,8 @@ const {
   syncUnsavedChangesForBeforeUnload,
   resolveLeaveSave,
   requestSceneSave,
+  requestManualSceneSave,
+  isManualSavePending,
   resolveUnsavedBeforeLeave,
   handleBeforeUnload,
   cleanupPendingResolver,
@@ -1005,6 +1011,7 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentScene,
+  confirmManualSaveDialog: () => confirmSaveCurrentScene(true),
   isEditorReady: () => editorLoading.ready.value,
   onBeforeSave: (trigger) => {
     currentSaveTrigger = trigger;
@@ -1173,8 +1180,14 @@ const saveVerseBeforeLeave = async (
   }
 
   try {
-    await saveScenePayload(verse as unknown as JsonValue);
-    if (!isCurrentSave()) return false;
+    // Keep the existing post-save publish choice for both manual entry points.
+    if (isManualSavePending()) {
+      const saved = await saveVerse(payload, trigger);
+      if (!saved || !isCurrentSave()) return false;
+    } else {
+      await saveScenePayload(verse as unknown as JsonValue);
+      if (!isCurrentSave()) return false;
+    }
     if (trigger === "manual" && showSuccess) {
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
     }
@@ -1533,79 +1546,16 @@ const handleMessage = async (e: MessageEvent) => {
         break;
       }
 
-      if (action === "save" && !payload.noChange) {
-        // Original save-verse logic
-        currentSaveTrigger = "manual";
-        isSavingVersion.value = true;
-        try {
-          const saved = await saveVerse(payload, currentSaveTrigger);
-          if (!isCurrentResponse()) break;
-          if (!saved) {
-            isSavingVersion.value = false;
-            resolveLeaveSave(false);
-            break;
-          }
-        } catch (error) {
-          if (isCurrentResponse()) {
-            isSavingVersion.value = false;
-            resolveLeaveSave(false);
-            ElMessage.error(t(writeFailureMessageKey(error)));
-          }
-          break;
+      if (action === "save") {
+        // The iframe updates its baseline when emitting save. Keep its snapshot
+        // until persistence succeeds, including when confirmation is cancelled.
+        if (!payload.noChange) {
+          pendingRestorePayload.value =
+            payload as unknown as VerseEditorPayload;
+          hasUnsavedChangesBeforeUnload.value = true;
         }
-        if (payload.verse) {
-          const savedAt = addSceneDraftVersion(
-            payload as VerseEditorPayload,
-            currentSaveTrigger
-          );
-          pendingRestorePayload.value = null;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-        }
-        hasUnsavedChangesBeforeUnload.value = false;
-        isSavingVersion.value = false;
-        ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
-      } else if (action === "save" && payload.noChange) {
-        // Original save-verse-none logic
-        if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
-          isSavingVersion.value = false;
-          resolveLeaveSave(false);
-          ElMessage.error(t("common.editorSave.pending"));
-          break;
-        }
-        if (pendingRestorePayload.value) {
-          const restoredPayload = pendingRestorePayload.value;
-          let result = false;
-          try {
-            result = await saveVerse(restoredPayload, currentSaveTrigger);
-          } catch (error) {
-            if (isCurrentResponse())
-              ElMessage.error(t(writeFailureMessageKey(error)));
-          }
-          if (!isCurrentResponse()) break;
-          if (!result) {
-            isSavingVersion.value = false;
-            resolveLeaveSave(false);
-            break;
-          }
-          const savedAt = addSceneDraftVersion(
-            restoredPayload,
-            currentSaveTrigger
-          );
-          pendingRestorePayload.value = null;
-          hasUnsavedChangesBeforeUnload.value = false;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-          isSavingVersion.value = false;
-          resolveLeaveSave(true);
-        } else {
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = new Date().toISOString();
-          ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
-          hasUnsavedChangesBeforeUnload.value = false;
-          isSavingVersion.value = false;
-          resolveLeaveSave(true);
-        }
+        void requestManualSceneSave();
+        break;
       } else if (action === "save-before-leave" && !payload.noChange) {
         // Original save-verse-before-leave logic
         isSavingVersion.value = true;

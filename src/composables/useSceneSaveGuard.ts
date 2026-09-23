@@ -10,6 +10,7 @@ export interface UseSceneSaveGuardOptions {
   pendingRestorePayload: Ref<unknown>;
   isSavingVersion: Ref<boolean>;
   confirmDialog: () => Promise<unknown>;
+  confirmManualSaveDialog?: () => Promise<unknown>;
   isEditorReady?: () => boolean;
   onBeforeSave?: (trigger: ScriptSaveTrigger) => void;
 }
@@ -21,6 +22,7 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
     pendingRestorePayload,
     isSavingVersion,
     confirmDialog,
+    confirmManualSaveDialog = confirmDialog,
     isEditorReady,
     onBeforeSave,
   } = options;
@@ -40,6 +42,8 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
     },
   });
   let stateVersion = 0;
+  let targetVersion = 0;
+  let pendingManualSave: Promise<boolean> | null = null;
   let pollingRequest: symbol | null = null;
   let pendingSceneSavePromise: Promise<boolean> | null = null;
 
@@ -55,6 +59,7 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
   };
 
   const resetUnsavedState = () => {
+    targetVersion += 1;
     markPersistenceAcknowledged();
     // A new target can poll immediately; old responses cannot update its state.
     pollingRequest = null;
@@ -130,6 +135,7 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
   };
 
   const requestSceneSave = (trigger: ScriptSaveTrigger) => {
+    if (trigger === "auto" && pendingManualSave) return Promise.resolve(false);
     if (pendingSceneSavePromise) return pendingSceneSavePromise;
     if (isEditorReady?.() === false) return Promise.resolve(false);
     onBeforeSave?.(trigger);
@@ -140,6 +146,26 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
       isSavingVersion.value = false;
     });
     return pendingSceneSavePromise;
+  };
+
+  // Toolbar and iframe menu saves share confirmation and persistence.
+  const requestManualSceneSave = (): Promise<boolean> => {
+    if (pendingManualSave) return pendingManualSave;
+    if (pendingSceneSavePromise) return pendingSceneSavePromise;
+    if (isEditorReady?.() === false) return Promise.resolve(false);
+    const target = targetVersion;
+    pendingManualSave = (async () => {
+      try {
+        await confirmManualSaveDialog();
+      } catch {
+        return false;
+      }
+      if (target !== targetVersion || isEditorReady?.() === false) return false;
+      return requestSceneSave("manual");
+    })().finally(() => {
+      pendingManualSave = null;
+    });
+    return pendingManualSave;
   };
 
   const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
@@ -171,6 +197,7 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
   };
 
   const cleanupPendingResolver = () => {
+    targetVersion += 1;
     if (pendingLeaveSaveResolver) {
       pendingLeaveSaveResolver(false);
       pendingLeaveSaveResolver = null;
@@ -188,6 +215,8 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
     waitForLeaveSaveResult,
     resolveLeaveSave,
     requestSceneSave,
+    requestManualSceneSave,
+    isManualSavePending: () => pendingManualSave !== null,
     resolveUnsavedBeforeLeave,
     handleBeforeUnload,
     cleanupPendingResolver,
