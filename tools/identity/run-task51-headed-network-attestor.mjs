@@ -19,7 +19,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { chromium } from "playwright";
 
-import { createTask51NetworkLedger } from "./task51-network-attestor-ledger.mjs";
+import {
+  createTask51NetworkLedger,
+  isTask51RunnerPageUrl,
+} from "./task51-network-attestor-ledger.mjs";
 import {
   buildTask51NetworkReceipt,
   assertTask51StageBExecutionSourceBindings,
@@ -630,7 +633,7 @@ async function waitForBrowserIdle(
   }
 }
 
-async function pushTask51RunnerThroughVueRouter(page, failureSignal) {
+export async function pushTask51RunnerThroughVueRouter(page, failureSignal) {
   await failureSignal.race(
     page.evaluate(async (path) => {
       const root = document.querySelector("#app");
@@ -644,7 +647,9 @@ async function pushTask51RunnerThroughVueRouter(page, failureSignal) {
     }, new URL(TASK51_RUNNER_URL).pathname)
   );
   await failureSignal.race(
-    page.waitForURL(TASK51_RUNNER_URL, { timeout: 60_000 })
+    page.waitForURL((url) => isTask51RunnerPageUrl(url.href), {
+      timeout: 60_000,
+    })
   );
   await failureSignal.race(
     page.locator("#task51-memory-runner").waitFor({
@@ -1072,6 +1077,9 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     if (ledger.snapshot().activeRequestCount !== 0) {
       throw new Error("TASK51_PREARM_CLAIM_GATE_REJECTED");
     }
+    if (!isTask51RunnerPageUrl(page.url())) {
+      throw new Error("TASK51_NETWORK_RUNNER_NAVIGATION_MISMATCH");
+    }
 
     const claimController = new AbortController();
     activeClaimController = claimController;
@@ -1089,7 +1097,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
       }
     }
     clearTimeout(preClaimTimeout);
-    if (page.url() !== options.runnerUrl) {
+    if (!isTask51RunnerPageUrl(page.url())) {
       throw new Error("TASK51_NETWORK_RUNNER_NAVIGATION_MISMATCH");
     }
     ledger.arm(page.url());

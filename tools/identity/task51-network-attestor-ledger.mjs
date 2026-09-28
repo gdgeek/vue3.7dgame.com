@@ -1,5 +1,14 @@
 const PRODUCTION_ORIGIN = "https://d.xrugc.com";
 const RUNNER_PATH = "/internal/task51/memory-isolated-runner";
+const RUNNER_LANGUAGES = new Set(["zh-CN", "en-US", "ja-JP", "th-TH", "zh-TW"]);
+const RUNNER_THEMES = new Set([
+  "modern-blue",
+  "deep-space",
+  "cyber-tech",
+  "edu-friendly",
+  "neo-brutalism",
+  "minimal-pure",
+]);
 const API_ORIGINS = Object.freeze([
   "https://api.xrteeth.com",
   "https://api.tmrpp.com",
@@ -130,6 +139,40 @@ function normalizedNetworkUrl(value) {
     throw new Error("TASK51_NETWORK_NONCANONICAL_URL");
   }
   return parsed.href;
+}
+
+// Only page preferences written by useUrlSettings are accepted here. Network
+// request URLs and the configured runner URL keep their existing exact rules.
+export function isTask51RunnerPageUrl(value) {
+  if (typeof value !== "string" || value.length > 512) return false;
+  try {
+    const parsed = new URL(value);
+    if (
+      parsed.origin !== PRODUCTION_ORIGIN ||
+      parsed.pathname !== RUNNER_PATH ||
+      parsed.username !== "" ||
+      parsed.password !== "" ||
+      parsed.hash !== "" ||
+      parsed.href !== value ||
+      value !== `${PRODUCTION_ORIGIN}${RUNNER_PATH}${parsed.search}`
+    )
+      return false;
+    if (parsed.search === "") return true;
+    const seen = new Set();
+    return parsed.search
+      .slice(1)
+      .split("&")
+      .every((part) => {
+        const [key, preference, ...extra] = part.split("=");
+        if (extra.length || seen.has(key)) return false;
+        seen.add(key);
+        return key === "lang"
+          ? RUNNER_LANGUAGES.has(preference)
+          : key === "theme" && RUNNER_THEMES.has(preference);
+      });
+  } catch {
+    return false;
+  }
 }
 
 function isForbiddenSameOriginPath(pathname) {
@@ -380,7 +423,7 @@ export function createTask51NetworkLedger({
 
   function arm(currentUrl) {
     if (armed || finalized) throw new Error("TASK51_NETWORK_DUPLICATE_ARM");
-    if (normalizedNetworkUrl(currentUrl) !== normalizedNetworkUrl(runnerUrl)) {
+    if (!isTask51RunnerPageUrl(currentUrl)) {
       throw new Error("TASK51_NETWORK_ARM_URL_MISMATCH");
     }
     if (

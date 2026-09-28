@@ -10,6 +10,7 @@ import {
   TASK51_EXPECTED_BUSINESS_REQUEST_COUNT,
   TASK51_NETWORK_CONSTANTS,
   createTask51NetworkLedger,
+  isTask51RunnerPageUrl,
   validateTask51StaticAllowlist,
 } from "../../../tools/identity/task51-network-attestor-ledger.mjs";
 import {
@@ -38,6 +39,7 @@ import {
   createTask51SafeRequestDescriptor,
   runTask51HeadedNetworkAttestor,
   parseTask51AttestorArguments,
+  pushTask51RunnerThroughVueRouter,
   task51RunnerFragmentBindings,
 } from "../../../tools/identity/run-task51-headed-network-attestor.mjs";
 
@@ -159,7 +161,10 @@ function completeBusinessLedger(
   });
 }
 
-function completedNetwork(staticRequestUrls: readonly string[] = STATIC_URLS) {
+function completedNetwork(
+  staticRequestUrls: readonly string[] = STATIC_URLS,
+  actualRunnerUrl = RUNNER_URL
+) {
   const { ledger } = createLedger();
   staticRequestUrls.forEach((url, index) => {
     const staticAsset = descriptor(`static-${index}`, "GET", url, "script");
@@ -168,7 +173,7 @@ function completedNetwork(staticRequestUrls: readonly string[] = STATIC_URLS) {
       ledger.finishRequest(staticAsset.id, staticMetadata(url)).allowed
     ).toBe(true);
   });
-  ledger.arm(RUNNER_URL);
+  ledger.arm(actualRunnerUrl);
   const preflight = optionsDescriptor("options-1", TASK51_BUSINESS_LEDGER[0]);
   expect(ledger.beginRequest(preflight).allowed).toBe(true);
   expect(ledger.finishRequest(preflight.id, OPTIONS_METADATA).allowed).toBe(
@@ -856,7 +861,7 @@ describe("Task 5.1 current execution sources (offline only)", () => {
 });
 
 describe("Task 5.1 current static repeated loads and receipt v3", () => {
-  function currentReceipt() {
+  function currentReceipt(actualRunnerUrl = RUNNER_URL) {
     const urls = [...STATIC_URLS];
     const counts = urls.map((url) => ({
       url,
@@ -879,7 +884,7 @@ describe("Task 5.1 current static repeated loads and receipt v3", () => {
           true
         );
       }
-    ledger.arm(RUNNER_URL);
+    ledger.arm(actualRunnerUrl);
     completeBusinessLedger(ledger);
     const network = ledger.finalize();
     const old = bindingsFor(network);
@@ -908,6 +913,19 @@ describe("Task 5.1 current static repeated loads and receipt v3", () => {
     expect(
       parseTask51NetworkReceipt(serializeTask51NetworkReceipt(receipt)).schema
     ).toBe("wp3-task51-safe-network-receipt-v3");
+  });
+  it("retains current receipt v3 bindings with the observed page preferences", () => {
+    const receipt = currentReceipt(
+      `${RUNNER_URL}?lang=en-US&theme=modern-blue`
+    );
+    const parsed = parseTask51NetworkReceipt(
+      serializeTask51NetworkReceipt(receipt)
+    );
+    expect(parsed.schema).toBe("wp3-task51-safe-network-receipt-v3");
+    expect(parsed.staticUrlManifest.urls).toEqual(STATIC_URLS);
+    expect(parsed.network.terminalBusinessRequestCount).toBe(64);
+    expect(parsed.network.staticRequestCount).toBe(5);
+    expect(parsed.executionSourcesSha256).toBe("a".repeat(64));
   });
   it.each([
     "first-sequence",
@@ -1716,6 +1734,109 @@ describe("Task 5.1 mandatory execution preflight", () => {
 });
 
 describe("Task 5.1 browser network fixed ledger", () => {
+  it("accepts only existing language/theme page preferences across entry, arm and receipt", async () => {
+    const languages = ["zh-CN", "en-US", "ja-JP", "th-TH", "zh-TW"];
+    const themes = [
+      "modern-blue",
+      "deep-space",
+      "cyber-tech",
+      "edu-friendly",
+      "neo-brutalism",
+      "minimal-pure",
+    ];
+    const urls = [
+      RUNNER_URL,
+      ...languages.map((lang) => `${RUNNER_URL}?lang=${lang}`),
+      ...themes.map((theme) => `${RUNNER_URL}?theme=${theme}`),
+      ...languages.flatMap((lang) =>
+        themes.flatMap((theme) => [
+          `${RUNNER_URL}?lang=${lang}&theme=${theme}`,
+          `${RUNNER_URL}?theme=${theme}&lang=${lang}`,
+        ])
+      ),
+    ];
+    for (const url of urls) {
+      expect(isTask51RunnerPageUrl(url)).toBe(true);
+      const attached = vi.fn().mockResolvedValue(undefined);
+      const evaluate = vi.fn().mockResolvedValue(undefined);
+      const waitForURL = vi.fn(async (predicate: (url: URL) => boolean) => {
+        expect(predicate(new URL(url))).toBe(true);
+        expect(predicate(new URL(`${RUNNER_URL}?token=unexpected`))).toBe(
+          false
+        );
+      });
+      await pushTask51RunnerThroughVueRouter(
+        { evaluate, waitForURL, locator: () => ({ waitFor: attached }) },
+        { race: (promise: Promise<unknown>) => promise }
+      );
+      expect(evaluate.mock.calls[0][1]).toBe(
+        TASK51_NETWORK_CONSTANTS.runnerPath
+      );
+      expect(attached).toHaveBeenCalledWith({
+        state: "attached",
+        timeout: 60_000,
+      });
+      const network = completedNetwork(STATIC_URLS, url);
+      const receipt = buildTask51NetworkReceipt(
+        bindingsFor(network),
+        network,
+        FLAGS
+      );
+      expect(
+        parseTask51NetworkReceipt(serializeTask51NetworkReceipt(receipt))
+          .network.terminalBusinessRequestCount
+      ).toBe(64);
+    }
+    // The page preference allowance cannot grant a document or API request.
+    const { ledger } = createLedger();
+    expect(
+      ledger.beginRequest(
+        descriptor("runner-document", "GET", urls.at(-1)!, "document")
+      ).allowed
+    ).toBe(false);
+    expect(() =>
+      validateTask51StaticAllowlist(urls.at(-1)!, STATIC_URLS)
+    ).toThrow("TASK51_NETWORK_RUNNER_URL_REJECTED");
+  });
+
+  it("rejects noncanonical, unknown, duplicate and credential-bearing runner parameters", () => {
+    const rejected = [
+      null,
+      undefined,
+      1,
+      {},
+      "https://other.example/internal/task51/memory-isolated-runner",
+      "http://d.xrugc.com/internal/task51/memory-isolated-runner",
+      RUNNER_URL.replace("d.xrugc.com", "root@d.xrugc.com"),
+      `${RUNNER_URL}/`,
+      `${RUNNER_URL}#`,
+      `${RUNNER_URL}#fragment`,
+      `${RUNNER_URL}?`,
+      `${RUNNER_URL}?lang=xx-XX`,
+      `${RUNNER_URL}?theme=unknown`,
+      `${RUNNER_URL}?lang=`,
+      `${RUNNER_URL}?theme=`,
+      `${RUNNER_URL}?lang`,
+      `${RUNNER_URL}?lang=en-US&lang=en-US`,
+      `${RUNNER_URL}?theme=modern-blue&theme=deep-space`,
+      `${RUNNER_URL}?lang=en-US&token=secret`,
+      `${RUNNER_URL}?redirect=/home`,
+      `${RUNNER_URL}?%6cang=en-US`,
+      `${RUNNER_URL}?lang=%65n-US`,
+      `${RUNNER_URL}?lang=en-US&`,
+      `${RUNNER_URL}?lang=en-US&&theme=modern-blue`,
+      `${RUNNER_URL}?lang=en-US=extra`,
+      `${RUNNER_URL}?theme=modern-blue%0A`,
+      `${RUNNER_URL} `,
+      `${RUNNER_URL}?lang=en-US#`,
+    ];
+    for (const url of rejected) {
+      expect(isTask51RunnerPageUrl(url)).toBe(false);
+      const { ledger } = createLedger();
+      expect(() => ledger.arm(url)).toThrow("TASK51_NETWORK_ARM_URL_MISMATCH");
+    }
+  });
+
   it("uses the exact same runner route in the supervisor and network policy", () => {
     expect(TASK51_RUNNER_URL).toBe(
       `${TASK51_NETWORK_CONSTANTS.productionOrigin}${TASK51_NETWORK_CONSTANTS.runnerPath}`
