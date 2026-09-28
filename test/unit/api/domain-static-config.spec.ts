@@ -258,6 +258,34 @@ describe("domain-static-config", () => {
     });
   });
 
+  it("reads the parent config directly for d.xrugc.com without a 404 probe", async () => {
+    const fetchMock = makeFetch({
+      "/config/domains/xrugc.com.json": xrugcConfig,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const parentDefault = await getStaticDomainDefault("xrugc.com");
+    const parentLanguage = await getStaticDomainLanguage("xrugc.com", "zh-CN");
+    const childDefault = await getStaticDomainDefault("d.xrugc.com");
+    const childLanguage = await getStaticDomainLanguage("d.xrugc.com", "zh-CN");
+
+    expect(childDefault).toEqual({
+      ...parentDefault,
+      domain: "d.xrugc.com",
+      is_domain_fallback: true,
+    });
+    expect(childLanguage).toEqual({
+      ...parentLanguage,
+      domain: "d.xrugc.com",
+      is_domain_fallback: true,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/config/domains/xrugc.com.json",
+      expect.anything()
+    );
+  });
+
   it("prefers the complete hostname before parent-domain configs", async () => {
     const fetchMock = makeFetch({
       "/config/domains/d.dev.xrugc.com.json": {
