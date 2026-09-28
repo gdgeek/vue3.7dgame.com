@@ -1088,9 +1088,29 @@ function ssoExecutionSourcesFixture() {
   return { ...source, prewarm };
 }
 
+const SSO_DEPLOYMENT_URL = "https://d.xrugc.com/api/v1/system/deployment";
+
+function ssoDeploymentExecutionSourcesFixture() {
+  const source = JSON.parse(canonicalTask51Json(ssoExecutionSourcesFixture()));
+  source.prewarm.bootstrapReads.push({
+    url: SSO_DEPLOYMENT_URL,
+    minimumCount: 1,
+    maximumCount: 1,
+    phase: "before-login-public",
+    ssoCallbackPublicReadCount: 1,
+  });
+  source.currentWeb.networkProvenance.bootstrapReadAllowlist =
+    source.prewarm.bootstrapReads.map((entry: { url: string }) => entry.url);
+  source.publicSources.push({
+    url: SSO_DEPLOYMENT_URL,
+    evidenceRef: "reports/public-deployment.json",
+    evidenceSha256: "b".repeat(64),
+  });
+  return source;
+}
+
 describe("Task 5.1 normal brand SSO prewarm (offline only)", () => {
-  const create = () => {
-    const source = ssoExecutionSourcesFixture();
+  const create = (source = ssoExecutionSourcesFixture()) => {
     const contract = source.prewarm;
     const supervisor = supervisorModule.createTask51PreArmSupervisor({
       staticUrls: source.currentWeb.networkProvenance.staticUrlManifest,
@@ -1158,6 +1178,272 @@ describe("Task 5.1 normal brand SSO prewarm (offline only)", () => {
       ssoCallbackDocumentCount: 1,
       ssoRefreshPostCount: 1,
     });
+  });
+  const reachDeploymentCallback = (f: ReturnType<typeof create>) => {
+    f.complete("GET", ROOT_URL, "document");
+    f.complete("GET", SSO_DEPLOYMENT_URL, "fetch");
+    f.complete("GET", f.contract.documentUrls[1], "document");
+    f.publicRead();
+    f.login();
+    f.callback();
+  };
+  const finishDeploymentPrewarm = (f: ReturnType<typeof create>) => {
+    f.complete("GET", SSO_DEPLOYMENT_URL, "fetch");
+    f.complete("POST", f.contract.sso.refreshUrl);
+    f.complete("GET", f.contract.transitionUserInfoUrl);
+    f.supervisor.enterTransition();
+    f.complete("GET", f.contract.transitionUserInfoUrl);
+    f.supervisor.enterQuiet(1000);
+  };
+  it("separately requires the exact deployment GET before login and after callback, through the shared source parser", () => {
+    const source = ssoDeploymentExecutionSourcesFixture();
+    const parsed = parseTask51StageBExecutionSources(
+      `${canonicalTask51Json(source)}\n`
+    );
+    const f = create(parsed.value);
+    reachDeploymentCallback(f);
+    finishDeploymentPrewarm(f);
+    expect(() =>
+      f.supervisor.assertReadyToClaim(
+        1000 + supervisorModule.TASK51_AUTH_QUIET_MS - 1
+      )
+    ).toThrow();
+    f.supervisor.assertReadyToClaim(
+      1000 + supervisorModule.TASK51_AUTH_QUIET_MS
+    );
+    expect(f.supervisor.snapshot()).toMatchObject({
+      mode: "strict",
+      bootstrapReadCount: 4,
+      ssoCallbackPublicReadCount: 1,
+      ssoRefreshPostCount: 1,
+      unexpectedRequestCount: 0,
+    });
+  });
+  it.each([
+    "missing-first",
+    "pending-first",
+    "failed-first-status",
+    "failed-first-request",
+    "duplicate-first",
+    "before-callback",
+    "missing-callback-read",
+    "pending-callback-read",
+    "duplicate-callback-read",
+    "failed-callback-status",
+    "failed-callback-request",
+    "wrong-url",
+    "wrong-method",
+    "callback-options",
+    "private-read-before-refresh",
+    "after-refresh",
+    "in-quiet",
+    "in-strict",
+  ])(
+    "rejects deployment callback fault %s without exchanging the two budgets",
+    (fault) => {
+      const f = create(ssoDeploymentExecutionSourcesFixture());
+      let decision;
+      if (fault === "missing-first") {
+        f.publicRead();
+        decision = f.begin("POST", f.contract.loginUrl).decision;
+      } else if (
+        [
+          "pending-first",
+          "failed-first-status",
+          "failed-first-request",
+        ].includes(fault)
+      ) {
+        f.publicRead();
+        const pending = f.begin("GET", SSO_DEPLOYMENT_URL, "fetch");
+        expect(pending.decision.allowed).toBe(true);
+        if (fault === "failed-first-status")
+          expect(
+            f.supervisor.finishRequest(pending.request.id, { httpStatus: 500 })
+              .allowed
+          ).toBe(false);
+        if (fault === "failed-first-request")
+          expect(f.supervisor.failRequest(pending.request.id).allowed).toBe(
+            false
+          );
+        decision = f.begin("POST", f.contract.loginUrl).decision;
+      } else if (fault === "duplicate-first") {
+        f.publicRead();
+        f.complete("GET", SSO_DEPLOYMENT_URL, "fetch");
+        decision = f.begin("GET", SSO_DEPLOYMENT_URL, "fetch").decision;
+      } else if (fault === "before-callback") {
+        f.complete("GET", SSO_DEPLOYMENT_URL, "fetch");
+        f.publicRead();
+        f.login();
+        decision = f.begin("GET", SSO_DEPLOYMENT_URL, "fetch").decision;
+      } else {
+        reachDeploymentCallback(f);
+        if (fault === "missing-callback-read") {
+          decision = f.begin("POST", f.contract.sso.refreshUrl).decision;
+        } else if (
+          [
+            "pending-callback-read",
+            "failed-callback-status",
+            "failed-callback-request",
+          ].includes(fault)
+        ) {
+          const pending = f.begin("GET", SSO_DEPLOYMENT_URL, "fetch");
+          expect(pending.decision.allowed).toBe(true);
+          if (fault === "failed-callback-status")
+            expect(
+              f.supervisor.finishRequest(pending.request.id, {
+                httpStatus: 500,
+              }).allowed
+            ).toBe(false);
+          if (fault === "failed-callback-request")
+            expect(f.supervisor.failRequest(pending.request.id).allowed).toBe(
+              false
+            );
+          decision = f.begin("POST", f.contract.sso.refreshUrl).decision;
+        } else if (fault === "wrong-url") {
+          decision = f.begin("GET", `${SSO_DEPLOYMENT_URL}?retry=1`).decision;
+        } else if (fault === "wrong-method") {
+          decision = f.begin("POST", SSO_DEPLOYMENT_URL).decision;
+        } else if (fault === "callback-options") {
+          decision = f.supervisor.beginRequest(
+            descriptor(
+              "callback-options",
+              "OPTIONS",
+              SSO_DEPLOYMENT_URL,
+              "other",
+              false,
+              "GET",
+              "content-type"
+            )
+          );
+        } else if (fault === "private-read-before-refresh") {
+          f.complete("GET", SSO_DEPLOYMENT_URL, "fetch");
+          decision = f.begin("GET", f.contract.transitionUserInfoUrl).decision;
+        } else if (fault === "duplicate-callback-read") {
+          f.complete("GET", SSO_DEPLOYMENT_URL, "fetch");
+          decision = f.begin("GET", SSO_DEPLOYMENT_URL, "fetch").decision;
+        } else if (fault === "after-refresh") {
+          f.complete("GET", SSO_DEPLOYMENT_URL, "fetch");
+          f.complete("POST", f.contract.sso.refreshUrl);
+          decision = f.begin("GET", SSO_DEPLOYMENT_URL, "fetch").decision;
+        } else {
+          finishDeploymentPrewarm(f);
+          if (fault === "in-strict")
+            f.supervisor.assertReadyToClaim(
+              1000 + supervisorModule.TASK51_AUTH_QUIET_MS
+            );
+          decision = f.begin("GET", SSO_DEPLOYMENT_URL, "fetch").decision;
+        }
+      }
+      expect(decision.allowed).toBe(false);
+      // A failed or duplicate attempt cannot be followed by an otherwise valid
+      // login, callback read or refresh to repair this opted-in run in place.
+      expect(f.begin("POST", f.contract.loginUrl).decision.allowed).toBe(false);
+      expect(f.begin("GET", SSO_DEPLOYMENT_URL, "fetch").decision.allowed).toBe(
+        false
+      );
+      expect(f.begin("POST", f.contract.sso.refreshUrl).decision.allowed).toBe(
+        false
+      );
+      expect(() => f.supervisor.enterTransition()).toThrow();
+    }
+  );
+  it.each([
+    "zero",
+    "two",
+    "string",
+    "null",
+    "wrong-url",
+    "query",
+    "wrong-phase",
+    "missing-phase",
+    "missing-sso",
+    "first-count-two",
+    "first-count-zero",
+    "missing-public-source",
+    "duplicate-url",
+    "extra-field",
+    "total-over-budget",
+  ])(
+    "rejects invalid owner-bound deployment declaration %s in the shared parser",
+    (fault) => {
+      const source = ssoDeploymentExecutionSourcesFixture();
+      const entry = source.prewarm.bootstrapReads.at(-1);
+      if (fault === "zero") entry.ssoCallbackPublicReadCount = 0;
+      if (fault === "two") entry.ssoCallbackPublicReadCount = 2;
+      if (fault === "string") entry.ssoCallbackPublicReadCount = "1";
+      if (fault === "null") entry.ssoCallbackPublicReadCount = null;
+      if (fault === "wrong-url")
+        entry.url = "https://xrugc.com/api/v1/system/deployment";
+      if (fault === "query") entry.url += "?retry=1";
+      if (fault === "wrong-phase") entry.phase = "after-authentication";
+      if (fault === "missing-phase") delete entry.phase;
+      if (fault === "missing-sso") delete source.prewarm.sso;
+      if (fault === "first-count-two")
+        entry.minimumCount = entry.maximumCount = 2;
+      if (fault === "first-count-zero") entry.minimumCount = 0;
+      if (fault === "missing-public-source")
+        source.publicSources = source.publicSources.filter(
+          (value: { url: string }) => value.url !== SSO_DEPLOYMENT_URL
+        );
+      if (fault === "duplicate-url")
+        source.prewarm.bootstrapReads.push({ ...entry });
+      if (fault === "extra-field") entry.anyPhase = true;
+      if (fault === "total-over-budget") {
+        // 128 ordinary GETs fit; the separately granted callback GET must
+        // still be included in the existing 128-request resource ceiling.
+        for (let i = 0; i < 8; i++)
+          source.prewarm.bootstrapReads.push({
+            url: `https://d.xrugc.com/api/v1/read-${i}`,
+            minimumCount: 0,
+            maximumCount: i === 7 ? 13 : 16,
+            phase: "after-authentication",
+          });
+      }
+      source.currentWeb.networkProvenance.bootstrapReadAllowlist =
+        source.prewarm.bootstrapReads.map(
+          (value: { url: string }) => value.url
+        );
+      expect(() =>
+        parseTask51StageBExecutionSources(`${canonicalTask51Json(source)}\n`)
+      ).toThrow();
+    }
+  );
+  it("does not grant a callback repeat when the optional declaration is absent", () => {
+    const source = ssoDeploymentExecutionSourcesFixture();
+    delete source.prewarm.bootstrapReads.at(-1).ssoCallbackPublicReadCount;
+    const parsed = parseTask51StageBExecutionSources(
+      `${canonicalTask51Json(source)}\n`
+    );
+    const f = create(parsed.value);
+    reachDeploymentCallback(f);
+    expect(f.begin("GET", SSO_DEPLOYMENT_URL, "fetch").decision.allowed).toBe(
+      false
+    );
+  });
+  it("observes the public deployment GET without reading credentials or bodies", async () => {
+    const forbidden = vi.fn(() => {
+      throw new Error("auth material must not be read");
+    });
+    const request = {
+      method: () => "GET",
+      url: () => SSO_DEPLOYMENT_URL,
+      resourceType: () => "fetch",
+      redirectedFrom: () => null,
+      headerValue: forbidden,
+      allHeaders: forbidden,
+      headers: forbidden,
+      postData: forbidden,
+      postDataJSON: forbidden,
+    };
+    expect(
+      await createTask51SafeRequestDescriptor(request, "deployment")
+    ).toMatchObject({
+      method: "GET",
+      url: SSO_DEPLOYMENT_URL,
+      corsRequestHeaderNames: null,
+      corsRequestMethod: null,
+    });
+    expect(forbidden).not.toHaveBeenCalled();
   });
   it.each([
     "refresh-before-login",

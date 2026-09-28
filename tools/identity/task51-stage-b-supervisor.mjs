@@ -1196,7 +1196,19 @@ export function assertTask51PrewarmContract(contract) {
           "minimumCount",
           "maximumCount",
           ...(Object.hasOwn(entry ?? {}, "phase") ? ["phase"] : []),
+          ...(Object.hasOwn(entry ?? {}, "ssoCallbackPublicReadCount")
+            ? ["ssoCallbackPublicReadCount"]
+            : []),
         ]) ||
+        (Object.hasOwn(entry ?? {}, "ssoCallbackPublicReadCount") &&
+          (entry.ssoCallbackPublicReadCount !== 1 ||
+            entry.url !==
+              `${TASK51_PRODUCTION_ORIGIN}/api/v1/system/deployment` ||
+            entry.phase !== "before-login-public" ||
+            entry.minimumCount !== 1 ||
+            entry.maximumCount !== 1 ||
+            !contract.sso ||
+            contract.oidc !== null)) ||
         (entry.phase !== undefined &&
           !["before-login-public", "after-authentication"].includes(
             entry.phase
@@ -1219,7 +1231,8 @@ export function assertTask51PrewarmContract(contract) {
     new Set(contract.bootstrapReads.map(({ url }) => url)).size !==
       contract.bootstrapReads.length ||
     contract.bootstrapReads.reduce(
-      (sum, entry) => sum + entry.maximumCount,
+      (sum, entry) =>
+        sum + entry.maximumCount + (entry.ssoCallbackPublicReadCount ?? 0),
       0
     ) > 128
   )
@@ -1272,8 +1285,32 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
   const statics = new Set(staticUrls);
   const active = new Map();
   const reads = new Map(
-    contract.bootstrapReads.map((entry) => [entry.url, { ...entry, count: 0 }])
+    contract.bootstrapReads.map((entry) => [
+      entry.url,
+      {
+        ...entry,
+        count: 0,
+        initialSucceededCount: 0,
+        ssoCallbackCount: 0,
+        ssoCallbackSucceededCount: 0,
+      },
+    ])
   );
+  const hasCallbackPublicRead = [...reads.values()].some(
+    (entry) => entry.ssoCallbackPublicReadCount === 1
+  );
+  const initialPublicReadsComplete = () =>
+    [...reads.values()].every(
+      (entry) =>
+        entry.ssoCallbackPublicReadCount !== 1 ||
+        entry.initialSucceededCount === 1
+    );
+  const callbackPublicReadsComplete = () =>
+    [...reads.values()].every(
+      (entry) =>
+        entry.ssoCallbackPublicReadCount !== 1 ||
+        entry.ssoCallbackSucceededCount === 1
+    );
   const options = new Map();
   let mode = "bootstrap";
   let loginCount = 0;
@@ -1334,10 +1371,15 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
       method === "POST"
     )
       return "token";
-    if (method === "GET" && reads.has(url.href))
-      return reads.get(url.href).phase === "before-login-public"
-        ? "public-read"
-        : "read";
+    if (method === "GET" && reads.has(url.href)) {
+      const entry = reads.get(url.href);
+      if (entry.phase !== "before-login-public") return "read";
+      // Only the owner-declared deployment GET may repeat after the SSO
+      // document. Its pre-login and pre-refresh budgets cannot be exchanged.
+      return entry.ssoCallbackPublicReadCount === 1 && loginCount === 1
+        ? "sso-public-read"
+        : "public-read";
+    }
     return null;
   }
   function beginRequest(descriptor) {
@@ -1408,9 +1450,15 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
     if (mode === "quiet" || mode === "strict" || !kind)
       return violate("TASK51_PREARM_QUIET_REQUEST_REJECTED");
     if (
+      (hasCallbackPublicRead &&
+        unexpectedRequestCount !== 0 &&
+        ["login", "public-read", "sso-public-read", "sso-refresh"].includes(
+          kind
+        )) ||
       (kind === "login" &&
         (loginCount !== 0 ||
           active.size !== 0 ||
+          !initialPublicReadsComplete() ||
           [...reads.values()].some(
             (entry) =>
               entry.phase === "before-login-public" &&
@@ -1424,10 +1472,18 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
         (loginCount !== 1 ||
           ssoDocumentCount !== 1 ||
           refreshCount !== 0 ||
+          !callbackPublicReadsComplete() ||
           active.size !== 0)) ||
       (kind === "public-read" &&
         (loginCount !== 0 ||
           reads.get(url.href).count >= reads.get(url.href).maximumCount)) ||
+      (kind === "sso-public-read" &&
+        (method !== "GET" ||
+          loginCount !== 1 ||
+          ssoDocumentCount !== 1 ||
+          refreshCount !== 0 ||
+          active.size !== 0 ||
+          reads.get(url.href).ssoCallbackCount !== 0)) ||
       (kind === "read" &&
         (loginCount !== 1 ||
           [...active.values()].some((entry) =>
@@ -1471,8 +1527,14 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
       if (kind === "token") tokenCount++;
       if (kind === "sso-refresh") refreshCount++;
       if (["read", "public-read"].includes(kind)) reads.get(url.href).count++;
+      if (kind === "sso-public-read") reads.get(url.href).ssoCallbackCount++;
       if (kind === "transition") transitionCount++;
-      active.set(descriptor.id, { kind });
+      active.set(descriptor.id, {
+        kind,
+        ...(["public-read", "sso-public-read"].includes(kind)
+          ? { readUrl: url.href }
+          : {}),
+      });
     }
     return Object.freeze({ allowed: true, category: "prearm" });
   }
@@ -1491,6 +1553,10 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
       !statuses.includes(metadata.httpStatus)
     )
       return violate("TASK51_PREARM_FAILURE_REJECTED");
+    if (record.kind === "sso-public-read")
+      reads.get(record.readUrl).ssoCallbackSucceededCount++;
+    if (record.kind === "public-read")
+      reads.get(record.readUrl).initialSucceededCount++;
     return Object.freeze({ allowed: true, category: "prearm" });
   }
   return Object.freeze({
@@ -1508,6 +1574,7 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
         loginCount !== 1 ||
         (contract.oidc && (authorizeCount !== 1 || tokenCount !== 1)) ||
         (contract.sso && (ssoDocumentCount !== 1 || refreshCount !== 1)) ||
+        !callbackPublicReadsComplete() ||
         [...reads.values()].some((entry) => entry.count < entry.minimumCount)
       )
         throw new Error("TASK51_PREARM_TRANSITION_GATE_REJECTED");
@@ -1549,9 +1616,19 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
             }
           : {}),
         bootstrapReadCount: [...reads.values()].reduce(
-          (sum, entry) => sum + entry.count,
+          (sum, entry) => sum + entry.count + entry.ssoCallbackCount,
           0
         ),
+        ...([...reads.values()].some(
+          (entry) => entry.ssoCallbackPublicReadCount === 1
+        )
+          ? {
+              ssoCallbackPublicReadCount: [...reads.values()].reduce(
+                (sum, entry) => sum + entry.ssoCallbackSucceededCount,
+                0
+              ),
+            }
+          : {}),
       }),
   });
 }
