@@ -22,6 +22,11 @@ import { chromium } from "playwright";
 import {
   createTask51NetworkLedger,
   isTask51RunnerPageUrl,
+  assertTask51PublicStartupLifecyclePlan,
+  assertTask51PublicStartupLifecycleReceipt,
+  TASK51_STARTUP_PUBLIC_READ_RESPONSES,
+  assertTask51CurrentStableEntry,
+  TASK51_CURRENT_STABLE_ENTRY_URL,
 } from "./task51-network-attestor-ledger.mjs";
 import {
   buildTask51NetworkReceipt,
@@ -40,6 +45,8 @@ import {
   TASK51_RUNNER_URL,
   TASK51_STRICT_WINDOW_TIMEOUT_MS,
   TASK51_WARM_URL,
+  TASK51_OPTIONAL_NEWS_URLS,
+  assertTask51PrewarmContract,
   claimPreparedTask51StageB,
   createTask51PreArmSupervisor,
   prepareTask51StageB,
@@ -154,7 +161,12 @@ export function parseTask51AttestorArguments(argv) {
     throw new Error("TASK51_EXECUTION_PREFLIGHT_INPUTS_REJECTED");
   }
   if (
-    values.warmUrl !== TASK51_WARM_URL ||
+    (values.warmUrl !== TASK51_WARM_URL &&
+      !(
+        values.warmUrl === TASK51_CURRENT_STABLE_ENTRY_URL &&
+        values.trustedHistoryExceptionAnchorPath &&
+        sourceKeys.every((key) => values[key])
+      )) ||
     values.runnerUrl !== TASK51_RUNNER_URL ||
     new Set(
       [
@@ -400,10 +412,14 @@ async function prepareExecutionSources(
   return sources;
 }
 
-export async function createTask51SafeRequestDescriptor(request, id) {
+export async function createTask51SafeRequestDescriptor(
+  request,
+  id,
+  decorationPlan = null
+) {
   const method = request.method().toUpperCase();
-  // OPTIONS is the sole exception to the no-header-read rule. These two CORS
-  // control fields contain header names/method only, never credential values.
+  // OPTIONS exposes only two CORS control fields (names/method, never values).
+  // The separate owner-bound decoration exception below exposes Origin only.
   const corsRequestMethod =
     method === "OPTIONS"
       ? await request.headerValue("access-control-request-method")
@@ -412,6 +428,12 @@ export async function createTask51SafeRequestDescriptor(request, id) {
     method === "OPTIONS"
       ? await request.headerValue("access-control-request-headers")
       : null;
+  const url = request.url();
+  // Only the two owner-bound public decorations expose Origin (never credential
+  // headers). Both observed entry flows issue these from xrugc.com's main page.
+  const decoration =
+    TASK51_OPTIONAL_NEWS_URLS.includes(url) &&
+    decorationPlan?.some((entry) => entry.url === url);
   return {
     corsRequestHeaderNames,
     corsRequestMethod,
@@ -419,8 +441,467 @@ export async function createTask51SafeRequestDescriptor(request, id) {
     method,
     redirected: request.redirectedFrom() !== null,
     resourceType: request.resourceType(),
-    url: request.url(),
+    url,
+    ...(decoration
+      ? { sourceOrigin: await request.headerValue("origin") }
+      : {}),
   };
+}
+
+/** Read only native event metadata. The native IDs are never inferred from a
+ * URL or supplied by a successful boolean; matching consumes one actual native
+ * request per browser request. No headers, credentials or body are read here. */
+export function isTask51PolicyBlockedNativeFailure(
+  errorText,
+  publicStartupLifecycleEnabled = false
+) {
+  return (
+    errorText === "net::ERR_BLOCKED_BY_CLIENT" ||
+    (publicStartupLifecycleEnabled &&
+      errorText === "net::ERR_BLOCKED_BY_CLIENT.Inspector")
+  );
+}
+
+export function assertTask51HeadedWarmEntry(warmUrl, executionSources) {
+  const stableEntry =
+    executionSources?.schema === TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA
+      ? (executionSources.prewarm?.publicStartupLifecycle?.stableEntry ?? null)
+      : null;
+  if (stableEntry !== null) {
+    assertTask51CurrentStableEntry(stableEntry);
+    assertTask51PublicStartupLifecyclePlan(
+      executionSources.prewarm.publicStartupLifecycle
+    );
+  }
+  const expected = stableEntry ? stableEntry.url : TASK51_WARM_URL;
+  if (warmUrl !== expected || executionSources?.prewarm?.warmUrl !== expected)
+    throw new Error("TASK51_ATTESTOR_FIXED_URLS_REJECTED");
+  return true;
+}
+
+export async function installTask51PublicStartupLifecycleNative(
+  page,
+  plan,
+  onViolation = () => {},
+  prewarmContract = null
+) {
+  assertTask51PublicStartupLifecyclePlan(plan);
+  if (prewarmContract !== null) assertTask51PrewarmContract(prewarmContract);
+  const cdp = await page.context().newCDPSession(page);
+  const records = new Map(),
+    owners = new WeakMap();
+  let document = null,
+    navigation = null,
+    authenticationStarted = false,
+    closed = false;
+  let firstAuthenticationRequest = null;
+  let navigationRequestedTimestamp = null;
+  const phaseBoundaries = {
+    authenticationStartedAt: null,
+    quietStartedAt: null,
+    strictStartedAt: null,
+  };
+  const now = () => new Date().toISOString();
+  const assets = new Set(plan.navigationAssets.map((entry) => entry.url));
+  const permitted = new Set(plan.staticRequestBounds.map((entry) => entry.url));
+  const violation = (code) => {
+    onViolation(code);
+    throw new Error(code);
+  };
+  const authUrls = new Set(
+    [
+      prewarmContract?.loginUrl,
+      prewarmContract?.sso?.refreshUrl,
+      prewarmContract?.oidc?.tokenUrl,
+    ].filter(Boolean)
+  );
+  const authUrl = (value) => {
+    const parsed = new URL(value);
+    if (
+      authUrls.has(value) ||
+      parsed.origin + parsed.pathname === prewarmContract?.oidc?.authorizeUrl
+    )
+      return parsed.origin + parsed.pathname;
+    return null;
+  };
+  const nativeRequestTime = (event) => {
+    if (
+      !Number.isFinite(event.wallTime) ||
+      event.wallTime <= 0 ||
+      !Number.isFinite(event.timestamp) ||
+      event.timestamp < 0
+    ) {
+      onViolation("TASK51_PUBLIC_STARTUP_NATIVE_CLOCK_REJECTED");
+      return null;
+    }
+    try {
+      return new Date(event.wallTime * 1000).toISOString();
+    } catch {
+      onViolation("TASK51_PUBLIC_STARTUP_NATIVE_CLOCK_REJECTED");
+      return null;
+    }
+  };
+  const nativeTerminalTime = (event, record) => {
+    if (
+      !Number.isFinite(event.timestamp) ||
+      event.timestamp < record.nativeTimestamp
+    ) {
+      onViolation("TASK51_PUBLIC_STARTUP_NATIVE_CLOCK_REJECTED");
+      return null;
+    }
+    try {
+      return new Date(
+        (record.nativeWallTime + event.timestamp - record.nativeTimestamp) *
+          1000
+      ).toISOString();
+    } catch {
+      onViolation("TASK51_PUBLIC_STARTUP_NATIVE_CLOCK_REJECTED");
+      return null;
+    }
+  };
+  cdp.on("Network.requestWillBeSent", (event) => {
+    const auth = authUrl(event.request.url);
+    if (auth !== null && firstAuthenticationRequest === null) {
+      const requestObservedAt = nativeRequestTime(event);
+      if (requestObservedAt === null) return;
+      firstAuthenticationRequest = {
+        requestId: event.requestId,
+        frameId: event.frameId,
+        loaderId: event.loaderId,
+        url: auth,
+        method: event.request.method,
+        resourceType: event.type.toLowerCase(),
+        requestObservedAt,
+      };
+      phaseBoundaries.authenticationStartedAt =
+        firstAuthenticationRequest.requestObservedAt;
+    }
+    if (!permitted.has(event.request.url)) return;
+    const requestObservedAt = nativeRequestTime(event);
+    if (requestObservedAt === null) return;
+    if (records.has(event.requestId) || event.redirectResponse) {
+      onViolation("TASK51_PUBLIC_STARTUP_NATIVE_REDIRECT_REJECTED");
+      return;
+    }
+    records.set(event.requestId, {
+      requestId: event.requestId,
+      frameId: event.frameId,
+      loaderId: event.loaderId,
+      url: event.request.url,
+      method: event.request.method,
+      resourceType: event.type.toLowerCase(),
+      requestObservedAt,
+      nativeTimestamp: event.timestamp,
+      nativeWallTime: event.wallTime,
+      nativeEvent: null,
+      terminalObservedAt: null,
+      httpStatus: null,
+      nativeErrorText: null,
+      canceled: null,
+      claimed: false,
+    });
+  });
+  cdp.on("Network.responseReceived", (event) => {
+    const record = records.get(event.requestId);
+    if (record) record.httpStatus = event.response.status;
+  });
+  cdp.on("Network.loadingFinished", (event) => {
+    const record = records.get(event.requestId);
+    if (record) {
+      if (record.nativeEvent !== null) {
+        onViolation("TASK51_PUBLIC_STARTUP_DUPLICATE_NATIVE_TERMINAL");
+        return;
+      }
+      const terminalObservedAt = nativeTerminalTime(event, record);
+      if (terminalObservedAt === null) return;
+      record.nativeEvent = "loadingFinished";
+      record.terminalObservedAt = terminalObservedAt;
+    }
+  });
+  cdp.on("Network.loadingFailed", (event) => {
+    const record = records.get(event.requestId);
+    if (record) {
+      if (record.nativeEvent !== null) {
+        onViolation("TASK51_PUBLIC_STARTUP_DUPLICATE_NATIVE_TERMINAL");
+        return;
+      }
+      const terminalObservedAt = nativeTerminalTime(event, record);
+      if (terminalObservedAt === null) return;
+      record.nativeEvent = "loadingFailed";
+      record.terminalObservedAt = terminalObservedAt;
+      record.nativeErrorText = event.errorText;
+      record.canceled =
+        typeof event.canceled === "boolean" ? event.canceled : null;
+    }
+  });
+  cdp.on("Page.frameNavigated", (event) => {
+    if (event.frame.parentId) return;
+    const next = {
+      frameId: event.frame.id,
+      loaderId: event.frame.loaderId,
+      url: event.frame.url,
+    };
+    if (
+      document?.url === plan.navigation.fromDocumentUrl &&
+      next.url === plan.navigation.toDocumentUrl
+    ) {
+      const matchingRequests = [...records.values()].filter(
+        (record) =>
+          record.resourceType === "document" &&
+          record.frameId === next.frameId &&
+          record.loaderId === next.loaderId &&
+          record.url === next.url
+      );
+      const request = matchingRequests[0];
+      if (
+        navigation ||
+        authenticationStarted ||
+        firstAuthenticationRequest !== null ||
+        matchingRequests.length !== 1 ||
+        document.frameId !== next.frameId ||
+        document.loaderId === next.loaderId
+      ) {
+        onViolation("TASK51_PUBLIC_STARTUP_NAVIGATION_REJECTED");
+        return;
+      }
+      navigation = {
+        frameId: next.frameId,
+        fromLoaderId: document.loaderId,
+        toLoaderId: next.loaderId,
+        fromDocumentUrl: document.url,
+        toDocumentUrl: next.url,
+        requestedAt: request.requestObservedAt,
+        committedAt: now(),
+      };
+      navigationRequestedTimestamp = request.nativeTimestamp;
+    }
+    document = next;
+  });
+  await cdp.send("Network.enable");
+  await cdp.send("Page.enable");
+  async function waitFor(predicate) {
+    const deadline = Date.now() + 5000;
+    while (!closed && Date.now() < deadline) {
+      const value = predicate();
+      if (value) return value;
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+    return violation("TASK51_PUBLIC_STARTUP_NATIVE_TERMINAL_MISSING");
+  }
+  async function bindRequest(request) {
+    if (owners.has(request)) return owners.get(request);
+    const record = await waitFor(() => {
+      const matches = [...records.values()].filter(
+        (entry) =>
+          !entry.claimed &&
+          entry.url === request.url() &&
+          entry.method === request.method() &&
+          entry.resourceType === request.resourceType().toLowerCase()
+      );
+      if (matches.length > 1)
+        return violation("TASK51_PUBLIC_STARTUP_NATIVE_REQUEST_AMBIGUOUS");
+      return matches[0];
+    });
+    record.claimed = true;
+    owners.set(request, record);
+    return record;
+  }
+  return Object.freeze({
+    bindRequest,
+    authenticationStarted: () => authenticationStarted,
+    async noteAuthenticationStarted(descriptor) {
+      authenticationStarted = true;
+      await waitFor(() => firstAuthenticationRequest !== null);
+      if (
+        firstAuthenticationRequest.url !== authUrl(descriptor?.url) ||
+        (firstAuthenticationRequest.method !== descriptor?.method &&
+          !(
+            firstAuthenticationRequest.method === "OPTIONS" &&
+            descriptor?.method === "POST" &&
+            ["fetch", "xhr", "other", "preflight"].includes(
+              firstAuthenticationRequest.resourceType
+            ) &&
+            ["fetch", "xhr", "other"].includes(descriptor?.resourceType)
+          )) ||
+        (firstAuthenticationRequest.resourceType !== descriptor?.resourceType &&
+          !(
+            firstAuthenticationRequest.method === "OPTIONS" &&
+            firstAuthenticationRequest.resourceType === "preflight" &&
+            ["fetch", "xhr", "other"].includes(descriptor?.resourceType)
+          ))
+      )
+        return violation("TASK51_PUBLIC_STARTUP_AUTH_BOUNDARY_REJECTED");
+    },
+    noteQuietStarted() {
+      if (!authenticationStarted || phaseBoundaries.quietStartedAt !== null)
+        return violation("TASK51_PUBLIC_STARTUP_PHASE_REJECTED");
+      phaseBoundaries.quietStartedAt = now();
+    },
+    noteStrictStarted() {
+      if (
+        phaseBoundaries.quietStartedAt === null ||
+        phaseBoundaries.strictStartedAt !== null
+      )
+        return violation("TASK51_PUBLIC_STARTUP_PHASE_REJECTED");
+      phaseBoundaries.strictStartedAt = now();
+    },
+    phaseBoundaries: () => structuredClone(phaseBoundaries),
+    firstAuthenticationRequest: () =>
+      structuredClone(firstAuthenticationRequest),
+    pendingRequestCount: () =>
+      [...records.values()].filter(
+        (record) => record.claimed && record.nativeEvent === null
+      ).length,
+    navigationDispatchState(request) {
+      const held = owners.get(request);
+      if (
+        closed ||
+        !held ||
+        held.nativeEvent !== null ||
+        held.method !== "GET" ||
+        held.resourceType !== "document" ||
+        held.url !== plan.navigation.toDocumentUrl ||
+        request.url() !== held.url ||
+        document?.url !== plan.navigation.fromDocumentUrl ||
+        held.frameId !== document.frameId ||
+        held.loaderId === document.loaderId ||
+        navigation !== null ||
+        authenticationStarted ||
+        firstAuthenticationRequest !== null
+      )
+        return violation("TASK51_PUBLIC_STARTUP_NAVIGATION_DISPATCH_REJECTED");
+      const pending = [...records.values()].filter(
+        (record) =>
+          record.claimed && record.nativeEvent === null && record !== held
+      );
+      if (
+        pending.some(
+          (record) =>
+            record.frameId !== document.frameId ||
+            record.loaderId !== document.loaderId ||
+            record.resourceType === "document"
+        )
+      )
+        return violation("TASK51_PUBLIC_STARTUP_NAVIGATION_PENDING_REJECTED");
+      return { pendingNativeRequestCount: pending.length };
+    },
+    navigation: () => structuredClone(navigation),
+    async terminalProof(
+      request,
+      { bodyReadFailure = null, bodyFailureObservedAt = null } = {}
+    ) {
+      if (
+        authenticationStarted ||
+        firstAuthenticationRequest !== null ||
+        !assets.has(request.url())
+      )
+        return violation("TASK51_PUBLIC_STARTUP_TERMINAL_REJECTED");
+      const record = await bindRequest(request);
+      await waitFor(() => record.nativeEvent !== null && navigation !== null);
+      if (
+        authenticationStarted ||
+        firstAuthenticationRequest !== null ||
+        navigationRequestedTimestamp === null ||
+        record.nativeTimestamp > navigationRequestedTimestamp
+      )
+        return violation("TASK51_PUBLIC_STARTUP_TERMINAL_REJECTED");
+      const proof = {
+        sequence: 1,
+        url: record.url,
+        resourceType: record.resourceType,
+        frameId: record.frameId,
+        loaderId: record.loaderId,
+        requestId: record.requestId,
+        requestObservedAt: record.requestObservedAt,
+        terminalObservedAt: record.terminalObservedAt,
+        bodyFailureObservedAt,
+        terminal: bodyReadFailure
+          ? "navigation-body-unavailable"
+          : "navigation-cancelled",
+        httpStatus: bodyReadFailure ? record.httpStatus : null,
+        byteLength: null,
+        contentSha256: null,
+        nativeBodyObserved: false,
+        nativeEvent: record.nativeEvent,
+        nativeErrorText: record.nativeErrorText,
+        canceled: record.canceled,
+        bodyReadFailure,
+      };
+      assertTask51PublicStartupLifecycleReceipt(
+        {
+          schema: "wp3-task51-public-startup-lifecycle-receipt-v1",
+          navigation,
+          exceptionalTerminals: [proof],
+          publicReadTerminals: [],
+          firstAuthenticationRequest: structuredClone(
+            firstAuthenticationRequest
+          ),
+          phaseBoundaries: structuredClone(phaseBoundaries),
+          staticTerminalCounts: {
+            successfulStatic: 0,
+            navigationCancelled: bodyReadFailure ? 0 : 1,
+            navigationBodyUnavailable: bodyReadFailure ? 1 : 0,
+          },
+        },
+        plan
+      );
+      return { proof, navigation: structuredClone(navigation) };
+    },
+    async close() {
+      closed = true;
+      await cdp.detach();
+    },
+  });
+}
+
+// Hold only the single source-bound public top-level navigation. Its own
+// admitted document is excluded; every earlier API/asset still needs its real
+// terminal and body proof before the navigation can invalidate that loader.
+export async function drainTask51PublicStartupNavigation(
+  request,
+  nativeLifecycle,
+  preArm,
+  ledger,
+  terminalTasks,
+  {
+    now = Date.now,
+    pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  } = {}
+) {
+  const deadline = now() + 5000;
+  while (now() < deadline) {
+    const native = nativeLifecycle.navigationDispatchState(request);
+    const prewarm = preArm.snapshot();
+    const network = ledger.snapshot();
+    const held = network.transcript.filter(
+      (entry) =>
+        entry.url === request.url() &&
+        entry.category === "static" &&
+        entry.method === "GET" &&
+        entry.resourceType === "document" &&
+        entry.terminal === null
+    );
+    if (
+      prewarm.mode !== "bootstrap" ||
+      prewarm.authenticationStarted ||
+      prewarm.unexpectedRequestCount !== 0 ||
+      network.armed ||
+      network.failureCount !== 0 ||
+      network.unexpectedRequestCount !== 0 ||
+      network.activeRequestCount < 1 ||
+      held.length !== 1
+    )
+      throw new Error("TASK51_PUBLIC_STARTUP_NAVIGATION_DRAIN_REJECTED");
+    if (
+      prewarm.activeRequestCount === 0 &&
+      network.activeRequestCount === 1 &&
+      terminalTasks.size === 0 &&
+      native.pendingNativeRequestCount === 0
+    )
+      return;
+    await pause(5);
+  }
+  throw new Error("TASK51_PUBLIC_STARTUP_NAVIGATION_DRAIN_TIMEOUT");
 }
 
 export function createTask51FailureSignal(onFail = () => {}) {
@@ -679,6 +1160,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
   const parsedSources = parseTask51StageBExecutionSources(
     readPreflightFile(options.executionSourcesPath, 512 * 1024)
   );
+  assertTask51HeadedWarmEntry(options.warmUrl, parsedSources.value);
   const exceptionRoute =
     parsedSources.value.schema === TASK51_EXCEPTION_EXECUTION_SOURCES_SCHEMA;
   if (
@@ -757,6 +1239,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     currentSources: current !== null,
     staticRequestCounts:
       current?.currentWeb.networkProvenance.staticRequestCounts ?? null,
+    publicStartupLifecycle: current?.prewarm.publicStartupLifecycle ?? null,
   });
   const preArm = createTask51PreArmSupervisor({
     bootstrapReadAllowlist: provenance.bootstrapReadAllowlist,
@@ -801,6 +1284,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     throw new Error("TASK51_BROWSER_RELEASE_BINDING_REJECTED");
   }
   let context;
+  let nativeLifecycle = null;
   let prompt;
   let intentionalLifecycleClose = false;
   let browserClosed = false;
@@ -823,6 +1307,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
 
     // Route and lifecycle guards are installed before the one permitted page.
     let page = null;
+    const publicReadTerminals = [];
     let pageCount = 0;
     let requestSequence = 0;
     let initialDocumentPending = true;
@@ -909,15 +1394,65 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
       if (!owner) return;
       requestOwners.delete(request);
       const task = (async () => {
+        if (owner.kind === "policy-blocked")
+          throw new Error("TASK51_POLICY_BLOCKED_REQUEST_SUCCEEDED");
         const response = await request.response();
         if (!response) throw new Error("TASK51_NETWORK_RESPONSE_MISSING");
         if (owner.kind !== "ledger") {
+          if (owner.publicRead) {
+            const expected = TASK51_STARTUP_PUBLIC_READ_RESPONSES.find(
+              (entry) => entry.url === request.url()
+            );
+            const bytes = await response.body();
+            try {
+              const contentSha256 = createHash("sha256")
+                .update(bytes)
+                .digest("hex");
+              if (
+                !expected ||
+                response.status() !== 200 ||
+                bytes.byteLength !== expected.byteLength ||
+                contentSha256 !== expected.contentSha256 ||
+                publicReadTerminals.some((entry) => entry.url === request.url())
+              )
+                throw new Error("TASK51_PUBLIC_STARTUP_PUBLIC_READ_REJECTED");
+              publicReadTerminals.push({
+                url: request.url(),
+                httpStatus: response.status(),
+                byteLength: bytes.byteLength,
+                contentSha256,
+              });
+            } finally {
+              bytes.fill(0);
+            }
+          }
           preArm.finishRequest(owner.id, { httpStatus: response.status() });
           return;
         }
         let contentSha256 = null;
         if (owner.category === "static") {
-          const responseBytes = await response.body();
+          let responseBytes;
+          try {
+            responseBytes = await response.body();
+          } catch (error) {
+            if (
+              !nativeLifecycle ||
+              !/No resource with given identifier found/.test(
+                String(error?.message)
+              )
+            )
+              throw error;
+            const result = await nativeLifecycle.terminalProof(request, {
+              bodyReadFailure: "NO_RESOURCE_WITH_GIVEN_IDENTIFIER",
+              bodyFailureObservedAt: new Date().toISOString(),
+            });
+            ledger.finishNavigationRequest(
+              owner.id,
+              result.proof,
+              result.navigation
+            );
+            return;
+          }
           try {
             const expected = expectedStaticResponses.get(request.url());
             staticResponseBytes += responseBytes.byteLength;
@@ -954,8 +1489,43 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
       const owner = requestOwners.get(request);
       if (!owner) return;
       requestOwners.delete(request);
-      if (owner.kind === "ledger") ledger.failRequest(owner.id);
-      else preArm.failRequest(owner.id);
+      if (owner.kind === "ledger") {
+        if (
+          !nativeLifecycle ||
+          request.failure()?.errorText !== "net::ERR_ABORTED"
+        ) {
+          ledger.failRequest(owner.id);
+          onViolation("TASK51_NETWORK_REQUEST_FAILED");
+        } else {
+          const task = nativeLifecycle
+            .terminalProof(request)
+            .then((result) =>
+              ledger.finishNavigationRequest(
+                owner.id,
+                result.proof,
+                result.navigation
+              )
+            )
+            .catch(() => {
+              ledger.failRequest(owner.id);
+              onViolation("TASK51_PUBLIC_STARTUP_TERMINAL_REJECTED");
+            })
+            .finally(() => terminalTasks.delete(task));
+          terminalTasks.add(task);
+        }
+      } else if (owner.kind === "policy-blocked") {
+        const failure = request.failure();
+        const failureText =
+          typeof failure === "string" ? failure : failure?.errorText;
+        if (
+          !isTask51PolicyBlockedNativeFailure(
+            failureText,
+            nativeLifecycle !== null
+          )
+        )
+          onViolation("TASK51_DECORATION_ABORT_TERMINAL_REJECTED");
+        else preArm.finishPolicyBlocked(owner.id);
+      } else preArm.failRequest(owner.id);
     });
     await context.route("**/*", async (route) => {
       const request = route.request();
@@ -995,13 +1565,49 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
       const id = `request-${requestSequence}`;
       let descriptor;
       try {
-        descriptor = await createTask51SafeRequestDescriptor(request, id);
+        descriptor = await createTask51SafeRequestDescriptor(
+          request,
+          id,
+          current?.prewarm?.publicDecorationDenials
+        );
       } catch {
         onViolation("TASK51_SAFE_CORS_METADATA_READ_REJECTED");
         await route.abort("blockedbyclient");
         return;
       }
       const strict = preArm.snapshot().mode === "strict";
+      const authenticationRequest =
+        current &&
+        (request.url() === current.prewarm.loginUrl ||
+          request.url() === current.prewarm.sso?.refreshUrl ||
+          request.url() === current.prewarm.oidc?.tokenUrl ||
+          (current.prewarm.oidc &&
+            new URL(request.url()).origin + new URL(request.url()).pathname ===
+              current.prewarm.oidc.authorizeUrl));
+      if (
+        nativeLifecycle &&
+        authenticationRequest &&
+        !nativeLifecycle.authenticationStarted()
+      ) {
+        try {
+          await nativeLifecycle.noteAuthenticationStarted(descriptor);
+        } catch {
+          onViolation("TASK51_PUBLIC_STARTUP_AUTH_BOUNDARY_REJECTED");
+          await route.abort("blockedbyclient");
+          return;
+        }
+        if (
+          ledger.snapshot().activeRequestCount !== 0 ||
+          ledger.snapshot().failureCount !== 0 ||
+          ledger.snapshot().unexpectedRequestCount !== 0 ||
+          terminalTasks.size !== 0 ||
+          nativeLifecycle.pendingRequestCount() !== 0
+        ) {
+          onViolation("TASK51_PUBLIC_STARTUP_AUTH_NOT_QUIET");
+          await route.abort("blockedbyclient");
+          return;
+        }
+      }
       const preArmDecision = strict ? null : preArm.beginRequest(descriptor);
       let decision = preArmDecision;
       let ownerKind = "prearm";
@@ -1009,20 +1615,74 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
         decision = ledger.beginRequest(descriptor);
         ownerKind = "ledger";
       }
+      if (decision?.policyBlocked === true) {
+        requestOwners.set(request, {
+          category: "public-decoration",
+          id,
+          kind: "policy-blocked",
+        });
+        await route.abort("blockedbyclient");
+        return;
+      }
       if (!decision?.allowed) {
         await route.abort("blockedbyclient");
         return;
+      }
+      if (nativeLifecycle && decision.category === "static") {
+        try {
+          await nativeLifecycle.bindRequest(request);
+        } catch {
+          onViolation("TASK51_PUBLIC_STARTUP_NATIVE_REQUEST_REJECTED");
+          await route.abort("blockedbyclient");
+          return;
+        }
       }
       requestOwners.set(request, {
         category: decision.category,
         id,
         kind: ownerKind,
+        ...(nativeLifecycle &&
+        current.prewarm.bootstrapReads.some(
+          (entry) =>
+            entry.url === request.url() && entry.phase === "before-login-public"
+        ) &&
+        !nativeLifecycle.authenticationStarted()
+          ? { publicRead: true }
+          : {}),
       });
       if (resourceType === "document") admittedDocumentUrls.add(request.url());
+      if (
+        nativeLifecycle &&
+        !current.prewarm.publicStartupLifecycle.stableEntry &&
+        resourceType === "document" &&
+        request.url() ===
+          current.prewarm.publicStartupLifecycle.navigation.toDocumentUrl
+      ) {
+        try {
+          await drainTask51PublicStartupNavigation(
+            request,
+            nativeLifecycle,
+            preArm,
+            ledger,
+            terminalTasks
+          );
+        } catch {
+          onViolation("TASK51_PUBLIC_STARTUP_NAVIGATION_NOT_QUIET");
+          await route.abort("blockedbyclient");
+          return;
+        }
+      }
       await route.continue();
     });
 
     page = await context.newPage();
+    if (current?.prewarm.publicStartupLifecycle)
+      nativeLifecycle = await installTask51PublicStartupLifecycleNative(
+        page,
+        current.prewarm.publicStartupLifecycle,
+        onViolation,
+        current.prewarm
+      );
     page.on("close", () => {
       if (intentionalLifecycleClose) return;
       failAttestor("TASK51_PAGE_CLOSED");
@@ -1067,6 +1727,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
     await pushTask51RunnerThroughVueRouter(page, failureSignal);
     await waitForBrowserIdle(preArm, ledger, failureSignal);
     preArm.enterQuiet(Date.now());
+    nativeLifecycle?.noteQuietStarted();
     stdout.write(
       `Runner loaded. Enforcing ${TASK51_AUTH_QUIET_MS / 60_000} minutes of API-silent auth quiet before consuming Stage B.\n`
     );
@@ -1074,7 +1735,13 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
       new Promise((resolve) => setTimeout(resolve, TASK51_AUTH_QUIET_MS))
     );
     preArm.assertReadyToClaim(Date.now());
-    if (ledger.snapshot().activeRequestCount !== 0) {
+    if (
+      ledger.snapshot().activeRequestCount !== 0 ||
+      ledger.snapshot().failureCount !== 0 ||
+      ledger.snapshot().unexpectedRequestCount !== 0 ||
+      terminalTasks.size !== 0 ||
+      nativeLifecycle?.pendingRequestCount() > 0
+    ) {
       throw new Error("TASK51_PREARM_CLAIM_GATE_REJECTED");
     }
     if (!isTask51RunnerPageUrl(page.url())) {
@@ -1101,6 +1768,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
       throw new Error("TASK51_NETWORK_RUNNER_NAVIGATION_MISMATCH");
     }
     ledger.arm(page.url());
+    nativeLifecycle?.noteStrictStarted();
     const strictDeadlineMs = Math.min(
       Date.parse(claim.claimedAt) + TASK51_STRICT_WINDOW_TIMEOUT_MS,
       Date.parse(preparedStageB.stageB.expiresAt) - 15_000
@@ -1196,6 +1864,26 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
           ? {
               executionSourcesSha256: executionSources.sha256,
               staticRequestCounts: provenance.staticRequestCounts,
+              ...(current.prewarm.publicStartupLifecycle
+                ? {
+                    publicStartupLifecyclePlan:
+                      current.prewarm.publicStartupLifecycle,
+                    publicStartupLifecycle: {
+                      ...ledger.publicStartupLifecycleSnapshot(),
+                      navigation: nativeLifecycle.navigation(),
+                      publicReadTerminals: structuredClone(publicReadTerminals),
+                      phaseBoundaries: nativeLifecycle.phaseBoundaries(),
+                      firstAuthenticationRequest:
+                        nativeLifecycle.firstAuthenticationRequest(),
+                    },
+                  }
+                : {}),
+              ...(current.prewarm.publicDecorationDenials !== undefined
+                ? {
+                    publicDecorationDenials:
+                      preArm.snapshot().publicDecorationDenials,
+                  }
+                : {}),
             }
           : {}),
         attestor: current
@@ -1241,6 +1929,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
   } finally {
     clearTimeout(preClaimTimeout);
     prompt?.close();
+    await nativeLifecycle?.close().catch(() => {});
     await context?.close().catch(() => {});
     if (!browserClosed) await browser.close().catch(() => {});
   }

@@ -12,6 +12,10 @@ import { basename, dirname, join } from "node:path";
 import {
   TASK51_AUTHENTICATED_READ_CORS_NAMES,
   TASK51_BOOTSTRAP_READ_ALLOWLIST,
+  assertTask51PublicStartupLifecyclePlan,
+  TASK51_OPTIONAL_PUBLIC_READ_URLS,
+  TASK51_CURRENT_STABLE_ENTRY_URL,
+  TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS,
 } from "./task51-network-attestor-ledger.mjs";
 
 export const TASK51_STAGE_B_CLAIM_URL =
@@ -22,6 +26,10 @@ export const TASK51_RUNNER_URL =
   "https://d.xrugc.com/internal/task51/memory-isolated-runner";
 export const TASK51_AUTH_QUIET_MS = 16 * 60 * 1_000;
 export const TASK51_STRICT_WINDOW_TIMEOUT_MS = 30 * 60 * 1_000;
+export const TASK51_OPTIONAL_NEWS_URLS = Object.freeze([
+  "https://blog.xrugc.com/index.php?per_page=100&hide_empty=false&rest_route=%2Fwp%2Fv2%2Fcategories",
+  "https://blog.xrugc.com/index.php?_embed=wp:featuredmedia,wp:term&per_page=10&page=1&rest_route=%2Fwp%2Fv2%2Fposts",
+]);
 
 const STAGE_B_MAX_BYTES = 16 * 1_024;
 const CLAIM_RECEIPT_MAX_BYTES = 8 * 1_024;
@@ -1163,6 +1171,11 @@ export function assertTask51PrewarmContract(contract) {
   const fail = () => {
     throw new Error("TASK51_PREWARM_CONTRACT_REJECTED");
   };
+  const stableEntry = contract?.publicStartupLifecycle?.stableEntry ?? null;
+  const optionalPublicReadUrls = [
+    ...TASK51_OPTIONAL_PUBLIC_READ_URLS,
+    ...(stableEntry ? TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS : []),
+  ];
   if (
     !hasExactKeys(contract, [
       "warmUrl",
@@ -1172,8 +1185,15 @@ export function assertTask51PrewarmContract(contract) {
       "bootstrapReads",
       "transitionUserInfoUrl",
       ...(Object.hasOwn(contract ?? {}, "sso") ? ["sso"] : []),
+      ...(Object.hasOwn(contract ?? {}, "publicDecorationDenials")
+        ? ["publicDecorationDenials"]
+        : []),
+      ...(Object.hasOwn(contract ?? {}, "publicStartupLifecycle")
+        ? ["publicStartupLifecycle"]
+        : []),
     ]) ||
-    contract.warmUrl !== TASK51_WARM_URL ||
+    contract.warmUrl !==
+      (stableEntry ? TASK51_CURRENT_STABLE_ENTRY_URL : TASK51_WARM_URL) ||
     !Array.isArray(contract.documentUrls) ||
     contract.documentUrls.length < 1 ||
     contract.documentUrls.length > 8 ||
@@ -1205,7 +1225,7 @@ export function assertTask51PrewarmContract(contract) {
             entry.url !==
               `${TASK51_PRODUCTION_ORIGIN}/api/v1/system/deployment` ||
             entry.phase !== "before-login-public" ||
-            entry.minimumCount !== 1 ||
+            entry.minimumCount !== (stableEntry ? 0 : 1) ||
             entry.maximumCount !== 1 ||
             !contract.sso ||
             contract.oidc !== null)) ||
@@ -1214,6 +1234,12 @@ export function assertTask51PrewarmContract(contract) {
             entry.phase
           )) ||
         (entry.phase === "before-login-public" &&
+          !(
+            contract.publicStartupLifecycle &&
+            optionalPublicReadUrls.includes(entry.url) &&
+            entry.minimumCount === 0 &&
+            entry.maximumCount === 1
+          ) &&
           (entry.minimumCount < 1 ||
             entry.minimumCount !== entry.maximumCount)) ||
         !exactPublicUrl(entry.url) ||
@@ -1234,9 +1260,70 @@ export function assertTask51PrewarmContract(contract) {
       (sum, entry) =>
         sum + entry.maximumCount + (entry.ssoCallbackPublicReadCount ?? 0),
       0
-    ) > 128
+    ) > 128 ||
+    (contract.publicDecorationDenials !== undefined &&
+      (!Array.isArray(contract.publicDecorationDenials) ||
+        contract.publicDecorationDenials.length !==
+          TASK51_OPTIONAL_NEWS_URLS.length ||
+        contract.publicDecorationDenials.some(
+          (entry, index) =>
+            !hasExactKeys(entry, [
+              "url",
+              "homepageUrl",
+              "scriptUrl",
+              "anonymousFailure",
+              "ownerDecision",
+            ]) ||
+            entry.url !== TASK51_OPTIONAL_NEWS_URLS[index] ||
+            !exactPublicUrl(entry.homepageUrl) ||
+            !exactPublicUrl(entry.scriptUrl) ||
+            ![entry.anonymousFailure, entry.ownerDecision].every(
+              (binding) =>
+                hasExactKeys(binding, ["evidenceRef", "evidenceSha256"]) &&
+                /^reports\/[A-Za-z0-9._/-]+\.json$/.test(binding.evidenceRef) &&
+                !binding.evidenceRef.split("/").includes("..") &&
+                SHA256_PATTERN.test(binding.evidenceSha256)
+            ) ||
+            entry.anonymousFailure.evidenceRef ===
+              entry.ownerDecision.evidenceRef ||
+            entry.anonymousFailure.evidenceSha256 ===
+              entry.ownerDecision.evidenceSha256
+        )))
   )
     fail();
+  if (contract.publicStartupLifecycle !== undefined) {
+    assertTask51PublicStartupLifecyclePlan(contract.publicStartupLifecycle);
+    if (
+      contract.publicStartupLifecycle.optionalPublicReadUrls.some(
+        (url) =>
+          !contract.bootstrapReads.some(
+            (entry) =>
+              entry.url === url &&
+              entry.phase === "before-login-public" &&
+              entry.minimumCount === 0 &&
+              entry.maximumCount === 1
+          )
+      ) ||
+      contract.bootstrapReads.some(
+        (entry) =>
+          entry.phase === "before-login-public" &&
+          !optionalPublicReadUrls.includes(entry.url) &&
+          (entry.minimumCount !== 1 || entry.maximumCount !== 1)
+      ) ||
+      (stableEntry &&
+        TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS.some(
+          (url) =>
+            !contract.bootstrapReads.some(
+              (entry) =>
+                entry.url === url &&
+                entry.phase === "before-login-public" &&
+                entry.minimumCount === 0 &&
+                entry.maximumCount === 1
+            )
+        ))
+    )
+      fail();
+  }
   if (contract.sso !== undefined && contract.sso !== null) {
     const sso = contract.sso;
     if (
@@ -1284,6 +1371,12 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
   assertTask51PrewarmContract(contract);
   const statics = new Set(staticUrls);
   const active = new Map();
+  const decorationDenials = new Map(
+    (contract.publicDecorationDenials ?? []).map(({ url }) => [
+      url,
+      { count: 0, terminalCount: 0 },
+    ])
+  );
   const reads = new Map(
     contract.bootstrapReads.map((entry) => [
       entry.url,
@@ -1303,7 +1396,11 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
     [...reads.values()].every(
       (entry) =>
         entry.ssoCallbackPublicReadCount !== 1 ||
-        entry.initialSucceededCount === 1
+        (contract.publicStartupLifecycle?.stableEntry
+          ? entry.initialSucceededCount === entry.count &&
+            entry.count >= entry.minimumCount &&
+            entry.count <= entry.maximumCount
+          : entry.initialSucceededCount === 1)
     );
   const callbackPublicReadsComplete = () =>
     [...reads.values()].every(
@@ -1313,6 +1410,7 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
     );
   const options = new Map();
   let mode = "bootstrap";
+  let authenticationStarted = false;
   let loginCount = 0;
   let authorizeCount = 0;
   let tokenCount = 0;
@@ -1392,6 +1490,10 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
         "redirected",
         "resourceType",
         "url",
+        ...(decorationDenials.has(descriptor?.url) &&
+        Object.hasOwn(descriptor ?? {}, "sourceOrigin")
+          ? ["sourceOrigin"]
+          : []),
       ]) ||
       ["id", "method", "resourceType", "url"].some(
         (key) => typeof descriptor[key] !== "string" || !descriptor[key]
@@ -1422,6 +1524,31 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
         ssoDocumentCount++;
       }
       return Object.freeze({ allowed: true, category: "static" });
+    }
+    if (decorationDenials.has(descriptor.url)) {
+      const record = decorationDenials.get(descriptor.url);
+      if (
+        descriptor.sourceOrigin !== "https://xrugc.com" ||
+        method !== "GET" ||
+        !["fetch", "xhr"].includes(resource) ||
+        descriptor.corsRequestHeaderNames !== null ||
+        descriptor.corsRequestMethod !== null ||
+        mode !== "bootstrap" ||
+        authenticationStarted ||
+        record.count !== 0 ||
+        unexpectedRequestCount !== 0
+      )
+        return violate("TASK51_PREARM_DECORATION_REJECTED");
+      record.count++;
+      active.set(descriptor.id, {
+        kind: "policy-blocked-decoration",
+        readUrl: descriptor.url,
+      });
+      return Object.freeze({
+        allowed: false,
+        category: "public-decoration",
+        policyBlocked: true,
+      });
     }
     if (
       !(
@@ -1462,7 +1589,15 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
           [...reads.values()].some(
             (entry) =>
               entry.phase === "before-login-public" &&
-              entry.count !== entry.minimumCount
+              (contract.publicStartupLifecycle &&
+              (TASK51_OPTIONAL_PUBLIC_READ_URLS.includes(entry.url) ||
+                (contract.publicStartupLifecycle.stableEntry &&
+                  TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS.includes(
+                    entry.url
+                  )))
+                ? entry.count < entry.minimumCount ||
+                  entry.count > entry.maximumCount
+                : entry.count !== entry.minimumCount)
           ))) ||
       (kind === "authorize" &&
         (loginCount !== 1 || authorizeCount !== 0 || active.size !== 0)) ||
@@ -1519,9 +1654,13 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
         : 1;
       if (names !== expected || count >= limit)
         return violate("TASK51_PREARM_REQUEST_REJECTED");
+      if (["login", "authorize", "token", "sso-refresh"].includes(kind))
+        authenticationStarted = true;
       options.set(url.href, count + 1);
       active.set(descriptor.id, { kind: "options" });
     } else {
+      if (["login", "authorize", "token", "sso-refresh"].includes(kind))
+        authenticationStarted = true;
       if (kind === "login") loginCount++;
       if (kind === "authorize") authorizeCount++;
       if (kind === "token") tokenCount++;
@@ -1542,6 +1681,8 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
     const record = active.get(id);
     if (!record) return violate("TASK51_PREARM_TERMINAL_REJECTED");
     active.delete(id);
+    if (record.kind === "policy-blocked-decoration")
+      return violate("TASK51_PREARM_DECORATION_TERMINAL_REJECTED");
     const statuses =
       record.kind === "options"
         ? [200, 204]
@@ -1559,9 +1700,18 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
       reads.get(record.readUrl).initialSucceededCount++;
     return Object.freeze({ allowed: true, category: "prearm" });
   }
+  function finishPolicyBlocked(id) {
+    const record = active.get(id);
+    if (record?.kind !== "policy-blocked-decoration")
+      return violate("TASK51_PREARM_DECORATION_TERMINAL_REJECTED");
+    active.delete(id);
+    decorationDenials.get(record.readUrl).terminalCount++;
+    return Object.freeze({ allowed: true, category: "public-decoration" });
+  }
   return Object.freeze({
     beginRequest,
     finishRequest,
+    finishPolicyBlocked,
     failRequest: (id) => {
       active.delete(id);
       return violate("TASK51_PREARM_FAILURE_REJECTED");
@@ -1609,6 +1759,7 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
         unexpectedRequestCount,
         quietStartedAt,
         bootstrapLoginPostCount: loginCount,
+        ...(contract.publicStartupLifecycle ? { authenticationStarted } : {}),
         ...(contract.sso
           ? {
               ssoCallbackDocumentCount: ssoDocumentCount,
@@ -1619,6 +1770,17 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
           (sum, entry) => sum + entry.count + entry.ssoCallbackCount,
           0
         ),
+        ...(contract.publicDecorationDenials !== undefined
+          ? {
+              publicDecorationDenials: contract.publicDecorationDenials.map(
+                ({ url }) => ({
+                  url,
+                  count: decorationDenials.get(url).count,
+                  terminalCount: decorationDenials.get(url).terminalCount,
+                })
+              ),
+            }
+          : {}),
         ...([...reads.values()].some(
           (entry) => entry.ssoCallbackPublicReadCount === 1
         )
