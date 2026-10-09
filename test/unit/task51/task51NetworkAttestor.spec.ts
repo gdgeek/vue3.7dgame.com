@@ -18,6 +18,13 @@ import {
   TASK51_CURRENT_STABLE_ENTRY_URL,
   TASK51_CURRENT_STABLE_ENTRY_RESPONSE,
   TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS,
+  TASK51_FINITE_PUBLIC_SOURCE_CLOSURE_REQUEST_SHA256,
+  TASK51_FINITE_PUBLIC_SOURCE_OWNER_DECISION,
+  TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS,
+  TASK51_FINITE_PUBLIC_READ_RESPONSES,
+  assertTask51BlockedOptionalPublicReads,
+  assertTask51BlockedOptionalPublicReadTerminals,
+  task51PublicReadResponseIdentities,
   assertTask51PublicStartupLifecyclePlan,
   assertTask51PublicStartupLifecycleReceipt,
   createTask51NetworkLedger,
@@ -360,6 +367,241 @@ function stableEntryPlan() {
     },
   };
 }
+
+function finiteBlockedPolicy() {
+  return structuredClone({
+    schema: "wp3-task51-blocked-optional-public-reads-finite-v1",
+    approvalRequestSha256: TASK51_FINITE_PUBLIC_SOURCE_CLOSURE_REQUEST_SHA256,
+    ownerDecision: TASK51_FINITE_PUBLIC_SOURCE_OWNER_DECISION,
+    entries: TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS,
+  });
+}
+function finiteContract() {
+  const blockedOptionalPublicReads = finiteBlockedPolicy();
+  const plan = {
+    ...stableEntryPlan(),
+    optionalPublicReadUrls: [TASK51_FINITE_PUBLIC_READ_RESPONSES[0].url],
+    blockedOptionalPublicReads,
+  };
+  const base = executionSourcesFixture().prewarm;
+  return {
+    ...base,
+    warmUrl: TASK51_CURRENT_STABLE_ENTRY_URL,
+    documentUrls: [
+      TASK51_CURRENT_STABLE_ENTRY_URL,
+      ROOT_URL,
+      "https://d.xrugc.com/sso",
+    ],
+    publicStartupLifecycle: plan,
+    blockedOptionalPublicReads,
+    oidc: null,
+    sso: {
+      callbackDocumentUrl: "https://d.xrugc.com/sso",
+      refreshUrl: "https://d.xrugc.com/api-auth/v1/auth/refresh",
+    },
+    bootstrapReads: [
+      ...TASK51_FINITE_PUBLIC_READ_RESPONSES.map(({ url }, index) => ({
+        url,
+        minimumCount: 0,
+        maximumCount: 1,
+        phase: "before-login-public",
+        ...(index === 1 ? { ssoCallbackPublicReadCount: 1 } : {}),
+      })),
+      ...base.bootstrapReads,
+    ],
+  };
+}
+function finiteNativeProof() {
+  return {
+    sequence: 1,
+    url: TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS[0].url,
+    method: "GET",
+    resourceType: "fetch",
+    frameId: "main-frame",
+    loaderId: "main-loader",
+    documentUrl: TASK51_CURRENT_STABLE_ENTRY_URL,
+    requestId: "network-1",
+    fetchRequestId: "fetch-1",
+    requestObservedAt: "2026-10-08T14:00:00.000Z",
+    interceptionObservedAt: "2026-10-08T14:00:00.001Z",
+    terminalObservedAt: "2026-10-08T14:00:00.002Z",
+    origin: "https://xrugc.com",
+    interceptStage: "Request",
+    interceptMethod: "Fetch.failRequest",
+    interceptErrorReason: "BlockedByClient",
+    remoteDispatched: false,
+    httpStatus: null,
+    byteLength: null,
+    contentSha256: null,
+    nativeEvent: "loadingFailed",
+    nativeErrorText: "net::ERR_BLOCKED_BY_CLIENT",
+    canceled: false,
+  };
+}
+
+describe("Task 5.1 finite source closure (offline only)", () => {
+  it("preserves the legacy five identities and binds exactly two current identities to the separate policy", () => {
+    const contract = finiteContract();
+    expect(supervisorModule.assertTask51PrewarmContract(contract)).toBe(true);
+    expect(
+      assertTask51PublicStartupLifecyclePlan(contract.publicStartupLifecycle)
+    ).toBe(true);
+    expect(task51PublicReadResponseIdentities()).toEqual(
+      TASK51_PUBLIC_STARTUP_READ_IDENTITIES
+    );
+    expect(task51PublicReadResponseIdentities(contract)).toEqual(
+      TASK51_FINITE_PUBLIC_READ_RESPONSES
+    );
+    expect(() =>
+      task51PublicReadResponseIdentities("item5-finite-public-source-closure")
+    ).toThrow();
+    expect(() =>
+      supervisorModule.assertTask51PrewarmContract({
+        ...contract,
+        blockedOptionalPublicReads: undefined,
+      })
+    ).toThrow();
+  });
+  it.each(["owner", "request", "url", "status", "body", "location", "extra"])(
+    "rejects policy %s drift",
+    (fault) => {
+      const policy: any = finiteBlockedPolicy();
+      if (fault === "owner")
+        policy.ownerDecision.evidenceSha256 = "0".repeat(64);
+      if (fault === "request") policy.approvalRequestSha256 = "0".repeat(64);
+      if (fault === "url") policy.entries[0].url += "&unexpected=1";
+      if (fault === "status") policy.entries[0].status = 200;
+      if (fault === "body") policy.entries[0].bodyRead = true;
+      if (fault === "location") policy.entries[0].locationRead = true;
+      if (fault === "extra") policy.extra = false;
+      expect(() => assertTask51BlockedOptionalPublicReads(policy)).toThrow();
+    }
+  );
+  it.each([
+    "method",
+    "origin",
+    "stage",
+    "event",
+    "status",
+    "body",
+    "time",
+    "duplicate",
+  ])("rejects native %s proof drift", (fault) => {
+    const proof: any = finiteNativeProof();
+    if (fault === "method") proof.method = "OPTIONS";
+    if (fault === "origin") proof.origin = null;
+    if (fault === "stage") proof.interceptStage = "Response";
+    if (fault === "event") proof.nativeEvent = "loadingFinished";
+    if (fault === "status") proof.httpStatus = 301;
+    if (fault === "body") proof.byteLength = 0;
+    if (fault === "time") proof.terminalObservedAt = proof.requestObservedAt;
+    expect(() =>
+      assertTask51BlockedOptionalPublicReadTerminals(
+        fault === "duplicate" ? [proof, proof] : [proof],
+        finiteContract().publicStartupLifecycle
+      )
+    ).toThrow();
+  });
+  it("keeps blocked proof optional but rejects old news response identities in the finite receipt", () => {
+    const plan = finiteContract().publicStartupLifecycle;
+    const receipt: any = {
+      ...startupSummary(),
+      blockedOptionalPublicReadTerminals: [finiteNativeProof()],
+      publicReadTerminals: TASK51_FINITE_PUBLIC_READ_RESPONSES.map((read) => ({
+        ...read,
+        httpStatus: 200,
+      })),
+    };
+    expect(assertTask51PublicStartupLifecycleReceipt(receipt, plan)).toBe(true);
+    receipt.blockedOptionalPublicReadTerminals = [];
+    expect(assertTask51PublicStartupLifecycleReceipt(receipt, plan)).toBe(true);
+    receipt.publicReadTerminals.push({
+      ...TASK51_PUBLIC_STARTUP_READ_IDENTITIES[1],
+      httpStatus: 200,
+    });
+    expect(() =>
+      assertTask51PublicStartupLifecycleReceipt(receipt, plan)
+    ).toThrow();
+  });
+  it("request-stage native failRequest requires the genuine loadingFailed before supervisor completion", async () => {
+    const contract = finiteContract();
+    const supervisor = supervisorModule.createTask51PreArmSupervisor({
+      prewarmContract: contract,
+      staticUrls: contract.publicStartupLifecycle.staticRequestBounds.map(
+        ({ url }) => url
+      ),
+    });
+    const events = new Map<string, (event: any) => void>();
+    const cdp = {
+      on: (name: string, callback: (event: any) => void) =>
+        events.set(name, callback),
+      send: vi.fn(async () => {}),
+      detach: vi.fn(async () => {}),
+    };
+    const onViolation = vi.fn();
+    const native = await installTask51PublicStartupLifecycleNative(
+      { context: () => ({ newCDPSession: async () => cdp }) },
+      contract.publicStartupLifecycle,
+      onViolation,
+      contract,
+      supervisor
+    );
+    const url = TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS[0].url;
+    const wallTime = Date.now() / 1000;
+    events.get("Page.frameNavigated")!({
+      frame: {
+        id: "main-frame",
+        loaderId: "main-loader",
+        url: TASK51_CURRENT_STABLE_ENTRY_URL,
+      },
+    });
+    events.get("Network.requestWillBeSent")!({
+      requestId: "network-1",
+      frameId: "main-frame",
+      loaderId: "main-loader",
+      documentURL: TASK51_CURRENT_STABLE_ENTRY_URL,
+      type: "Fetch",
+      timestamp: 10,
+      wallTime,
+      request: { url, method: "GET", headers: { Origin: "https://xrugc.com" } },
+    });
+    events.get("Fetch.requestPaused")!({
+      requestId: "fetch-1",
+      networkId: "network-1",
+      frameId: "main-frame",
+      resourceType: "Fetch",
+      request: { url, method: "GET", headers: { Origin: "https://xrugc.com" } },
+    });
+    await vi.waitFor(() =>
+      expect(cdp.send).toHaveBeenCalledWith("Fetch.failRequest", {
+        requestId: "fetch-1",
+        errorReason: "BlockedByClient",
+      })
+    );
+    expect(native.blockedOptionalPublicReadTerminals()).toEqual([]);
+    expect(supervisor.snapshot().activeRequestCount).toBe(1);
+    events.get("Network.loadingFailed")!({
+      requestId: "network-1",
+      timestamp: 10.1,
+      errorText: "net::ERR_BLOCKED_BY_CLIENT",
+      canceled: false,
+    });
+    await vi.waitFor(() => expect(native.pendingRequestCount()).toBe(0));
+    expect(supervisor.snapshot().activeRequestCount).toBe(0);
+    expect(native.blockedOptionalPublicReadTerminals()).toHaveLength(1);
+    expect(onViolation).not.toHaveBeenCalled();
+    expect(
+      cdp.send.mock.calls.some(([name]) =>
+        [
+          "Fetch.continueRequest",
+          "Fetch.fulfillRequest",
+          "Network.getResponseBody",
+        ].includes(name)
+      )
+    ).toBe(false);
+    await native.close();
+  });
+});
 
 describe("Task 5.1 independently approved current stable entry (offline only)", () => {
   function contractFixture() {

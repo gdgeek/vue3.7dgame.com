@@ -24,7 +24,8 @@ import {
   isTask51RunnerPageUrl,
   assertTask51PublicStartupLifecyclePlan,
   assertTask51PublicStartupLifecycleReceipt,
-  TASK51_STARTUP_PUBLIC_READ_RESPONSES,
+  task51PublicReadResponseIdentities,
+  assertTask51BlockedOptionalPublicReadTerminals,
   assertTask51CurrentStableEntry,
   TASK51_CURRENT_STABLE_ENTRY_URL,
 } from "./task51-network-attestor-ledger.mjs";
@@ -483,7 +484,8 @@ export async function installTask51PublicStartupLifecycleNative(
   page,
   plan,
   onViolation = () => {},
-  prewarmContract = null
+  prewarmContract = null,
+  preArm = null
 ) {
   assertTask51PublicStartupLifecyclePlan(plan);
   if (prewarmContract !== null) assertTask51PrewarmContract(prewarmContract);
@@ -504,6 +506,10 @@ export async function installTask51PublicStartupLifecycleNative(
   const now = () => new Date().toISOString();
   const assets = new Set(plan.navigationAssets.map((entry) => entry.url));
   const permitted = new Set(plan.staticRequestBounds.map((entry) => entry.url));
+  const blockedUrls = new Set((plan.blockedOptionalPublicReads?.entries ?? []).map(({ url }) => url));
+  const blockedTerminals = [], blockedTasks = new Set(), blockedFetchIds = new Set();
+  let blockedSequence = 0;
+  if (blockedUrls.size && !preArm) throw new Error("TASK51_BLOCKED_OPTIONAL_NATIVE_SUPERVISOR_MISSING");
   const violation = (code) => {
     onViolation(code);
     throw new Error(code);
@@ -576,7 +582,7 @@ export async function installTask51PublicStartupLifecycleNative(
       phaseBoundaries.authenticationStartedAt =
         firstAuthenticationRequest.requestObservedAt;
     }
-    if (!permitted.has(event.request.url)) return;
+    if (!permitted.has(event.request.url) && !blockedUrls.has(event.request.url)) return;
     const requestObservedAt = nativeRequestTime(event);
     if (requestObservedAt === null) return;
     if (records.has(event.requestId) || event.redirectResponse) {
@@ -599,11 +605,15 @@ export async function installTask51PublicStartupLifecycleNative(
       nativeErrorText: null,
       canceled: null,
       claimed: false,
+      ...(blockedUrls.has(event.request.url) ? { documentUrl: event.documentURL, origin: Object.entries(event.request.headers ?? {}).find(([key]) => key.toLowerCase() === "origin")?.[1] ?? null, blockedProof: null } : {}),
     });
   });
   cdp.on("Network.responseReceived", (event) => {
     const record = records.get(event.requestId);
-    if (record) record.httpStatus = event.response.status;
+    if (record) {
+      record.httpStatus = event.response.status;
+      if (blockedUrls.has(record.url)) onViolation("TASK51_BLOCKED_OPTIONAL_REMOTE_RESPONSE_REJECTED");
+    }
   });
   cdp.on("Network.loadingFinished", (event) => {
     const record = records.get(event.requestId);
@@ -616,6 +626,7 @@ export async function installTask51PublicStartupLifecycleNative(
       if (terminalObservedAt === null) return;
       record.nativeEvent = "loadingFinished";
       record.terminalObservedAt = terminalObservedAt;
+      if (blockedUrls.has(record.url)) onViolation("TASK51_BLOCKED_OPTIONAL_NATIVE_SUCCESS_REJECTED");
     }
   });
   cdp.on("Network.loadingFailed", (event) => {
@@ -632,6 +643,15 @@ export async function installTask51PublicStartupLifecycleNative(
       record.nativeErrorText = event.errorText;
       record.canceled =
         typeof event.canceled === "boolean" ? event.canceled : null;
+      if (record.blockedProof) {
+        const proof = { ...record.blockedProof, terminalObservedAt, nativeEvent: "loadingFailed", nativeErrorText: record.nativeErrorText, canceled: record.canceled };
+        try {
+          assertTask51BlockedOptionalPublicReadTerminals([...blockedTerminals, proof], plan, phaseBoundaries);
+          const decision = preArm.finishBlockedOptionalPublicRead(record.requestId, proof);
+          if (!decision.allowed) return;
+          blockedTerminals.push(proof);
+        } catch { onViolation("TASK51_BLOCKED_OPTIONAL_NATIVE_TERMINAL_REJECTED"); }
+      }
     }
   });
   cdp.on("Page.frameNavigated", (event) => {
@@ -706,6 +726,33 @@ export async function installTask51PublicStartupLifecycleNative(
     owners.set(request, record);
     return record;
   }
+  if (blockedUrls.size) {
+    cdp.on("Fetch.requestPaused", (event) => {
+      const task = (async () => {
+        let admitted = false;
+        try {
+          if (!blockedUrls.has(event.request.url) || blockedFetchIds.has(event.requestId) || event.responseStatusCode !== undefined || event.responseErrorReason !== undefined) throw new Error("TASK51_BLOCKED_OPTIONAL_NATIVE_PAUSE_REJECTED");
+          blockedFetchIds.add(event.requestId);
+          const record = await waitFor(() => records.get(event.networkId));
+          const origin = Object.entries(event.request.headers ?? {}).find(([key]) => key.toLowerCase() === "origin")?.[1] ?? null;
+          if (authenticationStarted || firstAuthenticationRequest !== null || phaseBoundaries.quietStartedAt !== null || phaseBoundaries.strictStartedAt !== null || record.claimed || record.nativeEvent !== null || !document || ![plan.navigation.fromDocumentUrl, plan.navigation.toDocumentUrl].includes(document.url) || record.frameId !== document.frameId || record.loaderId !== document.loaderId || record.documentUrl !== document.url || event.frameId !== record.frameId || event.request.url !== record.url || event.request.method !== record.method || event.resourceType.toLowerCase() !== record.resourceType || origin !== record.origin) throw new Error("TASK51_BLOCKED_OPTIONAL_NATIVE_OWNER_REJECTED");
+          const decision = preArm.beginRequest({ id: record.requestId, url: record.url, method: record.method, resourceType: record.resourceType, redirected: false, corsRequestHeaderNames: null, corsRequestMethod: null, origin, frameId: record.frameId, loaderId: record.loaderId, documentUrl: record.documentUrl });
+          if (!decision.policyBlocked) throw new Error("TASK51_BLOCKED_OPTIONAL_NATIVE_POLICY_REJECTED");
+          record.claimed = true;
+          record.blockedProof = { sequence: ++blockedSequence, url: record.url, method: record.method, resourceType: record.resourceType, frameId: record.frameId, loaderId: record.loaderId, documentUrl: record.documentUrl, requestId: record.requestId, fetchRequestId: event.requestId, requestObservedAt: record.requestObservedAt, interceptionObservedAt: now(), terminalObservedAt: null, origin, interceptStage: "Request", interceptMethod: "Fetch.failRequest", interceptErrorReason: "BlockedByClient", remoteDispatched: false, httpStatus: null, byteLength: null, contentSha256: null, nativeEvent: null, nativeErrorText: null, canceled: null };
+          admitted = true;
+        } catch { onViolation("TASK51_BLOCKED_OPTIONAL_NATIVE_PAUSE_REJECTED"); }
+        // Every pause is failed at Request stage; neither a guard failure nor a
+        // successful policy match can continue, fulfil, or inspect a response.
+        try { await cdp.send("Fetch.failRequest", { requestId: event.requestId, errorReason: "BlockedByClient" }); }
+        catch { onViolation("TASK51_BLOCKED_OPTIONAL_NATIVE_FAIL_REQUEST_REJECTED"); }
+        if (!admitted) return;
+        await waitFor(() => records.get(event.networkId)?.nativeEvent !== null);
+      })().catch(() => onViolation("TASK51_BLOCKED_OPTIONAL_NATIVE_TERMINAL_REJECTED")).finally(() => blockedTasks.delete(task));
+      blockedTasks.add(task);
+    });
+    await cdp.send("Fetch.enable", { patterns: [...blockedUrls].map((urlPattern) => ({ urlPattern, requestStage: "Request" })) });
+  }
   return Object.freeze({
     bindRequest,
     authenticationStarted: () => authenticationStarted,
@@ -748,10 +795,11 @@ export async function installTask51PublicStartupLifecycleNative(
     phaseBoundaries: () => structuredClone(phaseBoundaries),
     firstAuthenticationRequest: () =>
       structuredClone(firstAuthenticationRequest),
+    blockedOptionalPublicReadTerminals: () => structuredClone(blockedTerminals),
     pendingRequestCount: () =>
       [...records.values()].filter(
         (record) => record.claimed && record.nativeEvent === null
-      ).length,
+      ).length + blockedTasks.size,
     navigationDispatchState(request) {
       const held = owners.get(request);
       if (
@@ -833,6 +881,7 @@ export async function installTask51PublicStartupLifecycleNative(
           navigation,
           exceptionalTerminals: [proof],
           publicReadTerminals: [],
+          ...(plan.blockedOptionalPublicReads ? { blockedOptionalPublicReadTerminals: structuredClone(blockedTerminals) } : {}),
           firstAuthenticationRequest: structuredClone(
             firstAuthenticationRequest
           ),
@@ -1400,7 +1449,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
         if (!response) throw new Error("TASK51_NETWORK_RESPONSE_MISSING");
         if (owner.kind !== "ledger") {
           if (owner.publicRead) {
-            const expected = TASK51_STARTUP_PUBLIC_READ_RESPONSES.find(
+            const expected = task51PublicReadResponseIdentities(current.prewarm).find(
               (entry) => entry.url === request.url()
             );
             const bytes = await response.body();
@@ -1527,7 +1576,9 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
         else preArm.finishPolicyBlocked(owner.id);
       } else preArm.failRequest(owner.id);
     });
-    await context.route("**/*", async (route) => {
+    const blockedRouteUrls = current?.prewarm.blockedOptionalPublicReads?.entries.map(({ url }) => url) ?? [];
+    const routePattern = blockedRouteUrls.length ? new RegExp(`^(?!${blockedRouteUrls.map((url) => `${url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`).join("|")}).*`) : "**/*";
+    await context.route(routePattern, async (route) => {
       const request = route.request();
       const resourceType = request.resourceType().toLowerCase();
       if (
@@ -1681,7 +1732,8 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
         page,
         current.prewarm.publicStartupLifecycle,
         onViolation,
-        current.prewarm
+        current.prewarm,
+        preArm
       );
     page.on("close", () => {
       if (intentionalLifecycleClose) return;
@@ -1875,6 +1927,7 @@ export async function runTask51HeadedNetworkAttestor(options, overrides = {}) {
                       phaseBoundaries: nativeLifecycle.phaseBoundaries(),
                       firstAuthenticationRequest:
                         nativeLifecycle.firstAuthenticationRequest(),
+                      ...(current.prewarm.blockedOptionalPublicReads ? { blockedOptionalPublicReadTerminals: nativeLifecycle.blockedOptionalPublicReadTerminals() } : {}),
                     },
                   }
                 : {}),

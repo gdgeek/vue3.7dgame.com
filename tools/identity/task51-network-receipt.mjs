@@ -13,6 +13,7 @@ import {
   assertTask51CurrentStableEntry,
   TASK51_CURRENT_STABLE_ENTRY_URL,
   TASK51_CURRENT_STABLE_ENTRY_RESPONSE,
+  assertTask51BlockedOptionalPublicReads,
 } from "./task51-network-attestor-ledger.mjs";
 import {
   assertTask51PrewarmContract,
@@ -632,7 +633,7 @@ export function parseTask51StageBExecutionSources(raw) {
   if (value.prewarm.publicStartupLifecycle !== undefined) {
     if (
       !exceptionRoute ||
-      tool.branch !== "codex/task51-stage-b-public-bootstrap-contract-20260929"
+      tool.branch !== (value.prewarm.blockedOptionalPublicReads ? "codex/task51-stage-b-item5-source-closure-20261008" : "codex/task51-stage-b-public-bootstrap-contract-20260929")
     )
       error();
     assertTask51PublicStartupLifecyclePlan(
@@ -658,6 +659,8 @@ export function parseTask51StageBExecutionSources(raw) {
     )
       error();
   }
+  if (tool.branch === "codex/task51-stage-b-item5-source-closure-20261008" && !value.prewarm.blockedOptionalPublicReads) error();
+  if (value.prewarm.blockedOptionalPublicReads && (urls.some((url) => value.prewarm.blockedOptionalPublicReads.entries.some((entry) => entry.url === url)) || value.publicSources?.some((source) => value.prewarm.blockedOptionalPublicReads.entries.some((entry) => entry.url === source.url)))) error();
   if (
     p.staticUrlManifestSha256 !== task51StaticUrlManifestSha256(urls) ||
     !Array.isArray(p.staticResponses) ||
@@ -1263,6 +1266,11 @@ export function parseTask51NetworkAttestorReleaseEvidence(raw) {
 export function assertTask51NetworkReceipt(value) {
   const current = value?.schema === TASK51_CURRENT_NETWORK_RECEIPT_SCHEMA;
   const lifecycle = current ? (value.publicStartupLifecycle ?? null) : null;
+  const blocked = Object.hasOwn(value ?? {}, "blockedOptionalPublicReads") ? value.blockedOptionalPublicReads : null;
+  if (blocked !== null) {
+    if (!current || !lifecycle) throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READS_REJECTED");
+    assertTask51BlockedOptionalPublicReads(blocked);
+  } else if (Object.hasOwn(value ?? {}, "blockedOptionalPublicReads")) throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READS_REJECTED");
   const stableEntry = Object.hasOwn(value ?? {}, "stableEntry")
     ? value.stableEntry
     : null;
@@ -1274,7 +1282,7 @@ export function assertTask51NetworkReceipt(value) {
     throw new Error("TASK51_CURRENT_STABLE_ENTRY_REJECTED");
   }
   if (lifecycle) {
-    assertTask51PublicStartupLifecycleReceipt(lifecycle);
+    assertTask51PublicStartupLifecycleReceipt(lifecycle, blocked ? { blockedOptionalPublicReads: blocked } : null);
     if (
       Object.values(lifecycle.phaseBoundaries).some(
         (value) => value === null
@@ -1283,12 +1291,12 @@ export function assertTask51NetworkReceipt(value) {
         Date.parse(lifecycle.phaseBoundaries.quietStartedAt) <
         TASK51_AUTH_QUIET_MS ||
       value.attestor?.branch !==
-        "codex/task51-stage-b-public-bootstrap-contract-20260929"
+        (blocked ? "codex/task51-stage-b-item5-source-closure-20261008" : "codex/task51-stage-b-public-bootstrap-contract-20260929")
     )
       throw new Error("TASK51_PUBLIC_STARTUP_PHASE_REJECTED");
     // Only the fully typed, null-body native metadata envelope is exempt from
     // forbidden-key scanning. Unknown fields or actual body values are rejected.
-    const { publicStartupLifecycle: _metadata, ...rest } = value;
+    const { publicStartupLifecycle: _metadata, blockedOptionalPublicReads: _blockedMetadata, ...rest } = value;
     assertTask51ReceiptHasNoForbiddenFields(rest);
   } else assertTask51ReceiptHasNoForbiddenFields(value);
   if (
@@ -1302,6 +1310,7 @@ export function assertTask51NetworkReceipt(value) {
               ? ["publicDecorationDenials"]
               : []),
             ...(lifecycle ? ["publicStartupLifecycle"] : []),
+            ...(blocked ? ["blockedOptionalPublicReads"] : []),
             ...(stableEntry ? ["stableEntry"] : []),
           ]
         : RECEIPT_KEYS
@@ -1687,6 +1696,7 @@ export function buildTask51NetworkReceipt(
           ...(lifecycle
             ? { publicStartupLifecycle: structuredClone(lifecycle) }
             : {}),
+          ...(lifecycle && bindings.publicStartupLifecyclePlan?.blockedOptionalPublicReads ? { blockedOptionalPublicReads: structuredClone(bindings.publicStartupLifecyclePlan.blockedOptionalPublicReads) } : {}),
           ...(lifecycle && bindings.publicStartupLifecyclePlan?.stableEntry
             ? {
                 stableEntry: structuredClone(

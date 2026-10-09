@@ -16,6 +16,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   TASK51_AUTHENTICATED_READ_CORS_NAMES,
   TASK51_BOOTSTRAP_READ_ALLOWLIST,
+  TASK51_FINITE_PUBLIC_SOURCE_CLOSURE_REQUEST_SHA256,
+  TASK51_FINITE_PUBLIC_SOURCE_OWNER_DECISION,
+  TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS,
+  assertTask51BlockedOptionalPublicReads,
+  assertTask51BlockedOptionalPublicReadTerminals,
 } from "../../../tools/identity/task51-network-attestor-ledger.mjs";
 import {
   assertTask51NetworkFinalizationWindow,
@@ -38,6 +43,82 @@ import {
 } from "../../../tools/identity/task51-stage-b-supervisor.mjs";
 
 const NOW_MS = Date.parse("2026-08-28T10:00:00+08:00");
+
+describe("Task 5.1 finite blocked optional read proof boundary", () => {
+  const plan = () => ({
+    blockedOptionalPublicReads: structuredClone({
+      schema: "wp3-task51-blocked-optional-public-reads-finite-v1",
+      approvalRequestSha256: TASK51_FINITE_PUBLIC_SOURCE_CLOSURE_REQUEST_SHA256,
+      ownerDecision: TASK51_FINITE_PUBLIC_SOURCE_OWNER_DECISION,
+      entries: TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS,
+    }),
+  });
+  const proof = () => ({
+    sequence: 1,
+    url: TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS[0].url,
+    method: "GET",
+    resourceType: "xhr",
+    frameId: "main-frame",
+    loaderId: "main-loader",
+    documentUrl: "https://d.xrugc.com/",
+    requestId: "network-1",
+    fetchRequestId: "fetch-1",
+    requestObservedAt: "2026-10-08T14:00:00.000Z",
+    interceptionObservedAt: "2026-10-08T14:00:00.001Z",
+    terminalObservedAt: "2026-10-08T14:00:00.002Z",
+    origin: null,
+    interceptStage: "Request",
+    interceptMethod: "Fetch.failRequest",
+    interceptErrorReason: "BlockedByClient",
+    remoteDispatched: false,
+    httpStatus: null,
+    byteLength: null,
+    contentSha256: null,
+    nativeEvent: "loadingFailed",
+    nativeErrorText: "net::ERR_BLOCKED_BY_CLIENT",
+    canceled: null,
+  });
+  it("allows genuinely absent Origin only for native same-origin document ownership", () => {
+    expect(
+      assertTask51BlockedOptionalPublicReads(plan().blockedOptionalPublicReads)
+    ).toBe(true);
+    expect(
+      assertTask51BlockedOptionalPublicReadTerminals([proof()], plan())
+    ).toBe(true);
+    expect(assertTask51BlockedOptionalPublicReadTerminals([], plan())).toBe(
+      true
+    );
+    expect(() =>
+      assertTask51BlockedOptionalPublicReadTerminals(
+        [{ ...proof(), documentUrl: "https://xrugc.com/?lang=zh-CN" }],
+        plan()
+      )
+    ).toThrow();
+  });
+  it.each(["authenticationStartedAt", "quietStartedAt", "strictStartedAt"])(
+    "rejects an optional terminal at/after %s",
+    (boundary) => {
+      expect(() =>
+        assertTask51BlockedOptionalPublicReadTerminals([proof()], plan(), {
+          [boundary]: proof().terminalObservedAt,
+        })
+      ).toThrow();
+    }
+  );
+  it("never converts retained 301 metadata into a runtime terminal proof", () => {
+    expect(() =>
+      assertTask51BlockedOptionalPublicReadTerminals(
+        [TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS[0]],
+        plan()
+      )
+    ).toThrow();
+    const changed: any = plan();
+    changed.blockedOptionalPublicReads.entries[0].redirectFollowed = true;
+    expect(() =>
+      assertTask51BlockedOptionalPublicReads(changed.blockedOptionalPublicReads)
+    ).toThrow();
+  });
+});
 const APPROVAL_REF = "WP3-TASK51-MEMORY-RUNNER-STAGE-B-20260828";
 const EXECUTION_ID = "task51-stage-b-test-window-20260828";
 const CAPABILITY = "Y2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2M";

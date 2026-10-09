@@ -137,6 +137,152 @@ export const TASK51_STARTUP_PUBLIC_READ_RESPONSES = Object.freeze(
 );
 export const TASK51_PUBLIC_STARTUP_READ_IDENTITIES =
   TASK51_STARTUP_PUBLIC_READ_RESPONSES;
+
+export const TASK51_FINITE_PUBLIC_SOURCE_CLOSURE_PROFILE =
+  "item5-finite-public-source-closure";
+export const TASK51_FINITE_PUBLIC_SOURCE_CLOSURE_REQUEST_SHA256 =
+  "cd151413e246f4f8e0887e88431e1ef426ca076789cba4c03d12b8e9102443a6";
+export const TASK51_FINITE_PUBLIC_SOURCE_OWNER_DECISION = Object.freeze({
+  evidenceRef: "reports/item5-finite-source-owner-20261008/authority.json",
+  evidenceSha256: "5c39f759f5d92a554cff655f55b50029e979aeceacfd3c17aec07e9cc5855e38",
+});
+const finiteCanonical = (value) =>
+  Array.isArray(value)
+    ? value.map(finiteCanonical)
+    : value && typeof value === "object"
+      ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, finiteCanonical(value[key])]))
+      : value;
+const finiteEqual = (a, b) =>
+  JSON.stringify(finiteCanonical(a)) === JSON.stringify(finiteCanonical(b));
+const finiteFreeze = (value) => {
+  if (value && typeof value === "object") {
+    for (const child of Object.values(value)) finiteFreeze(child);
+    Object.freeze(value);
+  }
+  return value;
+};
+export const TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS = finiteFreeze([
+  {
+    "catalogIndex": 188,
+    "url": "https://d.xrugc.com/api-doc?per_page=100&hide_empty=false&rest_route=%2Fwp%2Fv2%2Fcategories",
+    "acceptedPriorHeaderObservation": {
+      "evidenceRef": "reports/item5-remaining-public-drift-diagnostic-20261008/resource-188.json",
+      "evidenceSha256": "8470bf71ebd40264c3ab05461a58dbc6e19109c43ed7705bbf5bfa342b047f5e"
+    },
+    "observedAt": "2026-10-08T13:10:14.723Z",
+    "status": 301,
+    "bodyRead": false,
+    "bodyBytesRead": 0,
+    "contentSha256": null,
+    "locationRead": false,
+    "redirectFollowed": false
+  },
+  {
+    "catalogIndex": 191,
+    "url": "https://d.xrugc.com/api-doc?_embed=wp%3Afeaturedmedia%2Cwp%3Aterm&per_page=10&page=1&rest_route=%2Fwp%2Fv2%2Fposts",
+    "acceptedPriorHeaderObservation": {
+      "evidenceRef": "reports/item5-remaining-public-drift-diagnostic-20261008/resource-191.json",
+      "evidenceSha256": "da4e7f0d6640b56aaf578e99895c4b6789393a21a8818268e6baefb39ed72a86"
+    },
+    "observedAt": "2026-10-08T13:10:15.814Z",
+    "status": 301,
+    "bodyRead": false,
+    "bodyBytesRead": 0,
+    "contentSha256": null,
+    "locationRead": false,
+    "redirectFollowed": false
+  },
+  {
+    "catalogIndex": 192,
+    "url": "https://d.xrugc.com/api-doc?categories=74&per_page=5&page=1&_fields=id,title,sort,excerpt,jetpack_featured_media_url,date&rest_route=%2Fwp%2Fv2%2Fposts",
+    "acceptedPriorHeaderObservation": {
+      "evidenceRef": "reports/item5-remaining-public-drift-diagnostic-20261008/resource-192.json",
+      "evidenceSha256": "7908e5ad89cbc4a4a231d027388637961154c293e0ff12bcbef9723009f16dd0"
+    },
+    "observedAt": "2026-10-08T13:10:15.904Z",
+    "status": 301,
+    "bodyRead": false,
+    "bodyBytesRead": 0,
+    "contentSha256": null,
+    "locationRead": false,
+    "redirectFollowed": false
+  }
+]);
+export function assertTask51BlockedOptionalPublicReads(value) {
+  if (
+    !exactKeys(value, ["schema", "approvalRequestSha256", "ownerDecision", "entries"]) ||
+    value.schema !== "wp3-task51-blocked-optional-public-reads-finite-v1" ||
+    value.approvalRequestSha256 !== TASK51_FINITE_PUBLIC_SOURCE_CLOSURE_REQUEST_SHA256 ||
+    !exactKeys(value.ownerDecision, ["evidenceRef", "evidenceSha256"]) ||
+    !finiteEqual(value.ownerDecision, TASK51_FINITE_PUBLIC_SOURCE_OWNER_DECISION) ||
+    !finiteEqual(value.entries, TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS)
+  ) throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READS_REJECTED");
+  return true;
+}
+// This selects identities, not authority. Actual use remains behind the root
+// independently pinned owner/acquisition/branch and production preflight.
+export function task51PublicReadResponseIdentities(plan = null) {
+  if (plan === null) return TASK51_STARTUP_PUBLIC_READ_RESPONSES;
+  if (!plan || typeof plan !== "object" || Array.isArray(plan))
+    throw new Error("TASK51_FINITE_PUBLIC_SOURCE_PROFILE_REJECTED");
+  if (!Object.hasOwn(plan, "blockedOptionalPublicReads"))
+    return TASK51_STARTUP_PUBLIC_READ_RESPONSES;
+  assertTask51BlockedOptionalPublicReads(plan.blockedOptionalPublicReads);
+  return TASK51_FINITE_PUBLIC_READ_RESPONSES;
+}
+export const TASK51_FINITE_PUBLIC_READ_RESPONSES = finiteFreeze([
+  {
+    url: "https://d.xrugc.com/api-config/api/v1/plugin/list",
+    contentSha256: "93aa70a0b45698864180666b555345b1019e553d41cd2c3ed67172e7ddb1a107",
+    byteLength: 533,
+  },
+  {
+    url: "https://d.xrugc.com/api/v1/system/deployment",
+    contentSha256: "9199c4003353b10e23a88474fc456da95ba96a9dbecc0bd16c486ad3974fbb22",
+    byteLength: 323,
+  },
+]);
+export function assertTask51BlockedOptionalPublicReadTerminals(terminals, plan, phaseBoundaries = null) {
+  assertTask51BlockedOptionalPublicReads(plan?.blockedOptionalPublicReads);
+  const keys = [
+    "sequence", "url", "method", "resourceType", "frameId", "loaderId",
+    "documentUrl", "requestId", "fetchRequestId", "requestObservedAt",
+    "interceptionObservedAt", "terminalObservedAt", "origin", "interceptStage",
+    "interceptMethod", "interceptErrorReason", "remoteDispatched", "httpStatus",
+    "byteLength", "contentSha256", "nativeEvent", "nativeErrorText", "canceled",
+  ];
+  const seen = new Set(), sequences = new Set(), nativeRequests = new Set();
+  const boundaries = Object.values(phaseBoundaries ?? {}).filter((v) => v !== null);
+  if (!Array.isArray(terminals) || terminals.length > 3 || boundaries.some((v) => !time(v)))
+    throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READ_TERMINAL_REJECTED");
+  for (const proof of terminals) {
+    const allowed = TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS.some((entry) => entry.url === proof?.url);
+    const documentAllowed = ["https://d.xrugc.com/", TASK51_CURRENT_STABLE_ENTRY_URL].includes(proof?.documentUrl);
+    const originAllowed = documentAllowed && (
+      proof.origin === new URL(proof.documentUrl).origin ||
+      (proof.origin === null && new URL(proof.documentUrl).origin === new URL(proof.url).origin)
+    );
+    if (
+      !allowed || !exactKeys(proof, keys) || seen.has(proof.url) ||
+      !Number.isSafeInteger(proof.sequence) || proof.sequence < 1 || sequences.has(proof.sequence) ||
+      ![proof.frameId, proof.loaderId, proof.requestId, proof.fetchRequestId].every(nativeId) ||
+      nativeRequests.has(proof.requestId) || !documentAllowed || !originAllowed ||
+      proof.method !== "GET" || !["fetch", "xhr"].includes(proof.resourceType) ||
+      ![proof.requestObservedAt, proof.interceptionObservedAt, proof.terminalObservedAt].every(time) ||
+      Date.parse(proof.requestObservedAt) > Date.parse(proof.interceptionObservedAt) ||
+      Date.parse(proof.interceptionObservedAt) > Date.parse(proof.terminalObservedAt) ||
+      boundaries.some((v) => Date.parse(proof.terminalObservedAt) >= Date.parse(v)) ||
+      proof.interceptStage !== "Request" || proof.interceptMethod !== "Fetch.failRequest" ||
+      proof.interceptErrorReason !== "BlockedByClient" || proof.remoteDispatched !== false ||
+      proof.httpStatus !== null || proof.byteLength !== null || proof.contentSha256 !== null ||
+      proof.nativeEvent !== "loadingFailed" || proof.nativeErrorText !== "net::ERR_BLOCKED_BY_CLIENT" ||
+      !(proof.canceled === null || typeof proof.canceled === "boolean")
+    ) throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READ_TERMINAL_REJECTED");
+    seen.add(proof.url); sequences.add(proof.sequence); nativeRequests.add(proof.requestId);
+  }
+  return true;
+}
+
 export const TASK51_NAVIGATION_PUBLIC_ASSETS = Object.freeze(
   [
     [
@@ -237,6 +383,8 @@ export function assertTask51PublicStartupLifecyclePlan(
   if (Object.hasOwn(plan ?? {}, "stableEntry"))
     assertTask51CurrentStableEntry(plan.stableEntry);
   const stableEntry = plan?.stableEntry ?? null;
+  const finite = Object.hasOwn(plan ?? {}, "blockedOptionalPublicReads");
+  if (finite) assertTask51BlockedOptionalPublicReads(plan.blockedOptionalPublicReads);
   if (
     !exactKeys(plan, [
       "schema",
@@ -247,6 +395,7 @@ export function assertTask51PublicStartupLifecyclePlan(
       "staticRequestBounds",
       "navigationAssets",
       ...(stableEntry ? ["stableEntry"] : []),
+      ...(finite ? ["blockedOptionalPublicReads"] : []),
     ]) ||
     plan.schema !== "wp3-task51-public-startup-lifecycle-plan-v1" ||
     plan.approvalRequestSha256 !== TASK51_PUBLIC_STARTUP_REQUEST_SHA256 ||
@@ -265,7 +414,9 @@ export function assertTask51PublicStartupLifecyclePlan(
     plan.navigation.toDocumentUrl !== "https://xrugc.com/?lang=zh-CN" ||
     plan.navigation.maximumCount !== 1 ||
     JSON.stringify(plan.optionalPublicReadUrls) !==
-      JSON.stringify(TASK51_OPTIONAL_PUBLIC_READ_URLS) ||
+      JSON.stringify(finite ? [TASK51_FINITE_PUBLIC_READ_RESPONSES[0].url] : TASK51_OPTIONAL_PUBLIC_READ_URLS) ||
+    (finite && (!stableEntry || plan.staticRequestBounds?.some((entry) =>
+      TASK51_FINITE_BLOCKED_OPTIONAL_PUBLIC_READS.some((blocked) => blocked.url === entry.url)))) ||
     !Array.isArray(plan.navigationAssets) ||
     plan.navigationAssets.length !== TASK51_NAVIGATION_PUBLIC_ASSETS.length ||
     plan.navigationAssets.some((asset, index) => {
@@ -364,7 +515,9 @@ export function assertTask51PublicStartupLifecycleReceipt(
   receipt,
   plan = null
 ) {
-  if (plan !== null) assertTask51PublicStartupLifecyclePlan(plan);
+  if (plan !== null && plan.schema !== undefined) assertTask51PublicStartupLifecyclePlan(plan);
+  const finite = Object.hasOwn(plan ?? {}, "blockedOptionalPublicReads");
+  if (finite) assertTask51BlockedOptionalPublicReads(plan.blockedOptionalPublicReads);
   const assets = plan?.navigationAssets ?? TASK51_NAVIGATION_PUBLIC_ASSETS;
   if (
     !exactKeys(receipt, [
@@ -375,6 +528,7 @@ export function assertTask51PublicStartupLifecycleReceipt(
       "staticTerminalCounts",
       "phaseBoundaries",
       "firstAuthenticationRequest",
+      ...(finite ? ["blockedOptionalPublicReadTerminals"] : []),
     ]) ||
     receipt.schema !== "wp3-task51-public-startup-lifecycle-receipt-v1" ||
     !Array.isArray(receipt.exceptionalTerminals) ||
@@ -407,7 +561,7 @@ export function assertTask51PublicStartupLifecycleReceipt(
     throw new Error("TASK51_PUBLIC_STARTUP_RECEIPT_REJECTED");
   const publicReads = new Set();
   for (const read of receipt.publicReadTerminals) {
-    const expected = TASK51_STARTUP_PUBLIC_READ_RESPONSES.find(
+    const expected = task51PublicReadResponseIdentities(plan).find(
       (entry) => entry.url === read?.url
     );
     if (
@@ -475,6 +629,9 @@ export function assertTask51PublicStartupLifecycleReceipt(
     .map((value) => Date.parse(value));
   const { authenticationStartedAt, quietStartedAt, strictStartedAt } =
     receipt.phaseBoundaries;
+  if (finite) assertTask51BlockedOptionalPublicReadTerminals(
+    receipt.blockedOptionalPublicReadTerminals, plan, receipt.phaseBoundaries
+  );
   if (
     (firstAuth === null) !== (authenticationStartedAt === null) ||
     (firstAuth !== null &&
@@ -1204,6 +1361,7 @@ export function createTask51NetworkLedger({
         },
         exceptionalTerminals: [...exceptionalTerminals, entry],
         publicReadTerminals: [],
+        ...(publicStartupLifecycle.blockedOptionalPublicReads ? { blockedOptionalPublicReadTerminals: [] } : {}),
         staticTerminalCounts: {
           successfulStatic: transcript.filter(
             (item) =>
@@ -1351,6 +1509,7 @@ export function createTask51NetworkLedger({
       navigation: structuredClone(startupNavigation),
       exceptionalTerminals: structuredClone(exceptionalTerminals),
       publicReadTerminals: [],
+      ...(publicStartupLifecycle?.blockedOptionalPublicReads ? { blockedOptionalPublicReadTerminals: [] } : {}),
       firstAuthenticationRequest: null,
       phaseBoundaries: {
         authenticationStartedAt: null,

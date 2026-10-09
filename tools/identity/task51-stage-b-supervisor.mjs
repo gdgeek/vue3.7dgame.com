@@ -16,6 +16,9 @@ import {
   TASK51_OPTIONAL_PUBLIC_READ_URLS,
   TASK51_CURRENT_STABLE_ENTRY_URL,
   TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS,
+  assertTask51BlockedOptionalPublicReads,
+  assertTask51BlockedOptionalPublicReadTerminals,
+  task51PublicReadResponseIdentities,
 } from "./task51-network-attestor-ledger.mjs";
 
 export const TASK51_STAGE_B_CLAIM_URL =
@@ -1172,9 +1175,16 @@ export function assertTask51PrewarmContract(contract) {
     throw new Error("TASK51_PREWARM_CONTRACT_REJECTED");
   };
   const stableEntry = contract?.publicStartupLifecycle?.stableEntry ?? null;
+  const finite = Object.hasOwn(contract ?? {}, "blockedOptionalPublicReads");
+  if (finite) {
+    assertTask51BlockedOptionalPublicReads(contract.blockedOptionalPublicReads);
+    assertTask51BlockedOptionalPublicReads(contract.publicStartupLifecycle?.blockedOptionalPublicReads);
+    if (JSON.stringify(contract.blockedOptionalPublicReads) !== JSON.stringify(contract.publicStartupLifecycle.blockedOptionalPublicReads)) fail();
+  }
+  const coldPublicReadUrls = finite ? [task51PublicReadResponseIdentities(contract)[1].url] : TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS;
   const optionalPublicReadUrls = [
-    ...TASK51_OPTIONAL_PUBLIC_READ_URLS,
-    ...(stableEntry ? TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS : []),
+    ...(finite ? [task51PublicReadResponseIdentities(contract)[0].url] : TASK51_OPTIONAL_PUBLIC_READ_URLS),
+    ...(stableEntry ? coldPublicReadUrls : []),
   ];
   if (
     !hasExactKeys(contract, [
@@ -1191,6 +1201,7 @@ export function assertTask51PrewarmContract(contract) {
       ...(Object.hasOwn(contract ?? {}, "publicStartupLifecycle")
         ? ["publicStartupLifecycle"]
         : []),
+      ...(finite ? ["blockedOptionalPublicReads"] : []),
     ]) ||
     contract.warmUrl !==
       (stableEntry ? TASK51_CURRENT_STABLE_ENTRY_URL : TASK51_WARM_URL) ||
@@ -1311,7 +1322,7 @@ export function assertTask51PrewarmContract(contract) {
           (entry.minimumCount !== 1 || entry.maximumCount !== 1)
       ) ||
       (stableEntry &&
-        TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS.some(
+        coldPublicReadUrls.some(
           (url) =>
             !contract.bootstrapReads.some(
               (entry) =>
@@ -1323,6 +1334,8 @@ export function assertTask51PrewarmContract(contract) {
         ))
     )
       fail();
+    if ((!finite && Object.hasOwn(contract.publicStartupLifecycle, "blockedOptionalPublicReads")) ||
+      (finite && contract.bootstrapReads.some((read) => contract.blockedOptionalPublicReads.entries.some((blocked) => blocked.url === read.url)))) fail();
   }
   if (contract.sso !== undefined && contract.sso !== null) {
     const sso = contract.sso;
@@ -1371,6 +1384,9 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
   assertTask51PrewarmContract(contract);
   const statics = new Set(staticUrls);
   const active = new Map();
+  const blockedOptional = new Map((contract.blockedOptionalPublicReads?.entries ?? []).map(({ url }) => [url, { count: 0, terminalCount: 0 }]));
+  const publicReadUrls = contract.blockedOptionalPublicReads ? task51PublicReadResponseIdentities(contract).map(({ url }) => url) : [...TASK51_OPTIONAL_PUBLIC_READ_URLS, ...(contract.publicStartupLifecycle?.stableEntry ? TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS : [])];
+  if ([...blockedOptional.keys()].some((url) => statics.has(url))) throw new Error("TASK51_PREARM_BLOCKED_OPTIONAL_STATIC_REJECTED");
   const decorationDenials = new Map(
     (contract.publicDecorationDenials ?? []).map(({ url }) => [
       url,
@@ -1494,6 +1510,7 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
         Object.hasOwn(descriptor ?? {}, "sourceOrigin")
           ? ["sourceOrigin"]
           : []),
+        ...(blockedOptional.has(descriptor?.url) ? ["origin", "frameId", "loaderId", "documentUrl"] : []),
       ]) ||
       ["id", "method", "resourceType", "url"].some(
         (key) => typeof descriptor[key] !== "string" || !descriptor[key]
@@ -1510,6 +1527,15 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
     const resource = descriptor.resourceType.toLowerCase();
     if (["websocket", "ping"].includes(resource))
       return violate("TASK51_PREARM_CHANNEL_REJECTED");
+    if (blockedOptional.has(descriptor.url)) {
+      const record = blockedOptional.get(descriptor.url);
+      let documentOrigin;
+      try { documentOrigin = new URL(descriptor.documentUrl).origin; } catch { return violate("TASK51_PREARM_BLOCKED_OPTIONAL_REJECTED"); }
+      if (method !== "GET" || !["fetch", "xhr"].includes(resource) || mode !== "bootstrap" || authenticationStarted || record.count !== 0 || unexpectedRequestCount !== 0 || descriptor.corsRequestHeaderNames !== null || descriptor.corsRequestMethod !== null || ![TASK51_WARM_URL, TASK51_CURRENT_STABLE_ENTRY_URL].includes(descriptor.documentUrl) || ![descriptor.frameId, descriptor.loaderId].every((id) => typeof id === "string" && /^[A-Za-z0-9._:-]{1,160}$/.test(id)) || !(descriptor.origin === documentOrigin || (descriptor.origin === null && documentOrigin === new URL(descriptor.url).origin))) return violate("TASK51_PREARM_BLOCKED_OPTIONAL_REJECTED");
+      record.count++;
+      active.set(descriptor.id, { kind: "policy-blocked-optional-public-read", readUrl: descriptor.url });
+      return Object.freeze({ allowed: false, category: "blocked-optional-public-read", policyBlocked: true });
+    }
     if (method === "GET" && statics.has(descriptor.url)) {
       if (contract.sso && descriptor.url === contract.sso.callbackDocumentUrl) {
         if (
@@ -1590,11 +1616,7 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
             (entry) =>
               entry.phase === "before-login-public" &&
               (contract.publicStartupLifecycle &&
-              (TASK51_OPTIONAL_PUBLIC_READ_URLS.includes(entry.url) ||
-                (contract.publicStartupLifecycle.stableEntry &&
-                  TASK51_STABLE_ENTRY_COLD_PUBLIC_READ_URLS.includes(
-                    entry.url
-                  )))
+              publicReadUrls.includes(entry.url)
                 ? entry.count < entry.minimumCount ||
                   entry.count > entry.maximumCount
                 : entry.count !== entry.minimumCount)
@@ -1681,7 +1703,7 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
     const record = active.get(id);
     if (!record) return violate("TASK51_PREARM_TERMINAL_REJECTED");
     active.delete(id);
-    if (record.kind === "policy-blocked-decoration")
+    if (["policy-blocked-decoration", "policy-blocked-optional-public-read"].includes(record.kind))
       return violate("TASK51_PREARM_DECORATION_TERMINAL_REJECTED");
     const statuses =
       record.kind === "options"
@@ -1712,6 +1734,14 @@ function createCurrentPreArmSupervisor(contract, staticUrls, onViolation) {
     beginRequest,
     finishRequest,
     finishPolicyBlocked,
+    finishBlockedOptionalPublicRead: (id, proof) => {
+      const record = active.get(id);
+      if (record?.kind !== "policy-blocked-optional-public-read" || record.readUrl !== proof?.url) return violate("TASK51_PREARM_BLOCKED_OPTIONAL_TERMINAL_REJECTED");
+      try { assertTask51BlockedOptionalPublicReadTerminals([proof], contract.publicStartupLifecycle); } catch { return violate("TASK51_PREARM_BLOCKED_OPTIONAL_TERMINAL_REJECTED"); }
+      active.delete(id);
+      blockedOptional.get(record.readUrl).terminalCount++;
+      return Object.freeze({ allowed: true, category: "blocked-optional-public-read" });
+    },
     failRequest: (id) => {
       active.delete(id);
       return violate("TASK51_PREARM_FAILURE_REJECTED");
