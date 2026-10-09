@@ -57,6 +57,18 @@ const TASK51_NETWORK_ATTESTOR_CANDIDATE_FILES = Object.freeze([
   "test/unit/task51/task51NetworkAttestor.spec.ts",
   "test/unit/task51/task51StageBSupervisor.spec.ts",
 ]);
+const TASK51_PUBLIC_BOOTSTRAP_POLICY_BRANCH =
+  "codex/task51-stage-b-public-bootstrap-contract-20260929";
+const TASK51_FINITE_PUBLIC_SOURCE_POLICY_BRANCH =
+  "codex/task51-stage-b-item5-source-closure-20261008";
+const TASK51_NATIVE_CLOSURE_POLICY_BRANCH =
+  "codex/task51-stage-b-item5-native-closure-20261009";
+const TASK51_BLOCKED_OPTIONAL_PUBLIC_READ_BRANCHES = new Set([
+  TASK51_FINITE_PUBLIC_SOURCE_POLICY_BRANCH,
+  TASK51_NATIVE_CLOSURE_POLICY_BRANCH,
+]);
+const task51BlockedOptionalPublicReadBranch = (branch) =>
+  TASK51_BLOCKED_OPTIONAL_PUBLIC_READ_BRANCHES.has(branch);
 const RECEIPT_KEYS = Object.freeze([
   "approvalRef",
   "attestor",
@@ -630,10 +642,15 @@ export function parseTask51StageBExecutionSources(raw) {
   ];
   if (!Array.isArray(p.staticRequestCounts)) error();
   const counts = validateTask51StaticRequestCounts(urls, p.staticRequestCounts);
-  if (value.prewarm.publicStartupLifecycle !== undefined) {
+  const lifecycle = value.prewarm.publicStartupLifecycle !== undefined;
+  const blocked = Object.hasOwn(value.prewarm, "blockedOptionalPublicReads");
+  const blockedBranch = task51BlockedOptionalPublicReadBranch(tool.branch);
+  if (lifecycle) {
     if (
       !exceptionRoute ||
-      tool.branch !== (value.prewarm.blockedOptionalPublicReads ? "codex/task51-stage-b-item5-source-closure-20261008" : "codex/task51-stage-b-public-bootstrap-contract-20260929")
+      (blocked
+        ? !blockedBranch
+        : tool.branch !== TASK51_PUBLIC_BOOTSTRAP_POLICY_BRANCH)
     )
       error();
     assertTask51PublicStartupLifecyclePlan(
@@ -659,8 +676,25 @@ export function parseTask51StageBExecutionSources(raw) {
     )
       error();
   }
-  if (tool.branch === "codex/task51-stage-b-item5-source-closure-20261008" && !value.prewarm.blockedOptionalPublicReads) error();
-  if (value.prewarm.blockedOptionalPublicReads && (urls.some((url) => value.prewarm.blockedOptionalPublicReads.entries.some((entry) => entry.url === url)) || value.publicSources?.some((source) => value.prewarm.blockedOptionalPublicReads.entries.some((entry) => entry.url === source.url)))) error();
+  if (
+    (blockedBranch && (!lifecycle || !blocked)) ||
+    (blocked && !blockedBranch)
+  )
+    error();
+  if (
+    value.prewarm.blockedOptionalPublicReads &&
+    (urls.some((url) =>
+      value.prewarm.blockedOptionalPublicReads.entries.some(
+        (entry) => entry.url === url
+      )
+    ) ||
+      value.publicSources?.some((source) =>
+        value.prewarm.blockedOptionalPublicReads.entries.some(
+          (entry) => entry.url === source.url
+        )
+      ))
+  )
+    error();
   if (
     p.staticUrlManifestSha256 !== task51StaticUrlManifestSha256(urls) ||
     !Array.isArray(p.staticResponses) ||
@@ -1266,11 +1300,15 @@ export function parseTask51NetworkAttestorReleaseEvidence(raw) {
 export function assertTask51NetworkReceipt(value) {
   const current = value?.schema === TASK51_CURRENT_NETWORK_RECEIPT_SCHEMA;
   const lifecycle = current ? (value.publicStartupLifecycle ?? null) : null;
-  const blocked = Object.hasOwn(value ?? {}, "blockedOptionalPublicReads") ? value.blockedOptionalPublicReads : null;
+  const blocked = Object.hasOwn(value ?? {}, "blockedOptionalPublicReads")
+    ? value.blockedOptionalPublicReads
+    : null;
   if (blocked !== null) {
-    if (!current || !lifecycle) throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READS_REJECTED");
+    if (!current || !lifecycle)
+      throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READS_REJECTED");
     assertTask51BlockedOptionalPublicReads(blocked);
-  } else if (Object.hasOwn(value ?? {}, "blockedOptionalPublicReads")) throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READS_REJECTED");
+  } else if (Object.hasOwn(value ?? {}, "blockedOptionalPublicReads"))
+    throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READS_REJECTED");
   const stableEntry = Object.hasOwn(value ?? {}, "stableEntry")
     ? value.stableEntry
     : null;
@@ -1282,7 +1320,13 @@ export function assertTask51NetworkReceipt(value) {
     throw new Error("TASK51_CURRENT_STABLE_ENTRY_REJECTED");
   }
   if (lifecycle) {
-    assertTask51PublicStartupLifecycleReceipt(lifecycle, blocked ? { blockedOptionalPublicReads: blocked } : null);
+    assertTask51PublicStartupLifecycleReceipt(
+      lifecycle,
+      blocked ? { blockedOptionalPublicReads: blocked } : null
+    );
+    const blockedBranch = task51BlockedOptionalPublicReadBranch(
+      value.attestor?.branch
+    );
     if (
       Object.values(lifecycle.phaseBoundaries).some(
         (value) => value === null
@@ -1290,15 +1334,26 @@ export function assertTask51NetworkReceipt(value) {
       Date.parse(lifecycle.phaseBoundaries.strictStartedAt) -
         Date.parse(lifecycle.phaseBoundaries.quietStartedAt) <
         TASK51_AUTH_QUIET_MS ||
-      value.attestor?.branch !==
-        (blocked ? "codex/task51-stage-b-item5-source-closure-20261008" : "codex/task51-stage-b-public-bootstrap-contract-20260929")
+      (blocked
+        ? !blockedBranch
+        : value.attestor?.branch !== TASK51_PUBLIC_BOOTSTRAP_POLICY_BRANCH)
     )
       throw new Error("TASK51_PUBLIC_STARTUP_PHASE_REJECTED");
     // Only the fully typed, null-body native metadata envelope is exempt from
     // forbidden-key scanning. Unknown fields or actual body values are rejected.
-    const { publicStartupLifecycle: _metadata, blockedOptionalPublicReads: _blockedMetadata, ...rest } = value;
+    const {
+      publicStartupLifecycle: _metadata,
+      blockedOptionalPublicReads: _blockedMetadata,
+      ...rest
+    } = value;
     assertTask51ReceiptHasNoForbiddenFields(rest);
   } else assertTask51ReceiptHasNoForbiddenFields(value);
+  if (
+    current &&
+    task51BlockedOptionalPublicReadBranch(value.attestor?.branch) &&
+    (!lifecycle || blocked === null)
+  )
+    throw new Error("TASK51_PUBLIC_STARTUP_PHASE_REJECTED");
   if (
     !hasExactKeys(
       value,
@@ -1696,7 +1751,14 @@ export function buildTask51NetworkReceipt(
           ...(lifecycle
             ? { publicStartupLifecycle: structuredClone(lifecycle) }
             : {}),
-          ...(lifecycle && bindings.publicStartupLifecyclePlan?.blockedOptionalPublicReads ? { blockedOptionalPublicReads: structuredClone(bindings.publicStartupLifecyclePlan.blockedOptionalPublicReads) } : {}),
+          ...(lifecycle &&
+          bindings.publicStartupLifecyclePlan?.blockedOptionalPublicReads
+            ? {
+                blockedOptionalPublicReads: structuredClone(
+                  bindings.publicStartupLifecyclePlan.blockedOptionalPublicReads
+                ),
+              }
+            : {}),
           ...(lifecycle && bindings.publicStartupLifecyclePlan?.stableEntry
             ? {
                 stableEntry: structuredClone(

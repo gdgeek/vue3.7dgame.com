@@ -242,6 +242,11 @@ export const TASK51_FINITE_PUBLIC_READ_RESPONSES = finiteFreeze([
     byteLength: 323,
   },
 ]);
+const TASK51_BLOCKED_OPTIONAL_NATIVE_ERROR_TEXTS = new Set([
+  "net::ERR_BLOCKED_BY_CLIENT",
+  "net::ERR_BLOCKED_BY_CLIENT.Inspector",
+]);
+
 export function assertTask51BlockedOptionalPublicReadTerminals(terminals, plan, phaseBoundaries = null) {
   assertTask51BlockedOptionalPublicReads(plan?.blockedOptionalPublicReads);
   const keys = [
@@ -275,7 +280,7 @@ export function assertTask51BlockedOptionalPublicReadTerminals(terminals, plan, 
       proof.interceptStage !== "Request" || proof.interceptMethod !== "Fetch.failRequest" ||
       proof.interceptErrorReason !== "BlockedByClient" || proof.remoteDispatched !== false ||
       proof.httpStatus !== null || proof.byteLength !== null || proof.contentSha256 !== null ||
-      proof.nativeEvent !== "loadingFailed" || proof.nativeErrorText !== "net::ERR_BLOCKED_BY_CLIENT" ||
+      proof.nativeEvent !== "loadingFailed" || !TASK51_BLOCKED_OPTIONAL_NATIVE_ERROR_TEXTS.has(proof.nativeErrorText) ||
       !(proof.canceled === null || typeof proof.canceled === "boolean")
     ) throw new Error("TASK51_BLOCKED_OPTIONAL_PUBLIC_READ_TERMINAL_REJECTED");
     seen.add(proof.url); sequences.add(proof.sequence); nativeRequests.add(proof.requestId);
