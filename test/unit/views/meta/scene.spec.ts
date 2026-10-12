@@ -21,6 +21,10 @@ const mockDirty = ref(false);
 const mockUnconfirmedPersistence = ref(false);
 let mockUseActualSaveGuard = false;
 const mockResolveLeaveSave = vi.fn();
+const mockConfirmEditorSave = vi.fn();
+vi.mock("@/utils/confirmEditorSave", () => ({
+  confirmEditorSave: mockConfirmEditorSave,
+}));
 const mockAppStore = reactive({ language: "zh-CN" });
 const mockGetVerses = vi.fn();
 const mockRegisterToolbar = vi.fn();
@@ -32,11 +36,13 @@ const mockDrawerState = reactive({
   open: false,
   ready: false,
   dirty: false,
+  needsPersistence: false,
   saving: false,
   tab: null as "blockly" | "script" | null,
 });
 let mockReadDrawerData: () => unknown = () => undefined;
 let mockEmitDrawerSaved: (result: unknown) => void = () => {};
+let mockEmitDrawerState: (result: unknown) => void = () => {};
 
 vi.mock("vue-router", () => ({
   createRouter: vi.fn(() => ({
@@ -218,6 +224,8 @@ vi.mock("@/composables/useSceneSaveGuard", async (importOriginal) => {
             syncUnsavedChangesForBeforeUnload: vi.fn(),
             resolveLeaveSave: mockResolveLeaveSave,
             requestSceneSave: vi.fn(),
+            requestManualSceneSave: vi.fn(),
+            isManualSavePending: () => false,
             resolveUnsavedBeforeLeave: vi.fn(async () => true),
             handleBeforeUnload: vi.fn(),
             cleanupPendingResolver: vi.fn(),
@@ -249,8 +257,40 @@ vi.mock("@/components/ScriptDraftDialog.vue", () => ({
 vi.mock("@/components/VerseScriptDrawer.vue", () => ({
   default: defineComponent({
     name: "VerseScriptDrawerStub",
-    setup(_props, { expose }) {
-      expose({ getState: () => ({ ...mockDrawerState }) });
+    props: { verseId: Number, title: String, sceneData: Object },
+    emits: ["closed", "saved", "state-change"],
+    setup(props, { expose, emit }) {
+      mockReadDrawerData = () => props.sceneData;
+      mockEmitDrawerSaved = (result) => emit("saved", result);
+      mockEmitDrawerState = (result) => emit("state-change", result);
+      expose({
+        open: () => {
+          mockDrawerOpen();
+          mockDrawerState.open = true;
+          mockDrawerState.tab = "blockly";
+        },
+        close: async (assertActive: () => void = () => {}) => {
+          assertActive();
+          if (!mockDrawerAllowClose.value) return false;
+          Object.assign(mockDrawerState, {
+            open: false,
+            ready: false,
+            dirty: false,
+            needsPersistence: false,
+            saving: false,
+            tab: null,
+          });
+          emit("closed");
+          return true;
+        },
+        getState: () => ({ ...mockDrawerState }),
+        resolveBeforeLeave: async () => mockDrawerAllowClose.value,
+        closeAfterNavigation: async () => {
+          mockDrawerState.open = false;
+          emit("closed");
+          return true;
+        },
+      });
       return {};
     },
     template: "<div class='verse-script-drawer-stub'></div>",
@@ -265,10 +305,11 @@ vi.mock("@/components/MetaScriptDrawer.vue", () => ({
       title: String,
       metaData: Object,
     },
-    emits: ["closed", "saved"],
+    emits: ["closed", "saved", "state-change"],
     setup(props, { expose, emit }) {
       mockReadDrawerData = () => props.metaData;
       mockEmitDrawerSaved = (result) => emit("saved", result);
+      mockEmitDrawerState = (result) => emit("state-change", result);
       expose({
         open: () => {
           mockDrawerOpen();
@@ -278,6 +319,7 @@ vi.mock("@/components/MetaScriptDrawer.vue", () => ({
         close: async (assertActive: () => void = () => {}) => {
           assertActive();
           if (!mockDrawerAllowClose.value) return false;
+          mockDrawerState.needsPersistence = false;
           mockDrawerState.open = false;
           mockDrawerState.ready = false;
           mockDrawerState.tab = null;
@@ -441,6 +483,24 @@ async function mountSceneView(kind: "meta" | "verse" = "meta") {
         app._instance!.setupState as { isSavingVersion: boolean }
       ).isSavingVersion = value;
     },
+    startPreview: () =>
+      (
+        app._instance!.setupState as {
+          startSceneRuntimePreview: () => Promise<unknown>;
+        }
+      ).startSceneRuntimePreview(),
+    prepareScriptPublication: () =>
+      (
+        app._instance!.setupState as {
+          saveSceneBeforeScriptPublish: () => Promise<string | undefined>;
+        }
+      ).saveSceneBeforeScriptPublish(),
+    releaseScene: (payload: Record<string, unknown>) =>
+      (
+        app._instance!.setupState as {
+          releaseVerse: (payload: Record<string, unknown>) => Promise<void>;
+        }
+      ).releaseVerse(payload),
     persistSceneMutation: (response: Record<string, unknown>) =>
       (
         app._instance!.setupState as {
@@ -488,6 +548,8 @@ describe("views/meta/scene.vue", () => {
     mockGetVerse.mockReset();
     mockPutVerse.mockReset();
     mockResolveLeaveSave.mockReset();
+    mockConfirmEditorSave.mockReset();
+    mockConfirmEditorSave.mockResolvedValue("confirm");
     mockUnconfirmedPersistence.value = false;
     mockUseActualSaveGuard = false;
     mockAppStore.language = "zh-CN";
@@ -511,11 +573,13 @@ describe("views/meta/scene.vue", () => {
       open: false,
       ready: false,
       dirty: false,
+      needsPersistence: false,
       saving: false,
       tab: null,
     });
     mockReadDrawerData = () => undefined;
     mockEmitDrawerSaved = () => {};
+    mockEmitDrawerState = () => {};
 
     mockGetMeta.mockImplementation(async (id: number) => makeMetaResponse(id));
     mockGetVerses.mockResolvedValue({
@@ -533,6 +597,200 @@ describe("views/meta/scene.vue", () => {
     vi.useRealTimers();
     delete (document as Document & { modelContext?: unknown }).modelContext;
     vi.resetModules();
+  });
+
+  describe.each(["meta", "verse"] as const)(
+    "%s script persistence ownership",
+    (kind) => {
+      const ownerKind = kind === "meta" ? "entity" : "scene";
+      const revision = `sha256:${"a".repeat(64)}`;
+      const openReadyDrawer = async () => {
+        const registry = registerTools();
+        const page = await mountSceneView(kind);
+        sendReady("persistence-document");
+        await flushAsync();
+        await finishEditorLoading();
+        const opening = registry
+          .get(`xrugc_open_${ownerKind}_script_editor`)!
+          .execute({});
+        await flushAsync();
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: document.querySelector("iframe")?.contentWindow,
+            origin: "https://editor.example.test",
+            data: {
+              type: "RESPONSE",
+              requestId: "webmcp-request",
+              payload: {
+                action: `webmcp-get-${ownerKind}-state`,
+                hostSessionId: mockHostSession,
+                ok: true,
+                entityId: 1,
+                sceneId: 1,
+                meta: makeMetaResponse(1).data.data,
+                verse: makeMetaResponse(1).data.data,
+                events: null,
+                changed: false,
+                loading: false,
+                entityVersion: "v1",
+                sceneVersion: "v1",
+                contextGeneration: 1,
+              },
+            },
+          })
+        );
+        await opening;
+        Object.assign(mockDrawerState, { ready: true, needsPersistence: true });
+        return { registry, page };
+      };
+      const notify = (ownerRevision = revision, editorKey = 1) =>
+        mockEmitDrawerState({
+          editorKey,
+          ownerRevision,
+          state: { ...mockDrawerState },
+        });
+      const readWorkspace = (registry: ReturnType<typeof registerTools>) =>
+        registry.get(`xrugc_get_${ownerKind}_workspace_context`)!.execute({});
+
+      it("retains persistence after closing the drawer without marking 3D edits dirty", async () => {
+        const { registry, page } = await openReadyDrawer();
+        notify();
+        await expect(readWorkspace(registry)).resolves.toMatchObject({
+          script: { dirty: false, needsPersistence: true },
+        });
+        expect(mockDirty.value).toBe(false);
+        await registry
+          .get(`xrugc_close_${ownerKind}_script_editor`)!
+          .execute({});
+        await expect(readWorkspace(registry)).resolves.toMatchObject({
+          script: { open: false, needsPersistence: true },
+        });
+        // A late teardown notification must not erase the retained requirement.
+        notify();
+        await expect(readWorkspace(registry)).resolves.toMatchObject({
+          script: { needsPersistence: true },
+        });
+        if (kind === "verse") {
+          const requestsBeforeBlockedActions =
+            mockSendRequest.mock.calls.length;
+          await expect(page.startPreview()).rejects.toThrow(
+            "请先保存当前 Blockly 工作区"
+          );
+          await expect(
+            registry.get("xrugc_stage_scene_publication")!.execute({})
+          ).resolves.toMatchObject({ isError: true, errorCode: "tool_failed" });
+          expect(mockSendRequest).toHaveBeenCalledTimes(
+            requestsBeforeBlockedActions
+          );
+          const failure = vi.fn();
+          const confirmation = vi.fn();
+          vi.stubGlobal("ElMessage", { error: failure, info: vi.fn() });
+          vi.stubGlobal("ElMessageBox", { confirm: confirmation });
+          await page.releaseScene({
+            verse: {
+              children: { modules: [{ parameters: { title: "live" } }] },
+            },
+          });
+          expect(confirmation).not.toHaveBeenCalled();
+          expect(failure).toHaveBeenCalledWith(
+            "请先保存当前 Blockly 工作区，再运行或发布场景"
+          );
+        }
+      });
+
+      it("ignores stale revisions and clears only a current confirmed clean state", async () => {
+        const { registry } = await openReadyDrawer();
+        notify();
+        mockDrawerState.needsPersistence = false;
+        notify("old-revision");
+        notify(revision, 2);
+        await expect(readWorkspace(registry)).resolves.toMatchObject({
+          script: { needsPersistence: true },
+        });
+        notify();
+        await expect(readWorkspace(registry)).resolves.toMatchObject({
+          script: { needsPersistence: false },
+        });
+      });
+
+      it("clears the retained requirement after a matching script save receipt", async () => {
+        const { registry } = await openReadyDrawer();
+        notify();
+        mockEmitDrawerSaved({
+          [kind === "meta" ? "entityId" : "sceneId"]: 1,
+          previousRevision: revision,
+          serverRevision: `sha256:${"c".repeat(64)}`,
+          [kind === "meta" ? "metaCode" : "verseCode"]: {
+            blockly: "{}",
+            js: "canonical()",
+            lua: "canonical()",
+          },
+        });
+        mockDrawerState.needsPersistence = false;
+        await expect(readWorkspace(registry)).resolves.toMatchObject({
+          script: { needsPersistence: false },
+        });
+        expect(mockDirty.value).toBe(false);
+      });
+    }
+  );
+
+  it("returns the confirmed parent revision after saving 3D edits before script publication", async () => {
+    mockUseActualSaveGuard = true;
+    vi.stubGlobal("ElMessage", {
+      success: vi.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
+    });
+    const scriptRevision = `sha256:${"b".repeat(64)}`;
+    const sceneRevision = `sha256:${"c".repeat(64)}`;
+    // Matching script receipt handling is exercised above. Start this parent
+    // callback with its acknowledged B, then make the actual 3D save advance C.
+    mockGetVerse.mockImplementation(async (id: number) => ({
+      data: { ...makeMetaResponse(id).data, serverRevision: scriptRevision },
+    }));
+    const page = await mountSceneView("verse");
+    sendReady("script-publication-3d-save");
+    await flushAsync();
+    await finishEditorLoading();
+    mockPutVerse.mockResolvedValueOnce({
+      data: { serverRevision: sceneRevision },
+    });
+    const respond = (payload: object) =>
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          source: document.querySelector("iframe")?.contentWindow,
+          origin: "https://editor.example.test",
+          data: {
+            type: "RESPONSE",
+            requestId: "webmcp-request",
+            payload: { hostSessionId: mockHostSession, ...payload },
+          },
+        })
+      );
+    const liveScene = {
+      children: { modules: [{ parameters: { title: "Unsaved 3D edit" } }] },
+    };
+    const preparation = page.prepareScriptPublication();
+    await flushAsync();
+    respond({
+      action: "webmcp-get-scene-state",
+      ok: true,
+      verse: liveScene,
+      changed: true,
+      loading: false,
+      sceneVersion: "live-v2",
+    });
+    await flushAsync();
+    expect(mockSendRequest).toHaveBeenLastCalledWith("save-before-leave");
+    respond({ action: "save-before-leave", verse: liveScene, events: null });
+    await expect(preparation).resolves.toBe(sceneRevision);
+    expect(mockPutVerse).toHaveBeenCalledWith(
+      1,
+      { data: liveScene },
+      expect.objectContaining({ expectedRevision: scriptRevision })
+    );
+    expect(mockGetVerse).toHaveBeenCalledOnce(); // initial load; no preparation refetch
   });
 
   describe("entity script drawer host", () => {
@@ -1129,9 +1387,84 @@ describe("views/meta/scene.vue", () => {
   );
 
   describe.each(["meta", "verse"] as const)(
+    "%s unified manual save entry points",
+    (kind) => {
+      it.each(["toolbar", "editor"])(
+        "confirms %s saves and preserves edits on cancellation",
+        async (entry) => {
+          mockUseActualSaveGuard = true;
+          vi.stubGlobal("ElMessage", {
+            error: vi.fn(),
+            info: vi.fn(),
+            success: vi.fn(),
+          });
+          await mountSceneView(kind);
+          sendReady("manual-confirmation");
+          await flushAsync();
+          await finishEditorLoading();
+          const put = kind === "meta" ? mockPutMeta : mockPutVerse;
+          const respond = (payload: object) =>
+            window.dispatchEvent(
+              new MessageEvent("message", {
+                source: document.querySelector("iframe")?.contentWindow,
+                origin: "https://editor.example.test",
+                data: { type: "RESPONSE", payload },
+              })
+            );
+          const data = {
+            meta: makeMetaResponse(1).data.data,
+            events: null,
+            verse: makeMetaResponse(1).data.data,
+          };
+          const save = () =>
+            entry === "toolbar"
+              ? mockRegisterToolbar.mock.calls.at(-1)![1].onSave()
+              : respond({ action: "save", ...data });
+          mockSendRequest.mockClear();
+          mockConfirmEditorSave.mockRejectedValueOnce("cancel");
+          save();
+          await flushAsync();
+          expect(mockConfirmEditorSave).toHaveBeenCalledOnce();
+          expect(mockConfirmEditorSave.mock.calls[0][1]).toMatchObject({
+            cancelButtonText: "common.cancel",
+            confirmButtonText: "common.button.save",
+          });
+          expect(mockSendRequest).not.toHaveBeenCalledWith("save-before-leave");
+          expect(put).not.toHaveBeenCalled();
+          if (entry === "editor")
+            expect(mockUpdateToolbarStatus).toHaveBeenLastCalledWith(
+              expect.anything(),
+              "dirty"
+            );
+          // After cancelling, either entry can confirm and request the same snapshot path.
+          save();
+          await flushAsync();
+          expect(mockSendRequest).toHaveBeenCalledWith("save-before-leave");
+          expect(put).not.toHaveBeenCalled();
+          put.mockRejectedValueOnce({
+            isAxiosError: true,
+            response: { status: 409 },
+          });
+          respond(
+            entry === "editor"
+              ? { action: "save-before-leave", noChange: true }
+              : { action: "save-before-leave", ...data }
+          );
+          await flushAsync();
+          expect(put).toHaveBeenCalledOnce();
+          expect(mockUpdateToolbarStatus).toHaveBeenLastCalledWith(
+            expect.anything(),
+            "dirty"
+          );
+        }
+      );
+    }
+  );
+
+  describe.each(["meta", "verse"] as const)(
     "%s manual save failures",
     (kind) => {
-      it.each(["save", "save-before-leave"])(
+      it.each(["save-before-leave"])(
         "reports a rejected %s and never acknowledges a noChange retry",
         async (action) => {
           const errorMessage = vi.fn();

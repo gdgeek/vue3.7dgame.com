@@ -2,7 +2,7 @@
  * Tests for src/layout/components/NavBar/components/Breadcrumb.vue
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { createApp, nextTick } from "vue";
+import { createApp, nextTick, ref } from "vue";
 
 // ─── Mock vue-router ───────────────────────────────────────────────────────────
 const mockRoute = {
@@ -131,6 +131,51 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
       }
     }
   );
+
+  it("keeps script edits visible during saving and prefers real user dirty state", async () => {
+    mockRoute.path = "/meta/script";
+    const dirty = ref(false);
+    const toolbar = (
+      await import("@/composables/useEditorVersionToolbar")
+    ).useEditorVersionToolbar();
+    toolbar.registerToolbar("meta-script-editor", {
+      status: "dirty",
+      getUnsavedChanges: () => dirty.value,
+    });
+    const { el } = await mount();
+    expect(el.querySelector(".editor-mode-tag__dirty")).toBeNull();
+    dirty.value = true;
+    toolbar.updateToolbarStatus("meta-script-editor", "saving");
+    await nextTick();
+    expect(el.querySelector(".editor-mode-tag__dirty")).not.toBeNull();
+    dirty.value = false;
+    await nextTick();
+    expect(el.querySelector(".editor-mode-tag__dirty")).toBeNull();
+    toolbar.unregisterToolbar("meta-script-editor");
+  });
+
+  it("preserves the scene status fallback and clears a previous script getter on owner changes", async () => {
+    mockRoute.path = "/verse/scene";
+    const toolbar = (
+      await import("@/composables/useEditorVersionToolbar")
+    ).useEditorVersionToolbar();
+    toolbar.registerToolbar("verse-script-editor", {
+      status: "saving",
+      getUnsavedChanges: () => true,
+    });
+    toolbar.registerToolbar("verse-scene-editor", { status: "saved" });
+    const { el } = await mount();
+    expect(el.querySelector(".crumb-unsaved-dot")).toBeNull();
+    toolbar.updateToolbarStatus("verse-script-editor", "dirty");
+    await nextTick();
+    expect(el.querySelector(".crumb-unsaved-dot")).toBeNull();
+    toolbar.updateToolbarStatus("verse-scene-editor", "dirty");
+    await nextTick();
+    expect(el.querySelector(".crumb-unsaved-dot")).not.toBeNull();
+    toolbar.unregisterToolbar("verse-scene-editor");
+    await nextTick();
+    expect(el.querySelector(".crumb-unsaved-dot")).toBeNull();
+  });
 
   it("handles unknown path — returns workspace breadcrumb key", async () => {
     mockRoute.meta = { title: "SomeTitle" };

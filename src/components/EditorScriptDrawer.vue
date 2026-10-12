@@ -14,7 +14,12 @@
   >
     <template #header="{ titleId, titleClass }">
       <h2 :id="titleId" :class="titleClass">
-        {{ $t(editorLabelKey) }}{{ title ? ` · ${title}` : "" }}
+        <EditorModeTag
+          mode="script"
+          :label="String($t(editorLabelKey))"
+          :dirty="Boolean(scriptEditor?.hasUnsavedChanges)"
+        ></EditorModeTag>
+        <span v-if="title" class="script-drawer-title"> · {{ title }}</span>
       </h2>
       <EditorActionGroup
         class="script-drawer-actions"
@@ -64,18 +69,20 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref, type Component } from "vue";
+import { onBeforeUnmount, ref, watch, type Component } from "vue";
+import EditorModeTag from "./EditorModeTag.vue";
 import EditorActionGroup from "./EditorActionGroup.vue";
 import type {
   ScriptDrawerEditor,
   ScriptDrawerState,
+  ScriptDrawerStateChange,
 } from "./script-drawer-types";
 import {
   faClockRotateLeft,
   faFloppyDisk,
 } from "@fortawesome/free-solid-svg-icons";
 
-defineProps<{
+const props = defineProps<{
   editorComponent: Component;
   editorKey: number;
   editorProps: Record<string, unknown>;
@@ -83,7 +90,11 @@ defineProps<{
   editorLabelKey: string;
   saveLabelKey: string;
 }>();
-const emit = defineEmits<{ closed: []; saved: [payload: unknown] }>();
+const emit = defineEmits<{
+  closed: [];
+  saved: [payload: unknown];
+  "state-change": [payload: ScriptDrawerStateChange];
+}>();
 const visible = ref(false);
 const scriptEditor = ref<ScriptDrawerEditor>();
 let pendingClose: Promise<boolean> | null = null;
@@ -164,9 +175,31 @@ const getState = (): ScriptDrawerState => ({
     Boolean(scriptEditor.value) &&
     !scriptEditor.value!.editorContentLoading,
   dirty: Boolean(scriptEditor.value?.hasUnsavedChanges),
+  needsPersistence: Boolean(scriptEditor.value?.needsPersistence),
   saving: Boolean(scriptEditor.value?.isSaving),
   tab: visible.value ? (scriptEditor.value?.activeName ?? null) : null,
 });
+watch(
+  () => [
+    props.editorKey,
+    visible.value,
+    scriptEditor.value?.editorContentLoading,
+    scriptEditor.value?.hasUnsavedChanges,
+    scriptEditor.value?.needsPersistence,
+    scriptEditor.value?.isSaving,
+    scriptEditor.value?.ownerRevision,
+    scriptEditor.value?.activeName,
+  ],
+  () => {
+    if (!scriptEditor.value) return;
+    emit("state-change", {
+      editorKey: props.editorKey,
+      ownerRevision: scriptEditor.value.ownerRevision ?? null,
+      state: getState(),
+    });
+  },
+  { flush: "sync" }
+);
 onBeforeUnmount(() => {
   invalidateSession();
   finishClosing?.(false);
@@ -212,11 +245,21 @@ defineExpose({
   }
 
   .el-drawer__title {
+    display: flex;
+    gap: 8px;
+    align-items: center;
     min-width: 0;
     margin: 0;
     overflow: hidden;
     font-size: 20px;
     font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .script-drawer-title {
+    min-width: 0;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }

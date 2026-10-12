@@ -103,6 +103,7 @@ function createBase(options: UseScriptEditorBaseOptions) {
     JavaScriptCode: ref(""),
     resolveUnsavedChangesBeforeLeave: vi.fn(async () => true),
     hasUnsavedChanges: ref(false),
+    needsPersistence: ref(false),
     draftVersions: ref([]),
     versionDialogVisible: ref(false),
     autoSaveEnabled: ref(false),
@@ -121,6 +122,7 @@ function createBase(options: UseScriptEditorBaseOptions) {
     getEditorInitState: () => ({
       data: snapshot.blocklyData,
       code: { js: snapshot.js, lua: snapshot.lua },
+      editingBaseline: { canonical: true },
       persisted: { data: snapshot.blocklyData },
       hostSessionId: "test-script-session",
     }),
@@ -173,6 +175,8 @@ function mountScript(
     resolveBeforeClose: () => Promise<boolean>;
     saveable: boolean;
     editorContentLoading: boolean;
+    needsPersistence: boolean;
+    ownerRevision: string | null;
     openVersionDialog: () => void;
   };
   let mounted = true;
@@ -378,6 +382,30 @@ describe("embedded meta script editor", () => {
     expect(root.querySelector("#editor")).not.toBeNull();
     unmount();
     expect(mocks.unregisterToolbar).toHaveBeenCalledWith("meta-script-editor");
+  });
+
+  it("forwards the session editing baseline and exposes persistence without a user edit marker", async () => {
+    route.name = "MetaScript";
+    route.query.id = "7";
+    const { base, vm } = mountScript();
+    await flushAsync();
+    expect(base.postMessage).toHaveBeenCalledWith(
+      "INIT",
+      expect.objectContaining({
+        config: expect.objectContaining({
+          editingBaseline: { canonical: true },
+          persisted: { data: JSON.parse(savedMeta().metaCode.blockly) },
+        }),
+      })
+    );
+    const toolbar = mocks.registerToolbar.mock.lastCall![1];
+    base.needsPersistence.value = true;
+    await nextTick();
+    expect(vm.needsPersistence).toBe(true);
+    expect(vm.ownerRevision).toBe(revision);
+    expect(toolbar.getUnsavedChanges()).toBe(false);
+    base.hasUnsavedChanges.value = true;
+    expect(toolbar.getUnsavedChanges()).toBe(true);
   });
 
   it("ignores a load that finishes after close and fetches a fresh session on reopen", async () => {

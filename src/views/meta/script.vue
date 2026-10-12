@@ -403,6 +403,7 @@ const initEditor = (overrideData?: unknown) => {
         data: overrideData ?? initState.data,
         code: initState.code,
         persisted: initState.persisted,
+        editingBaseline: initState.editingBaseline,
         hostSessionId: initState.hostSessionId,
         userInfo: {
           id: userStore.userInfo?.id || null,
@@ -481,6 +482,7 @@ const {
   JavaScriptCode,
   resolveUnsavedChangesBeforeLeave,
   hasUnsavedChanges,
+  needsPersistence = ref(false),
   draftVersions,
   versionDialogVisible,
   autoSaveEnabled,
@@ -619,6 +621,7 @@ const registerMetaScriptTools = () => {
       editable: Boolean(meta.value?.editable),
       ready: isScriptViewActive && editorContentReady.value,
       dirty: hasUnsavedChanges.value,
+      needsPersistence: needsPersistence.value,
       saving: isSaving.value,
     }),
     getMetaScript: async ({ includeWorkspace, includeGeneratedCode }) => {
@@ -830,6 +833,7 @@ const registerScriptBlockTools = () => {
       editable: Boolean(meta.value?.editable),
       ready: isScriptViewActive && editorContentReady.value,
       dirty: hasUnsavedChanges.value,
+      needsPersistence: needsPersistence.value,
       saving: isSaving.value,
     }),
     getBlockCatalog: async (filters) =>
@@ -954,6 +958,7 @@ const activateToolbar = () => {
   if (props.embedded) return;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getUnsavedChanges: () => hasUnsavedChanges.value,
     getLoadingState: () => ({
       loading: editorContentLoading.value,
       blocked: editorContentLoading.value,
@@ -1267,6 +1272,8 @@ defineExpose({
   isSaving,
   editorContentLoading,
   hasUnsavedChanges,
+  needsPersistence,
+  ownerRevision: computed(() => meta.value?.serverRevision ?? null),
   activeName,
   resolveBeforeClose: () =>
     resolveUnsavedChangesBeforeLeave({ showDiscardInfo: true }),

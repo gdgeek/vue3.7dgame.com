@@ -12,6 +12,9 @@ const setup = () => {
     (action: string): string | undefined => `${action}-${++sequence}`
   );
   const confirmDialog = vi.fn(() => Promise.reject("close"));
+  const confirmManualSaveDialog = vi.fn<() => Promise<unknown>>(() =>
+    Promise.resolve()
+  );
   const pendingRestorePayload = ref<unknown>(null);
   const guard = useSceneSaveGuard({
     sendRequest,
@@ -19,6 +22,7 @@ const setup = () => {
     pendingRestorePayload,
     isSavingVersion: ref(false),
     confirmDialog,
+    confirmManualSaveDialog,
   });
   const respond = (requestId: string, changed: boolean) => {
     const resolver = pendingRequests.get(requestId);
@@ -35,6 +39,7 @@ const setup = () => {
     guard,
     sendRequest,
     confirmDialog,
+    confirmManualSaveDialog,
     pendingRestorePayload,
     pendingRequests,
     respond,
@@ -159,5 +164,82 @@ describe("useSceneSaveGuard persistence state", () => {
     respond(newRequest, true);
     await newPoll;
     expect(guard.hasUnsavedChangesBeforeUnload.value).toBe(true);
+  });
+});
+
+describe("manual scene save confirmation", () => {
+  it.each(["cancel", "close"])(
+    "preserves edits without saving on %s",
+    async (action) => {
+      const {
+        guard,
+        sendRequest,
+        confirmManualSaveDialog,
+        pendingRestorePayload,
+      } = setup();
+      pendingRestorePayload.value = { meta: { title: "unsaved" } };
+      guard.hasUnsavedChangesBeforeUnload.value = true;
+      confirmManualSaveDialog.mockRejectedValueOnce(action);
+      expect(await guard.requestManualSceneSave()).toBe(false);
+      expect(sendRequest).not.toHaveBeenCalled();
+      expect(guard.hasUnsavedChangesBeforeUnload.value).toBe(true);
+      expect(pendingRestorePayload.value).toEqual({
+        meta: { title: "unsaved" },
+      });
+    }
+  );
+
+  it("shares a single confirmation and save across repeated entry points", async () => {
+    const { guard, sendRequest, confirmManualSaveDialog } = setup();
+    let confirm!: () => void;
+    confirmManualSaveDialog.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          confirm = resolve;
+        })
+    );
+    const first = guard.requestManualSceneSave();
+    expect(guard.requestManualSceneSave()).toBe(first);
+    expect(confirmManualSaveDialog).toHaveBeenCalledOnce();
+    expect(sendRequest).not.toHaveBeenCalled();
+    // A timer must not save behind the open confirmation window.
+    expect(await guard.requestSceneSave("auto")).toBe(false);
+    confirm();
+    await Promise.resolve();
+    expect(sendRequest).toHaveBeenCalledOnce();
+    expect(sendRequest).toHaveBeenCalledWith("save-before-leave");
+    guard.resolveLeaveSave(true);
+    expect(await first).toBe(true);
+  });
+
+  it.each(["resetUnsavedState", "cleanupPendingResolver"] as const)(
+    "does not save a stale target after %s",
+    async (reset) => {
+      const { guard, sendRequest, confirmManualSaveDialog } = setup();
+      let confirm!: () => void;
+      confirmManualSaveDialog.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            confirm = resolve;
+          })
+      );
+      const pending = guard.requestManualSceneSave();
+      guard[reset]();
+      confirm();
+      expect(await pending).toBe(false);
+      expect(sendRequest).not.toHaveBeenCalled();
+    }
+  );
+
+  it("can confirm and save after cancelling an earlier attempt", async () => {
+    const { guard, sendRequest, confirmManualSaveDialog } = setup();
+    confirmManualSaveDialog.mockRejectedValueOnce("cancel");
+    expect(await guard.requestManualSceneSave()).toBe(false);
+    const pending = guard.requestManualSceneSave();
+    await Promise.resolve();
+    expect(sendRequest).toHaveBeenCalledOnce();
+    expect(sendRequest).toHaveBeenCalledWith("save-before-leave");
+    guard.resolveLeaveSave(true);
+    expect(await pending).toBe(true);
   });
 });
