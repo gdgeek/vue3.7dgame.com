@@ -124,7 +124,7 @@ describe("CI/CD release workflow", () => {
       "publish",
     ]);
     expect(buildRefs).toEqual(["main", "develop", "publish"]);
-    expect(buildJob).toContain("if: github.event_name == 'push'");
+    expect(buildCondition).toContain("github.event_name == 'push'");
   });
 
   it("tests release pull requests without granting them image writes", () => {
@@ -138,10 +138,13 @@ describe("CI/CD release workflow", () => {
       "develop",
       "publish",
     ]);
-    expect(buildJob).toContain("if: github.event_name == 'push'");
+    expect(buildJob).toContain("github.event_name == 'push'");
+    expect(buildJob).toContain(
+      "github.event_name == 'workflow_dispatch' && inputs.publish_candidate"
+    );
   });
 
-  it("emits only a branch tag plus publish-only latest", () => {
+  it("separates release tags from explicitly requested candidate tags", () => {
     const buildJob = getJobBlocks(workflow).build;
     const metadataTags = buildJob
       .split(/\r?\n/)
@@ -149,8 +152,9 @@ describe("CI/CD release workflow", () => {
       .filter((line) => line.startsWith("type="));
 
     expect(metadataTags).toEqual([
-      "type=ref,event=branch",
-      "type=raw,value=latest,enable=${{ github.ref == 'refs/heads/publish' }}",
+      "type=ref,event=branch,enable=${{ github.event_name == 'push' }}",
+      "type=raw,value=latest,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/publish' }}",
+      "type=raw,value=candidate-${{ github.sha }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.publish_candidate }}",
     ]);
     expect(buildJob).toContain("digest: ${{ steps.publish.outputs.digest }}");
     expect(buildJob).toContain("id: build");
@@ -176,7 +180,29 @@ describe("CI/CD release workflow", () => {
       .filter((line) => line.includes("value=latest"));
 
     expect(latestRules).toEqual([
-      "type=raw,value=latest,enable=${{ github.ref == 'refs/heads/publish' }}",
+      "type=raw,value=latest,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/publish' }}",
     ]);
+  });
+
+  it("defaults manual runs to validation and checks the exact candidate tag before building", () => {
+    const dispatch = getIndentedBlock(
+      getIndentedBlock(workflow, "on", 0),
+      "workflow_dispatch",
+      2
+    );
+    expect(dispatch).toContain("publish_candidate:");
+    expect(dispatch).toContain("type: boolean");
+    expect(dispatch).toContain("default: false");
+    const buildJob = getJobBlocks(workflow).build;
+    expect(buildJob).toContain("flavor: latest=false");
+    expect(buildJob).toContain(
+      "CANDIDATE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:candidate-${{ github.sha }}"
+    );
+    const guard = buildJob.indexOf('test "$IMAGE_TAGS" = "$CANDIDATE_IMAGE"');
+    const build = buildJob.indexOf(
+      "Build the complete image before publication"
+    );
+    expect(guard).toBeGreaterThan(0);
+    expect(build).toBeGreaterThan(guard);
   });
 });
