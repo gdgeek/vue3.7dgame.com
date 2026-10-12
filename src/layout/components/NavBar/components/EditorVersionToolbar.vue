@@ -1,86 +1,236 @@
 <template>
   <div v-if="editorVersionToolbarState.active" class="editor-version-toolbar">
-    <el-button
-      v-if="editorVersionToolbarState.onRunPreview"
-      class="toolbar-entry-btn"
-      size="small"
-      @click="runPreview"
-    >
-      <el-icon class="entry-icon">
-        <VideoPlay></VideoPlay>
-      </el-icon>
-      <span class="entry-label">{{ t("common.unityPreview.entry") }}</span>
-    </el-button>
-    <el-button class="toolbar-entry-btn" size="small" @click="openDialog">
-      <font-awesome-icon
-        class="entry-icon"
-        :icon="['fas', 'clock-rotate-left']"
-      ></font-awesome-icon>
-      <span class="entry-label">{{ t("common.scriptDraft.entry") }}</span>
-    </el-button>
+    <EditorActionGroup :actions="actions"></EditorActionGroup>
+    <EntityInfoDialog
+      v-if="isEntityEditor"
+      v-model="entityInfoVisible"
+      :entity-id="entityId"
+    ></EntityInfoDialog>
+    <SceneInfoDialog
+      v-if="isSceneEditor"
+      v-model="sceneInfoVisible"
+      :scene-id="entityId"
+    ></SceneInfoDialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, defineAsyncComponent, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
+import {
+  faCode,
+  faCube,
+  faLayerGroup,
+  faPlay,
+  faClockRotateLeft,
+  faBoxArchive,
+} from "@fortawesome/free-solid-svg-icons";
+import EditorActionGroup, {
+  type EditorAction,
+} from "@/components/EditorActionGroup.vue";
 import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
-import { VideoPlay } from "@element-plus/icons-vue";
 
+const EntityInfoDialog = defineAsyncComponent(
+  () => import("@/components/Meta/EntityInfoDialog.vue")
+);
+const SceneInfoDialog = defineAsyncComponent(
+  () => import("@/components/SceneInfoDialog.vue")
+);
 const { t } = useI18n();
-const { editorVersionToolbarState, openDialog, runPreview } =
-  useEditorVersionToolbar();
+const route = useRoute();
+const routePath = computed(() => route?.path ?? "");
+const isEntityEditor = computed(() => routePath.value === "/meta/scene");
+const isSceneEditor = computed(() => routePath.value === "/verse/scene");
+const entityId = computed(() => {
+  const value = route?.query?.id;
+  return Number(Array.isArray(value) ? value[0] : value);
+});
+const entityInfoVisible = ref(false);
+const sceneInfoVisible = ref(false);
+watch(routePath, () => {
+  entityInfoVisible.value = false;
+  sceneInfoVisible.value = false;
+});
+const {
+  editorVersionToolbarState,
+  openDialog,
+  runPreview,
+  openScript,
+  openPublications,
+} = useEditorVersionToolbar();
+const loadingState = computed(
+  () =>
+    editorVersionToolbarState.getLoadingState?.() ?? {
+      loading: false,
+      blocked: false,
+    }
+);
+const sceneInfoButtonClass = computed(() =>
+  isSceneEditor.value && editorVersionToolbarState.status === "dirty"
+    ? "toolbar-entry-btn toolbar-entry-btn--scene-info is-dirty"
+    : "toolbar-entry-btn toolbar-entry-btn--scene-info"
+);
+const entityInfoButtonClass = computed(() =>
+  !isSceneEditor.value && editorVersionToolbarState.status === "dirty"
+    ? "toolbar-entry-btn toolbar-entry-btn--entity-info is-dirty"
+    : "toolbar-entry-btn toolbar-entry-btn--entity-info"
+);
+const actions = computed<EditorAction[]>(() => [
+  ...(isSceneEditor.value
+    ? [
+        {
+          id: "scene-info",
+          label: t("verse.toolbar.info"),
+          icon: faLayerGroup,
+          iconOnly: true,
+          class: sceneInfoButtonClass.value,
+          onClick: () => {
+            if (editorVersionToolbarState.status === "dirty") {
+              editorVersionToolbarState.onSave?.();
+              return;
+            }
+            sceneInfoVisible.value = true;
+          },
+        },
+      ]
+    : []),
+  ...(isEntityEditor.value
+    ? [
+        {
+          id: "entity-info",
+          label: t("meta.scene.editorInfo"),
+          icon: faCube,
+          iconOnly: true,
+          class: entityInfoButtonClass.value,
+          onClick: () => {
+            if (editorVersionToolbarState.status === "dirty") {
+              editorVersionToolbarState.onSave?.();
+              return;
+            }
+            entityInfoVisible.value = true;
+          },
+        },
+      ]
+    : []),
+  ...(editorVersionToolbarState.onRunPreview
+    ? [
+        {
+          id: "run",
+          label: t(
+            isSceneEditor.value
+              ? "verse.toolbar.run"
+              : "common.unityPreview.entry"
+          ),
+          tooltip: t("common.unityPreview.entry"),
+          icon: faPlay,
+          primary: true,
+          class: "toolbar-entry-btn toolbar-entry-btn--run",
+          onClick: runPreview,
+          loading: loadingState.value.loading,
+          disabled: loadingState.value.blocked,
+        },
+      ]
+    : []),
+  ...(editorVersionToolbarState.onOpenPublications
+    ? [
+        {
+          id: "publications",
+          label: t(
+            isSceneEditor.value
+              ? "verse.toolbar.versions"
+              : "common.publicationHistory.title"
+          ),
+          tooltip: t("common.publicationHistory.title"),
+          icon: faBoxArchive,
+          class: "toolbar-entry-btn",
+          onClick: openPublications,
+        },
+      ]
+    : []),
+  {
+    id: "versions",
+    label: t(
+      isSceneEditor.value ? "verse.toolbar.history" : "common.scriptDraft.entry"
+    ),
+    tooltip: t("common.scriptDraft.entry"),
+    icon: faClockRotateLeft,
+    class: "toolbar-entry-btn",
+    onClick: openDialog,
+    loading: loadingState.value.loading,
+    disabled: loadingState.value.blocked,
+  },
+  ...(editorVersionToolbarState.onOpenScript
+    ? [
+        {
+          id: "script",
+          label: t(
+            isSceneEditor.value
+              ? "verse.toolbar.script"
+              : "route.project.scriptEditor"
+          ),
+          tooltip: t("route.project.scriptEditor"),
+          icon: faCode,
+          class: "toolbar-entry-btn",
+          onClick: openScript,
+          loading: loadingState.value.loading,
+          disabled: loadingState.value.blocked,
+        },
+      ]
+    : []),
+]);
 </script>
 
 <style lang="scss" scoped>
 .editor-version-toolbar {
   display: flex;
-  gap: 8px;
   align-items: center;
   margin-left: 4px;
 }
 
-.toolbar-entry-btn {
-  height: 32px;
-  padding: 0 14px;
-  border-radius: 999px;
+.editor-version-toolbar :deep(.toolbar-entry-btn--scene-info) {
+  color: #2f9e44;
 }
 
-.entry-icon {
-  margin-right: 6px;
+.editor-version-toolbar
+  :deep(.toolbar-entry-btn--scene-info:hover:not(:disabled)) {
+  color: #2f9e44;
+  background: color-mix(in srgb, #2f9e44 12%, transparent);
 }
 
-.toolbar-entry-btn :deep(.el-icon.entry-icon) {
-  margin-right: 6px;
+.editor-version-toolbar :deep(.toolbar-entry-btn--scene-info.is-dirty) {
+  color: #d97706;
 }
 
-@container app-navbar (width <= 1200px) {
+.editor-version-toolbar :deep(.toolbar-entry-btn--entity-info) {
+  color: #2f9e44;
+}
+
+.editor-version-toolbar
+  :deep(.toolbar-entry-btn--entity-info:hover:not(:disabled)) {
+  color: #2f9e44;
+  background: color-mix(in srgb, #2f9e44 12%, transparent);
+}
+
+.editor-version-toolbar :deep(.toolbar-entry-btn--entity-info.is-dirty) {
+  color: #d97706;
+}
+
+.editor-version-toolbar
+  :deep(.toolbar-entry-btn--entity-info.is-dirty:hover:not(:disabled)) {
+  color: #d97706;
+  background: color-mix(in srgb, #d97706 14%, transparent);
+}
+
+.editor-version-toolbar
+  :deep(.toolbar-entry-btn--scene-info.is-dirty:hover:not(:disabled)) {
+  color: #d97706;
+  background: color-mix(in srgb, #d97706 14%, transparent);
+}
+
+@container app-navbar (width <= 900px) {
   .editor-version-toolbar {
-    gap: 4px;
     margin-left: 0;
-  }
-
-  .toolbar-entry-btn {
-    width: 40px;
-    min-width: 40px;
-    height: 40px;
-    padding: 0;
-  }
-
-  .entry-icon,
-  .toolbar-entry-btn :deep(.el-icon.entry-icon) {
-    margin-right: 0;
-  }
-
-  .entry-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
   }
 }
 </style>

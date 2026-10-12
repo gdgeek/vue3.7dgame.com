@@ -26,6 +26,8 @@ interface FetchDefaultInfoOptions {
   forceRefresh?: boolean;
 }
 
+const defaultInfoRequests = new WeakMap<object, Promise<void>>();
+
 // Cookie helper functions
 function setCookie(name: string, value: string, days: number) {
   const expires = new Date();
@@ -65,6 +67,14 @@ function getDomainForQuery(): string {
   return domain;
 }
 
+function getStoredUserPreference(key: "language" | "appTheme"): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
 interface DomainState {
   defaultInfo: DomainDefaultInfo | null;
   langInfo: DomainLanguageInfo | null;
@@ -88,23 +98,14 @@ export const useDomainStore = defineStore("domain", {
     keywords: (state) => state.langInfo?.keywords || "",
     author: (state) => state.langInfo?.author || "",
     homepage: (state) => state.defaultInfo?.homepage || "",
-    domain: (state) => state.langInfo?.domain || "",
     links: (state) => state.langInfo?.links || [],
     defaultLang: (state) => state.defaultInfo?.lang || "",
-    /** 域名指定了支持的语言时，锁定语言，隐藏切换 */
-    isLanguageLocked: (state) => {
-      const lang = state.defaultInfo?.lang;
-      return !!lang && SUPPORTED_LANGUAGES.has(lang);
-    },
-    /** 域名指定了有效样式（style > 0）时，锁定样式，隐藏切换 */
-    isStyleLocked: (state) => {
-      const style = state.defaultInfo?.style;
-      return !!style && style > 0;
-    },
     /** WordPress 博客地址 */
     blog: (state) => state.defaultInfo?.blog || "",
     /** 域名自定义图标 */
     icon: (state) => state.defaultInfo?.icon || "",
+    /** 体素功能必须由当前白牌显式开启。 */
+    voxelEnabled: (state) => state.defaultInfo?.features?.voxel === true,
     isLoaded: (state) =>
       state.defaultInfo !== null && state.langInfo !== null && !state.loading,
   },
@@ -113,14 +114,34 @@ export const useDomainStore = defineStore("domain", {
     /**
      * 启动时调用一次，获取基础信息（homepage, lang）
      */
-    async fetchDefaultInfo(options: FetchDefaultInfoOptions = {}) {
+    fetchDefaultInfo(options: FetchDefaultInfoOptions = {}): Promise<void> {
+      const pending = defaultInfoRequests.get(this);
+      if (pending) {
+        return options.forceRefresh
+          ? pending.then(() => this.fetchDefaultInfo(options))
+          : pending;
+      }
+
+      const request = this.loadDefaultInfo(options).finally(() => {
+        defaultInfoRequests.delete(this);
+      });
+      defaultInfoRequests.set(this, request);
+      return request;
+    },
+
+    async loadDefaultInfo(options: FetchDefaultInfoOptions) {
       // Try cookie cache first
-      const cachedData = options.forceRefresh
-        ? null
-        : getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
+      const cachedData =
+        options.forceRefresh || this.defaultInfo !== null
+          ? null
+          : getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
       if (cachedData) {
         try {
-          this.defaultInfo = JSON.parse(cachedData);
+          this.defaultInfo = {
+            ...JSON.parse(cachedData),
+            // 缓存只恢复品牌信息；功能开关等待本次配置请求确认。
+            features: undefined,
+          };
         } catch (e) {
           logger.warn("Failed to parse cached default domain info:", e);
         }
@@ -145,21 +166,33 @@ export const useDomainStore = defineStore("domain", {
           err instanceof Error ? err.message : "Failed to fetch default info";
         logger.error("Failed to fetch default domain info:", err);
         this.error = message;
+        if (this.defaultInfo) {
+          this.defaultInfo = { ...this.defaultInfo, features: undefined };
+        }
       }
 
-      // 域名指定了支持的语言 → 强制锁定
-      if (this.isLanguageLocked && this.defaultInfo?.lang) {
+      // 域名语言仅作为首次访问默认值；已保存的用户选择优先。
+      if (
+        this.defaultInfo?.lang &&
+        SUPPORTED_LANGUAGES.has(this.defaultInfo.lang) &&
+        !SUPPORTED_LANGUAGES.has(getStoredUserPreference("language") || "")
+      ) {
         const { loadLanguageAsync } = await import("@/lang");
         await loadLanguageAsync(this.defaultInfo.lang);
       }
 
-      // 域名指定了有效样式 → 强制切换到对应主题（style 从 1 开始，themes 数组从 0 开始）
-      if (this.isStyleLocked && this.defaultInfo?.style) {
+      // 域名样式仅作为首次访问默认值；已保存的用户选择优先。
+      // style 从 1 开始，themes 数组从 0 开始。
+      if (this.defaultInfo?.style && this.defaultInfo.style > 0) {
         const { useTheme } = await import("@/composables/useTheme");
         const { availableThemes, setTheme } = useTheme();
+        const storedTheme = getStoredUserPreference("appTheme");
+        const hasValidStoredTheme = availableThemes.value.some(
+          (theme) => theme.name === storedTheme
+        );
         const themeIndex = this.defaultInfo.style - 1;
         const targetTheme = availableThemes.value[themeIndex];
-        if (targetTheme) {
+        if (!hasValidStoredTheme && targetTheme) {
           setTheme(targetTheme.name);
         }
       }

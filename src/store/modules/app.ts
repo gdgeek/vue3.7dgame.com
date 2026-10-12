@@ -11,7 +11,9 @@ export const useAppStore = defineStore("app", () => {
   // state
   const device = useStorage("device", DeviceEnum.DESKTOP);
   const size = useStorage("size", defaultSettings.size);
-  const language = useStorage("language", defaultSettings.language);
+  const language = useStorage("language", defaultSettings.language, undefined, {
+    writeDefaults: false,
+  });
   const sidebarStatus = useStorage("sidebarStatus", SidebarStatusEnum.CLOSED);
   const locale = ref<typeof zhCn | Record<string, unknown>>(zhCn); // 默认使用中文
 

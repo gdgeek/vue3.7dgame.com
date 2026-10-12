@@ -19,6 +19,67 @@ const UNITY_PREVIEW_ASSET_ORIGINS = new Set([
   `https://${UNITY_PREVIEW_CDN_HOST}`,
   `https://${UNITY_PREVIEW_MRPP_COS_HOST}`,
 ]);
+// API labels, identifiers and content fingerprints are opaque text, not URLs.
+// In particular ContentRevision::hash returns "sha256:<digest>" for both metas
+// and verses. Never interpret that prefix as a resource protocol.
+const UNITY_PREVIEW_TEXT_FIELDS = new Set([
+  "name",
+  "title",
+  "description",
+  "serverRevision",
+  "uuid",
+  "md5",
+  "type",
+  "created_at",
+  "updated_at",
+]);
+// File API records carry a storage key and original filename alongside url.
+// A key such as "/ai/polygen/model.glb" is not a relative download address.
+const UNITY_PREVIEW_FILE_TEXT_FIELDS = new Set(["key", "filename"]);
+const UNITY_PREVIEW_CODE_FIELDS = new Set([
+  "code",
+  "metaCode",
+  "verseCode",
+  "script",
+  "lua",
+  "js",
+  "javascript",
+  "metasJavaScript",
+  "blockly",
+  "workspace",
+]);
+
+export class UnityPreviewAssetError extends Error {
+  readonly fields: string[] = [];
+  readonly origin: string | null;
+
+  constructor(
+    value: string,
+    readonly reason: "scheme" | "origin" | "credentials"
+  ) {
+    super("WGP-ASSET-DENIED");
+    // Diagnostics must never expose credentials, signed queries or file paths.
+    try {
+      const url = new URL(value, window.location.origin);
+      this.origin = /^https?:$/.test(url.protocol) ? url.origin : null;
+    } catch {
+      this.origin = null;
+    }
+  }
+}
+
+const atUnityPreviewField = (field: string, callback: () => void) => {
+  try {
+    callback();
+  } catch (error) {
+    if (error instanceof UnityPreviewAssetError) {
+      error.fields.unshift(
+        /^(?:[a-zA-Z_]\w{0,39}|\d+)$/.test(field) ? field : "[field]"
+      );
+    }
+    throw error;
+  }
+};
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -98,10 +159,16 @@ const normalizeLegacyUnityPreviewAssetUrl = (value: string): string => {
   }
 };
 
+export type UnityPreviewUrlOptions = {
+  /** Match the built-in runner's CSP/SW allowlist without expanding other callers. */
+  restrictToRuntimeOrigins?: boolean;
+};
+
 const toUnityPreviewDirectAssetUrl = (
   value: string,
   legacyProxyOrigin: string,
-  assetBaseOrigin: string
+  assetBaseOrigin: string,
+  options: UnityPreviewUrlOptions
 ): string => {
   const normalizedValue = value.replace(/\\\//g, "/");
   const candidate = normalizeLegacyUnityPreviewAssetUrl(
@@ -109,7 +176,7 @@ const toUnityPreviewDirectAssetUrl = (
   );
   const explicitScheme = /^[a-z][a-z0-9+.-]*:/i.test(candidate);
   if (explicitScheme && !/^https?:\/\//i.test(candidate)) {
-    throw new Error("WGP-ASSET-DENIED");
+    throw new UnityPreviewAssetError(candidate, "scheme");
   }
   const absoluteUrl = /^(?:https?:)?\/\//i.test(candidate);
   if (!absoluteUrl && !candidate.startsWith("/")) {
@@ -132,8 +199,10 @@ const toUnityPreviewDirectAssetUrl = (
 
   const assetBase = readUnityPreviewOrigin(assetBaseOrigin);
   const allowedOrigins = new Set(UNITY_PREVIEW_ASSET_ORIGINS);
-  if (assetBase) allowedOrigins.add(assetBase);
+  if (assetBase && !options.restrictToRuntimeOrigins)
+    allowedOrigins.add(assetBase);
   const localDevelopment =
+    !options.restrictToRuntimeOrigins &&
     isUnityPreviewLocalDevelopment() &&
     url.protocol === "http:" &&
     isUnityPreviewLoopback(url.hostname);
@@ -143,7 +212,10 @@ const toUnityPreviewDirectAssetUrl = (
     url.username ||
     url.password
   ) {
-    throw new Error("WGP-ASSET-DENIED");
+    throw new UnityPreviewAssetError(
+      candidate,
+      url.username || url.password ? "credentials" : "origin"
+    );
   }
 
   // Preserve validated absolute URLs byte-for-byte so signed query ordering
@@ -156,7 +228,8 @@ const toUnityPreviewDirectAssetUrl = (
 const rewriteUnityPreviewStringUrls = (
   value: string,
   proxyOrigin: string,
-  assetBaseOrigin: string
+  assetBaseOrigin: string,
+  options: UnityPreviewUrlOptions
 ): string => {
   const trimmed = value.trim();
   if (
@@ -172,7 +245,7 @@ const rewriteUnityPreviewStringUrls = (
     if (parsed !== undefined) {
       // Keep recursive validation outside the JSON parse catch. A denied URL
       // must propagate instead of falling back to the original encoded text.
-      rewriteUnityPreviewUrls(parsed, proxyOrigin, assetBaseOrigin);
+      rewriteUnityPreviewUrls(parsed, proxyOrigin, assetBaseOrigin, options);
       return JSON.stringify(parsed);
     }
   }
@@ -180,51 +253,111 @@ const rewriteUnityPreviewStringUrls = (
   const direct = toUnityPreviewDirectAssetUrl(
     value,
     proxyOrigin,
-    assetBaseOrigin
+    assetBaseOrigin,
+    options
   );
   if (direct !== value) {
     return direct;
   }
 
   return value.replace(/https?:\\?\/\\?\/[^\s"'<>]+/gi, (url) =>
-    toUnityPreviewDirectAssetUrl(url, proxyOrigin, assetBaseOrigin)
+    toUnityPreviewDirectAssetUrl(url, proxyOrigin, assetBaseOrigin, options)
+  );
+};
+
+const rewriteUnityPreviewCodeUrls = (
+  value: string,
+  field: string,
+  proxyOrigin: string,
+  assetBaseOrigin: string,
+  options: UnityPreviewUrlOptions
+): string => {
+  // Source code may start with a Lua method call or a JavaScript label. Do not
+  // treat the whole program as a URL. Keep checking its embedded HTTP(S) URLs.
+  // Blockly's xmlns attributes identify XML namespaces; they are never fetched.
+  const pattern =
+    field === "blockly" || field === "workspace"
+      ? /\bxmlns(?::[\w.-]+)?\s*=\s*(?:"[^"]*"|'[^']*')|https?:\\?\/\\?\/[^\s"'<>]+/gi
+      : /https?:\\?\/\\?\/[^\s"'<>]+/gi;
+  return value.replace(pattern, (match) =>
+    /^xmlns\b/.test(match)
+      ? match
+      : toUnityPreviewDirectAssetUrl(
+          match,
+          proxyOrigin,
+          assetBaseOrigin,
+          options
+        )
   );
 };
 
 export const rewriteUnityPreviewUrls = (
   value: unknown,
   proxyOrigin: string,
-  assetBaseOrigin: string
+  assetBaseOrigin: string,
+  options: UnityPreviewUrlOptions = {}
 ): void => {
   if (!value || typeof value !== "object") return;
 
   if (Array.isArray(value)) {
-    value.forEach((item, index) => {
-      if (typeof item === "string") {
-        value[index] = rewriteUnityPreviewStringUrls(
-          item,
-          proxyOrigin,
-          assetBaseOrigin
-        );
-      } else {
-        rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin);
-      }
-    });
+    value.forEach((item, index) =>
+      atUnityPreviewField(String(index), () => {
+        if (typeof item === "string") {
+          value[index] = rewriteUnityPreviewStringUrls(
+            item,
+            proxyOrigin,
+            assetBaseOrigin,
+            options
+          );
+        } else {
+          rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin, options);
+        }
+      })
+    );
     return;
   }
 
   const record = value as Record<string, unknown>;
-  Object.entries(record).forEach(([key, item]) => {
-    if (typeof item === "string") {
-      record[key] = rewriteUnityPreviewStringUrls(
-        item,
-        proxyOrigin,
-        assetBaseOrigin
-      );
-    } else {
-      rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin);
-    }
-  });
+  Object.entries(record).forEach(([key, item]) =>
+    atUnityPreviewField(key, () => {
+      if (typeof item === "string") {
+        if (
+          UNITY_PREVIEW_TEXT_FIELDS.has(key) ||
+          (typeof record.url === "string" &&
+            UNITY_PREVIEW_FILE_TEXT_FIELDS.has(key))
+        )
+          return;
+        if (UNITY_PREVIEW_CODE_FIELDS.has(key)) {
+          record[key] = rewriteUnityPreviewCodeUrls(
+            item,
+            key,
+            proxyOrigin,
+            assetBaseOrigin,
+            options
+          );
+          return;
+        }
+        if (key === "info") {
+          // The API accepts both plain text and JSON in info. Structured info
+          // still uses the recursive validator, including encoded file URLs.
+          try {
+            const info: unknown = JSON.parse(item);
+            if (!info || typeof info !== "object") return;
+          } catch {
+            return;
+          }
+        }
+        record[key] = rewriteUnityPreviewStringUrls(
+          item,
+          proxyOrigin,
+          assetBaseOrigin,
+          options
+        );
+      } else {
+        rewriteUnityPreviewUrls(item, proxyOrigin, assetBaseOrigin, options);
+      }
+    })
+  );
 };
 
 export const normalizeUnityPreviewMetas = (metas: unknown): unknown[] => {

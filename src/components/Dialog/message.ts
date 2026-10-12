@@ -1,4 +1,5 @@
 import { createVNode, render, shallowReactive, type VNode } from "vue";
+import { useGlobalConfig, useZIndex } from "element-plus";
 import MessageConstructor from "./Message.vue";
 
 export type MessageType = "success" | "warning" | "info" | "error";
@@ -23,7 +24,7 @@ type MessageInstance = {
 
 const instances = shallowReactive<MessageInstance[]>([]);
 let seed = 1;
-const zIndexStart = 2000;
+const { nextZIndex } = useZIndex(useGlobalConfig("zIndex", 2000));
 
 const Message = (options: MessageOptions | string) => {
   if (typeof options === "string") {
@@ -45,7 +46,8 @@ const Message = (options: MessageOptions | string) => {
   const props = {
     ...options,
     id,
-    zIndex: zIndexStart + seed,
+    // Share the overlay counter so messages appear above the active drawer/dialog.
+    zIndex: Math.max(nextZIndex(), options.zIndex ?? 0),
     offset: verticalOffset, // Initial offset
     onClose: () => {
       close(id, userOnClose);

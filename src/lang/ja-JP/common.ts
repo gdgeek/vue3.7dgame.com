@@ -1,6 +1,28 @@
 // common translations for ja-JP
 export default {
   common: {
+    editorLoading: {
+      progressLabel: "リソースの読み込み状況",
+      count: "{total} 件中 {completed} 件完了",
+      workFailed: "読み込みが完了しませんでした。再読み込みしてください。",
+      stages: {
+        connecting: "エディターに接続中",
+        data: "シーン／エンティティのデータを取得中",
+        initializing: "エディターを初期化中",
+        assets: "リソースを読み込み中",
+        finishing: "シーンと編集状態を準備中",
+        ready: "読み込み完了",
+        error: "読み込み失敗",
+        model: "モデルを読み込み中",
+        module: "シーンのエンティティを読み込み中",
+        anchor: "アンカーを読み込み中",
+        space: "空間背景を読み込み中",
+      },
+      message: "エディターを読み込み中…",
+      hint: "読み込み完了後に編集、保存、実行、スクリプトを利用できます。",
+      failed: "読み込みが完了しませんでした。再試行してください。",
+      retry: "再読み込み",
+    },
     confirm: "確認",
     cancel: "キャンセル",
     selectUser: "ユーザーを選択",
@@ -75,9 +97,11 @@ export default {
     unityPreview: {
       entry: "シーンを実行",
       title: "シーンを実行",
-      helpClick: "画面をクリックするとシーンを操作できます",
-      helpRotate: "Alt + マウス左ボタンで視点を回転",
-      helpZoomPan: "ホイールでズーム、右ボタンでパン",
+      helpClick: "まず実行画面をクリックしてフォーカスを合わせます",
+      helpRotate:
+        "Alt（Mac：⌥ Option）を押しながらマウスの左ボタンでドラッグすると視点を回転できます",
+      helpZoomPan:
+        "マウスホイールまたはトラックパッドの2本指スクロールでズームし、右ボタンでドラッグすると視点を平行移動できます",
       helpFullscreen: "全画面でより広くプレビューできます",
       fullscreen: "シーンを全画面で実行",
       close: "シーン実行を閉じる",
@@ -104,6 +128,7 @@ export default {
     home: "ホーム",
     resources: "素材ライブラリ",
     model: "モデル",
+    voxel: "ボクセル",
     picture: "画像",
     audio: "音声",
     video: "動画",

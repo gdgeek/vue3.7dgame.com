@@ -1,6 +1,81 @@
 // common translations for zh-TW
 export default {
   common: {
+    appUpdate: {
+      available:
+        "網站有新版本。請先保存或匯出未保存內容、確認待處理操作並關閉執行場景，再手動重新整理；之後重新發現 WebMCP 工具。",
+      dismiss: "稍後",
+    },
+    recovery: {
+      summary: "保存衝突：本地修改仍未保存。",
+      open: "查看衝突與保留副本",
+      boundary:
+        "這裡保留的是被伺服器拒絕的提交副本，可能不含之後的編輯。預覽最多顯示 12,000 字元，匯出包含完整副本。讀取伺服器不會覆蓋編輯器或更新保存基線；請先匯出，再核對最新版並重新編輯。",
+      export: "匯出被拒絕的提交",
+      read: "唯讀查看伺服器最新版",
+      keep: "保留本地並繼續編輯",
+      local: "本次提交副本",
+      server: "伺服器目前內容（唯讀）",
+      failed: "讀取失敗或權限已變化，未顯示伺服器內容。",
+    },
+    publicationHistory: {
+      retention:
+        "最多保留最近 {count} 份發佈正文，超出後自動清理舊正文；目前發佈不受影響。",
+      expired:
+        "該版本正文已按保留策略清理。請重新整理列表選擇仍保留的版本，無需再次發佈。",
+      from: "比較起始版本",
+      to: "比較目標版本",
+      compare: "比較發布版本",
+      identical: "原始正文完全相同",
+      different: "原始正文不同；以下為結構差異摘要",
+      truncated: "差異達到上限，結果不完整；請分別匯出核對。",
+      export: "匯出正文與資源引用",
+      pending:
+        "發佈已成功，歷史正文尚未核驗。可在發佈歷史中重試讀取，請勿重複發佈。",
+      title: "發佈歷史",
+      boundary:
+        "服务器保存的固定发布版本，与本机草稿独立。查看历史不会覆盖当前场景。",
+      refresh: "重新整理列表",
+      capacity: "{count} 个版本 · 已用 {used} / {budget}",
+      capacityWarning: "归档容量接近上限，请联系管理员规划容量。",
+      empty: "暂无固定发布历史。旧发布不会被自动补录为历史原件。",
+      date: "发布时间",
+      language: "语言",
+      actor: "发布人 ID",
+      version: "版本",
+      inspect: "读取并核验",
+      more: "加载更多",
+      detail: "版本详情",
+      verified: "歷史正文核驗通過",
+      resources:
+        "只核验已归档正文；资源文件未复制，可用性尚未检查，也不保证能恢复编辑工程。",
+      body: "查看固定正文",
+      forbidden: "当前账号没有读取此场景历史的权限。",
+      failed:
+        "读取或核验未通过。可重试读取；不会再次发布或用当前快照代替历史。",
+    },
+    editorLoading: {
+      progressLabel: "資源載入進度",
+      count: "已完成 {completed} / {total} 項",
+      workFailed: "載入未完成，請重新載入。",
+      stages: {
+        connecting: "正在連接編輯器",
+        data: "正在讀取場景／實體資料",
+        initializing: "正在初始化編輯器",
+        assets: "正在載入資源",
+        finishing: "正在整理場景與編輯狀態",
+        ready: "載入完成",
+        error: "載入失敗",
+        model: "正在載入模型",
+        module: "正在載入場景實體",
+        anchor: "正在載入錨點",
+        space: "正在載入空間背景",
+      },
+      message: "編輯器正在載入…",
+      hint: "載入完成後即可編輯、儲存、執行或開啟腳本。",
+      failed: "編輯器載入未完成，請重試。",
+      retry: "重新載入",
+    },
     confirm: "確認",
     cancel: "取消",
     selectUser: "選擇用戶",
@@ -74,9 +149,9 @@ export default {
     unityPreview: {
       entry: "運行場景",
       title: "運行場景",
-      helpClick: "單擊畫面後可操作場景",
-      helpRotate: "按住 Alt + 滑鼠左鍵旋轉視角",
-      helpZoomPan: "滾輪縮放視角，右鍵平移視角",
+      helpClick: "先點擊運行畫面，使其取得焦點",
+      helpRotate: "按住 Alt（Mac：⌥ Option）並用滑鼠左鍵拖曳，旋轉視角",
+      helpZoomPan: "滾輪或觸控板雙指捲動可縮放；滑鼠右鍵拖曳可平移",
       helpFullscreen: "全螢幕可獲得更完整預覽",
       fullscreen: "全螢幕運行場景",
       close: "關閉運行場景",
@@ -103,6 +178,7 @@ export default {
     home: "首頁",
     resources: "素材庫",
     model: "模型",
+    voxel: "體素",
     picture: "圖片",
     audio: "音頻",
     video: "視頻",

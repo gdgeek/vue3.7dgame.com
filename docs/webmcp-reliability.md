@@ -1,0 +1,84 @@
+# WebMCP 集成与可靠性
+
+本实现将 web PR #40 的工具能力迁移到 develop，配合 Editor PR #7、Blockly PR #8 与 WebGL Preview PR #1 的适配层重写。保留 develop 的脚本保存协议、Unity 预览会话和当前依赖版本。
+
+## 页面能力
+
+- 实体编辑器：实时实体树、节点检查、校验、资源查询，以及节点变换、属性、层级、顺序、复制、删除、批量修改、组件、信号与资源放入。
+- 场景编辑器：实时场景读取、实体搜索/放入、实例变换/属性/删除、资源与发布前检查、确认发布、Unity 预览状态与诊断。
+- 实体和场景 Blockly 页：工作区读取/校验、积木目录/结构、临时工作区验证、整份替换与批量操作。
+- 场景 Blockly 页复用 Unity 场景预览工具。实体 Blockly 页只暴露编辑能力；运行时验收应进入包含该实体的场景。未恢复 develop 已删除的浏览器 JavaScript 执行器。
+
+注册器使用 `document.modelContext.registerTool`。不支持 WebMCP 的浏览器保持原有页面功能。工具随页面卸载、停用、路由变化及 iframe INIT 生命周期撤销；重新进入页面会创建新的草稿空间。
+
+## 写操作合同
+
+`stage` 在可见编辑器或临时工作区验证提案并生成有时限的草稿，同时记录已加载的服务器版本。P1 的 `complete` 立即返回 `operationId` 与 `awaiting_confirmation`，后台仍展示原操作详情并等待用户确认，再检查页面会话与版本。调用方随后用 `xrugc_get_operation_status` 查询，不能把首次返回当作完成。草稿单次消费，确认等待期间过期、并发重复请求、页面切换均不能复用草稿。
+
+同一账号与目标只允许一个正在执行的 WebMCP 完成操作。重复 complete 返回已有状态，不再次执行。`xrugc_cancel_operation` 只取消仍等待确认的操作；即使用户之后点击原确认框，也不会继续写入。提交开始后不能取消已发往后端的事务。
+
+iframe RPC 关联 requestId、当前 frame、精确 origin 和 hostSessionId。异步资源读取后、新的写入或保存开始前再次检查注册会话。Editor 与 Blockly 端仍执行权限、版本和上下文校验，工具注解不替代这些检查。
+
+节点编辑通过项目自有命令和适配器执行；不修改 Three.js 和 Blockly 外部库。Blockly 批量操作先在临时工作区验证，确认框列出目标积木、操作及字段前后值，成功修改支持一次撤销，失败恢复原工作区。
+
+## 完成状态与持久化
+
+- `status: completed` 携带保存回执；`persistence: server_acknowledged` 表示服务端保存请求已成功返回。
+- `editorAcknowledged` 独立表示编辑器保存标记的确认。实体/场景标记失败不会把已成功保存的数据报告为保存失败；dirty 状态保留以便重新读取。
+- 编辑器已应用但保存未确认时返回 `status: partial`、`editorApplied: true`、`persistence: unverified`，并提示 `read_state_before_retry`。不能盲目重放原修改。
+- 四个编辑页保存收到 HTTP 409 时，保留 `partial` 和本地修改，明确返回 `persistence: server_rejected`、`errorCode: write_conflict`、`httpStatus: 409`，下一步为 `review_server_state_before_retry`。网络超时或服务不可用仍为 `unverified`，不能据此认定服务器已拒绝写入。
+- 四个编辑页保存未确认时锁存 dirty，并暂停自动保存，避免自动生成新操作重试；轮询超时、编辑器返回无新增修改都不能清掉该状态，也不能让离开前保存误报成功。只有当前对象的实际保存确认或切换/明确放弃当前编辑会话才清除锁存；迟到的旧对象、旧会话确认不清除新修改。脚本页收到完整 noChange 快照时也必须与最后已保存内容比对，不能仅凭编辑器声明推进服务器保存基线。
+- 发布成功返回 snapshotId 和持久化操作回执，页面刷新失败保留回执并返回 refreshWarning。P1 使用现有可变 Snapshot，`readBackVerified` 保持 false；当次发布成功不代表能读回当时的固定内容。
+
+后端配套提供保存/脚本保存/发布的 UUID 幂等键和 `If-Match` 乐观锁。编辑器人工保存也使用加载时的服务器版本，409 后保留本地内容，不自动覆盖新版本。缺少服务器版本或匹配回执时不能视为保存成功。后端仅新增操作回执表 webmcp_operation，schema 和路由必须先部署，详细迁移见后端 `docs/webmcp-p1.md`。主站运行器整合与可靠性增强分别交付。
+
+页面操作状态包括 awaiting_confirmation、executing、submitting、completed、partial、cancelled、failed、unknown。浏览器 sessionStorage 最多保留 100 条、24 小时的操作元数据，包含账号/目标/操作 ID，不保存提案、结果正文、token 或资源 URL。重载后以服务器回执恢复已提交的保存/发布结果；404 是 not_observed，不能据此重试。完整编辑器结果仅留在当前内存，取消和未提交操作没有持久化后端回执。
+
+资源重命名、上传等未接入这五个后端写入入口的动作，只具备当前页面完成状态，不能承诺重载后的后端幂等恢复。场景引用的其他实体/资源没有统一锁定；当前版本保护的是目标主记录及其脚本。
+
+## 读取与运行诊断
+
+实体读取来自 `webmcp-get-entity-state` 的实时序列化结果，携带 source、entityVersion、contextGeneration 和 dirty 状态，避免把页面缓存当成未保存编辑内容。
+
+资源检查只检查实体/资源元数据、引用和文件信息。`metadataReady` 不代表模型下载、初始化、脚本行为、动画或设备兼容性通过；没有证据的项目保留 unknown。
+
+场景上下文的 published 来自独立后端 publication 查询。查询失败时保留未知，不猜测旧 verseRelease 字段。`xrugc_get_scene_publication` 只读取当前发布状态和快照标识（current_snapshot），不接受历史版本参数。固定历史发布快照和独立版本读回属于 P2。
+
+Unity 桥接接收 `WGP-UNITY-LOADER`、`WGP-UNITY-START`、`WGP-UNITY-TIMEOUT` 与 `SCENE_FORWARD_FAILED`，兼容旧 `UNITY_LOAD_FAILED`。启动前错误必须带当前 nonce，关闭后与旧会话消息被忽略。诊断只返回允许的错误码与阶段，不回传原始 token、签名 URL 或消息正文。启动工具返回可见预览的 loading 状态，随后读取状态直至运行器实际确认 running。
+
+## 四页一致性补修
+
+本次仅修改主前端：共用冲突分类、中英文恢复提示、实体页持久化锁存、脚本页保存证据与 noChange 检查，以及旧请求返回后的页面归属检查。保留最新 develop 移除脚本页运行按钮的改动，不新增后端接口/迁移，不修改 Blockly、Three.js 或原 WebGL 插件。
+
+测试区分自动化与线上证据：页面挂载测试覆盖实体/场景保存；共享脚本宿主按 meta/verse 分别测试失败、clean event、noChange、离页保护与旧请求；操作注册器模拟提交后丢响应并查回原回执。后者不是线上网络故障注入，生产验收仍按下列清单记录。
+
+## 验证范围
+
+单元测试覆盖草稿生命周期、实时读取、部分完成回执、发布回执保留、RPC 并发和会话隔离、Unity 错误、场景播放适配器及现有脚本保存回归。运行命令：
+
+```bash
+pnpm run test:run
+pnpm run type-check
+pnpm run build
+```
+
+真实浏览器和后端验收步骤见 [验收清单](./webmcp-scene-acceptance.md)。本文件不将原 PR 作者的历史测试场景、登录会话或截图视为本次迁移的验证证据。原生 WebMCP transport、真实 Unity 资源加载、当前发布状态与操作回执、头显行为需要对应运行环境验收；历史快照读回不在 P1 验收范围。
+
+
+### 场景／实体载入遮罩
+
+宿主页现在区分 INIT 已发送与内容就绪：在当前 iframe/session 下读取实时编辑器状态，直到 `ok=true && loading=false` 才开放操作。初次进入、刷新、切换目标与恢复版本均重置载入状态；过期响应不撤销当前遮罩。60 秒未完成或首次数据请求失败时提供重新载入入口。遮罩仅覆盖各自的 iframe，依赖内容的顶部和抽屉按钮分别显示 loading 并禁用；页面导航、账号等外围操作及服务器发布历史仍可使用，不禁用整个页面或抢占焦点。恢复版本仍在载入时选择离开，确认弹窗中的保存请求会等待编辑器就绪；明确放弃修改离开或取消导航会立即停止等待，载入失败时不会旋转等待或向 iframe 发送保存。
+
+WebMCP 请先读取场景／实体工作区上下文的 `ready/loading/status/blocked/error/retryAfterMs`。加载未完成时等候并重读；失败时交由用户重试。编辑器上下文工具在尚未就绪时返回载入状态而不读取半成品快照；打开脚本工具返回未应用状态。
+
+## P2 固定发布历史（2026-09-13 开发完成，待部署）
+
+场景编辑和场景脚本页新增独立“服务器发布历史”，包含分页、容量、指定版本正文及核验结果。它与 localStorage 草稿版本管理分开。WebMCP 新增只读 `xrugc_list_scene_publications` 和 `xrugc_get_scene_publication_version`，可在编辑器加载期间查询服务器历史；切页、切场景、切账号后不采用迟到响应。
+
+发布成功后独立 GET publicationVersionId，核对 sceneId、版本、schemaVersion、language、回执哈希、原文 UTF-8 SHA256、字节数及结构。仅全部通过才为 readBackVerified=true；读失败保留 server_acknowledged，提示重试读取，不重发发布。返回摘要只包含四个归档证据字段，不扩散整个 Snapshot 载荷。
+
+网站 publication 指南升至 1.1.0。旧后端回执没有归档时仍兼容并提示 history_unavailable；新字段部分损坏时提示合同不完整。资源为引用，未存储资源二进制，正文核验通过不证明资源仍可运行或工程可恢复。
+
+上线必须先完成后端精确 P2 迁移、双后端权限/历史核验，再部署前端。详细后端合同见对应 server 仓库 docs/webmcp-p2-publication-history.md。
+
+载入状态的 `progress` 包含当前阶段（连接、读取数据、初始化、载入资源、整理、就绪或失败）、已完成/总项目数及当前项目名称。百分比仅表示已完成载入项目占比，不表示下载字节或剩余时间；旧版编辑器未提供计数时显示不定进度。资源项目全部完成后仍需等待 `ready=true`，不能用百分比代替操作就绪守卫。

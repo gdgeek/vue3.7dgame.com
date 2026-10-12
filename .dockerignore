@@ -58,3 +58,7 @@ stats.html
 # Python 临时文件
 *.py
 __pycache__
+
+# Digest-acquired Unity artifacts; never source-controlled or sent as build context
+.unity-artifacts/
+.unity-runtime/

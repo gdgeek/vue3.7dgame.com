@@ -1,0 +1,437 @@
+{
+  "scope": "P1 same WorkBuddy task actual tool calls; no narrative used as proof",
+  "taskId": "dc9b9993-cf1a-4e5f-bff6-70fe2a5e8c27",
+  "sourceStartLine": 133,
+  "capturedAt": "2026-09-17T18:08:22.420343+00:00",
+  "calls": [
+    {
+      "callLine": 133,
+      "startedAt": "2026-09-17T18:05:15.678000+00:00",
+      "clientTool": "ToolSearch",
+      "classification": "client tool discovery",
+      "argumentKeys": ["queries", "top_k"],
+      "resultLine": 134,
+      "returnedAt": "2026-09-17T18:05:15.687000+00:00",
+      "durationMs": 9,
+      "clientStatus": "completed"
+    },
+    {
+      "callLine": 137,
+      "startedAt": "2026-09-17T18:05:24.452000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 138,
+      "returnedAt": "2026-09-17T18:05:24.527000+00:00",
+      "durationMs": 75,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "ad0575e56a0c4a273b033f3689fddc161c8c383d993c649e6c359ac399b583ef",
+        "toolCount": 14,
+        "toolNames": [
+          "xrugc_get_entity_workspace_context",
+          "xrugc_open_entity_script_editor",
+          "xrugc_close_entity_script_editor",
+          "xrugc_get_meta_script",
+          "xrugc_validate_meta_script",
+          "xrugc_stage_meta_script_replace",
+          "xrugc_complete_meta_script_replace",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation",
+          "xrugc_get_script_block_catalog",
+          "xrugc_get_script_block_structure",
+          "xrugc_stage_script_block_batch",
+          "xrugc_complete_script_block_batch"
+        ]
+      }
+    },
+    {
+      "callLine": 141,
+      "startedAt": "2026-09-17T18:05:35.539000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_meta_script",
+      "arguments": {
+        "arguments": {
+          "includeGeneratedCode": true,
+          "includeWorkspace": true
+        },
+        "contextSha256": "ad0575e56a0c4a273b033f3689fddc161c8c383d993c649e6c359ac399b583ef",
+        "toolName": "xrugc_get_meta_script"
+      },
+      "resultLine": 142,
+      "returnedAt": "2026-09-17T18:05:35.669000+00:00",
+      "durationMs": 130,
+      "clientStatus": "completed",
+      "result": {
+        "entityId": 1091,
+        "entityTitle": "WorkBuddy P1 isolated entity",
+        "workspaceVersion": "{\"backpack\":[]}",
+        "summary": {
+          "blockCount": 0,
+          "topLevelBlockCount": 0,
+          "variableCount": 0,
+          "commentCount": 0,
+          "blockTypes": {},
+          "serializedBytes": 15,
+          "generatedJavaScriptBytes": 0,
+          "generatedLuaBytes": 0
+        },
+        "valid": true,
+        "warnings": [],
+        "canSave": true,
+        "validationScope": "workspace-and-generated-syntax",
+        "workspace": {
+          "backpack": []
+        },
+        "generatedCode": {
+          "js": "",
+          "lua": ""
+        }
+      }
+    },
+    {
+      "callLine": 145,
+      "startedAt": "2026-09-17T18:05:41.082000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_script_block_catalog",
+      "arguments": {
+        "arguments": {
+          "query": "if"
+        },
+        "contextSha256": "ad0575e56a0c4a273b033f3689fddc161c8c383d993c649e6c359ac399b583ef",
+        "toolName": "xrugc_get_script_block_catalog"
+      },
+      "resultLine": 146,
+      "returnedAt": "2026-09-17T18:05:41.189000+00:00",
+      "durationMs": 107,
+      "clientStatus": "completed",
+      "result": {
+        "action": "webmcp-get-script-block-catalog",
+        "ok": true,
+        "matched": 1,
+        "returned": 1,
+        "truncated": false,
+        "categories": [
+          {
+            "name": "逻辑",
+            "path": "逻辑",
+            "dynamic": false
+          },
+          {
+            "name": "循环",
+            "path": "循环",
+            "dynamic": false
+          },
+          {
+            "name": "数学",
+            "path": "数学",
+            "dynamic": false
+          },
+          {
+            "name": "文本",
+            "path": "文本",
+            "dynamic": false
+          },
+          {
+            "name": "列表",
+            "path": "列表",
+            "dynamic": false
+          },
+          {
+            "name": "坐标",
+            "path": "坐标",
+            "dynamic": false
+          },
+          {
+            "name": "任务",
+            "path": "任务",
+            "dynamic": false
+          },
+          {
+            "name": "动作",
+            "path": "动作",
+            "dynamic": false
+          },
+          {
+            "name": "指令",
+            "path": "指令",
+            "dynamic": false
+          },
+          {
+            "name": "信号",
+            "path": "信号",
+            "dynamic": false
+          },
+          {
+            "name": "节点",
+            "path": "节点",
+            "dynamic": false
+          },
+          {
+            "name": "文字",
+            "path": "文字",
+            "dynamic": false
+          },
+          {
+            "name": "模型",
+            "path": "模型",
+            "dynamic": false
+          },
+          {
+            "name": "图片",
+            "path": "图片",
+            "dynamic": false
+          },
+          {
+            "name": "视频",
+            "path": "视频",
+            "dynamic": false
+          },
+          {
+            "name": "音频",
+            "path": "音频",
+            "dynamic": false
+          },
+          {
+            "name": "变量",
+            "path": "变量",
+            "dynamic": true
+          },
+          {
+            "name": "函数",
+            "path": "函数",
+            "dynamic": true
+          }
+        ],
+        "catalogScope": "static-toolbox",
+        "dynamicCategoriesExpanded": false,
+        "blocks": [
+          {
+            "type": "controls_if",
+            "category": "逻辑",
+            "text": "如果 ? 执行 ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "IF0",
+                "kind": "value",
+                "checks": ["Boolean"]
+              },
+              {
+                "name": "DO0",
+                "kind": "statement",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "controls_if"
+            }
+          }
+        ],
+        "hostSessionId": "script-1789668269180-i654riu5g"
+      }
+    },
+    {
+      "callLine": 149,
+      "startedAt": "2026-09-17T18:05:49.906000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_script_block_catalog",
+      "arguments": {
+        "arguments": {
+          "query": "boolean"
+        },
+        "contextSha256": "ad0575e56a0c4a273b033f3689fddc161c8c383d993c649e6c359ac399b583ef",
+        "toolName": "xrugc_get_script_block_catalog"
+      },
+      "resultLine": 150,
+      "returnedAt": "2026-09-17T18:05:49.996000+00:00",
+      "durationMs": 90,
+      "clientStatus": "completed",
+      "result": {
+        "action": "webmcp-get-script-block-catalog",
+        "ok": true,
+        "matched": 1,
+        "returned": 1,
+        "truncated": false,
+        "categories": [
+          {
+            "name": "逻辑",
+            "path": "逻辑",
+            "dynamic": false
+          },
+          {
+            "name": "循环",
+            "path": "循环",
+            "dynamic": false
+          },
+          {
+            "name": "数学",
+            "path": "数学",
+            "dynamic": false
+          },
+          {
+            "name": "文本",
+            "path": "文本",
+            "dynamic": false
+          },
+          {
+            "name": "列表",
+            "path": "列表",
+            "dynamic": false
+          },
+          {
+            "name": "坐标",
+            "path": "坐标",
+            "dynamic": false
+          },
+          {
+            "name": "任务",
+            "path": "任务",
+            "dynamic": false
+          },
+          {
+            "name": "动作",
+            "path": "动作",
+            "dynamic": false
+          },
+          {
+            "name": "指令",
+            "path": "指令",
+            "dynamic": false
+          },
+          {
+            "name": "信号",
+            "path": "信号",
+            "dynamic": false
+          },
+          {
+            "name": "节点",
+            "path": "节点",
+            "dynamic": false
+          },
+          {
+            "name": "文字",
+            "path": "文字",
+            "dynamic": false
+          },
+          {
+            "name": "模型",
+            "path": "模型",
+            "dynamic": false
+          },
+          {
+            "name": "图片",
+            "path": "图片",
+            "dynamic": false
+          },
+          {
+            "name": "视频",
+            "path": "视频",
+            "dynamic": false
+          },
+          {
+            "name": "音频",
+            "path": "音频",
+            "dynamic": false
+          },
+          {
+            "name": "变量",
+            "path": "变量",
+            "dynamic": true
+          },
+          {
+            "name": "函数",
+            "path": "函数",
+            "dynamic": true
+          }
+        ],
+        "catalogScope": "static-toolbox",
+        "dynamicCategoriesExpanded": false,
+        "blocks": [
+          {
+            "type": "logic_boolean",
+            "category": "逻辑",
+            "text": "true",
+            "fields": {
+              "BOOL": "TRUE"
+            },
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Boolean"]
+            },
+            "sampleState": {
+              "type": "logic_boolean",
+              "fields": {
+                "BOOL": "TRUE"
+              }
+            }
+          }
+        ],
+        "hostSessionId": "script-1789668269180-i654riu5g"
+      }
+    },
+    {
+      "callLine": 153,
+      "startedAt": "2026-09-17T18:06:08.245000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_stage_script_block_batch",
+      "arguments": {
+        "arguments": {
+          "operations": [
+            {
+              "op": "create",
+              "block": {
+                "type": "controls_if"
+              },
+              "clientId": "if1",
+              "x": 100,
+              "y": 50
+            },
+            {
+              "op": "create",
+              "block": {
+                "type": "logic_boolean",
+                "fields": {
+                  "BOOL": "FALSE"
+                }
+              },
+              "clientId": "bool1"
+            },
+            {
+              "op": "connect",
+              "blockId": "bool1",
+              "connection": "input",
+              "inputName": "IF0",
+              "parentBlockId": "if1"
+            }
+          ]
+        },
+        "contextSha256": "ad0575e56a0c4a273b033f3689fddc161c8c383d993c649e6c359ac399b583ef",
+        "toolName": "xrugc_stage_script_block_batch"
+      },
+      "resultLine": 154,
+      "returnedAt": "2026-09-17T18:06:08.375000+00:00",
+      "durationMs": 130,
+      "clientStatus": "completed",
+      "result": {
+        "code": "tool_error",
+        "message": "当前脚本存在未保存修改，请先保存后再创建积木预览",
+        "nextAction": "重新查询当前工具；写入发生异常时先用原 operationId 查询回执，不要直接重试提交。"
+      }
+    }
+  ]
+}

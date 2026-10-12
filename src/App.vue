@@ -17,9 +17,14 @@
       </transition>
     </router-view>
   </el-config-provider>
+  <AppUpdateNotice></AppUpdateNotice>
+  <ConflictRecovery></ConflictRecovery>
   <span class="global-version">v{{ appVersion }}</span>
 </template>
 <script setup>
+import { useAuthoringWebMcp } from "@/composables/useAuthoringWebMcp";
+import AppUpdateNotice from "@/components/AppUpdateNotice.vue";
+import ConflictRecovery from "@/components/ConflictRecovery.vue";
 import { UpdateAbility } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { ElConfigProvider } from "element-plus";
@@ -44,6 +49,7 @@ const userStore = useUserStore();
 const domainStore = useDomainStore();
 const ability = useAbility(); // 提取到 setup 顶层
 const appStore = useAppStore();
+useAuthoringWebMcp();
 
 const elementLocaleMap = {
   "zh-CN": zhCn,
@@ -94,16 +100,12 @@ async function ensureBootToken() {
 }
 
 watch(
-  () => userStore.userInfo,
-  (newUserInfo) => {
-    if (
-      newUserInfo == null ||
-      newUserInfo.id === 0 ||
-      userStore.userInfo == null
-    ) {
-      return;
-    }
-    UpdateAbility(ability, userStore.userInfo.roles, userStore.userInfo.id);
+  [() => userStore.userInfo, () => domainStore.voxelEnabled],
+  ([userInfo, voxelEnabled]) => {
+    const currentUser = userInfo?.id ? userInfo : null;
+    UpdateAbility(ability, currentUser?.roles ?? [], currentUser?.id ?? 0, {
+      voxelEnabled,
+    });
     UpdateRoutes(ability);
   },
   { deep: true, immediate: true }
@@ -173,10 +175,10 @@ canvas {
   position: fixed;
   right: 12px;
   bottom: 8px;
+  z-index: 9999;
   font-size: 11px;
   color: #ccc;
   pointer-events: none;
-  z-index: 9999;
   user-select: none;
 }
 </style>

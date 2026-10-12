@@ -143,6 +143,7 @@ import {
   postParticle,
 } from "@/api/v1/resources/index";
 import { usePageData } from "@/composables/usePageData";
+import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
@@ -169,6 +170,10 @@ const fileType = ref(".json");
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
+const trackWebMcpUpload = useWebMcpUploadIntent(
+  openUploadDialog,
+  () => uploadDialogVisible.value
+);
 const handleUploadSuccess = async () => {
   uploadDialogVisible.value = false;
   refresh();
@@ -194,7 +199,7 @@ const saveParticle = async (
     if (effectType) data.effect_type = effectType;
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;
-    const response = await postParticle(data);
+    const response = await trackWebMcpUpload(() => postParticle(data));
     if (response.data.id) callback(response.data.id);
   } catch (err) {
     logger.error("Failed to save particle:", err);

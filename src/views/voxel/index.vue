@@ -142,6 +142,7 @@ import {
 } from "@/api/v1/resources/index";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
+import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
@@ -168,6 +169,10 @@ const fileType = ref(".vox");
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
+const trackWebMcpUpload = useWebMcpUploadIntent(
+  openUploadDialog,
+  () => uploadDialogVisible.value
+);
 const handleUploadSuccess = async () => {
   uploadDialogVisible.value = false;
   refresh();
@@ -191,7 +196,7 @@ const saveVoxel = async (
     } = { name, file_id };
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;
-    const response = await postVoxel(data);
+    const response = await trackWebMcpUpload(() => postVoxel(data));
     if (response.data.id) callback(response.data.id);
   } catch (err) {
     logger.error("Failed to save voxel:", err);

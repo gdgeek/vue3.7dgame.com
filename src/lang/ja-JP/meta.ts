@@ -95,10 +95,14 @@ export default {
       },
     },
     scene: {
-      error: "エディターがありません",
+      editorInfo: "エンティティ編集",
+      infoLoadFailed:
+        "エンティティ情報を読み込めませんでした。もう一度お試しください。",
+      infoRetry: "再試行",
+      error: "エンティティエディターがありません",
       info: "保存権限がありません！",
-      success: "シーン保存成功~",
-      saveError: "シーン保存に失敗しました",
+      success: "エンティティを保存しました",
+      saveError: "エンティティの保存に失敗しました",
       noChanges: "プロジェクトに変更はありません",
       coverUploadError:
         "カバー画像アップロードエラー：画像データが見つかりません",

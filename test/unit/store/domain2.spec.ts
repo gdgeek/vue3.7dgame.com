@@ -1,12 +1,10 @@
 /**
  * domain2.spec.ts
  *
- * Covers src/store/modules/domain.ts lines not reached in domain.spec.ts:
- *   - lines 141-143: fetchDefaultInfo when isLanguageLocked=true
- *     → dynamic import("@/lang") + loadLanguageAsync(lang)
- *   - lines 147-154: fetchDefaultInfo when isStyleLocked=true
- *     → dynamic import("@/composables/useTheme") + setTheme(targetTheme.name)
- *     → line 152 false branch: theme not found (style index out of bounds)
+ * Covers domain-provided language and style defaults:
+ *   - fresh visitors receive supported domain defaults
+ *   - saved user preferences take priority over domain defaults
+ *   - invalid or out-of-range defaults are ignored
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
@@ -62,13 +60,14 @@ function makeDefaultInfo(overrides = {}) {
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
-describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", () => {
+describe("useDomainStore — language and style defaults (domain2)", () => {
   let getDomainDefault: ReturnType<typeof vi.fn>;
   let useDomainStore: typeof import("@/store/modules/domain").useDomainStore;
 
   beforeEach(async () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    localStorage.clear();
 
     // Clear document cookies
     document.cookie.split(";").forEach((c) => {
@@ -85,9 +84,9 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
     vi.restoreAllMocks();
   });
 
-  // ── Language lock (lines 141-143) ──────────────────────────────────────
+  // ── Language default ────────────────────────────────────────────────────
 
-  describe("fetchDefaultInfo() — isLanguageLocked=true", () => {
+  describe("fetchDefaultInfo() — domain language default", () => {
     it("lang='zh-CN' triggers loadLanguageAsync('zh-CN')", async () => {
       const info = makeDefaultInfo({ lang: "zh-CN" });
       getDomainDefault.mockResolvedValue({ data: info });
@@ -138,7 +137,30 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
       expect(mockLoadLanguageAsync).not.toHaveBeenCalled();
     });
 
-    it("fetchDefaultInfo still updates defaultInfo when lang is locked", async () => {
+    it("saved language preference is not overwritten", async () => {
+      localStorage.setItem("language", "en-US");
+      const info = makeDefaultInfo({ lang: "zh-CN" });
+      getDomainDefault.mockResolvedValue({ data: info });
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+
+      expect(mockLoadLanguageAsync).not.toHaveBeenCalled();
+      expect(localStorage.getItem("language")).toBe("en-US");
+    });
+
+    it("invalid saved language does not block the domain default", async () => {
+      localStorage.setItem("language", "fr-FR");
+      const info = makeDefaultInfo({ lang: "zh-CN" });
+      getDomainDefault.mockResolvedValue({ data: info });
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+
+      expect(mockLoadLanguageAsync).toHaveBeenCalledWith("zh-CN");
+    });
+
+    it("fetchDefaultInfo still updates defaultInfo when lang has a default", async () => {
       const info = makeDefaultInfo({
         lang: "zh-CN",
         homepage: "https://locked.com",
@@ -152,9 +174,9 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
     });
   });
 
-  // ── Style lock (lines 147-154) ────────────────────────────────────────
+  // ── Style default ───────────────────────────────────────────────────────
 
-  describe("fetchDefaultInfo() — isStyleLocked=true", () => {
+  describe("fetchDefaultInfo() — domain style default", () => {
     it("style=1 triggers setTheme with first available theme (index 0)", async () => {
       const info = makeDefaultInfo({ style: 1 });
       getDomainDefault.mockResolvedValue({ data: info });
@@ -206,6 +228,29 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
       expect(mockSetTheme).not.toHaveBeenCalled();
     });
 
+    it("saved theme preference is not overwritten", async () => {
+      localStorage.setItem("appTheme", "nature");
+      const info = makeDefaultInfo({ style: 1 });
+      getDomainDefault.mockResolvedValue({ data: info });
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+
+      expect(mockSetTheme).not.toHaveBeenCalled();
+      expect(localStorage.getItem("appTheme")).toBe("nature");
+    });
+
+    it("invalid saved theme does not block the domain default", async () => {
+      localStorage.setItem("appTheme", "missing-theme");
+      const info = makeDefaultInfo({ style: 1 });
+      getDomainDefault.mockResolvedValue({ data: info });
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+
+      expect(mockSetTheme).toHaveBeenCalledWith("modern-blue");
+    });
+
     it("style=1 still updates defaultInfo correctly", async () => {
       const info = makeDefaultInfo({
         style: 1,
@@ -220,9 +265,9 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
     });
   });
 
-  // ── Both language lock and style lock ────────────────────────────────
+  // ── Both defaults ───────────────────────────────────────────────────────
 
-  describe("fetchDefaultInfo() — both language lock AND style lock", () => {
+  describe("fetchDefaultInfo() — both language and style defaults", () => {
     it("both loadLanguageAsync and setTheme are called", async () => {
       const info = makeDefaultInfo({ lang: "zh-CN", style: 1 });
       getDomainDefault.mockResolvedValue({ data: info });

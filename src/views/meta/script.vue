@@ -1,11 +1,11 @@
 <template>
-  <div class="verse-code">
+  <div class="verse-code" :class="{ 'script--embedded': embedded }">
     <el-container>
       <el-main>
         <el-card class="box-card">
           <el-container>
             <div class="script-tabs-wrapper">
-              <div class="script-editor-toolbar">
+              <div v-if="!embedded" class="script-editor-toolbar">
                 <div
                   class="script-mode-tabs"
                   role="tablist"
@@ -16,9 +16,17 @@
                     class="script-mode-tab"
                     :class="{ 'is-active': activeName === 'blockly' }"
                     role="tab"
+                    :disabled="editorContentLoading"
+                    :aria-busy="editorContentLoading"
                     :aria-selected="activeName === 'blockly'"
                     @click="activeName = 'blockly'"
                   >
+                    <el-icon
+                      v-if="editorContentLoading"
+                      class="is-loading script-action-icon"
+                    >
+                      <Loading></Loading>
+                    </el-icon>
                     {{ $t("verse.view.script.edit") }}
                   </button>
                   <button
@@ -26,9 +34,17 @@
                     class="script-mode-tab"
                     :class="{ 'is-active': activeName === 'script' }"
                     role="tab"
+                    :disabled="editorContentLoading"
+                    :aria-busy="editorContentLoading"
                     :aria-selected="activeName === 'script'"
                     @click="activeName = 'script'"
                   >
+                    <el-icon
+                      v-if="editorContentLoading"
+                      class="is-loading script-action-icon"
+                    >
+                      <Loading></Loading>
+                    </el-icon>
                     {{ $t("verse.view.script.code") }}
                   </button>
                 </div>
@@ -36,7 +52,7 @@
                 <div v-if="meta" class="script-tabs-actions">
                   <el-select
                     v-model="selectedUsedSceneId"
-                    class="script-used-scenes-select"
+                    class="script-context-select script-used-scenes-select"
                     size="small"
                     :placeholder="usedSceneSelectPlaceholder"
                     :disabled="usedSceneOptions.length === 0"
@@ -50,52 +66,62 @@
                       :value="scene.id"
                     ></el-option>
                   </el-select>
-                  <el-button
-                    class="script-action-button"
-                    type="primary"
-                    size="small"
-                    :title="$t('meta.script.entityEditor')"
-                    :aria-label="$t('meta.script.entityEditor')"
-                    @click="goBackToSceneEditor"
-                  >
-                    <font-awesome-icon
-                      class="script-action-icon"
-                      :icon="['fas', 'cube']"
-                    ></font-awesome-icon>
-                    <span class="secondary-action-label">
-                      {{ $t("meta.script.entityEditor") }}
-                    </span>
-                  </el-button>
-                  <el-button
-                    class="script-action-button script-save-button"
-                    type="primary"
-                    size="small"
-                    :title="$t('meta.script.save')"
-                    :aria-label="$t('meta.script.save')"
-                    @click="save"
-                  >
-                    <font-awesome-icon
-                      class="script-action-icon"
-                      icon="save"
-                    ></font-awesome-icon>
-                    <span>{{ $t("meta.script.save") }}</span>
-                  </el-button>
+                  <div class="script-primary-actions">
+                    <el-button
+                      class="script-action-button"
+                      type="primary"
+                      size="small"
+                      :title="$t('meta.script.entityEditor')"
+                      :aria-label="$t('meta.script.entityEditor')"
+                      @click="goBackToSceneEditor"
+                    >
+                      <font-awesome-icon
+                        class="script-action-icon"
+                        :icon="['fas', 'cube']"
+                      ></font-awesome-icon>
+                      <span class="secondary-action-label">
+                        {{ $t("meta.script.entityEditor") }}
+                      </span>
+                    </el-button>
+                    <el-button
+                      class="script-action-button script-save-button"
+                      type="primary"
+                      size="small"
+                      :title="$t('meta.script.save')"
+                      :aria-label="$t('meta.script.save')"
+                      :loading="editorContentLoading || isSaving"
+                      :disabled="!saveable || editorContentLoading || isSaving"
+                      @click="save"
+                    >
+                      <font-awesome-icon
+                        class="script-action-icon"
+                        v-if="!editorContentLoading && !isSaving"
+                        icon="save"
+                      ></font-awesome-icon>
+                      <span>{{ $t("meta.script.save") }}</span>
+                    </el-button>
+                  </div>
                 </div>
               </div>
               <el-tabs
                 v-model="activeName"
                 class="script-main-tabs"
-                type="card"
+                :type="embedded ? '' : 'card'"
                 style="width: 100%"
               >
                 <el-tab-pane
                   :label="$t('verse.view.script.edit')"
                   name="blockly"
                 >
-                  <el-main class="blockly-editor-main">
+                  <el-main
+                    class="blockly-editor-main"
+                    :aria-busy="editorContentLoading"
+                  >
                     <div
                       v-if="editorContentLoading"
                       class="script-editor-loading-indicator"
+                      role="status"
+                      :aria-label="$t('common.editorLoading.message')"
                     >
                       <el-icon class="script-editor-loading-spinner is-loading">
                         <Loading></Loading>
@@ -106,8 +132,10 @@
                       style="width: 100%; height: 100%; padding: 0; margin: 0"
                       class="blockly-editor-frame"
                       scrolling="no"
-                      id="editor"
+                      :id="embedded ? 'meta-script-editor' : 'editor'"
                       ref="editor"
+                      :inert="editorContentLoading"
+                      :tabindex="editorContentLoading ? -1 : 0"
                       :src="src"
                       @load="handleEditorFrameLoad"
                     ></iframe>
@@ -138,6 +166,8 @@
                           <div class="code-container">
                             <el-button
                               class="copy-button"
+                              :loading="editorContentLoading"
+                              :disabled="editorContentLoading"
                               text
                               @click="copyCode(LuaCode)"
                               ><el-icon class="icon">
@@ -163,6 +193,8 @@
                           <div class="code-container">
                             <el-button
                               class="copy-button"
+                              :loading="editorContentLoading"
+                              :disabled="editorContentLoading"
                               text
                               @click="copyCode(JavaScriptCode)"
                               ><el-icon class="icon">
@@ -184,6 +216,8 @@
         </el-card>
         <ScriptDraftDialog
           :model-value="versionDialogVisible"
+          :editor-loading="editorContentLoading"
+          :editor-blocked="editorContentLoading || isSaving"
           :versions="draftVersions"
           :auto-save-enabled="autoSaveEnabled"
           :auto-save-interval-seconds="autoSaveIntervalSeconds"
@@ -201,6 +235,12 @@
 <script setup lang="ts">
 // @ts-nocheck
 import {
+  createWriteOptions,
+  applyWriteRevision,
+  type WriteOptions,
+} from "@/api/v1/write-contract";
+import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
+import {
   computed,
   onActivated,
   onBeforeUnmount,
@@ -212,8 +252,9 @@ import {
 import { CopyDocument, Loading } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
+import type { MetaCode } from "@/api/v1/types/meta";
 import { getVerses } from "@/api/v1/verse";
 import { Message } from "@/components/Dialog";
 import pako from "pako";
@@ -235,12 +276,53 @@ import {
 } from "@/composables/useEditorVersionToolbar";
 import { useUserStore } from "@/store/modules/user";
 
+import {
+  registerMetaScriptWebMcpTools,
+  type MetaScriptReplaceCompletion,
+  type MetaScriptReplacePreview,
+  type MetaScriptSnapshot,
+} from "@/services/webmcp/meta-script-tools";
+import {
+  registerScriptBlockWebMcpTools,
+  type ScriptBlockBatchCompletion,
+  type ScriptBlockBatchPreview,
+} from "@/services/webmcp/script-block-tools";
+let webMcpLifecycle: AbortController | null = null;
+let scriptBlockWebMcpLifecycle: AbortController | null = null;
+import {
+  formatBlockOperationResults,
+  formatScriptWarnings,
+} from "@/utils/webMcpConfirmation";
+import { sceneWriteFailure } from "@/services/webmcp/scene-write-failure";
+import { createIframeRpc } from "@/utils/iframeRpc";
+
+const props = withDefaults(
+  defineProps<{
+    embedded?: boolean;
+    metaId?: number;
+    metaData?: unknown;
+  }>(),
+  { embedded: false }
+);
+const emit = defineEmits<{
+  close: [];
+  saved: [
+    payload: {
+      entityId: number;
+      previousRevision?: string;
+      serverRevision?: string;
+      metaCode: MetaCode;
+    },
+  ];
+}>();
+
 // ---------- Meta 专有状态 ----------
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
 const route = useRoute();
 const router = useRouter();
-const id = computed(() => parseInt(route.query.id as string));
+const id = computed(() => props.metaId ?? parseInt(route.query.id as string));
+const saveable = computed(() => Boolean(meta.value?.editable));
 const loader = getConfiguredGLTFLoader();
 let metaLoadSequence = 0;
 let isScriptViewActive = true;
@@ -336,7 +418,7 @@ const initEditor = (overrideData?: unknown) => {
 // ---------- postScript（Meta 版：保存到服务端，无发布流程）----------
 const postScript = async (
   message: EditorPostPayload,
-  context: { trigger: ScriptSaveTrigger }
+  context: { trigger: ScriptSaveTrigger; write?: WriteOptions }
 ) => {
   if (meta.value === null) {
     const errorMessage = t("meta.script.error1");
@@ -356,12 +438,32 @@ const postScript = async (
     blocklyData = `compressed:${base64Str}`;
   }
 
-  await putMetaCode(meta.value.id, {
+  const savedOwner = meta.value;
+  const previousRevision = savedOwner.serverRevision;
+  const metaCode = {
     blockly: blocklyData,
     lua: message.lua,
     js: message.js,
-  });
+  };
+  const savedResponse = await putMetaCode(
+    meta.value.id,
+    metaCode,
+    context.write ?? createWriteOptions(savedOwner?.serverRevision)
+  );
+  if (meta.value === savedOwner) applyWriteRevision(savedOwner, savedResponse);
 
+  if (
+    isScriptViewActive &&
+    meta.value === savedOwner &&
+    savedOwner.id === id.value
+  ) {
+    emit("saved", {
+      entityId: savedOwner.id,
+      previousRevision,
+      serverRevision: savedOwner.serverRevision,
+      metaCode,
+    });
+  }
   if (context.trigger === "manual") {
     Message.success(t("meta.script.success"));
   }
@@ -395,7 +497,7 @@ const {
   beginEditorSession,
   initializeSavedSnapshot,
   getEditorInitState,
-  save,
+  save: persistScript,
   openVersionDialog,
   clearDraftHistory,
   restoreDraftVersion,
@@ -405,6 +507,7 @@ const {
   isReady,
   copyCode,
 } = useScriptEditorBase({
+  registerRouteGuard: !props.embedded,
   luaLocalVar: "meta",
   i18nKeys: {
     error1: "meta.script.error1",
@@ -424,6 +527,8 @@ const {
   onRestoreDraft: () => reloadEditorFrame(),
 });
 
+const save = persistScript;
+
 const toolbarOwner = "meta-script-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
   useEditorVersionToolbar();
@@ -439,10 +544,420 @@ const editorContentLoading = computed(
   () => loading.value || !editorContentReady.value
 );
 
+const requireSuccessfulWebMcpResponse = (response: Record<string, unknown>) => {
+  if (response.ok !== true) {
+    throw new Error(
+      typeof response.error === "string"
+        ? response.error
+        : "Blockly 编辑器操作失败"
+    );
+  }
+  return response;
+};
+
+const webMcpRpc = createIframeRpc({
+  frame: () => editor.value,
+  session: () => getEditorInitState()?.hostSessionId,
+  send: (action, data) => postMessage("REQUEST", { action, ...data }),
+});
+const handleWebMcpEditorMessage = webMcpRpc.handleMessage;
+
+const formatMetaScriptReplaceConfirmation = (
+  preview: MetaScriptReplacePreview
+) =>
+  [
+    `确认替换实体“${preview.entityTitle}”的 Blockly 脚本吗？`,
+    `块数量：${preview.current.blockCount} → ${preview.proposed.blockCount}`,
+    `顶层流程：${preview.current.topLevelBlockCount} → ${preview.proposed.topLevelBlockCount}`,
+    `变量数量：${preview.current.variableCount} → ${preview.proposed.variableCount}`,
+    `JavaScript：${preview.current.generatedJavaScriptBytes} → ${preview.proposed.generatedJavaScriptBytes} 字节`,
+    `Lua：${preview.current.generatedLuaBytes} → ${preview.proposed.generatedLuaBytes} 字节`,
+    "候选工作区已完成 Blockly 反序列化与双语言代码生成检查",
+    ...formatScriptWarnings(preview.warnings),
+    "确认后将更新可见工作区，并调用平台原有保存流程",
+  ].join("\n");
+
+const registerMetaScriptTools = () => {
+  const ownerId = id.value;
+  const ownerSession = getEditorInitState()?.hostSessionId;
+  let registration: AbortController | null = null;
+  const assertActive = () => {
+    if (
+      registration?.signal.aborted ||
+      !isScriptViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getEditorInitState()?.hostSessionId
+    ) {
+      throw new Error("Blockly 会话已经切换，请重新预览");
+    }
+  };
+  const requestBlocklyEditor = (
+    ...args: Parameters<typeof webMcpRpc.request>
+  ) => {
+    assertActive();
+    return webMcpRpc.request(...args);
+  };
+  const save = (...args: Parameters<typeof persistScript>) => {
+    assertActive();
+    return persistScript(...args);
+  };
+
+  webMcpLifecycle?.abort();
+  registration = webMcpLifecycle = registerMetaScriptWebMcpTools({
+    operations: {
+      registerStatusTools: true,
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "meta",
+        targetId: id.value,
+        serverRevision: meta.value?.serverRevision ?? "",
+      }),
+    },
+    getContext: () => ({
+      entityId: Number.isFinite(id.value) ? id.value : null,
+      entityTitle: meta.value?.title ?? "未命名实体",
+      editable: Boolean(meta.value?.editable),
+      ready: isScriptViewActive && editorContentReady.value,
+      dirty: hasUnsavedChanges.value,
+      saving: isSaving.value,
+    }),
+    getMetaScript: async ({ includeWorkspace, includeGeneratedCode }) => {
+      if (!meta.value || !Number.isFinite(meta.value.id)) {
+        throw new Error("实体脚本尚未加载完成");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-meta-script", {
+          includeWorkspace,
+          includeGeneratedCode,
+        })
+      );
+      return {
+        entityId: meta.value.id,
+        entityTitle: meta.value.title,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+        valid: Boolean(response.valid),
+        issue: response.issue,
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+        workspace: response.workspace,
+        generatedCode: response.generatedCode,
+      } as MetaScriptSnapshot;
+    },
+    validateMetaScript: async (focusIssue) => {
+      if (!meta.value || !Number.isFinite(meta.value.id)) {
+        throw new Error("实体脚本尚未加载完成");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-validate-meta-script", {
+          focusIssue,
+        })
+      );
+      return {
+        entityId: meta.value.id,
+        entityTitle: meta.value.title,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+        valid: Boolean(response.valid),
+        issue: response.issue,
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+      } as MetaScriptSnapshot;
+    },
+    stageMetaScriptReplace: async (workspace) => {
+      if (!meta.value || !Number.isFinite(meta.value.id)) {
+        throw new Error("实体脚本尚未加载完成");
+      }
+      if (!meta.value.editable) {
+        throw new Error("当前账号没有修改此实体脚本的权限");
+      }
+      if (!editorContentReady.value) {
+        throw new Error("Blockly 工作区尚未准备完成");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      if (hasUnsavedChanges.value) {
+        throw new Error("当前脚本存在未保存修改，请先保存后再创建替换预览");
+      }
+
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-stage-meta-script-replace",
+          { workspace },
+          30000
+        )
+      );
+      return {
+        entityId: meta.value.id,
+        entityTitle: meta.value.title,
+        workspaceVersion: String(response.workspaceVersion),
+        current: response.current,
+        proposed: response.proposed,
+        proposedWorkspace: response.proposedWorkspace,
+        changed: Boolean(response.changed),
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+      } as MetaScriptReplacePreview;
+    },
+    confirmMetaScriptReplace: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatMetaScriptReplaceConfirmation(preview),
+          "WebMCP Blockly 脚本替换",
+          {
+            confirmButtonText: t("meta.script.save"),
+            cancelButtonText: t("common.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeMetaScriptReplace: async (preview) => {
+      if (!meta.value || meta.value.id !== preview.entityId) {
+        throw new Error("当前实体已经切换，请重新创建脚本预览");
+      }
+      if (!meta.value.editable) {
+        throw new Error("当前账号没有修改此实体脚本的权限");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-complete-meta-script-replace",
+          {
+            workspaceVersion: preview.workspaceVersion,
+            workspace: preview.proposedWorkspace,
+          },
+          30000
+        )
+      );
+      if (!response.noChange) {
+        try {
+          await save("manual", {
+            suppressNoChangeInfo: true,
+            write: writeOptionsForPreview(preview, meta.value?.serverRevision),
+          });
+        } catch (error) {
+          throw sceneWriteFailure(
+            error,
+            {
+              ownerId,
+              workspaceVersion: response.workspaceVersion,
+            },
+            "Blockly 工作区已应用修改"
+          );
+        }
+      }
+      return {
+        editorApplied: !response.noChange,
+        persistence: response.noChange ? "unchanged" : "server_acknowledged",
+        editorAcknowledged: false,
+        noChange: Boolean(response.noChange),
+        entityId: meta.value.id,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+      } as MetaScriptReplaceCompletion;
+    },
+    onRegistrationError: (toolName, error) => {
+      logger.warn(`WebMCP tool registration failed: ${toolName}`, error);
+    },
+  });
+};
+
+const formatScriptBlockBatchConfirmation = (preview: ScriptBlockBatchPreview) =>
+  [
+    `确认修改实体“${preview.ownerTitle}”的 Blockly 积木吗？`,
+    `批量操作：${preview.operationCount} 项`,
+    ...formatBlockOperationResults(preview.results),
+    `块数量：${preview.current.blockCount} → ${preview.proposed.blockCount}`,
+    `顶层流程：${preview.current.topLevelBlockCount} → ${preview.proposed.topLevelBlockCount}`,
+    `JavaScript：${preview.current.generatedJavaScriptBytes} → ${preview.proposed.generatedJavaScriptBytes} 字节`,
+    `Lua：${preview.current.generatedLuaBytes} → ${preview.proposed.generatedLuaBytes} 字节`,
+    "全部操作已在临时 Blockly 工作区执行并完成代码生成检查",
+    ...formatScriptWarnings(preview.warnings),
+    "确认后将作为一个撤销步骤更新可见工作区并保存",
+  ].join("\n");
+
+const registerScriptBlockTools = () => {
+  const ownerId = id.value;
+  const ownerSession = getEditorInitState()?.hostSessionId;
+  let registration: AbortController | null = null;
+  const assertActive = () => {
+    if (
+      registration?.signal.aborted ||
+      !isScriptViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getEditorInitState()?.hostSessionId
+    ) {
+      throw new Error("Blockly 会话已经切换，请重新预览");
+    }
+  };
+  const requestBlocklyEditor = (
+    ...args: Parameters<typeof webMcpRpc.request>
+  ) => {
+    assertActive();
+    return webMcpRpc.request(...args);
+  };
+  const save = (...args: Parameters<typeof persistScript>) => {
+    assertActive();
+    return persistScript(...args);
+  };
+
+  scriptBlockWebMcpLifecycle?.abort();
+  registration = scriptBlockWebMcpLifecycle = registerScriptBlockWebMcpTools({
+    operations: {
+      registerStatusTools: false,
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "meta",
+        targetId: id.value,
+        serverRevision: meta.value?.serverRevision ?? "",
+      }),
+    },
+    getContext: () => ({
+      ownerKind: "entity",
+      ownerId: Number.isFinite(id.value) ? id.value : null,
+      ownerTitle: meta.value?.title ?? "未命名实体",
+      editable: Boolean(meta.value?.editable),
+      ready: isScriptViewActive && editorContentReady.value,
+      dirty: hasUnsavedChanges.value,
+      saving: isSaving.value,
+    }),
+    getBlockCatalog: async (filters) =>
+      requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-script-block-catalog", filters)
+      ),
+    getBlockStructure: async (filters) =>
+      requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-script-block-structure", filters)
+      ),
+    stageBlockBatch: async (operations) => {
+      if (!meta.value || !Number.isFinite(meta.value.id)) {
+        throw new Error("实体脚本尚未加载完成");
+      }
+      if (!meta.value.editable) {
+        throw new Error("当前账号没有修改此实体脚本的权限");
+      }
+      if (!editorContentReady.value) {
+        throw new Error("Blockly 工作区尚未准备完成");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      if (hasUnsavedChanges.value) {
+        throw new Error("当前脚本存在未保存修改，请先保存后再创建积木预览");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-stage-script-block-batch",
+          { operations },
+          30000
+        )
+      );
+      return {
+        ownerKind: "entity",
+        ownerId: meta.value.id,
+        ownerTitle: meta.value.title,
+        workspaceVersion: String(response.workspaceVersion),
+        current: response.current,
+        proposed: response.proposed,
+        proposedWorkspace: response.proposedWorkspace,
+        changed: Boolean(response.changed),
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+        operationCount: Number(response.operationCount),
+        results: response.results,
+      } as ScriptBlockBatchPreview;
+    },
+    confirmBlockBatch: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatScriptBlockBatchConfirmation(preview),
+          "WebMCP Blockly 积木批量修改",
+          {
+            confirmButtonText: t("meta.script.save"),
+            cancelButtonText: t("common.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeBlockBatch: async (preview) => {
+      if (!meta.value || meta.value.id !== preview.ownerId) {
+        throw new Error("当前实体已经切换，请重新创建积木预览");
+      }
+      if (!meta.value.editable) {
+        throw new Error("当前账号没有修改此实体脚本的权限");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-complete-script-block-batch",
+          {
+            workspaceVersion: preview.workspaceVersion,
+            workspace: preview.proposedWorkspace,
+          },
+          30000
+        )
+      );
+      if (!response.noChange) {
+        try {
+          await save("manual", {
+            suppressNoChangeInfo: true,
+            write: writeOptionsForPreview(preview, meta.value?.serverRevision),
+          });
+        } catch (error) {
+          throw sceneWriteFailure(
+            error,
+            {
+              ownerId,
+              workspaceVersion: response.workspaceVersion,
+            },
+            "Blockly 工作区已应用修改"
+          );
+        }
+      }
+      return {
+        editorApplied: !response.noChange,
+        persistence: response.noChange ? "unchanged" : "server_acknowledged",
+        editorAcknowledged: false,
+        noChange: Boolean(response.noChange),
+        ownerKind: "entity",
+        ownerId: meta.value.id,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+      } as ScriptBlockBatchCompletion;
+    },
+    onRegistrationError: (toolName, error) => {
+      logger.warn(`WebMCP tool registration failed: ${toolName}`, error);
+    },
+  });
+};
+
 const activateToolbar = () => {
   isScriptViewActive = true;
+  if (props.embedded) return;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getLoadingState: () => ({
+      loading: editorContentLoading.value,
+      blocked: editorContentLoading.value,
+    }),
     onOpen: openVersionDialog,
   });
 };
@@ -452,15 +967,15 @@ onActivated(activateToolbar);
 onDeactivated(() => {
   isScriptViewActive = false;
   metaLoadSequence += 1;
-  unregisterToolbar(toolbarOwner);
+  if (!props.embedded) unregisterToolbar(toolbarOwner);
 });
 
 watch(toolbarStatus, (status) => {
-  updateToolbarStatus(toolbarOwner, status);
+  if (!props.embedded) updateToolbarStatus(toolbarOwner, status);
 });
 
 onBeforeUnmount(() => {
-  unregisterToolbar(toolbarOwner);
+  if (!props.embedded) unregisterToolbar(toolbarOwner);
 });
 
 const { t } = useI18n();
@@ -511,6 +1026,10 @@ const sceneEditorLink = computed(() => {
 });
 
 const goBackToSceneEditor = async () => {
+  if (props.embedded) {
+    emit("close");
+    return;
+  }
   const canLeave = await resolveUnsavedChangesBeforeLeave({
     showDiscardInfo: false,
   });
@@ -575,18 +1094,38 @@ const loadSceneNameMap = async () => {
 
 // ---------- 加载 Meta 脚本会话 ----------
 const loadMetaScriptSession = async () => {
-  if (!isScriptViewActive || route.name !== "MetaScript") return;
+  if (!isScriptViewActive || (!props.embedded && route.name !== "MetaScript"))
+    return;
   if (!Number.isFinite(id.value)) return;
   const requestedId = id.value;
   const loadSequence = ++metaLoadSequence;
   try {
     loading.value = true;
-    await loadSceneNameMap();
-    const response = await getMeta(id.value, {
+    if (!props.embedded) await loadSceneNameMap();
+    const response = await getMeta(requestedId, {
       expand: "cyber,event,share,metaCode,verseMetas",
     });
     if (loadSequence !== metaLoadSequence || requestedId !== id.value) return;
     logger.log("response数据", response);
+    const loadedMeta = { ...response.data };
+    if (
+      props.embedded &&
+      props.metaData &&
+      typeof props.metaData === "object" &&
+      !Array.isArray(props.metaData)
+    ) {
+      // Live editing supplies structure; code, permissions and write revision
+      // always come from the fresh server response.
+      const liveMeta = props.metaData as Partial<metaInfo>;
+      for (const key of ["data", "resources", "events"] as const) {
+        if (
+          Object.prototype.hasOwnProperty.call(liveMeta, key) &&
+          liveMeta[key] !== undefined
+        ) {
+          loadedMeta[key] = JSON.parse(JSON.stringify(liveMeta[key]));
+        }
+      }
+    }
 
     const assignAnimations = (
       entities: EntityNode[],
@@ -606,13 +1145,10 @@ const loadMetaScriptSession = async () => {
       });
     };
 
-    if (response.data.resources.length > 0) {
+    if (loadedMeta.resources.length > 0) {
       try {
-        for (const model of response.data.resources) {
-          if (model.type !== "polygen") {
-            meta.value = response.data;
-            continue;
-          }
+        for (const model of loadedMeta.resources) {
+          if (model.type !== "polygen") continue;
           const modelUrl = convertToHttps(model.file.url);
           const modelId = model.id;
           await new Promise<void>((resolve, reject) => {
@@ -620,7 +1156,7 @@ const loadMetaScriptSession = async () => {
               modelUrl,
               (gltf) => {
                 const animationNames = gltf.animations.map((clip) => clip.name);
-                const data = response.data.data as {
+                const data = loadedMeta.data as {
                   children?: { entities?: EntityNode[] };
                 };
                 if (data?.children?.entities) {
@@ -630,7 +1166,7 @@ const loadMetaScriptSession = async () => {
                     animationNames
                   );
                 }
-                response.data.data = data;
+                loadedMeta.data = data;
                 resolve();
               },
               undefined,
@@ -653,7 +1189,7 @@ const loadMetaScriptSession = async () => {
     }
 
     if (loadSequence !== metaLoadSequence || requestedId !== id.value) return;
-    meta.value = response.data;
+    meta.value = loadedMeta;
     const savedSnapshot = readSavedEditorSnapshot();
     if (savedSnapshot) {
       beginEditorSession(savedSnapshot, `meta:${meta.value!.id}`);
@@ -675,30 +1211,136 @@ onActivated(() => {
   }
 });
 
-onBeforeRouteUpdate(async (to, from, next) => {
-  if (to.path !== from.path || to.query.id === from.query.id) {
-    next();
-    return;
-  }
-  const canLeave = await resolveUnsavedChangesBeforeLeave({
-    showDiscardInfo: true,
+if (!props.embedded) {
+  onBeforeRouteUpdate(async (to, from, next) => {
+    if (to.path !== from.path || to.query.id === from.query.id) {
+      next();
+      return;
+    }
+    const canLeave = await resolveUnsavedChangesBeforeLeave({
+      showDiscardInfo: true,
+    });
+    next(canLeave ? undefined : false);
   });
-  next(canLeave ? undefined : false);
-});
+}
 
 watch(id, (nextId, previousId) => {
   if (
     isScriptViewActive &&
-    route.name === "MetaScript" &&
+    (props.embedded || route.name === "MetaScript") &&
     Number.isFinite(nextId) &&
     nextId !== previousId
   ) {
     void loadMetaScriptSession();
   }
 });
+
+const stopWebMcpTools = () => {
+  webMcpLifecycle?.abort();
+  scriptBlockWebMcpLifecycle?.abort();
+  webMcpRpc.cancel();
+};
+onMounted(() => window.addEventListener("message", handleWebMcpEditorMessage));
+onActivated(() => {
+  isScriptViewActive = true;
+  registerMetaScriptTools();
+  registerScriptBlockTools();
+});
+onDeactivated(stopWebMcpTools);
+onBeforeUnmount(() => {
+  isScriptViewActive = false;
+  metaLoadSequence += 1;
+  stopWebMcpTools();
+  window.removeEventListener("message", handleWebMcpEditorMessage);
+});
+watch([id, editorFrameKey, editorContentReady], () => {
+  stopWebMcpTools();
+  if (isScriptViewActive && editorContentReady.value) {
+    registerMetaScriptTools();
+    registerScriptBlockTools();
+  }
+});
+defineExpose({
+  save,
+  openVersionDialog,
+  saveable,
+  isSaving,
+  editorContentLoading,
+  hasUnsavedChanges,
+  activeName,
+  resolveBeforeClose: () =>
+    resolveUnsavedChangesBeforeLeave({ showDiscardInfo: true }),
+});
 </script>
 
 <style scoped>
+.script--embedded,
+.script--embedded > .el-container,
+.script--embedded > .el-container > .el-main > .box-card,
+.script--embedded
+  > .el-container
+  > .el-main
+  > .box-card
+  :deep(> .el-card__body),
+.script--embedded .script-tabs-wrapper,
+.script--embedded .script-main-tabs {
+  height: 100%;
+  min-height: 0;
+}
+
+.script--embedded > .el-container > .el-main {
+  padding: 0;
+}
+
+.script--embedded > .el-container > .el-main > .box-card {
+  border: 0;
+  box-shadow: none;
+}
+
+.script--embedded :deep(.el-card__body) {
+  padding: 16px 24px;
+}
+
+.script--embedded
+  > .el-container
+  > .el-main
+  > .box-card
+  :deep(> .el-card__body > .el-container) {
+  height: 100%;
+}
+
+.script--embedded .script-main-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__header) {
+  flex-shrink: 0;
+  order: -1;
+  margin: 0 0 12px;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__content) {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__content > .el-tab-pane) {
+  height: 100%;
+}
+
+.script--embedded .blockly-editor-main {
+  height: 100%;
+  min-height: 0;
+}
+
+@media (width <= 767px) {
+  .script--embedded :deep(.el-card__body) {
+    padding: 12px;
+  }
+}
+
 .icon {
   margin-right: 5px;
 }
@@ -720,100 +1362,6 @@ watch(id, (nextId, previousId) => {
 
 .light-theme .hljs {
   background-color: #fafafa !important;
-}
-
-.script-tabs-wrapper {
-  container-name: script-editor;
-  container-type: inline-size;
-  position: relative;
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-}
-
-.script-editor-toolbar {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-  min-height: 40px;
-  margin-bottom: 8px;
-}
-
-.script-mode-tabs {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  min-width: 0;
-}
-
-.script-mode-tab {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 92px;
-  height: 32px;
-  padding: 0 12px;
-  font-size: 12px;
-  line-height: 1.1;
-  color: var(--text-secondary, #64748b);
-  white-space: nowrap;
-  cursor: pointer;
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-color, #d6deea);
-  border-radius: 8px;
-}
-
-.script-mode-tab:hover,
-.script-mode-tab:focus-visible,
-.script-mode-tab.is-active {
-  color: var(--primary-color, #06a7ee);
-  border-color: var(--primary-color, #06a7ee);
-}
-
-.script-mode-tab:focus-visible {
-  outline: 2px solid
-    color-mix(in srgb, var(--primary-color, #06a7ee) 30%, transparent);
-  outline-offset: 2px;
-}
-
-.script-tabs-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-self: end;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.script-action-button {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  min-height: 32px;
-  margin-left: 0 !important;
-}
-
-.script-action-icon {
-  margin-right: 4px;
-  font-size: 14px;
-  color: inherit;
-}
-
-.script-used-scenes-select {
-  width: 180px;
-}
-
-.script-used-scenes-select :deep(.el-select__wrapper) {
-  align-items: center;
-  min-height: 32px;
-}
-
-.script-used-scenes-select :deep(.el-select__placeholder),
-.script-used-scenes-select :deep(.el-select__selected-item) {
-  line-height: 20px;
-  text-align: center;
 }
 
 :global(.script-used-scenes-popper .el-select-dropdown__item) {
@@ -851,7 +1399,9 @@ watch(id, (nextId, previousId) => {
   box-shadow: inset 0 0 0 1px var(--script-select-hover-ring) !important;
 }
 
-.script-tabs-wrapper :deep(.el-tabs__header) {
+.verse-code:not(.script--embedded)
+  .script-tabs-wrapper
+  :deep(.el-tabs__header) {
   display: none !important;
 }
 
@@ -887,7 +1437,8 @@ watch(id, (nextId, previousId) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  cursor: wait;
+  background: var(--el-mask-color, rgb(255 255 255 / 90%));
 }
 
 .script-editor-loading-spinner {
@@ -900,83 +1451,6 @@ watch(id, (nextId, previousId) => {
   color: var(--primary-color, #06a7ee);
 }
 
-@container script-editor (width <= 1100px) {
-  .script-editor-toolbar {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-
-  .script-tabs-actions {
-    justify-content: flex-end;
-    justify-self: stretch;
-    width: 100%;
-    max-width: none;
-  }
-
-  .script-used-scenes-select {
-    flex: 1 1 220px;
-    width: auto;
-    min-width: 180px;
-  }
-
-  .blockly-editor-main {
-    height: calc(100dvh - 225px);
-  }
-}
-
-@container script-editor (width <= 620px) {
-  .script-mode-tabs {
-    width: 100%;
-  }
-
-  .script-mode-tab {
-    flex: 1 1 50%;
-    min-width: 0;
-    min-height: 40px;
-  }
-
-  .script-tabs-actions {
-    display: grid;
-    grid-template-columns: 44px minmax(88px, auto);
-    justify-content: end;
-  }
-
-  .script-used-scenes-select {
-    grid-column: 1 / -1;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .script-action-button {
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0 12px;
-  }
-
-  .script-tabs-actions
-    .script-action-button:not(.script-save-button)
-    .script-action-icon {
-    margin-right: 0;
-  }
-
-  .secondary-action-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .blockly-editor-main {
-    height: calc(100dvh - 285px);
-    min-height: 360px;
-  }
-}
-
 .dark-theme :deep(.hljs) {
   background-color: rgb(24 24 24) !important;
 }
@@ -985,3 +1459,5 @@ watch(id, (nextId, previousId) => {
   background-color: #fafafa !important;
 }
 </style>
+
+<style scoped src="@/styles/script-editor-toolbar.css"></style>

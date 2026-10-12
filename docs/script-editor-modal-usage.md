@@ -1,5 +1,7 @@
 # 脚本编辑器模态窗口使用指南
 
+> 本文描述旧的全局模态 API。`/verse/scene` 现使用直接复用完整脚本页的 `VerseScriptDrawer`，参见 [场景脚本抽屉](./script-editor-modal-implementation.md)。本次无需启用全局 Provider。
+
 ## 概述
 
 脚本编辑器现在支持两种使用方式：

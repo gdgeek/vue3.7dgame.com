@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "xrugc-webmcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@jason.today/webmcp@0.1.13", "--mcp"]
+    }
+  }
+}

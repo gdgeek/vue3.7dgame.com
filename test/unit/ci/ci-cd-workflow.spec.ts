@@ -88,8 +88,8 @@ describe("CI/CD release workflow", () => {
 
   it("serializes every registry-writing job across all branches", () => {
     const jobs = getJobBlocks(workflow);
-    const registryWriters = Object.entries(jobs).filter(([, job]) =>
-      /^\s+push: true$/m.test(job)
+    const registryWriters = Object.entries(jobs).filter(
+      ([, job]) => /^\s+push: true$/m.test(job) || /\bdocker push\b/.test(job)
     );
 
     expect(registryWriters.map(([name]) => name)).toEqual(["build"]);
@@ -152,8 +152,20 @@ describe("CI/CD release workflow", () => {
       "type=ref,event=branch",
       "type=raw,value=latest,enable=${{ github.ref == 'refs/heads/publish' }}",
     ]);
-    expect(buildJob).toContain("digest: ${{ steps.build.outputs.digest }}");
+    expect(buildJob).toContain("digest: ${{ steps.publish.outputs.digest }}");
     expect(buildJob).toContain("id: build");
+    expect(buildJob).toContain("id: publish");
+    expect(buildJob).toContain(".RepoDigests 0");
+  });
+
+  it("verifies the loaded final image before the first registry write", () => {
+    const buildJob = getJobBlocks(workflow).build;
+    expect(buildJob).toContain("push: false");
+    expect(buildJob).toContain("load: true");
+    const smoke = buildJob.indexOf("node scripts/unity/container-smoke.mjs");
+    const push = buildJob.indexOf('docker push "$image"');
+    expect(smoke).toBeGreaterThan(0);
+    expect(push).toBeGreaterThan(smoke);
   });
 
   it("emits latest only from the publish branch", () => {

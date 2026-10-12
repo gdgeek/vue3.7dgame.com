@@ -211,6 +211,7 @@ import {
 import { printVector2 } from "@/assets/js/helper";
 import { toHttps } from "@/utils/helper";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
+import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
@@ -363,6 +364,10 @@ const detailProperties = computed(() => {
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
+const trackWebMcpUpload = useWebMcpUploadIntent(
+  openUploadDialog,
+  () => uploadDialogVisible.value
+);
 
 const openViewDialog = async (id: number) => {
   currentVideoId.value = id;
@@ -453,7 +458,7 @@ const saveVideo = async (
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;
     else data.image_id = file_id;
-    const response = await postVideo(data);
+    const response = await trackWebMcpUpload(() => postVideo(data));
     if (response.data.id) callback(response.data.id);
   } catch (err) {
     logger.error("Failed to save video:", err);

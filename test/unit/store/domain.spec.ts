@@ -155,11 +155,6 @@ describe("useDomainStore", () => {
       expect(store.homepage).toBe("");
     });
 
-    it("domain 返回空字符串", () => {
-      const store = useDomainStore();
-      expect(store.domain).toBe("");
-    });
-
     it("links 返回空数组", () => {
       const store = useDomainStore();
       expect(store.links).toEqual([]);
@@ -249,73 +244,90 @@ describe("useDomainStore", () => {
     });
   });
 
-  // ── isLanguageLocked ─────────────────────────────────────────────────────
-
-  describe("isLanguageLocked", () => {
-    it("无 defaultInfo 时返回 false", () => {
-      const store = useDomainStore();
-      expect(store.isLanguageLocked).toBe(false);
-    });
-
-    it("lang 为空字符串时返回 false", () => {
-      const store = useDomainStore();
-      store.defaultInfo = makeDefaultInfo({ lang: "" });
-      expect(store.isLanguageLocked).toBe(false);
-    });
-
-    it("lang 为有效支持语言时返回 true", () => {
-      const store = useDomainStore();
-      store.defaultInfo = makeDefaultInfo({ lang: "zh-CN" });
-      expect(store.isLanguageLocked).toBe(true);
-    });
-
-    it("lang 为 'en-US' 时返回 true", () => {
-      const store = useDomainStore();
-      store.defaultInfo = makeDefaultInfo({ lang: "en-US" });
-      expect(store.isLanguageLocked).toBe(true);
-    });
-
-    it("lang 为 'ja-JP' 时返回 true", () => {
-      const store = useDomainStore();
-      store.defaultInfo = makeDefaultInfo({ lang: "ja-JP" });
-      expect(store.isLanguageLocked).toBe(true);
-    });
-
-    it("lang 为不支持的语言时返回 false", () => {
-      const store = useDomainStore();
-      store.defaultInfo = makeDefaultInfo({ lang: "fr-FR" });
-      expect(store.isLanguageLocked).toBe(false);
-    });
-  });
-
-  // ── isStyleLocked ────────────────────────────────────────────────────────
-
-  describe("isStyleLocked", () => {
-    it("无 defaultInfo 时返回 false", () => {
-      const store = useDomainStore();
-      expect(store.isStyleLocked).toBe(false);
-    });
-
-    it("style 为 0 时返回 false", () => {
-      const store = useDomainStore();
-      store.defaultInfo = makeDefaultInfo({ style: 0 });
-      expect(store.isStyleLocked).toBe(false);
-    });
-
-    it("style 为 1 时返回 true", () => {
-      const store = useDomainStore();
-      store.defaultInfo = makeDefaultInfo({ style: 1 });
-      expect(store.isStyleLocked).toBe(true);
-    });
-
-    it("style 为 2 时返回 true", () => {
-      const store = useDomainStore();
-      store.defaultInfo = makeDefaultInfo({ style: 2 });
-      expect(store.isStyleLocked).toBe(true);
-    });
-  });
-
   // ── fetchDefaultInfo ─────────────────────────────────────────────────────
+
+  describe("白牌体素开关", () => {
+    it("配置未加载时关闭", () => {
+      expect(useDomainStore().voxelEnabled).toBe(false);
+    });
+
+    it.each([
+      [undefined, false],
+      [{}, false],
+      [{ voxel: false }, false],
+      [{ voxel: true }, true],
+      [{ voxel: "true" }, false],
+      [{ voxel: 1 }, false],
+      [null, false],
+    ])("仅布尔 true 开启体素：%j", (features, enabled) => {
+      const store = useDomainStore();
+      store.defaultInfo = makeDefaultInfo({ features });
+      expect(store.voxelEnabled).toBe(enabled);
+    });
+
+    it("不从旧 Cookie 开启功能，等待当前白牌配置", async () => {
+      const cachedInfo = makeDefaultInfo({ features: { voxel: true } });
+      document.cookie = `domain_default_info=${encodeURIComponent(
+        JSON.stringify(cachedInfo)
+      )};path=/`;
+      let resolveConfig!: (response: {
+        data: ReturnType<typeof makeDefaultInfo>;
+      }) => void;
+      getDomainDefault.mockReturnValue(
+        new Promise((resolve) => {
+          resolveConfig = resolve;
+        })
+      );
+
+      const store = useDomainStore();
+      const pending = store.fetchDefaultInfo();
+      const concurrent = store.fetchDefaultInfo();
+      expect(getDomainDefault).toHaveBeenCalledTimes(1);
+      expect(store.voxelEnabled).toBe(false);
+      resolveConfig({ data: makeDefaultInfo({ features: { voxel: true } }) });
+      await Promise.all([pending, concurrent]);
+      expect(store.voxelEnabled).toBe(true);
+
+      getDomainDefault.mockResolvedValue({ data: makeDefaultInfo() });
+      await store.fetchDefaultInfo({ forceRefresh: true });
+      expect(store.voxelEnabled).toBe(false);
+    });
+
+    it("刷新期间保留已确认的体素开关，直到新配置返回", async () => {
+      getDomainDefault.mockResolvedValue({
+        data: makeDefaultInfo({ features: { voxel: true } }),
+      });
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+      expect(store.voxelEnabled).toBe(true);
+
+      let resolveConfig!: (response: {
+        data: ReturnType<typeof makeDefaultInfo>;
+      }) => void;
+      getDomainDefault.mockReturnValue(
+        new Promise((resolve) => {
+          resolveConfig = resolve;
+        })
+      );
+
+      const pending = store.fetchDefaultInfo();
+      expect(store.voxelEnabled).toBe(true);
+      resolveConfig({ data: makeDefaultInfo({ features: { voxel: false } }) });
+      await pending;
+      expect(store.voxelEnabled).toBe(false);
+    });
+
+    it("配置刷新失败时关闭曾经开启的功能", async () => {
+      const store = useDomainStore();
+      store.defaultInfo = makeDefaultInfo({ features: { voxel: true } });
+      getDomainDefault.mockRejectedValue(new Error("Network error"));
+
+      await store.fetchDefaultInfo({ forceRefresh: true });
+
+      expect(store.voxelEnabled).toBe(false);
+      expect(store.homepage).toBe("https://test.com");
+    });
+  });
 
   describe("fetchDefaultInfo()", () => {
     it("成功时更新 defaultInfo", async () => {

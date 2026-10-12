@@ -85,6 +85,7 @@ export interface SpaceInfo {
 
 /** 场景数据 */
 export interface VerseData {
+  serverRevision?: string;
   id: number;
   author_id: number;
   created_at?: string;
@@ -123,6 +124,7 @@ export interface PostVerseData {
 
 /** 更新场景请求（部分字段） */
 export interface PutVerseData {
+  info?: string | null;
   image_id?: number;
   description?: string;
   name?: string;

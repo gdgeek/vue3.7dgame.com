@@ -31,6 +31,41 @@ function createTokenStore(initialToken: TokenInfo | null = null) {
 }
 
 describe("authClient", () => {
+  it("invalidates privileged runtime work before a delayed refresh commits", async () => {
+    const initial = createToken({
+      refreshToken: "refresh-before-runtime-work",
+    });
+    const refreshed = createToken({ accessToken: "access-after-refresh" });
+    const tokenStore = createTokenStore(initial);
+    let resolveRefresh!: (response: { data: { token: TokenInfo } }) => void;
+    const http = {
+      get: vi.fn(),
+      post: vi.fn(
+        () =>
+          new Promise<{ data: { token: TokenInfo } }>((resolve) => {
+            resolveRefresh = resolve;
+          })
+      ),
+    };
+    const client = createAuthClient({ http, tokenStore, provider: "legacy" });
+    const activity = vi.fn();
+    const unsubscribe = subscribeSensitiveRuntimeActivity(activity);
+    try {
+      const pending = client.refresh();
+      await vi.waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      // A privileged operation could arm after the original request started.
+      activity.mockClear();
+      resolveRefresh({ data: { token: refreshed } });
+      await pending;
+      expect(activity).toHaveBeenCalled();
+      expect(activity.mock.invocationCallOrder[0]).toBeLessThan(
+        tokenStore.setToken.mock.invocationCallOrder[0]
+      );
+    } finally {
+      unsubscribe();
+    }
+  });
+
   it("signals synchronously before auth network and token-store side effects", async () => {
     const token = createToken({ accessToken: "fence-test-token" });
     const refreshed = createToken({ accessToken: "fence-refreshed-token" });

@@ -3,6 +3,7 @@ import {
   cloneForUnityPreview,
   normalizeUnityPreviewData,
   rewriteUnityPreviewUrls,
+  UnityPreviewAssetError,
 } from "@/utils/unityPreviewPayload";
 
 const withWindowLocation = <T>(
@@ -25,6 +26,243 @@ const withWindowLocation = <T>(
 };
 
 describe("unityPreviewPayload", () => {
+  const rewriteRuntime = (payload: unknown) =>
+    rewriteUnityPreviewUrls(
+      payload,
+      "https://d.xrugc.com",
+      "https://d.xrugc.com",
+      { restrictToRuntimeOrigins: true }
+    );
+
+  it("preserves content revisions on scene 408 and nested entities", () => {
+    const serverRevision = `sha256:${"a".repeat(64)}`;
+    const payload = {
+      scene: { id: 408, serverRevision },
+      metas: [{ serverRevision, data: JSON.stringify({ serverRevision }) }],
+    };
+    const expected = structuredClone(payload);
+    rewriteRuntime(payload);
+    expect(payload).toEqual(expected);
+  });
+
+  it("preserves API identifiers, file fingerprints and plain text info", () => {
+    const payload = {
+      uuid: "urn:uuid:example",
+      info: "备注: 详情见 https://example.org/model.glb",
+      file: {
+        type: "model/gltf-binary",
+        md5: "md5:0123456789abcdef",
+        url: "https://data.7dgame.com/model.glb",
+      },
+    };
+    const expected = structuredClone(payload);
+    rewriteRuntime(payload);
+    expect(payload).toEqual(expected);
+  });
+
+  it("does not mistake Lua method calls or JavaScript labels for URL schemes", () => {
+    const payload = {
+      metas: [
+        {
+          code: "self:initialize()",
+          script: "self:initialize()",
+          metaCode: "self:initialize()",
+        },
+      ],
+      verseCode: "self:initialize()",
+      script: {
+        lua: "self:initialize()",
+        javascript: "start: for (;;) break start;",
+      },
+    };
+    const expected = structuredClone(payload);
+    rewriteRuntime(payload);
+    expect(payload).toEqual(expected);
+  });
+
+  it("preserves Blockly namespaces and still normalizes embedded asset URLs", () => {
+    const url =
+      "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/model.glb?sign=a%26b&part=1&part=2";
+    const payload = {
+      metas: [
+        {
+          metaCode: {
+            blockly: `<xml xmlns="https://developers.google.com/blockly/xml"><field name="URL">${url}</field></xml>`,
+            lua: `self:load("${url}")`,
+            js: `load("${url}")`,
+          },
+        },
+      ],
+    };
+    rewriteRuntime(payload);
+    const code = payload.metas[0].metaCode;
+    expect(code.blockly).toContain(
+      'xmlns="https://developers.google.com/blockly/xml"'
+    );
+    for (const value of Object.values(code)) {
+      expect(value).toContain(
+        "https://data.7dgame.com/model.glb?sign=a%26b&part=1&part=2"
+      );
+    }
+  });
+
+  it.each([
+    "https://private.example/model.glb",
+    "http://data.7dgame.com/model.glb",
+    "https://user:password@data.7dgame.com/model.glb",
+  ])("still rejects actual URLs in code and structured metadata: %s", (url) => {
+    for (const payload of [
+      { serverRevision: "sha256:abc", resources: [{ file: { url } }] },
+      { serverRevision: { file: { url } } },
+      { uuid: { url } },
+      { info: JSON.stringify({ file: { url } }) },
+      { info: { file: { url } } },
+      { metas: [{ metaCode: { lua: `self:load("${url}")` } }] },
+      { script: { javascript: `load("${url}")` } },
+      {
+        blockly: `<xml xmlns="https://developers.google.com/blockly/xml"><field name="URL">${url}</field></xml>`,
+      },
+      { data: JSON.stringify({ code: { file: { url } } }) },
+    ]) {
+      expect(() => rewriteRuntime(payload)).toThrow("WGP-ASSET-DENIED");
+    }
+  });
+
+  it("preserves scene 506 file storage keys and filenames while validating download URLs", () => {
+    const file = {
+      key: "/ai/polygen/model.glb",
+      filename: "Polygen:model.glb",
+      url: "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/ai/polygen/model.glb?sign=a%26b&part=1&part=2",
+    };
+    const image = {
+      key: "/screenshot/polygen/model.jpg",
+      filename: "preview.jpg",
+      url: "https://data.7dgame.com/screenshot/polygen/model.jpg",
+    };
+    const resource = { name: "Polygen:model.glb", file, image };
+    const source = {
+      resources: [resource],
+      metas: [
+        { resources: [resource], data: JSON.stringify({ fileData: file }) },
+      ],
+    };
+    const payload = structuredClone(source);
+    rewriteUnityPreviewUrls(
+      payload,
+      "https://d.dev.xrugc.com",
+      "https://d.dev.xrugc.com",
+      { restrictToRuntimeOrigins: true }
+    );
+    const expectedFile = {
+      ...file,
+      url: file.url.replace(
+        "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com",
+        "data.7dgame.com"
+      ),
+    };
+    expect(payload.resources[0].file).toEqual(expectedFile);
+    expect(payload.resources[0].image).toEqual(image);
+    expect(payload.metas[0].resources[0].file).toEqual(expectedFile);
+    expect(JSON.parse(payload.metas[0].data).fileData).toEqual(expectedFile);
+    expect(source.resources[0].file).toEqual(file);
+  });
+
+  it.each([
+    "http://data.7dgame.com/model.glb",
+    "https://private.example/model.glb",
+    "file:///private/model.glb",
+  ])(
+    "still rejects a denied file URL beside preserved storage metadata: %s",
+    (url) => {
+      expect(() =>
+        rewriteUnityPreviewUrls(
+          {
+            resources: [
+              {
+                file: {
+                  key: "/ai/polygen/model.glb",
+                  filename: "Polygen:model.glb",
+                  url,
+                },
+              },
+            ],
+          },
+          "https://d.dev.xrugc.com",
+          "https://d.dev.xrugc.com",
+          { restrictToRuntimeOrigins: true }
+        )
+      ).toThrow("WGP-ASSET-DENIED");
+    }
+  );
+
+  it("does not skip structured data stored under a file metadata key", () => {
+    expect(() =>
+      rewriteUnityPreviewUrls(
+        {
+          file: {
+            url: "https://data.7dgame.com/model.glb",
+            key: { url: "https://private.example/model.glb" },
+          },
+        },
+        "https://d.dev.xrugc.com",
+        "https://d.dev.xrugc.com",
+        { restrictToRuntimeOrigins: true }
+      )
+    ).toThrow("WGP-ASSET-DENIED");
+  });
+
+  it("identifies denied nested JSON fields without exposing URL secrets", () => {
+    const payload = {
+      metas: [
+        {
+          data: JSON.stringify({
+            file: {
+              url: "https://user:password@private.example/secret-model.glb?token=secret#private",
+            },
+          }),
+        },
+      ],
+    };
+    let denied: unknown;
+    try {
+      rewriteUnityPreviewUrls(
+        payload,
+        "https://app.example",
+        "https://api.example",
+        { restrictToRuntimeOrigins: true }
+      );
+    } catch (error) {
+      denied = error;
+    }
+    expect(denied).toBeInstanceOf(UnityPreviewAssetError);
+    expect(denied).toMatchObject({
+      fields: ["metas", "0", "data", "file", "url"],
+      origin: "https://private.example",
+      reason: "credentials",
+    });
+    const diagnostic = JSON.stringify(denied);
+    for (const secret of ["password", "secret-model", "token=", "#private"])
+      expect(diagnostic).not.toContain(secret);
+  });
+
+  it("redacts arbitrary field keys and opaque URL contents from denial diagnostics", () => {
+    try {
+      rewriteUnityPreviewUrls(
+        { "https://private.example/?token=secret": ["data:secret"] },
+        "https://app.example",
+        "https://api.example"
+      );
+      expect.fail("must reject unsupported schemes");
+    } catch (error) {
+      expect(error).toMatchObject({
+        fields: ["[field]", "0"],
+        origin: null,
+        reason: "scheme",
+      });
+      expect(JSON.stringify(error)).not.toContain("secret");
+    }
+  });
+
   it("preserves allowlisted absolute signed asset urls byte-for-byte", () => {
     const signedUrl =
       "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2";
@@ -215,6 +453,128 @@ describe("unityPreviewPayload", () => {
       "https://api.d.xrteeth.com/assets/demo.glb"
     );
     expect((payload as typeof source).data).not.toContain("/__xrugc_proxy__");
+  });
+
+  describe("built-in runtime origin restriction", () => {
+    const options = { restrictToRuntimeOrigins: true };
+    const rewrite = (payload: unknown) =>
+      rewriteUnityPreviewUrls(
+        payload,
+        "http://localhost:3016",
+        "http://localhost:8081",
+        options
+      );
+
+    it("keeps scene 506 metadata as text while preparing its model URL", () => {
+      const legacyModel =
+        "https://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/ai/polygen/model.glb?sign=a%2Fb%3D&part=2&part=1";
+      const title = "Polygen:脱口秀小朋友.glb";
+      const description = "详情见 https://www.example.org/about";
+      const payload = {
+        scene: { id: 506, name: title, description },
+        metas: [
+          {
+            name: title,
+            data: JSON.stringify({ name: title, title, description }),
+            resources: [{ name: title, file: { url: legacyModel } }],
+          },
+        ],
+      };
+
+      rewrite(payload);
+
+      expect(payload.scene).toEqual({ id: 506, name: title, description });
+      expect(payload.metas[0].name).toBe(title);
+      expect(JSON.parse(payload.metas[0].data)).toEqual({
+        name: title,
+        title,
+        description,
+      });
+      expect(payload.metas[0].resources[0]).toEqual({
+        name: title,
+        file: {
+          url: legacyModel.replace(
+            "7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com",
+            "data.7dgame.com"
+          ),
+        },
+      });
+    });
+
+    it.each([
+      "https://attacker.example/model.glb",
+      "ftp://attacker.example/model.glb",
+      "file:///private/model.glb",
+      "blob:https://attacker.example/resource-id",
+      "data:model/gltf-binary;base64,AAAA",
+      "javascript:alert(1)",
+    ])(
+      "still rejects actual resource URLs beside display metadata: %s",
+      (url) => {
+        for (const payload of [
+          { name: "Polygen:模型", resources: [{ file: { url } }] },
+          { data: JSON.stringify({ title: "Model:preview", file: { url } }) },
+          { name: { file: { url } } },
+        ]) {
+          expect(() => rewrite(payload)).toThrow("WGP-ASSET-DENIED");
+        }
+      }
+    );
+
+    it.each([
+      "https://data.7dgame.com/model.glb?token=a%26b%3Dc&part=1&part=2",
+      "https://mrpp-1257979353.cos.ap-chengdu.myqcloud.com/image.png?sign=a%2Fb%3D&part=2&part=1",
+    ])("preserves approved signed CDN asset byte-for-byte: %s", (url) => {
+      const payload = {
+        resources: [{ file: { url } }],
+        data: JSON.stringify({ model: url }),
+      };
+      rewrite(payload);
+      expect(payload.resources[0].file.url).toBe(url);
+      expect(JSON.parse(payload.data).model).toBe(url);
+    });
+
+    it.each([
+      "http://localhost:8081/uploads/model.glb",
+      "http://127.0.0.1:8081/uploads/model.glb",
+      "https://api.example.com/uploads/model.glb",
+      "/uploads/model.glb",
+    ])("rejects API/local resources during strict preparation: %s", (url) => {
+      withWindowLocation({ hostname: "localhost", protocol: "http:" }, () => {
+        const payload = { resources: [{ file: { url } }] };
+        expect(() =>
+          rewriteUnityPreviewUrls(
+            payload,
+            "https://app.example.com",
+            "https://api.example.com",
+            options
+          )
+        ).toThrow("WGP-ASSET-DENIED");
+      });
+    });
+
+    it("keeps the strict policy through encoded JSON, arrays and legacy proxy aliases", () => {
+      const target = "http://localhost:8081/uploads/model.glb";
+      for (const payload of [
+        { data: JSON.stringify({ model: target }) },
+        { data: [target] },
+        {
+          model: `http://localhost:3016/__xrugc_proxy__?url=${encodeURIComponent(target)}`,
+        },
+      ])
+        expect(() => rewrite(payload)).toThrow("WGP-ASSET-DENIED");
+    });
+
+    it("keeps non-resource relative API references and ordinary payload metadata unchanged", () => {
+      const payload = {
+        scene: { id: 42, source: "xrugc-web-scene-editor" },
+        route: "/v1/verses/42",
+        script: 'print("scene ready")',
+      };
+      const before = structuredClone(payload);
+      rewrite(payload);
+      expect(payload).toEqual(before);
+    });
   });
 
   it("parses json scene data when possible", () => {

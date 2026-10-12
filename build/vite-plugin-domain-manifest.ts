@@ -4,38 +4,43 @@ import type { Plugin } from "vite";
 
 export const DOMAIN_MANIFEST_FILE_NAME = "config/domains/manifest.json";
 export const DOMAIN_MANIFEST_PUBLIC_PATH = `/${DOMAIN_MANIFEST_FILE_NAME}`;
+export const WHITE_LABEL_NGINX_MAP_FILE_NAME =
+  "config/domains/white-label-nginx-map.conf";
+export const WHITE_LABEL_PUBLIC_PATHS = new Set([
+  "/white-label",
+  "/white-label/",
+]);
 export const DOMAIN_MANIFEST_MAX_DOMAINS = 256;
 export const DOMAIN_MANIFEST_MAX_BYTES = 1024 * 1024;
 
 const DOMAIN_CONFIG_KEY_PATTERN =
   /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/;
-const SUPPORTED_LOCALES = new Set([
-  "zh-CN",
+const DEFAULT_LOCALE = "zh-CN";
+const SUPPORTED_LOCALES = [
+  DEFAULT_LOCALE,
   "zh-TW",
   "en-US",
   "ja-JP",
   "th-TH",
-]);
+] as const;
+const SUPPORTED_LOCALE_SET = new Set<string>(SUPPORTED_LOCALES);
 const TOP_LEVEL_KEYS = new Set([
   "name",
-  "description",
-  "is_active",
-  "fallback_domain",
+  "homepage",
   "default_config",
   "configs",
 ]);
 const DEFAULT_CONFIG_KEYS = new Set([
   "blog",
-  "homepage",
   "icon",
   "lang",
   "style",
+  "features",
 ]);
+const FEATURE_CONFIG_KEYS = new Set(["voxel"]);
 const LOCALIZED_CONFIG_KEYS = new Set([
   "author",
   "description",
-  "domain",
-  "homepage",
   "keywords",
   "links",
   "title",
@@ -43,7 +48,6 @@ const LOCALIZED_CONFIG_KEYS = new Set([
 const LOCALIZED_REQUIRED_STRING_KEYS = [
   "author",
   "description",
-  "domain",
   "keywords",
   "title",
 ] as const;
@@ -62,11 +66,13 @@ export type JsonValue =
 export type JsonObject = { [key: string]: JsonValue };
 
 export interface StaticDomainDefaultConfig {
-  blog?: string;
-  homepage?: string;
-  icon?: string;
   lang?: string;
   style?: number;
+  icon?: string;
+  blog?: string;
+  features?: {
+    voxel?: boolean;
+  };
 }
 
 export interface StaticDomainLink {
@@ -75,33 +81,27 @@ export interface StaticDomainLink {
 }
 
 export interface StaticDomainLocalizedConfig {
-  author: string;
-  description: string;
-  domain: string;
-  homepage?: string;
-  keywords: string;
-  links: StaticDomainLink[];
   title: string;
+  description: string;
+  keywords: string;
+  author: string;
+  links: StaticDomainLink[];
 }
 
 export interface StaticDomainConfig {
   name: string;
-  description: string;
-  is_active: boolean;
-  fallback_domain: string | null;
+  homepage?: string;
   default_config: StaticDomainDefaultConfig;
   configs: Record<string, StaticDomainLocalizedConfig>;
 }
 
 export interface DomainManifestEntry {
   configKey: string;
-  description: string;
-  isActive: boolean;
   config: StaticDomainConfig;
 }
 
 export interface DomainManifest {
-  schemaVersion: 1;
+  schemaVersion: 2;
   domains: DomainManifestEntry[];
 }
 
@@ -164,10 +164,16 @@ function validateDefaultConfig(
   value: Record<string, unknown>
 ): asserts value is Record<string, unknown> & StaticDomainDefaultConfig {
   validateAllowedKeys(fileName, "default_config", value, DEFAULT_CONFIG_KEYS);
-  for (const key of ["blog", "homepage", "icon", "lang"] as const) {
+  for (const key of ["blog", "icon", "lang"] as const) {
     if (key in value) {
       validatePublicString(fileName, `default_config.${key}`, value[key]);
     }
+  }
+  if (typeof value.lang === "string" && !SUPPORTED_LOCALE_SET.has(value.lang)) {
+    validationError(
+      fileName,
+      'field "default_config.lang" uses an unsupported locale'
+    );
   }
   if (
     "style" in value &&
@@ -175,6 +181,49 @@ function validateDefaultConfig(
   ) {
     validationError(fileName, 'field "default_config.style" must be a number');
   }
+  if ("features" in value) {
+    if (!isObjectRecord(value.features)) {
+      validationError(
+        fileName,
+        'field "default_config.features" must be an object'
+      );
+    }
+    validateAllowedKeys(
+      fileName,
+      "default_config.features",
+      value.features,
+      FEATURE_CONFIG_KEYS
+    );
+    if (
+      "voxel" in value.features &&
+      typeof value.features.voxel !== "boolean"
+    ) {
+      validationError(
+        fileName,
+        'field "default_config.features.voxel" must be a boolean'
+      );
+    }
+  }
+}
+
+function canonicalizeDefaultConfig(
+  value: Record<string, unknown> & StaticDomainDefaultConfig
+): StaticDomainDefaultConfig {
+  return {
+    ...(typeof value.lang === "string" ? { lang: value.lang } : {}),
+    ...(typeof value.style === "number" ? { style: value.style } : {}),
+    ...(typeof value.icon === "string" ? { icon: value.icon } : {}),
+    ...(typeof value.blog === "string" ? { blog: value.blog } : {}),
+    ...(value.features
+      ? {
+          features: {
+            ...(typeof value.features.voxel === "boolean"
+              ? { voxel: value.features.voxel }
+              : {}),
+          },
+        }
+      : {}),
+  };
 }
 
 function validateLocalizedConfig(
@@ -187,9 +236,6 @@ function validateLocalizedConfig(
 
   for (const key of LOCALIZED_REQUIRED_STRING_KEYS) {
     validatePublicString(fileName, `${path}.${key}`, value[key]);
-  }
-  if ("homepage" in value) {
-    validatePublicString(fileName, `${path}.homepage`, value.homepage);
   }
   if (!Array.isArray(value.links)) {
     validationError(fileName, `field "${path}.links" must be an array`);
@@ -275,28 +321,8 @@ function parseStaticDomainConfig(
       'field "name" must be a lowercase domain configuration key'
     );
   }
-  if (typeof raw.description !== "string") {
-    return validationError(fileName, 'field "description" must be a string');
-  }
-  validatePublicString(fileName, "description", raw.description);
-  if (typeof raw.is_active !== "boolean") {
-    return validationError(fileName, 'field "is_active" must be a boolean');
-  }
-  if (raw.fallback_domain !== null && typeof raw.fallback_domain !== "string") {
-    return validationError(
-      fileName,
-      'field "fallback_domain" must be a string or null'
-    );
-  }
-  if (
-    typeof raw.fallback_domain === "string" &&
-    (raw.fallback_domain.length > 253 ||
-      !DOMAIN_CONFIG_KEY_PATTERN.test(raw.fallback_domain))
-  ) {
-    return validationError(
-      fileName,
-      'field "fallback_domain" must be a lowercase domain configuration key or null'
-    );
+  if ("homepage" in raw) {
+    validatePublicString(fileName, "homepage", raw.homepage);
   }
   if (!isObjectRecord(raw.default_config)) {
     return validationError(
@@ -308,9 +334,9 @@ function parseStaticDomainConfig(
   if (!isObjectRecord(raw.configs)) {
     return validationError(fileName, 'field "configs" must be an object');
   }
-  const configs: Record<string, StaticDomainLocalizedConfig> = {};
+  const validatedConfigs = new Map<string, StaticDomainLocalizedConfig>();
   for (const [locale, localizedConfig] of Object.entries(raw.configs)) {
-    if (!SUPPORTED_LOCALES.has(locale)) {
+    if (!SUPPORTED_LOCALE_SET.has(locale)) {
       return validationError(
         fileName,
         `field "configs.${locale}" uses an unsupported locale`
@@ -323,15 +349,38 @@ function parseStaticDomainConfig(
       );
     }
     validateLocalizedConfig(fileName, locale, localizedConfig);
-    configs[locale] = localizedConfig;
+    validatedConfigs.set(locale, localizedConfig);
+  }
+
+  const defaultLocale = raw.default_config.lang ?? DEFAULT_LOCALE;
+  if (!validatedConfigs.has(defaultLocale)) {
+    return validationError(
+      fileName,
+      `field "configs.${defaultLocale}" must provide the default language configuration`
+    );
+  }
+
+  const configs: Record<string, StaticDomainLocalizedConfig> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    const localizedConfig = validatedConfigs.get(locale);
+    if (!localizedConfig) continue;
+
+    configs[locale] = {
+      title: localizedConfig.title,
+      description: localizedConfig.description,
+      keywords: localizedConfig.keywords,
+      author: localizedConfig.author,
+      links: localizedConfig.links.map((link) => ({
+        name: link.name,
+        url: link.url,
+      })),
+    };
   }
 
   return {
     name: raw.name,
-    description: raw.description,
-    is_active: raw.is_active,
-    fallback_domain: raw.fallback_domain,
-    default_config: raw.default_config,
+    ...(typeof raw.homepage === "string" ? { homepage: raw.homepage } : {}),
+    default_config: canonicalizeDefaultConfig(raw.default_config),
     configs,
   };
 }
@@ -363,48 +412,9 @@ export function createDomainManifest(
 
     return {
       configKey: config.name,
-      description: config.description,
-      isActive: config.is_active,
       config,
     } satisfies DomainManifestEntry;
   });
-
-  const configsByKey = new Map(
-    domains.map(({ config }) => [config.name, config] as const)
-  );
-  for (const { config } of domains) {
-    const fallback = config.fallback_domain;
-    if (!fallback) continue;
-    if (fallback === config.name) {
-      validationError(
-        `${config.name}.json`,
-        `fallback_domain must not reference itself`
-      );
-    }
-    if (!configsByKey.has(fallback)) {
-      validationError(
-        `${config.name}.json`,
-        `fallback_domain "${fallback}" does not reference a checked-in config`
-      );
-    }
-  }
-
-  for (const { config } of domains) {
-    const chain: string[] = [];
-    let current: StaticDomainConfig | undefined = config;
-    while (current?.fallback_domain) {
-      const repeatedAt = chain.indexOf(current.name);
-      if (repeatedAt >= 0) {
-        const cycle = [...chain.slice(repeatedAt), current.name].join(" -> ");
-        validationError(
-          `${config.name}.json`,
-          `fallback_domain cycle detected: ${cycle}`
-        );
-      }
-      chain.push(current.name);
-      current = configsByKey.get(current.fallback_domain);
-    }
-  }
 
   domains.sort((left, right) =>
     left.configKey < right.configKey
@@ -413,7 +423,7 @@ export function createDomainManifest(
         ? 1
         : 0
   );
-  return { schemaVersion: 1, domains };
+  return { schemaVersion: 2, domains };
 }
 
 export function readDomainManifest(root: string): DomainManifest {
@@ -444,9 +454,76 @@ export function serializeDomainManifest(manifest: DomainManifest): string {
   return serialized;
 }
 
+/** Stable public representation used by /white-label in development. */
+export function serializeWhiteLabelConfig(config: StaticDomainConfig): string {
+  return `${JSON.stringify(config, null, 2)}\n`;
+}
+
+function normalizeRequestHostname(host: string | undefined): string {
+  if (!host) return "";
+
+  try {
+    return new URL(`http://${host.trim()}`).hostname
+      .toLowerCase()
+      .replace(/\.$/, "");
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Resolves the complete request host first, then successively broader checked-in
+ * parent domains. For example, d.dev.xrugc.com tries d.dev.xrugc.com,
+ * dev.xrugc.com, xrugc.com, and finally default.
+ */
+export function resolveWhiteLabelConfig(
+  manifest: DomainManifest,
+  requestHost: string | undefined
+): StaticDomainConfig | undefined {
+  const hostname = normalizeRequestHostname(requestHost);
+  const candidates = manifest.domains
+    .filter(
+      ({ configKey }) =>
+        configKey !== "default" &&
+        (hostname === configKey || hostname.endsWith(`.${configKey}`))
+    )
+    .sort((left, right) => right.configKey.length - left.configKey.length);
+
+  return (
+    candidates[0]?.config ??
+    manifest.domains.find(({ configKey }) => configKey === "default")?.config
+  );
+}
+
+/** Nginx hostnames maps use the same exact-host then longest-parent rule. */
+export function serializeWhiteLabelNginxMap(manifest: DomainManifest): string {
+  if (!manifest.domains.some(({ configKey }) => configKey === "default")) {
+    throw new Error(
+      '[domain-manifest] white-label endpoint requires "default.json"'
+    );
+  }
+
+  const mappings = manifest.domains
+    .filter(({ configKey }) => configKey !== "default")
+    .map(
+      ({ configKey }) => `    .${configKey} /config/domains/${configKey}.json;`
+    );
+
+  return [
+    "# Generated by vite-plugin-domain-manifest. Do not edit.",
+    "map $host $white_label_config_uri {",
+    "    hostnames;",
+    "    default /config/domains/default.json;",
+    ...mappings,
+    "}",
+    "",
+  ].join("\n");
+}
+
 export function domainManifestJson(): Plugin {
   let root = process.cwd();
-  const render = () => serializeDomainManifest(readDomainManifest(root));
+  const read = () => readDomainManifest(root);
+  const render = () => serializeDomainManifest(read());
 
   return {
     name: "vite-plugin-domain-manifest",
@@ -464,16 +541,37 @@ export function domainManifestJson(): Plugin {
           next();
           return;
         }
-        if (pathname !== DOMAIN_MANIFEST_PUBLIC_PATH) {
+        const isManifest = pathname === DOMAIN_MANIFEST_PUBLIC_PATH;
+        const isWhiteLabel = WHITE_LABEL_PUBLIC_PATHS.has(pathname);
+        if (!isManifest && !isWhiteLabel) {
           next();
           return;
         }
 
         try {
+          let body: string;
+          if (isManifest) {
+            body = render();
+          } else {
+            const config = resolveWhiteLabelConfig(
+              read(),
+              request.headers.host
+            );
+            if (!config) {
+              throw new Error(
+                '[domain-manifest] white-label endpoint requires "default.json"'
+              );
+            }
+            body = serializeWhiteLabelConfig(config);
+          }
           response.statusCode = 200;
           response.setHeader("Content-Type", "application/json; charset=utf-8");
           response.setHeader("Cache-Control", "no-store");
-          response.end(render());
+          if (isWhiteLabel) {
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("X-Content-Type-Options", "nosniff");
+          }
+          response.end(body);
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "unknown manifest error";
@@ -489,10 +587,16 @@ export function domainManifestJson(): Plugin {
     },
 
     generateBundle() {
+      const manifest = read();
       this.emitFile({
         type: "asset",
         fileName: DOMAIN_MANIFEST_FILE_NAME,
-        source: render(),
+        source: serializeDomainManifest(manifest),
+      });
+      this.emitFile({
+        type: "asset",
+        fileName: WHITE_LABEL_NGINX_MAP_FILE_NAME,
+        source: serializeWhiteLabelNginxMap(manifest),
       });
     },
   };

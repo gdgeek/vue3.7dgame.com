@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createApp, defineComponent, h, markRaw } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
 
 // --- 提升 mock 变量，确保在工厂函数中可用 ---
 const { mockInflate, mockJsBeautify, mockMessage, mockMessageBox } = vi.hoisted(
@@ -127,6 +128,17 @@ function makeOptions(
 describe("useScriptEditorBase", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("lets an embedded host own route protection without adding a duplicate guard", () => {
+    const embedded = withSetup(() =>
+      useScriptEditorBase(makeOptions({ registerRouteGuard: false }))
+    );
+    expect(onBeforeRouteLeave).not.toHaveBeenCalled();
+    embedded.unmount();
+    const page = withSetup(() => useScriptEditorBase(makeOptions()));
+    expect(onBeforeRouteLeave).toHaveBeenCalledOnce();
+    page.unmount();
   });
 
   // ----------------------------------------------------------------
@@ -734,6 +746,7 @@ describe("useScriptEditorBase", () => {
       } as MockIframe as HTMLIFrameElement;
 
       const savePromise = result.save();
+      const leavePromise = result.resolveUnsavedChangesBeforeLeave();
       const saveExpectation =
         expect(savePromise).rejects.toThrow("network failed");
       await result.handleMessage({
@@ -751,6 +764,8 @@ describe("useScriptEditorBase", () => {
       } as MockMessageEvent as MessageEvent);
 
       await saveExpectation;
+      await expect(leavePromise).resolves.toBe(false);
+      expect(mockMessageBox.confirm).not.toHaveBeenCalled();
       expect(
         mockPost.mock.calls.some(
           ([message]) =>
@@ -961,6 +976,83 @@ describe("useScriptEditorBase", () => {
       expect(result.JavaScriptCode.value).toBe("formatted:var x=1;");
       unmount();
     });
+
+    it.each(["meta", "verse"] as const)(
+      "%s ignores only empty backpack serialization and preserves real edits",
+      async (from) => {
+        const postScript = vi.fn();
+        const { result, unmount } = withSetup(() =>
+          useScriptEditorBase(
+            makeOptions({ luaLocalVar: from, onPost: postScript })
+          )
+        );
+        result.beginEditorSession({ lua: "", js: "", blocklyData: {} });
+        const hostSessionId = result.getEditorInitState()!.hostSessionId;
+        let revision = 0;
+        const update = (blocklyData: unknown, lua = "", js = "") =>
+          result.handleMessage({
+            data: {
+              type: "EVENT",
+              payload: {
+                event: "update",
+                hostSessionId,
+                dirty: true,
+                workspaceRevision: revision++,
+                blocklyData,
+                lua,
+                js,
+              },
+            },
+          } as unknown as MessageEvent);
+
+        await update({ backpack: [] });
+        expect(result.hasUnsavedChanges.value).toBe(false);
+        expect(result.getEditorInitState()!.persisted.data).toEqual({});
+        for (const data of [
+          { backpack: [{ type: "text" }] },
+          { backpack: [], variables: [{ name: "x", id: "v" }] },
+          { backpack: [], blocks: { blocks: [{ type: "text", id: "b" }] } },
+          { backpack: [], unknownExtension: true },
+        ]) {
+          await update(data);
+          expect(result.hasUnsavedChanges.value).toBe(true);
+        }
+        await update({ backpack: [] }, "changed()");
+        expect(result.hasUnsavedChanges.value).toBe(true);
+        await update({ backpack: [] }, "", "changed();");
+        expect(result.hasUnsavedChanges.value).toBe(true);
+        await update({ backpack: [] });
+        expect(result.hasUnsavedChanges.value).toBe(false);
+        expect(postScript).not.toHaveBeenCalled();
+
+        result.beginEditorSession(
+          {
+            lua: "",
+            js: "",
+            blocklyData: { backpack: [{ type: "text" }] },
+          },
+          "another-object"
+        );
+        await update({ backpack: [] }); // old session must not affect new owner
+        expect(result.hasUnsavedChanges.value).toBe(false);
+        await result.handleMessage({
+          data: {
+            type: "EVENT",
+            payload: {
+              event: "update",
+              hostSessionId: result.getEditorInitState()!.hostSessionId,
+              dirty: true,
+              workspaceRevision: 0,
+              blocklyData: { backpack: [] },
+              lua: "",
+              js: "",
+            },
+          },
+        } as unknown as MessageEvent);
+        expect(result.hasUnsavedChanges.value).toBe(true);
+        unmount();
+      }
+    );
 
     it("EVENT update：Blockly 数据不变但生成代码升级时标记为待保存", async () => {
       const { result, unmount } = withSetup(() =>
@@ -1907,3 +1999,248 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
     expect(result.isFullscreen.value).toBe(false);
   });
 });
+
+describe.each(["meta", "verse"] as const)(
+  "%s script persistence evidence",
+  (from) => {
+    it.each([
+      ["conflict", { isAxiosError: true, response: { status: 409 } }],
+      ["unverified", new Error("response lost")],
+    ])(
+      "retains %s errors and dirty state through clean events and noChange",
+      async (kind, error) => {
+        vi.useFakeTimers();
+        const onPost = vi.fn().mockRejectedValueOnce(error);
+        const { result, unmount } = withSetup(() =>
+          useScriptEditorBase(
+            makeOptions({
+              from,
+              onPost,
+              getDraftStorageKey: () => `p1:${from}:${kind}`,
+            })
+          )
+        );
+        const postMessage = vi.fn();
+        result.editor.value = {
+          contentWindow: { postMessage },
+        } as unknown as HTMLIFrameElement;
+        const saved = { lua: "old", js: "old", blocklyData: { v: 0 } };
+        const edited = { lua: "new", js: "new", blocklyData: { v: 1 } };
+        result.beginEditorSession(saved, `${from}:1`);
+        const event = (data: unknown) =>
+          result.handleMessage({ data } as MessageEvent);
+        const update = (payload: unknown) =>
+          event({
+            type: "EVENT",
+            payload: { event: "update", ...(payload as object) },
+          });
+        const response = (payload: object) =>
+          event({
+            type: "RESPONSE",
+            requestId: requestIdFrom(postMessage),
+            payload: { action: "save", ...payload },
+          });
+        try {
+          await update({ ...edited, dirty: true });
+          const first = result.save();
+          const rejected = expect(first).rejects.toBe(error);
+          await response({
+            lua: edited.lua,
+            js: edited.js,
+            data: edited.blocklyData,
+            saveId: "failed",
+          });
+          await rejected;
+          expect(mockMessage.error).toHaveBeenCalledWith(
+            `common.editorSave.${kind}`
+          );
+          await update({ ...edited, dirty: false });
+          expect(result.hasUnsavedChanges.value).toBe(true);
+          const requests = postMessage.mock.calls.length;
+          await vi.advanceTimersByTimeAsync(120000);
+          expect(postMessage.mock.calls.length).toBe(requests);
+          for (const payload of [
+            {},
+            { lua: edited.lua, js: edited.js, data: edited.blocklyData },
+          ]) {
+            const retry = result.save();
+            const retryRejected =
+              expect(retry).rejects.toThrow("must be verified");
+            await response({
+              noChange: true,
+              saveId: "not-a-receipt",
+              ...payload,
+            });
+            await retryRejected;
+            expect(result.hasUnsavedChanges.value).toBe(true);
+          }
+          expect(onPost).toHaveBeenCalledTimes(1);
+          expect(
+            postMessage.mock.calls.some(
+              ([message]) => message.type === "SAVE_ACK"
+            )
+          ).toBe(false);
+          const leaveEvent = { preventDefault: vi.fn(), returnValue: "" };
+          result.handleBeforeUnload(leaveEvent as unknown as BeforeUnloadEvent);
+          expect(leaveEvent.preventDefault).toHaveBeenCalledOnce();
+
+          // A deliberate save with a real successful response can clear the latch.
+          onPost.mockResolvedValueOnce(undefined);
+          const next = result.save();
+          await response({
+            lua: edited.lua,
+            js: edited.js,
+            data: edited.blocklyData,
+            saveId: "saved",
+          });
+          await expect(next).resolves.toBeUndefined();
+          expect(result.hasUnsavedChanges.value).toBe(false);
+        } finally {
+          unmount();
+          vi.useRealTimers();
+        }
+      }
+    );
+
+    it.each(["success", "conflict", "permission"] as const)(
+      "validates a differing noChange snapshot before %s acknowledgment",
+      async (outcome) => {
+        let canSave = true;
+        const error = { isAxiosError: true, response: { status: 409 } };
+        const onPost =
+          outcome === "conflict"
+            ? vi.fn().mockRejectedValue(error)
+            : vi.fn().mockResolvedValue(undefined);
+        const { result, unmount } = withSetup(() =>
+          useScriptEditorBase(
+            makeOptions({ from, onPost, canSave: () => canSave })
+          )
+        );
+        const postMessage = vi.fn();
+        result.editor.value = {
+          contentWindow: { postMessage },
+        } as unknown as HTMLIFrameElement;
+        try {
+          result.beginEditorSession(
+            { lua: "old", js: "old", blocklyData: { v: 0 } },
+            `${from}:1`
+          );
+          await result.handleMessage({
+            data: {
+              type: "EVENT",
+              payload: {
+                event: "update",
+                lua: "new",
+                js: "new",
+                blocklyData: { v: 1 },
+                dirty: true,
+              },
+            },
+          } as MessageEvent);
+          const pending = result.save();
+          const settled =
+            outcome === "success"
+              ? expect(pending).resolves.toBeUndefined()
+              : outcome === "conflict"
+                ? expect(pending).rejects.toBe(error)
+                : expect(pending).rejects.toThrow("cannot be saved");
+          if (outcome === "permission") canSave = false;
+          await result.handleMessage({
+            data: {
+              type: "RESPONSE",
+              requestId: requestIdFrom(postMessage),
+              payload: {
+                action: "save",
+                noChange: true,
+                saveId: "verify-before-ack",
+                lua: "new",
+                js: "new",
+                data: { v: 1 },
+              },
+            },
+          } as MessageEvent);
+          await settled;
+          expect(onPost).toHaveBeenCalledTimes(
+            outcome === "permission" ? 0 : 1
+          );
+          const acknowledgments = postMessage.mock.calls
+            .map(([message]) => message.type)
+            .filter((type) => ["SAVE_ACK", "SAVE_NACK"].includes(type));
+          expect(acknowledgments).toEqual([
+            outcome === "success" ? "SAVE_ACK" : "SAVE_NACK",
+          ]);
+          expect(result.hasUnsavedChanges.value).toBe(outcome !== "success");
+        } finally {
+          unmount();
+        }
+      }
+    );
+
+    it("does not let an old successful write acknowledge a replacement script", async () => {
+      let finish!: () => void;
+      const onPost = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finish = resolve;
+          })
+      );
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions({ from, onPost }))
+      );
+      const postMessage = vi.fn();
+      result.editor.value = {
+        contentWindow: { postMessage },
+      } as unknown as HTMLIFrameElement;
+      try {
+        result.beginEditorSession(
+          { lua: "a", js: "a", blocklyData: {} },
+          `${from}:1`
+        );
+        const oldSave = result.save();
+        const cancelled = expect(oldSave).rejects.toThrow("script changed");
+        const pending = result.handleMessage({
+          data: {
+            type: "RESPONSE",
+            requestId: requestIdFrom(postMessage),
+            payload: {
+              action: "save",
+              lua: "b",
+              js: "b",
+              data: { v: 1 },
+              saveId: "old",
+            },
+          },
+        } as MessageEvent);
+        await Promise.resolve();
+        result.beginEditorSession(
+          { lua: "replacement", js: "replacement", blocklyData: {} },
+          `${from}:2`
+        );
+        await cancelled;
+        await result.handleMessage({
+          data: {
+            type: "EVENT",
+            payload: {
+              event: "update",
+              lua: "draft",
+              js: "draft",
+              blocklyData: { v: 2 },
+              dirty: true,
+            },
+          },
+        } as MessageEvent);
+        finish();
+        await pending;
+        expect(result.hasUnsavedChanges.value).toBe(true);
+        expect(result.unsavedBlocklyData.value).toEqual({ v: 2 });
+        expect(
+          postMessage.mock.calls.some(
+            ([message]) => message.type === "SAVE_ACK"
+          )
+        ).toBe(false);
+      } finally {
+        unmount();
+      }
+    });
+  }
+);

@@ -66,7 +66,6 @@ describe("getDomainLanguage()", () => {
     vi.resetModules();
     staticLanguage.mockResolvedValue({
       data: {
-        domain: "example.com",
         title: "Example",
         description: "",
         keywords: "",

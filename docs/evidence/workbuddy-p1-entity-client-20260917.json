@@ -1,0 +1,493 @@
+{
+  "scope": "Actual WorkBuddy entity calls; full restart followed by fresh pairing restored tool discovery. No narrative used as proof.",
+  "taskId": "dc9b9993-cf1a-4e5f-bff6-70fe2a5e8c27",
+  "sourceStartLine": 1,
+  "capturedAt": "2026-09-17T02:05:00.333983+00:00",
+  "calls": [
+    {
+      "callLine": 62,
+      "startedAt": "2026-09-17T01:54:31.364000+00:00",
+      "clientTool": "ToolSearch",
+      "classification": "client tool discovery",
+      "argumentKeys": ["queries", "top_k"],
+      "resultLine": 63,
+      "returnedAt": "2026-09-17T01:54:31.386000+00:00",
+      "durationMs": 22,
+      "clientStatus": "completed"
+    },
+    {
+      "callLine": 73,
+      "startedAt": "2026-09-17T01:58:09.545000+00:00",
+      "clientTool": "ToolSearch",
+      "classification": "client tool discovery",
+      "argumentKeys": ["queries", "top_k"],
+      "resultLine": 74,
+      "returnedAt": "2026-09-17T01:58:09.565000+00:00",
+      "durationMs": 20,
+      "clientStatus": "completed"
+    },
+    {
+      "callLine": 77,
+      "startedAt": "2026-09-17T01:58:19.958000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 78,
+      "returnedAt": "2026-09-17T01:58:20.198000+00:00",
+      "durationMs": 240,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolCount": 37,
+        "toolNames": [
+          "xrugc_get_entity_workspace_context",
+          "xrugc_open_entity_script_editor",
+          "xrugc_close_entity_script_editor",
+          "xrugc_get_editor_context",
+          "xrugc_get_entity_tree",
+          "xrugc_inspect_entity_node",
+          "xrugc_validate_entity",
+          "xrugc_search_assets",
+          "xrugc_stage_node_transform",
+          "xrugc_complete_node_transform",
+          "xrugc_stage_node_properties",
+          "xrugc_complete_node_properties",
+          "xrugc_stage_resource_placement",
+          "xrugc_complete_resource_placement",
+          "xrugc_stage_node_reparent",
+          "xrugc_complete_node_reparent",
+          "xrugc_stage_node_deletion",
+          "xrugc_complete_node_deletion",
+          "xrugc_stage_node_reorder",
+          "xrugc_complete_node_reorder",
+          "xrugc_stage_node_clone",
+          "xrugc_complete_node_clone",
+          "xrugc_stage_node_batch",
+          "xrugc_complete_node_batch",
+          "xrugc_get_entity_asset_usage",
+          "xrugc_start_asset_upload",
+          "xrugc_stage_asset_rename",
+          "xrugc_complete_asset_rename",
+          "xrugc_get_node_components",
+          "xrugc_stage_component_batch",
+          "xrugc_complete_component_batch",
+          "xrugc_get_entity_signals",
+          "xrugc_stage_signal_batch",
+          "xrugc_complete_signal_batch",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation"
+        ]
+      }
+    },
+    {
+      "callLine": 81,
+      "startedAt": "2026-09-17T01:58:31.681000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_entity_workspace_context",
+      "arguments": {
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolName": "xrugc_get_entity_workspace_context",
+        "arguments": {}
+      },
+      "resultLine": 82,
+      "returnedAt": "2026-09-17T01:58:31.973000+00:00",
+      "durationMs": 292,
+      "clientStatus": "completed",
+      "result": {
+        "entityId": 1091,
+        "entityTitle": "WorkBuddy P1 isolated entity",
+        "activeEditor": "entity",
+        "entity": {
+          "ready": true,
+          "loading": false,
+          "status": "ready",
+          "blocked": false,
+          "error": null,
+          "retryAfterMs": null,
+          "dirty": false,
+          "saving": false
+        },
+        "script": {
+          "open": false,
+          "ready": false,
+          "dirty": false,
+          "saving": false,
+          "tab": null
+        }
+      }
+    },
+    {
+      "callLine": 85,
+      "startedAt": "2026-09-17T01:58:38.821000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_entity_tree",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolName": "xrugc_get_entity_tree"
+      },
+      "resultLine": 86,
+      "returnedAt": "2026-09-17T01:58:41.041000+00:00",
+      "durationMs": 2220,
+      "clientStatus": "completed",
+      "result": {
+        "entityId": 1091,
+        "entityTitle": "WorkBuddy P1 isolated entity",
+        "nodeCount": 1,
+        "truncated": false,
+        "tree": [
+          {
+            "id": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+            "path": "0",
+            "name": "P1 cube node",
+            "type": "Polygen",
+            "resourceId": 5495,
+            "childCount": 0,
+            "children": []
+          }
+        ],
+        "source": "live-editor",
+        "dirty": false,
+        "entityVersion": "editor-v1-476-d9650050",
+        "contextGeneration": 1
+      }
+    },
+    {
+      "callLine": 93,
+      "startedAt": "2026-09-17T01:59:51.039000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_inspect_entity_node",
+      "arguments": {
+        "arguments": {
+          "nodeId": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978"
+        },
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolName": "xrugc_inspect_entity_node"
+      },
+      "resultLine": 94,
+      "returnedAt": "2026-09-17T01:59:51.431000+00:00",
+      "durationMs": 392,
+      "clientStatus": "completed",
+      "result": {
+        "found": true,
+        "id": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+        "path": "0",
+        "name": "P1 cube node",
+        "type": "Polygen",
+        "resourceId": 5495,
+        "childCount": 0,
+        "parameters": {
+          "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+          "name": "P1 cube node",
+          "transform": {
+            "position": {
+              "x": 0.05,
+              "y": 0,
+              "z": 0
+            },
+            "rotate": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "active": true,
+          "resource": 5495,
+          "isCollider": false
+        },
+        "source": "live-editor",
+        "dirty": false,
+        "entityVersion": "editor-v1-476-d9650050",
+        "contextGeneration": 1
+      }
+    },
+    {
+      "callLine": 97,
+      "startedAt": "2026-09-17T02:00:03.340000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_stage_node_transform",
+      "arguments": {
+        "arguments": {
+          "nodeId": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+          "transform": {
+            "position": {
+              "x": 0.1,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          }
+        },
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolName": "xrugc_stage_node_transform"
+      },
+      "resultLine": 98,
+      "returnedAt": "2026-09-17T02:00:03.638000+00:00",
+      "durationMs": 298,
+      "clientStatus": "completed",
+      "result": {
+        "status": "staged",
+        "draftId": "a97970e0-2cdb-4b1b-b7be-91670828bcbf",
+        "expiresAt": "2026-09-17T02:05:03.560Z",
+        "preview": {
+          "entityId": 1091,
+          "nodeId": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+          "nodeName": "P1 cube node",
+          "current": {
+            "position": {
+              "x": 0.05,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "proposed": {
+            "position": {
+              "x": 0.1,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "changed": true
+        }
+      }
+    },
+    {
+      "callLine": 101,
+      "startedAt": "2026-09-17T02:00:12.703000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_complete_node_transform",
+      "arguments": {
+        "arguments": {
+          "draftId": "a97970e0-2cdb-4b1b-b7be-91670828bcbf"
+        },
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolName": "xrugc_complete_node_transform"
+      },
+      "resultLine": 102,
+      "returnedAt": "2026-09-17T02:00:12.917000+00:00",
+      "durationMs": 214,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "a97970e0-2cdb-4b1b-b7be-91670828bcbf",
+        "toolName": "xrugc_complete_node_transform",
+        "targetType": "meta",
+        "targetId": 1091,
+        "status": "awaiting_confirmation",
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 109,
+      "startedAt": "2026-09-17T02:02:00.733000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_operation_status",
+      "arguments": {
+        "arguments": {
+          "operationId": "a97970e0-2cdb-4b1b-b7be-91670828bcbf"
+        },
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolName": "xrugc_get_operation_status"
+      },
+      "resultLine": 110,
+      "returnedAt": "2026-09-17T02:02:02.204000+00:00",
+      "durationMs": 1471,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "a97970e0-2cdb-4b1b-b7be-91670828bcbf",
+        "toolName": "xrugc_complete_node_transform",
+        "targetType": "meta",
+        "targetId": 1091,
+        "status": "completed",
+        "writeReceipt": {
+          "action": "save",
+          "operationId": "a97970e0-2cdb-4b1b-b7be-91670828bcbf",
+          "serverRevision": "sha256:d8b0b3d052999e7360eea50641354b58e1cbca38c59026fc57702e065ac5deb5",
+          "status": "completed",
+          "targetId": 1091,
+          "targetType": "meta"
+        },
+        "result": {
+          "status": "completed",
+          "draftId": "a97970e0-2cdb-4b1b-b7be-91670828bcbf",
+          "entityId": 1091,
+          "editorApplied": true,
+          "persistence": "server_acknowledged",
+          "editorAcknowledged": true,
+          "ownerId": 1091,
+          "nodeId": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+          "nodeName": "P1 cube node",
+          "transform": {
+            "position": {
+              "x": 0.1,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "noChange": false
+        },
+        "nextAction": "inspect_result",
+        "verification": "server_acknowledged"
+      }
+    },
+    {
+      "callLine": 113,
+      "startedAt": "2026-09-17T02:02:09.301000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_inspect_entity_node",
+      "arguments": {
+        "arguments": {
+          "nodeId": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978"
+        },
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolName": "xrugc_inspect_entity_node"
+      },
+      "resultLine": 114,
+      "returnedAt": "2026-09-17T02:02:12.549000+00:00",
+      "durationMs": 3248,
+      "clientStatus": "completed",
+      "result": {
+        "found": true,
+        "id": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+        "path": "0",
+        "name": "P1 cube node",
+        "type": "Polygen",
+        "resourceId": 5495,
+        "childCount": 0,
+        "parameters": {
+          "uuid": "e58d3ec7-c1b7-49f9-8df3-8df0b3db9978",
+          "name": "P1 cube node",
+          "transform": {
+            "position": {
+              "x": 0.1,
+              "y": 0,
+              "z": 0
+            },
+            "rotate": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "active": true,
+          "resource": 5495,
+          "isCollider": false
+        },
+        "source": "live-editor",
+        "dirty": false,
+        "entityVersion": "editor-v1-475-5bfc172a",
+        "contextGeneration": 1
+      }
+    },
+    {
+      "callLine": 117,
+      "startedAt": "2026-09-17T02:02:18.752000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_open_entity_script_editor",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "429affa28fca5f2f67ee656156a35c02b725e52eaccc714f965dd74f8624761c",
+        "toolName": "xrugc_open_entity_script_editor"
+      },
+      "resultLine": 118,
+      "returnedAt": "2026-09-17T02:02:19.485000+00:00",
+      "durationMs": 733,
+      "clientStatus": "completed",
+      "result": {
+        "status": "opened",
+        "context": {
+          "entityId": 1091,
+          "entityTitle": "WorkBuddy P1 isolated entity",
+          "activeEditor": "entity-script",
+          "entity": {
+            "ready": true,
+            "loading": false,
+            "status": "ready",
+            "blocked": false,
+            "error": null,
+            "retryAfterMs": null,
+            "dirty": false,
+            "saving": false
+          },
+          "script": {
+            "open": true,
+            "ready": false,
+            "dirty": false,
+            "saving": false,
+            "tab": null
+          }
+        },
+        "rediscoverTools": true
+      }
+    },
+    {
+      "callLine": 121,
+      "startedAt": "2026-09-17T02:02:26.029000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 122,
+      "returnedAt": "2026-09-17T02:02:30.705000+00:00",
+      "durationMs": 4676,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "05e2442daabbd0d236a1a866ddef8ecbeab651c97df311966d2aafb059206618",
+        "toolCount": 3,
+        "toolNames": [
+          "xrugc_get_entity_workspace_context",
+          "xrugc_open_entity_script_editor",
+          "xrugc_close_entity_script_editor"
+        ]
+      }
+    }
+  ]
+}

@@ -9,3 +9,6 @@ public
 
 src/assets
 stats.html
+# Digest-acquired and generated Unity runtime files
+.unity-artifacts/
+.unity-runtime/

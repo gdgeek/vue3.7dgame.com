@@ -208,6 +208,7 @@ import {
 import { printVector2 } from "@/assets/js/helper";
 import { toHttps } from "@/utils/helper";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
+import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
@@ -353,6 +354,10 @@ const getPictureAspectRatio = (item: ResourceInfo) =>
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
+const trackWebMcpUpload = useWebMcpUploadIntent(
+  openUploadDialog,
+  () => uploadDialogVisible.value
+);
 
 const openViewDialog = async (id: number) => {
   currentPictureId.value = id;
@@ -451,7 +456,7 @@ const savePicture = async (
       data.info = info;
       data.image_id = file_id;
     }
-    const response = await postPicture(data);
+    const response = await trackWebMcpUpload(() => postPicture(data));
     if (response.data.id) callback(response.data.id);
   } catch (err) {
     logger.error("Failed to save picture:", err);

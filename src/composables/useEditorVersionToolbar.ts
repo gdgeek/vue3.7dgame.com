@@ -6,24 +6,36 @@ type EditorVersionToolbarState = {
   active: boolean;
   owner: string | null;
   status: EditorToolbarStatus;
+  getLoadingState: (() => { loading: boolean; blocked: boolean }) | null;
   onRunPreview: (() => void) | null;
+  onSave: (() => void) | null;
   onOpen: (() => void) | null;
+  onOpenScript: (() => void) | null;
+  onOpenPublications: (() => void) | null;
 };
 
 const state = reactive<EditorVersionToolbarState>({
   active: false,
   owner: null,
   status: "saved",
+  getLoadingState: null,
   onRunPreview: null,
+  onSave: null,
   onOpen: null,
+  onOpenScript: null,
+  onOpenPublications: null,
 });
 
 const resetState = () => {
   state.active = false;
   state.owner = null;
   state.status = "saved";
+  state.getLoadingState = null;
   state.onRunPreview = null;
+  state.onSave = null;
   state.onOpen = null;
+  state.onOpenScript = null;
+  state.onOpenPublications = null;
 };
 
 export const useEditorVersionToolbar = () => {
@@ -34,8 +46,12 @@ export const useEditorVersionToolbar = () => {
     state.active = true;
     state.owner = owner;
     state.status = payload.status || "saved";
+    state.getLoadingState = payload.getLoadingState || null;
     state.onRunPreview = payload.onRunPreview || null;
+    state.onSave = payload.onSave || null;
     state.onOpen = payload.onOpen || null;
+    state.onOpenScript = payload.onOpenScript || null;
+    state.onOpenPublications = payload.onOpenPublications || null;
   };
 
   const updateToolbarStatus = (owner: string, status: EditorToolbarStatus) => {
@@ -49,11 +65,18 @@ export const useEditorVersionToolbar = () => {
   };
 
   const openDialog = () => {
+    if (state.getLoadingState?.().blocked) return;
     state.onOpen?.();
   };
 
   const runPreview = () => {
+    if (state.getLoadingState?.().blocked) return;
     state.onRunPreview?.();
+  };
+
+  const openScript = () => {
+    if (state.getLoadingState?.().blocked) return;
+    state.onOpenScript?.();
   };
 
   return {
@@ -63,5 +86,7 @@ export const useEditorVersionToolbar = () => {
     unregisterToolbar,
     openDialog,
     runPreview,
+    openScript,
+    openPublications: () => state.onOpenPublications?.(),
   };
 };

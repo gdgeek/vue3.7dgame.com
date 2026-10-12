@@ -7,6 +7,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // ── vi.hoisted 变量（在 vi.mock 工厂函数中引用，必须提前 hoist）──────────
 const mockGetAccessToken = vi.hoisted(() => vi.fn(() => null as string | null));
 const mockGetUserInfo = vi.hoisted(() => vi.fn());
+const mockDomainStore = vi.hoisted(() => ({
+  defaultInfo: null as Record<string, unknown> | null,
+  voxelEnabled: false,
+  fetchDefaultInfo: vi.fn(),
+}));
+const mockUseDomainStore = vi.hoisted(() => vi.fn(() => mockDomainStore));
 
 // ── 捕获 router 钩子 ────────────────────────────────────────────────────────
 let capturedBeforeEach:
@@ -31,6 +37,10 @@ vi.mock("@/utils/nprogress", () => ({
 
 vi.mock("@/services/auth/authClient", () => ({
   default: { getAccessToken: mockGetAccessToken },
+}));
+
+vi.mock("@/store/modules/domain", () => ({
+  useDomainStore: mockUseDomainStore,
 }));
 
 // mockUserInfo 由各 describe 块在 beforeEach 中赋值
@@ -74,6 +84,10 @@ beforeEach(() => {
   mockUserInfo = null;
   mockGetAccessToken.mockReturnValue(null);
   mockGetUserInfo.mockReset();
+  mockDomainStore.defaultInfo = null;
+  mockDomainStore.voxelEnabled = false;
+  mockDomainStore.fetchDefaultInfo.mockReset();
+  mockDomainStore.fetchDefaultInfo.mockResolvedValue(undefined);
 
   // 设置 mock 实现以捕获注册的回调
   mockRouter.beforeEach.mockImplementation((cb: any) => {
@@ -138,6 +152,151 @@ describe("beforeEach 守卫 — 有 token 时", () => {
       next
     );
     expect(next).toHaveBeenCalledWith();
+    expect(mockUseDomainStore).not.toHaveBeenCalled();
+  });
+
+  it.each(["/resource/voxel", "/resource/voxel/index", "/resource/voxel/view"])(
+    "体素直链 %s 等待白牌配置后放行",
+    async (path) => {
+      let finishConfigLoad!: () => void;
+      mockDomainStore.fetchDefaultInfo.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finishConfigLoad = () => {
+              mockDomainStore.defaultInfo = { features: { voxel: true } };
+              mockDomainStore.voxelEnabled = true;
+              resolve();
+            };
+          })
+      );
+      const next = vi.fn();
+      const navigation = capturedBeforeEach!(
+        makeTo({ path }),
+        makeFrom(),
+        next
+      );
+
+      expect(mockDomainStore.fetchDefaultInfo).toHaveBeenCalledOnce();
+      expect(next).not.toHaveBeenCalled();
+
+      finishConfigLoad();
+      await navigation;
+
+      expect(next).toHaveBeenCalledOnce();
+      expect(next).toHaveBeenCalledWith();
+    }
+  );
+
+  it.each([
+    "/resource/voxel",
+    "/resource/voxel/index",
+    "/resource/voxel/view",
+    "/RESOURCE/VOXEL/index",
+  ])("白牌关闭体素时 %s 进入 /404", async (path) => {
+    mockDomainStore.defaultInfo = { features: { voxel: false } };
+    const next = vi.fn();
+
+    await capturedBeforeEach!(makeTo({ path }), makeFrom(), next);
+
+    expect(next).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledWith("/404");
+    expect(mockDomainStore.fetchDefaultInfo).toHaveBeenCalledOnce();
+    expect(mockGetUserInfo).not.toHaveBeenCalled();
+  });
+
+  it("白牌已开启体素时仍等待配置确认后放行", async () => {
+    mockDomainStore.defaultInfo = { features: { voxel: true } };
+    mockDomainStore.voxelEnabled = true;
+    const next = vi.fn();
+
+    await capturedBeforeEach!(
+      makeTo({ path: "/resource/voxel/index" }),
+      makeFrom(),
+      next
+    );
+
+    expect(next).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledWith();
+    expect(mockDomainStore.fetchDefaultInfo).toHaveBeenCalledOnce();
+  });
+
+  it("缓存配置不能在白牌配置加载完成前放行体素直链", async () => {
+    mockDomainStore.defaultInfo = { features: { voxel: true } };
+    mockDomainStore.voxelEnabled = true;
+    let finishConfigLoad!: () => void;
+    mockDomainStore.fetchDefaultInfo.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishConfigLoad = () => {
+            mockDomainStore.defaultInfo = { features: { voxel: false } };
+            mockDomainStore.voxelEnabled = false;
+            resolve();
+          };
+        })
+    );
+    const next = vi.fn();
+    const navigation = capturedBeforeEach!(
+      makeTo({ path: "/resource/voxel/index" }),
+      makeFrom(),
+      next
+    );
+
+    expect(mockDomainStore.fetchDefaultInfo).toHaveBeenCalledOnce();
+    expect(next).not.toHaveBeenCalled();
+
+    finishConfigLoad();
+    await navigation;
+
+    expect(next).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledWith("/404");
+  });
+
+  it("白牌配置加载后未开启体素时进入 /404", async () => {
+    mockDomainStore.fetchDefaultInfo.mockImplementationOnce(async () => {
+      mockDomainStore.defaultInfo = {};
+    });
+    const next = vi.fn();
+
+    await capturedBeforeEach!(
+      makeTo({ path: "/resource/voxel/index" }),
+      makeFrom(),
+      next
+    );
+
+    expect(mockDomainStore.fetchDefaultInfo).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledWith("/404");
+  });
+
+  it("白牌配置加载失败时体素访问关闭", async () => {
+    mockDomainStore.fetchDefaultInfo.mockRejectedValueOnce(
+      new Error("white-label configuration unavailable")
+    );
+    const next = vi.fn();
+
+    await capturedBeforeEach!(
+      makeTo({ path: "/resource/voxel/view" }),
+      makeFrom(),
+      next
+    );
+
+    expect(next).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledWith("/404");
+    expect(NProgress.done).toHaveBeenCalled();
+  });
+
+  it.each([
+    "/resource/voxel-other",
+    "/resource/voxels",
+    "/resource/polygen/index",
+  ])("白牌体素开关不匹配其他路由 %s", async (path) => {
+    const next = vi.fn();
+
+    await capturedBeforeEach!(makeTo({ path }), makeFrom(), next);
+
+    expect(next).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledWith();
+    expect(mockUseDomainStore).not.toHaveBeenCalled();
   });
 
   it("路由未匹配且 from.name 存在时回退到 from", async () => {

@@ -188,7 +188,7 @@ export const deleteAudio = (id: number | string) => deleteResources(id);
 export const deleteParticle = (id: number | string) => deleteResources(id);
 
 // 获取特定资源
-const getResource = (
+export const getResource = (
   type: ResourceType,
   id: number | string,
   expand: string = "image,author"
@@ -199,7 +199,7 @@ const getResource = (
   };
   const queryString = qs.stringify(query, true);
   const url = `/v1/resources/${id}${queryString}`;
-  return request({
+  return request<ResourceInfo>({
     url,
     method: "get",
   });

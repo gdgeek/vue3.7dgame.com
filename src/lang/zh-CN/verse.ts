@@ -1,6 +1,15 @@
 // 场景部分国际化
 export default {
   verse: {
+    toolbar: {
+      run: "运行",
+      versions: "版本",
+      history: "历史",
+      script: "脚本",
+      info: "场景编辑",
+      infoLoadFailed: "无法加载场景信息，请重试。",
+      retry: "重试",
+    },
     create: { defaultName: "新场景" },
     listPage: {
       myScenes: "我的场景",
@@ -233,8 +242,9 @@ export default {
         coverUploadFailed: "封面图片上传失败",
       },
       script: {
+        drawer: { versions: "版本历史", preview: "运行场景" },
         title: "脚本",
-        save: "保存",
+        save: "保存脚本",
         error1: "没有信息",
         error2: "没有编辑权限",
         error3: "没有脚本编辑器",

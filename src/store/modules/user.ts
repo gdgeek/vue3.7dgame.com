@@ -10,6 +10,7 @@ import authClient from "@/services/auth/authClient";
 import { normalizeLoginError } from "@/services/auth/loginError";
 import { signalSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 import { SessionSupersededError } from "@/services/auth/sessionErrors";
+import { revokeWebMcpDevIdentity } from "@/services/webmcp/dev-feature";
 
 export const useUserStore = defineStore(
   "user",
@@ -204,6 +205,7 @@ export const useUserStore = defineStore(
 
     /** 注销登录，清除 Token 和用户数据。 */
     const logout = async () => {
+      revokeWebMcpDevIdentity();
       signalSensitiveRuntimeActivity();
       // 调用后端注销 API（忽略失败，确保本地清理总是执行）
       let logoutError: Error | null = null;

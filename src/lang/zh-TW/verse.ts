@@ -1,6 +1,15 @@
 // verse translations for zh-TW
 export default {
   verse: {
+    toolbar: {
+      run: "運行",
+      versions: "版本",
+      history: "歷史",
+      script: "腳本",
+      info: "場景編輯",
+      infoLoadFailed: "無法載入場景資訊，請重試。",
+      retry: "重試",
+    },
     create: {
       defaultName: "新場景",
     },

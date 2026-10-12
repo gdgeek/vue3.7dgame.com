@@ -19,8 +19,20 @@ describe("responsive editor header regression", () => {
   const versionToolbarSource = readSource(
     "src/layout/components/NavBar/components/EditorVersionToolbar.vue"
   );
+  const editorActionSource = readSource("src/components/EditorActionGroup.vue");
+  const scriptDrawerSource = readSource(
+    "src/components/EditorScriptDrawer.vue"
+  );
   const verseScriptSource = readSource("src/views/verse/script.vue");
+  const toolbarStyles = readSource("src/styles/script-editor-toolbar.css");
   const metaScriptSource = readSource("src/views/meta/script.vue");
+  const publicLanguageSources = [
+    readSource("src/views/login/index.vue"),
+    readSource("src/views/register/index.vue"),
+    readSource("src/views/site/index.vue"),
+    readSource("src/views/web/index.vue"),
+    readSource("src/layout/components/NavBar/components/NavbarRight.vue"),
+  ];
 
   it("uses a named container and removes low-priority navbar content at compact widths", () => {
     expect(navbarSource).toContain("container-name: app-navbar");
@@ -46,11 +58,29 @@ describe("responsive editor header regression", () => {
     );
   });
 
-  it("continues to compact version controls by available navbar width", () => {
-    expect(versionToolbarSource).toContain('class="entry-label"');
-    expect(versionToolbarSource).toContain(
-      "@container app-navbar (width <= 1200px)"
+  it("always exposes theme and language choices instead of domain-locking them", () => {
+    expect(headerActionsSource).toContain('class="theme-dropdown"');
+    expect(headerActionsSource).toContain('class="language-dropdown"');
+    expect(headerActionsSource).not.toContain("isStyleLocked");
+    expect(headerActionsSource).not.toContain("isLanguageLocked");
+    for (const source of publicLanguageSources) {
+      expect(source).not.toContain("isLanguageLocked");
+    }
+  });
+
+  it("compacts shared navbar and drawer controls by available container width", () => {
+    expect(versionToolbarSource).toContain("<EditorActionGroup");
+    expect(scriptDrawerSource).toContain("<EditorActionGroup");
+    expect(scriptDrawerSource).toContain(
+      "container: script-drawer / inline-size"
     );
+    expect(editorActionSource).toContain('class="editor-action-label"');
+    expect(editorActionSource).toContain("@container (width <= 900px)");
+    expect(editorActionSource).toMatch(/@container[^}]+width:\s*40px/s);
+    expect(editorActionSource).toMatch(
+      /\.editor-action-label\s*\{[^}]*display:\s*none/s
+    );
+    expect(editorActionSource).toContain("'aria-label': action.label");
   });
 
   it.each([
@@ -61,11 +91,17 @@ describe("responsive editor header regression", () => {
     (_, source) => {
       expect(source).toContain('class="script-editor-toolbar"');
       expect(source).toContain('class="script-mode-tabs"');
-      expect(source).toContain("container-name: script-editor");
-      expect(source).toContain("@container script-editor (width <= 1100px)");
-      expect(source).toContain("@container script-editor (width <= 620px)");
+      expect(source).toContain('src="@/styles/script-editor-toolbar.css"');
+      expect(source).toContain('class="script-primary-actions"');
+      expect(toolbarStyles).toContain("container-name: script-editor");
+      expect(toolbarStyles).toContain(
+        "@container script-editor (width <= 800px)"
+      );
+      expect(toolbarStyles).toContain(
+        "@container script-editor (width <= 620px)"
+      );
       expect(source).not.toContain("padding-right: 460px");
-      expect(source).not.toMatch(
+      expect(toolbarStyles).not.toMatch(
         /\.script-tabs-actions\s*\{[^}]*position:\s*absolute/s
       );
     }

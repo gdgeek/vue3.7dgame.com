@@ -9,6 +9,11 @@ const mockPluginsByGroup = reactive(
 const mockCurrentRoute = reactive({
   path: "/home",
 });
+const mockDomainStore = reactive({
+  icon: "",
+  title: "XRUGC",
+  voxelEnabled: false,
+});
 const mockPluginStore = reactive({
   init: vi.fn(),
   enabledPlugins: [] as Array<Record<string, unknown>>,
@@ -46,7 +51,7 @@ vi.mock("@/store", () => ({
 }));
 
 vi.mock("@/store/modules/domain", () => ({
-  useDomainStore: vi.fn(() => ({ icon: "", title: "XRUGC" })),
+  useDomainStore: vi.fn(() => mockDomainStore),
 }));
 
 vi.mock("@/store/modules/app", () => ({
@@ -87,7 +92,7 @@ const RouterLinkStub = defineComponent({
     },
   },
   template:
-    "<a class='router-link-stub'><slot :isActive='false' :navigate='navigate' /></a>",
+    "<a class='router-link-stub' :data-to='to'><slot :isActive='false' :navigate='navigate' /></a>",
 });
 const FontAwesomeIconStub = defineComponent({
   name: "FontAwesomeIcon",
@@ -152,6 +157,7 @@ function showVisiblePluginMenu() {
 describe("SidebarLeft plugin auth", () => {
   beforeEach(() => {
     mockCurrentRoute.path = "/home";
+    mockDomainStore.voxelEnabled = false;
     mockPluginStore.initialized = false;
     mockPluginStore.init.mockResolvedValue(undefined);
     mockPluginStore.configuredEnabledPlugins = [
@@ -172,6 +178,38 @@ describe("SidebarLeft plugin auth", () => {
       .forEach((fn) => fn());
     vi.clearAllMocks();
   });
+
+  it.each([false, true])(
+    "updates voxel links in both menus when white-label access changes (collapsed=%s)",
+    async (collapsed) => {
+      const { el } = await mount(collapsed);
+      const voxelLinks = () =>
+        el.querySelectorAll('[data-to="/resource/voxel/index"]');
+
+      expect(voxelLinks()).toHaveLength(0);
+      expect(el.textContent).not.toContain("sidebar.voxel");
+      expect(
+        el.querySelector('[data-to="/resource/polygen/index"]')
+      ).not.toBeNull();
+
+      mockDomainStore.voxelEnabled = true;
+      await nextTick();
+
+      expect(voxelLinks()).toHaveLength(2);
+      expect(
+        el.querySelector('.popover-menu [data-to="/resource/voxel/index"]')
+      ).not.toBeNull();
+      expect(
+        el.querySelector('.submenu [data-to="/resource/voxel/index"]')
+      ).not.toBeNull();
+
+      mockDomainStore.voxelEnabled = false;
+      await nextTick();
+
+      expect(voxelLinks()).toHaveLength(0);
+      expect(el.textContent).not.toContain("sidebar.voxel");
+    }
+  );
 
   it("hides the tools root until at least one plugin is visible", async () => {
     mockPluginStore.configuredEnabledPlugins = [

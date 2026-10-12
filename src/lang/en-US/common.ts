@@ -1,6 +1,93 @@
 // common translations for en-US
 export default {
   common: {
+    appUpdate: {
+      available:
+        "A new version is available. Save or export local edits, resolve pending operations and close the runtime before reloading manually. Rediscover WebMCP tools afterwards.",
+      dismiss: "Later",
+    },
+    recovery: {
+      summary: "Save conflict: local edits remain unsaved.",
+      open: "Review conflict and keep a copy",
+      boundary:
+        "This is the rejected submission, not later edits. Previews show up to 12,000 characters; export includes the full submission. Reading the server never changes your editor or save baseline. Export first, review the latest version, then re-edit.",
+      export: "Export rejected submission",
+      read: "Read latest server content",
+      keep: "Keep local edits",
+      local: "Rejected submission",
+      server: "Current server content (read-only)",
+      failed: "Read failed or access changed. Server content is not displayed.",
+    },
+    publicationHistory: {
+      retention:
+        "Keeps the latest {count} publication bodies. Older bodies are automatically removed; the current publication is unaffected.",
+      expired:
+        "This version body has expired under the retention policy. Refresh the list to choose a retained version; do not republish.",
+      from: "From version",
+      to: "To version",
+      compare: "Compare publications",
+      identical: "Canonical bodies are identical",
+      different: "Canonical bodies differ; structural summary follows",
+      truncated:
+        "Diff limit reached; export both versions to inspect the complete content.",
+      export: "Export body and resource references",
+      pending:
+        "Publication succeeded; the archived body is not yet verified. Retry reading in publication history, without republishing.",
+      title: "Publication history",
+      boundary:
+        "Fixed server publication versions, separate from local drafts. Reading history does not replace the current scene.",
+      refresh: "Refresh list",
+      capacity: "{count} versions · {used} / {budget} used",
+      capacityWarning:
+        "Archive capacity is approaching its limit. Contact an administrator.",
+      empty:
+        "No fixed publication history. Earlier publications are not retroactively archived.",
+      date: "Published",
+      language: "Language",
+      actor: "Actor ID",
+      version: "Version",
+      inspect: "Read and verify",
+      more: "Load more",
+      detail: "Version details",
+      verified: "Archived body verified",
+      resources:
+        "Only the archived body is verified. Resource files are not copied or checked; editor project recovery is not guaranteed.",
+      body: "View fixed body",
+      forbidden:
+        "You do not have current permission to read this scene history.",
+      failed:
+        "Reading or verification failed. Retry reading only; this does not republish or substitute the current snapshot.",
+    },
+    editorLoading: {
+      progressLabel: "Resource loading progress",
+      count: "Completed {completed} / {total} items",
+      workFailed: "Loading did not finish. Please reload.",
+      stages: {
+        connecting: "Connecting to the editor",
+        data: "Reading scene / entity data",
+        initializing: "Initializing the editor",
+        assets: "Loading resources",
+        finishing: "Preparing the scene and editor state",
+        ready: "Ready",
+        error: "Loading failed",
+        model: "Loading model",
+        module: "Loading scene entity",
+        anchor: "Loading anchor",
+        space: "Loading spatial background",
+      },
+      message: "Loading editor…",
+      hint: "Editing, saving, running and scripts will be available when loading completes.",
+      failed: "The editor could not finish loading. Please retry.",
+      retry: "Reload editor",
+    },
+    editorSave: {
+      conflict:
+        "The server rejected a version conflict. Your local changes are still unsaved. Keep them and review the latest server version before continuing.",
+      unverified:
+        "The save result is not yet confirmed. Your local changes are retained. Check the original operation receipt and server state first.",
+      pending:
+        "A previous save is still unconfirmed. Check the server version first; no new editor changes do not prove that the save succeeded.",
+    },
     confirm: "Confirm",
     cancel: "Cancel",
     selectUser: "Select User",
@@ -75,9 +162,11 @@ export default {
     unityPreview: {
       entry: "Run Scene",
       title: "Run Scene",
-      helpClick: "Click the view to control the scene",
-      helpRotate: "Hold Alt + left mouse button to rotate",
-      helpZoomPan: "Use the wheel to zoom, right mouse button to pan",
+      helpClick: "Click the preview first to focus it",
+      helpRotate:
+        "Hold Alt (⌥ Option on Mac) and drag with the left mouse button to rotate",
+      helpZoomPan:
+        "Use the mouse wheel or two-finger trackpad scrolling to zoom; drag with the right mouse button to pan",
       helpFullscreen: "Use fullscreen for a fuller preview",
       fullscreen: "Fullscreen run scene",
       close: "Close run scene",
@@ -104,6 +193,7 @@ export default {
     home: "Home",
     resources: "Resources",
     model: "Model",
+    voxel: "Voxel",
     picture: "Picture",
     audio: "Audio",
     video: "Video",

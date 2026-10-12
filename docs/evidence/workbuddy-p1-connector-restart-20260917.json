@@ -1,0 +1,60 @@
+{
+  "scope": "actual WorkBuddy UI connector disable-enable and subsequent real client discovery",
+  "clientVersion": "5.5.2",
+  "connector": "xrugc-webmcp-dev",
+  "disabledObserved": true,
+  "enabledObserved": true,
+  "greenConnectionObserved": true,
+  "websiteRemainedConnected": true,
+  "websiteToolCount": 37,
+  "searchesAfterToggle": [
+    {
+      "at": 1789607433684,
+      "discoveredToolNames": [
+        "mcp__xrugc-webmcp-dev___webmcp_define-mcp-tool",
+        "mcp__xrugc-webmcp-dev___webmcp_get-token",
+        "mcp__sheetagent__read_table",
+        "mcp__sheetagent__run_command",
+        "LSP",
+        "mcp__sheetagent__set_cell_range",
+        "mcp__weixinpay__weixinpay_feedback",
+        "mcp__weixinpay__weixinpay_register",
+        "search_plugins",
+        "mcp__sheetagent__calculate_formulas",
+        "mcp__sheetagent__fill_formula",
+        "mcp__sheetagent__search_data",
+        "mcp__weixinpay__weixinpay_retry_pay",
+        "mcp__sheetagent__calculate_single_formula",
+        "mcp__sheetagent__get_cell_ranges",
+        "mcp__sheetagent__resolve_local_excel",
+        "workbuddy_sites_deploy"
+      ]
+    },
+    {
+      "at": 1789607463143,
+      "discoveredToolNames": [
+        "LSP",
+        "mcp__sheetagent__read_table",
+        "mcp__sheetagent__get_cell_ranges",
+        "mcp__xrugc-webmcp-dev___webmcp_get-token",
+        "mcp__sheetagent__resolve_local_excel",
+        "mcp__sheetagent__search_data",
+        "mcp__sheetagent__run_command",
+        "mcp__sheetagent__set_cell_range",
+        "search_plugins",
+        "workbuddy_sites_deploy"
+      ]
+    }
+  ],
+  "siteReadSucceeded": false,
+  "independentBridgeAfterToggle": {
+    "observedAt": "2026-09-17T01:12:36.641Z",
+    "scope": "independent fixed-version stdio tools/list; not WorkBuddy acceptance",
+    "toolNames": [
+      "127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "_webmcp_get-token",
+      "_webmcp_define-mcp-tool"
+    ]
+  }
+}

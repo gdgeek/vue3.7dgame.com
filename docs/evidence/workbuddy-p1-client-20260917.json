@@ -1,0 +1,4288 @@
+{
+  "scope": "P1 same WorkBuddy task actual tool calls; no narrative used as proof",
+  "sourceStartLine": 153,
+  "capturedAt": "2026-09-16T17:16:32.434875+00:00",
+  "calls": [
+    {
+      "callLine": 162,
+      "startedAt": "2026-09-16T16:44:53.893000+00:00",
+      "clientTool": "ToolSearch",
+      "classification": "client tool discovery",
+      "argumentKeys": ["queries", "top_k"],
+      "resultLine": 163,
+      "returnedAt": "2026-09-16T16:44:53.896000+00:00",
+      "durationMs": 3,
+      "clientStatus": "completed"
+    },
+    {
+      "callLine": 166,
+      "startedAt": "2026-09-16T16:44:59.310000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 167,
+      "returnedAt": "2026-09-16T16:44:59.507000+00:00",
+      "durationMs": 197,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolCount": 28,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_editor_context",
+          "xrugc_get_scene_modules",
+          "xrugc_inspect_scene_module",
+          "xrugc_validate_scene",
+          "xrugc_search_entities",
+          "xrugc_get_scene_publication",
+          "xrugc_check_scene_resource_readiness",
+          "xrugc_check_scene_publication_readiness",
+          "xrugc_get_scene_runtime_diagnostics",
+          "xrugc_stage_scene_entity_placement",
+          "xrugc_complete_scene_entity_placement",
+          "xrugc_stage_scene_module_transform",
+          "xrugc_complete_scene_module_transform",
+          "xrugc_stage_scene_module_properties",
+          "xrugc_complete_scene_module_properties",
+          "xrugc_stage_scene_module_deletion",
+          "xrugc_complete_scene_module_deletion",
+          "xrugc_stage_scene_publication",
+          "xrugc_complete_scene_publication",
+          "xrugc_get_scene_runtime_preview_status",
+          "xrugc_start_scene_runtime_preview",
+          "xrugc_stop_scene_runtime_preview",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation"
+        ]
+      }
+    },
+    {
+      "callLine": 170,
+      "startedAt": "2026-09-16T16:45:10.744000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_workspace_context",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_get_scene_workspace_context"
+      },
+      "resultLine": 171,
+      "returnedAt": "2026-09-16T16:45:10.889000+00:00",
+      "durationMs": 145,
+      "clientStatus": "completed",
+      "result": {
+        "sceneId": 666,
+        "sceneName": "WorkBuddy P1 primary",
+        "activeEditor": "scene",
+        "scene": {
+          "ready": true,
+          "loading": false,
+          "status": "ready",
+          "blocked": false,
+          "error": null,
+          "retryAfterMs": null,
+          "dirty": false,
+          "saving": false
+        },
+        "script": {
+          "open": false,
+          "ready": false,
+          "dirty": false,
+          "saving": false,
+          "tab": null
+        }
+      }
+    },
+    {
+      "callLine": 172,
+      "startedAt": "2026-09-16T16:45:29.845000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_modules",
+      "arguments": {
+        "arguments": {
+          "limit": 500,
+          "query": ""
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_get_scene_modules"
+      },
+      "resultLine": 173,
+      "returnedAt": "2026-09-16T16:45:30.008000+00:00",
+      "durationMs": 163,
+      "clientStatus": "completed",
+      "result": {
+        "moduleCount": 1,
+        "matchedCount": 1,
+        "truncated": false,
+        "modules": [
+          {
+            "id": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+            "path": "0",
+            "title": "P1 cube instance",
+            "entityId": 1091,
+            "active": true,
+            "transform": {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotate": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "callLine": 176,
+      "startedAt": "2026-09-16T16:45:37.730000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_stage_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "transform": {
+            "position": {
+              "x": 0.1
+            }
+          }
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_stage_scene_module_transform"
+      },
+      "resultLine": 177,
+      "returnedAt": "2026-09-16T16:45:38.074000+00:00",
+      "durationMs": 344,
+      "clientStatus": "completed",
+      "result": {
+        "status": "staged",
+        "draftId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70",
+        "expiresAt": "2026-09-16T16:50:38.016Z",
+        "preview": {
+          "sceneId": 666,
+          "sceneVersion": "verse-v1-339-3911ac55",
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "moduleTitle": "P1 cube instance",
+          "current": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "proposed": {
+            "position": {
+              "x": 0.1,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "changed": true
+        }
+      }
+    },
+    {
+      "callLine": 180,
+      "startedAt": "2026-09-16T16:45:45.520000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_complete_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "draftId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_complete_scene_module_transform"
+      },
+      "resultLine": 181,
+      "returnedAt": "2026-09-16T16:45:45.815000+00:00",
+      "durationMs": 295,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "awaiting_confirmation",
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 184,
+      "startedAt": "2026-09-16T16:45:51.411000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_complete_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "draftId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_complete_scene_module_transform"
+      },
+      "resultLine": 185,
+      "returnedAt": "2026-09-16T16:45:51.534000+00:00",
+      "durationMs": 123,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "awaiting_confirmation",
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 188,
+      "startedAt": "2026-09-16T16:45:59.082000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_cancel_operation",
+      "arguments": {
+        "arguments": {
+          "operationId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_cancel_operation"
+      },
+      "resultLine": 189,
+      "returnedAt": "2026-09-16T16:45:59.173000+00:00",
+      "durationMs": 91,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "cancelled",
+        "nextAction": "inspect_result"
+      }
+    },
+    {
+      "callLine": 192,
+      "startedAt": "2026-09-16T16:46:04.418000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_operation_status",
+      "arguments": {
+        "arguments": {
+          "operationId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_get_operation_status"
+      },
+      "resultLine": 193,
+      "returnedAt": "2026-09-16T16:46:04.740000+00:00",
+      "durationMs": 322,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "14761fc9-6987-4f92-8b3b-13bcb8c16c70",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "cancelled",
+        "nextAction": "inspect_result"
+      }
+    },
+    {
+      "callLine": 198,
+      "startedAt": "2026-09-16T16:48:41.952000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_stage_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "transform": {
+            "position": {
+              "x": 0.2
+            }
+          }
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_stage_scene_module_transform"
+      },
+      "resultLine": 199,
+      "returnedAt": "2026-09-16T16:48:42.114000+00:00",
+      "durationMs": 162,
+      "clientStatus": "completed",
+      "result": {
+        "status": "staged",
+        "draftId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+        "expiresAt": "2026-09-16T16:53:42.107Z",
+        "preview": {
+          "sceneId": 666,
+          "sceneVersion": "verse-v1-339-3911ac55",
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "moduleTitle": "P1 cube instance",
+          "current": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "proposed": {
+            "position": {
+              "x": 0.2,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "changed": true
+        }
+      }
+    },
+    {
+      "callLine": 202,
+      "startedAt": "2026-09-16T16:48:51.075000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_complete_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "draftId": "8dc5f96a-4776-4dea-b115-161ff83354fe"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_complete_scene_module_transform"
+      },
+      "resultLine": 203,
+      "returnedAt": "2026-09-16T16:48:51.358000+00:00",
+      "durationMs": 283,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "awaiting_confirmation",
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 206,
+      "startedAt": "2026-09-16T16:48:57.747000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_complete_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "draftId": "8dc5f96a-4776-4dea-b115-161ff83354fe"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_complete_scene_module_transform"
+      },
+      "resultLine": 207,
+      "returnedAt": "2026-09-16T16:48:57.809000+00:00",
+      "durationMs": 62,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "awaiting_confirmation",
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 217,
+      "startedAt": "2026-09-16T16:53:50.275000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 218,
+      "returnedAt": "2026-09-16T16:53:50.429000+00:00",
+      "durationMs": 154,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolCount": 28,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_editor_context",
+          "xrugc_get_scene_modules",
+          "xrugc_inspect_scene_module",
+          "xrugc_validate_scene",
+          "xrugc_search_entities",
+          "xrugc_get_scene_publication",
+          "xrugc_check_scene_resource_readiness",
+          "xrugc_check_scene_publication_readiness",
+          "xrugc_get_scene_runtime_diagnostics",
+          "xrugc_stage_scene_entity_placement",
+          "xrugc_complete_scene_entity_placement",
+          "xrugc_stage_scene_module_transform",
+          "xrugc_complete_scene_module_transform",
+          "xrugc_stage_scene_module_properties",
+          "xrugc_complete_scene_module_properties",
+          "xrugc_stage_scene_module_deletion",
+          "xrugc_complete_scene_module_deletion",
+          "xrugc_stage_scene_publication",
+          "xrugc_complete_scene_publication",
+          "xrugc_get_scene_runtime_preview_status",
+          "xrugc_start_scene_runtime_preview",
+          "xrugc_stop_scene_runtime_preview",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation"
+        ]
+      }
+    },
+    {
+      "callLine": 221,
+      "startedAt": "2026-09-16T16:54:05.681000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_operation_status",
+      "arguments": {
+        "arguments": {
+          "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_get_operation_status"
+      },
+      "resultLine": 222,
+      "returnedAt": "2026-09-16T16:54:06.240000+00:00",
+      "durationMs": 559,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "completed",
+        "writeReceipt": {
+          "action": "save",
+          "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+          "serverRevision": "sha256:a2ff79e53d225c02b99a4844c180c23f9bd17a43f88fe5f6d4e737dfb117c792",
+          "status": "completed",
+          "targetId": 666,
+          "targetType": "verse"
+        },
+        "result": {
+          "status": "completed",
+          "draftId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+          "sceneId": 666,
+          "editorApplied": true,
+          "persistence": "server_acknowledged",
+          "editorAcknowledged": true,
+          "ownerId": 666,
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "moduleTitle": "P1 cube instance",
+          "transform": {
+            "position": {
+              "x": 0.2,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "noChange": false
+        },
+        "nextAction": "inspect_result",
+        "verification": "server_acknowledged"
+      }
+    },
+    {
+      "callLine": 223,
+      "startedAt": "2026-09-16T16:54:14.969000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_modules",
+      "arguments": {
+        "arguments": {
+          "limit": 500,
+          "query": ""
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_get_scene_modules"
+      },
+      "resultLine": 224,
+      "returnedAt": "2026-09-16T16:54:15.128000+00:00",
+      "durationMs": 159,
+      "clientStatus": "completed",
+      "result": {
+        "moduleCount": 1,
+        "matchedCount": 1,
+        "truncated": false,
+        "modules": [
+          {
+            "id": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+            "path": "0",
+            "title": "P1 cube instance",
+            "entityId": 1091,
+            "active": true,
+            "transform": {
+              "position": {
+                "x": 0.2,
+                "y": 0,
+                "z": 0
+              },
+              "rotate": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "callLine": 227,
+      "startedAt": "2026-09-16T16:54:22.543000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_complete_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "draftId": "8dc5f96a-4776-4dea-b115-161ff83354fe"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_complete_scene_module_transform"
+      },
+      "resultLine": 228,
+      "returnedAt": "2026-09-16T16:54:22.716000+00:00",
+      "durationMs": 173,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "completed",
+        "writeReceipt": {
+          "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+          "status": "completed",
+          "targetType": "verse",
+          "targetId": 666,
+          "action": "save",
+          "serverRevision": "sha256:a2ff79e53d225c02b99a4844c180c23f9bd17a43f88fe5f6d4e737dfb117c792"
+        },
+        "result": {
+          "status": "completed",
+          "draftId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+          "sceneId": 666,
+          "editorApplied": true,
+          "persistence": "server_acknowledged",
+          "editorAcknowledged": true,
+          "ownerId": 666,
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "moduleTitle": "P1 cube instance",
+          "transform": {
+            "position": {
+              "x": 0.2,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "noChange": false
+        },
+        "nextAction": "inspect_result"
+      }
+    },
+    {
+      "callLine": 231,
+      "startedAt": "2026-09-16T16:54:29.849000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_cancel_operation",
+      "arguments": {
+        "arguments": {
+          "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe"
+        },
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_cancel_operation"
+      },
+      "resultLine": 232,
+      "returnedAt": "2026-09-16T16:54:29.969000+00:00",
+      "durationMs": 120,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "8dc5f96a-4776-4dea-b115-161ff83354fe",
+        "status": "not_cancellable",
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 235,
+      "startedAt": "2026-09-16T16:54:35.329000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_open_scene_script_editor",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_open_scene_script_editor"
+      },
+      "resultLine": 236,
+      "returnedAt": "2026-09-16T16:54:35.711000+00:00",
+      "durationMs": 382,
+      "clientStatus": "completed",
+      "result": {
+        "status": "opened",
+        "context": {
+          "sceneId": 666,
+          "sceneName": "WorkBuddy P1 primary",
+          "activeEditor": "scene-script",
+          "scene": {
+            "ready": true,
+            "loading": false,
+            "status": "ready",
+            "blocked": false,
+            "error": null,
+            "retryAfterMs": null,
+            "dirty": false,
+            "saving": false
+          },
+          "script": {
+            "open": true,
+            "ready": false,
+            "dirty": false,
+            "saving": false,
+            "tab": null
+          }
+        },
+        "rediscoverTools": true
+      }
+    },
+    {
+      "callLine": 239,
+      "startedAt": "2026-09-16T16:54:44.591000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_workspace_context",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "57c44a2352c43d089b51752a066dbea1bb329b597273ed9ebc4b2008a1b05859",
+        "toolName": "xrugc_get_scene_workspace_context"
+      },
+      "resultLine": 240,
+      "returnedAt": "2026-09-16T16:54:44.729000+00:00",
+      "durationMs": 138,
+      "clientStatus": "completed",
+      "result": {
+        "code": "stale_context",
+        "message": "页面或编辑会话已变化，请重新调用 xrugc_webmcp_list_tools。",
+        "nextAction": "重新查询当前工具；写入发生异常时先用原 operationId 查询回执，不要直接重试提交。"
+      }
+    },
+    {
+      "callLine": 243,
+      "startedAt": "2026-09-16T16:54:51.679000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 244,
+      "returnedAt": "2026-09-16T16:54:51.826000+00:00",
+      "durationMs": 147,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolCount": 14,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_script",
+          "xrugc_validate_scene_script",
+          "xrugc_stage_scene_script_replace",
+          "xrugc_complete_scene_script_replace",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation",
+          "xrugc_get_script_block_catalog",
+          "xrugc_get_script_block_structure",
+          "xrugc_stage_script_block_batch",
+          "xrugc_complete_script_block_batch"
+        ]
+      }
+    },
+    {
+      "callLine": 247,
+      "startedAt": "2026-09-16T16:55:01.385000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_script",
+      "arguments": {
+        "arguments": {
+          "includeGeneratedCode": true,
+          "includeWorkspace": true
+        },
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_get_scene_script"
+      },
+      "resultLine": 248,
+      "returnedAt": "2026-09-16T16:55:01.931000+00:00",
+      "durationMs": 546,
+      "clientStatus": "completed",
+      "result": {
+        "sceneId": 666,
+        "sceneTitle": "WorkBuddy P1 primary",
+        "workspaceVersion": "{\"backpack\":[]}",
+        "summary": {
+          "blockCount": 0,
+          "topLevelBlockCount": 0,
+          "variableCount": 0,
+          "commentCount": 0,
+          "blockTypes": {},
+          "serializedBytes": 15,
+          "generatedJavaScriptBytes": 0,
+          "generatedLuaBytes": 0
+        },
+        "valid": true,
+        "warnings": [],
+        "canSave": true,
+        "validationScope": "workspace-and-generated-syntax",
+        "workspace": {
+          "backpack": []
+        },
+        "generatedCode": {
+          "js": "",
+          "lua": ""
+        }
+      }
+    },
+    {
+      "callLine": 249,
+      "startedAt": "2026-09-16T16:55:09.460000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_script_block_catalog",
+      "arguments": {
+        "arguments": {
+          "limit": 250
+        },
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_get_script_block_catalog"
+      },
+      "resultLine": 250,
+      "returnedAt": "2026-09-16T16:55:10.579000+00:00",
+      "durationMs": 1119,
+      "clientStatus": "completed",
+      "result": {
+        "action": "webmcp-get-script-block-catalog",
+        "ok": true,
+        "matched": 58,
+        "returned": 58,
+        "truncated": false,
+        "categories": [
+          {
+            "name": "逻辑",
+            "path": "逻辑",
+            "dynamic": false
+          },
+          {
+            "name": "循环",
+            "path": "循环",
+            "dynamic": false
+          },
+          {
+            "name": "数学",
+            "path": "数学",
+            "dynamic": false
+          },
+          {
+            "name": "文本",
+            "path": "文本",
+            "dynamic": false
+          },
+          {
+            "name": "列表",
+            "path": "列表",
+            "dynamic": false
+          },
+          {
+            "name": "坐标",
+            "path": "坐标",
+            "dynamic": false
+          },
+          {
+            "name": "任务",
+            "path": "任务",
+            "dynamic": false
+          },
+          {
+            "name": "信号",
+            "path": "信号",
+            "dynamic": false
+          },
+          {
+            "name": "变量",
+            "path": "变量",
+            "dynamic": true
+          },
+          {
+            "name": "函数",
+            "path": "函数",
+            "dynamic": true
+          }
+        ],
+        "catalogScope": "static-toolbox",
+        "dynamicCategoriesExpanded": false,
+        "blocks": [
+          {
+            "type": "controls_if",
+            "category": "逻辑",
+            "text": "如果 ? 执行 ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "IF0",
+                "kind": "value",
+                "checks": ["Boolean"]
+              },
+              {
+                "name": "DO0",
+                "kind": "statement",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "controls_if"
+            }
+          },
+          {
+            "type": "logic_compare",
+            "category": "逻辑",
+            "text": "? = ?",
+            "fields": {
+              "OP": "EQ"
+            },
+            "inputs": [
+              {
+                "name": "A",
+                "kind": "value",
+                "checks": null
+              },
+              {
+                "name": "B",
+                "kind": "value",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Boolean"]
+            },
+            "sampleState": {
+              "type": "logic_compare",
+              "fields": {
+                "OP": "EQ"
+              }
+            }
+          },
+          {
+            "type": "logic_operation",
+            "category": "逻辑",
+            "text": "? 并且 ?",
+            "fields": {
+              "OP": "AND"
+            },
+            "inputs": [
+              {
+                "name": "A",
+                "kind": "value",
+                "checks": ["Boolean"]
+              },
+              {
+                "name": "B",
+                "kind": "value",
+                "checks": ["Boolean"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Boolean"]
+            },
+            "sampleState": {
+              "type": "logic_operation",
+              "fields": {
+                "OP": "AND"
+              }
+            }
+          },
+          {
+            "type": "logic_negate",
+            "category": "逻辑",
+            "text": "非 ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "BOOL",
+                "kind": "value",
+                "checks": ["Boolean"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Boolean"]
+            },
+            "sampleState": {
+              "type": "logic_negate"
+            }
+          },
+          {
+            "type": "logic_boolean",
+            "category": "逻辑",
+            "text": "true",
+            "fields": {
+              "BOOL": "TRUE"
+            },
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Boolean"]
+            },
+            "sampleState": {
+              "type": "logic_boolean",
+              "fields": {
+                "BOOL": "TRUE"
+              }
+            }
+          },
+          {
+            "type": "logic_null",
+            "category": "逻辑",
+            "text": "空",
+            "fields": {},
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "logic_null"
+            }
+          },
+          {
+            "type": "logic_ternary",
+            "category": "逻辑",
+            "text": "断言 ? 如果为 true ? 如果为 false ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "IF",
+                "kind": "value",
+                "checks": ["Boolean"]
+              },
+              {
+                "name": "THEN",
+                "kind": "value",
+                "checks": null
+              },
+              {
+                "name": "ELSE",
+                "kind": "value",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "logic_ternary"
+            }
+          },
+          {
+            "type": "controls_repeat_ext",
+            "category": "循环",
+            "text": "重复 10 次 执行 ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "TIMES",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "DO",
+                "kind": "statement",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "controls_repeat_ext",
+              "inputs": {
+                "TIMES": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "02$M~H,7Q+{J$]C*~6Q:",
+                    "fields": {
+                      "NUM": 10
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "controls_whileUntil",
+            "category": "循环",
+            "text": "当条件满足时重复 ? 执行 ?",
+            "fields": {
+              "MODE": "WHILE"
+            },
+            "inputs": [
+              {
+                "name": "BOOL",
+                "kind": "value",
+                "checks": ["Boolean"]
+              },
+              {
+                "name": "DO",
+                "kind": "statement",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "controls_whileUntil",
+              "fields": {
+                "MODE": "WHILE"
+              }
+            }
+          },
+          {
+            "type": "controls_for",
+            "category": "循环",
+            "text": "变量 i 从 1 数到 10 每次增加 1 执行 ?",
+            "fields": {
+              "VAR": "5im}hsgYk.)8Vc6sq2o,"
+            },
+            "inputs": [
+              {
+                "name": "FROM",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "TO",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "BY",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "DO",
+                "kind": "statement",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "controls_for",
+              "fields": {
+                "VAR": {
+                  "id": "5im}hsgYk.)8Vc6sq2o,",
+                  "name": "i",
+                  "type": ""
+                }
+              },
+              "inputs": {
+                "FROM": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "b;?BM;O/)+[BSk+KOP}_",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                },
+                "TO": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "*qC1|s9c_y0f}{5MfE~q",
+                    "fields": {
+                      "NUM": 10
+                    }
+                  }
+                },
+                "BY": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "u+[rAHUZLk3,CgD!578d",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "controls_forEach",
+            "category": "循环",
+            "text": "遍历列表 ? 里的每一项 i 执行 ?",
+            "fields": {
+              "VAR": "8^pMH4o|@E]s=o^jJU[J"
+            },
+            "inputs": [
+              {
+                "name": "LIST",
+                "kind": "value",
+                "checks": ["Array"]
+              },
+              {
+                "name": "DO",
+                "kind": "statement",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "controls_forEach",
+              "fields": {
+                "VAR": {
+                  "id": "8^pMH4o|@E]s=o^jJU[J",
+                  "name": "i",
+                  "type": ""
+                }
+              }
+            }
+          },
+          {
+            "type": "controls_flow_statements",
+            "category": "循环",
+            "text": "跳出循环",
+            "fields": {
+              "FLOW": "BREAK"
+            },
+            "inputs": [],
+            "connections": {
+              "previous": true,
+              "next": false,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "controls_flow_statements",
+              "fields": {
+                "FLOW": "BREAK"
+              }
+            }
+          },
+          {
+            "type": "math_number",
+            "category": "数学",
+            "text": "123",
+            "fields": {
+              "NUM": 123
+            },
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_number",
+              "fields": {
+                "NUM": 123
+              }
+            }
+          },
+          {
+            "type": "math_arithmetic",
+            "category": "数学",
+            "text": "1 + 1",
+            "fields": {
+              "OP": "ADD"
+            },
+            "inputs": [
+              {
+                "name": "A",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "B",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_arithmetic",
+              "fields": {
+                "OP": "ADD"
+              },
+              "inputs": {
+                "A": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "1$poO|_d0`e4uwYNSrpR",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                },
+                "B": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "2/yJq^J6sesqL7*gEkA(",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_single",
+            "category": "数学",
+            "text": "平方根 9",
+            "fields": {
+              "OP": "ROOT"
+            },
+            "inputs": [
+              {
+                "name": "NUM",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_single",
+              "fields": {
+                "OP": "ROOT"
+              },
+              "inputs": {
+                "NUM": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "JFYy`ap7`q[.7voi3p3v",
+                    "fields": {
+                      "NUM": 9
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_trig",
+            "category": "数学",
+            "text": "正弦 45",
+            "fields": {
+              "OP": "SIN"
+            },
+            "inputs": [
+              {
+                "name": "NUM",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_trig",
+              "fields": {
+                "OP": "SIN"
+              },
+              "inputs": {
+                "NUM": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "JE[x7Ug=KAh5i~^``[:B",
+                    "fields": {
+                      "NUM": 45
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_constant",
+            "category": "数学",
+            "text": "π",
+            "fields": {
+              "CONSTANT": "PI"
+            },
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_constant",
+              "fields": {
+                "CONSTANT": "PI"
+              }
+            }
+          },
+          {
+            "type": "math_number_property",
+            "category": "数学",
+            "text": "0 是偶数",
+            "fields": {
+              "PROPERTY": "EVEN"
+            },
+            "inputs": [
+              {
+                "name": "NUMBER_TO_CHECK",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Boolean"]
+            },
+            "sampleState": {
+              "type": "math_number_property",
+              "extraState": "<mutation divisor_input=\"false\"></mutation>",
+              "fields": {
+                "PROPERTY": "EVEN"
+              },
+              "inputs": {
+                "NUMBER_TO_CHECK": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "b2o*a5g+DW/}9:Rq!aL?",
+                    "fields": {
+                      "NUM": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_round",
+            "category": "数学",
+            "text": "四舍五入 3.1",
+            "fields": {
+              "OP": "ROUND"
+            },
+            "inputs": [
+              {
+                "name": "NUM",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_round",
+              "fields": {
+                "OP": "ROUND"
+              },
+              "inputs": {
+                "NUM": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "i3/Py5q2Ttr_Hm%]JwWH",
+                    "fields": {
+                      "NUM": 3.1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_on_list",
+            "category": "数学",
+            "text": "列表的和 ?",
+            "fields": {
+              "OP": "SUM"
+            },
+            "inputs": [
+              {
+                "name": "LIST",
+                "kind": "value",
+                "checks": ["Array"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_on_list",
+              "extraState": "<mutation op=\"SUM\"></mutation>",
+              "fields": {
+                "OP": "SUM"
+              }
+            }
+          },
+          {
+            "type": "math_modulo",
+            "category": "数学",
+            "text": "64 ÷ 10 的余数",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "DIVIDEND",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "DIVISOR",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_modulo",
+              "inputs": {
+                "DIVIDEND": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "lX{;KLd@$w,Ln}iDgI0p",
+                    "fields": {
+                      "NUM": 64
+                    }
+                  }
+                },
+                "DIVISOR": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "aD78v%y*+.f@,+}4ZxOe",
+                    "fields": {
+                      "NUM": 10
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_constrain",
+            "category": "数学",
+            "text": "将 50 限制在 最低 1 到最高 100 之间",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "LOW",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "HIGH",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_constrain",
+              "inputs": {
+                "VALUE": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "{abD{(L9ir[w6Ah79)p(",
+                    "fields": {
+                      "NUM": 50
+                    }
+                  }
+                },
+                "LOW": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "rhC]nprmU2I!w5A?)ORk",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                },
+                "HIGH": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "5E;B,wljVagUDh5)Pm]?",
+                    "fields": {
+                      "NUM": 100
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_random_int",
+            "category": "数学",
+            "text": "从 1 到 100 范围内的随机整数",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "FROM",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "TO",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_random_int",
+              "inputs": {
+                "FROM": {
+                  "shadow": {
+                    "type": "math_integer_number",
+                    "id": "-T6-:Io*M{Pj#Llg)sn@",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                },
+                "TO": {
+                  "shadow": {
+                    "type": "math_integer_number",
+                    "id": "``!8U#]4ULIrh;7i+C@{",
+                    "fields": {
+                      "NUM": 100
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_random_float_range",
+            "category": "数学",
+            "text": "从 1 到 100 范围内的随机小数",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "FROM",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "TO",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_random_float_range",
+              "inputs": {
+                "FROM": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "lDimQ+?v)/+lSQ)7B7,-",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                },
+                "TO": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "[*{U+!_4vcq^5ql3O]s?",
+                    "fields": {
+                      "NUM": 100
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "math_random_float",
+            "category": "数学",
+            "text": "随机小数",
+            "fields": {},
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_random_float"
+            }
+          },
+          {
+            "type": "math_atan2",
+            "category": "数学",
+            "text": "点(x: 1 ,y: 1 )的方位角",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "X",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "Y",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "math_atan2",
+              "inputs": {
+                "X": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "S|R8Un`bAer@=,$|(=(l",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                },
+                "Y": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "/LYeOJz#@t/@5?KJ3$Bu",
+                    "fields": {
+                      "NUM": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text",
+            "category": "文本",
+            "text": "“ abc ”",
+            "fields": {
+              "TEXT": "abc"
+            },
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["String"]
+            },
+            "sampleState": {
+              "type": "text",
+              "fields": {
+                "TEXT": "abc"
+              }
+            }
+          },
+          {
+            "type": "text_join",
+            "category": "文本",
+            "text": "创建文本，内容： ? ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "ADD0",
+                "kind": "value",
+                "checks": null
+              },
+              {
+                "name": "ADD1",
+                "kind": "value",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["String"]
+            },
+            "sampleState": {
+              "type": "text_join",
+              "extraState": {
+                "itemCount": 2
+              }
+            }
+          },
+          {
+            "type": "text_append",
+            "category": "文本",
+            "text": "在 项目 之后加上文本 “ abc ”",
+            "fields": {
+              "VAR": "(Kse.^IQ8K*`/r3,|%/`"
+            },
+            "inputs": [
+              {
+                "name": "TEXT",
+                "kind": "value",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "text_append",
+              "fields": {
+                "VAR": {
+                  "id": "(Kse.^IQ8K*`/r3,|%/`",
+                  "name": "项目",
+                  "type": ""
+                }
+              },
+              "inputs": {
+                "TEXT": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "T_G]5WHhgI!+7[dhZD`1",
+                    "fields": {
+                      "TEXT": "abc"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text_length",
+            "category": "文本",
+            "text": "“ abc ” 的长度",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["String", "Array"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "text_length",
+              "inputs": {
+                "VALUE": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "L60zjz-`?63DBi1Ar8nu",
+                    "fields": {
+                      "TEXT": "abc"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text_isEmpty",
+            "category": "文本",
+            "text": "“  ” 是空的",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["String", "Array"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Boolean"]
+            },
+            "sampleState": {
+              "type": "text_isEmpty",
+              "inputs": {
+                "VALUE": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "b~9Aj_I^NY)1((VTMiaX",
+                    "fields": {
+                      "TEXT": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text_indexOf",
+            "category": "文本",
+            "text": "在文本 i 里 寻找第一次出现的文本 “ abc ”",
+            "fields": {
+              "END": "FIRST"
+            },
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["String"]
+              },
+              {
+                "name": "FIND",
+                "kind": "value",
+                "checks": ["String"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "text_indexOf",
+              "fields": {
+                "END": "FIRST"
+              },
+              "inputs": {
+                "VALUE": {
+                  "block": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": {
+                        "id": "+I2k|hPWJub:b[Iyb*$/",
+                        "name": "i",
+                        "type": ""
+                      }
+                    }
+                  }
+                },
+                "FIND": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "q(J@/kd-ROn).Z/%y4E1",
+                    "fields": {
+                      "TEXT": "abc"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text_charAt",
+            "category": "文本",
+            "text": "在文本 i 里 获取第#个字符 ?",
+            "fields": {
+              "WHERE": "FROM_START"
+            },
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["String"]
+              },
+              {
+                "name": "AT",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["String"]
+            },
+            "sampleState": {
+              "type": "text_charAt",
+              "extraState": "<mutation at=\"true\"></mutation>",
+              "fields": {
+                "WHERE": "FROM_START"
+              },
+              "inputs": {
+                "VALUE": {
+                  "block": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": {
+                        "id": "RIwS$@)0?/eIyx(5x/js",
+                        "name": "i",
+                        "type": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text_getSubstring",
+            "category": "文本",
+            "text": "从文本 i 获取子串，从第#个字符 ? 到第#个字符 ?",
+            "fields": {
+              "WHERE1": "FROM_START",
+              "WHERE2": "FROM_START"
+            },
+            "inputs": [
+              {
+                "name": "STRING",
+                "kind": "value",
+                "checks": ["String"]
+              },
+              {
+                "name": "WHERE1_INPUT",
+                "kind": "dummy",
+                "checks": null
+              },
+              {
+                "name": "AT1",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "WHERE2_INPUT",
+                "kind": "dummy",
+                "checks": null
+              },
+              {
+                "name": "AT2",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["String"]
+            },
+            "sampleState": {
+              "type": "text_getSubstring",
+              "extraState": "<mutation at1=\"true\" at2=\"true\"></mutation>",
+              "fields": {
+                "WHERE1": "FROM_START",
+                "WHERE2": "FROM_START"
+              },
+              "inputs": {
+                "STRING": {
+                  "block": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": {
+                        "id": "D#-[qd~,a$|wl0mW+I/!",
+                        "name": "i",
+                        "type": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text_changeCase",
+            "category": "文本",
+            "text": "转为大写 “ abc ”",
+            "fields": {
+              "CASE": "UPPERCASE"
+            },
+            "inputs": [
+              {
+                "name": "TEXT",
+                "kind": "value",
+                "checks": ["String"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["String"]
+            },
+            "sampleState": {
+              "type": "text_changeCase",
+              "fields": {
+                "CASE": "UPPERCASE"
+              },
+              "inputs": {
+                "TEXT": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "+FIvKxC_uT3xvz@fC(7k",
+                    "fields": {
+                      "TEXT": "abc"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text_trim",
+            "category": "文本",
+            "text": "消除其两侧的空格 “ abc ”",
+            "fields": {
+              "MODE": "BOTH"
+            },
+            "inputs": [
+              {
+                "name": "TEXT",
+                "kind": "value",
+                "checks": ["String"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["String"]
+            },
+            "sampleState": {
+              "type": "text_trim",
+              "fields": {
+                "MODE": "BOTH"
+              },
+              "inputs": {
+                "TEXT": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "k[]_Nw1)-fb!?eK@+3bP",
+                    "fields": {
+                      "TEXT": "abc"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "text_print",
+            "category": "文本",
+            "text": "输出 “ abc ”",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "TEXT",
+                "kind": "value",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "text_print",
+              "inputs": {
+                "TEXT": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "#[Gywrjn-Y;maX=nrpy|",
+                    "fields": {
+                      "TEXT": "abc"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "lists_create_empty",
+            "category": "列表",
+            "text": "创建空列表",
+            "fields": {},
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Array"]
+            },
+            "sampleState": {
+              "type": "lists_create_empty"
+            }
+          },
+          {
+            "type": "lists_create_with",
+            "category": "列表",
+            "text": "创建列表，内容： ? ? ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "ADD0",
+                "kind": "value",
+                "checks": null
+              },
+              {
+                "name": "ADD1",
+                "kind": "value",
+                "checks": null
+              },
+              {
+                "name": "ADD2",
+                "kind": "value",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Array"]
+            },
+            "sampleState": {
+              "type": "lists_create_with",
+              "extraState": {
+                "itemCount": 3
+              }
+            }
+          },
+          {
+            "type": "lists_repeat",
+            "category": "列表",
+            "text": "建立列表使用项 ? 重复 5 次",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "ITEM",
+                "kind": "value",
+                "checks": null
+              },
+              {
+                "name": "NUM",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Array"]
+            },
+            "sampleState": {
+              "type": "lists_repeat",
+              "inputs": {
+                "NUM": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "fEjd8uKy*U,)mL!B88+i",
+                    "fields": {
+                      "NUM": 5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "lists_length",
+            "category": "列表",
+            "text": "? 的长度",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["String", "Array"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "lists_length"
+            }
+          },
+          {
+            "type": "lists_isEmpty",
+            "category": "列表",
+            "text": "? 是空的",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["String", "Array"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Boolean"]
+            },
+            "sampleState": {
+              "type": "lists_isEmpty"
+            }
+          },
+          {
+            "type": "lists_indexOf",
+            "category": "列表",
+            "text": "在列表中 i 寻找第一次出现的项 ?",
+            "fields": {
+              "END": "FIRST"
+            },
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["Array"]
+              },
+              {
+                "name": "FIND",
+                "kind": "value",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Number"]
+            },
+            "sampleState": {
+              "type": "lists_indexOf",
+              "fields": {
+                "END": "FIRST"
+              },
+              "inputs": {
+                "VALUE": {
+                  "block": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": {
+                        "id": "0-gVDmbO{lI/HVpZu3Q1",
+                        "name": "i",
+                        "type": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "lists_getIndex",
+            "category": "列表",
+            "text": "在列表中 i 取得  # ?",
+            "fields": {
+              "MODE": "GET",
+              "SPACE": "",
+              "WHERE": "FROM_START"
+            },
+            "inputs": [
+              {
+                "name": "VALUE",
+                "kind": "value",
+                "checks": ["Array"]
+              },
+              {
+                "name": "AT",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "lists_getIndex",
+              "fields": {
+                "MODE": "GET",
+                "WHERE": "FROM_START"
+              },
+              "inputs": {
+                "VALUE": {
+                  "block": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": {
+                        "id": "/(,WG)g8=[CD)m4%NhP@",
+                        "name": "i",
+                        "type": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "lists_setIndex",
+            "category": "列表",
+            "text": "在列表中 i 设置  # ? 值为 ?",
+            "fields": {
+              "MODE": "SET",
+              "SPACE": "",
+              "WHERE": "FROM_START"
+            },
+            "inputs": [
+              {
+                "name": "LIST",
+                "kind": "value",
+                "checks": ["Array"]
+              },
+              {
+                "name": "AT",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "TO",
+                "kind": "value",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "lists_setIndex",
+              "fields": {
+                "MODE": "SET",
+                "WHERE": "FROM_START"
+              },
+              "inputs": {
+                "LIST": {
+                  "block": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": {
+                        "id": "CC+bx=ON%=9+kR?dctpv",
+                        "name": "i",
+                        "type": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "lists_getSublist",
+            "category": "列表",
+            "text": "在列表中 i 获取子列表，从第#项 ? 到第#项 ?",
+            "fields": {
+              "WHERE1": "FROM_START",
+              "WHERE2": "FROM_START"
+            },
+            "inputs": [
+              {
+                "name": "LIST",
+                "kind": "value",
+                "checks": ["Array"]
+              },
+              {
+                "name": "WHERE1_INPUT",
+                "kind": "dummy",
+                "checks": null
+              },
+              {
+                "name": "AT1",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "WHERE2_INPUT",
+                "kind": "dummy",
+                "checks": null
+              },
+              {
+                "name": "AT2",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Array"]
+            },
+            "sampleState": {
+              "type": "lists_getSublist",
+              "fields": {
+                "WHERE1": "FROM_START",
+                "WHERE2": "FROM_START"
+              },
+              "inputs": {
+                "LIST": {
+                  "block": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": {
+                        "id": "21b:9_am~w;W}Za/|/Gf",
+                        "name": "i",
+                        "type": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "lists_split",
+            "category": "列表",
+            "text": "从文本制作列表 ? delimiter “ , ”",
+            "fields": {
+              "MODE": "SPLIT"
+            },
+            "inputs": [
+              {
+                "name": "INPUT",
+                "kind": "value",
+                "checks": ["String"]
+              },
+              {
+                "name": "DELIM",
+                "kind": "value",
+                "checks": ["String"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Array"]
+            },
+            "sampleState": {
+              "type": "lists_split",
+              "extraState": {
+                "mode": "SPLIT"
+              },
+              "fields": {
+                "MODE": "SPLIT"
+              },
+              "inputs": {
+                "DELIM": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "FGOeNE_RsH57$lu(dd_L",
+                    "fields": {
+                      "TEXT": ","
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "vector3_data",
+            "category": "坐标",
+            "text": "X 0 Y 0 Z 0",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "X",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "Y",
+                "kind": "value",
+                "checks": ["Number"]
+              },
+              {
+                "name": "Z",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Vector3"]
+            },
+            "sampleState": {
+              "type": "vector3_data",
+              "inputs": {
+                "X": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "vxw3QyPfVTnHyVho~*R#",
+                    "fields": {
+                      "NUM": 0
+                    }
+                  }
+                },
+                "Y": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "w|Gn=YfNSI4d*hz?BHS3",
+                    "fields": {
+                      "NUM": 0
+                    }
+                  }
+                },
+                "Z": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "qFr|Yc-$n{sK(fEiPevc",
+                    "fields": {
+                      "NUM": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "transform_data",
+            "category": "坐标",
+            "text": "位置 X 0 Y 0 Z 0 旋转 X 0 Y 0 Z 0 缩放 X 1 Y 1 Z 1",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "position",
+                "kind": "value",
+                "checks": ["Vector3"]
+              },
+              {
+                "name": "rotate",
+                "kind": "value",
+                "checks": ["Vector3"]
+              },
+              {
+                "name": "scale",
+                "kind": "value",
+                "checks": ["Vector3"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Transform"]
+            },
+            "sampleState": {
+              "type": "transform_data",
+              "inputs": {
+                "position": {
+                  "shadow": {
+                    "type": "vector3_data",
+                    "id": "%|a+59^?5EwPPMCRi7:G",
+                    "inputs": {
+                      "X": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "3tb.[xgUf|~$CT3O?*H%",
+                          "fields": {
+                            "NUM": 0
+                          }
+                        }
+                      },
+                      "Y": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "TSzfD2@9^)?acjMx%4dL",
+                          "fields": {
+                            "NUM": 0
+                          }
+                        }
+                      },
+                      "Z": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "1EAzy4rg8z=::fHJ3WzC",
+                          "fields": {
+                            "NUM": 0
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "rotate": {
+                  "shadow": {
+                    "type": "vector3_data",
+                    "id": "ud@/4G,bVSH+c=+22x3K",
+                    "inputs": {
+                      "X": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "TEoc}99uj3r#tOpo{3qU",
+                          "fields": {
+                            "NUM": 0
+                          }
+                        }
+                      },
+                      "Y": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "a6~160RT-By@Qf*CiqpG",
+                          "fields": {
+                            "NUM": 0
+                          }
+                        }
+                      },
+                      "Z": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "G.z_%xt9gwDi][%7gBBY",
+                          "fields": {
+                            "NUM": 0
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "scale": {
+                  "shadow": {
+                    "type": "vector3_data",
+                    "id": "N/7h1p.?1d3{@w=~p|.i",
+                    "inputs": {
+                      "X": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "-0WP%eX{NI.]`2;GK]/B",
+                          "fields": {
+                            "NUM": 1
+                          }
+                        }
+                      },
+                      "Y": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "DZQ.C{0Vey7V#,HC15%c",
+                          "fields": {
+                            "NUM": 1
+                          }
+                        }
+                      },
+                      "Z": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "m,tx53d);d[XcnLiGJqM",
+                          "fields": {
+                            "NUM": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "run_task",
+            "category": "任务",
+            "text": "启动任务 ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "content",
+                "kind": "value",
+                "checks": ["Task"]
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "run_task"
+            }
+          },
+          {
+            "type": "sleep_task",
+            "category": "任务",
+            "text": "休眠： 0 秒",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "Time",
+                "kind": "value",
+                "checks": ["Number"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Task"]
+            },
+            "sampleState": {
+              "type": "sleep_task",
+              "inputs": {
+                "Time": {
+                  "block": {
+                    "type": "math_number",
+                    "fields": {
+                      "NUM": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "task_array",
+            "category": "任务",
+            "text": "任务数组 list 创建列表，内容： ? ? ?",
+            "fields": {
+              "ArrayType": "LIST"
+            },
+            "inputs": [
+              {
+                "name": "TaskArray",
+                "kind": "value",
+                "checks": ["Array"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Task"]
+            },
+            "sampleState": {
+              "type": "task_array",
+              "fields": {
+                "ArrayType": "LIST"
+              },
+              "inputs": {
+                "TaskArray": {
+                  "block": {
+                    "type": "lists_create_with",
+                    "extraState": {
+                      "itemCount": 3
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "task_circle",
+            "category": "任务",
+            "text": "任务循环 0 创建列表，内容： ? ? ?",
+            "fields": {
+              "Times": 0
+            },
+            "inputs": [
+              {
+                "name": "TaskArray",
+                "kind": "value",
+                "checks": ["Array"]
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": ["Task"]
+            },
+            "sampleState": {
+              "type": "task_circle",
+              "fields": {
+                "Times": 0
+              },
+              "inputs": {
+                "TaskArray": {
+                  "block": {
+                    "type": "lists_create_with",
+                    "extraState": {
+                      "itemCount": 3
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "init_signal",
+            "category": "信号",
+            "text": "初始化 ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "content",
+                "kind": "statement",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "init_signal"
+            }
+          },
+          {
+            "type": "output_signal",
+            "category": "信号",
+            "text": "触发信号 none",
+            "fields": {
+              "Output": "{\"index\":\"\",\"uuid\":\"\"}"
+            },
+            "inputs": [],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "output_signal",
+              "fields": {
+                "Output": "{\"index\":\"\",\"uuid\":\"\"}"
+              }
+            }
+          },
+          {
+            "type": "input_signal",
+            "category": "信号",
+            "text": "接收信号 none ?",
+            "fields": {
+              "Event": ""
+            },
+            "inputs": [
+              {
+                "name": "content",
+                "kind": "statement",
+                "checks": null
+              }
+            ],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "input_signal",
+              "fields": {
+                "Event": ""
+              }
+            }
+          },
+          {
+            "type": "output_mult_signal",
+            "category": "信号",
+            "text": "触发多个信号 ?",
+            "fields": {},
+            "inputs": [
+              {
+                "name": "LIST",
+                "kind": "value",
+                "checks": ["Array"]
+              }
+            ],
+            "connections": {
+              "previous": true,
+              "next": true,
+              "output": false,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "output_mult_signal"
+            }
+          },
+          {
+            "type": "output_signal_item",
+            "category": "信号",
+            "text": "实体的输入信号 none",
+            "fields": {
+              "Output": "{\"index\":\"\",\"uuid\":\"\"}"
+            },
+            "inputs": [],
+            "connections": {
+              "previous": false,
+              "next": false,
+              "output": true,
+              "previousChecks": null,
+              "nextChecks": null,
+              "outputChecks": null
+            },
+            "sampleState": {
+              "type": "output_signal_item",
+              "fields": {
+                "Output": "{\"index\":\"\",\"uuid\":\"\"}"
+              }
+            }
+          }
+        ],
+        "hostSessionId": "script-1789577676947-79umew1yy"
+      }
+    },
+    {
+      "callLine": 257,
+      "startedAt": "2026-09-16T17:01:53.001000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 258,
+      "returnedAt": "2026-09-16T17:01:53.263000+00:00",
+      "durationMs": 262,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolCount": 14,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_script",
+          "xrugc_validate_scene_script",
+          "xrugc_stage_scene_script_replace",
+          "xrugc_complete_scene_script_replace",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation",
+          "xrugc_get_script_block_catalog",
+          "xrugc_get_script_block_structure",
+          "xrugc_stage_script_block_batch",
+          "xrugc_complete_script_block_batch"
+        ]
+      }
+    },
+    {
+      "callLine": 261,
+      "startedAt": "2026-09-16T17:01:59.481000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_script",
+      "arguments": {
+        "arguments": {
+          "includeGeneratedCode": true,
+          "includeWorkspace": true
+        },
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_get_scene_script"
+      },
+      "resultLine": 262,
+      "returnedAt": "2026-09-16T17:02:01.359000+00:00",
+      "durationMs": 1878,
+      "clientStatus": "completed",
+      "result": {
+        "sceneId": 666,
+        "sceneTitle": "WorkBuddy P1 primary",
+        "workspaceVersion": "{\"backpack\":[]}",
+        "summary": {
+          "blockCount": 0,
+          "topLevelBlockCount": 0,
+          "variableCount": 0,
+          "commentCount": 0,
+          "blockTypes": {},
+          "serializedBytes": 15,
+          "generatedJavaScriptBytes": 0,
+          "generatedLuaBytes": 0
+        },
+        "valid": true,
+        "warnings": [],
+        "canSave": true,
+        "validationScope": "workspace-and-generated-syntax",
+        "workspace": {
+          "backpack": []
+        },
+        "generatedCode": {
+          "js": "",
+          "lua": ""
+        }
+      }
+    },
+    {
+      "callLine": 265,
+      "startedAt": "2026-09-16T17:02:27.494000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_stage_scene_script_replace",
+      "arguments": {
+        "arguments": {
+          "workspace": {
+            "backpack": [],
+            "blocks": {
+              "languageVersion": 0,
+              "blocks": [
+                {
+                  "type": "controls_if",
+                  "id": "p1s1_if_001",
+                  "x": 20,
+                  "y": 20,
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_boolean",
+                        "id": "p1s1_bool_001",
+                        "fields": {
+                          "BOOL": "FALSE"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_stage_scene_script_replace"
+      },
+      "resultLine": 266,
+      "returnedAt": "2026-09-16T17:02:27.831000+00:00",
+      "durationMs": 337,
+      "clientStatus": "completed",
+      "result": {
+        "status": "staged",
+        "draftId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+        "expiresAt": "2026-09-16T17:07:27.818Z",
+        "preview": {
+          "sceneId": 666,
+          "sceneTitle": "WorkBuddy P1 primary",
+          "workspaceVersion": "{\"backpack\":[]}",
+          "current": {
+            "blockCount": 0,
+            "topLevelBlockCount": 0,
+            "variableCount": 0,
+            "commentCount": 0,
+            "blockTypes": {},
+            "serializedBytes": 15,
+            "generatedJavaScriptBytes": 0,
+            "generatedLuaBytes": 0
+          },
+          "proposed": {
+            "blockCount": 2,
+            "topLevelBlockCount": 1,
+            "variableCount": 0,
+            "commentCount": 0,
+            "blockTypes": {
+              "controls_if": 1,
+              "logic_boolean": 1
+            },
+            "serializedBytes": 212,
+            "generatedJavaScriptBytes": 15,
+            "generatedLuaBytes": 18
+          },
+          "changed": true,
+          "warnings": [
+            {
+              "blockId": "p1s1_if_001",
+              "code": "detached-statement-block",
+              "severity": "warning",
+              "message": "“如果 false 执行 ?”没有连接到入口或流程，保存后可能不会执行。"
+            }
+          ],
+          "canSave": true
+        }
+      }
+    },
+    {
+      "callLine": 269,
+      "startedAt": "2026-09-16T17:02:49.276000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_complete_scene_script_replace",
+      "arguments": {
+        "arguments": {
+          "draftId": "f7a325ba-d753-4898-a616-168cdfdd4209"
+        },
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_complete_scene_script_replace"
+      },
+      "resultLine": 270,
+      "returnedAt": "2026-09-16T17:02:51.097000+00:00",
+      "durationMs": 1821,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+        "toolName": "xrugc_complete_scene_script_replace",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "awaiting_confirmation",
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 275,
+      "startedAt": "2026-09-16T17:03:41.824000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_operation_status",
+      "arguments": {
+        "arguments": {
+          "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209"
+        },
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_get_operation_status"
+      },
+      "resultLine": 276,
+      "returnedAt": "2026-09-16T17:03:42.278000+00:00",
+      "durationMs": 454,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+        "toolName": "xrugc_complete_scene_script_replace",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "completed",
+        "writeReceipt": {
+          "action": "save_code",
+          "operationId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+          "serverRevision": "sha256:66fae68da3400a1124c8f275beedc893cd6de4a667eecc90df18f07f27121924",
+          "status": "completed",
+          "targetId": 666,
+          "targetType": "verse"
+        },
+        "result": {
+          "status": "completed",
+          "draftId": "f7a325ba-d753-4898-a616-168cdfdd4209",
+          "editorApplied": true,
+          "persistence": "server_acknowledged",
+          "editorAcknowledged": false,
+          "noChange": false,
+          "sceneId": 666,
+          "workspaceVersion": "{\"backpack\":[],\"blocks\":{\"blocks\":[{\"id\":\"p1s1_if_001\",\"inputs\":{\"IF0\":{\"block\":{\"fields\":{\"BOOL\":\"FALSE\"},\"id\":\"p1s1_bool_001\",\"type\":\"logic_boolean\"}}},\"type\":\"controls_if\",\"x\":20,\"y\":20}],\"languageVersion\":0}}",
+          "summary": {
+            "blockCount": 2,
+            "topLevelBlockCount": 1,
+            "variableCount": 0,
+            "commentCount": 0,
+            "blockTypes": {
+              "controls_if": 1,
+              "logic_boolean": 1
+            },
+            "serializedBytes": 212,
+            "generatedJavaScriptBytes": 15,
+            "generatedLuaBytes": 18
+          }
+        },
+        "nextAction": "inspect_result",
+        "verification": "server_acknowledged"
+      }
+    },
+    {
+      "callLine": 279,
+      "startedAt": "2026-09-16T17:03:48.777000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_script",
+      "arguments": {
+        "arguments": {
+          "includeGeneratedCode": true,
+          "includeWorkspace": true
+        },
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_get_scene_script"
+      },
+      "resultLine": 280,
+      "returnedAt": "2026-09-16T17:03:49.058000+00:00",
+      "durationMs": 281,
+      "clientStatus": "completed",
+      "result": {
+        "sceneId": 666,
+        "sceneTitle": "WorkBuddy P1 primary",
+        "workspaceVersion": "{\"backpack\":[],\"blocks\":{\"blocks\":[{\"id\":\"p1s1_if_001\",\"inputs\":{\"IF0\":{\"block\":{\"fields\":{\"BOOL\":\"FALSE\"},\"id\":\"p1s1_bool_001\",\"type\":\"logic_boolean\"}}},\"type\":\"controls_if\",\"x\":20,\"y\":20}],\"languageVersion\":0}}",
+        "summary": {
+          "blockCount": 2,
+          "topLevelBlockCount": 1,
+          "variableCount": 0,
+          "commentCount": 0,
+          "blockTypes": {
+            "controls_if": 1,
+            "logic_boolean": 1
+          },
+          "serializedBytes": 212,
+          "generatedJavaScriptBytes": 15,
+          "generatedLuaBytes": 18
+        },
+        "valid": false,
+        "issue": {
+          "message": "“如果 false 执行 ?”没有连接到入口或流程，保存后可能不会执行。",
+          "blockId": "p1s1_if_001",
+          "blockType": "controls_if",
+          "blockText": "如果 false 执行 ?"
+        },
+        "warnings": [
+          {
+            "blockId": "p1s1_if_001",
+            "code": "detached-statement-block",
+            "severity": "warning",
+            "message": "“如果 false 执行 ?”没有连接到入口或流程，保存后可能不会执行。"
+          }
+        ],
+        "canSave": true,
+        "validationScope": "workspace-and-generated-syntax",
+        "workspace": {
+          "blocks": {
+            "languageVersion": 0,
+            "blocks": [
+              {
+                "type": "controls_if",
+                "id": "p1s1_if_001",
+                "x": 20,
+                "y": 20,
+                "inputs": {
+                  "IF0": {
+                    "block": {
+                      "type": "logic_boolean",
+                      "id": "p1s1_bool_001",
+                      "fields": {
+                        "BOOL": "FALSE"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "backpack": []
+        },
+        "generatedCode": {
+          "js": "if (false) {\n}\n",
+          "lua": "if false then\nend\n"
+        }
+      }
+    },
+    {
+      "callLine": 283,
+      "startedAt": "2026-09-16T17:03:57.361000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_close_scene_script_editor",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_close_scene_script_editor"
+      },
+      "resultLine": 284,
+      "returnedAt": "2026-09-16T17:04:04.069000+00:00",
+      "durationMs": 6708,
+      "clientStatus": "completed",
+      "result": {
+        "status": "closed",
+        "context": {
+          "sceneId": 666,
+          "sceneName": "WorkBuddy P1 primary",
+          "activeEditor": "scene",
+          "scene": {
+            "ready": true,
+            "loading": false,
+            "status": "ready",
+            "blocked": false,
+            "error": null,
+            "retryAfterMs": null,
+            "dirty": false,
+            "saving": false
+          },
+          "script": {
+            "open": false,
+            "ready": false,
+            "dirty": false,
+            "saving": false,
+            "tab": null
+          }
+        },
+        "rediscoverTools": true
+      }
+    },
+    {
+      "callLine": 287,
+      "startedAt": "2026-09-16T17:04:13.080000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_script",
+      "arguments": {
+        "arguments": {
+          "includeGeneratedCode": true,
+          "includeWorkspace": true
+        },
+        "contextSha256": "9cc513fa51f6efb71c1a967234d78e737a4eadfcf94d98a35d2d9f00615b0b06",
+        "toolName": "xrugc_get_scene_script"
+      },
+      "resultLine": 288,
+      "returnedAt": "2026-09-16T17:04:13.218000+00:00",
+      "durationMs": 138,
+      "clientStatus": "completed",
+      "result": {
+        "code": "stale_context",
+        "message": "页面或编辑会话已变化，请重新调用 xrugc_webmcp_list_tools。",
+        "nextAction": "重新查询当前工具；写入发生异常时先用原 operationId 查询回执，不要直接重试提交。"
+      }
+    },
+    {
+      "callLine": 291,
+      "startedAt": "2026-09-16T17:04:19.376000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 292,
+      "returnedAt": "2026-09-16T17:04:19.435000+00:00",
+      "durationMs": 59,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "a09b7e21f32f225fa7ba4f171a0a72cf08738ae2ffe0246d3d96a9afc200ec1f",
+        "toolCount": 28,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_editor_context",
+          "xrugc_get_scene_modules",
+          "xrugc_inspect_scene_module",
+          "xrugc_validate_scene",
+          "xrugc_search_entities",
+          "xrugc_get_scene_publication",
+          "xrugc_check_scene_resource_readiness",
+          "xrugc_check_scene_publication_readiness",
+          "xrugc_get_scene_runtime_diagnostics",
+          "xrugc_stage_scene_entity_placement",
+          "xrugc_complete_scene_entity_placement",
+          "xrugc_stage_scene_module_transform",
+          "xrugc_complete_scene_module_transform",
+          "xrugc_stage_scene_module_properties",
+          "xrugc_complete_scene_module_properties",
+          "xrugc_stage_scene_module_deletion",
+          "xrugc_complete_scene_module_deletion",
+          "xrugc_stage_scene_publication",
+          "xrugc_complete_scene_publication",
+          "xrugc_get_scene_runtime_preview_status",
+          "xrugc_start_scene_runtime_preview",
+          "xrugc_stop_scene_runtime_preview",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation"
+        ]
+      }
+    },
+    {
+      "callLine": 295,
+      "startedAt": "2026-09-16T17:04:35.989000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_open_scene_script_editor",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "a09b7e21f32f225fa7ba4f171a0a72cf08738ae2ffe0246d3d96a9afc200ec1f",
+        "toolName": "xrugc_open_scene_script_editor"
+      },
+      "resultLine": 296,
+      "returnedAt": "2026-09-16T17:04:36.770000+00:00",
+      "durationMs": 781,
+      "clientStatus": "completed",
+      "result": {
+        "status": "opened",
+        "context": {
+          "sceneId": 666,
+          "sceneName": "WorkBuddy P1 primary",
+          "activeEditor": "scene-script",
+          "scene": {
+            "ready": true,
+            "loading": false,
+            "status": "ready",
+            "blocked": false,
+            "error": null,
+            "retryAfterMs": null,
+            "dirty": false,
+            "saving": false
+          },
+          "script": {
+            "open": true,
+            "ready": false,
+            "dirty": false,
+            "saving": false,
+            "tab": "blockly"
+          }
+        },
+        "rediscoverTools": true
+      }
+    },
+    {
+      "callLine": 299,
+      "startedAt": "2026-09-16T17:04:41.505000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 300,
+      "returnedAt": "2026-09-16T17:04:42.309000+00:00",
+      "durationMs": 804,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "bad8d2af62727593a2a546841402d501296e267b54c6589f2cbb7e3da178e6c3",
+        "toolCount": 3,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor"
+        ]
+      }
+    },
+    {
+      "callLine": 303,
+      "startedAt": "2026-09-16T17:04:47.721000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_workspace_context",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "bad8d2af62727593a2a546841402d501296e267b54c6589f2cbb7e3da178e6c3",
+        "toolName": "xrugc_get_scene_workspace_context"
+      },
+      "resultLine": 304,
+      "returnedAt": "2026-09-16T17:04:47.783000+00:00",
+      "durationMs": 62,
+      "clientStatus": "completed",
+      "result": {
+        "code": "stale_context",
+        "message": "页面或编辑会话已变化，请重新调用 xrugc_webmcp_list_tools。",
+        "nextAction": "重新查询当前工具；写入发生异常时先用原 operationId 查询回执，不要直接重试提交。"
+      }
+    },
+    {
+      "callLine": 307,
+      "startedAt": "2026-09-16T17:04:57.249000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 308,
+      "returnedAt": "2026-09-16T17:04:57.385000+00:00",
+      "durationMs": 136,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "3307e93087a2e550e46944b18c0259090d978b28d692fe641a1dab86a0efe02f",
+        "toolCount": 14,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_script",
+          "xrugc_validate_scene_script",
+          "xrugc_stage_scene_script_replace",
+          "xrugc_complete_scene_script_replace",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation",
+          "xrugc_get_script_block_catalog",
+          "xrugc_get_script_block_structure",
+          "xrugc_stage_script_block_batch",
+          "xrugc_complete_script_block_batch"
+        ]
+      }
+    },
+    {
+      "callLine": 311,
+      "startedAt": "2026-09-16T17:05:08.994000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_script",
+      "arguments": {
+        "arguments": {
+          "includeGeneratedCode": true,
+          "includeWorkspace": true
+        },
+        "contextSha256": "3307e93087a2e550e46944b18c0259090d978b28d692fe641a1dab86a0efe02f",
+        "toolName": "xrugc_get_scene_script"
+      },
+      "resultLine": 312,
+      "returnedAt": "2026-09-16T17:05:09.269000+00:00",
+      "durationMs": 275,
+      "clientStatus": "completed",
+      "result": {
+        "sceneId": 666,
+        "sceneTitle": "WorkBuddy P1 primary",
+        "workspaceVersion": "{\"backpack\":[],\"blocks\":{\"blocks\":[{\"id\":\"p1s1_if_001\",\"inputs\":{\"IF0\":{\"block\":{\"fields\":{\"BOOL\":\"FALSE\"},\"id\":\"p1s1_bool_001\",\"type\":\"logic_boolean\"}}},\"type\":\"controls_if\",\"x\":20,\"y\":20}],\"languageVersion\":0}}",
+        "summary": {
+          "blockCount": 2,
+          "topLevelBlockCount": 1,
+          "variableCount": 0,
+          "commentCount": 0,
+          "blockTypes": {
+            "controls_if": 1,
+            "logic_boolean": 1
+          },
+          "serializedBytes": 212,
+          "generatedJavaScriptBytes": 15,
+          "generatedLuaBytes": 18
+        },
+        "valid": false,
+        "issue": {
+          "message": "“如果 false 执行 ?”没有连接到入口或流程，保存后可能不会执行。",
+          "blockId": "p1s1_if_001",
+          "blockType": "controls_if",
+          "blockText": "如果 false 执行 ?"
+        },
+        "warnings": [
+          {
+            "blockId": "p1s1_if_001",
+            "code": "detached-statement-block",
+            "severity": "warning",
+            "message": "“如果 false 执行 ?”没有连接到入口或流程，保存后可能不会执行。"
+          }
+        ],
+        "canSave": true,
+        "validationScope": "workspace-and-generated-syntax",
+        "workspace": {
+          "blocks": {
+            "languageVersion": 0,
+            "blocks": [
+              {
+                "type": "controls_if",
+                "id": "p1s1_if_001",
+                "x": 20,
+                "y": 20,
+                "inputs": {
+                  "IF0": {
+                    "block": {
+                      "type": "logic_boolean",
+                      "id": "p1s1_bool_001",
+                      "fields": {
+                        "BOOL": "FALSE"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "backpack": []
+        },
+        "generatedCode": {
+          "js": "if (false) {\n}\n",
+          "lua": "if false then\nend\n"
+        }
+      }
+    },
+    {
+      "callLine": 317,
+      "startedAt": "2026-09-16T17:06:34.656000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_close_scene_script_editor",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "3307e93087a2e550e46944b18c0259090d978b28d692fe641a1dab86a0efe02f",
+        "toolName": "xrugc_close_scene_script_editor"
+      },
+      "resultLine": 318,
+      "returnedAt": "2026-09-16T17:06:35.346000+00:00",
+      "durationMs": 690,
+      "clientStatus": "completed",
+      "result": {
+        "status": "closed",
+        "context": {
+          "sceneId": 666,
+          "sceneName": "WorkBuddy P1 primary",
+          "activeEditor": "scene",
+          "scene": {
+            "ready": true,
+            "loading": false,
+            "status": "ready",
+            "blocked": false,
+            "error": null,
+            "retryAfterMs": null,
+            "dirty": false,
+            "saving": false
+          },
+          "script": {
+            "open": false,
+            "ready": false,
+            "dirty": false,
+            "saving": false,
+            "tab": null
+          }
+        },
+        "rediscoverTools": true
+      }
+    },
+    {
+      "callLine": 321,
+      "startedAt": "2026-09-16T17:06:39.535000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 322,
+      "returnedAt": "2026-09-16T17:06:39.836000+00:00",
+      "durationMs": 301,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "7cc3fb6fb2bac70f932287661211d46c9797026134b073549d7e970f3f43498b",
+        "toolCount": 28,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_editor_context",
+          "xrugc_get_scene_modules",
+          "xrugc_inspect_scene_module",
+          "xrugc_validate_scene",
+          "xrugc_search_entities",
+          "xrugc_get_scene_publication",
+          "xrugc_check_scene_resource_readiness",
+          "xrugc_check_scene_publication_readiness",
+          "xrugc_get_scene_runtime_diagnostics",
+          "xrugc_stage_scene_entity_placement",
+          "xrugc_complete_scene_entity_placement",
+          "xrugc_stage_scene_module_transform",
+          "xrugc_complete_scene_module_transform",
+          "xrugc_stage_scene_module_properties",
+          "xrugc_complete_scene_module_properties",
+          "xrugc_stage_scene_module_deletion",
+          "xrugc_complete_scene_module_deletion",
+          "xrugc_stage_scene_publication",
+          "xrugc_complete_scene_publication",
+          "xrugc_get_scene_runtime_preview_status",
+          "xrugc_start_scene_runtime_preview",
+          "xrugc_stop_scene_runtime_preview",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation"
+        ]
+      }
+    },
+    {
+      "callLine": 325,
+      "startedAt": "2026-09-16T17:06:45.129000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_modules",
+      "arguments": {
+        "arguments": {
+          "limit": 500,
+          "query": ""
+        },
+        "contextSha256": "7cc3fb6fb2bac70f932287661211d46c9797026134b073549d7e970f3f43498b",
+        "toolName": "xrugc_get_scene_modules"
+      },
+      "resultLine": 326,
+      "returnedAt": "2026-09-16T17:06:45.190000+00:00",
+      "durationMs": 61,
+      "clientStatus": "completed",
+      "result": {
+        "moduleCount": 1,
+        "matchedCount": 1,
+        "truncated": false,
+        "modules": [
+          {
+            "id": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+            "path": "0",
+            "title": "P1 cube instance",
+            "entityId": 1091,
+            "active": true,
+            "transform": {
+              "position": {
+                "x": 0.2,
+                "y": 0,
+                "z": 0
+              },
+              "rotate": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "scale": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "callLine": 329,
+      "startedAt": "2026-09-16T17:06:50.655000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_stage_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "transform": {
+            "position": {
+              "x": 0.3
+            }
+          }
+        },
+        "contextSha256": "7cc3fb6fb2bac70f932287661211d46c9797026134b073549d7e970f3f43498b",
+        "toolName": "xrugc_stage_scene_module_transform"
+      },
+      "resultLine": 330,
+      "returnedAt": "2026-09-16T17:06:50.767000+00:00",
+      "durationMs": 112,
+      "clientStatus": "completed",
+      "result": {
+        "status": "staged",
+        "draftId": "537669e2-2848-4c07-ab8b-590dab52027f",
+        "expiresAt": "2026-09-16T17:11:50.754Z",
+        "preview": {
+          "sceneId": 666,
+          "sceneVersion": "verse-v1-341-03ae5f19",
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "moduleTitle": "P1 cube instance",
+          "current": {
+            "position": {
+              "x": 0.2,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "proposed": {
+            "position": {
+              "x": 0.3,
+              "y": 0,
+              "z": 0
+            },
+            "rotationDegrees": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          },
+          "changed": true
+        }
+      }
+    },
+    {
+      "callLine": 333,
+      "startedAt": "2026-09-16T17:07:03.496000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_complete_scene_module_transform",
+      "arguments": {
+        "arguments": {
+          "draftId": "537669e2-2848-4c07-ab8b-590dab52027f"
+        },
+        "contextSha256": "7cc3fb6fb2bac70f932287661211d46c9797026134b073549d7e970f3f43498b",
+        "toolName": "xrugc_complete_scene_module_transform"
+      },
+      "resultLine": 334,
+      "returnedAt": "2026-09-16T17:07:03.772000+00:00",
+      "durationMs": 276,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "537669e2-2848-4c07-ab8b-590dab52027f",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "awaiting_confirmation",
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 339,
+      "startedAt": "2026-09-16T17:10:44.043000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_operation_status",
+      "arguments": {
+        "arguments": {
+          "operationId": "537669e2-2848-4c07-ab8b-590dab52027f"
+        },
+        "contextSha256": "7cc3fb6fb2bac70f932287661211d46c9797026134b073549d7e970f3f43498b",
+        "toolName": "xrugc_get_operation_status"
+      },
+      "resultLine": 340,
+      "returnedAt": "2026-09-16T17:10:44.361000+00:00",
+      "durationMs": 318,
+      "clientStatus": "completed",
+      "result": {
+        "operationId": "537669e2-2848-4c07-ab8b-590dab52027f",
+        "toolName": "xrugc_complete_scene_module_transform",
+        "targetType": "verse",
+        "targetId": 666,
+        "status": "partial",
+        "result": {
+          "ownerId": 666,
+          "moduleId": "4f06f25f-e324-4ae4-87ff-f583e0e95a01",
+          "sceneVersion": "verse-v1-341-ccc07eb8",
+          "status": "partial",
+          "editorApplied": true,
+          "persistence": "unverified",
+          "retry": "read_state_before_retry",
+          "draftId": "537669e2-2848-4c07-ab8b-590dab52027f",
+          "message": "实体实例变换已应用到编辑器，保存结果未确认，请先读取状态再操作"
+        },
+        "nextAction": "query_operation_before_retry"
+      }
+    },
+    {
+      "callLine": 348,
+      "startedAt": "2026-09-16T17:14:43.482000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 349,
+      "returnedAt": "2026-09-16T17:14:43.651000+00:00",
+      "durationMs": 169,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "0216977f509990b66b8298c4fdf6449b3e1a43c21c1de7e1e6eca2026c107ae5",
+        "toolCount": 14,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_script",
+          "xrugc_validate_scene_script",
+          "xrugc_stage_scene_script_replace",
+          "xrugc_complete_scene_script_replace",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation",
+          "xrugc_get_script_block_catalog",
+          "xrugc_get_script_block_structure",
+          "xrugc_stage_script_block_batch",
+          "xrugc_complete_script_block_batch"
+        ]
+      }
+    },
+    {
+      "callLine": 352,
+      "startedAt": "2026-09-16T17:14:49.323000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_get_scene_script",
+      "arguments": {
+        "arguments": {
+          "includeGeneratedCode": true,
+          "includeWorkspace": true
+        },
+        "contextSha256": "0216977f509990b66b8298c4fdf6449b3e1a43c21c1de7e1e6eca2026c107ae5",
+        "toolName": "xrugc_get_scene_script"
+      },
+      "resultLine": 353,
+      "returnedAt": "2026-09-16T17:14:49.389000+00:00",
+      "durationMs": 66,
+      "clientStatus": "completed",
+      "result": {
+        "sceneId": 666,
+        "sceneTitle": "WorkBuddy P1 primary",
+        "workspaceVersion": "{\"backpack\":[],\"blocks\":{\"blocks\":[{\"id\":\"p1s1_if_001\",\"inputs\":{\"IF0\":{\"block\":{\"fields\":{\"BOOL\":\"TRUE\"},\"id\":\"p1s1_bool_001\",\"type\":\"logic_boolean\"}}},\"type\":\"controls_if\",\"x\":20,\"y\":20}],\"languageVersion\":0}}",
+        "summary": {
+          "blockCount": 2,
+          "topLevelBlockCount": 1,
+          "variableCount": 0,
+          "commentCount": 0,
+          "blockTypes": {
+            "controls_if": 1,
+            "logic_boolean": 1
+          },
+          "serializedBytes": 211,
+          "generatedJavaScriptBytes": 14,
+          "generatedLuaBytes": 17
+        },
+        "valid": false,
+        "issue": {
+          "message": "“如果 true 执行 ?”没有连接到入口或流程，保存后可能不会执行。",
+          "blockId": "p1s1_if_001",
+          "blockType": "controls_if",
+          "blockText": "如果 true 执行 ?"
+        },
+        "warnings": [
+          {
+            "blockId": "p1s1_if_001",
+            "code": "detached-statement-block",
+            "severity": "warning",
+            "message": "“如果 true 执行 ?”没有连接到入口或流程，保存后可能不会执行。"
+          }
+        ],
+        "canSave": true,
+        "validationScope": "workspace-and-generated-syntax",
+        "workspace": {
+          "blocks": {
+            "languageVersion": 0,
+            "blocks": [
+              {
+                "type": "controls_if",
+                "id": "p1s1_if_001",
+                "x": 20,
+                "y": 20,
+                "inputs": {
+                  "IF0": {
+                    "block": {
+                      "type": "logic_boolean",
+                      "id": "p1s1_bool_001",
+                      "fields": {
+                        "BOOL": "TRUE"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "backpack": []
+        },
+        "generatedCode": {
+          "js": "if (true) {\n}\n",
+          "lua": "if true then\nend\n"
+        }
+      }
+    },
+    {
+      "callLine": 356,
+      "startedAt": "2026-09-16T17:14:57.207000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_call_tool",
+      "businessTool": "xrugc_close_scene_script_editor",
+      "arguments": {
+        "arguments": {},
+        "contextSha256": "0216977f509990b66b8298c4fdf6449b3e1a43c21c1de7e1e6eca2026c107ae5",
+        "toolName": "xrugc_close_scene_script_editor"
+      },
+      "resultLine": 357,
+      "returnedAt": "2026-09-16T17:14:57.587000+00:00",
+      "durationMs": 380,
+      "clientStatus": "completed",
+      "result": {
+        "status": "closed",
+        "context": {
+          "sceneId": 666,
+          "sceneName": "WorkBuddy P1 primary",
+          "activeEditor": "scene",
+          "scene": {
+            "ready": true,
+            "loading": false,
+            "status": "ready",
+            "blocked": false,
+            "error": null,
+            "retryAfterMs": null,
+            "dirty": false,
+            "saving": false
+          },
+          "script": {
+            "open": false,
+            "ready": false,
+            "dirty": false,
+            "saving": false,
+            "tab": null
+          }
+        },
+        "rediscoverTools": true
+      }
+    },
+    {
+      "callLine": 360,
+      "startedAt": "2026-09-16T17:15:01.654000+00:00",
+      "clientTool": "mcp__xrugc-webmcp-dev__127_0_0_1_3102-xrugc_webmcp_list_tools",
+      "businessTool": "xrugc_webmcp_list_tools",
+      "arguments": {},
+      "resultLine": 361,
+      "returnedAt": "2026-09-16T17:15:01.707000+00:00",
+      "durationMs": 53,
+      "clientStatus": "completed",
+      "result": {
+        "contextSha256": "f43636351d520f371e8d2d5dfa42a3965c63909cd2fac4f99af6abdbcdbf7e7e",
+        "toolCount": 28,
+        "toolNames": [
+          "xrugc_get_scene_workspace_context",
+          "xrugc_open_scene_script_editor",
+          "xrugc_close_scene_script_editor",
+          "xrugc_get_scene_editor_context",
+          "xrugc_get_scene_modules",
+          "xrugc_inspect_scene_module",
+          "xrugc_validate_scene",
+          "xrugc_search_entities",
+          "xrugc_get_scene_publication",
+          "xrugc_check_scene_resource_readiness",
+          "xrugc_check_scene_publication_readiness",
+          "xrugc_get_scene_runtime_diagnostics",
+          "xrugc_stage_scene_entity_placement",
+          "xrugc_complete_scene_entity_placement",
+          "xrugc_stage_scene_module_transform",
+          "xrugc_complete_scene_module_transform",
+          "xrugc_stage_scene_module_properties",
+          "xrugc_complete_scene_module_properties",
+          "xrugc_stage_scene_module_deletion",
+          "xrugc_complete_scene_module_deletion",
+          "xrugc_stage_scene_publication",
+          "xrugc_complete_scene_publication",
+          "xrugc_get_scene_runtime_preview_status",
+          "xrugc_start_scene_runtime_preview",
+          "xrugc_stop_scene_runtime_preview",
+          "xrugc_get_workflow_guide",
+          "xrugc_get_operation_status",
+          "xrugc_cancel_operation"
+        ]
+      }
+    }
+  ]
+}

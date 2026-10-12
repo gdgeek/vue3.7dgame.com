@@ -1,3 +1,4 @@
+import { appReleasePlugin } from "./build/vite-plugin-app-release";
 import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import { UserConfig, ConfigEnv, loadEnv, defineConfig } from "vite";
@@ -18,6 +19,8 @@ import { resolve } from "path";
 import { normalizeDevProxyTarget } from "./build/dev-proxy-target";
 import { domainManifestJson } from "./build/vite-plugin-domain-manifest";
 import { pluginEnvJson } from "./build/vite-plugin-env-json";
+import { unityRuntimeStatic } from "./build/vite-plugin-unity-runtime";
+import { webMcpGuides } from "./build/vite-plugin-webmcp-guides";
 import {
   name,
   version,
@@ -118,24 +121,22 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           target: wechatAuthProxyTarget,
           rewrite: (path) => path.replace(/^\/wechat-auth/, ""),
         },
-        "/webgl-preview": {
-          changeOrigin: true,
-          target: normalizeDevProxyTarget(
-            env.VITE_APP_UNITY_PREVIEW_PROXY_TARGET ||
-              "https://webgl-preview.plugins.xrugc.com"
-          ),
-          rewrite: (path) => path.replace(/^\/webgl-preview/, ""),
-        },
-        "/__xrugc_proxy__": {
-          changeOrigin: true,
-          target: normalizeDevProxyTarget(
-            env.VITE_APP_UNITY_PREVIEW_PROXY_TARGET ||
-              "https://webgl-preview.plugins.xrugc.com"
-          ),
-        },
+        ...(env.VITE_APP_REMOTE_ORIGIN
+          ? Object.fromEntries(
+              ["/api", "/api-auth", "/api-config"].map((prefix) => [
+                prefix,
+                {
+                  target: normalizeDevProxyTarget(env.VITE_APP_REMOTE_ORIGIN),
+                  changeOrigin: true,
+                  // Preserve the deployed frontend's API prefixes and TLS verification.
+                },
+              ])
+            )
+          : {}),
       },
     },
     plugins: [
+      appReleasePlugin(__APP_INFO__.buildTimestamp),
       vue(),
       // jsx、tsx语法支持
       vueJsx(),
@@ -212,6 +213,8 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       }),
       domainManifestJson(),
       pluginEnvJson(),
+      webMcpGuides(),
+      unityRuntimeStatic(),
     ],
     // 预加载项目必需的组件
     optimizeDeps: {

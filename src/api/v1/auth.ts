@@ -45,6 +45,7 @@ export const register = (data: RegisterRequest) => {
   });
 };
 
-export const logout = () => {
-  return authClient.logout();
+export const logout = async () => {
+  await authClient.logout();
+  return true;
 };

@@ -1,12 +1,19 @@
 <template>
-  <span class="editor-mode-tag" aria-current="page">
+  <span
+    class="editor-mode-tag"
+    aria-current="page"
+    :aria-label="label"
+    :title="mode === 'scene' ? label : undefined"
+  >
     <span class="editor-mode-tag__icon" aria-hidden="true">
       <FontAwesomeIcon
         class="editor-mode-tag__icon-glyph"
         :icon="icon"
       ></FontAwesomeIcon>
     </span>
-    <span class="editor-mode-tag__label">{{ label }}</span>
+    <span v-if="mode !== 'scene'" class="editor-mode-tag__label">{{
+      label
+    }}</span>
     <span v-if="dirty" class="editor-mode-tag__dirty" aria-hidden="true"></span>
   </span>
 </template>
@@ -96,6 +103,28 @@ const icon = computed(() => MODE_ICONS[props.mode]);
     height: 26px;
     padding: 0 8px;
     font-size: 12px;
+  }
+}
+
+@container app-navbar (width <= 360px) {
+  .editor-mode-tag {
+    flex-shrink: 1;
+    gap: 4px;
+    min-width: 0;
+    height: auto;
+    min-height: 28px;
+    padding: 4px 6px;
+    white-space: normal;
+  }
+
+  .editor-mode-tag__label {
+    min-width: 0;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  .editor-mode-tag__dirty {
+    flex-shrink: 0;
   }
 }
 </style>

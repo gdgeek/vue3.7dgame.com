@@ -1,3 +1,6 @@
+vi.mock("@/store/modules/user", () => ({
+  useUserStore: () => ({ userInfo: { id: 3 } }),
+}));
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, reactive, ref } from "vue";
 

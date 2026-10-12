@@ -21,7 +21,12 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 
 // 当前主题名称（持久化到 localStorage）
-const currentThemeName = useStorage<string>("appTheme", defaultTheme.name);
+const currentThemeName = useStorage<string>(
+  "appTheme",
+  defaultTheme.name,
+  undefined,
+  { writeDefaults: false }
+);
 
 // 自定义主题色（仅用于日间模式）
 const customPrimaryColor = useStorage<string | null>(
@@ -277,6 +282,9 @@ export function useTheme() {
     const theme = getTheme(themeName);
     if (theme) {
       currentThemeName.value = themeName;
+      // 即使用户选择的正好是当前主题，也要记录为显式偏好，
+      // 避免下次启动时被域名默认值覆盖。
+      window.localStorage.setItem("appTheme", themeName);
       // 切换主题时，如果是日间模式且有自定义主题色，应用自定义色
       if (themeName === "modern-blue" && customPrimaryColor.value) {
         applyTheme(theme);

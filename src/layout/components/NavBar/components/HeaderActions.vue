@@ -15,7 +15,6 @@
 
       <!-- 主题切换下拉菜单 -->
       <el-dropdown
-        v-if="!domainStore.isStyleLocked"
         @command="handleThemeChange"
         trigger="click"
         class="theme-dropdown"
@@ -56,7 +55,6 @@
       </el-dropdown>
 
       <el-dropdown
-        v-if="!domainStore.isLanguageLocked"
         @command="handleLanguageChange"
         trigger="click"
         class="language-dropdown"
@@ -115,41 +113,37 @@
             {{ t("ui.fullscreen") }}
           </el-dropdown-item>
 
-          <template v-if="!domainStore.isStyleLocked">
-            <el-dropdown-item class="compact-menu-heading" disabled divided>
-              {{ t("ui.switchTheme") }}
-            </el-dropdown-item>
-            <el-dropdown-item
-              v-for="theme in availableThemes"
-              :key="`compact-theme-${theme.name}`"
-              :command="`theme:${theme.name}`"
-            >
-              <span class="compact-menu-label">{{ theme.displayName }}</span>
-              <font-awesome-icon
-                v-if="currentThemeName === theme.name"
-                class="compact-menu-check"
-                :icon="['fas', 'check']"
-              ></font-awesome-icon>
-            </el-dropdown-item>
-          </template>
+          <el-dropdown-item class="compact-menu-heading" disabled divided>
+            {{ t("ui.switchTheme") }}
+          </el-dropdown-item>
+          <el-dropdown-item
+            v-for="theme in availableThemes"
+            :key="`compact-theme-${theme.name}`"
+            :command="`theme:${theme.name}`"
+          >
+            <span class="compact-menu-label">{{ theme.displayName }}</span>
+            <font-awesome-icon
+              v-if="currentThemeName === theme.name"
+              class="compact-menu-check"
+              :icon="['fas', 'check']"
+            ></font-awesome-icon>
+          </el-dropdown-item>
 
-          <template v-if="!domainStore.isLanguageLocked">
-            <el-dropdown-item class="compact-menu-heading" disabled divided>
-              {{ t("ui.language") }}
-            </el-dropdown-item>
-            <el-dropdown-item
-              v-for="lang in languages"
-              :key="`compact-language-${lang.value}`"
-              :command="`language:${lang.value}`"
-            >
-              <span class="compact-menu-label">{{ lang.label }}</span>
-              <font-awesome-icon
-                v-if="currentLocale === lang.value"
-                class="compact-menu-check"
-                :icon="['fas', 'check']"
-              ></font-awesome-icon>
-            </el-dropdown-item>
-          </template>
+          <el-dropdown-item class="compact-menu-heading" disabled divided>
+            {{ t("ui.language") }}
+          </el-dropdown-item>
+          <el-dropdown-item
+            v-for="lang in languages"
+            :key="`compact-language-${lang.value}`"
+            :command="`language:${lang.value}`"
+          >
+            <span class="compact-menu-label">{{ lang.label }}</span>
+            <font-awesome-icon
+              v-if="currentLocale === lang.value"
+              class="compact-menu-check"
+              :icon="['fas', 'check']"
+            ></font-awesome-icon>
+          </el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -161,12 +155,10 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTheme } from "@/composables/useTheme";
 import { useFullscreen } from "@vueuse/core";
-import { useDomainStore } from "@/store/modules/domain";
 
 const { locale, t } = useI18n();
 const { availableThemes, currentThemeName, setTheme } = useTheme();
 const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
-const domainStore = useDomainStore();
 
 const currentLocale = computed(() => locale.value);
 

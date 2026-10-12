@@ -1,4 +1,4 @@
-import { ref, type Ref } from "vue";
+import { computed, ref, type Ref } from "vue";
 import type { ScriptSaveTrigger } from "@/composables/useScriptEditorBase";
 
 export interface UseSceneSaveGuardOptions {
@@ -10,6 +10,8 @@ export interface UseSceneSaveGuardOptions {
   pendingRestorePayload: Ref<unknown>;
   isSavingVersion: Ref<boolean>;
   confirmDialog: () => Promise<unknown>;
+  confirmManualSaveDialog?: () => Promise<unknown>;
+  isEditorReady?: () => boolean;
   onBeforeSave?: (trigger: ScriptSaveTrigger) => void;
 }
 
@@ -20,46 +22,91 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
     pendingRestorePayload,
     isSavingVersion,
     confirmDialog,
+    confirmManualSaveDialog = confirmDialog,
+    isEditorReady,
     onBeforeSave,
   } = options;
 
   let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
-  const hasUnsavedChangesBeforeUnload = ref(false);
-  let isPollingUnsavedChanges = false;
+  const editorDirty = ref(false);
+  const persistenceUnverified = ref(false);
+  const hasUnconfirmedPersistence = computed(() => persistenceUnverified.value);
+  const hasUnsavedChangesBeforeUnload = computed({
+    get: () =>
+      editorDirty.value ||
+      persistenceUnverified.value ||
+      Boolean(pendingRestorePayload.value),
+    // Legacy editor notifications may clear editor state, never a failed save.
+    set: (changed: boolean) => {
+      editorDirty.value = changed;
+    },
+  });
+  let stateVersion = 0;
+  let targetVersion = 0;
+  let pendingManualSave: Promise<boolean> | null = null;
+  let pollingRequest: symbol | null = null;
   let pendingSceneSavePromise: Promise<boolean> | null = null;
 
+  const markPersistenceUnverified = () => {
+    stateVersion += 1;
+    persistenceUnverified.value = true;
+  };
+
+  const markPersistenceAcknowledged = () => {
+    stateVersion += 1;
+    persistenceUnverified.value = false;
+    editorDirty.value = false;
+  };
+
+  const resetUnsavedState = () => {
+    targetVersion += 1;
+    markPersistenceAcknowledged();
+    // A new target can poll immediately; old responses cannot update its state.
+    pollingRequest = null;
+  };
+
   const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
+    if (isEditorReady?.() === false)
+      return Promise.resolve(hasUnsavedChangesBeforeUnload.value);
+    const queryVersion = stateVersion;
     return new Promise((resolve) => {
       const requestId = sendRequest("check-unsaved-changes");
       if (!requestId) {
-        resolve(false);
+        resolve(hasUnsavedChangesBeforeUnload.value);
         return;
       }
 
       const timeout = window.setTimeout(() => {
         pendingRequests.delete(requestId);
-        resolve(false);
+        resolve(hasUnsavedChangesBeforeUnload.value);
       }, 1200);
 
       pendingRequests.set(requestId, (payload) => {
         window.clearTimeout(timeout);
         pendingRequests.delete(requestId);
-        resolve(pendingRestorePayload.value ? true : Boolean(payload.changed));
+        resolve(
+          queryVersion !== stateVersion || typeof payload.changed !== "boolean"
+            ? hasUnsavedChangesBeforeUnload.value
+            : persistenceUnverified.value ||
+                Boolean(pendingRestorePayload.value) ||
+                payload.changed
+        );
       });
     });
   };
 
   const syncUnsavedChangesForBeforeUnload = async () => {
-    if (isPollingUnsavedChanges) return;
+    if (pollingRequest) return;
 
-    isPollingUnsavedChanges = true;
+    const request = Symbol("unsaved-query");
+    const queryVersion = stateVersion;
+    pollingRequest = request;
     try {
       const changed = await queryUnsavedChangesBeforeLeave();
-      hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-        ? true
-        : changed;
+      if (queryVersion === stateVersion)
+        hasUnsavedChangesBeforeUnload.value = changed;
     } finally {
-      isPollingUnsavedChanges = false;
+      if (pollingRequest === request) pollingRequest = null;
     }
   };
 
@@ -88,7 +135,9 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
   };
 
   const requestSceneSave = (trigger: ScriptSaveTrigger) => {
+    if (trigger === "auto" && pendingManualSave) return Promise.resolve(false);
     if (pendingSceneSavePromise) return pendingSceneSavePromise;
+    if (isEditorReady?.() === false) return Promise.resolve(false);
     onBeforeSave?.(trigger);
     isSavingVersion.value = true;
     sendRequest("save-before-leave");
@@ -99,16 +148,33 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
     return pendingSceneSavePromise;
   };
 
-  const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
-    if (pendingRestorePayload.value) {
-      hasUnsavedChangesBeforeUnload.value = true;
-    }
-    const changed = await queryUnsavedChangesBeforeLeave();
-    hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
-      ? true
-      : changed;
+  // Toolbar and iframe menu saves share confirmation and persistence.
+  const requestManualSceneSave = (): Promise<boolean> => {
+    if (pendingManualSave) return pendingManualSave;
+    if (pendingSceneSavePromise) return pendingSceneSavePromise;
+    if (isEditorReady?.() === false) return Promise.resolve(false);
+    const target = targetVersion;
+    pendingManualSave = (async () => {
+      try {
+        await confirmManualSaveDialog();
+      } catch {
+        return false;
+      }
+      if (target !== targetVersion || isEditorReady?.() === false) return false;
+      return requestSceneSave("manual");
+    })().finally(() => {
+      pendingManualSave = null;
+    });
+    return pendingManualSave;
+  };
 
-    if (!changed) {
+  const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
+    const queryVersion = stateVersion;
+    const changed = await queryUnsavedChangesBeforeLeave();
+    if (queryVersion === stateVersion)
+      hasUnsavedChangesBeforeUnload.value = changed;
+
+    if (!hasUnsavedChangesBeforeUnload.value) {
       return true;
     }
 
@@ -131,6 +197,7 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
   };
 
   const cleanupPendingResolver = () => {
+    targetVersion += 1;
     if (pendingLeaveSaveResolver) {
       pendingLeaveSaveResolver(false);
       pendingLeaveSaveResolver = null;
@@ -139,11 +206,17 @@ export function useSceneSaveGuard(options: UseSceneSaveGuardOptions) {
 
   return {
     hasUnsavedChangesBeforeUnload,
+    hasUnconfirmedPersistence,
+    markPersistenceUnverified,
+    markPersistenceAcknowledged,
+    resetUnsavedState,
     queryUnsavedChangesBeforeLeave,
     syncUnsavedChangesForBeforeUnload,
     waitForLeaveSaveResult,
     resolveLeaveSave,
     requestSceneSave,
+    requestManualSceneSave,
+    isManualSavePending: () => pendingManualSave !== null,
     resolveUnsavedBeforeLeave,
     handleBeforeUnload,
     cleanupPendingResolver,

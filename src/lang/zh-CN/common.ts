@@ -1,6 +1,89 @@
 // 通用翻译
 export default {
   common: {
+    appUpdate: {
+      available:
+        "网站有新版本。请先保存或导出未保存内容、确认待处理操作并关闭运行场景，再手动刷新；刷新后重新发现 WebMCP 工具。",
+      dismiss: "稍后",
+    },
+    recovery: {
+      summary: "保存冲突：本地修改仍未保存。",
+      open: "查看冲突与保留副本",
+      boundary:
+        "这里保留的是被服务器拒绝的提交副本，可能不含之后的编辑。预览最多显示 12,000 字符，导出包含完整提交副本。读取服务器不会覆盖编辑器或更新保存基线；请先导出，再核对最新版并重新编辑。",
+      export: "导出被拒绝的提交",
+      read: "只读查看服务器最新版",
+      keep: "保留本地并继续编辑",
+      local: "本次提交副本",
+      server: "服务器当前内容（只读）",
+      failed: "读取失败或权限已变化，未显示服务器内容。",
+    },
+    publicationHistory: {
+      retention:
+        "最多保留最近 {count} 份发布正文，超出后自动清理旧正文；当前发布不受影响。",
+      expired:
+        "该版本正文已按保留策略清理。请刷新列表选择仍保留的版本，无需再次发布。",
+      from: "比较起始版本",
+      to: "比较目标版本",
+      compare: "比较发布版本",
+      identical: "原始正文完全相同",
+      different: "原始正文不同；以下为结构差异摘要",
+      truncated: "差异达到上限，结果不完整；请分别导出核对。",
+      export: "导出正文与资源引用",
+      pending:
+        "发布已成功，历史正文尚未核验。可在发布历史中重试读取，请勿重复发布。",
+      title: "发布历史",
+      boundary:
+        "服务器保存的固定发布版本，与本机草稿独立。查看历史不会覆盖当前场景。",
+      refresh: "刷新列表",
+      capacity: "{count} 个版本 · 已用 {used} / {budget}",
+      capacityWarning: "归档容量接近上限，请联系管理员规划容量。",
+      empty: "暂无固定发布历史。旧发布不会被自动补录为历史原件。",
+      date: "发布时间",
+      language: "语言",
+      actor: "发布人 ID",
+      version: "版本",
+      inspect: "读取并核验",
+      more: "加载更多",
+      detail: "版本详情",
+      verified: "历史正文核验通过",
+      resources:
+        "只核验已归档正文；资源文件未复制，可用性尚未检查，也不保证能恢复编辑工程。",
+      body: "查看固定正文",
+      forbidden: "当前账号没有读取此场景历史的权限。",
+      failed:
+        "读取或核验未通过。可重试读取；不会再次发布或用当前快照代替历史。",
+    },
+    editorLoading: {
+      progressLabel: "资源载入进度",
+      count: "已完成 {completed} / {total} 项",
+      workFailed: "载入未完成，请重新载入。",
+      stages: {
+        connecting: "正在连接编辑器",
+        data: "正在读取场景／实体数据",
+        initializing: "正在初始化编辑器",
+        assets: "正在载入资源",
+        finishing: "正在整理场景与编辑状态",
+        ready: "载入完成",
+        error: "载入失败",
+        model: "正在载入模型",
+        module: "正在载入场景实体",
+        anchor: "正在载入锚点",
+        space: "正在载入空间背景",
+      },
+      message: "编辑器正在载入…",
+      hint: "载入完成后即可编辑、保存、运行或打开脚本。",
+      failed: "编辑器载入未完成，请重试。",
+      retry: "重新载入",
+    },
+    editorSave: {
+      conflict:
+        "服务器拒绝了版本冲突写入。本地修改仍未保存，请保留内容并核对服务器最新版本后再操作。",
+      unverified:
+        "保存结果尚未确认。本地修改已保留，请先查询原操作回执和服务器状态。",
+      pending:
+        "仍有未确认保存的修改，请先核对服务器版本；编辑器无新增修改不代表保存成功。",
+    },
     confirm: "确认",
     cancel: "取消",
     selectUser: "选择用户",
@@ -49,7 +132,7 @@ export default {
       cancel: "否",
     },
     scriptDraft: {
-      title: "版本管理",
+      title: "版本历史",
       autoSave: "自动保存",
       interval: "保存间隔",
       minutes: "分钟",
@@ -69,14 +152,14 @@ export default {
       summaryAdded: "新增 {items}",
       summaryRemoved: "删除 {items}",
       summaryModified: "修改 {items}",
-      entry: "版本管理",
+      entry: "版本历史",
     },
     unityPreview: {
       entry: "运行场景",
       title: "运行场景",
-      helpClick: "单击画面后可操作场景",
-      helpRotate: "按住 Alt + 鼠标左键旋转视角",
-      helpZoomPan: "滚轮缩放视角，右键平移视角",
+      helpClick: "先单击运行画面，使其获得焦点",
+      helpRotate: "按住 Alt（Mac：⌥ Option）并用鼠标左键拖动，旋转视角",
+      helpZoomPan: "滚轮或触控板双指滚动可缩放；鼠标右键拖动可平移",
       helpFullscreen: "全屏可获得更完整预览",
       fullscreen: "全屏运行场景",
       close: "关闭运行场景",
@@ -117,6 +200,7 @@ export default {
     home: "主页",
     resources: "素材库",
     model: "模型",
+    voxel: "体素",
     picture: "图片",
     audio: "音频",
     video: "视频",

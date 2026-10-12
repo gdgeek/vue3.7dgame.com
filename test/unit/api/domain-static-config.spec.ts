@@ -7,6 +7,8 @@ import {
 } from "@/api/domain-static-config";
 import bujiabanConfig from "../../../public/config/domains/bujiaban.com.json";
 import devXrugcConfig from "../../../public/config/domains/dev.xrugc.com.json";
+import xrugcConfig from "../../../public/config/domains/xrugc.com.json";
+import defaultConfig from "../../../public/config/domains/default.json";
 import xiadingConfig from "../../../public/config/domains/xiading.hxgxonline.com.json";
 
 function makeFetch(configs: Record<string, unknown>) {
@@ -36,14 +38,12 @@ describe("domain-static-config", () => {
     vi.unstubAllEnvs();
   });
 
-  it("loads current domain default_config", async () => {
+  it("loads top-level homepage with current domain default_config", async () => {
     const fetchMock = makeFetch({
       "/config/domains/example.com.json": {
         name: "example.com",
-        is_active: true,
-        fallback_domain: "default",
+        homepage: "https://example.com",
         default_config: {
-          homepage: "https://example.com",
           lang: "zh-CN",
           style: 1,
         },
@@ -76,18 +76,44 @@ describe("domain-static-config", () => {
     });
   });
 
+  it.each([
+    ["xrugc.com", "xrugc.com", false],
+    ["d.xrugc.com", "xrugc.com", false],
+    ["dev.xrugc.com", "dev.xrugc.com", true],
+    ["d.dev.xrugc.com", "dev.xrugc.com", true],
+    ["bujiaban.com", "bujiaban.com", false],
+    ["other.example.com", "default", false],
+  ])(
+    "按 %s 的完整白牌配置决定体素开关",
+    async (domain, actualDomain, enabled) => {
+      vi.stubGlobal(
+        "fetch",
+        makeFetch({
+          "/config/domains/xrugc.com.json": xrugcConfig,
+          "/config/domains/dev.xrugc.com.json": devXrugcConfig,
+          "/config/domains/bujiaban.com.json": bujiabanConfig,
+          "/config/domains/default.json": defaultConfig,
+        })
+      );
+
+      const result = await getStaticDomainDefault(domain);
+
+      expect(result?.actual_domain).toBe(actualDomain);
+      const features = result?.data.features as { voxel?: boolean } | undefined;
+      expect(features?.voxel === true).toBe(enabled);
+    }
+  );
+
   it("falls back to zh-CN when requested language is missing", async () => {
     vi.stubGlobal(
       "fetch",
       makeFetch({
         "/config/domains/example.com.json": {
           name: "example.com",
-          is_active: true,
-          fallback_domain: "default",
-          default_config: { homepage: "https://example.com" },
+          homepage: "https://example.com",
+          default_config: {},
           configs: {
             "zh-CN": {
-              domain: "example.com",
               title: "中文标题",
             },
           },
@@ -105,30 +131,26 @@ describe("domain-static-config", () => {
       is_fallback: true,
       is_domain_fallback: false,
       data: {
-        domain: "example.com",
         title: "中文标题",
       },
     });
   });
 
-  it("falls back to fallback_domain for language config", async () => {
+  it("falls back to default.json for language config", async () => {
     vi.stubGlobal(
       "fetch",
       makeFetch({
         "/config/domains/child.example.com.json": {
           name: "child.example.com",
-          is_active: true,
-          fallback_domain: "default",
-          default_config: { homepage: "https://child.example.com" },
+          homepage: "https://child.example.com",
+          default_config: {},
           configs: {},
         },
         "/config/domains/default.json": {
           name: "default",
-          is_active: true,
-          default_config: { homepage: "" },
+          default_config: {},
           configs: {
             "en-US": {
-              domain: "default",
               title: "Fallback Title",
             },
           },
@@ -146,29 +168,24 @@ describe("domain-static-config", () => {
       is_fallback: false,
       is_domain_fallback: true,
       data: {
-        domain: "default",
         title: "Fallback Title",
       },
     });
   });
 
-  it("falls back to fallback_domain default_config", async () => {
+  it("falls back to default.json default_config", async () => {
     vi.stubGlobal(
       "fetch",
       makeFetch({
         "/config/domains/child.example.com.json": {
           name: "child.example.com",
-          is_active: true,
-          fallback_domain: "default",
           default_config: {},
           configs: {},
         },
         "/config/domains/default.json": {
           name: "default",
-          is_active: true,
-          default_config: {
-            homepage: "https://default.example.com",
-          },
+          homepage: "https://default.example.com",
+          default_config: {},
           configs: {},
         },
       })
@@ -193,10 +210,8 @@ describe("domain-static-config", () => {
       makeFetch({
         "/config/domains/default.json": {
           name: "default",
-          is_active: true,
-          default_config: {
-            homepage: "https://default.example.com",
-          },
+          homepage: "https://default.example.com",
+          default_config: {},
           configs: {},
         },
       })
@@ -220,13 +235,10 @@ describe("domain-static-config", () => {
       makeFetch({
         "/config/domains/xrugc.com.json": {
           name: "xrugc.com",
-          is_active: true,
-          default_config: {
-            homepage: "https://xrugc.com/",
-          },
+          homepage: "https://xrugc.com/",
+          default_config: {},
           configs: {
             "zh-CN": {
-              domain: "xrugc.com",
               title: "XR UGC",
             },
           },
@@ -241,10 +253,67 @@ describe("domain-static-config", () => {
       actual_domain: "xrugc.com",
       is_domain_fallback: true,
       data: {
-        domain: "xrugc.com",
         title: "XR UGC",
       },
     });
+  });
+
+  it("reads the parent config directly for d.xrugc.com without a 404 probe", async () => {
+    const fetchMock = makeFetch({
+      "/config/domains/xrugc.com.json": xrugcConfig,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const parentDefault = await getStaticDomainDefault("xrugc.com");
+    const parentLanguage = await getStaticDomainLanguage("xrugc.com", "zh-CN");
+    const childDefault = await getStaticDomainDefault("d.xrugc.com");
+    const childLanguage = await getStaticDomainLanguage("d.xrugc.com", "zh-CN");
+
+    expect(childDefault).toEqual({
+      ...parentDefault,
+      domain: "d.xrugc.com",
+      is_domain_fallback: true,
+    });
+    expect(childLanguage).toEqual({
+      ...parentLanguage,
+      domain: "d.xrugc.com",
+      is_domain_fallback: true,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/config/domains/xrugc.com.json",
+      expect.anything()
+    );
+  });
+
+  it("prefers the complete hostname before parent-domain configs", async () => {
+    const fetchMock = makeFetch({
+      "/config/domains/d.dev.xrugc.com.json": {
+        name: "d.dev.xrugc.com",
+        homepage: "https://d.dev.xrugc.com/",
+        default_config: {},
+        configs: {},
+      },
+      "/config/domains/dev.xrugc.com.json": {
+        name: "dev.xrugc.com",
+        homepage: "https://dev.xrugc.com/",
+        default_config: {},
+        configs: {},
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getStaticDomainDefault("d.dev.xrugc.com");
+
+    expect(result).toMatchObject({
+      actual_domain: "d.dev.xrugc.com",
+      is_domain_fallback: false,
+      data: { homepage: "https://d.dev.xrugc.com/" },
+    });
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/config/domains/dev.xrugc.com.json",
+      expect.anything()
+    );
   });
 
   it("loads bujiaban.com default and all localized configs from static JSON", async () => {
@@ -255,7 +324,7 @@ describe("domain-static-config", () => {
 
     const defaultResult = await getStaticDomainDefault("www.bujiaban.com");
 
-    expect(fetchMock).not.toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "/config/domains/www.bujiaban.com.json",
       expect.anything()
     );
@@ -285,9 +354,6 @@ describe("domain-static-config", () => {
         requested_language: language,
         is_fallback: false,
         is_domain_fallback: true,
-        data: {
-          domain: "bujiaban.com",
-        },
       });
 
       expect(result?.data.title).toBeTruthy();
@@ -331,7 +397,6 @@ describe("domain-static-config", () => {
       is_fallback: true,
       is_domain_fallback: true,
       data: {
-        domain: "dev.xrugc.com",
         title: "XR UGC Dev",
       },
     });
@@ -351,7 +416,7 @@ describe("domain-static-config", () => {
       "/config/domains/xiading.hxgxonline.com.json",
       expect.anything()
     );
-    expect(fetchMock).not.toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "/config/domains/d.xiading.hxgxonline.com.json",
       expect.anything()
     );
@@ -382,7 +447,6 @@ describe("domain-static-config", () => {
       is_fallback: false,
       is_domain_fallback: true,
       data: {
-        domain: "xiading.hxgxonline.com",
         title: "夏鼎AI/AR教育平台",
       },
     });

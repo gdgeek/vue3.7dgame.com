@@ -49,7 +49,8 @@ const root = ["root"];
 export function UpdateAbility(
   ability: { update: (rules: unknown[]) => void },
   roles: string[] | null,
-  userId: number
+  userId: number,
+  options: { voxelEnabled?: boolean } = {}
 ) {
   const newAbility = defineAbility((can) => {
     if (!roles) {
@@ -91,6 +92,11 @@ export function UpdateAbility(
       ]);
 
       edit = edit.concat(["polygen", "audio", "picture", "video", "phototype"]);
+
+      if (options.voxelEnabled === true) {
+        edit.push("voxel");
+        menu.push(/^\/resource\/voxel(\/|$)/);
+      }
 
       menu = menu.concat([
         "/site/logout",

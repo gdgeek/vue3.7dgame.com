@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
+vi.mock("@/services/auth/authClient", () => ({
+  default: { logout: vi.fn().mockResolvedValue(undefined) },
+}));
 
 describe("api/v1/auth", () => {
   let request: ReturnType<typeof vi.fn>;
@@ -62,6 +65,15 @@ describe("api/v1/auth", () => {
 
   it("logout resolves true", async () => {
     await expect(api.logout()).resolves.toBe(true);
+    const { default: authClient } = await import("@/services/auth/authClient");
+    expect(authClient.logout).toHaveBeenCalledOnce();
+  });
+
+  it("logout preserves a failed session revocation", async () => {
+    const { default: authClient } = await import("@/services/auth/authClient");
+    const failure = new Error("session revocation unavailable");
+    vi.mocked(authClient.logout).mockRejectedValueOnce(failure);
+    await expect(api.logout()).rejects.toBe(failure);
   });
 
   it("logout does not call request", async () => {

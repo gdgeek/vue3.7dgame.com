@@ -212,6 +212,7 @@ import {
 import { toHttps } from "@/utils/helper";
 import { getDefaultAvatarUrl } from "@/utils/avatar";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
+import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
@@ -346,6 +347,10 @@ const detailProperties = computed(() => {
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
+const trackWebMcpUpload = useWebMcpUploadIntent(
+  openUploadDialog,
+  () => uploadDialogVisible.value
+);
 
 const openViewDialog = async (id: number) => {
   viewDialogVisible.value = true;
@@ -435,7 +440,7 @@ const saveAudio = async (
       file_id,
     };
     if (info) data.info = info;
-    const response = await postAudio(data);
+    const response = await trackWebMcpUpload(() => postAudio(data));
     if (response.data.id) callback(response.data.id);
   } catch (err) {
     logger.error("Failed to save audio:", err);

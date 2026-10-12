@@ -36,8 +36,12 @@ defineExpose({
   whenReady() {
     return playerRef.value?.whenReady() ?? Promise.resolve();
   },
-  playAnimation(uuid: string, animationName: string) {
-    return playerRef.value?.playAnimation(uuid, animationName);
+  playAnimation(
+    uuid: string,
+    animationName: string,
+    options?: { loop?: boolean }
+  ) {
+    return playerRef.value?.playAnimation(uuid, animationName, options);
   },
   getAudioUrl(uuid: string) {
     return playerRef.value?.getAudioUrl(uuid);

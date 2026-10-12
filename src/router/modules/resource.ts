@@ -10,7 +10,7 @@ export const resourceRoutes: RouteRecordRaw = {
   path: "/resource",
   component: null,
   name: "/resource",
-  redirect: "/resource/voxel/index",
+  redirect: "/resource/polygen/index",
   meta: {
     title: "resourceManagement.title",
     icon: "system",
@@ -29,7 +29,6 @@ export const resourceRoutes: RouteRecordRaw = {
         title: "resourceManagement.voxelManagement.title",
         icon: "",
         hidden: true,
-        private: true,
         alwaysShow: false,
         params: null,
       },
@@ -39,6 +38,7 @@ export const resourceRoutes: RouteRecordRaw = {
           name: "",
           component: () => import("@/views/voxel/index.vue"),
           meta: {
+            preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
             title: "resourceManagement.voxelManagement.voxelList",
             icon: "el-icon-list",
             hidden: true,
@@ -96,6 +96,7 @@ export const resourceRoutes: RouteRecordRaw = {
       name: "",
       component: () => import("@/views/picture/index.vue"),
       meta: {
+        preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
         title: "resourceManagement.pictureManagement.title",
         icon: "el-icon-picture",
         hidden: true,
@@ -123,6 +124,7 @@ export const resourceRoutes: RouteRecordRaw = {
       name: "VideoIndex",
       component: () => import("@/views/video/index.vue"),
       meta: {
+        preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
         title: "resourceManagement.videoManagement.title",
         icon: "el-icon-video-camera",
         hidden: true,
@@ -150,6 +152,7 @@ export const resourceRoutes: RouteRecordRaw = {
       name: "",
       component: () => import("@/views/audio/index.vue"),
       meta: {
+        preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
         title: "resourceManagement.audioManagement.title",
         icon: "el-icon-headset",
         hidden: true,
@@ -191,6 +194,7 @@ export const resourceRoutes: RouteRecordRaw = {
           name: "ParticleIndex",
           component: () => import("@/views/particle/index.vue"),
           meta: {
+            preserveComponentOnQueryKeys: ["webmcpUpload", "webmcpUploadId"],
             title: "resourceManagement.particleManagement.particleList",
             icon: "el-icon-list",
             hidden: true,

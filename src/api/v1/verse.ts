@@ -1,3 +1,4 @@
+import { guardedWrite, type WriteOptions } from "./write-protocol";
 import request from "@/utils/request";
 import qs from "querystringify";
 import { v4 as uuidv4 } from "uuid";
@@ -66,14 +67,33 @@ export const postVerse = (data: PostVerseData) => {
   });
 };
 
-export const putVerseCode = (id: number, data: VerseCode) => {
+export const putVerseCode = (
+  id: number,
+  data: VerseCode,
+  write?: WriteOptions
+) => {
+  if (write)
+    return guardedWrite<VerseCode>(
+      `/v1/verses/${id}/code`,
+      "put",
+      data,
+      { targetType: "verse", targetId: id },
+      "save_code",
+      write
+    );
   return request<VerseCode>({
     url: `/v1/verses/${id}/code`,
     data,
     method: "put",
   });
 };
-export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
+export const getVerse = (
+  id: number,
+  expand = "metas,share",
+  cl = "lua",
+  signal?: AbortSignal,
+  options: { skipErrorMessage?: boolean } = {}
+) => {
   // Visibility is a Yii extraField: omitting it makes public scenes appear
   // private when a detail panel reloads with its own expansion list.
   const fields = new Set(
@@ -84,8 +104,10 @@ export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
   );
   fields.add("public");
   return request<VerseData>({
+    ...options,
     url: `/v1/verses/${id}${qs.stringify({ expand: [...fields].join(","), cl }, true)}`,
     method: "get",
+    signal,
   });
 };
 /*
@@ -155,7 +177,20 @@ export const getVerses = (params: VersesParams) => {
   });
 };
 
-export const putVerse = (id: number, data: PutVerseData) => {
+export const putVerse = (
+  id: number,
+  data: PutVerseData,
+  write?: WriteOptions
+) => {
+  if (write)
+    return guardedWrite<VerseData>(
+      `/v1/verses/${id}`,
+      "put",
+      { ...data, version: environment.version },
+      { targetType: "verse", targetId: id },
+      "save",
+      write
+    );
   data.version = environment.version;
   return request({
     url: `/v1/verses/${id}`,
@@ -219,7 +254,16 @@ export const removeTag = (id: number | string, tagsId: number | string) => {
  * 为 verse 拍照生成快照
  * POST /v1/verses/{id}/take-photo
  */
-export const takePhoto = (verseId: number) => {
+export const takePhoto = (verseId: number, write?: WriteOptions) => {
+  if (write)
+    return guardedWrite<Record<string, unknown>>(
+      `/v1/verses/${verseId}/take-photo`,
+      "post",
+      {},
+      { targetType: "verse", targetId: verseId },
+      "publish",
+      write
+    );
   return request({
     url: `/v1/verses/${verseId}/take-photo`,
     method: "post",

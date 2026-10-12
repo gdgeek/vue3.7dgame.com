@@ -9,6 +9,8 @@ declare module "*.vue" {
 
 // TypeScript 类型提示都为 string： https://github.com/vitejs/vite/issues/6930
 interface ImportMetaEnv {
+  /** Optional webmcp.dev bridge; enabled only when exactly "true". */
+  VITE_WEBMCP_DEV_ENABLED?: string;
   /** 应用端口 */
   VITE_APP_PORT: number;
   /** API 地址 */

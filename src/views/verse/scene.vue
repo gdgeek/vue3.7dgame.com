@@ -4,11 +4,22 @@
     <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
-      <el-main style="padding: 0; overflow: hidden">
+      <el-main
+        class="editor-container"
+        v-bind="{ 'aria-busy': !editorLoading.ready.value }"
+      >
+        <EditorLoadingOverlay
+          :blocked="!editorLoading.ready.value"
+          :failed="editorLoading.status.value === 'error'"
+          :progress="editorLoading.progress.value"
+          @retry="editorFrameKey += 1"
+        ></EditorLoadingOverlay>
         <iframe
           :key="editorFrameKey"
           id="editor"
           ref="editor"
+          :inert="!editorLoading.ready.value"
+          :tabindex="editorLoading.ready.value ? 0 : -1"
           :src="src"
           class="content"
           height="100%"
@@ -17,8 +28,24 @@
         ></iframe>
       </el-main>
     </el-container>
+    <VerseScriptDrawer
+      ref="scriptDrawer"
+      :verse-id="id"
+      :title="verse?.name || ''"
+      :scene-data="scriptSceneData"
+      :before-publish="saveSceneBeforeScriptPublish"
+      @closed="handleScriptDrawerClosed"
+      @saved="handleScriptSaved"
+    ></VerseScriptDrawer>
+    <PublicationHistoryDialog
+      v-model="publicationHistoryVisible"
+      :scene-id="id"
+      :actor-id="userStore.userInfo?.id"
+    ></PublicationHistoryDialog>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"
+      :editor-loading="editorLoading.getState().loading"
+      :editor-blocked="!editorLoading.ready.value"
       :versions="draftVersions"
       :auto-save-enabled="autoSaveEnabled"
       :auto-save-interval-seconds="autoSaveIntervalSeconds"
@@ -34,18 +61,48 @@
       :frame-visible="unityPreviewFrameVisible"
       :frame-key="unityPreviewFrameKey"
       :src="unityPreviewSrc"
-      @closed="handleUnityPreviewClosed"
+      @close="handleUnityPreviewClosed"
+      :state="unityPreviewState"
+      @retry="runSceneRuntimePreview"
       @frame-load="handleUnityPreviewLoad"
     ></UnityPreviewDialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import { applySceneScriptSave } from "@/utils/sceneScriptSave";
+import PublicationHistoryDialog from "@/components/MrPP/PublicationHistoryDialog.vue";
+import {
+  createWriteOptions,
+  applyWriteRevision,
+  type WriteOptions,
+} from "@/api/v1/write-contract";
+import { getScenePublication } from "@/api/v1/write-protocol";
+import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
+import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
+import { useScenePublicationScope } from "@/composables/useScenePublicationScope";
+import { WebMcpCompletionError } from "@/services/webmcp/completion-result";
+import {
+  sceneWriteFailure,
+  writeFailureMessageKey,
+} from "@/services/webmcp/scene-write-failure";
+import EditorLoadingOverlay from "@/components/EditorLoadingOverlay.vue";
+import { useEditorLoading } from "@/composables/useEditorLoading";
+import { createIframeRpc } from "@/utils/iframeRpc";
+import {
+  useIframeInitialization,
+  type IframeInitializationTicket,
+} from "@/composables/useIframeInitialization";
 import { logger } from "@/utils/logger";
 import { hasPublishableSceneContent } from "@/utils/versePublish";
 import { saveThenPublishScene } from "@/utils/scenePublish";
 import { takePhoto } from "@/api/v1/verse";
-import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
+import {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useRoute,
+  useRouter,
+} from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 //import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
@@ -59,13 +116,15 @@ import {
   type VerseData,
   type VerseMetasWithJsCode,
 } from "@/api/v1/verse";
+import { getMeta, getMetas } from "@/api/v1/meta";
 import type { JsonValue } from "@/api/v1/types/common";
 import { getPrefab } from "@/api/v1/prefab";
 import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import { translateRouteTitle } from "@/utils/i18n";
+import VerseScriptDrawer from "@/components/VerseScriptDrawer.vue";
+import { useSceneWorkspaceWebMcp } from "@/composables/useSceneWorkspaceWebMcp";
 import env from "@/environment";
 import { useFileStore } from "@/store/modules/config";
 import {
@@ -79,6 +138,7 @@ import type {
 import type { MetaInfo } from "@/api/v1/types/meta";
 import { useIframeMessaging } from "@/composables/useIframeMessaging";
 import { useSceneSaveGuard } from "@/composables/useSceneSaveGuard";
+import { confirmEditorSave } from "@/utils/confirmEditorSave";
 import { VERSE_SCENE_EXPAND, buildVerseEditorInitConfig } from "./sceneSpace";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
@@ -93,6 +153,29 @@ import {
   readUnityPreviewVerseCode,
   UNITY_PREVIEW_VERSE_EXPAND,
 } from "@/utils/unityPreviewPayload";
+import {
+  buildSceneModuleList,
+  registerSceneEditorWebMcpTools,
+  validateScene,
+  type SceneEditorLiveState,
+} from "@/services/webmcp/scene-editor-tools";
+import type {
+  SceneEntityPlacementPreview,
+  SceneModuleTransform,
+} from "@/services/webmcp/scene-entity-placement-tools";
+import type {
+  SceneModuleTransformPatch,
+  SceneModuleTransformPreview,
+  SceneModuleTransformSnapshot,
+} from "@/services/webmcp/scene-module-transform-tools";
+import type {
+  SceneModulePropertyPatch,
+  SceneModulePropertyPreview,
+  SceneModulePropertySnapshot,
+} from "@/services/webmcp/scene-module-property-tools";
+import type { SceneModuleDeletionPreview } from "@/services/webmcp/scene-module-deletion-tools";
+import { checkSceneReadiness } from "@/services/webmcp/scene-reliability-tools";
+import type { ScenePublicationPreview } from "@/services/webmcp/scene-publication-tools";
 
 // 组件状态
 const userStore = useUserStore();
@@ -103,10 +186,10 @@ const route = useRoute();
 const router = useRouter();
 const editor = ref<HTMLIFrameElement>();
 import qs from "querystringify";
-let init = false;
 const saveable = ref(false);
 let unsavedCheckPollingTimer: number | null = null;
 const editorFrameKey = ref(0);
+let webMcpLifecycle: AbortController | null = null;
 const isRestoringDraft = ref(false);
 const versionDialogVisible = ref(false);
 const draftVersions = ref<ScriptDraftVersion[]>([]);
@@ -122,6 +205,7 @@ const pendingRestorePayload = ref<VerseEditorPayload | null>(null);
 let currentSaveTrigger: ScriptSaveTrigger = "manual";
 let autoSaveTimer: number | null = null;
 
+const publicationHistoryVisible = ref(false);
 const toolbarOwner = "verse-scene-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
   useEditorVersionToolbar();
@@ -129,7 +213,22 @@ const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
 const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
-    onOpen: openVersionDialog,
+    getLoadingState: editorLoading.getState,
+    onOpen: () => {
+      if (editorLoading.ready.value) openVersionDialog();
+    },
+    onRunPreview: () => {
+      if (editorLoading.ready.value) runSceneRuntimePreview();
+    },
+    onSave: () => {
+      if (editorLoading.ready.value) void requestManualSceneSave();
+    },
+    onOpenScript: () => {
+      if (editorLoading.ready.value) void openScriptDrawer();
+    },
+    onOpenPublications: () => {
+      publicationHistoryVisible.value = true;
+    },
   });
 };
 const toolbarStatus = computed<EditorToolbarStatus>(() => {
@@ -166,28 +265,121 @@ const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
 //const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
 
-const decodeRouteText = (value: string): string => {
-  let decoded = value;
-  for (let i = 0; i < 2; i += 1) {
-    try {
-      const next = decodeURIComponent(decoded);
-      if (next === decoded) break;
-      decoded = next;
-    } catch {
-      break;
-    }
+const scriptDrawer = ref<InstanceType<typeof VerseScriptDrawer>>();
+const scriptSceneData = ref<unknown>();
+const scriptDrawerActive = ref(false);
+let sceneViewActive = true;
+let openingScriptDrawer: Promise<void> | null = null;
+const invalidateScriptPreview = () => {
+  verseMetasWithLuaCodeData.value = undefined;
+  verseMetasWithJsCodeData.value = undefined;
+};
+const handleScriptSaved = (result: unknown) => {
+  if (
+    !sceneViewActive ||
+    !scriptDrawerActive.value ||
+    verse.value?.id !== id.value
+  )
+    return;
+  if (applySceneScriptSave(verse.value, result)) invalidateScriptPreview();
+};
+const saveSceneBeforeScriptPublish = async () => {
+  const live = await getLiveSceneState();
+  if (live.loading) throw new Error("场景仍在加载，请稍后重试");
+  if (live.changed || pendingRestorePayload.value) {
+    if (!(await requestSceneSave("manual")))
+      throw new Error("场景保存失败，已取消发布");
   }
-  return decoded;
+};
+const openScriptDrawerOrThrow = (assertActive: () => void = () => {}) => {
+  assertActive();
+  if (openingScriptDrawer) return openingScriptDrawer.then(assertActive);
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const assertOwner = () => {
+    assertActive();
+    if (
+      !sceneViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getHostSessionId()
+    )
+      throw new Error("场景工作区已切换，请重新发现工具");
+  };
+  openingScriptDrawer = (async () => {
+    assertOwner();
+    if (!scriptDrawer.value) throw new Error("场景工作区尚未准备完成");
+    if (scriptDrawerActive.value) {
+      scriptDrawer.value.open();
+      return;
+    }
+    await unityPreview.close();
+    assertOwner();
+    const live = await getLiveSceneState();
+    assertOwner();
+    if (live.loading) throw new Error("场景仍在加载，请稍后重试");
+    scriptSceneData.value = safeClone(live.verse);
+    scriptDrawerActive.value = true;
+    webMcpLifecycle?.abort();
+    webMcpRpc.cancel();
+    scriptDrawer.value.open();
+  })().finally(() => {
+    openingScriptDrawer = null;
+  });
+  return openingScriptDrawer;
+};
+const openScriptDrawer = () => {
+  if (!editorLoading.ready.value) return;
+  return openScriptDrawerOrThrow().catch((error) => {
+    if (!editorLoading.ready.value) return;
+    ElMessage.error(error instanceof Error ? error.message : String(error));
+  });
+};
+const handleScriptDrawerClosed = () => {
+  scriptDrawerActive.value = false;
+  invalidateScriptPreview();
+  registerPageWebMcpTools();
 };
 
-// 计算属性
-const title = computed(() => {
-  const decodedTitle = decodeRouteText((route.query.title as string) || "");
-  const match = decodedTitle.match(/【(.*?)】/);
-  return match ? match[0] : "";
-});
-
 const id = computed(() => parseInt(route.query.id as string));
+
+useSceneWorkspaceWebMcp({
+  ownerId: () => id.value,
+  getContext: () => ({
+    sceneId: Number.isFinite(id.value) ? id.value : null,
+    sceneName: verse.value?.id === id.value ? (verse.value.name ?? null) : null,
+    activeEditor: scriptDrawerActive.value ? "scene-script" : "scene",
+    scene: {
+      ...editorLoading.getState(),
+      ready:
+        sceneViewActive &&
+        verse.value?.id === id.value &&
+        editorLoading.ready.value,
+      dirty:
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value),
+      saving: isSavingVersion.value,
+    },
+    script: scriptDrawer.value?.getState() ?? {
+      open: false,
+      ready: false,
+      dirty: false,
+      saving: false,
+      tab: null,
+    },
+  }),
+  openScriptEditor: openScriptDrawerOrThrow,
+  closeScriptEditor: async (assertActive) => {
+    if (openingScriptDrawer) await openingScriptDrawer;
+    assertActive();
+    return (await scriptDrawer.value?.close(assertActive)) ?? true;
+  },
+  onRegistrationError: (toolName, error) => {
+    logger.warn(
+      `WebMCP workspace tool registration failed: ${toolName}`,
+      error
+    );
+  },
+});
 
 const src = computed(() => {
   const query: Record<string, string | number> = {
@@ -206,14 +398,16 @@ const src = computed(() => {
 const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 
-const ensureUnityPreviewRuntimeData = async () => {
+const ensureUnityPreviewRuntimeData = async (signal?: AbortSignal) => {
   if (verseMetasWithLuaCodeData.value && verseMetasWithJsCodeData.value) return;
   if (!Number.isFinite(id.value)) return;
 
+  const requestedId = id.value;
   const [responseLua, responseJs] = await Promise.all([
-    getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
-    getVerse(id.value, UNITY_PREVIEW_VERSE_EXPAND, "js"),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "lua", signal),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "js", signal),
   ]);
+  if (signal?.aborted || requestedId !== id.value) return;
   verseMetasWithLuaCodeData.value =
     responseLua.data as unknown as VerseMetasWithJsCode;
   verseMetasWithJsCodeData.value =
@@ -269,19 +463,43 @@ const unityPreviewVisible = unityPreview.visible;
 const unityPreviewFrameVisible = unityPreview.frameVisible;
 const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
+const unityPreviewState = unityPreview.runtimeState;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
 
-// 监听语言变化
-watch(
-  () => appStore.language,
-  async () => {
-    await refresh();
-  }
-);
+const checkPublicationResources = async () => {
+  const report = await checkSceneReadiness({
+    getContext: () => ({
+      scene: verse.value,
+      dirty:
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value),
+      loading: !editorLoading.ready.value,
+      ready: editorLoading.ready.value,
+    }),
+    getLiveState: getLiveSceneState,
+    readEntityForReadiness: async (entityId: number) =>
+      (await getMeta(entityId, { expand: "resources,metaCode" })).data,
+  });
+  if (!report.metadataReady)
+    throw new Error(`资源发布前检查未通过：${report.blockers.join("；")}`);
+  return report;
+};
+
+const getSceneRuntimePreviewStatus = () => ({
+  sceneId: Number.isFinite(id.value) ? id.value : null,
+  sceneName: verse.value?.name ?? null,
+  ...unityPreview.runtimeState.value,
+});
+
 const verse = ref<VerseData | null>(null);
-const pushVerseToEditor = (nextVerse: VerseData) => {
-  postStandardMessage("INIT", {
+const pushVerseToEditor = (
+  nextVerse: VerseData,
+  ticket: IframeInitializationTicket | null = editorInitialization.begin()
+) => {
+  if (!ticket || !editorInitialization.isCurrent(ticket)) return;
+  webMcpRpc.cancel("编辑器正在重新初始化");
+  editorInitialization.send(ticket, {
     token: null,
     config: buildVerseEditorInitConfig({
       id: id.value,
@@ -293,15 +511,28 @@ const pushVerseToEditor = (nextVerse: VerseData) => {
       },
     }),
   });
+  registerPageWebMcpTools();
 };
 
 // 刷新场景数据
 const refresh = async () => {
-  const response = await getVerse(id.value, VERSE_SCENE_EXPAND);
-  verse.value = response.data;
-  saveable.value = verse.value ? verse.value.editable : false;
-  if (verse.value) {
-    pushVerseToEditor(verse.value);
+  const ticket = editorInitialization.begin();
+  if (!ticket) return;
+  editorLoading.setPhase("data");
+  webMcpRpc.cancel("编辑器正在重新初始化");
+  try {
+    const response = await getVerse(ticket.owner, VERSE_SCENE_EXPAND);
+    if (!editorInitialization.isCurrent(ticket)) return;
+    verse.value = response.data;
+    saveable.value = verse.value ? verse.value.editable : false;
+    if (verse.value) pushVerseToEditor(verse.value, ticket);
+  } catch (error) {
+    editorInitialization.fail(ticket);
+    if (editorInitialization.isCurrent(ticket)) {
+      logger.error(error);
+      if (!editorInitialization.isReady())
+        editorLoading.fail("data-load-failed");
+    }
   }
 };
 
@@ -626,7 +857,11 @@ const restoreDraftVersion = (draftId: string) => {
   };
   pendingRestorePayload.value = safeClone(payload);
   isRestoringDraft.value = true;
+  editorContentReady.value = false;
+  webMcpRpc.cancel();
+  webMcpLifecycle?.abort();
   editorFrameKey.value += 1;
+  registerPageWebMcpTools();
   hasUnsavedChangesBeforeUnload.value = true;
   Message.success(t("common.scriptDraft.restoreSuccess"));
   versionDialogVisible.value = false;
@@ -644,10 +879,11 @@ const restartAutoSaveTimer = () => {
   if (!autoSaveEnabled.value || !buildSceneDraftStorageKey.value) return;
 
   autoSaveTimer = window.setInterval(async () => {
+    if (hasUnconfirmedPersistence.value) return;
     if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
       return;
     }
-    if (isSavingVersion.value) return;
+    if (isSavingVersion.value || !editorLoading.ready.value) return;
     if (!verse.value?.editable) return;
     try {
       await requestSceneSave("auto");
@@ -671,29 +907,101 @@ const _isUnsavedChangesResultPayload = (
   typeof value.changed === "boolean";
 
 // 消息发送基础设施
-const { postStandardMessage, sendRequest, pendingRequests } =
+const { postStandardMessage, sendRequest, pendingRequests, getHostSessionId } =
   useIframeMessaging(editor, {
     onError: () => ElMessage.error(t("verse.view.sceneEditor.error1")),
   });
+const capturePublicationScope = useScenePublicationScope(() => ({
+  sceneId: id.value,
+  sessionId: getHostSessionId(),
+  actorId: String(userStore.userInfo?.id ?? ""),
+  editorTarget: `${src.value}:${editorFrameKey.value}`,
+}));
 
-const confirmSaveCurrentScene = () =>
-  ElMessageBox.confirm(t("common.sceneSaveConfirm.message"), "", {
-    showClose: true,
-    center: true,
-    distinguishCancelAndClose: true,
-    closeOnClickModal: false,
-    closeOnPressEscape: true,
-    showCancelButton: true,
-    customClass: "script-save-confirm-box",
-    confirmButtonText: t("common.sceneSaveConfirm.confirm"),
-    cancelButtonText: t("common.sceneSaveConfirm.cancel"),
-  });
+const editorInitialization = useIframeInitialization({
+  frame: () => editor.value,
+  owner: () => id.value,
+  src: () => src.value,
+  frameKey: () => editorFrameKey.value,
+  sendInit: (payload) => postStandardMessage("INIT", payload),
+});
+const editorContentReady = editorInitialization.ready;
+
+const webMcpRpc = createIframeRpc({
+  frame: () => editor.value,
+  session: getHostSessionId,
+  ready: editorInitialization.isReady,
+  send: sendRequest,
+});
+const requestEditor = webMcpRpc.request;
+const editorLoading = useEditorLoading({
+  initialized: editorInitialization.isReady,
+  target: () => `${id.value}:${src.value}:${editorFrameKey.value}`,
+  probe: () => requestEditor("webmcp-get-scene-state"),
+});
+
+const requireSuccessfulEditorResponse = (response: Record<string, unknown>) => {
+  if (response.ok !== true) {
+    throw new Error(
+      typeof response.error === "string" ? response.error : "场景编辑器操作失败"
+    );
+  }
+  return response;
+};
+
+const getLiveSceneState = async (): Promise<SceneEditorLiveState> => {
+  if (!editorContentReady.value) {
+    throw new Error("场景编辑器尚未加载完成");
+  }
+  const response = requireSuccessfulEditorResponse(
+    await requestEditor("webmcp-get-scene-state")
+  );
+  if (response.loading === true && editorLoading.ready.value)
+    editorLoading.restart();
+  return {
+    verse: response.verse,
+    sceneVersion: String(response.sceneVersion || ""),
+    // Include writes whose persistence has not been acknowledged by the host.
+    changed: Boolean(response.changed) || hasUnsavedChangesBeforeUnload.value,
+    loading: Boolean(response.loading),
+    selectedModuleIds: Array.isArray(response.selectedModuleIds)
+      ? response.selectedModuleIds.map(String)
+      : [],
+  };
+};
+
+const confirmSaveCurrentScene = (manual = false) =>
+  confirmEditorSave(
+    t("common.sceneSaveConfirm.message"),
+    {
+      showClose: true,
+      center: true,
+      distinguishCancelAndClose: true,
+      closeOnClickModal: false,
+      closeOnPressEscape: true,
+      showCancelButton: true,
+      customClass: "script-save-confirm-box",
+      confirmButtonText: t(
+        manual ? "common.button.save" : "common.sceneSaveConfirm.confirm"
+      ),
+      cancelButtonText: t(
+        manual ? "common.cancel" : "common.sceneSaveConfirm.cancel"
+      ),
+    },
+    editorLoading.getState
+  );
 
 const {
   hasUnsavedChangesBeforeUnload,
+  hasUnconfirmedPersistence,
+  markPersistenceUnverified,
+  markPersistenceAcknowledged,
+  resetUnsavedState,
   syncUnsavedChangesForBeforeUnload,
   resolveLeaveSave,
   requestSceneSave,
+  requestManualSceneSave,
+  isManualSavePending,
   resolveUnsavedBeforeLeave,
   handleBeforeUnload,
   cleanupPendingResolver,
@@ -703,6 +1011,8 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentScene,
+  confirmManualSaveDialog: () => confirmSaveCurrentScene(true),
+  isEditorReady: () => editorLoading.ready.value,
   onBeforeSave: (trigger) => {
     currentSaveTrigger = trigger;
   },
@@ -740,16 +1050,20 @@ const saveVerse = async (
   data: unknown,
   trigger: ScriptSaveTrigger = "manual"
 ) => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const isCurrentSave = () =>
+    ownerId === id.value && ownerSession === getHostSessionId();
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
-    return;
+    return false;
   }
 
   const verse = payload.verse;
 
   if (!saveable.value) {
     ElMessage.info(t("verse.view.sceneEditor.info3"));
-    return;
+    return false;
   }
 
   // 处理重复标题，确保标题唯一
@@ -780,18 +1094,13 @@ const saveVerse = async (
   if (verse?.children?.modules) {
     retitleVerses(verse.children.modules);
   }
-  await putVerse(id.value, { data: verse as unknown as JsonValue });
-  if (verse.value) {
-    verse.value = {
-      ...verse.value,
-      data: safeClone(verse),
-    };
-  }
+  await saveScenePayload(verse as unknown as JsonValue);
+  if (!isCurrentSave()) return false;
 
   if (trigger === "manual") {
     if (!hasPublishableSceneContent(verse)) {
       ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
-      return;
+      return true;
     }
 
     ElMessageBox.confirm(
@@ -804,7 +1113,11 @@ const saveVerse = async (
       }
     )
       .then(async () => {
-        await takePhoto(id.value);
+        if (!isCurrentSave()) return;
+        await takePhoto(
+          id.value,
+          createWriteOptions(getSceneServerModel()?.serverRevision)
+        );
         ElMessage({
           type: "success",
           message: t("verse.view.sceneEditor.publishSuccess"),
@@ -817,6 +1130,7 @@ const saveVerse = async (
         });
       });
   }
+  return true;
 };
 
 const saveVerseBeforeLeave = async (
@@ -824,6 +1138,10 @@ const saveVerseBeforeLeave = async (
   trigger: ScriptSaveTrigger = currentSaveTrigger,
   showSuccess = true
 ): Promise<boolean> => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const isCurrentSave = () =>
+    ownerId === id.value && ownerSession === getHostSessionId();
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
     return false;
@@ -833,7 +1151,7 @@ const saveVerseBeforeLeave = async (
 
   if (!saveable.value) {
     ElMessage.info(t("verse.view.sceneEditor.info3"));
-    return true;
+    return false;
   }
 
   const retitleVerses = (verses: VerseModule[]) => {
@@ -862,21 +1180,245 @@ const saveVerseBeforeLeave = async (
   }
 
   try {
-    await putVerse(id.value, { data: verse as unknown as JsonValue });
-    if (verse.value) {
-      verse.value = {
-        ...verse.value,
-        data: safeClone(verse),
-      };
+    // Keep the existing post-save publish choice for both manual entry points.
+    if (isManualSavePending()) {
+      const saved = await saveVerse(payload, trigger);
+      if (!saved || !isCurrentSave()) return false;
+    } else {
+      await saveScenePayload(verse as unknown as JsonValue);
+      if (!isCurrentSave()) return false;
     }
     if (trigger === "manual" && showSuccess) {
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
     }
     return true;
-  } catch {
-    ElMessage.error(t("verse.view.sceneEditor.error1"));
+  } catch (error) {
+    if (isCurrentSave()) ElMessage.error(t(writeFailureMessageKey(error)));
     return false;
   }
+};
+
+const formatSceneVector = (value: { x: number; y: number; z: number }) =>
+  `${value.x.toFixed(3)} / ${value.y.toFixed(3)} / ${value.z.toFixed(3)}`;
+
+const formatEntityPlacementConfirmation = (
+  preview: SceneEntityPlacementPreview
+) =>
+  [
+    `确认把实体“${preview.entityTitle}”放入当前场景吗？`,
+    `实例名称：${preview.proposedTitle}`,
+    `位置：${formatSceneVector(preview.transform.position)}`,
+    `旋转：${formatSceneVector(preview.transform.rotate)}`,
+    `缩放：${formatSceneVector(preview.transform.scale)}`,
+    preview.emptyEntity ? "提醒：这个实体目前没有内容" : "",
+    "此操作会保存场景，但不会发布",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+const formatSceneModuleTransformConfirmation = (
+  preview: SceneModuleTransformPreview
+) => {
+  const lines = [`确认修改实体实例“${preview.moduleTitle}”吗？`];
+  const appendChange = (
+    label: string,
+    current: { x: number; y: number; z: number },
+    proposed: { x: number; y: number; z: number }
+  ) => {
+    if (formatSceneVector(current) !== formatSceneVector(proposed)) {
+      lines.push(
+        `${label}：${formatSceneVector(current)} → ${formatSceneVector(proposed)}`
+      );
+    }
+  };
+  appendChange("位置", preview.current.position, preview.proposed.position);
+  appendChange(
+    "旋转",
+    preview.current.rotationDegrees,
+    preview.proposed.rotationDegrees
+  );
+  appendChange("缩放", preview.current.scale, preview.proposed.scale);
+  lines.push("此操作会保存场景，但不会发布");
+  return lines.join("\n");
+};
+
+const formatSceneModulePropertyConfirmation = (
+  preview: SceneModulePropertyPreview
+) => {
+  const lines = [`确认修改实体实例“${preview.moduleTitle}”的属性吗？`];
+  if (preview.current.title !== preview.proposed.title) {
+    lines.push(`名称：${preview.current.title} → ${preview.proposed.title}`);
+  }
+  if (preview.current.visible !== preview.proposed.visible) {
+    lines.push(
+      `可见性：${preview.current.visible ? "显示" : "隐藏"} → ${
+        preview.proposed.visible ? "显示" : "隐藏"
+      }`
+    );
+  }
+  lines.push("此操作会保存场景，但不会发布");
+  return lines.join("\n");
+};
+
+const formatSceneModuleDeletionConfirmation = (
+  preview: SceneModuleDeletionPreview
+) =>
+  [
+    `确认删除实体实例“${preview.moduleTitle}”吗？`,
+    preview.entityId === null ? "" : `来源实体 ID：${preview.entityId}`,
+    `删除范围：实例本身及其 ${preview.descendantCount} 个内部对象`,
+    "删除后会立即保存场景，但不会发布；仍可在编辑器中撤销后重新保存",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+const formatScenePublicationConfirmation = (preview: ScenePublicationPreview) =>
+  [
+    `确认${preview.alreadyPublished ? "重新" : ""}发布场景“${preview.sceneName}”吗？`,
+    `发布内容：${preview.moduleCount} 个实体实例`,
+    preview.warningCount > 0
+      ? `发布前检查有 ${preview.warningCount} 条警告：${preview.warnings.join(
+          "；"
+        )}`
+      : "发布前检查没有警告",
+    "发布将创建当前已保存版本的运行快照",
+  ].join("\n");
+
+const uniqueSceneModuleTitle = (baseTitle: string, liveVerse: unknown) => {
+  const existing = new Set(
+    buildSceneModuleList(liveVerse, { limit: 500 }).modules.map(
+      (module) => module.title
+    )
+  );
+  if (!existing.has(baseTitle)) return baseTitle;
+  let suffix = 2;
+  while (existing.has(`${baseTitle} (${suffix})`)) suffix += 1;
+  return `${baseTitle} (${suffix})`;
+};
+
+const countEntityRootNodes = (data: unknown) => {
+  if (!isRecord(data)) return 0;
+  const children = isRecord(data.children) ? data.children : null;
+  return Array.isArray(children?.entities) ? children.entities.length : 0;
+};
+
+const getSceneServerModel = () => verse.value;
+const saveScenePayload = async (sceneData: JsonValue, write?: WriteOptions) => {
+  const scene = verse.value;
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  markPersistenceUnverified();
+  const result = await putVerse(
+    ownerId,
+    { data: sceneData },
+    write ?? createWriteOptions(scene?.serverRevision)
+  );
+  if (
+    scene &&
+    verse.value === scene &&
+    id.value === ownerId &&
+    ownerSession === getHostSessionId()
+  ) {
+    applyWriteRevision(scene, result);
+    verse.value = { ...scene, data: safeClone(sceneData) };
+    markPersistenceAcknowledged();
+  }
+  return result;
+};
+
+const persistWebMcpSceneMutation = async (
+  response: Record<string, unknown>,
+  messages: { success: string; failure: string },
+  preview: object
+) => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const ownerModel = verse.value;
+  markPersistenceUnverified();
+  if (!isRecord(response.verse)) {
+    throw new WebMcpCompletionError(
+      {
+        status: "partial",
+        editorApplied: true,
+        persistence: "unverified",
+        retry: "read_state_before_retry",
+        ownerId,
+        moduleId: response.moduleId,
+      },
+      "编辑器没有返回可保存的场景数据"
+    );
+  }
+  const sceneData = response.verse as VerseEditorData;
+  const payload: VerseEditorPayload = { verse: sceneData };
+  currentSaveTrigger = "manual";
+  isSavingVersion.value = true;
+  let serverSaved = false;
+  let editorAcknowledged = false;
+  try {
+    const savedResponse = await putVerse(
+      ownerId,
+      { data: sceneData as unknown as JsonValue },
+      writeOptionsForPreview(preview, verse.value?.serverRevision)
+    );
+    serverSaved = true;
+    if (
+      ownerId === id.value &&
+      ownerSession === getHostSessionId() &&
+      ownerModel === verse.value
+    ) {
+      applyWriteRevision(verse.value, savedResponse);
+      verseMetasWithLuaCodeData.value = undefined;
+      verseMetasWithJsCodeData.value = undefined;
+      if (verse.value)
+        verse.value = {
+          ...verse.value,
+          data: safeClone(sceneData) as unknown as JsonValue,
+        };
+      const savedAt = addSceneDraftVersion(payload, currentSaveTrigger);
+      pendingRestorePayload.value = null;
+      lastSaveTrigger.value = currentSaveTrigger;
+      lastSavedAt.value = savedAt || new Date().toISOString();
+      const savedModel = verse.value;
+      try {
+        requireSuccessfulEditorResponse(
+          await requestEditor("webmcp-mark-scene-saved", {
+            expectedSceneVersion: String(response.sceneVersion || ""),
+          })
+        );
+        editorAcknowledged = true;
+      } catch {
+        /* Persistence succeeded; only the editor acknowledgement failed. */
+      }
+      if (
+        editorAcknowledged &&
+        ownerId === id.value &&
+        ownerSession === getHostSessionId() &&
+        savedModel === verse.value
+      )
+        markPersistenceAcknowledged();
+    }
+    Message.success(messages.success);
+  } catch (error) {
+    if (!serverSaved)
+      throw sceneWriteFailure(
+        error,
+        {
+          ownerId,
+          moduleId: response.moduleId,
+          sceneVersion: response.sceneVersion,
+        },
+        messages.failure
+      );
+  } finally {
+    if (ownerId === id.value && ownerSession === getHostSessionId())
+      isSavingVersion.value = false;
+  }
+  return {
+    editorApplied: true,
+    persistence: "server_acknowledged",
+    editorAcknowledged,
+    ownerId,
+  };
 };
 
 //发布场景
@@ -899,6 +1441,7 @@ const releaseVerse = async (data: unknown) => {
     return;
   }
 
+  const isCurrentPublication = capturePublicationScope();
   isPublishingVerse.value = true;
   try {
     await ElMessageBox.confirm(
@@ -910,16 +1453,37 @@ const releaseVerse = async (data: unknown) => {
         type: "warning",
       }
     );
+    if (!isCurrentPublication()) return;
 
     const published = await saveThenPublishScene(
       payload,
       (currentPayload) => saveVerseBeforeLeave(currentPayload, "manual", false),
-      () => takePhoto(id.value)
+      async () => {
+        if (!isCurrentPublication()) return;
+        const ownerId = id.value;
+        const response = await takePhoto(
+          ownerId,
+          createWriteOptions(getSceneServerModel()?.serverRevision)
+        );
+        const result = await readBackScenePublication({
+          sceneId: ownerId,
+          snapshot: response.data,
+          refresh: () => getVerse(ownerId, VERSE_SCENE_EXPAND),
+          isCurrent: isCurrentPublication,
+          apply: (fresh) => {
+            if (verse.value?.id === ownerId) verse.value = fresh.data;
+          },
+        });
+        if (isCurrentPublication() && !result.readBackVerified)
+          ElMessage.warning(t("common.publicationHistory.pending"));
+        return response;
+      }
     );
-    if (!published) return;
+    if (!published || !isCurrentPublication()) return;
 
     ElMessage.success(t("verse.page.list.releaseConfirm.success"));
   } catch (error) {
+    if (!isCurrentPublication()) return;
     if (error === "cancel" || error === "close") {
       ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
     } else {
@@ -933,6 +1497,14 @@ const releaseVerse = async (data: unknown) => {
 
 // 处理来自编辑器的消息（标准协议：msg.type 路由）
 const handleMessage = async (e: MessageEvent) => {
+  if (e.source !== editor.value?.contentWindow) return;
+  try {
+    if (e.origin !== new URL(editor.value.src, window.location.href).origin)
+      return;
+  } catch {
+    return;
+  }
+  webMcpRpc.handleMessage(e);
   const msg = e.data;
   if (!msg || typeof msg.type !== "string") return;
 
@@ -940,64 +1512,55 @@ const handleMessage = async (e: MessageEvent) => {
 
   switch (msg.type) {
     case "PLUGIN_READY":
+      if (!editorInitialization.acceptReady(payload)) break;
+      isSavingVersion.value = false;
+      webMcpRpc.cancel("编辑器文档已重新加载");
+      webMcpLifecycle?.abort();
+      registerPageWebMcpTools();
       hasUnsavedChangesBeforeUnload.value = false;
       if (isRestoringDraft.value && verse.value) {
         isRestoringDraft.value = false;
         pushVerseToEditor(verse.value);
         hasUnsavedChangesBeforeUnload.value = true;
-      } else if (!init) {
-        init = true;
-        refresh();
+      } else {
+        await refresh();
       }
       break;
 
     case "RESPONSE": {
+      const responseOwner = id.value;
+      const responseSession = getHostSessionId();
+      const isCurrentResponse = () =>
+        responseOwner === id.value && responseSession === getHostSessionId();
       const action = payload.action as string | undefined;
+      const requestId =
+        typeof msg.requestId === "string" ? msg.requestId : undefined;
+      const requestResolver = requestId
+        ? pendingRequests.get(requestId)
+        : undefined;
+      if (requestResolver) {
+        requestResolver(payload);
+      }
 
-      if (action === "save" && !payload.noChange) {
-        // Original save-verse logic
-        currentSaveTrigger = "manual";
-        isSavingVersion.value = true;
-        await saveVerse(payload, currentSaveTrigger);
-        if (payload.verse) {
-          const savedAt = addSceneDraftVersion(
-            payload as VerseEditorPayload,
-            currentSaveTrigger
-          );
-          pendingRestorePayload.value = null;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
+      if (action?.startsWith("webmcp-")) {
+        break;
+      }
+
+      if (action === "save") {
+        // The iframe updates its baseline when emitting save. Keep its snapshot
+        // until persistence succeeds, including when confirmation is cancelled.
+        if (!payload.noChange) {
+          pendingRestorePayload.value =
+            payload as unknown as VerseEditorPayload;
+          hasUnsavedChangesBeforeUnload.value = true;
         }
-        hasUnsavedChangesBeforeUnload.value = false;
-        isSavingVersion.value = false;
-        ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
-      } else if (action === "save" && payload.noChange) {
-        // Original save-verse-none logic
-        if (pendingRestorePayload.value) {
-          const restoredPayload = pendingRestorePayload.value;
-          await saveVerse(restoredPayload, currentSaveTrigger);
-          const savedAt = addSceneDraftVersion(
-            restoredPayload,
-            currentSaveTrigger
-          );
-          pendingRestorePayload.value = null;
-          hasUnsavedChangesBeforeUnload.value = false;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-          isSavingVersion.value = false;
-          resolveLeaveSave(true);
-        } else {
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = new Date().toISOString();
-          ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
-          hasUnsavedChangesBeforeUnload.value = false;
-          isSavingVersion.value = false;
-          resolveLeaveSave(true);
-        }
+        void requestManualSceneSave();
+        break;
       } else if (action === "save-before-leave" && !payload.noChange) {
         // Original save-verse-before-leave logic
         isSavingVersion.value = true;
         const result = await saveVerseBeforeLeave(payload, currentSaveTrigger);
+        if (!isCurrentResponse()) break;
         if (result && payload.verse) {
           const savedAt = addSceneDraftVersion(
             payload as VerseEditorPayload,
@@ -1015,12 +1578,19 @@ const handleMessage = async (e: MessageEvent) => {
         resolveLeaveSave(result);
       } else if (action === "save-before-leave" && payload.noChange) {
         // Original save-verse-before-leave-none logic
+        if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
+          isSavingVersion.value = false;
+          resolveLeaveSave(false);
+          ElMessage.error(t("common.editorSave.pending"));
+          break;
+        }
         if (pendingRestorePayload.value) {
           const restoredPayload = pendingRestorePayload.value;
           const result = await saveVerseBeforeLeave(
             restoredPayload,
             currentSaveTrigger
           );
+          if (!isCurrentResponse()) break;
           if (result) {
             const savedAt = addSceneDraftVersion(
               restoredPayload,
@@ -1080,21 +1650,7 @@ const handleMessage = async (e: MessageEvent) => {
         releaseVerse(payload);
       } else if (event === "goto") {
         if (payload.target === "blockly.js") {
-          const scriptRoute = router
-            .getRoutes()
-            .find((route) => route.path === "/verse/script");
-
-          if (scriptRoute && scriptRoute.meta.title) {
-            const metaTitle = translateRouteTitle(scriptRoute.meta.title);
-
-            router.push({
-              path: "/verse/script",
-              query: {
-                id: id.value,
-                title: metaTitle + title.value,
-              },
-            });
-          }
+          await openScriptDrawer();
         }
       } else if (event === "upload-cover") {
         handleUploadCover(payload);
@@ -1192,6 +1748,36 @@ const handleUploadCover = async (data: unknown) => {
   }
 };
 
+watch(
+  [id, src, editorFrameKey],
+  () => {
+    editorInitialization.reset();
+    webMcpRpc.cancel("编辑器目标已改变");
+    webMcpLifecycle?.abort();
+    registerPageWebMcpTools();
+  },
+  { flush: "sync" }
+);
+
+watch(id, (nextId, previousId) => {
+  if (!Number.isFinite(nextId) || nextId === previousId) return;
+  webMcpRpc.cancel();
+  webMcpLifecycle?.abort();
+  unityPreview.close();
+  verse.value = null;
+  editorContentReady.value = false;
+  pendingRestorePayload.value = null;
+  isRestoringDraft.value = false;
+  resetUnsavedState();
+  isSavingVersion.value = false;
+  verseMetasWithLuaCodeData.value = undefined;
+  verseMetasWithJsCodeData.value = undefined;
+  editorFrameKey.value += 1;
+  loadSceneDraftState();
+  restartAutoSaveTimer();
+  registerPageWebMcpTools();
+});
+
 // 生命周期钩子
 onMounted(() => {
   loadSceneDraftState();
@@ -1203,14 +1789,784 @@ onMounted(() => {
   unsavedCheckPollingTimer = window.setInterval(() => {
     void syncUnsavedChangesForBeforeUnload();
   }, 2000);
+
+  registerPageWebMcpTools();
 });
 
-onActivated(activateToolbar);
-onDeactivated(() => unregisterToolbar(toolbarOwner));
+const startSceneRuntimePreview = async () => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const assertSceneActive = () => {
+    if (
+      !sceneViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getHostSessionId()
+    )
+      throw new Error("场景工作区已切换，请重新发现工具");
+    if (scriptDrawerActive.value || openingScriptDrawer)
+      throw new Error("请先关闭脚本编辑抽屉，再运行场景");
+  };
+  assertSceneActive();
+  const scene = verse.value;
+  if (!scene || !Number.isFinite(scene.id)) {
+    throw new Error("场景数据尚未加载完成");
+  }
+  if (!scene.viewable) {
+    throw new Error("当前账号没有预览此场景的权限");
+  }
+
+  const liveState = await getLiveSceneState();
+  assertSceneActive();
+  const hasUnsavedChanges =
+    liveState.changed ||
+    hasUnsavedChangesBeforeUnload.value ||
+    Boolean(pendingRestorePayload.value);
+  hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+  if (liveState.loading) {
+    throw new Error("场景实体仍在加载，暂时不能启动运行预览");
+  }
+  if (hasUnsavedChanges) {
+    throw new Error("运行预览读取已保存版本，请先保存当前场景修改");
+  }
+  const validation = validateScene(scene, liveState);
+  if (!validation.valid) {
+    throw new Error(`场景校验失败：${validation.errors.join("；")}`);
+  }
+  if (validation.moduleCount === 0) {
+    throw new Error("空场景不能启动运行预览");
+  }
+
+  verseMetasWithLuaCodeData.value = undefined;
+  verseMetasWithJsCodeData.value = undefined;
+  await unityPreview.open();
+  return getSceneRuntimePreviewStatus();
+};
+const runSceneRuntimePreview = () => {
+  if (!editorLoading.ready.value) return;
+  void startSceneRuntimePreview().catch((error) => {
+    if (!editorLoading.ready.value) return;
+    ElMessage.error(
+      error instanceof Error ? error.message : "无法启动场景运行"
+    );
+  });
+};
+
+const registerPageWebMcpTools = () => {
+  if (!sceneViewActive || scriptDrawerActive.value) return;
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  let registration: AbortController | null = null;
+  const assertActive = () => {
+    if (
+      registration?.signal.aborted ||
+      !sceneViewActive ||
+      scriptDrawerActive.value ||
+      ownerId !== id.value ||
+      ownerSession !== getHostSessionId()
+    ) {
+      throw new Error("编辑器会话已经切换，请重新预览");
+    }
+  };
+  const requestEditor = (...args: Parameters<typeof webMcpRpc.request>) => {
+    assertActive();
+    return webMcpRpc.request(...args);
+  };
+  const saveWebMcpSceneMutation = (
+    ...args: Parameters<typeof persistWebMcpSceneMutation>
+  ) => {
+    try {
+      assertActive();
+    } catch {
+      throw new WebMcpCompletionError(
+        {
+          status: "partial",
+          editorApplied: true,
+          persistence: "unverified",
+          retry: "read_state_before_retry",
+          ownerId,
+          nodeId: args[0].nodeId,
+          moduleId: args[0].moduleId,
+        },
+        "编辑器已应用修改，但会话已切换，请重新读取状态"
+      );
+    }
+    return persistWebMcpSceneMutation(...args);
+  };
+
+  webMcpLifecycle?.abort();
+  registration = webMcpLifecycle = registerSceneEditorWebMcpTools({
+    getEditorLoadingState: editorLoading.getState,
+    readPublication: async () => {
+      assertActive();
+      return (await getScenePublication(ownerId)).data;
+    },
+    operations: {
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "verse",
+        targetId: id.value,
+        serverRevision: verse.value?.serverRevision ?? "",
+      }),
+    },
+    getContext: () => ({
+      scene: verse.value,
+      dirty:
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value),
+      loading: !editorLoading.ready.value,
+      ready: editorLoading.ready.value,
+    }),
+    getLiveState: getLiveSceneState,
+    searchEntities: async ({ query, page, pageSize }) => {
+      const response = await getMetas(
+        "-updated_at",
+        query,
+        page,
+        "image,author,resources",
+        "id,uuid,title,name,updated_at,image,events,resources,editable,viewable",
+        pageSize
+      );
+      const totalHeader = response.headers?.["x-pagination-total-count"];
+      const total = Number(totalHeader);
+      return {
+        items: response.data,
+        page,
+        pageSize,
+        total: Number.isFinite(total) ? total : undefined,
+      };
+    },
+    stageEntityPlacement: async ({ entityId, title, transform }) => {
+      const scene = verse.value;
+      if (!scene || !Number.isFinite(scene.id)) {
+        throw new Error("场景数据尚未加载完成");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有修改此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      const hasUnsavedChanges =
+        liveState.changed ||
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (liveState.loading) {
+        throw new Error("场景实体仍在加载，请稍后重试");
+      }
+      if (hasUnsavedChanges) {
+        throw new Error("当前场景存在未保存修改，请先保存后再创建放入预览");
+      }
+      if (!liveState.sceneVersion) {
+        throw new Error("无法读取当前场景版本，请刷新编辑器后重试");
+      }
+
+      const entityResponse = await getMeta(entityId, {
+        expand: "resources",
+      });
+      const entity = entityResponse.data;
+      if (!entity || entity.viewable === false) {
+        throw new Error("实体不存在或当前账号无权查看");
+      }
+      const entityTitle = entity.title || entity.name || `实体 ${entityId}`;
+      const proposedTitle = uniqueSceneModuleTitle(
+        title || entityTitle,
+        liveState.verse
+      );
+      return {
+        sceneId: scene.id,
+        sceneVersion: liveState.sceneVersion,
+        entityId: entity.id,
+        entityUuid: entity.uuid,
+        entityTitle,
+        entityUpdatedAt: entity.updated_at,
+        proposedTitle,
+        transform,
+        resourceCount: entity.resources?.length ?? 0,
+        emptyEntity: countEntityRootNodes(entity.data) === 0,
+      };
+    },
+    confirmEntityPlacement: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatEntityPlacementConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeEntityPlacement: async (preview) => {
+      const scene = verse.value;
+      if (!scene || scene.id !== preview.sceneId) {
+        throw new Error("当前场景已经切换，请重新创建实体放入预览");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有修改此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      if (
+        liveState.changed ||
+        Boolean(pendingRestorePayload.value) ||
+        liveState.sceneVersion !== preview.sceneVersion
+      ) {
+        throw new Error("场景在预览后已发生变化，请重新创建实体放入预览");
+      }
+
+      const entityResponse = await getMeta(preview.entityId, {
+        expand: "resources",
+      });
+      const entity = entityResponse.data;
+      if (!entity || entity.uuid !== preview.entityUuid) {
+        throw new Error("实体不存在或标识已经变化，请重新预览");
+      }
+      if (
+        preview.entityUpdatedAt &&
+        entity.updated_at &&
+        preview.entityUpdatedAt !== entity.updated_at
+      ) {
+        throw new Error("实体在预览后已被更新，请重新预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor(
+          "webmcp-complete-scene-entity-placement",
+          {
+            expectedSceneVersion: preview.sceneVersion,
+            operationId: preview.operationId,
+            entity,
+            title: preview.proposedTitle,
+            transform: preview.transform as SceneModuleTransform,
+          },
+          120000
+        )
+      );
+      const persistence = await saveWebMcpSceneMutation(
+        response,
+        {
+          success: "实体已放入场景并保存，场景尚未发布",
+          failure: "实体实例已放入编辑器",
+        },
+        preview
+      );
+      // Validation must include the entity just placed, before the next reload.
+      if (verse.value?.id === preview.sceneId) {
+        verse.value.metas = [
+          ...(verse.value.metas ?? []).filter((item) => item.id !== entity.id),
+          entity,
+        ];
+      }
+      return {
+        ...persistence,
+        moduleId: String(response.moduleId),
+        moduleTitle: String(response.moduleTitle || preview.proposedTitle),
+        entityId: Number(response.entityId),
+        transform: response.transform as SceneModuleTransform,
+      };
+    },
+    stageModuleTransform: async (moduleId, transform) => {
+      const scene = verse.value;
+      if (!scene || !Number.isFinite(scene.id)) {
+        throw new Error("场景数据尚未加载完成");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有修改此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      const hasUnsavedChanges =
+        liveState.changed ||
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (liveState.loading) {
+        throw new Error("场景实体仍在加载，请稍后重试");
+      }
+      if (hasUnsavedChanges) {
+        throw new Error("当前场景存在未保存修改，请先保存后再创建变换预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-scene-module-transform", {
+          moduleId,
+          transform: transform as SceneModuleTransformPatch,
+        })
+      );
+      const sceneVersion = String(response.sceneVersion || "");
+      if (!sceneVersion || sceneVersion !== liveState.sceneVersion) {
+        throw new Error("场景在读取变换时发生变化，请重新预览");
+      }
+      return {
+        sceneId: scene.id,
+        sceneVersion,
+        moduleId: String(response.moduleId),
+        moduleTitle: String(response.moduleTitle || "未命名实体实例"),
+        current: response.current as SceneModuleTransformSnapshot,
+        proposed: response.proposed as SceneModuleTransformSnapshot,
+        changed: Boolean(response.changed),
+      };
+    },
+    confirmModuleTransform: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatSceneModuleTransformConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeModuleTransform: async (preview) => {
+      const scene = verse.value;
+      if (!scene || scene.id !== preview.sceneId) {
+        throw new Error("当前场景已经切换，请重新创建实例变换预览");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有修改此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      if (
+        liveState.changed ||
+        Boolean(pendingRestorePayload.value) ||
+        liveState.sceneVersion !== preview.sceneVersion
+      ) {
+        throw new Error("场景在预览后已发生变化，请重新创建实例变换预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-complete-scene-module-transform", {
+          expectedSceneVersion: preview.sceneVersion,
+          moduleId: preview.moduleId,
+          expectedCurrent: preview.current,
+          proposed: preview.proposed,
+        })
+      );
+      const persistence = await saveWebMcpSceneMutation(
+        response,
+        {
+          success: "实体实例变换已保存，场景尚未发布",
+          failure: "实体实例变换已应用到编辑器",
+        },
+        preview
+      );
+      return {
+        ...persistence,
+        moduleId: String(response.moduleId),
+        moduleTitle: String(response.moduleTitle || preview.moduleTitle),
+        transform: response.transform as SceneModuleTransformSnapshot,
+        noChange: Boolean(response.noChange),
+      };
+    },
+    stageModuleProperties: async (moduleId, properties) => {
+      const scene = verse.value;
+      if (!scene || !Number.isFinite(scene.id)) {
+        throw new Error("场景数据尚未加载完成");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有修改此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      const hasUnsavedChanges =
+        liveState.changed ||
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (liveState.loading) {
+        throw new Error("场景实体仍在加载，请稍后重试");
+      }
+      if (hasUnsavedChanges) {
+        throw new Error("当前场景存在未保存修改，请先保存后再创建属性预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-scene-module-properties", {
+          moduleId,
+          properties: properties as SceneModulePropertyPatch,
+        })
+      );
+      const sceneVersion = String(response.sceneVersion || "");
+      if (!sceneVersion || sceneVersion !== liveState.sceneVersion) {
+        throw new Error("场景在读取实例属性时发生变化，请重新预览");
+      }
+      return {
+        sceneId: scene.id,
+        sceneVersion,
+        moduleId: String(response.moduleId),
+        moduleTitle: String(response.moduleTitle || "未命名实体实例"),
+        current: response.current as SceneModulePropertySnapshot,
+        proposed: response.proposed as SceneModulePropertySnapshot,
+        changed: Boolean(response.changed),
+      };
+    },
+    confirmModuleProperties: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatSceneModulePropertyConfirmation(preview),
+          "WebMCP",
+          {
+            confirmButtonText: t("common.entitySaveConfirm.confirm"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeModuleProperties: async (preview) => {
+      const scene = verse.value;
+      if (!scene || scene.id !== preview.sceneId) {
+        throw new Error("当前场景已经切换，请重新创建实例属性预览");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有修改此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      if (
+        liveState.changed ||
+        Boolean(pendingRestorePayload.value) ||
+        liveState.sceneVersion !== preview.sceneVersion
+      ) {
+        throw new Error("场景在预览后已发生变化，请重新创建实例属性预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-complete-scene-module-properties", {
+          expectedSceneVersion: preview.sceneVersion,
+          moduleId: preview.moduleId,
+          expectedCurrent: preview.current,
+          proposed: preview.proposed,
+        })
+      );
+      const persistence = await saveWebMcpSceneMutation(
+        response,
+        {
+          success: "实体实例属性已保存，场景尚未发布",
+          failure: "实体实例属性已应用到编辑器",
+        },
+        preview
+      );
+      return {
+        ...persistence,
+        moduleId: String(response.moduleId),
+        moduleTitle: String(response.moduleTitle || preview.proposed.title),
+        properties: response.properties as SceneModulePropertySnapshot,
+        noChange: Boolean(response.noChange),
+      };
+    },
+    stageModuleDeletion: async (moduleId) => {
+      const scene = verse.value;
+      if (!scene || !Number.isFinite(scene.id)) {
+        throw new Error("场景数据尚未加载完成");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有修改此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      const hasUnsavedChanges =
+        liveState.changed ||
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (liveState.loading) {
+        throw new Error("场景实体仍在加载，请稍后重试");
+      }
+      if (hasUnsavedChanges) {
+        throw new Error("当前场景存在未保存修改，请先保存后再创建删除预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-stage-scene-module-deletion", {
+          moduleId,
+        })
+      );
+      const sceneVersion = String(response.sceneVersion || "");
+      if (!sceneVersion || sceneVersion !== liveState.sceneVersion) {
+        throw new Error("场景在读取实例删除范围时发生变化，请重新预览");
+      }
+      const entityId = Number(response.entityId);
+      return {
+        sceneId: scene.id,
+        sceneVersion,
+        moduleId: String(response.moduleId),
+        moduleTitle: String(response.moduleTitle || "未命名实体实例"),
+        entityId:
+          Number.isSafeInteger(entityId) && entityId > 0 ? entityId : null,
+        visible: Boolean(response.visible),
+        descendantCount: Number(response.descendantCount) || 0,
+      };
+    },
+    confirmModuleDeletion: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatSceneModuleDeletionConfirmation(preview),
+          "WebMCP 删除确认",
+          {
+            confirmButtonText: t("common.delete"),
+            cancelButtonText: t("common.entitySaveConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            type: "warning",
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeModuleDeletion: async (preview) => {
+      const scene = verse.value;
+      if (!scene || scene.id !== preview.sceneId) {
+        throw new Error("当前场景已经切换，请重新创建实例删除预览");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有修改此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      if (
+        liveState.changed ||
+        Boolean(pendingRestorePayload.value) ||
+        liveState.sceneVersion !== preview.sceneVersion
+      ) {
+        throw new Error("场景在预览后已发生变化，请重新创建实例删除预览");
+      }
+
+      const response = requireSuccessfulEditorResponse(
+        await requestEditor("webmcp-complete-scene-module-deletion", {
+          expectedSceneVersion: preview.sceneVersion,
+          moduleId: preview.moduleId,
+          expected: {
+            moduleTitle: preview.moduleTitle,
+            entityId: preview.entityId,
+            visible: preview.visible,
+            descendantCount: preview.descendantCount,
+          },
+        })
+      );
+      const persistence = await saveWebMcpSceneMutation(
+        response,
+        {
+          success: "实体实例已删除并保存，场景尚未发布",
+          failure: "实体实例已从编辑器删除",
+        },
+        preview
+      );
+      const entityId = Number(response.entityId);
+      return {
+        ...persistence,
+        moduleId: String(response.moduleId),
+        moduleTitle: String(response.moduleTitle || preview.moduleTitle),
+        entityId:
+          Number.isSafeInteger(entityId) && entityId > 0 ? entityId : null,
+        removedObjectCount: Number(response.removedObjectCount) || 1,
+      };
+    },
+    stageScenePublication: async () => {
+      const scene = verse.value;
+      if (!scene || !Number.isFinite(scene.id)) {
+        throw new Error("场景数据尚未加载完成");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有发布此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      const hasUnsavedChanges =
+        liveState.changed ||
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value);
+      hasUnsavedChangesBeforeUnload.value = hasUnsavedChanges;
+      if (liveState.loading) {
+        throw new Error("场景实体仍在加载，暂时不能发布");
+      }
+      if (hasUnsavedChanges) {
+        throw new Error("当前场景存在未保存修改，请先保存后再发布");
+      }
+      if (!liveState.sceneVersion) {
+        throw new Error("无法读取当前场景版本，请刷新编辑器后重试");
+      }
+
+      const validation = validateScene(scene, liveState);
+      if (!validation.valid) {
+        throw new Error(`场景校验失败：${validation.errors.join("；")}`);
+      }
+      if (validation.moduleCount === 0) {
+        throw new Error("空场景不能发布，请先放入至少一个实体");
+      }
+      await checkPublicationResources();
+      return {
+        sceneId: scene.id,
+        sceneVersion: liveState.sceneVersion,
+        sceneName: scene.name || "未命名场景",
+        moduleCount: validation.moduleCount,
+        warningCount: validation.warnings.length,
+        warnings: validation.warnings.slice(0, 8),
+        alreadyPublished: (await getScenePublication(scene.id)).data.published,
+      };
+    },
+    confirmScenePublication: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatScenePublicationConfirmation(preview),
+          "WebMCP 发布确认",
+          {
+            confirmButtonText: t("verse.page.list.releaseConfirm.confirm"),
+            cancelButtonText: t("verse.page.list.releaseConfirm.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            type: "warning",
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeScenePublication: async (preview) => {
+      const isCurrentPublication = capturePublicationScope();
+      const scene = verse.value;
+      if (!scene || scene.id !== preview.sceneId) {
+        throw new Error("当前场景已经切换，请重新执行发布前检查");
+      }
+      if (!scene.editable || !saveable.value) {
+        throw new Error("当前账号没有发布此场景的权限");
+      }
+
+      const liveState = await getLiveSceneState();
+      if (
+        liveState.loading ||
+        liveState.changed ||
+        hasUnsavedChangesBeforeUnload.value ||
+        Boolean(pendingRestorePayload.value) ||
+        liveState.sceneVersion !== preview.sceneVersion
+      ) {
+        throw new Error("场景在发布预览后发生了变化，请重新执行发布前检查");
+      }
+      const validation = validateScene(scene, liveState);
+      if (!validation.valid || validation.moduleCount === 0) {
+        throw new Error(
+          validation.errors.length > 0
+            ? `场景校验失败：${validation.errors.join("；")}`
+            : "空场景不能发布"
+        );
+      }
+
+      const readiness = await checkPublicationResources();
+      if (
+        readiness.sceneId !== preview.sceneId ||
+        readiness.sceneVersion !== preview.sceneVersion
+      ) {
+        throw new Error("资源检查期间场景发生变化，请重新执行发布前检查");
+      }
+      assertActive();
+      if (!isCurrentPublication())
+        throw new Error("编辑器会话或账号已经切换，请重新执行发布前检查");
+      const snapshotResponse = await takePhoto(
+        scene.id,
+        writeOptionsForPreview(preview, scene.serverRevision)
+      );
+      const snapshot = isRecord(snapshotResponse.data)
+        ? snapshotResponse.data
+        : {};
+      const result = await readBackScenePublication({
+        sceneId: scene.id,
+        snapshot,
+        refresh: () => getVerse(scene.id, VERSE_SCENE_EXPAND),
+        isCurrent: isCurrentPublication,
+        apply: (response) => {
+          if (verse.value?.id === scene.id) verse.value = response.data;
+        },
+      });
+      if (isCurrentPublication())
+        ElMessage.success(t("verse.page.list.releaseConfirm.success"));
+      return result;
+    },
+    readEntityForReadiness: async (entityId) =>
+      (await getMeta(entityId, { expand: "resources,metaCode" })).data,
+    validateForReadiness: async () =>
+      validateScene(verse.value, await getLiveSceneState()),
+    getPreviewStatus: getSceneRuntimePreviewStatus,
+    startPreview: startSceneRuntimePreview,
+    stopPreview: async () => {
+      await unityPreview.close();
+      return getSceneRuntimePreviewStatus();
+    },
+    onRegistrationError: (toolName, error) => {
+      logger.warn(`WebMCP tool registration failed: ${toolName}`, error);
+    },
+  });
+};
+
+onActivated(() => {
+  sceneViewActive = true;
+  activateToolbar();
+  registerPageWebMcpTools();
+});
+onDeactivated(() => {
+  sceneViewActive = false;
+  unregisterToolbar(toolbarOwner);
+  webMcpLifecycle?.abort();
+  webMcpRpc.cancel();
+});
 
 onBeforeRouteLeave(async (_to, _from, next) => {
+  if (!((await scriptDrawer.value?.resolveBeforeLeave()) ?? true)) {
+    next(false);
+    return;
+  }
   const canLeave = await resolveUnsavedBeforeLeave();
+  if (canLeave) {
+    await unityPreview.close();
+    await scriptDrawer.value?.closeAfterNavigation();
+  }
   next(canLeave);
+});
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.query.id !== from.query.id) await unityPreview.close();
+});
+
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.query.id === from.query.id) return true;
+  if (!((await scriptDrawer.value?.resolveBeforeLeave()) ?? true)) return false;
+  if (!(await resolveUnsavedBeforeLeave())) return false;
+  await scriptDrawer.value?.closeAfterNavigation();
+  return true;
 });
 
 watch(toolbarStatus, (status) => {
@@ -1233,6 +2589,12 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  sceneViewActive = false;
+  editorInitialization.reset();
+  webMcpLifecycle?.abort();
+  webMcpLifecycle = null;
+  webMcpRpc.cancel();
+  editorContentReady.value = false;
   postStandardMessage("DESTROY");
   unregisterToolbar(toolbarOwner);
   clearAutoSaveTimer();
@@ -1262,6 +2624,12 @@ onBeforeUnmount(() => {
   :deep(.el-main) {
     position: relative;
   }
+}
+
+.editor-container {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
 }
 
 .content {

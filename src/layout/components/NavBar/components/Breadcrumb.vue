@@ -143,6 +143,21 @@ const resolveMapSegments = (
       { key: "sidebar.resources" },
       { key: "sidebar.model" },
     ],
+    "/resource/voxel/index": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+      { key: "sidebar.voxel" },
+    ],
+    "/resource/voxel/view": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+      {
+        key: "sidebar.voxel",
+        to: { path: "/resource/voxel/index" },
+        clickable: true,
+      },
+      { key: "route.resourceManagement.voxelManagement.voxelProcessing" },
+    ],
     "/resource/picture/index": [
       { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
       { key: "sidebar.resources" },
@@ -262,11 +277,6 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       { label: workspace, to: HOME_PATH, clickable: true },
       { label: entity, to: ENTITY_LIST_PATH, clickable: true },
       { label: name, primary: true },
-      {
-        label: String(t("route.meta.sceneEditor")),
-        kind: "mode",
-        mode: "entity",
-      },
     ]);
   }
 
@@ -295,11 +305,6 @@ const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
       { label: workspace, to: HOME_PATH, clickable: true },
       { label: scene, to: SCENE_LIST_PATH, clickable: true },
       { label: name, primary: true },
-      {
-        label: String(t("route.project.sceneEditor")),
-        kind: "mode",
-        mode: "scene",
-      },
     ]);
   }
 
@@ -419,7 +424,7 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 
 @container app-navbar (width <= 1120px) {
   .breadcrumb-nav {
-    gap: 0;
+    gap: 8px;
   }
 
   .crumb-link:not(.is-primary),
@@ -431,12 +436,18 @@ const handleNavigate = (item: BreadcrumbSegment) => {
     max-width: 100%;
   }
 
-  .crumb-unsaved-dot--current {
+  .breadcrumb-nav:has(.editor-mode-tag) .crumb-unsaved-dot--current {
     display: none;
   }
 
   .crumb-unsaved-dot--compact {
     display: inline-block;
+  }
+}
+
+@container app-navbar (width <= 640px) {
+  .breadcrumb-nav:has(.editor-mode-tag) .crumb-link.is-primary {
+    display: none;
   }
 }
 </style>

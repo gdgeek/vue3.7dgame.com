@@ -1,0 +1,98 @@
+{
+  "capturedAt": "2026-09-17T18:13:40.173520+00:00",
+  "environment": {
+    "client": "WorkBuddy 5.5.2",
+    "browser": "Chrome 152",
+    "frontend": "v2026.09.17-0111",
+    "apiCommit": "966514522fc1236da24c721a40c98dd216da32f6",
+    "database": "xrugc_webmcp_p0_20260916",
+    "localOnly": true
+  },
+  "recovery": {
+    "apiEntryMissing": true,
+    "affectedRequestsReturned": 404,
+    "restoredFromSameLocalGitCommit": true,
+    "deploymentProbeStatus": 200,
+    "preExistingObjectHashesUnchanged": true
+  },
+  "workbuddy": {
+    "initialVisibleCredits": 30,
+    "freshPairingSucceeded": true,
+    "entityTools": 37,
+    "scriptTools": 14,
+    "scriptReadAndCatalogSucceeded": true,
+    "stageRejected": "当前脚本存在未保存修改，请先保存后再创建积木预览",
+    "stageOperationCreated": false,
+    "completeCalled": false,
+    "endState": "You’ve used all your available credits. Upgrade or invite friends to continue."
+  },
+  "manualScriptBaseline": {
+    "targetId": 1091,
+    "code": {
+      "blockly": "{\"backpack\":[]}",
+      "lua": "",
+      "js": ""
+    },
+    "operation": {
+      "operation_id": "e2c27973-97a5-4126-8666-7377d00ad136",
+      "action": "save_code",
+      "receipt": {
+        "action": "save_code",
+        "operationId": "e2c27973-97a5-4126-8666-7377d00ad136",
+        "serverRevision": "sha256:48b5958192a91b2d6667d7af3ac4c35d764277b7e7e88f84f33266cba1c06e3e",
+        "status": "completed",
+        "targetId": 1091,
+        "targetType": "meta"
+      },
+      "created_at": 1789668404
+    },
+    "entityDataUnchanged": true,
+    "notMcpWrite": true
+  },
+  "connectedLogout": {
+    "preLogoutUi": "已连接 · 当前工具：37",
+    "logoutHttpStatus": 200,
+    "logoutAtUtc": "2026-09-17T18:09:54Z",
+    "preLogoutTools": {
+      "observedAt": "2026-09-17T18:09:32.724Z",
+      "scope": "independent fixed-version stdio tools/list; not WorkBuddy acceptance",
+      "toolNames": [
+        "127_0_0_1_3102-xrugc_webmcp_list_tools",
+        "127_0_0_1_3102-xrugc_webmcp_call_tool",
+        "_webmcp_get-token",
+        "_webmcp_define-mcp-tool"
+      ]
+    },
+    "postLogoutTools": {
+      "observedAt": "2026-09-17T18:10:16.392Z",
+      "scope": "independent fixed-version stdio tools/list; not WorkBuddy acceptance",
+      "toolNames": [
+        "127_0_0_1_3102-xrugc_webmcp_list_tools",
+        "127_0_0_1_3102-xrugc_webmcp_call_tool",
+        "_webmcp_get-token",
+        "_webmcp_define-mcp-tool"
+      ]
+    },
+    "postLogoutReadOnlyCall": {
+      "observedAt": "2026-09-17T18:11:12.779Z",
+      "scope": "independent fixed-version stdio call after connected browser logout; not WorkBuddy acceptance",
+      "callResult": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Error: Tool not found: 127_0_0_1_3102-xrugc_webmcp_list_tools"
+          }
+        ],
+        "isError": true
+      }
+    },
+    "secondAccount": {
+      "id": 897,
+      "uiName": "WorkBuddy P1 Second Account",
+      "connectionStatus": "未连接",
+      "toolCount": 0,
+      "pairingInputEmpty": true
+    },
+    "limits": "Post-logout call uses an independent fixed-version stdio diagnostic, not WorkBuddy. Does not cover stale contextToken replay, JWT refresh or unauthorized events."
+  }
+}

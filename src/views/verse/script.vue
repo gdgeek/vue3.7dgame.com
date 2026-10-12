@@ -1,11 +1,16 @@
 <template>
-  <div class="script">
+  <div class="script" :class="{ 'script--embedded': embedded }">
+    <PublicationHistoryDialog
+      v-model="publicationHistoryVisible"
+      :scene-id="id"
+      :actor-id="userStore.userInfo?.id"
+    ></PublicationHistoryDialog>
     <el-container>
       <el-main>
         <el-card class="box-card">
           <el-container>
             <div class="script-tabs-wrapper">
-              <div class="script-editor-toolbar">
+              <div v-if="!embedded" class="script-editor-toolbar">
                 <div
                   class="script-mode-tabs"
                   role="tablist"
@@ -16,9 +21,17 @@
                     class="script-mode-tab"
                     :class="{ 'is-active': activeName === 'blockly' }"
                     role="tab"
+                    :disabled="editorContentLoading"
+                    :aria-busy="editorContentLoading"
                     :aria-selected="activeName === 'blockly'"
                     @click="activeName = 'blockly'"
                   >
+                    <el-icon
+                      v-if="editorContentLoading"
+                      class="is-loading script-action-icon"
+                    >
+                      <Loading></Loading>
+                    </el-icon>
                     {{ $t("verse.view.script.edit") }}
                   </button>
                   <button
@@ -26,9 +39,17 @@
                     class="script-mode-tab"
                     :class="{ 'is-active': activeName === 'script' }"
                     role="tab"
+                    :disabled="editorContentLoading"
+                    :aria-busy="editorContentLoading"
                     :aria-selected="activeName === 'script'"
                     @click="activeName = 'script'"
                   >
+                    <el-icon
+                      v-if="editorContentLoading"
+                      class="is-loading script-action-icon"
+                    >
+                      <Loading></Loading>
+                    </el-icon>
                     {{ $t("verse.view.script.code") }}
                   </button>
                 </div>
@@ -36,7 +57,7 @@
                 <div v-if="verse" class="script-tabs-actions">
                   <el-select
                     v-model="selectedLoadedMetaId"
-                    class="script-loaded-metas-select"
+                    class="script-context-select script-loaded-metas-select"
                     size="small"
                     :placeholder="
                       $t('verse.view.script.loadedEntitiesPlaceholder')
@@ -52,53 +73,68 @@
                       :value="metaOption.id"
                     ></el-option>
                   </el-select>
-                  <el-button
-                    class="script-action-button"
-                    type="primary"
-                    size="small"
-                    :title="$t('route.project.sceneEditor')"
-                    :aria-label="$t('route.project.sceneEditor')"
-                    @click="goBackToSceneEditor"
-                  >
-                    <font-awesome-icon
-                      class="script-action-icon"
-                      :icon="['fas', 'cube']"
-                    ></font-awesome-icon>
-                    <span class="secondary-action-label">
-                      {{ $t("route.project.sceneEditor") }}
-                    </span>
-                  </el-button>
-                  <el-button
-                    v-if="saveable"
-                    class="script-action-button script-save-button"
-                    type="primary"
-                    size="small"
-                    :title="$t('verse.view.script.save')"
-                    :aria-label="$t('verse.view.script.save')"
-                    @click="save"
-                  >
-                    <font-awesome-icon
-                      class="script-action-icon"
-                      icon="save"
-                    ></font-awesome-icon>
-                    <span>{{ $t("verse.view.script.save") }}</span>
-                  </el-button>
+                  <div class="script-primary-actions">
+                    <el-button
+                      size="small"
+                      @click="publicationHistoryVisible = true"
+                      >{{ $t("common.publicationHistory.title") }}</el-button
+                    >
+                    <el-button
+                      class="script-action-button"
+                      type="primary"
+                      size="small"
+                      :title="$t('route.project.sceneEditor')"
+                      :aria-label="$t('route.project.sceneEditor')"
+                      @click="goBackToSceneEditor"
+                    >
+                      <font-awesome-icon
+                        class="script-action-icon"
+                        :icon="['fas', 'cube']"
+                      ></font-awesome-icon>
+                      <span class="secondary-action-label">
+                        {{ $t("route.project.sceneEditor") }}
+                      </span>
+                    </el-button>
+                    <el-button
+                      v-if="saveable"
+                      class="script-action-button script-save-button"
+                      type="primary"
+                      size="small"
+                      :title="$t('verse.view.script.save')"
+                      :aria-label="$t('verse.view.script.save')"
+                      :loading="editorContentLoading || isSaving"
+                      :disabled="!saveable || editorContentLoading || isSaving"
+                      @click="save"
+                    >
+                      <font-awesome-icon
+                        class="script-action-icon"
+                        v-if="!editorContentLoading && !isSaving"
+                        icon="save"
+                      ></font-awesome-icon>
+                      <span>{{ $t("verse.view.script.save") }}</span>
+                    </el-button>
+                  </div>
                 </div>
               </div>
               <el-tabs
                 v-model="activeName"
                 class="script-main-tabs"
-                type="card"
+                :type="embedded ? '' : 'card'"
                 style="width: 100%"
               >
                 <el-tab-pane
                   :label="$t('verse.view.script.edit')"
                   name="blockly"
                 >
-                  <el-main class="blockly-editor-main">
+                  <el-main
+                    class="blockly-editor-main"
+                    :aria-busy="editorContentLoading"
+                  >
                     <div
                       v-if="editorContentLoading"
                       class="script-editor-loading-indicator"
+                      role="status"
+                      :aria-label="$t('common.editorLoading.message')"
                     >
                       <el-icon class="script-editor-loading-spinner is-loading">
                         <Loading></Loading>
@@ -109,8 +145,10 @@
                       style="width: 100%; height: 100%; padding: 0; margin: 0"
                       class="blockly-editor-frame"
                       scrolling="no"
-                      id="editor"
+                      :id="embedded ? 'verse-script-editor' : 'editor'"
                       ref="editor"
+                      :inert="editorContentLoading"
+                      :tabindex="editorContentLoading ? -1 : 0"
                       :src="src"
                       @load="handleEditorFrameLoad"
                     ></iframe>
@@ -137,6 +175,8 @@
                           <div class="code-container">
                             <el-button
                               class="copy-button"
+                              :loading="editorContentLoading"
+                              :disabled="editorContentLoading"
                               text
                               @click="copyCode(LuaCode)"
                               ><el-icon class="icon">
@@ -162,6 +202,8 @@
                           <div class="code-container">
                             <el-button
                               class="copy-button"
+                              :loading="editorContentLoading"
+                              :disabled="editorContentLoading"
                               text
                               @click="copyCode(JavaScriptCode)"
                               ><el-icon class="icon">
@@ -183,6 +225,8 @@
         </el-card>
         <ScriptDraftDialog
           :model-value="versionDialogVisible"
+          :editor-loading="editorContentLoading"
+          :editor-blocked="editorContentLoading || isSaving"
           :versions="draftVersions"
           :auto-save-enabled="autoSaveEnabled"
           :auto-save-interval-seconds="autoSaveIntervalSeconds"
@@ -198,7 +242,9 @@
           :frame-visible="unityPreviewFrameVisible"
           :frame-key="unityPreviewFrameKey"
           :src="unityPreviewSrc"
-          @closed="handleUnityPreviewClosed"
+          @close="handleUnityPreviewClosed"
+          :state="unityPreviewState"
+          @retry="runSceneRuntimePreview"
           @frame-load="handleUnityPreviewLoad"
         ></UnityPreviewDialog>
       </el-main>
@@ -208,6 +254,15 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { readBackScenePublication } from "@/utils/scenePublicationAcknowledgement";
+import PublicationHistoryDialog from "@/components/MrPP/PublicationHistoryDialog.vue";
+import { createPublicationHistoryTools } from "@/services/webmcp/publication-history-tools";
+import {
+  createWriteOptions,
+  applyWriteRevision,
+  type WriteOptions,
+} from "@/api/v1/write-contract";
+import { writeOptionsForPreview } from "@/services/webmcp/operation-context";
 import { logger } from "@/utils/logger";
 import { hasPublishableSceneContent } from "@/utils/versePublish";
 import {
@@ -219,7 +274,12 @@ import {
   onActivated,
   onDeactivated,
 } from "vue";
-import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
+import {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useRoute,
+  useRouter,
+} from "vue-router";
 import {
   getVerse,
   putVerseCode,
@@ -246,6 +306,8 @@ import {
 } from "@/composables/useEditorVersionToolbar";
 import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
+import { registerWebMcpTools } from "@/services/webmcp/model-context";
+import { createSceneRuntimePreviewTools } from "@/services/webmcp/scene-runtime-preview-tools";
 import UnityPreviewDialog from "@/components/UnityPreviewDialog.vue";
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
 import { normalizeUnityPreviewVerseLua } from "@/utils/unityPreviewLua";
@@ -256,6 +318,41 @@ import {
   UNITY_PREVIEW_VERSE_EXPAND,
 } from "@/utils/unityPreviewPayload";
 
+import {
+  registerVerseScriptWebMcpTools,
+  type VerseScriptReplaceCompletion,
+  type VerseScriptReplacePreview,
+  type VerseScriptSnapshot,
+} from "@/services/webmcp/verse-script-tools";
+import {
+  registerScriptBlockWebMcpTools,
+  type ScriptBlockBatchCompletion,
+  type ScriptBlockBatchPreview,
+} from "@/services/webmcp/script-block-tools";
+let webMcpLifecycle: AbortController | null = null;
+let scriptBlockWebMcpLifecycle: AbortController | null = null;
+import {
+  formatBlockOperationResults,
+  formatScriptWarnings,
+  hasGeneratedScriptErrors,
+} from "@/utils/webMcpConfirmation";
+import { sceneWriteFailure } from "@/services/webmcp/scene-write-failure";
+import { createIframeRpc } from "@/utils/iframeRpc";
+
+const props = withDefaults(
+  defineProps<{
+    embedded?: boolean;
+    verseId?: number;
+    sceneData?: unknown;
+    beforePublish?: () => Promise<void>;
+  }>(),
+  { embedded: false }
+);
+const emit = defineEmits<{
+  close: [];
+  saved: [payload: import("@/utils/sceneScriptSave").SceneScriptSaved];
+}>();
+
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
 const verse = ref<VerseData>();
@@ -263,7 +360,7 @@ const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 const verseMetasWithLuaCodeData = ref<VerseMetasWithJsCode>();
 const route = useRoute();
 const router = useRouter();
-const id = computed(() => parseInt(route.query.id as string));
+const id = computed(() => props.verseId ?? parseInt(route.query.id as string));
 const metasJavaScriptCode = ref("");
 let unityPreviewRuntimeVerseId: number | null = null;
 // map 用于记录每个 meta_id 在场景中对应的实体列表
@@ -312,6 +409,10 @@ const loadedMetaOptions = computed<LoadedMetaOption[]>(() => {
 });
 
 const goBackToSceneEditor = async () => {
+  if (props.embedded) {
+    emit("close");
+    return;
+  }
   const canLeave = await resolveUnsavedChangesBeforeLeave({
     showDiscardInfo: false,
   });
@@ -337,10 +438,12 @@ const goToLoadedMetaEditor = async (metaId: number, metaName?: string) => {
     `${sceneEditorTitle}【${metaName || fallbackName}】`
   );
 
-  router.push({
-    path: "/meta/scene",
-    query: { id: metaId, title },
-  });
+  const target = { path: "/meta/scene", query: { id: metaId, title } };
+  if (props.embedded) {
+    window.open(router.resolve(target).href, "_blank", "noopener");
+  } else {
+    router.push(target);
+  }
 };
 
 const handleLoadedMetaChange = async (metaId: number) => {
@@ -403,7 +506,10 @@ const getMetaJavaScriptCode = (meta: VerseMeta | meta): string => {
   return "";
 };
 
-const loadMetaJavaScriptCode = async (metas: Array<VerseMeta | meta>) => {
+const loadMetaJavaScriptCode = async (
+  metas: Array<VerseMeta | meta>,
+  signal?: AbortSignal
+) => {
   const directScripts = metas.map((metaItem) => ({
     id: metaItem.id,
     script: getMetaJavaScriptCode(metaItem),
@@ -424,7 +530,7 @@ const loadMetaJavaScriptCode = async (metas: Array<VerseMeta | meta>) => {
   const fetchedScripts = await Promise.all(
     missingMetaIds.map(async (metaId) => {
       try {
-        const response = await getMeta(metaId, { expand: "metaCode" });
+        const response = await getMeta(metaId, { expand: "metaCode" }, signal);
         return { id: metaId, script: response.data.metaCode?.js || "" };
       } catch (error) {
         logger.error("实体脚本补充加载失败:", { metaId, error });
@@ -492,7 +598,7 @@ const initEditor = (overrideData?: unknown) => {
 // ---------- postScript（Verse 版：保存 + 发布流程）----------
 const postScript = async (
   message: EditorPostPayload,
-  context: { trigger: ScriptSaveTrigger }
+  context: { trigger: ScriptSaveTrigger; write?: WriteOptions }
 ) => {
   if (verse.value === null) {
     const errorMessage = t("verse.view.script.error1");
@@ -512,12 +618,39 @@ const postScript = async (
     blocklyData = `compressed:${base64Str}`;
   }
 
-  await putVerseCode(verse.value!.id, {
-    blockly: blocklyData,
-    js: message.js,
-    lua: message.lua,
-  });
+  const savedOwner = verse.value;
+  const previousRevision = savedOwner.serverRevision;
+  const verseCode = { blockly: blocklyData, js: message.js, lua: message.lua };
+  const savedOwnerId = savedOwner.id;
+  const savedSession = getEditorInitState()?.hostSessionId;
+  const savedLoadSequence = verseLoadSequence;
+  const isCurrentSave = () =>
+    isScriptViewActive &&
+    id.value === savedOwnerId &&
+    verse.value === savedOwner &&
+    verseLoadSequence === savedLoadSequence &&
+    getEditorInitState()?.hostSessionId === savedSession;
+  const savedResponse = await putVerseCode(
+    savedOwnerId,
+    {
+      blockly: blocklyData,
+      js: message.js,
+      lua: message.lua,
+    },
+    context.write ?? createWriteOptions(savedOwner?.serverRevision)
+  );
+  // A late receipt belongs to the original editor session, including when the
+  // same scene has been reopened. It must not start UI work in its replacement.
+  if (!isCurrentSave()) return;
+  applyWriteRevision(savedOwner, savedResponse);
 
+  emit("saved", {
+    sceneId: savedOwnerId,
+    previousRevision,
+    serverRevision: savedOwner.serverRevision,
+    verseCode,
+  });
+  if (!isCurrentSave()) return;
   if (context.trigger === "manual") {
     Message.success(t("verse.view.script.success"));
     if (!hasPublishableSceneContent(verse.value)) {
@@ -538,11 +671,28 @@ const postScript = async (
       }
     )
       .then(async () => {
-        await takePhoto(id.value);
-        ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
+        if (!isCurrentSave() || !savedOwner.editable) return;
+        await props.beforePublish?.();
+        if (!isCurrentSave() || !savedOwner.editable) return;
+        const publication = await takePhoto(
+          savedOwnerId,
+          createWriteOptions(savedOwner.serverRevision)
+        );
+        const verification = await readBackScenePublication({
+          sceneId: savedOwnerId,
+          snapshot: publication.data,
+          refresh: () =>
+            getVerse(savedOwnerId, "metas, module, share, verseCode"),
+          apply: () => {},
+        });
+        if (isCurrentSave() && !verification.readBackVerified)
+          ElMessage.warning(t("common.publicationHistory.pending"));
+        if (isCurrentSave())
+          ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
       })
       .catch(() => {
-        ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
+        if (isCurrentSave())
+          ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
       });
   }
 };
@@ -575,7 +725,7 @@ const {
   beginEditorSession,
   initializeSavedSnapshot,
   getEditorInitState,
-  save,
+  save: persistScript,
   openVersionDialog,
   clearDraftHistory,
   restoreDraftVersion,
@@ -585,6 +735,7 @@ const {
   isReady,
   copyCode,
 } = useScriptEditorBase({
+  registerRouteGuard: !props.embedded,
   luaLocalVar: "verse",
   i18nKeys: {
     error1: "verse.view.script.error1",
@@ -604,6 +755,8 @@ const {
   onRestoreDraft: () => reloadEditorFrame(),
 });
 
+const save = persistScript;
+
 const toolbarOwner = "verse-script-editor";
 const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
   useEditorVersionToolbar();
@@ -619,10 +772,421 @@ const editorContentLoading = computed(
   () => loading.value || !editorContentReady.value
 );
 
+const requireSuccessfulWebMcpResponse = (response: Record<string, unknown>) => {
+  if (response.ok !== true) {
+    throw new Error(
+      typeof response.error === "string"
+        ? response.error
+        : "Blockly 编辑器操作失败"
+    );
+  }
+  return response;
+};
+
+const webMcpRpc = createIframeRpc({
+  frame: () => editor.value,
+  session: () => getEditorInitState()?.hostSessionId,
+  send: (action, data) => postMessage("REQUEST", { action, ...data }),
+});
+const requestBlocklyEditor = webMcpRpc.request;
+const handleWebMcpEditorMessage = webMcpRpc.handleMessage;
+
+const formatVerseScriptReplaceConfirmation = (
+  preview: VerseScriptReplacePreview
+) =>
+  [
+    `确认替换场景“${preview.sceneTitle}”的 Blockly 脚本吗？`,
+    `块数量：${preview.current.blockCount} → ${preview.proposed.blockCount}`,
+    `顶层流程：${preview.current.topLevelBlockCount} → ${preview.proposed.topLevelBlockCount}`,
+    `变量数量：${preview.current.variableCount} → ${preview.proposed.variableCount}`,
+    `JavaScript：${preview.current.generatedJavaScriptBytes} → ${preview.proposed.generatedJavaScriptBytes} 字节`,
+    `Lua：${preview.current.generatedLuaBytes} → ${preview.proposed.generatedLuaBytes} 字节`,
+    "候选工作区已完成 Blockly 反序列化与双语言代码生成检查",
+    ...formatScriptWarnings(preview.warnings),
+    "确认后将更新可见工作区并保存脚本；平台仍会单独询问是否发布场景",
+  ].join("\n");
+
+const registerVerseScriptTools = () => {
+  const ownerId = id.value;
+  const ownerSession = getEditorInitState()?.hostSessionId;
+  let registration: AbortController | null = null;
+  const assertActive = () => {
+    if (
+      registration?.signal.aborted ||
+      !isScriptViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getEditorInitState()?.hostSessionId
+    ) {
+      throw new Error("Blockly 会话已经切换，请重新预览");
+    }
+  };
+  const requestBlocklyEditor = (
+    ...args: Parameters<typeof webMcpRpc.request>
+  ) => {
+    assertActive();
+    return webMcpRpc.request(...args);
+  };
+  const save = (...args: Parameters<typeof persistScript>) => {
+    assertActive();
+    return persistScript(...args);
+  };
+
+  webMcpLifecycle?.abort();
+  registration = webMcpLifecycle = registerVerseScriptWebMcpTools({
+    operations: {
+      registerStatusTools: true,
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "verse",
+        targetId: id.value,
+        serverRevision: verse.value?.serverRevision ?? "",
+      }),
+    },
+    getContext: () => ({
+      sceneId: Number.isFinite(id.value) ? id.value : null,
+      sceneTitle: verse.value?.name ?? "未命名场景",
+      editable: Boolean(verse.value?.editable),
+      ready: isScriptViewActive && editorContentReady.value,
+      dirty: hasUnsavedChanges.value,
+      saving: isSaving.value,
+    }),
+    getVerseScript: async ({ includeWorkspace, includeGeneratedCode }) => {
+      if (!verse.value || !Number.isFinite(verse.value.id)) {
+        throw new Error("场景脚本尚未加载完成");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-scene-script", {
+          includeWorkspace,
+          includeGeneratedCode,
+        })
+      );
+      return {
+        sceneId: verse.value.id,
+        sceneTitle: verse.value.name,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+        valid: Boolean(response.valid),
+        issue: response.issue,
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+        workspace: response.workspace,
+        generatedCode: response.generatedCode,
+      } as VerseScriptSnapshot;
+    },
+    validateVerseScript: async (focusIssue) => {
+      if (!verse.value || !Number.isFinite(verse.value.id)) {
+        throw new Error("场景脚本尚未加载完成");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-validate-scene-script", {
+          focusIssue,
+        })
+      );
+      return {
+        sceneId: verse.value.id,
+        sceneTitle: verse.value.name,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+        valid: Boolean(response.valid),
+        issue: response.issue,
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+      } as VerseScriptSnapshot;
+    },
+    stageVerseScriptReplace: async (workspace) => {
+      if (!verse.value || !Number.isFinite(verse.value.id)) {
+        throw new Error("场景脚本尚未加载完成");
+      }
+      if (!verse.value.editable) {
+        throw new Error("当前账号没有修改此场景脚本的权限");
+      }
+      if (!editorContentReady.value) {
+        throw new Error("Blockly 工作区尚未准备完成");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      if (hasUnsavedChanges.value) {
+        throw new Error("当前脚本存在未保存修改，请先保存后再创建替换预览");
+      }
+
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-stage-scene-script-replace",
+          { workspace },
+          30000
+        )
+      );
+      return {
+        sceneId: verse.value.id,
+        sceneTitle: verse.value.name,
+        workspaceVersion: String(response.workspaceVersion),
+        current: response.current,
+        proposed: response.proposed,
+        proposedWorkspace: response.proposedWorkspace,
+        changed: Boolean(response.changed),
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+      } as VerseScriptReplacePreview;
+    },
+    confirmVerseScriptReplace: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatVerseScriptReplaceConfirmation(preview),
+          "WebMCP Blockly 场景脚本替换",
+          {
+            confirmButtonText: t("verse.view.script.save"),
+            cancelButtonText: t("verse.view.script.leave.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeVerseScriptReplace: async (preview) => {
+      if (!verse.value || verse.value.id !== preview.sceneId) {
+        throw new Error("当前场景已经切换，请重新创建脚本预览");
+      }
+      if (!verse.value.editable) {
+        throw new Error("当前账号没有修改此场景脚本的权限");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-complete-scene-script-replace",
+          {
+            workspaceVersion: preview.workspaceVersion,
+            workspace: preview.proposedWorkspace,
+          },
+          30000
+        )
+      );
+      if (!response.noChange) {
+        try {
+          await save("manual", {
+            suppressNoChangeInfo: true,
+            write: writeOptionsForPreview(preview, verse.value?.serverRevision),
+          });
+        } catch (error) {
+          throw sceneWriteFailure(
+            error,
+            {
+              ownerId,
+              workspaceVersion: response.workspaceVersion,
+            },
+            "Blockly 工作区已应用修改"
+          );
+        }
+      }
+      return {
+        editorApplied: !response.noChange,
+        persistence: response.noChange ? "unchanged" : "server_acknowledged",
+        editorAcknowledged: false,
+        noChange: Boolean(response.noChange),
+        sceneId: verse.value.id,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+      } as VerseScriptReplaceCompletion;
+    },
+    onRegistrationError: (toolName, error) => {
+      logger.warn(`WebMCP tool registration failed: ${toolName}`, error);
+    },
+  });
+};
+
+const formatScriptBlockBatchConfirmation = (preview: ScriptBlockBatchPreview) =>
+  [
+    `确认修改场景“${preview.ownerTitle}”的 Blockly 积木吗？`,
+    `批量操作：${preview.operationCount} 项`,
+    ...formatBlockOperationResults(preview.results),
+    `块数量：${preview.current.blockCount} → ${preview.proposed.blockCount}`,
+    `顶层流程：${preview.current.topLevelBlockCount} → ${preview.proposed.topLevelBlockCount}`,
+    `JavaScript：${preview.current.generatedJavaScriptBytes} → ${preview.proposed.generatedJavaScriptBytes} 字节`,
+    `Lua：${preview.current.generatedLuaBytes} → ${preview.proposed.generatedLuaBytes} 字节`,
+    "全部操作已在临时 Blockly 工作区执行并完成代码生成检查",
+    ...formatScriptWarnings(preview.warnings),
+    "确认后将更新可见工作区并保存脚本；平台仍会单独询问是否发布场景",
+  ].join("\n");
+
+const registerScriptBlockTools = () => {
+  const ownerId = id.value;
+  const ownerSession = getEditorInitState()?.hostSessionId;
+  let registration: AbortController | null = null;
+  const assertActive = () => {
+    if (
+      registration?.signal.aborted ||
+      !isScriptViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getEditorInitState()?.hostSessionId
+    ) {
+      throw new Error("Blockly 会话已经切换，请重新预览");
+    }
+  };
+  const requestBlocklyEditor = (
+    ...args: Parameters<typeof webMcpRpc.request>
+  ) => {
+    assertActive();
+    return webMcpRpc.request(...args);
+  };
+  const save = (...args: Parameters<typeof persistScript>) => {
+    assertActive();
+    return persistScript(...args);
+  };
+
+  scriptBlockWebMcpLifecycle?.abort();
+  registration = scriptBlockWebMcpLifecycle = registerScriptBlockWebMcpTools({
+    operations: {
+      registerStatusTools: false,
+      getScope: () => ({
+        actorId: String(userStore.userInfo?.id ?? ""),
+        targetType: "verse",
+        targetId: id.value,
+        serverRevision: verse.value?.serverRevision ?? "",
+      }),
+    },
+    getContext: () => ({
+      ownerKind: "scene",
+      ownerId: Number.isFinite(id.value) ? id.value : null,
+      ownerTitle: verse.value?.name ?? "未命名场景",
+      editable: Boolean(verse.value?.editable),
+      ready: isScriptViewActive && editorContentReady.value,
+      dirty: hasUnsavedChanges.value,
+      saving: isSaving.value,
+    }),
+    getBlockCatalog: async (filters) =>
+      requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-script-block-catalog", filters)
+      ),
+    getBlockStructure: async (filters) =>
+      requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor("webmcp-get-script-block-structure", filters)
+      ),
+    stageBlockBatch: async (operations) => {
+      if (!verse.value || !Number.isFinite(verse.value.id)) {
+        throw new Error("场景脚本尚未加载完成");
+      }
+      if (!verse.value.editable) {
+        throw new Error("当前账号没有修改此场景脚本的权限");
+      }
+      if (!editorContentReady.value) {
+        throw new Error("Blockly 工作区尚未准备完成");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      if (hasUnsavedChanges.value) {
+        throw new Error("当前脚本存在未保存修改，请先保存后再创建积木预览");
+      }
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-stage-script-block-batch",
+          { operations },
+          30000
+        )
+      );
+      return {
+        ownerKind: "scene",
+        ownerId: verse.value.id,
+        ownerTitle: verse.value.name,
+        workspaceVersion: String(response.workspaceVersion),
+        current: response.current,
+        proposed: response.proposed,
+        proposedWorkspace: response.proposedWorkspace,
+        changed: Boolean(response.changed),
+        warnings: response.warnings,
+        canSave: response.canSave,
+        validationScope: response.validationScope,
+        operationCount: Number(response.operationCount),
+        results: response.results,
+      } as ScriptBlockBatchPreview;
+    },
+    confirmBlockBatch: async (preview) => {
+      try {
+        await ElMessageBox.confirm(
+          formatScriptBlockBatchConfirmation(preview),
+          "WebMCP Blockly 积木批量修改",
+          {
+            confirmButtonText: t("verse.view.script.save"),
+            cancelButtonText: t("verse.view.script.leave.cancel"),
+            distinguishCancelAndClose: true,
+            closeOnClickModal: false,
+            closeOnPressEscape: true,
+            showCancelButton: true,
+            customClass: "script-save-confirm-box",
+          }
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    completeBlockBatch: async (preview) => {
+      if (!verse.value || verse.value.id !== preview.ownerId) {
+        throw new Error("当前场景已经切换，请重新创建积木预览");
+      }
+      if (!verse.value.editable) {
+        throw new Error("当前账号没有修改此场景脚本的权限");
+      }
+      if (isSaving.value) throw new Error("脚本正在保存，请稍后重试");
+      const response = requireSuccessfulWebMcpResponse(
+        await requestBlocklyEditor(
+          "webmcp-complete-script-block-batch",
+          {
+            workspaceVersion: preview.workspaceVersion,
+            workspace: preview.proposedWorkspace,
+          },
+          30000
+        )
+      );
+      if (!response.noChange) {
+        try {
+          await save("manual", {
+            suppressNoChangeInfo: true,
+            write: writeOptionsForPreview(preview, verse.value?.serverRevision),
+          });
+        } catch (error) {
+          throw sceneWriteFailure(
+            error,
+            {
+              ownerId,
+              workspaceVersion: response.workspaceVersion,
+            },
+            "Blockly 工作区已应用修改"
+          );
+        }
+      }
+      return {
+        editorApplied: !response.noChange,
+        persistence: response.noChange ? "unchanged" : "server_acknowledged",
+        editorAcknowledged: false,
+        noChange: Boolean(response.noChange),
+        ownerKind: "scene",
+        ownerId: verse.value.id,
+        workspaceVersion: String(response.workspaceVersion),
+        summary: response.summary,
+      } as ScriptBlockBatchCompletion;
+    },
+    onRegistrationError: (toolName, error) => {
+      logger.warn(`WebMCP tool registration failed: ${toolName}`, error);
+    },
+  });
+};
+
 const activateToolbar = () => {
   isScriptViewActive = true;
+  if (props.embedded) return;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getLoadingState: () => ({
+      loading: editorContentLoading.value,
+      blocked: editorContentLoading.value,
+    }),
     onOpen: openVersionDialog,
   });
 };
@@ -682,7 +1246,7 @@ const resource = computed(() => {
   return { events: { inputs, outputs } };
 });
 
-const ensureUnityPreviewRuntimeData = async () => {
+const ensureUnityPreviewRuntimeData = async (signal?: AbortSignal) => {
   if (!Number.isFinite(id.value)) return;
   const requestedId = id.value;
   if (
@@ -694,20 +1258,35 @@ const ensureUnityPreviewRuntimeData = async () => {
   }
 
   const [responseLua, responseJs] = await Promise.all([
-    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "lua"),
-    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "js"),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "lua", signal),
+    getVerse(requestedId, UNITY_PREVIEW_VERSE_EXPAND, "js", signal),
   ]);
-  if (requestedId !== id.value) return;
+  if (signal?.aborted || !isScriptViewActive || requestedId !== id.value)
+    return;
 
   verseMetasWithLuaCodeData.value =
     responseLua.data as unknown as VerseMetasWithJsCode;
   verseMetasWithJsCodeData.value =
     responseJs.data as unknown as VerseMetasWithJsCode;
+  if (props.embedded && props.sceneData) {
+    // Include newly placed instances and exclude deleted ones without saving/reloading the scene.
+    for (const runtime of [
+      verseMetasWithLuaCodeData.value,
+      verseMetasWithJsCodeData.value,
+    ]) {
+      const savedMetas = new Map(
+        (runtime.metas ?? []).map((meta) => [Number(meta.id), meta])
+      );
+      runtime.metas = (verse.value?.metas ?? []).map(
+        (meta) => savedMetas.get(Number(meta.id)) ?? meta
+      );
+    }
+  }
   const previewMetas = Array.isArray(verseMetasWithJsCodeData.value.metas)
     ? verseMetasWithJsCodeData.value.metas
     : [];
-  const metaScripts = await loadMetaJavaScriptCode(previewMetas);
-  if (requestedId !== id.value) return;
+  const metaScripts = await loadMetaJavaScriptCode(previewMetas, signal);
+  if (signal?.aborted || requestedId !== id.value) return;
 
   metasJavaScriptCode.value = metaScripts.join("\n");
   unityPreviewRuntimeVerseId = requestedId;
@@ -727,7 +1306,7 @@ const buildUnityPreviewPayload = () => {
       name: verse.value?.name ?? "",
       description: verse.value?.description ?? "",
       data: normalizeUnityPreviewData(
-        runtimeData?.data ?? verse.value?.data ?? null
+        props.sceneData ?? runtimeData?.data ?? verse.value?.data ?? null
       ),
     },
     resources: cloneForUnityPreview(runtimeData?.resources ?? []),
@@ -752,12 +1331,14 @@ const unityPreviewVisible = unityPreview.visible;
 const unityPreviewFrameVisible = unityPreview.frameVisible;
 const unityPreviewFrameKey = unityPreview.frameKey;
 const unityPreviewSrc = unityPreview.src;
+const unityPreviewState = unityPreview.runtimeState;
 const handleUnityPreviewLoad = unityPreview.handleLoad;
 const handleUnityPreviewClosed = unityPreview.handleClosed;
 
 // ---------- 加载 Verse 脚本会话 ----------
 const loadVerseScriptSession = async () => {
-  if (!isScriptViewActive || route.name !== "Script") return;
+  if (!isScriptViewActive || (!props.embedded && route.name !== "Script"))
+    return;
   if (!Number.isFinite(id.value)) return;
   const requestedId = id.value;
   const loadSequence = ++verseLoadSequence;
@@ -774,6 +1355,32 @@ const loadVerseScriptSession = async () => {
     );
     if (loadSequence !== verseLoadSequence || requestedId !== id.value) return;
     verse.value = response.data;
+    if (props.embedded && props.sceneData) {
+      verse.value = { ...verse.value, data: props.sceneData };
+      const modules =
+        (props.sceneData as VerseEntityNode).children?.modules ?? [];
+      const metaIds = [
+        ...new Set(
+          modules
+            .map((item) => Number(item.parameters?.meta_id))
+            .filter((value) => value > 0)
+        ),
+      ];
+      const knownMetas = new Map(
+        (verse.value.metas ?? []).map((meta) => [Number(meta.id), meta])
+      );
+      const metas = await Promise.all(
+        metaIds.map(
+          async (metaId) =>
+            knownMetas.get(metaId) ??
+            (await getMeta(metaId, { expand: "events,metaCode,resources" }))
+              .data
+        )
+      );
+      if (loadSequence !== verseLoadSequence || requestedId !== id.value)
+        return;
+      verse.value = { ...verse.value, metas };
+    }
     logger.error(verse.value);
     logger.log("Verse", verse.value);
     if (verse.value && verse.value.data) {
@@ -811,30 +1418,199 @@ onActivated(() => {
   }
 });
 
-onBeforeRouteUpdate(async (to, from, next) => {
-  if (to.path !== from.path || to.query.id === from.query.id) {
-    next();
-    return;
-  }
-  const canLeave = await resolveUnsavedChangesBeforeLeave({
-    showDiscardInfo: true,
+if (!props.embedded) {
+  onBeforeRouteUpdate(async (to, from, next) => {
+    if (to.path !== from.path || to.query.id === from.query.id) {
+      next();
+      return;
+    }
+    const canLeave = await resolveUnsavedChangesBeforeLeave({
+      showDiscardInfo: true,
+    });
+    if (canLeave) await unityPreview.close();
+    next(canLeave ? undefined : false);
   });
-  next(canLeave ? undefined : false);
-});
+  onBeforeRouteLeave(async () => {
+    await unityPreview.close();
+  });
+}
 
 watch(id, (nextId, previousId) => {
   if (
     isScriptViewActive &&
-    route.name === "Script" &&
+    (props.embedded || route.name === "Script") &&
     Number.isFinite(nextId) &&
     nextId !== previousId
   ) {
     void loadVerseScriptSession();
   }
 });
+
+let runtimeWebMcpLifecycle: AbortController | null = null;
+const getSceneRuntimePreviewStatus = () => ({
+  sceneId: verse.value?.id ?? null,
+  sceneName: verse.value?.name ?? null,
+  ...unityPreview.runtimeState.value,
+});
+
+const startSceneRuntimePreview = async () => {
+  if (props.embedded)
+    throw new Error("请先关闭脚本编辑抽屉，再从场景编辑器运行场景");
+  const session = getEditorInitState()?.hostSessionId;
+  if (!isScriptViewActive || !editorContentReady.value || !verse.value)
+    throw new Error("场景脚本尚未准备完成");
+  if (hasUnsavedChanges.value || isSaving.value)
+    throw new Error("请先保存当前 Blockly 工作区，再启动场景运行预览");
+  const response = requireSuccessfulWebMcpResponse(
+    await requestBlocklyEditor("webmcp-validate-scene-script", {
+      focusIssue: false,
+    })
+  );
+  if (response.canSave === false || hasGeneratedScriptErrors(response.warnings))
+    throw new Error("脚本包含阻塞错误，请先修复");
+  if (!isScriptViewActive || session !== getEditorInitState()?.hostSessionId)
+    throw new Error("编辑器会话已经切换");
+  await unityPreview.open();
+  return getSceneRuntimePreviewStatus();
+};
+const runSceneRuntimePreview = () => {
+  void startSceneRuntimePreview().catch((error) => {
+    ElMessage.error(
+      error instanceof Error ? error.message : "无法启动场景运行"
+    );
+  });
+};
+
+const publicationHistoryVisible = ref(false);
+const registerRuntimeTools = () => {
+  runtimeWebMcpLifecycle?.abort();
+  runtimeWebMcpLifecycle = null;
+  if (props.embedded) return;
+  runtimeWebMcpLifecycle = registerWebMcpTools([
+    ...createPublicationHistoryTools(
+      () => verse.value?.id ?? null,
+      () => String(userStore.userInfo?.id ?? "")
+    ),
+    ...createSceneRuntimePreviewTools({
+      getPreviewStatus: getSceneRuntimePreviewStatus,
+      startPreview: startSceneRuntimePreview,
+      stopPreview: async () => {
+        await unityPreview.close();
+        return getSceneRuntimePreviewStatus();
+      },
+    }),
+  ]);
+};
+const stopWebMcpTools = () => {
+  runtimeWebMcpLifecycle?.abort();
+  unityPreview.close();
+  webMcpLifecycle?.abort();
+  scriptBlockWebMcpLifecycle?.abort();
+  webMcpRpc.cancel();
+};
+onMounted(() => window.addEventListener("message", handleWebMcpEditorMessage));
+onActivated(() => {
+  isScriptViewActive = true;
+  registerVerseScriptTools();
+  registerScriptBlockTools();
+  registerRuntimeTools();
+});
+onDeactivated(stopWebMcpTools);
+onBeforeUnmount(() => {
+  isScriptViewActive = false;
+  verseLoadSequence += 1;
+  stopWebMcpTools();
+  window.removeEventListener("message", handleWebMcpEditorMessage);
+});
+watch([id, editorFrameKey, editorContentReady], () => {
+  stopWebMcpTools();
+  if (isScriptViewActive && editorContentReady.value) {
+    registerVerseScriptTools();
+    registerScriptBlockTools();
+    registerRuntimeTools();
+  }
+});
+defineExpose({
+  save,
+  openVersionDialog,
+  saveable,
+  isSaving,
+  editorContentLoading,
+  hasUnsavedChanges,
+  activeName,
+  resolveBeforeClose: () =>
+    resolveUnsavedChangesBeforeLeave({ showDiscardInfo: true }),
+});
 </script>
 
 <style scoped>
+.script--embedded,
+.script--embedded > .el-container,
+.script--embedded > .el-container > .el-main > .box-card,
+.script--embedded
+  > .el-container
+  > .el-main
+  > .box-card
+  :deep(> .el-card__body),
+.script--embedded .script-tabs-wrapper,
+.script--embedded .script-main-tabs {
+  height: 100%;
+  min-height: 0;
+}
+
+.script--embedded > .el-container > .el-main {
+  padding: 0;
+}
+
+.script--embedded > .el-container > .el-main > .box-card {
+  border: 0;
+  box-shadow: none;
+}
+
+.script--embedded :deep(.el-card__body) {
+  padding: 16px 24px;
+}
+
+.script--embedded
+  > .el-container
+  > .el-main
+  > .box-card
+  :deep(> .el-card__body > .el-container) {
+  height: 100%;
+}
+
+.script--embedded .script-main-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__header) {
+  flex-shrink: 0;
+  order: -1;
+  margin: 0 0 12px;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__content) {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.script--embedded :deep(.script-main-tabs > .el-tabs__content > .el-tab-pane) {
+  height: 100%;
+}
+
+.script--embedded .blockly-editor-main {
+  height: 100%;
+  min-height: 0;
+}
+
+@media (width <= 767px) {
+  .script--embedded :deep(.el-card__body) {
+    padding: 12px;
+  }
+}
+
 .icon {
   margin-right: 5px;
 }
@@ -856,100 +1632,6 @@ watch(id, (nextId, previousId) => {
 
 .light-theme .hljs {
   background-color: #fafafa !important;
-}
-
-.script-tabs-wrapper {
-  container-name: script-editor;
-  container-type: inline-size;
-  position: relative;
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-}
-
-.script-editor-toolbar {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-  min-height: 40px;
-  margin-bottom: 8px;
-}
-
-.script-mode-tabs {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  min-width: 0;
-}
-
-.script-mode-tab {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 92px;
-  height: 32px;
-  padding: 0 12px;
-  font-size: 12px;
-  line-height: 1.1;
-  color: var(--text-secondary, #64748b);
-  white-space: nowrap;
-  cursor: pointer;
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-color, #d6deea);
-  border-radius: 8px;
-}
-
-.script-mode-tab:hover,
-.script-mode-tab:focus-visible,
-.script-mode-tab.is-active {
-  color: var(--primary-color, #06a7ee);
-  border-color: var(--primary-color, #06a7ee);
-}
-
-.script-mode-tab:focus-visible {
-  outline: 2px solid
-    color-mix(in srgb, var(--primary-color, #06a7ee) 30%, transparent);
-  outline-offset: 2px;
-}
-
-.script-tabs-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-self: end;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.script-action-button {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  min-height: 32px;
-  margin-left: 0 !important;
-}
-
-.script-action-icon {
-  margin-right: 4px;
-  font-size: 14px;
-  color: inherit;
-}
-
-.script-loaded-metas-select {
-  width: 180px;
-}
-
-.script-loaded-metas-select :deep(.el-select__wrapper) {
-  align-items: center;
-  min-height: 32px;
-}
-
-.script-loaded-metas-select :deep(.el-select__placeholder),
-.script-loaded-metas-select :deep(.el-select__selected-item) {
-  line-height: 20px;
-  text-align: center;
 }
 
 :global(.script-loaded-metas-popper.el-select__popper) {
@@ -1005,7 +1687,7 @@ watch(id, (nextId, previousId) => {
   background: transparent !important;
 }
 
-.script-tabs-wrapper :deep(.el-tabs__header) {
+.script:not(.script--embedded) .script-tabs-wrapper :deep(.el-tabs__header) {
   display: none !important;
 }
 
@@ -1041,7 +1723,8 @@ watch(id, (nextId, previousId) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  cursor: wait;
+  background: var(--el-mask-color, rgb(255 255 255 / 90%));
 }
 
 .script-editor-loading-spinner {
@@ -1054,83 +1737,6 @@ watch(id, (nextId, previousId) => {
   color: var(--primary-color, #06a7ee);
 }
 
-@container script-editor (width <= 1100px) {
-  .script-editor-toolbar {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-
-  .script-tabs-actions {
-    justify-content: flex-end;
-    justify-self: stretch;
-    width: 100%;
-    max-width: none;
-  }
-
-  .script-loaded-metas-select {
-    flex: 1 1 220px;
-    width: auto;
-    min-width: 180px;
-  }
-
-  .blockly-editor-main {
-    height: calc(100dvh - 225px);
-  }
-}
-
-@container script-editor (width <= 620px) {
-  .script-mode-tabs {
-    width: 100%;
-  }
-
-  .script-mode-tab {
-    flex: 1 1 50%;
-    min-width: 0;
-    min-height: 40px;
-  }
-
-  .script-tabs-actions {
-    display: grid;
-    grid-template-columns: 44px 44px minmax(88px, auto);
-    justify-content: end;
-  }
-
-  .script-loaded-metas-select {
-    grid-column: 1 / -1;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .script-action-button {
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0 12px;
-  }
-
-  .script-tabs-actions
-    .script-action-button:not(.script-save-button)
-    .script-action-icon {
-    margin-right: 0;
-  }
-
-  .secondary-action-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .blockly-editor-main {
-    height: calc(100dvh - 285px);
-    min-height: 360px;
-  }
-}
-
 .dark-theme :deep(.hljs) {
   background-color: rgb(24 24 24) !important;
 }
@@ -1139,3 +1745,5 @@ watch(id, (nextId, previousId) => {
   background-color: #fafafa !important;
 }
 </style>
+
+<style scoped src="@/styles/script-editor-toolbar.css"></style>

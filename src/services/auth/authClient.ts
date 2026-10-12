@@ -154,6 +154,7 @@ export function createAuthClient(options: AuthClientOptions = {}) {
   }
 
   function commitToken(token: TokenInfo, reason: TokenChangedReason) {
+    signalSensitiveRuntimeActivity();
     tokenStore.setToken(token);
     coordinator.changed();
     notify(token, reason);

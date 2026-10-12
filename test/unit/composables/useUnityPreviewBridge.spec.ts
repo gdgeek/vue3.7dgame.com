@@ -1,64 +1,100 @@
+import unityArtifactLock from "../../../scripts/unity/artifact-lock.json";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createApp, defineComponent, h, nextTick, type App } from "vue";
+import {
+  createApp,
+  defineComponent,
+  h,
+  nextTick,
+  reactive,
+  type App,
+} from "vue";
 
-vi.mock("@/environment", () => ({
-  default: {
-    unityPreview: "/webgl-preview/embed.html",
-    api: "/api",
-  },
-}));
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    log: vi.fn(),
-    warn: vi.fn(),
-  },
-}));
-
-vi.mock("@/utils/unityPreviewPayload", () => ({
-  cloneForUnityPreview: vi.fn((payload: unknown) => payload),
-  rewriteUnityPreviewUrls: vi.fn(),
-  summarizeUnityPreviewPayload: vi.fn(() => ({})),
-}));
-
+vi.mock("@/environment", () => ({ default: { api: "/api" } }));
+vi.mock("@/utils/logger", () => ({ logger: { log: vi.fn(), warn: vi.fn() } }));
+vi.mock("@/utils/unityPreviewPayload", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/utils/unityPreviewPayload")>();
+  return {
+    ...actual,
+    rewriteUnityPreviewUrls: vi.fn(),
+    summarizeUnityPreviewPayload: vi.fn(() => ({})),
+  };
+});
 import { useUnityPreviewBridge } from "@/composables/useUnityPreviewBridge";
+import {
+  rewriteUnityPreviewUrls,
+  UnityPreviewAssetError,
+} from "@/utils/unityPreviewPayload";
 
-type PreviewBridge = ReturnType<typeof useUnityPreviewBridge>;
+const release = {
+  protocolVersion: 1,
+  runtimeReleaseId: "abcdef0123456789abcdef01",
+  buildId: unityArtifactLock.buildId,
+  entrypoint: "/webgl-preview/releases/abcdef0123456789abcdef01/embed.html",
+};
+const audioResource = {
+  origin: "https://data.7dgame.com",
+  path: "/audio/scene-theme.mp3",
+  kind: "audio",
+  reason: "network",
+};
 
-describe("useUnityPreviewBridge session boundary", () => {
+describe("built-in Unity controller", () => {
   let app: App<Element>;
   let mountTarget: HTMLDivElement;
-  let bridge: PreviewBridge;
+  let bridge: ReturnType<typeof useUnityPreviewBridge>;
   let frameSource: Window;
   let postMessage: ReturnType<typeof vi.fn>;
   let buildPayload: ReturnType<typeof vi.fn>;
   let ensureRuntimeData: ReturnType<typeof vi.fn>;
-  let notifyError: ReturnType<typeof vi.fn>;
-  let appMounted: boolean;
+  let fetchMock: ReturnType<typeof vi.fn>;
+  let mounted: boolean;
 
-  const dispatchRunnerMessage = (
+  const envelope = (type: string, fields: Record<string, unknown> = {}) => ({
+    type,
+    protocolVersion: 1,
+    sessionId: bridge.sessionId.value,
+    runtimeReleaseId: release.runtimeReleaseId,
+    buildId: release.buildId,
+    ...fields,
+  });
+  const dispatch = (
     data: Record<string, unknown>,
-    origin: string,
+    origin = window.location.origin,
     source: MessageEventSource | null = frameSource
   ) => {
     const event = new MessageEvent("message", { data, origin });
     Object.defineProperty(event, "source", { value: source });
     window.dispatchEvent(event);
   };
-
-  const flushBridgePromises = async () => {
-    await Promise.resolve();
+  const flush = async () => {
+    for (let i = 0; i < 8; i += 1) await Promise.resolve();
     await nextTick();
-    await Promise.resolve();
   };
+  const finishClose = async () => {
+    const closing = bridge.close();
+    dispatch(envelope("unity-web-preview-disposed"));
+    await closing;
+  };
+  const ready = () => dispatch(envelope("unity-web-preview-ready"));
+  const forwarded = () =>
+    dispatch(envelope("unity-web-preview-scene-forwarded"));
 
   beforeEach(() => {
+    vi.useFakeTimers();
     frameSource = {} as Window;
-    postMessage = vi.fn(() => true);
+    postMessage = vi.fn((message: unknown) => {
+      // Match the real Window.postMessage boundary: Vue proxies must throw.
+      structuredClone(message);
+      return true;
+    });
     buildPayload = vi.fn(() => ({ scene: { id: 42 } }));
     ensureRuntimeData = vi.fn(async () => undefined);
-    notifyError = vi.fn();
-
+    fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ ...release }),
+    }));
+    vi.stubGlobal("fetch", fetchMock);
     mountTarget = document.createElement("div");
     document.body.append(mountTarget);
     app = createApp(
@@ -67,290 +103,756 @@ describe("useUnityPreviewBridge session boundary", () => {
           bridge = useUnityPreviewBridge({
             buildPayload,
             ensureRuntimeData,
-            notifyError,
+            notifyError: vi.fn(),
           });
           return () => h("div");
         },
       })
     );
     app.mount(mountTarget);
-    appMounted = true;
-
+    mounted = true;
     bridge.dialogRef.value = {
       isFrameSource: (source: MessageEventSource | null) =>
         source === frameSource,
       postMessage,
-      toggleFullscreen: vi.fn(),
     } as unknown as NonNullable<typeof bridge.dialogRef.value>;
   });
-
-  afterEach(() => {
-    if (appMounted) app.unmount();
+  afterEach(async () => {
+    if (mounted) app.unmount();
+    await vi.runAllTimersAsync();
     mountTarget.remove();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
-  it("binds URL, incoming ready, payload and camera messages to one session", async () => {
+  it("coalesces concurrent starts and preserves a downloading or running session", async () => {
+    const first = bridge.open();
+    const second = bridge.open();
+    expect(first).toBe(second);
+    await first;
+    const session = bridge.sessionId.value;
+    const key = bridge.frameKey.value;
     await bridge.open();
-
-    const runnerUrl = new URL(bridge.src.value);
-    const session = runnerUrl.searchParams.get("session");
-    expect(runnerUrl.pathname).toBe("/webgl-preview/embed.html");
-    expect(session).toMatch(/^unity-preview-[A-Za-z0-9-]+$/);
-
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-ready", session },
-      "https://attacker.example"
-    );
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-ready", session: `${session}-stale` },
-      runnerUrl.origin
-    );
-    await flushBridgePromises();
-    expect(bridge.ready.value).toBe(false);
-    expect(postMessage).not.toHaveBeenCalled();
-
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-ready", session },
-      runnerUrl.origin
-    );
-    await flushBridgePromises();
-
-    expect(bridge.ready.value).toBe(true);
-    expect(bridge.runnerProtocol.value).toBe("session-v1");
-    expect(postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "xrugc-load-scene-json",
-        session,
-        payload: { scene: { id: 42 } },
-      }),
-      runnerUrl.origin
-    );
-    expect(postMessage).toHaveBeenCalledWith(
-      {
-        type: "unity-web-preview-camera-mode",
-        session,
-        mode: "orbit",
-      },
-      runnerUrl.origin
-    );
+    expect(bridge.sessionId.value).toBe(session);
+    expect(bridge.frameKey.value).toBe(key);
+    ready();
+    forwarded();
+    dispatch({
+      type: "unity-web-preview-scene-running",
+      message: "Scene is running",
+    });
+    await bridge.open();
+    expect(bridge.sessionId.value).toBe(session);
     expect(buildPayload).toHaveBeenCalledTimes(1);
+    expect(
+      postMessage.mock.calls.some(
+        ([m]) => m.type === "unity-web-preview-dispose"
+      )
+    ).toBe(false);
+  });
 
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-scene-running" },
-      runnerUrl.origin
+  it("pins the same-origin entry to active metadata and sends one payload per iframe", async () => {
+    await bridge.open();
+    const url = new URL(bridge.src.value);
+    expect(url.origin).toBe(window.location.origin);
+    expect(url.pathname).toBe(release.entrypoint);
+    expect(url.searchParams.get("sessionId")).toMatch(/^unity-preview-/);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/webgl-preview/active.json",
+      expect.objectContaining({
+        cache: "no-store",
+        redirect: "error",
+        signal: expect.any(AbortSignal),
+      })
     );
-    expect(bridge.status.value).toBe("场景数据已发送到 Unity");
+    ready();
+    ready();
+    await bridge.send();
+    const payloads = postMessage.mock.calls.filter(
+      ([m]) => m.type === "xrugc-load-scene-json"
+    );
+    expect(payloads).toHaveLength(1);
+    expect(payloads[0][0]).toMatchObject(
+      envelope("xrugc-load-scene-json", { payload: { scene: { id: 42 } } })
+    );
+    expect(bridge.stage.value).toBe("loading_scene");
+  });
 
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-scene-running", session },
-      runnerUrl.origin
+  it("keeps prepared nested scene JSON cloneable when the source is Vue-reactive", async () => {
+    const scene = reactive({
+      scene: { id: 42, data: { modules: [{ id: 7, position: [1, 0, 0] }] } },
+    });
+    buildPayload.mockReturnValueOnce(scene);
+    await bridge.open();
+    expect(() => structuredClone(bridge.pendingPayload.value)).not.toThrow();
+    expect(structuredClone(bridge.pendingPayload.value)).toEqual(
+      JSON.parse(JSON.stringify(scene))
     );
-    expect(bridge.status.value).toBe("场景已在 Unity 中运行");
+    ready();
+    expect(bridge.stage.value).toBe("loading_scene");
+    expect(bridge.failure.value).toBeNull();
+    const sent = postMessage.mock.calls.find(
+      ([message]) =>
+        (message as { type: string }).type === "xrugc-load-scene-json"
+    )?.[0];
+    expect(() => structuredClone(sent)).not.toThrow();
+    expect(sent).toMatchObject({ payload: { scene: { id: 42 } } });
+  });
+
+  it("turns a native postMessage exception into SCENE_FORWARD_FAILED and cleans up", async () => {
+    await bridge.open();
+    postMessage.mockImplementationOnce(() => {
+      throw new DOMException("Payload could not be cloned", "DataCloneError");
+    });
+    expect(() => ready()).not.toThrow();
+    expect(bridge.runtimeState.value).toMatchObject({
+      stage: "error",
+      phase: "attention",
+      failure: { code: "SCENE_FORWARD_FAILED" },
+    });
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "unity-web-preview-dispose" }),
+      window.location.origin
+    );
+    dispatch(envelope("unity-web-preview-disposed"));
+    await flush();
+    expect(bridge.frameVisible.value).toBe(false);
+    expect(bridge.failure.value?.code).toBe("SCENE_FORWARD_FAILED");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("exposes safe asset rejection details to the shared runtime status", async () => {
+    vi.mocked(rewriteUnityPreviewUrls).mockImplementationOnce(() => {
+      const error = new UnityPreviewAssetError(
+        "https://private.example/model.glb?token=secret",
+        "origin"
+      );
+      error.fields.push("resources", "0", "file", "url");
+      throw error;
+    });
+    await bridge.open();
+    expect(bridge.runtimeState.value).toMatchObject({
+      frameVisible: false,
+      failure: {
+        code: "SCENE_ASSET_ORIGIN_DENIED",
+        asset: {
+          field: "resources.0.file.url",
+          origin: "https://private.example",
+          reason: "origin",
+        },
+      },
+    });
+    expect(JSON.stringify(bridge.runtimeState.value)).not.toContain(
+      "token=secret"
+    );
+    expect(() => structuredClone(bridge.runtimeState.value)).not.toThrow();
+    await bridge.close();
+    expect(bridge.runtimeState.value.failure).toBeNull();
   });
 
   it.each([
-    ["pre-session runner", {}],
-    ["empty-session runner", { session: "" }],
+    {
+      code: "SCENE_RESOURCE_FETCH_FAILED",
+      reason: "network",
+      status: undefined,
+    },
+    { code: "SCENE_RESOURCE_HTTP_ERROR", reason: "http", status: 403 },
+    { code: "SCENE_RESOURCE_EMPTY", reason: "empty", status: 200 },
   ])(
-    "locks %s to legacy-v0 while retaining exact source and origin checks",
-    async (_label, legacySession) => {
+    "retains safe $reason resource diagnostics through Quit and exposes cloneable WebMCP state",
+    async ({ code, reason, status }) => {
       await bridge.open();
-      const runnerUrl = new URL(bridge.src.value);
-      const session = runnerUrl.searchParams.get("session");
-
-      dispatchRunnerMessage(
-        { type: "unity-web-preview-ready", ...legacySession },
-        "https://attacker.example"
+      ready();
+      const resource = {
+        ...audioResource,
+        reason,
+        ...(status !== undefined ? { status } : {}),
+      };
+      dispatch(
+        envelope("unity-web-preview-error", {
+          code,
+          message: "https://data.7dgame.com/audio/scene-theme.mp3?token=secret",
+          resource: {
+            ...resource,
+            path: `${audioResource.path}?token=secret#private`,
+            url: "https://private.example/?signature=secret",
+          },
+        })
       );
-      dispatchRunnerMessage(
-        { type: "unity-web-preview-ready", ...legacySession },
-        runnerUrl.origin,
-        {} as Window
-      );
-      expect(bridge.runnerProtocol.value).toBe("pending");
-      expect(postMessage).not.toHaveBeenCalled();
-
-      dispatchRunnerMessage(
-        { type: "unity-web-preview-ready", ...legacySession },
-        runnerUrl.origin
-      );
-      await flushBridgePromises();
-
-      expect(bridge.ready.value).toBe(true);
-      expect(bridge.runnerProtocol.value).toBe("legacy-v0");
+      expect(bridge.runtimeState.value).toMatchObject({
+        stage: "error",
+        failure: { code, stage: "loading_scene", resource },
+      });
+      expect(bridge.failure.value?.resource).toEqual(resource);
+      expect(JSON.stringify(bridge.runtimeState.value)).not.toContain("secret");
+      expect(() => structuredClone(bridge.runtimeState.value)).not.toThrow();
       expect(postMessage).toHaveBeenCalledWith(
-        {
-          type: "xrugc-load-scene-json",
-          payload: { scene: { id: 42 } },
-        },
-        runnerUrl.origin
+        expect.objectContaining({ type: "unity-web-preview-dispose" }),
+        window.location.origin
       );
-      expect(postMessage).toHaveBeenCalledWith(
-        {
-          type: "unity-web-preview-camera-mode",
-          mode: "orbit",
-        },
-        runnerUrl.origin
-      );
-
-      dispatchRunnerMessage(
-        { type: "unity-web-preview-scene-running", session },
-        runnerUrl.origin
-      );
-      expect(bridge.status.value).toBe("场景数据已发送到 Unity");
-
-      dispatchRunnerMessage(
-        { type: "unity-web-preview-scene-running", ...legacySession },
-        runnerUrl.origin
-      );
-      expect(bridge.status.value).toBe("场景已在 Unity 中运行");
-
-      bridge.handleClosed();
-      expect(postMessage).toHaveBeenCalledWith(
-        { type: "webgl-preview-dispose" },
-        runnerUrl.origin
-      );
-      expect(bridge.runnerProtocol.value).toBe("pending");
+      dispatch(envelope("unity-web-preview-disposed"));
+      await flush();
+      expect(bridge.runtimeState.value).toMatchObject({
+        frameVisible: false,
+        cleanup: "disposed",
+        failure: { resource },
+      });
+      expect(vi.getTimerCount()).toBe(0);
     }
   );
 
-  it("does not let a non-ready legacy message select the protocol", async () => {
+  it("reads the same validated resource from runtime error state envelopes", async () => {
     await bridge.open();
-    const runnerUrl = new URL(bridge.src.value);
-    const session = runnerUrl.searchParams.get("session");
-
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-scene-running" },
-      runnerUrl.origin
+    ready();
+    const resource = { ...audioResource, reason: "http", status: 404 };
+    dispatch(
+      envelope("unity-web-preview-state", {
+        stage: "error",
+        failure: {
+          code: "SCENE_RESOURCE_HTTP_ERROR",
+          message: "signed-url-secret",
+          resource,
+        },
+      })
     );
-    expect(bridge.runnerProtocol.value).toBe("pending");
-    expect(bridge.ready.value).toBe(false);
-    expect(postMessage).not.toHaveBeenCalled();
-
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-ready", session },
-      runnerUrl.origin
-    );
-    await flushBridgePromises();
-    expect(bridge.runnerProtocol.value).toBe("session-v1");
-    expect(bridge.ready.value).toBe(true);
+    expect(bridge.failure.value).toMatchObject({
+      code: "SCENE_RESOURCE_HTTP_ERROR",
+      resource,
+    });
+    expect(bridge.failure.value?.message).not.toContain("signed-url-secret");
   });
 
-  it("disposes the current session and rejects its messages after reopening", async () => {
-    await bridge.open();
-    const firstUrl = new URL(bridge.src.value);
-    const firstSession = firstUrl.searchParams.get("session");
-
-    bridge.handleClosed();
-    expect(postMessage).toHaveBeenCalledWith(
-      { type: "webgl-preview-dispose", session: firstSession },
-      firstUrl.origin
-    );
-
-    postMessage.mockClear();
-    await bridge.open();
-    const secondUrl = new URL(bridge.src.value);
-    const secondSession = secondUrl.searchParams.get("session");
-    expect(secondSession).not.toBe(firstSession);
-
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-ready", session: firstSession },
-      secondUrl.origin
-    );
-    await flushBridgePromises();
-    expect(bridge.ready.value).toBe(false);
-    expect(postMessage).not.toHaveBeenCalled();
-  });
-
-  it("drops a delayed send after close and does not deliver it into a reopened session", async () => {
-    await bridge.open();
-    const firstSession = new URL(bridge.src.value).searchParams.get("session");
-    postMessage.mockClear();
-
-    let resolveDelayedPayload!: (payload: unknown) => void;
-    buildPayload.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveDelayedPayload = resolve;
+  it.each([
+    { origin: "https://attacker.example" },
+    { origin: "http://data.7dgame.com" },
+    { origin: "https://data.7dgame.com.evil.example" },
+    { origin: "https://user:secret@data.7dgame.com" },
+    { origin: "https://data.7dgame.com?token=secret" },
+    { path: "https://data.7dgame.com/audio.mp3?token=secret" },
+    { path: "//attacker.example/secret" },
+    { path: "/audio%3Ftoken%3Dsecret.mp3" },
+    { path: "/audio%253Ftoken%253Dsecret.mp3" },
+    { path: "/audio%00secret.mp3" },
+    { path: "/audio/../secret.mp3" },
+    { path: `/${"secret".repeat(100)}` },
+    { kind: "secret" },
+    { reason: "secret" },
+    { status: 0 },
+    { status: 403 },
+  ])(
+    "omits malformed or sensitive resource fields %j without losing the safe failure",
+    async (fields) => {
+      await bridge.open();
+      ready();
+      dispatch(
+        envelope("unity-web-preview-error", {
+          code: "SCENE_RESOURCE_FETCH_FAILED",
+          message: "raw-secret-message",
+          resource: { ...audioResource, ...fields },
         })
-    );
-    const delayedSend = bridge.send();
-    await flushBridgePromises();
+      );
+      expect(bridge.failure.value?.code).toBe("SCENE_RESOURCE_FETCH_FAILED");
+      expect(bridge.failure.value?.resource).toBeUndefined();
+      expect(JSON.stringify(bridge.runtimeState.value)).not.toContain("secret");
+    }
+  );
 
-    bridge.handleClosed();
+  it.each([0, 99, 200, 206, 600, 404.5, "404", Number.NaN])(
+    "rejects invalid HTTP failure status %j",
+    async (status) => {
+      await bridge.open();
+      ready();
+      dispatch(
+        envelope("unity-web-preview-error", {
+          code: "SCENE_RESOURCE_HTTP_ERROR",
+          resource: { ...audioResource, reason: "http", status },
+        })
+      );
+      expect(bridge.failure.value?.code).toBe("SCENE_RESOURCE_HTTP_ERROR");
+      expect(bridge.failure.value?.resource).toBeUndefined();
+    }
+  );
+
+  it("uses a fixed generic message for unknown codes and ignores their diagnostics", async () => {
+    await bridge.open();
+    ready();
+    dispatch(
+      envelope("unity-web-preview-error", {
+        code: "https://data.7dgame.com/audio.mp3?token=secret",
+        message: "raw-secret-message",
+        resource: audioResource,
+      })
+    );
+    expect(bridge.failure.value?.code).toBe("RUNTIME_ERROR");
+    expect(bridge.failure.value?.resource).toBeUndefined();
+    expect(JSON.stringify(bridge.runtimeState.value)).not.toContain("secret");
+  });
+
+  it("ignores resource failures from other sessions, releases, builds, frames and origins", async () => {
+    await bridge.open();
+    ready();
+    const fields = {
+      code: "SCENE_RESOURCE_FETCH_FAILED",
+      resource: audioResource,
+    };
+    for (const identity of [
+      { sessionId: "stale" },
+      { buildId: "sha256:wrong" },
+      { runtimeReleaseId: "old-release" },
+      { protocolVersion: 0 },
+    ]) {
+      dispatch(envelope("unity-web-preview-error", { ...fields, ...identity }));
+    }
+    dispatch(
+      envelope("unity-web-preview-error", fields),
+      "https://attacker.example"
+    );
+    dispatch(
+      envelope("unity-web-preview-error", fields),
+      window.location.origin,
+      {} as Window
+    );
+    expect(bridge.stage.value).toBe("loading_scene");
+    expect(bridge.failure.value).toBeNull();
+  });
+
+  it("clears resource diagnostics on retry and does not accept errors from the disposed iframe", async () => {
+    await bridge.open();
+    ready();
+    const oldFrame = frameSource;
+    const oldError = envelope("unity-web-preview-error", {
+      code: "SCENE_RESOURCE_FETCH_FAILED",
+      resource: audioResource,
+    });
+    dispatch(oldError);
+    const retrying = bridge.retry();
+    dispatch(envelope("unity-web-preview-disposed"));
+    frameSource = {} as Window;
+    await retrying;
+    ready();
+    dispatch(oldError);
+    dispatch(
+      envelope("unity-web-preview-error", {
+        code: "SCENE_RESOURCE_FETCH_FAILED",
+        resource: audioResource,
+      }),
+      window.location.origin,
+      oldFrame
+    );
+    expect(bridge.failure.value).toBeNull();
+    expect(bridge.stage.value).toBe("loading_scene");
+    forwarded();
+    dispatch({ type: "unity-web-preview-scene-running" });
+    expect(bridge.stage.value).toBe("running");
+    expect(bridge.runtimeState.value.failure).toBeNull();
+  });
+
+  it("rejects unsupported resource origins during preparing without mounting or downloading Unity", async () => {
+    vi.mocked(rewriteUnityPreviewUrls).mockImplementationOnce(() => {
+      throw new Error("WGP-ASSET-DENIED: signed-private-url");
+    });
+    await bridge.open();
+    expect(rewriteUnityPreviewUrls).toHaveBeenLastCalledWith(
+      { scene: { id: 42 } },
+      window.location.origin,
+      window.location.origin,
+      { restrictToRuntimeOrigins: true }
+    );
+    expect(bridge.runtimeState.value).toMatchObject({
+      visible: true,
+      frameVisible: false,
+      stage: "error",
+      phase: "attention",
+      failure: { code: "SCENE_ASSET_ORIGIN_DENIED", stage: "preparing" },
+    });
+    expect(bridge.frameKey.value).toBe(0);
+    expect(postMessage).not.toHaveBeenCalled();
+    expect(bridge.failure.value?.message).toContain("data.7dgame.com");
+    expect(bridge.failure.value?.message).toContain("不会自动转发登录凭据");
+    expect(JSON.stringify(bridge.runtimeState.value)).not.toContain(
+      "signed-private-url"
+    );
+  });
+
+  it.each([
+    { sessionId: "stale" },
+    { buildId: "sha256:wrong" },
+    { runtimeReleaseId: "old-release" },
+    { protocolVersion: 0 },
+  ])("rejects an incorrect identity %j before READY", async (fields) => {
+    await bridge.open();
+    dispatch(envelope("unity-web-preview-ready", fields));
+    expect(bridge.ready.value).toBe(false);
+    expect(postMessage).not.toHaveBeenCalled();
+  });
+
+  it("rejects another origin, frame and all bare events except the gated native running callback", async () => {
+    await bridge.open();
+    dispatch(envelope("unity-web-preview-ready"), "https://attacker.example");
+    dispatch(
+      envelope("unity-web-preview-ready"),
+      window.location.origin,
+      {} as Window
+    );
+    dispatch({ type: "unity-web-preview-ready" });
+    dispatch({ type: "unity-web-preview-scene-running" });
+    expect(bridge.ready.value).toBe(false);
+    ready();
+    expect(bridge.phase.value).toBe("ready");
+    forwarded();
+    dispatch(
+      envelope("unity-web-preview-scene-running", { sessionId: "stale" })
+    );
+    dispatch(
+      { type: "unity-web-preview-scene-running" },
+      window.location.origin,
+      {} as Window
+    );
+    dispatch(
+      { type: "unity-web-preview-scene-running" },
+      "https://attacker.example"
+    );
+    expect(bridge.phase.value).toBe("ready");
+    dispatch({
+      type: "unity-web-preview-scene-running",
+      message: "Scene is running",
+    });
+    expect(bridge.phase.value).toBe("running");
+    dispatch(envelope("unity-web-preview-scene-visible"));
+    expect(bridge.runtimeState.value.evidence?.kind).toBe(
+      "unity-scene-started-callback"
+    );
     expect(postMessage).toHaveBeenCalledWith(
-      { type: "webgl-preview-dispose", session: firstSession },
+      expect.objectContaining({
+        type: "unity-web-preview-runtime-confirmed",
+        sessionId: bridge.sessionId.value,
+      }),
       window.location.origin
     );
+  });
 
-    buildPayload.mockImplementationOnce(() => ({ scene: { id: 84 } }));
+  it("buffers a native callback delivered before typed scene-forwarded without announcing success early", async () => {
     await bridge.open();
-    const secondUrl = new URL(bridge.src.value);
-    const secondSession = secondUrl.searchParams.get("session");
-
-    resolveDelayedPayload({ scene: { id: 7 } });
-    await delayedSend;
-    dispatchRunnerMessage(
-      { type: "unity-web-preview-ready", session: secondSession },
-      secondUrl.origin
-    );
-    await flushBridgePromises();
-
-    const payloadMessages = postMessage.mock.calls
-      .map(([message]) => message as { type?: string; payload?: unknown })
-      .filter((message) => message.type === "xrugc-load-scene-json");
-    expect(payloadMessages).toEqual([
-      expect.objectContaining({
-        session: secondSession,
-        payload: { scene: { id: 84 } },
-      }),
-    ]);
-    expect(bridge.pendingPayload.value).toEqual({ scene: { id: 84 } });
+    ready();
+    dispatch({
+      type: "unity-web-preview-scene-running",
+      message: "Scene is running",
+    });
+    expect(bridge.stage.value).toBe("loading_scene");
+    expect(bridge.runtimeState.value.evidence).toBeNull();
+    forwarded();
+    expect(bridge.stage.value).toBe("running");
   });
 
-  it("keeps a closed bridge closed when an in-flight open resolves late", async () => {
-    let resolveOpeningPayload!: (payload: unknown) => void;
+  it("does not carry buffered native evidence into a retry or accept old iframe callbacks", async () => {
+    await bridge.open();
+    ready();
+    const oldFrame = frameSource;
+    dispatch({ type: "unity-web-preview-scene-running" });
+    const retry = bridge.retry();
+    dispatch(envelope("unity-web-preview-disposed"));
+    frameSource = {} as Window;
+    await retry;
+    ready();
+    forwarded();
+    dispatch(
+      { type: "unity-web-preview-scene-running" },
+      window.location.origin,
+      oldFrame
+    );
+    expect(bridge.stage.value).toBe("loading_scene");
+  });
+
+  it("still times out if native evidence has no corresponding forwarded acknowledgement", async () => {
+    await bridge.open();
+    ready();
+    dispatch({ type: "unity-web-preview-scene-running" });
+    await vi.advanceTimersByTimeAsync(120000);
+    expect(bridge.failure.value?.code).toBe("SCENE_CONFIRMATION_TIMEOUT");
+    forwarded();
+    expect(bridge.phase.value).toBe("attention");
+  });
+
+  it("does not elevate visible logs or payload forwarding to running", async () => {
+    await bridge.open();
+    ready();
+    forwarded();
+    dispatch(envelope("unity-web-preview-scene-visible"));
+    dispatch(envelope("unity-web-preview-state", { stage: "running" }));
+    expect(bridge.stage.value).toBe("loading_scene");
+    expect(bridge.progress.value.kind).toBe("indeterminate");
+    await vi.advanceTimersByTimeAsync(120000);
+    expect(bridge.phase.value).toBe("attention");
+    expect(bridge.failure.value?.code).toBe("SCENE_CONFIRMATION_TIMEOUT");
+    dispatch({ type: "unity-web-preview-scene-running" });
+    expect(bridge.phase.value).toBe("attention");
+  });
+
+  it("waits for matching disposed before removing the old iframe or creating a retry", async () => {
+    await bridge.open();
+    const firstSession = bridge.sessionId.value;
+    const firstKey = bridge.frameKey.value;
+    const retry = bridge.retry();
+    expect(bridge.stage.value).toBe("stopping");
+    expect(bridge.frameVisible.value).toBe(true);
+    dispatch(envelope("unity-web-preview-disposed", { sessionId: "stale" }));
+    await flush();
+    expect(bridge.frameKey.value).toBe(firstKey);
+    dispatch(envelope("unity-web-preview-disposed"));
+    frameSource = {} as Window;
+    await retry;
+    expect(bridge.sessionId.value).not.toBe(firstSession);
+    expect(bridge.frameKey.value).toBe(firstKey + 1);
+    dispatch(
+      envelope("unity-web-preview-error", {
+        sessionId: firstSession,
+        code: "UNITY_LOAD_FAILED",
+      })
+    );
+    expect(bridge.failure.value).toBeNull();
+  });
+
+  it("force-removes a nonresponsive iframe after a bounded Quit wait", async () => {
+    await bridge.open();
+    const closing = bridge.close();
+    await vi.advanceTimersByTimeAsync(4999);
+    expect(bridge.frameVisible.value).toBe(true);
+    await vi.advanceTimersByTimeAsync(1);
+    await closing;
+    expect(bridge.runtimeState.value).toMatchObject({
+      phase: "closed",
+      cleanup: "timeout",
+      frameVisible: false,
+      sessionId: null,
+    });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("cancels metadata/preparation and ignores a delayed scene payload after close", async () => {
+    let resolvePayload!: (value: unknown) => void;
     buildPayload.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
-          resolveOpeningPayload = resolve;
+          resolvePayload = resolve;
         })
     );
-
     const opening = bridge.open();
-    await flushBridgePromises();
-    bridge.handleClosed();
-    resolveOpeningPayload({ scene: { id: 99 } });
+    await flush();
+    const signal = fetchMock.mock.calls[0][1].signal;
+    await bridge.close();
+    resolvePayload({ scene: { id: 999 } });
     await opening;
-
-    expect(bridge.visible.value).toBe(false);
-    expect(bridge.frameVisible.value).toBe(false);
-    expect(bridge.pendingPayload.value).toBeNull();
-    expect(new URL(bridge.src.value).searchParams.get("session")).toBeNull();
+    expect(signal.aborted).toBe(true);
+    expect(bridge.runtimeState.value).toMatchObject({
+      phase: "closed",
+      frameVisible: false,
+    });
+    expect(postMessage).not.toHaveBeenCalled();
   });
 
-  it("does not revive an in-flight open after the owner component unmounts", async () => {
-    let resolveOpeningPayload!: (payload: unknown) => void;
+  it("ignores an in-flight open when its page unmounts", async () => {
+    let resolvePayload!: (value: unknown) => void;
     buildPayload.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
-          resolveOpeningPayload = resolve;
+          resolvePayload = resolve;
         })
     );
-
     const opening = bridge.open();
-    await flushBridgePromises();
+    await flush();
     app.unmount();
-    appMounted = false;
-    resolveOpeningPayload({ scene: { id: 100 } });
+    mounted = false;
+    resolvePayload({ scene: { id: 999 } });
     await opening;
-
     expect(bridge.frameVisible.value).toBe(false);
-    expect(bridge.pendingPayload.value).toBeNull();
-    expect(new URL(bridge.src.value).searchParams.get("session")).toBeNull();
-    expect(postMessage).not.toHaveBeenCalledWith(
-      expect.objectContaining({ type: "xrugc-load-scene-json" }),
-      expect.any(String)
+    expect(bridge.src.value).toBe("");
+  });
+
+  it("quits and destroys a failed runtime while retaining actionable diagnostics", async () => {
+    await bridge.open();
+    ready();
+    forwarded();
+    const activeSession = bridge.sessionId.value;
+    dispatch(envelope("unity-web-preview-scene-visible"));
+    dispatch(
+      envelope("unity-web-preview-error", { code: "UNITY_DOWNLOAD_STALLED" })
     );
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "unity-web-preview-dispose",
+        sessionId: activeSession,
+      }),
+      window.location.origin
+    );
+    expect(bridge.frameVisible.value).toBe(true);
+    dispatch(envelope("unity-web-preview-disposed"));
+    await flush();
+    expect(bridge.runtimeState.value).toMatchObject({
+      visible: true,
+      frameVisible: false,
+      phase: "attention",
+      sessionId: activeSession,
+      failure: { code: "UNITY_DOWNLOAD_STALLED" },
+      evidence: { kind: "unity-scene-bounds-log" },
+      cleanup: "disposed",
+    });
+    expect(vi.getTimerCount()).toBe(0);
+    await bridge.retry();
+    expect(bridge.sessionId.value).not.toBe(activeSession);
+    expect(bridge.failure.value).toBeNull();
+  });
+
+  it("allows only the last concurrent open and keeps a close during retry final", async () => {
+    await bridge.open();
+    const retryOne = bridge.retry();
+    const retryTwo = bridge.retry();
+    dispatch(envelope("unity-web-preview-disposed"));
+    await Promise.all([retryOne, retryTwo]);
+    expect(bridge.frameKey.value).toBe(2);
+    const retryThree = bridge.retry();
+    const closing = bridge.close();
+    dispatch(envelope("unity-web-preview-disposed"));
+    await Promise.all([retryThree, closing]);
+    expect(bridge.stage.value).toBe("closed");
+    expect(bridge.frameKey.value).toBe(2);
+  });
+
+  it("does not adapt native callbacks from a different Unity build or malformed native payload", async () => {
+    const otherBuild = `sha256:${"1".repeat(64)}`;
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ...release, buildId: otherBuild }),
+    });
+    await bridge.open();
+    dispatch(envelope("unity-web-preview-ready", { buildId: otherBuild }));
+    dispatch(
+      envelope("unity-web-preview-scene-forwarded", { buildId: otherBuild })
+    );
+    dispatch({
+      type: "unity-web-preview-scene-running",
+      message: "Scene is running",
+    });
+    expect(bridge.stage.value).toBe("loading_scene");
+    const closing = bridge.close();
+    dispatch(envelope("unity-web-preview-disposed", { buildId: otherBuild }));
+    await closing;
+    await bridge.open();
+    ready();
+    forwarded();
+    dispatch({
+      type: "unity-web-preview-scene-running",
+      message: { attacker: true },
+    });
+    expect(bridge.stage.value).toBe("loading_scene");
+  });
+
+  it("waits through a long first download while byte progress continues", async () => {
+    await bridge.open();
+    for (let i = 1; i <= 10; i++) {
+      await vi.advanceTimersByTimeAsync(60000);
+      dispatch(
+        envelope("unity-web-preview-state", {
+          stage: "downloading_runtime",
+          progress: { kind: "bytes", loaded: i * 1000, total: 20000 },
+        })
+      );
+      expect(bridge.failure.value).toBeNull();
+    }
+    expect(bridge.stage.value).toBe("downloading_runtime");
+    expect(bridge.elapsedSeconds.value).toBe(600);
+  });
+
+  it("tracks measured bytes, rejects invalid totals, and does not extend timeout for repeated values", async () => {
+    await bridge.open();
+    const state = (progress: unknown) =>
+      dispatch(
+        envelope("unity-web-preview-state", {
+          stage: "downloading_runtime",
+          progress,
+        })
+      );
+    state({ kind: "bytes", loaded: 100, total: 200 });
+    expect(bridge.progress.value).toMatchObject({
+      kind: "bytes",
+      loaded: 100,
+      total: 200,
+    });
+    await vi.advanceTimersByTimeAsync(80000);
+    state({ kind: "bytes", loaded: 100, total: 200 });
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(bridge.failure.value?.code).toBe("DOWNLOAD_STALLED");
+    await finishClose();
+    await bridge.open();
+    state({ kind: "bytes", loaded: 100, total: 0 });
+    expect(bridge.progress.value.kind).toBe("indeterminate");
+  });
+
+  it("identifies per-artifact byte progress and resets the download watchdog when the next artifact starts", async () => {
+    await bridge.open();
+    const state = (progress: unknown) =>
+      dispatch(
+        envelope("unity-web-preview-state", {
+          stage: "downloading_runtime",
+          progress,
+        })
+      );
+    state({
+      kind: "bytes",
+      loaded: 200,
+      total: 200,
+      artifact: "data",
+      unit: "decoded-response-bytes",
+    });
+    await vi.advanceTimersByTimeAsync(80000);
+    state({
+      kind: "bytes",
+      loaded: 0,
+      total: 100,
+      artifact: "wasm",
+      unit: "decoded-response-bytes",
+    });
+    expect(bridge.progress.value).toMatchObject({
+      artifact: "wasm",
+      unit: "decoded-response-bytes",
+      loaded: 0,
+    });
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(bridge.failure.value).toBeNull();
+    await vi.advanceTimersByTimeAsync(80000);
+    expect(bridge.failure.value?.code).toBe("DOWNLOAD_STALLED");
+  });
+
+  it("keeps diagnostics structured and omits runner text that may contain private URLs", async () => {
+    await bridge.open();
+    dispatch(
+      envelope("unity-web-preview-error", {
+        code: "WGP-UNITY-LOADER",
+        message: "token=private-secret",
+      })
+    );
+    expect(bridge.failure.value).toMatchObject({
+      code: "WGP-UNITY-LOADER",
+      stage: "downloading_runtime",
+    });
+    expect(JSON.stringify(bridge.runtimeState.value)).not.toContain(
+      "private-secret"
+    );
+    ready();
+    expect(bridge.phase.value).toBe("attention");
+  });
+
+  it.each([
+    { entrypoint: "https://webgl-preview.plugins.xrugc.com/embed.html" },
+    { entrypoint: "/webgl-preview/releases/../embed.html" },
+    { runtimeReleaseId: "../../login" },
+    { buildId: "unverified-build" },
+  ])("does not mount an iframe for invalid metadata %j", async (fields) => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ...release, ...fields }),
+    });
+    await bridge.open();
+    expect(bridge.frameVisible.value).toBe(false);
+    expect(bridge.failure.value?.code).toBe("RUNTIME_METADATA_INVALID");
   });
 });
