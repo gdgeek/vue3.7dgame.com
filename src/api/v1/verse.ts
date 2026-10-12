@@ -74,8 +74,17 @@ export const putVerseCode = (id: number, data: VerseCode) => {
   });
 };
 export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
+  // Visibility is a Yii extraField: omitting it makes public scenes appear
+  // private when a detail panel reloads with its own expansion list.
+  const fields = new Set(
+    expand
+      .split(",")
+      .map((field) => field.trim())
+      .filter(Boolean)
+  );
+  fields.add("public");
   return request<VerseData>({
-    url: `/v1/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`,
+    url: `/v1/verses/${id}${qs.stringify({ expand: [...fields].join(","), cl }, true)}`,
     method: "get",
   });
 };

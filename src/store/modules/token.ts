@@ -2,17 +2,20 @@ import { logger } from "@/utils/logger";
 import type { TokenInfo } from "@/api/v1/types/auth";
 
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+import { signalSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 import { createSecureLS } from "@/utils/secureLs";
 
 const ls = createSecureLS({ encodingType: "aes" });
 
 function setToken(token: TokenInfo) {
+  signalSensitiveRuntimeActivity();
   ls.set(TOKEN_KEY, token);
 }
 function hasToken() {
   return getToken() !== null;
 }
 function removeToken() {
+  signalSensitiveRuntimeActivity();
   ls.remove(TOKEN_KEY);
 }
 function getToken(): TokenInfo | null {

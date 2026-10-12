@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { TokenInfo } from "@/api/v1/types/auth";
+import { subscribeSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 
 // Mock logger to avoid side effects
 vi.mock("@/utils/logger", () => ({
@@ -159,6 +160,25 @@ describe("Token store module", () => {
   });
 
   describe("完整生命周期", () => {
+    it("在 storage mutation 前同步发送无载荷 activity signal", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      const token = makeToken();
+      const observedBeforeMutation: Array<TokenInfo | null> = [];
+      const unsubscribe = subscribeSensitiveRuntimeActivity(() => {
+        observedBeforeMutation.push(Token.getToken());
+      });
+
+      try {
+        Token.setToken(token);
+        Token.removeToken();
+      } finally {
+        unsubscribe();
+      }
+
+      expect(observedBeforeMutation).toEqual([null, token]);
+      expect(Token.getToken()).toBeNull();
+    });
+
     it("set → get → has → remove 完整流程", async () => {
       const Token = (await import("@/store/modules/token")).default;
       const token = makeToken();

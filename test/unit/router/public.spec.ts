@@ -181,16 +181,20 @@ describe("publicRoutes 路由模块", () => {
   // 懒加载验证
   // -------------------------------------------------------------------------
   describe("懒加载组件", () => {
-    it("/web component() 返回 Promise", () => {
+    it("/web component() 返回 Promise", async () => {
       const webRoute = publicRoutes.find((r) => r.path === "/web");
       const comp = webRoute?.component as () => Promise<unknown>;
-      expect(comp()).toBeInstanceOf(Promise);
+      const pendingComponent = comp();
+      expect(pendingComponent).toBeInstanceOf(Promise);
+      await pendingComponent;
     });
 
-    it("/sso component() 返回 Promise", () => {
+    it("/sso component() 返回 Promise", async () => {
       const ssoRoute = publicRoutes.find((r) => r.path === "/sso");
       const comp = ssoRoute?.component as () => Promise<unknown>;
-      expect(comp()).toBeInstanceOf(Promise);
+      const pendingComponent = comp();
+      expect(pendingComponent).toBeInstanceOf(Promise);
+      await pendingComponent;
     });
   });
 });

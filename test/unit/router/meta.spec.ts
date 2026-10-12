@@ -24,11 +24,13 @@ describe("metaRoutes 路由模块", () => {
     });
   });
 
-  it("每条路由 component 是懒加载函数", () => {
-    metaRoutes.forEach((route) => {
+  it("每条路由 component 是懒加载函数", async () => {
+    for (const route of metaRoutes) {
       const comp = route.component as () => Promise<unknown>;
-      expect(comp()).toBeInstanceOf(Promise);
-    });
+      const pendingComponent = comp();
+      expect(pendingComponent).toBeInstanceOf(Promise);
+      await pendingComponent;
+    }
   });
 
   // -------------------------------------------------------------------------

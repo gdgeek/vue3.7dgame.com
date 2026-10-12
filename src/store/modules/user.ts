@@ -8,6 +8,7 @@ import type { WechatLoginRequest } from "@/api/v1/types/wechat";
 import { putUserData } from "@/api/v1/user";
 import authClient from "@/services/auth/authClient";
 import { normalizeLoginError } from "@/services/auth/loginError";
+import { signalSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 
 export const useUserStore = defineStore(
   "user",
@@ -16,6 +17,7 @@ export const useUserStore = defineStore(
     const userInfo = ref<UserInfoType | null>(defaultUserInfo);
 
     async function loginByWechat(data: WechatLoginRequest) {
+      signalSensitiveRuntimeActivity();
       const response = await wechatLogin(data);
       if (!response.data.success) {
         throw new Error("Login failed, please try again later.");
@@ -92,6 +94,7 @@ export const useUserStore = defineStore(
      */
     async function login(loginData: LoginData) {
       try {
+        signalSensitiveRuntimeActivity();
         const response = await authClient.login(loginData);
         if (!response.success) {
           // Extract error message from API response
@@ -115,6 +118,7 @@ export const useUserStore = defineStore(
     /** 更新用户信息并同步到服务端。 */
     const setUserInfo = async (data: unknown) => {
       try {
+        signalSensitiveRuntimeActivity();
         const response = await putUserData(data);
         //  logger.error("getUserInfo response:", response);
         // 确保数据存在
@@ -128,6 +132,7 @@ export const useUserStore = defineStore(
           return;
         }
 
+        signalSensitiveRuntimeActivity();
         userInfo.value = user;
         // 更新 userInfo
         userInfo.value.id = user.id;
@@ -149,6 +154,7 @@ export const useUserStore = defineStore(
     /** 从服务端拉取并更新当前用户信息。 */
     const getUserInfo = async () => {
       try {
+        signalSensitiveRuntimeActivity();
         const response = await authClient.getCurrentUser();
         // 确保数据存在
         if (!response || !response.success) {
@@ -162,6 +168,7 @@ export const useUserStore = defineStore(
         }
 
         // 更新 userInfo，使用服务端返回的权限数据
+        signalSensitiveRuntimeActivity();
         userInfo.value = user;
         userInfo.value.perms = user.perms ?? [];
 
@@ -181,6 +188,7 @@ export const useUserStore = defineStore(
 
     /** 注销登录，清除 Token 和用户数据。 */
     const logout = async () => {
+      signalSensitiveRuntimeActivity();
       // 调用后端注销 API（忽略失败，确保本地清理总是执行）
       let logoutError: Error | null = null;
       try {
@@ -192,6 +200,7 @@ export const useUserStore = defineStore(
       }
 
       // 用户数据清空
+      signalSensitiveRuntimeActivity();
       userInfo.value = {
         id: 0,
         userData: {
