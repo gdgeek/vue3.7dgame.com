@@ -1,6 +1,6 @@
 /**
  * Unit tests for src/api/v1/tags.ts
- * Covers: getTags — with and without the type filter
+ * Covers: getTags — fetch all tags and return the response
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -27,35 +27,13 @@ describe("Tags API", () => {
       await tagsApi.getTags();
       const { url, method } = request.mock.calls[0][0];
       expect(method).toBe("get");
-      expect(url).toContain("/v1/tags");
-    });
-
-    it("omits TagsSearch[type] when type is null (default)", async () => {
-      await tagsApi.getTags();
-      expect(request.mock.calls[0][0].url).not.toContain("TagsSearch");
-    });
-
-    it("omits TagsSearch[type] when called with explicit null", async () => {
-      await tagsApi.getTags(null);
-      expect(request.mock.calls[0][0].url).not.toContain("TagsSearch");
-    });
-
-    it("includes TagsSearch[type] when type is provided", async () => {
-      await tagsApi.getTags("model");
-      const { url } = request.mock.calls[0][0];
-      expect(url).toContain("TagsSearch");
-      expect(url).toContain("model");
-    });
-
-    it("encodes a different type value correctly", async () => {
-      await tagsApi.getTags("picture");
-      expect(request.mock.calls[0][0].url).toContain("picture");
+      expect(url).toBe("/v1/tags");
     });
 
     it("returns the request result", async () => {
       const mockResp = { data: [{ id: 1, name: "fantasy" }] };
       request.mockResolvedValue(mockResp);
-      const result = await tagsApi.getTags("model");
+      const result = await tagsApi.getTags();
       expect(result).toEqual(mockResp);
     });
   });
