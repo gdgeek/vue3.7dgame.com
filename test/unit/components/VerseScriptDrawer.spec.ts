@@ -32,6 +32,8 @@ vi.mock("@/views/verse/script.vue", async () => {
           editorContentLoading: false,
           isSaving: false,
           hasUnsavedChanges: false,
+          needsPersistence: false,
+          ownerRevision: "script-revision",
           activeName: "blockly",
         });
         mounts(props, state);
@@ -96,11 +98,13 @@ const Drawer = defineComponent({
 const cleanups: Array<() => void> = [];
 const createDrawer = () => {
   const closed = vi.fn();
+  const stateChanged = vi.fn();
   const app = createApp(VerseScriptDrawer, {
     verseId: 2329,
     title: "Scene",
     sceneData: { children: { modules: [] } },
     onClosed: closed,
+    onStateChange: stateChanged,
   });
   app.component("ElDrawer", Drawer);
   app.component(
@@ -153,6 +157,7 @@ const createDrawer = () => {
   return {
     vm,
     closed,
+    stateChanged,
     get: (selector: string) => ({
       trigger: async (_event: string) => {
         const button = el.querySelector<HTMLButtonElement>(selector);
@@ -453,12 +458,44 @@ describe("scene script drawer", () => {
     expect(wrapper.vm.getState()).toMatchObject({ open: true, ready: true });
     expect(mounts).toHaveBeenCalledTimes(2);
   });
+  it("keeps the edit marker during saving and forwards independent persistence state", async () => {
+    const wrapper = createDrawer();
+    wrapper.vm.open();
+    await flushPromises();
+    const state = mounts.mock.calls[0][1];
+    state.needsPersistence = true;
+    await nextTick();
+    expect(wrapper.find(".editor-mode-tag__dirty").exists()).toBe(false);
+    expect(wrapper.stateChanged).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        editorKey: 2329,
+        ownerRevision: "script-revision",
+        state: expect.objectContaining({
+          dirty: false,
+          needsPersistence: true,
+        }),
+      })
+    );
+    state.hasUnsavedChanges = true;
+    state.isSaving = true;
+    await nextTick();
+    expect(wrapper.find(".editor-mode-tag__dirty").exists()).toBe(true);
+    state.isSaving = false; // failed save retains dirty state
+    await nextTick();
+    expect(wrapper.find(".editor-mode-tag__dirty").exists()).toBe(true);
+    state.hasUnsavedChanges = false;
+    state.needsPersistence = false;
+    await nextTick();
+    expect(wrapper.find(".editor-mode-tag__dirty").exists()).toBe(false);
+  });
+
   it("reports the script editor's readiness, unsaved work, saving state, and selected tab", async () => {
     const wrapper = createDrawer();
     expect(wrapper.vm.getState()).toEqual({
       open: false,
       ready: false,
       dirty: false,
+      needsPersistence: false,
       saving: false,
       tab: null,
     });
@@ -481,6 +518,7 @@ describe("scene script drawer", () => {
       open: true,
       ready: false,
       dirty: true,
+      needsPersistence: false,
       saving: true,
       tab: "script",
     });

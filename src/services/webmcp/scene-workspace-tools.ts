@@ -15,6 +15,7 @@ export type SceneWorkspaceContext = {
     saving: boolean;
   };
   script: {
+    needsPersistence?: boolean;
     open: boolean;
     ready: boolean;
     dirty: boolean;

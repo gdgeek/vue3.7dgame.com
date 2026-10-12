@@ -344,7 +344,7 @@ const props = withDefaults(
     embedded?: boolean;
     verseId?: number;
     sceneData?: unknown;
-    beforePublish?: () => Promise<void>;
+    beforePublish?: () => Promise<void | string>;
   }>(),
   { embedded: false }
 );
@@ -583,6 +583,7 @@ const initEditor = (overrideData?: unknown) => {
         data: overrideData ?? initState.data,
         code: initState.code,
         persisted: initState.persisted,
+        editingBaseline: initState.editingBaseline,
         hostSessionId: initState.hostSessionId,
         userInfo: {
           id: userStore.userInfo?.id || null,
@@ -672,12 +673,20 @@ const postScript = async (
     )
       .then(async () => {
         if (!isCurrentSave() || !savedOwner.editable) return;
-        await props.beforePublish?.();
+        if (needsPersistence.value || hasUnsavedChanges.value || isSaving.value)
+          throw new Error("请先保存当前 Blockly 工作区，再发布场景");
+        const preparedRevision = await props.beforePublish?.();
         if (!isCurrentSave() || !savedOwner.editable) return;
-        const publication = await takePhoto(
-          savedOwnerId,
-          createWriteOptions(savedOwner.serverRevision)
+        if (needsPersistence.value || hasUnsavedChanges.value || isSaving.value)
+          throw new Error("请先保存当前 Blockly 工作区，再发布场景");
+        const publicationWrite = createWriteOptions(
+          preparedRevision ?? savedOwner.serverRevision
         );
+        // Saving the parent 3D workspace may have advanced the same scene.
+        // Adopt its acknowledged revision only in the still-current script session.
+        if (typeof preparedRevision === "string")
+          savedOwner.serverRevision = publicationWrite.expectedRevision;
+        const publication = await takePhoto(savedOwnerId, publicationWrite);
         const verification = await readBackScenePublication({
           sceneId: savedOwnerId,
           snapshot: publication.data,
@@ -690,9 +699,17 @@ const postScript = async (
         if (isCurrentSave())
           ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
       })
-      .catch(() => {
-        if (isCurrentSave())
+      .catch((error) => {
+        if (!isCurrentSave()) return;
+        if (error === "cancel" || error === "close") {
           ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
+        } else {
+          ElMessage.error(
+            error instanceof Error
+              ? error.message
+              : t("verse.view.sceneEditor.publishFailed")
+          );
+        }
       });
   }
 };
@@ -710,6 +727,7 @@ const {
   unsavedBlocklyData,
   resolveUnsavedChangesBeforeLeave,
   hasUnsavedChanges,
+  needsPersistence = ref(false),
   draftVersions,
   versionDialogVisible,
   autoSaveEnabled,
@@ -848,6 +866,7 @@ const registerVerseScriptTools = () => {
       editable: Boolean(verse.value?.editable),
       ready: isScriptViewActive && editorContentReady.value,
       dirty: hasUnsavedChanges.value,
+      needsPersistence: needsPersistence.value,
       saving: isSaving.value,
     }),
     getVerseScript: async ({ includeWorkspace, includeGeneratedCode }) => {
@@ -1059,6 +1078,7 @@ const registerScriptBlockTools = () => {
       editable: Boolean(verse.value?.editable),
       ready: isScriptViewActive && editorContentReady.value,
       dirty: hasUnsavedChanges.value,
+      needsPersistence: needsPersistence.value,
       saving: isSaving.value,
     }),
     getBlockCatalog: async (filters) =>
@@ -1183,6 +1203,7 @@ const activateToolbar = () => {
   if (props.embedded) return;
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
+    getUnsavedChanges: () => hasUnsavedChanges.value,
     getLoadingState: () => ({
       loading: editorContentLoading.value,
       blocked: editorContentLoading.value,
@@ -1196,15 +1217,15 @@ onActivated(activateToolbar);
 onDeactivated(() => {
   isScriptViewActive = false;
   verseLoadSequence += 1;
-  unregisterToolbar(toolbarOwner);
+  if (!props.embedded) unregisterToolbar(toolbarOwner);
 });
 
 watch(toolbarStatus, (status) => {
-  updateToolbarStatus(toolbarOwner, status);
+  if (!props.embedded) updateToolbarStatus(toolbarOwner, status);
 });
 
 onBeforeUnmount(() => {
-  unregisterToolbar(toolbarOwner);
+  if (!props.embedded) unregisterToolbar(toolbarOwner);
 });
 
 // ---------- resource computed（Verse 专有：构建事件 inputs/outputs）----------
@@ -1459,7 +1480,7 @@ const startSceneRuntimePreview = async () => {
   const session = getEditorInitState()?.hostSessionId;
   if (!isScriptViewActive || !editorContentReady.value || !verse.value)
     throw new Error("场景脚本尚未准备完成");
-  if (hasUnsavedChanges.value || isSaving.value)
+  if (needsPersistence.value || hasUnsavedChanges.value || isSaving.value)
     throw new Error("请先保存当前 Blockly 工作区，再启动场景运行预览");
   const response = requireSuccessfulWebMcpResponse(
     await requestBlocklyEditor("webmcp-validate-scene-script", {
@@ -1470,6 +1491,8 @@ const startSceneRuntimePreview = async () => {
     throw new Error("脚本包含阻塞错误，请先修复");
   if (!isScriptViewActive || session !== getEditorInitState()?.hostSessionId)
     throw new Error("编辑器会话已经切换");
+  if (needsPersistence.value || hasUnsavedChanges.value || isSaving.value)
+    throw new Error("请先保存当前 Blockly 工作区，再启动场景运行预览");
   await unityPreview.open();
   return getSceneRuntimePreviewStatus();
 };
@@ -1537,6 +1560,8 @@ defineExpose({
   isSaving,
   editorContentLoading,
   hasUnsavedChanges,
+  needsPersistence,
+  ownerRevision: computed(() => verse.value?.serverRevision ?? null),
   activeName,
   resolveBeforeClose: () =>
     resolveUnsavedChangesBeforeLeave({ showDiscardInfo: true }),

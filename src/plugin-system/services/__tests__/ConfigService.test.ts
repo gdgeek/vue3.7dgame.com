@@ -37,7 +37,7 @@ describe("ConfigService", () => {
     expect(mockGet.mock.calls[0]?.[1]?.params).toBeUndefined();
   });
 
-  it("adds a time query parameter when loading local plugins config", async () => {
+  it("uses a stable build version when loading local plugins config", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -47,13 +47,22 @@ describe("ConfigService", () => {
       }),
     });
     vi.stubGlobal("fetch", fetchMock);
-    vi.spyOn(Date, "now").mockReturnValue(1712345678901);
+    vi.stubGlobal("__APP_INFO__", { buildTimestamp: 1712345678901 });
+    const now = vi.spyOn(Date, "now").mockReturnValue(111);
 
     const service = new ConfigService();
     await service.loadLocalConfig();
+    now.mockReturnValue(222);
+    await service.loadLocalConfig();
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/config/plugins.json?time=1712345678901"
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "/config/plugins.json?v=1712345678901"
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/config/plugins.json?v=1712345678901"
     );
   });
 

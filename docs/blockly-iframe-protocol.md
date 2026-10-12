@@ -67,6 +67,7 @@ interface Message {
         resource?: object
       },
       data: object,                       // Blockly 工作区 JSON 数据
+      editingBaseline?: object,           // 当前脚本会话缓存的规范化编辑基线
       code?: {                            // 可选；当前已保存的原始生成代码
         js: string,
         lua: string
@@ -86,6 +87,8 @@ interface Message {
 ```
 
 `data` 表示本次 iframe 应加载的工作区，语言切换或 iframe 重建时可以是尚未保存的草稿；`persisted` 始终表示服务端最后确认的工作区和代码。新版 Blockly 必须用 `persisted` 建立 dirty/save 基线，并在 `EVENT`、`RESPONSE` 中原样回传 `hostSessionId`。旧版不识别这些字段时仍按 `data`、`code` 工作。
+
+新版另用完整规范化积木数据 `editingBaseline` 判断用户编辑。首次加载先规范化持久数据建立该基线，再加载不同内容的草稿；首帧 update 回传基线，宿主仅在当前会话等待首帧且尚无基线时采纳。同一脚本重建 iframe 时传回缓存基线，以保留迁移产生的影子积木 ID；换脚本或放弃修改时清空。该基线不得替代 `persisted`，也不得直接采用草稿首帧。
 
 ### PLUGIN_READY（Blockly → 主系统）
 
@@ -207,7 +210,9 @@ Blockly 主动推送的通知，通过 `payload.event` 区分事件类型。
     lua: "-- current Lua code...",
     js: "// current JavaScript code...",
     blocklyData: { /* current workspace JSON */ },
-    dirty: true,
+    dirty: true,                 // 当前数据/生成代码与服务端持久快照存在差异
+    editorDirty: true,           // 可选；当前积木与规范化编辑基线存在差异
+    // editingBaseline: { ... }, // 可选；仅首帧 update 回传完整规范化基线
     workspaceRevision: 12,
     hostSessionId: "script-..."
   }
@@ -234,7 +239,9 @@ Blockly 主动推送的通知，通过 `payload.event` 区分事件类型。
 }
 ```
 
-宿主仅处理来自当前 iframe `contentWindow`、预期 Blockly origin 和当前 `hostSessionId` 的消息；旧 frame、旧会话及倒退的 `workspaceRevision` 会被忽略。Blockly 声明 `dirty` 时该值是权威状态，宿主仅对旧版 Blockly 使用快照签名回退。
+宿主仅处理来自当前 iframe `contentWindow`、预期 Blockly origin 和当前 `hostSessionId` 的消息；旧 frame、旧会话及倒退的 `workspaceRevision` 会被忽略。新宿主优先使用 `editorDirty` 驱动黄点与离页保护，并将 `dirty` 暴露为 `needsPersistence`；缺少新字段的旧插件沿用原 dirty/快照签名和空背包兼容逻辑。
+
+正常进入后，自动迁移和代码重生成可以是 `editorDirty: false, dirty: true`。该状态不触发初始化自动保存；显式保存仍需持久化完整数据和生成代码，运行或发布前提示先保存。保存响应同样可携带 `editorDirty`。只有匹配的成功保存确认才将两种基线推进到提交快照，再与最新编辑比较；失败、超时和旧回执不能清除新修改。抽屉关闭不清除父页面缓存的 `needsPersistence`，防止后续运行或发布绕过检查。
 
 ### THEME_CHANGE（主系统 → Blockly）
 

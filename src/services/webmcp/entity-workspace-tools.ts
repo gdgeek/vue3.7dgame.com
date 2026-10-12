@@ -15,6 +15,7 @@ export type EntityWorkspaceContext = {
     saving: boolean;
   };
   script: {
+    needsPersistence?: boolean;
     open: boolean;
     ready: boolean;
     dirty: boolean;

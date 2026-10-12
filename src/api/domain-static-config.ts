@@ -162,7 +162,9 @@ async function loadStaticConfig(
   domain: string
 ): Promise<StaticDomainConfig | null> {
   const normalized = normalizeStaticDomainName(domain);
-  for (const candidate of getStaticDomainCandidates(normalized)) {
+  // This route shares the parent catalog entry; skip its absent JSON probe.
+  const lookupDomain = normalized === "d.xrugc.com" ? "xrugc.com" : normalized;
+  for (const candidate of getStaticDomainCandidates(lookupDomain)) {
     const config = await loadStaticConfigByExactName(candidate);
     if (config) {
       return config;

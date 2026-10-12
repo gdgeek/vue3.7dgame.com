@@ -36,6 +36,7 @@
       :before-publish="saveSceneBeforeScriptPublish"
       @closed="handleScriptDrawerClosed"
       @saved="handleScriptSaved"
+      @state-change="handleScriptStateChange"
     ></VerseScriptDrawer>
     <PublicationHistoryDialog
       v-model="publicationHistoryVisible"
@@ -70,6 +71,11 @@
 </template>
 
 <script setup lang="ts">
+import {
+  useScriptPersistenceGuard,
+  scriptPersistenceVersion,
+} from "@/composables/useScriptPersistenceGuard";
+import type { ScriptDrawerStateChange } from "@/components/script-drawer-types";
 import { applySceneScriptSave } from "@/utils/sceneScriptSave";
 import PublicationHistoryDialog from "@/components/MrPP/PublicationHistoryDialog.vue";
 import {
@@ -221,7 +227,7 @@ const activateToolbar = () => {
       if (editorLoading.ready.value) runSceneRuntimePreview();
     },
     onSave: () => {
-      if (editorLoading.ready.value) void requestSceneSave("manual");
+      if (editorLoading.ready.value) void requestManualSceneSave();
     },
     onOpenScript: () => {
       if (editorLoading.ready.value) void openScriptDrawer();
@@ -274,6 +280,25 @@ const invalidateScriptPreview = () => {
   verseMetasWithLuaCodeData.value = undefined;
   verseMetasWithJsCodeData.value = undefined;
 };
+const scriptPersistence = useScriptPersistenceGuard(() => {
+  const scene = verse.value;
+  return {
+    id: scene?.id ?? null,
+    revision: scene?.serverRevision ?? null,
+    scriptVersion: scriptPersistenceVersion(scene?.verseCode),
+    session: getHostSessionId(),
+  };
+});
+const handleScriptStateChange = (change: ScriptDrawerStateChange) => {
+  if (
+    !sceneViewActive ||
+    !scriptDrawerActive.value ||
+    change.editorKey !== id.value
+  )
+    return;
+  scriptPersistence.update(change);
+};
+
 const handleScriptSaved = (result: unknown) => {
   if (
     !sceneViewActive ||
@@ -281,15 +306,43 @@ const handleScriptSaved = (result: unknown) => {
     verse.value?.id !== id.value
   )
     return;
-  if (applySceneScriptSave(verse.value, result)) invalidateScriptPreview();
+  if (applySceneScriptSave(verse.value, result)) {
+    scriptPersistence.clear();
+    invalidateScriptPreview();
+  }
+};
+const assertScriptPersisted = () => {
+  const script = scriptDrawer.value?.getState();
+  if (
+    scriptPersistence.needsPersistence.value ||
+    (script?.open &&
+      (script.needsPersistence || !script.ready || script.saving))
+  ) {
+    throw new Error("请先保存当前 Blockly 工作区，再运行或发布场景");
+  }
 };
 const saveSceneBeforeScriptPublish = async () => {
+  const ownerId = id.value;
+  const ownerSession = getHostSessionId();
+  const assertOwner = () => {
+    if (
+      !sceneViewActive ||
+      ownerId !== id.value ||
+      ownerSession !== getHostSessionId()
+    )
+      throw new Error("场景工作区已切换，请重新发现工具");
+    assertScriptPersisted();
+  };
+  assertOwner();
   const live = await getLiveSceneState();
+  assertOwner();
   if (live.loading) throw new Error("场景仍在加载，请稍后重试");
   if (live.changed || pendingRestorePayload.value) {
     if (!(await requestSceneSave("manual")))
       throw new Error("场景保存失败，已取消发布");
   }
+  assertOwner();
+  return getSceneServerModel()?.serverRevision;
 };
 const openScriptDrawerOrThrow = (assertActive: () => void = () => {}) => {
   assertActive();
@@ -359,12 +412,20 @@ useSceneWorkspaceWebMcp({
         Boolean(pendingRestorePayload.value),
       saving: isSavingVersion.value,
     },
-    script: scriptDrawer.value?.getState() ?? {
-      open: false,
-      ready: false,
-      dirty: false,
-      saving: false,
-      tab: null,
+    script: {
+      ...(scriptDrawer.value?.getState() ?? {
+        open: false,
+        ready: false,
+        dirty: false,
+        saving: false,
+        tab: null,
+      }),
+      needsPersistence:
+        scriptPersistence.needsPersistence.value ||
+        Boolean(
+          scriptDrawer.value?.getState().open &&
+            scriptDrawer.value?.getState().needsPersistence
+        ),
     },
   }),
   openScriptEditor: openScriptDrawerOrThrow,
@@ -970,7 +1031,7 @@ const getLiveSceneState = async (): Promise<SceneEditorLiveState> => {
   };
 };
 
-const confirmSaveCurrentScene = () =>
+const confirmSaveCurrentScene = (manual = false) =>
   confirmEditorSave(
     t("common.sceneSaveConfirm.message"),
     {
@@ -981,8 +1042,12 @@ const confirmSaveCurrentScene = () =>
       closeOnPressEscape: true,
       showCancelButton: true,
       customClass: "script-save-confirm-box",
-      confirmButtonText: t("common.sceneSaveConfirm.confirm"),
-      cancelButtonText: t("common.sceneSaveConfirm.cancel"),
+      confirmButtonText: t(
+        manual ? "common.button.save" : "common.sceneSaveConfirm.confirm"
+      ),
+      cancelButtonText: t(
+        manual ? "common.cancel" : "common.sceneSaveConfirm.cancel"
+      ),
     },
     editorLoading.getState
   );
@@ -996,6 +1061,8 @@ const {
   syncUnsavedChangesForBeforeUnload,
   resolveLeaveSave,
   requestSceneSave,
+  requestManualSceneSave,
+  isManualSavePending,
   resolveUnsavedBeforeLeave,
   handleBeforeUnload,
   cleanupPendingResolver,
@@ -1005,6 +1072,7 @@ const {
   pendingRestorePayload,
   isSavingVersion,
   confirmDialog: confirmSaveCurrentScene,
+  confirmManualSaveDialog: () => confirmSaveCurrentScene(true),
   isEditorReady: () => editorLoading.ready.value,
   onBeforeSave: (trigger) => {
     currentSaveTrigger = trigger;
@@ -1091,6 +1159,12 @@ const saveVerse = async (
   if (!isCurrentSave()) return false;
 
   if (trigger === "manual") {
+    try {
+      assertScriptPersisted();
+    } catch (error) {
+      ElMessage.warning(error instanceof Error ? error.message : String(error));
+      return true;
+    }
     if (!hasPublishableSceneContent(verse)) {
       ElMessage.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
       return true;
@@ -1107,6 +1181,7 @@ const saveVerse = async (
     )
       .then(async () => {
         if (!isCurrentSave()) return;
+        assertScriptPersisted();
         await takePhoto(
           id.value,
           createWriteOptions(getSceneServerModel()?.serverRevision)
@@ -1116,11 +1191,17 @@ const saveVerse = async (
           message: t("verse.view.sceneEditor.publishSuccess"),
         });
       })
-      .catch(() => {
-        ElMessage({
-          type: "info",
-          message: t("verse.view.sceneEditor.publishCanceled"),
-        });
+      .catch((error) => {
+        if (!isCurrentSave()) return;
+        if (error === "cancel" || error === "close") {
+          ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
+        } else {
+          ElMessage.error(
+            error instanceof Error
+              ? error.message
+              : t("verse.view.sceneEditor.publishFailed")
+          );
+        }
       });
   }
   return true;
@@ -1173,8 +1254,14 @@ const saveVerseBeforeLeave = async (
   }
 
   try {
-    await saveScenePayload(verse as unknown as JsonValue);
-    if (!isCurrentSave()) return false;
+    // Keep the existing post-save publish choice for both manual entry points.
+    if (isManualSavePending()) {
+      const saved = await saveVerse(payload, trigger);
+      if (!saved || !isCurrentSave()) return false;
+    } else {
+      await saveScenePayload(verse as unknown as JsonValue);
+      if (!isCurrentSave()) return false;
+    }
     if (trigger === "manual" && showSuccess) {
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
     }
@@ -1431,6 +1518,7 @@ const releaseVerse = async (data: unknown) => {
   const isCurrentPublication = capturePublicationScope();
   isPublishingVerse.value = true;
   try {
+    assertScriptPersisted();
     await ElMessageBox.confirm(
       t("verse.view.sceneEditor.saveCurrentAndPublishConfirm"),
       t("verse.view.sceneEditor.publishScene"),
@@ -1447,6 +1535,7 @@ const releaseVerse = async (data: unknown) => {
       (currentPayload) => saveVerseBeforeLeave(currentPayload, "manual", false),
       async () => {
         if (!isCurrentPublication()) return;
+        assertScriptPersisted();
         const ownerId = id.value;
         const response = await takePhoto(
           ownerId,
@@ -1475,7 +1564,11 @@ const releaseVerse = async (data: unknown) => {
       ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
     } else {
       logger.error("Failed to save and publish scene:", error);
-      ElMessage.error(t("verse.view.sceneEditor.publishFailed"));
+      ElMessage.error(
+        error instanceof Error
+          ? error.message
+          : t("verse.view.sceneEditor.publishFailed")
+      );
     }
   } finally {
     isPublishingVerse.value = false;
@@ -1533,79 +1626,16 @@ const handleMessage = async (e: MessageEvent) => {
         break;
       }
 
-      if (action === "save" && !payload.noChange) {
-        // Original save-verse logic
-        currentSaveTrigger = "manual";
-        isSavingVersion.value = true;
-        try {
-          const saved = await saveVerse(payload, currentSaveTrigger);
-          if (!isCurrentResponse()) break;
-          if (!saved) {
-            isSavingVersion.value = false;
-            resolveLeaveSave(false);
-            break;
-          }
-        } catch (error) {
-          if (isCurrentResponse()) {
-            isSavingVersion.value = false;
-            resolveLeaveSave(false);
-            ElMessage.error(t(writeFailureMessageKey(error)));
-          }
-          break;
+      if (action === "save") {
+        // The iframe updates its baseline when emitting save. Keep its snapshot
+        // until persistence succeeds, including when confirmation is cancelled.
+        if (!payload.noChange) {
+          pendingRestorePayload.value =
+            payload as unknown as VerseEditorPayload;
+          hasUnsavedChangesBeforeUnload.value = true;
         }
-        if (payload.verse) {
-          const savedAt = addSceneDraftVersion(
-            payload as VerseEditorPayload,
-            currentSaveTrigger
-          );
-          pendingRestorePayload.value = null;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-        }
-        hasUnsavedChangesBeforeUnload.value = false;
-        isSavingVersion.value = false;
-        ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
-      } else if (action === "save" && payload.noChange) {
-        // Original save-verse-none logic
-        if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
-          isSavingVersion.value = false;
-          resolveLeaveSave(false);
-          ElMessage.error(t("common.editorSave.pending"));
-          break;
-        }
-        if (pendingRestorePayload.value) {
-          const restoredPayload = pendingRestorePayload.value;
-          let result = false;
-          try {
-            result = await saveVerse(restoredPayload, currentSaveTrigger);
-          } catch (error) {
-            if (isCurrentResponse())
-              ElMessage.error(t(writeFailureMessageKey(error)));
-          }
-          if (!isCurrentResponse()) break;
-          if (!result) {
-            isSavingVersion.value = false;
-            resolveLeaveSave(false);
-            break;
-          }
-          const savedAt = addSceneDraftVersion(
-            restoredPayload,
-            currentSaveTrigger
-          );
-          pendingRestorePayload.value = null;
-          hasUnsavedChangesBeforeUnload.value = false;
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = savedAt || new Date().toISOString();
-          isSavingVersion.value = false;
-          resolveLeaveSave(true);
-        } else {
-          lastSaveTrigger.value = currentSaveTrigger;
-          lastSavedAt.value = new Date().toISOString();
-          ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
-          hasUnsavedChangesBeforeUnload.value = false;
-          isSavingVersion.value = false;
-          resolveLeaveSave(true);
-        }
+        void requestManualSceneSave();
+        break;
       } else if (action === "save-before-leave" && !payload.noChange) {
         // Original save-verse-before-leave logic
         isSavingVersion.value = true;
@@ -1810,6 +1840,7 @@ watch(
 );
 
 watch(id, (nextId, previousId) => {
+  scriptPersistence.clear();
   if (!Number.isFinite(nextId) || nextId === previousId) return;
   webMcpRpc.cancel();
   webMcpLifecycle?.abort();
@@ -1855,6 +1886,7 @@ const startSceneRuntimePreview = async () => {
       throw new Error("场景工作区已切换，请重新发现工具");
     if (scriptDrawerActive.value || openingScriptDrawer)
       throw new Error("请先关闭脚本编辑抽屉，再运行场景");
+    assertScriptPersisted();
   };
   assertSceneActive();
   const scene = verse.value;
@@ -2445,6 +2477,7 @@ const registerPageWebMcpTools = () => {
       };
     },
     stageScenePublication: async () => {
+      assertScriptPersisted();
       const scene = verse.value;
       if (!scene || !Number.isFinite(scene.id)) {
         throw new Error("场景数据尚未加载完成");
@@ -2509,6 +2542,7 @@ const registerPageWebMcpTools = () => {
       }
     },
     completeScenePublication: async (preview) => {
+      assertScriptPersisted();
       const isCurrentPublication = capturePublicationScope();
       const scene = verse.value;
       if (!scene || scene.id !== preview.sceneId) {
@@ -2547,6 +2581,7 @@ const registerPageWebMcpTools = () => {
       assertActive();
       if (!isCurrentPublication())
         throw new Error("编辑器会话或账号已经切换，请重新执行发布前检查");
+      assertScriptPersisted();
       const snapshotResponse = await takePhoto(
         scene.id,
         writeOptionsForPreview(preview, scene.serverRevision)
@@ -2590,6 +2625,7 @@ onActivated(() => {
 });
 onDeactivated(() => {
   sceneViewActive = false;
+  scriptPersistence.clear();
   unregisterToolbar(toolbarOwner);
   webMcpLifecycle?.abort();
   webMcpRpc.cancel();
@@ -2640,6 +2676,7 @@ watch(
 
 onBeforeUnmount(() => {
   sceneViewActive = false;
+  scriptPersistence.clear();
   editorInitialization.reset();
   webMcpLifecycle?.abort();
   webMcpLifecycle = null;
