@@ -20,7 +20,7 @@ const EMPTY_CONFIG: PluginsConfig = {
 };
 
 function buildLocalConfigUrl(): string {
-  return `/config/plugins.json?time=${Date.now()}`;
+  return `/config/plugins.json?v=${__APP_INFO__.buildTimestamp}`;
 }
 
 function deriveOriginFromUrl(url: string): string | undefined {
