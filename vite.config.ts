@@ -88,6 +88,11 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       open: false,
       strictPort: true,
       proxy: {
+        "/api-auth": {
+          changeOrigin: true,
+          target: env.VITE_APP_AUTH_PROXY_TARGET || "http://localhost:8086",
+          rewrite: (path) => path.replace(/^\/api-auth/, ""),
+        },
         ...(env.VITE_APP_API_URL
           ? {
               /** 代理前缀为 /dev-api 的请求  */

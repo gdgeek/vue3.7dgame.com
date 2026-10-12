@@ -5,6 +5,94 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+describe("migration session recovery", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetAuthClientMock();
+    vi.resetModules();
+  });
+
+  it("keeps an expired session stored when refresh is temporarily unavailable", async () => {
+    mockAuthClient.getTokenInfo.mockReturnValue({
+      accessToken: "old",
+      refreshToken: "refresh",
+      expires: new Date(0).toISOString(),
+    });
+    mockAuthClient.getAccessToken.mockReturnValue("old");
+    const unavailable = { response: { status: 503 } };
+    mockAuthClient.refresh.mockRejectedValue(unavailable);
+    await import("@/utils/request");
+    const handler = mockService.interceptors.request.use.mock.calls[0][0];
+    await expect(handler({ url: "/v1/meta", headers: {} })).rejects.toBe(
+      unavailable
+    );
+    expect(mockAuthClient.clearToken).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it.each(["get", "post"])(
+    "recovers one 401 for a safe %s request",
+    async (method) => {
+      mockAuthClient.getTokenInfo.mockReturnValue({ refreshToken: "refresh" });
+      let access = "old";
+      mockAuthClient.getAccessToken.mockImplementation(() => access);
+      mockAuthClient.refresh.mockImplementation(async () => {
+        access = "new";
+      });
+      await import("@/utils/request");
+      const handler = mockService.interceptors.response.use.mock.calls[0][1];
+      const config = {
+        url: "/v1/meta",
+        method,
+        headers: {
+          Authorization: "Bearer old",
+          ...(method === "post" ? { "Idempotency-Key": "operation-1" } : {}),
+        },
+      };
+      await handler({ response: { status: 401 }, config });
+      expect(mockAuthClient.refresh).toHaveBeenCalledOnce();
+      expect(mockService).toHaveBeenCalledWith(
+        expect.objectContaining({
+          authRetried: true,
+          headers: expect.objectContaining({ Authorization: "Bearer new" }),
+        })
+      );
+      expect(mockAuthClient.clearToken).not.toHaveBeenCalled();
+    }
+  );
+
+  it("refreshes credentials but does not replay a write without an idempotency key", async () => {
+    mockAuthClient.getTokenInfo.mockReturnValue({ refreshToken: "refresh" });
+    mockAuthClient.getAccessToken.mockReturnValue("old");
+    mockAuthClient.refresh.mockResolvedValue({});
+    await import("@/utils/request");
+    const handler = mockService.interceptors.response.use.mock.calls[0][1];
+    const error = {
+      response: { status: 401 },
+      config: {
+        method: "post",
+        url: "/v1/meta",
+        headers: { Authorization: "Bearer old" },
+      },
+    };
+    await expect(handler(error)).rejects.toBe(error);
+    expect(mockService).not.toHaveBeenCalled();
+    expect(mockAuthClient.clearToken).not.toHaveBeenCalled();
+  });
+
+  it("does not clear or retry a 401 belonging to the previous account", async () => {
+    await import("@/utils/request");
+    const handler = mockService.interceptors.response.use.mock.calls[0][1];
+    const error = {
+      response: { status: 401 },
+      config: { authSessionEpoch: "previous", headers: {} },
+    };
+    await expect(handler(error)).rejects.toBe(error);
+    expect(mockAuthClient.refresh).not.toHaveBeenCalled();
+    expect(mockAuthClient.clearToken).not.toHaveBeenCalled();
+  });
+});
+
 // Capture the axios service instance created at module level.
 // Made callable (via vi.fn base) so the failover path `return service(config)` works.
 const mockService = vi.hoisted(() => {
@@ -24,6 +112,7 @@ const mockAuthClient = vi.hoisted(() => ({
   getAccessToken: vi.fn(() => null),
   getTokenInfo: vi.fn(() => null),
   refresh: vi.fn(),
+  getSessionEpoch: vi.fn(() => "epoch-1"),
 }));
 
 function resetAuthClientMock() {
@@ -31,6 +120,7 @@ function resetAuthClientMock() {
   mockAuthClient.getAccessToken.mockReset().mockReturnValue(null);
   mockAuthClient.getTokenInfo.mockReset().mockReturnValue(null);
   mockAuthClient.refresh.mockReset();
+  mockAuthClient.getSessionEpoch.mockReset().mockReturnValue("epoch-1");
 }
 
 vi.mock("axios", () => ({
@@ -220,7 +310,7 @@ describe("request interceptor logic", () => {
     };
     mockAuthClient.getTokenInfo.mockReturnValue(expiringToken);
     mockAuthClient.getAccessToken.mockReturnValue("old-token");
-    mockAuthClient.refresh.mockRejectedValue(new Error("refresh failed"));
+    mockAuthClient.refresh.mockRejectedValue({ response: { status: 401 } });
 
     await import("@/utils/request");
     const reqInterceptor =
@@ -681,10 +771,8 @@ describe("refreshToken guard (lines 87-88) — token without refreshToken", () =
       mockService.interceptors.request.use.mock.calls[0]?.[0];
     const config = { url: "/v1/data", headers: {}, baseURL: "" };
 
-    // Should reject because refreshToken() throws when token is null
-    await expect(reqInterceptor(config)).rejects.toBeDefined();
-    // clearToken should be called via handleUnauthorized
-    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
+    await expect(reqInterceptor(config)).resolves.toBe(config);
+    expect(mockAuthClient.clearToken).not.toHaveBeenCalled();
   });
 
   it("handles authClient refresh rejection when token has no refreshToken field", async () => {
@@ -702,8 +790,8 @@ describe("refreshToken guard (lines 87-88) — token without refreshToken", () =
       mockService.interceptors.request.use.mock.calls[0]?.[0];
     const config = { url: "/v1/other", headers: {}, baseURL: "" };
 
-    await expect(reqInterceptor(config)).rejects.toBeDefined();
-    expect(mockAuthClient.clearToken).toHaveBeenCalledWith("unauthorized");
+    await expect(reqInterceptor(config)).resolves.toBe(config);
+    expect(mockAuthClient.clearToken).not.toHaveBeenCalled();
   });
 });
 

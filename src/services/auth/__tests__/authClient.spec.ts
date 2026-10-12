@@ -160,11 +160,18 @@ describe("authClient", () => {
 
     const first = client.refresh();
     const second = client.refresh();
-
+    await vi.waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
     expect(http.post).toHaveBeenCalledTimes(1);
-    expect(http.post).toHaveBeenCalledWith("/v1/auth/refresh", {
-      refreshToken: "old-refresh",
-    });
+    expect(http.post).toHaveBeenCalledWith(
+      "/v1/auth/refresh",
+      {
+        refreshToken: "old-refresh",
+      },
+      expect.objectContaining({
+        headers: { "Idempotency-Key": expect.any(String) },
+        timeout: 5000,
+      })
+    );
 
     resolveRefresh?.({ data: { token: newToken } });
 
@@ -277,9 +284,17 @@ describe("authClient", () => {
       username: "guanfei",
       password: "123456",
     });
-    expect(authHttp.post).toHaveBeenNthCalledWith(2, "/v1/auth/refresh", {
-      refreshToken: "identity-refresh",
-    });
+    expect(authHttp.post).toHaveBeenNthCalledWith(
+      2,
+      "/v1/auth/refresh",
+      {
+        refreshToken: "identity-refresh",
+      },
+      expect.objectContaining({
+        headers: { "Idempotency-Key": expect.any(String) },
+        timeout: 5000,
+      })
+    );
     expect(authHttp.post).toHaveBeenNthCalledWith(
       3,
       "/v1/auth/logout",

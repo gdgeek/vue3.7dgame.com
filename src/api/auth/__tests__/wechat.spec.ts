@@ -1,6 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const request = vi.fn();
+const { identity } = vi.hoisted(() => ({ identity: vi.fn(() => false) }));
+
+vi.mock("@/services/auth/provider", () => ({
+  isIdentityProviderEnabled: identity,
+}));
 
 vi.mock("@/utils/request", () => ({
   default: request,
@@ -14,6 +19,7 @@ vi.mock("@/environment", () => ({
 }));
 
 describe("wechat auth API", () => {
+  beforeEach(() => identity.mockReturnValue(false));
   it("requests the QR code from the configured WeChat auth API", async () => {
     const { getQrcode } = await import("../wechat");
 
@@ -34,6 +40,23 @@ describe("wechat auth API", () => {
     expect(request).toHaveBeenCalledWith({
       baseURL: "https://auth.bujiaban.com",
       url: "/v1/wechat/refresh?token=wechat-token",
+      method: "get",
+    });
+  });
+
+  it("routes QR creation and polling to Identity in explicit Identity mode", async () => {
+    identity.mockReturnValue(true);
+    const { getQrcode, refresh } = await import("../wechat");
+    getQrcode();
+    refresh("wechat-token");
+    expect(request).toHaveBeenLastCalledWith({
+      baseURL: "/api-auth",
+      url: "/v1/wechat/refresh?token=wechat-token",
+      method: "get",
+    });
+    expect(request).toHaveBeenCalledWith({
+      baseURL: "/api-auth",
+      url: "/v1/wechat/qrcode",
       method: "get",
     });
   });

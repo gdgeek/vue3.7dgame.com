@@ -252,6 +252,7 @@ const register = async () => {
     if (valid) {
       loading.value = true;
       try {
+        const epoch = authClient.beginSessionChange?.();
         const response = await wechatRegister({
           username: registerForm.value.username,
           password: registerForm.value.password,
@@ -260,7 +261,7 @@ const register = async () => {
         const data = response.data;
         if (data.success) {
           Message.success(t("login.success"));
-          authClient.acceptToken(data.token, "register");
+          authClient.acceptToken(data.token, "register", epoch);
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });
         } else {

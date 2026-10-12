@@ -1,4 +1,5 @@
 import request from "@/utils/request";
+import authClient from "@/services/auth/authClient";
 import type {
   LoginRequest,
   LoginResponse,
@@ -45,13 +46,5 @@ export const register = (data: RegisterRequest) => {
 };
 
 export const logout = () => {
-  return new Promise((resolve) => {
-    // localStorage.clear();
-    resolve(true);
-  });
-  /*
-  return request({
-    url: `/v1/auth/logout`,
-    method: "delete",
-  });*/
+  return authClient.logout();
 };

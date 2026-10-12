@@ -273,7 +273,8 @@ describe("useUserStore", () => {
     await store.loginByWechat({ code: "wx-code" } as never);
     expect(mockAuthClient.acceptToken).toHaveBeenCalledWith(
       "wec-tok",
-      "wechat"
+      "wechat",
+      undefined
     );
   });
 

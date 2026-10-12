@@ -9,6 +9,7 @@ import { putUserData } from "@/api/v1/user";
 import authClient from "@/services/auth/authClient";
 import { normalizeLoginError } from "@/services/auth/loginError";
 import { signalSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
+import { SessionSupersededError } from "@/services/auth/sessionErrors";
 
 export const useUserStore = defineStore(
   "user",
@@ -18,6 +19,7 @@ export const useUserStore = defineStore(
 
     async function loginByWechat(data: WechatLoginRequest) {
       signalSensitiveRuntimeActivity();
+      const epoch = authClient.beginSessionChange?.();
       const response = await wechatLogin(data);
       if (!response.data.success) {
         throw new Error("Login failed, please try again later.");
@@ -25,7 +27,7 @@ export const useUserStore = defineStore(
       const token = response.data.token;
 
       if (token) {
-        authClient.acceptToken(token, "wechat");
+        authClient.acceptToken(token, "wechat", epoch);
       } else {
         throw new Error("The login response is missing the access_token");
       }
@@ -118,8 +120,15 @@ export const useUserStore = defineStore(
     /** 更新用户信息并同步到服务端。 */
     const setUserInfo = async (data: unknown) => {
       try {
+        const epoch = authClient.getSessionEpoch?.();
+        const actor = authClient.getSubject?.();
         signalSensitiveRuntimeActivity();
         const response = await putUserData(data);
+        if (
+          (epoch && epoch !== authClient.getSessionEpoch?.()) ||
+          (actor && actor !== authClient.getSubject?.())
+        )
+          throw new SessionSupersededError();
         //  logger.error("getUserInfo response:", response);
         // 确保数据存在
         if (!response.data || !response.data.success) {
@@ -154,8 +163,15 @@ export const useUserStore = defineStore(
     /** 从服务端拉取并更新当前用户信息。 */
     const getUserInfo = async () => {
       try {
+        const epoch = authClient.getSessionEpoch?.();
+        const actor = authClient.getSubject?.();
         signalSensitiveRuntimeActivity();
         const response = await authClient.getCurrentUser();
+        if (
+          (epoch && epoch !== authClient.getSessionEpoch?.()) ||
+          (actor && actor !== authClient.getSubject?.())
+        )
+          throw new SessionSupersededError();
         // 确保数据存在
         if (!response || !response.success) {
           logger.error("Verification failed, please Login again.");
@@ -191,13 +207,18 @@ export const useUserStore = defineStore(
       signalSensitiveRuntimeActivity();
       // 调用后端注销 API（忽略失败，确保本地清理总是执行）
       let logoutError: Error | null = null;
+      let epoch: string | undefined;
       try {
-        await authClient.logout();
+        const pending = authClient.logout();
+        epoch = authClient.getSessionEpoch?.();
+        await pending;
       } catch (error) {
         logger.error("Backend logout failed:", error);
         logoutError =
           error instanceof Error ? error : new Error("Backend logout failed");
       }
+
+      if (epoch && epoch !== authClient.getSessionEpoch?.()) return;
 
       // 用户数据清空
       signalSensitiveRuntimeActivity();
@@ -237,6 +258,17 @@ export const useUserStore = defineStore(
         throw logoutError;
       }
     };
+
+    const stopSessionListener = authClient.onTokenChanged?.(
+      (token, context) => {
+        if (!token) userInfo.value = null;
+        else if (context.reason === "external") {
+          userInfo.value = null;
+          void getUserInfo().catch(() => undefined);
+        }
+      }
+    );
+    onScopeDispose(() => stopSessionListener?.());
 
     return {
       userInfo,

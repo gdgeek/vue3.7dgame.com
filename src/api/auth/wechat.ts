@@ -1,8 +1,11 @@
 import request from "@/utils/request";
 import env from "@/environment";
+import { isIdentityProviderEnabled } from "@/services/auth/provider";
 
 const authBaseConfig = () => {
-  const baseURL = env.wechatAuthApi?.replace(/\/+$/, "");
+  const baseURL = (
+    isIdentityProviderEnabled() ? env.authApi || "/api-auth" : env.wechatAuthApi
+  )?.replace(/\/+$/, "");
   return baseURL ? { baseURL } : {};
 };
 

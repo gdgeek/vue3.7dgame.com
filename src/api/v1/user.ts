@@ -2,6 +2,7 @@ import type { AxiosError } from "axios";
 import env from "@/environment";
 import request from "@/utils/request";
 import qs from "querystringify";
+import { isIdentityProviderEnabled } from "@/services/auth/provider";
 import { UserInfoReturnType } from "../user/model";
 
 export type userCreationData = {
@@ -29,7 +30,7 @@ export const getUserCreation = () => {
   });
 };
 
-const legacyPutUserData = (data: unknown) => {
+const mainPutUserData = (data: unknown) => {
   return request<UserInfoReturnType>({
     url: `/v1/user/update`,
     method: "put",
@@ -39,7 +40,7 @@ const legacyPutUserData = (data: unknown) => {
 
 const identityPutUserData = (data: unknown) => {
   return request<UserInfoReturnType>({
-    baseURL: env.authApi,
+    baseURL: env.authApi || "/api-auth",
     url: `/v1/user/update`,
     method: "put",
     data,
@@ -48,15 +49,18 @@ const identityPutUserData = (data: unknown) => {
 };
 
 export const putUserData = async (data: unknown) => {
+  // The independent-mode PHP gateway performs the sole Identity write and then
+  // returns the business aggregate (gold/points/avatar File included).
+  if (isIdentityProviderEnabled()) return mainPutUserData(data);
   if (!env.authApi) {
-    return legacyPutUserData(data);
+    return mainPutUserData(data);
   }
 
   try {
     return await identityPutUserData(data);
   } catch (error) {
     if (shouldFallbackToLegacyProfileWrite(error)) {
-      return legacyPutUserData(data);
+      return mainPutUserData(data);
     }
 
     throw error;

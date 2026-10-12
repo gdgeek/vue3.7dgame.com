@@ -6,6 +6,11 @@ import env from "@/environment";
 import { ref, watch } from "vue";
 import { logger } from "@/utils/logger";
 import authClient from "@/services/auth/authClient";
+import { isIdentityProviderEnabled } from "@/services/auth/provider";
+import {
+  isDefinitiveSessionFailure,
+  SessionSupersededError,
+} from "@/services/auth/sessionErrors";
 
 const lang = ref(i18n.global.locale.value);
 watch(
@@ -54,6 +59,15 @@ const service = axios.create({
 // 请求拦截器（Token 刷新）
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    // Existing endpoint envelopes stay stable; explicit Identity mode has one writer.
+    if (
+      isIdentityProviderEnabled() &&
+      /^\/v1\/(auth|email|password|wechat)\//.test(config.url ?? "") &&
+      (!config.baseURL || config.baseURL === env.api)
+    ) {
+      config.baseURL = env.authApi || "/api-auth";
+    }
+    config.authSessionEpoch ??= authClient.getSessionEpoch?.();
     const token = authClient.getTokenInfo();
 
     // 设置token
@@ -79,7 +93,15 @@ service.interceptors.request.use(
             return Promise.reject(err);
           }
 
-          // 刷新失败 -> 跳转登录
+          if (!isDefinitiveSessionFailure(err)) {
+            // A drain/network failure must not erase a still usable login session.
+            if (
+              !(err instanceof SessionSupersededError) &&
+              new Date(token.expires).getTime() > Date.now()
+            )
+              return config;
+            return Promise.reject(err);
+          }
           const router = useRouter();
           return handleUnauthorized(router, err);
         }
@@ -160,6 +182,53 @@ service.interceptors.response.use(
     if (response.status === 401) {
       if (getAuthScope(axiosError.config) === "plugin") {
         return Promise.reject(error);
+      }
+      const config = axiosError.config;
+      if (
+        config?.authSessionEpoch &&
+        config.authSessionEpoch !== authClient.getSessionEpoch?.()
+      )
+        return Promise.reject(error);
+      const isAuthEndpoint = refreshTokenWhitelist.some((path) =>
+        config?.url?.includes(path)
+      );
+      if (
+        config &&
+        !config.authRetried &&
+        !isAuthEndpoint &&
+        authClient.getTokenInfo()?.refreshToken
+      ) {
+        config.authRetried = true;
+        const sent = String(config.headers?.Authorization ?? "").replace(
+          /^Bearer\s+/i,
+          ""
+        );
+        try {
+          if (
+            !authClient.getAccessToken() ||
+            sent === authClient.getAccessToken()
+          )
+            await authClient.refresh();
+          if (
+            config.authSessionEpoch &&
+            config.authSessionEpoch !== authClient.getSessionEpoch?.()
+          )
+            return Promise.reject(error);
+          const method = (config.method ?? "get").toLowerCase();
+          const safe =
+            ["get", "head", "options"].includes(method) ||
+            Boolean(
+              config.headers?.["Idempotency-Key"] ||
+                config.headers?.["X-Idempotency-Key"]
+            );
+          if (!safe) return Promise.reject(error);
+          config.headers.Authorization = `Bearer ${authClient.getAccessToken()}`;
+          return service(config);
+        } catch (refreshError) {
+          if (!isDefinitiveSessionFailure(refreshError))
+            return Promise.reject(refreshError);
+          return handleUnauthorized(router, refreshError);
+        }
       }
       return handleUnauthorized(router, error);
     } else if (response.status === 404) {

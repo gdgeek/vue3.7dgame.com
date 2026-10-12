@@ -6,6 +6,8 @@ declare module "axios" {
     skipErrorMessage?: boolean;
     /** Distinguish host auth from plugin auth. */
     authScope?: "host" | "plugin";
+    authSessionEpoch?: string;
+    authRetried?: boolean;
   }
 
   interface InternalAxiosRequestConfig {
@@ -13,5 +15,7 @@ declare module "axios" {
     skipErrorMessage?: boolean;
     /** Distinguish host auth from plugin auth. */
     authScope?: "host" | "plugin";
+    authSessionEpoch?: string;
+    authRetried?: boolean;
   }
 }

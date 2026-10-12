@@ -11,6 +11,15 @@ import env from "@/environment";
 import { signalSensitiveRuntimeActivity } from "@/services/security/sensitiveRuntimeActivity";
 import Token from "@/store/modules/token";
 import { resolveAuthProvider, type AuthProvider } from "./provider";
+import {
+  createSessionCoordinator,
+  type SessionCoordinator,
+} from "./sessionCoordinator";
+import {
+  isTransientAuthFailure,
+  retryDelay,
+  SessionSupersededError,
+} from "./sessionErrors";
 
 export type TokenChangedReason =
   | "login"
@@ -47,6 +56,7 @@ export interface AuthClientOptions {
   tokenStore?: AuthTokenStore;
   provider?: AuthProvider;
   oidcBridge?: Partial<OidcBridgeConfig>;
+  coordinator?: SessionCoordinator;
 }
 
 export interface OidcBridgeConfig {
@@ -83,6 +93,21 @@ function getAccessTokenFromInfo(token: TokenInfo | null): string | null {
   return token?.accessToken || token?.token || null;
 }
 
+function tokenSubject(token: TokenInfo | null): string | null {
+  try {
+    const encoded = (getAccessTokenFromInfo(token) || "").split(".")[1];
+    const value = JSON.parse(
+      atob(encoded.replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    const subject = value.uid ?? value.sub;
+    return typeof subject === "number" || typeof subject === "string"
+      ? String(subject)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 function buildAuthHeaders(token: TokenInfo | null) {
   const accessToken = getAccessTokenFromInfo(token);
   return accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
@@ -94,14 +119,22 @@ export function createAuthClient(options: AuthClientOptions = {}) {
     options.mainHttp ?? options.http ?? createDefaultHttpClient(env.api);
   const authHttp: AuthHttpClient =
     options.authHttp ??
-    (provider === "identity" ? createDefaultHttpClient(env.authApi) : mainHttp);
+    (provider === "identity"
+      ? createDefaultHttpClient(env.authApi || "/api-auth")
+      : mainHttp);
   const tokenStore = options.tokenStore ?? Token;
   const oidcBridge: OidcBridgeConfig = {
     ...env.oidcBridge,
     ...options.oidcBridge,
   };
   const subscribers = new Set<TokenChangedListener>();
-  let refreshPromise: Promise<RefreshTokenResponse> | null = null;
+  const coordinator =
+    options.coordinator ?? createSessionCoordinator(!options.tokenStore);
+  let refreshRequest: {
+    credential: string;
+    epoch: string;
+    promise: Promise<RefreshTokenResponse>;
+  } | null = null;
 
   function notify(token: TokenInfo | null, reason: TokenChangedReason) {
     for (const subscriber of subscribers) {
@@ -111,29 +144,42 @@ export function createAuthClient(options: AuthClientOptions = {}) {
 
   function acceptToken(
     token: TokenInfo,
-    reason: TokenChangedReason = "external"
+    reason: TokenChangedReason = "external",
+    expectedEpoch?: string
   ) {
     signalSensitiveRuntimeActivity();
+    if (expectedEpoch !== undefined) assertCurrent(expectedEpoch);
+    else if (reason !== "refresh") coordinator.advanceEpoch();
+    return commitToken(token, reason);
+  }
+
+  function commitToken(token: TokenInfo, reason: TokenChangedReason) {
     tokenStore.setToken(token);
+    coordinator.changed();
     notify(token, reason);
     return token;
   }
 
   function clearToken(reason: TokenChangedReason = "external") {
     signalSensitiveRuntimeActivity();
+    coordinator.advanceEpoch();
     tokenStore.removeToken();
+    coordinator.changed();
     notify(null, reason);
   }
 
   async function login(data: LoginRequest): Promise<LoginResponse> {
     signalSensitiveRuntimeActivity();
+    const epoch = coordinator.advanceEpoch();
     const response = await authHttp.post<LoginResponse>("/v1/auth/login", data);
+    assertCurrent(epoch);
     if (response.data?.token) {
-      acceptToken(response.data.token, "login");
+      commitToken(response.data.token, "login");
       const oidcToken = await exchangeOidcBridgeToken(response.data.token);
+      assertCurrent(epoch);
       if (oidcToken) {
         response.data.token = oidcToken;
-        acceptToken(oidcToken, "login");
+        commitToken(oidcToken, "login");
       }
     }
     return response.data;
@@ -210,49 +256,81 @@ export function createAuthClient(options: AuthClientOptions = {}) {
 
   async function refresh(refreshToken?: string): Promise<RefreshTokenResponse> {
     signalSensitiveRuntimeActivity();
-    if (refreshPromise) {
-      return refreshPromise;
-    }
-
     const tokenToRefresh = refreshToken ?? tokenStore.getToken()?.refreshToken;
     if (!tokenToRefresh) {
       throw new Error("No refresh token available");
     }
-
-    const request = authHttp
-      .post<RefreshTokenResponse>("/v1/auth/refresh", {
-        refreshToken: tokenToRefresh,
-      })
-      .then((response) => {
-        if (!response.data?.token) {
-          throw new Error("Refresh response is missing token");
-        }
-        acceptToken(response.data.token, "refresh");
-        return response.data;
-      });
-
-    const sharedRefreshPromise = request.then(
-      (result) => {
-        Promise.resolve().then(() => {
-          refreshPromise = null;
-        });
-        return result;
-      },
-      (error) => {
-        Promise.resolve().then(() => {
-          refreshPromise = null;
-        });
-        throw error;
+    if (
+      refreshRequest?.credential === tokenToRefresh &&
+      refreshRequest.epoch === coordinator.epoch()
+    ) {
+      return refreshRequest.promise;
+    }
+    const explicitSwitch =
+      refreshToken !== undefined &&
+      refreshToken !== tokenStore.getToken()?.refreshToken;
+    const epoch = explicitSwitch
+      ? coordinator.advanceEpoch()
+      : coordinator.epoch();
+    const promise = coordinator.lock(async () => {
+      assertCurrent(epoch);
+      const current = tokenStore.getToken();
+      // Another tab may have completed the same rotation while we waited for its lock.
+      if (
+        !explicitSwitch &&
+        current?.refreshToken &&
+        current.refreshToken !== tokenToRefresh
+      ) {
+        notify(current, "refresh");
+        return { token: current };
       }
-    );
-    refreshPromise = sharedRefreshPromise;
+      const requestId = globalThis.crypto.randomUUID();
+      for (let attempt = 0; ; attempt++) {
+        try {
+          const response = await authHttp.post<RefreshTokenResponse>(
+            "/v1/auth/refresh",
+            {
+              refreshToken: tokenToRefresh,
+            },
+            {
+              headers: { "Idempotency-Key": requestId },
+              timeout: 5000,
+            }
+          );
+          assertCurrent(epoch);
+          if (!response.data?.token) {
+            throw new Error("Refresh response is missing token");
+          }
+          commitToken(response.data.token, explicitSwitch ? "sso" : "refresh");
+          return response.data;
+        } catch (error) {
+          assertCurrent(epoch);
+          if (attempt >= 1 || !isTransientAuthFailure(error)) throw error;
+          await new Promise((resolve) =>
+            setTimeout(resolve, retryDelay(error, attempt))
+          );
+          assertCurrent(epoch);
+        }
+      }
+    });
+    refreshRequest = { credential: tokenToRefresh, epoch, promise };
+    void promise
+      .finally(() => {
+        if (refreshRequest?.promise === promise) refreshRequest = null;
+      })
+      .catch(() => undefined);
+    return promise;
+  }
 
-    return sharedRefreshPromise;
+  function assertCurrent(epoch: string) {
+    if (epoch !== coordinator.epoch()) throw new SessionSupersededError();
   }
 
   async function logout(): Promise<void> {
     signalSensitiveRuntimeActivity();
     const token = tokenStore.getToken();
+    // Invalidate pending login/refresh responses before the revoke request leaves.
+    clearToken("logout");
     let logoutError: unknown = null;
 
     if (token) {
@@ -267,8 +345,6 @@ export function createAuthClient(options: AuthClientOptions = {}) {
       }
     }
 
-    clearToken("logout");
-
     if (logoutError) {
       throw logoutError;
     }
@@ -276,10 +352,32 @@ export function createAuthClient(options: AuthClientOptions = {}) {
 
   async function getCurrentUser(): Promise<UserInfoReturnType> {
     signalSensitiveRuntimeActivity();
-    const response = await mainHttp.get<UserInfoReturnType>("/v1/user/info", {
-      headers: buildAuthHeaders(tokenStore.getToken()),
-    });
-    return response.data;
+    const epoch = coordinator.epoch();
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const response = await mainHttp.get<UserInfoReturnType>(
+          "/v1/user/info",
+          {
+            headers: buildAuthHeaders(tokenStore.getToken()),
+          }
+        );
+        assertCurrent(epoch);
+        return response.data;
+      } catch (error) {
+        assertCurrent(epoch);
+        if (attempt >= 1) throw error;
+        const status = (error as { response?: { status?: number } })?.response
+          ?.status;
+        if (status === 401 && tokenStore.getToken()?.refreshToken)
+          await refresh();
+        else if (isTransientAuthFailure(error))
+          await new Promise((resolve) =>
+            setTimeout(resolve, retryDelay(error, attempt))
+          );
+        else throw error;
+        assertCurrent(epoch);
+      }
+    }
   }
 
   function getAccessToken(): string | null {
@@ -301,18 +399,30 @@ export function createAuthClient(options: AuthClientOptions = {}) {
     };
   }
 
+  const unsubscribeSession = coordinator.subscribe(() =>
+    notify(tokenStore.getToken(), "external")
+  );
+
   return {
     acceptToken,
     clearToken,
     getAccessToken,
     getCurrentUser,
     getRefreshToken,
+    getSessionEpoch: () => coordinator.epoch(),
+    getSubject: () => tokenSubject(tokenStore.getToken()),
+    beginSessionChange: () => coordinator.advanceEpoch(),
     getTokenInfo,
     login,
     logout,
     onTokenChanged,
     provider,
     refresh,
+    destroy: () => {
+      unsubscribeSession();
+      coordinator.destroy();
+      subscribers.clear();
+    },
   };
 }
 
