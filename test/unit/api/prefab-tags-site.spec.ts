@@ -1,7 +1,7 @@
 /**
  * Unit tests for:
  *   - src/api/v1/prefab.ts  (CRUD + sort aliasing)
- *   - src/api/v1/tags.ts    (getTags with/without type)
+ *   - src/api/v1/tags.ts    (getTags)
  *   - src/api/v1/site.ts    (PostSiteAppleId)
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -170,42 +170,17 @@ describe("Tags API", () => {
     await tagsApi.getTags();
     expect(request).toHaveBeenCalledWith(
       expect.objectContaining({
-        url: expect.stringContaining("/v1/tags"),
+        url: "/v1/tags",
         method: "get",
       })
     );
   });
 
-  it("omits TagsSearch when type is null (default)", async () => {
-    await tagsApi.getTags(null);
-    const url: string = request.mock.calls[0][0].url;
-    expect(url).not.toContain("TagsSearch");
-  });
-
-  it("includes TagsSearch[type] when type is provided", async () => {
-    await tagsApi.getTags("scene");
-    const url: string = request.mock.calls[0][0].url;
-    expect(url).toContain("TagsSearch");
-    expect(url).toContain("scene");
-  });
-
-  it("different type values are forwarded correctly", async () => {
-    await tagsApi.getTags("prefab");
-    const url: string = request.mock.calls[0][0].url;
-    expect(url).toContain("prefab");
-  });
-
   it("returns the request result", async () => {
     const mockResp = { data: [{ id: 1, name: "Scene" }] };
     request.mockResolvedValue(mockResp);
-    const result = await tagsApi.getTags("scene");
+    const result = await tagsApi.getTags();
     expect(result).toEqual(mockResp);
-  });
-
-  it("omits TagsSearch when type is undefined", async () => {
-    await tagsApi.getTags(undefined);
-    const url: string = request.mock.calls[0][0].url;
-    expect(url).not.toContain("TagsSearch");
   });
 });
 

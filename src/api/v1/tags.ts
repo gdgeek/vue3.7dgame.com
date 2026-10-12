@@ -1,14 +1,8 @@
 import request from "@/utils/request";
 
-import qs from "querystringify";
-
-export const getTags = (type: string | null = null) => {
-  const query: Record<string, unknown> = {};
-  if (type !== null) {
-    query["TagsSearch[type]"] = type;
-  }
+export const getTags = () => {
   return request({
-    url: `/v1/tags${qs.stringify(query, true)}`,
+    url: "/v1/tags",
     method: "get",
   });
 };

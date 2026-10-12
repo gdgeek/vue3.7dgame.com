@@ -308,11 +308,6 @@ describe("VerseTag 接口", () => {
     const t: VerseTag = { id: 1, name: "3D" };
     expect(t.name).toBe("3D");
   });
-
-  it("可选字段 type", () => {
-    const t: VerseTag = { id: 2, name: "VR", type: "category" };
-    expect(t.type).toBe("category");
-  });
 });
 
 describe("VerseData 接口", () => {

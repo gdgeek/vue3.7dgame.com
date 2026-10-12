@@ -1,8 +1,8 @@
 <template>
-  <div v-if="classify" class="flex gap-2">
+  <div class="flex gap-2">
     <el-tag
       v-for="tag in tags"
-      :type="tag.type === 'Classify' ? 'primary' : 'success'"
+      type="primary"
       :key="tag.name"
       :closable="props.editable"
       @close="close(tag.id)"
@@ -14,7 +14,7 @@
       @change="handleChange"
       v-model="value"
       size="small"
-      :options="classify"
+      :options="availableTags"
       :placeholder="t('verse.listPage.addTag')"
       style="width: 108px"
     ></el-select-v2>
@@ -34,7 +34,6 @@ type VerseTagLink = {
 type TagRecord = {
   id: number;
   name: string;
-  type: string;
   key?: string | number;
 };
 
@@ -61,11 +60,11 @@ const data = computed(() => {
   });
 });
 
-const classify = computed(() => {
+const availableTags = computed(() => {
   if (list.value === null) return [];
   return list.value
     .filter((item) => {
-      return !data.value.includes(item.id) && item.type === "Classify";
+      return !data.value.includes(item.id);
     })
     .map((item) => {
       return {
@@ -80,13 +79,12 @@ const tags = computed(() => {
 
   return list.value
     .filter((item) => {
-      return data.value.includes(item.id) && item.type === "Classify";
+      return data.value.includes(item.id);
     })
     .map((item) => {
       return {
         name: item.name,
         id: item.id,
-        type: item.type,
       };
     });
 });

@@ -17,10 +17,10 @@ export const useTagsStore = defineStore("tags", () => {
   // 刷新标签
   const refreshTags = async () => {
     try {
-      const classify = await getTags("Classify");
+      const res = await getTags();
 
       const map = new Map<number, TagInfo>();
-      classify.data.forEach(
+      res.data.forEach(
         (item: { id: number; name: string; info: string; managed: 0 | 1 }) => {
           const obj: TagInfo = {
             name: item.name,

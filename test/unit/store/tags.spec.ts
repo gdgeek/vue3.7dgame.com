@@ -29,11 +29,11 @@ describe("useTagsStore", () => {
     expect(store.tagsMap).toBeNull();
   });
 
-  it("refreshTags calls getTags with 'Classify'", async () => {
+  it("refreshTags calls getTags without a type filter", async () => {
     tagsApi.getTags.mockResolvedValue({ data: [] });
     const store = useTagsStore();
     await store.refreshTags();
-    expect(tagsApi.getTags).toHaveBeenCalledWith("Classify");
+    expect(tagsApi.getTags).toHaveBeenCalledWith();
   });
 
   it("tagsMap is populated after refreshTags", async () => {
