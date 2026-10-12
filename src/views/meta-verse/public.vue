@@ -249,18 +249,13 @@ const currentCategoryName = computed(() => {
 onMounted(async () => {
   try {
     const res = await getTags();
-    const classifyTags = res.data
-      .filter(
-        (tag: { id: number; name: string; type?: string }) =>
-          tag.type === "Classify"
-      )
-      .map((tag: { id: number; name: string; type?: string }) => ({
-        id: tag.id,
-        name: tag.name,
-      }));
+    const tagCategories = res.data.map((tag: { id: number; name: string }) => ({
+      id: tag.id,
+      name: tag.name,
+    }));
     categories.value = [
       { id: 0, name: t("verse.publicPage.allCategory") },
-      ...classifyTags,
+      ...tagCategories,
     ];
   } catch (e) {
     logger.error("Failed to load tags:", e);

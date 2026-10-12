@@ -40,6 +40,8 @@ export type EditorUpdatePayload = {
   js: string;
   blocklyData: unknown;
   dirty?: boolean;
+  editorDirty?: boolean;
+  editingBaseline?: unknown;
   workspaceRevision?: number;
 };
 
@@ -51,6 +53,7 @@ export type ScriptEditorSavedSnapshot = {
 
 export type ScriptEditorInitState = {
   data: unknown;
+  editingBaseline?: unknown;
   code: { lua: string; js: string };
   persisted: {
     data: unknown;
@@ -152,7 +155,11 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const codeDialogTitle = ref("");
   const unsavedBlocklyData = ref<unknown>(null);
   const editorDirty = ref(false);
+  const persistenceDirty = ref(false);
   const persistenceUnverified = ref(false);
+  const needsPersistence = computed(
+    () => persistenceDirty.value || persistenceUnverified.value
+  );
   const hasUnsavedChanges = computed({
     get: () => editorDirty.value || persistenceUnverified.value,
     set: (dirty: boolean) => {
@@ -199,6 +206,8 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   let persistenceInFlight = false;
   let pendingRestorePayload: EditorPostPayload | null = null;
   let savedSnapshotPayload: ScriptEditorSavedSnapshot | null = null;
+  let editingBaseline: unknown;
+  let usesEditingBaseline = false;
   let latestWorkspaceRevision = -1;
   let sessionProtocolConfirmed = false;
 
@@ -354,11 +363,25 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           ...savedSnapshotPayload,
           blocklyData: withoutEmptyBackpack(savedSnapshotPayload.blocklyData),
         });
-    hasUnsavedChanges.value = onlyEmptyBackpackChanged
-      ? false
-      : typeof payload.dirty === "boolean"
+    persistenceDirty.value =
+      typeof payload.dirty === "boolean"
         ? payload.dirty
         : nextSignature !== lastSavedSignature;
+    if (typeof payload.editorDirty === "boolean") {
+      usesEditingBaseline = true;
+      hasUnsavedChanges.value = payload.editorDirty;
+    } else if (usesEditingBaseline && editingBaseline !== undefined) {
+      hasUnsavedChanges.value =
+        safeStringify(clonedBlocklyData) !== safeStringify(editingBaseline);
+    } else {
+      // Old plugins retain the persisted-snapshot policy and its narrow
+      // empty-backpack compatibility exception.
+      hasUnsavedChanges.value = onlyEmptyBackpackChanged
+        ? false
+        : typeof payload.dirty === "boolean"
+          ? payload.dirty
+          : nextSignature !== lastSavedSignature;
+    }
   };
 
   const markCurrentPayloadAsSaved = (payload: {
@@ -376,13 +399,25 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       latestEditorSignature = lastSavedSignature;
     }
     hasInitializedSavedSnapshot = true;
-    hasUnsavedChanges.value = latestEditorSignature !== lastSavedSignature;
+    persistenceDirty.value = latestEditorSignature !== lastSavedSignature;
+    if (usesEditingBaseline) {
+      editingBaseline = safeClone(payload.blocklyData);
+      hasUnsavedChanges.value =
+        latestEditorPayload !== null &&
+        safeStringify(latestEditorPayload.blocklyData) !==
+          safeStringify(editingBaseline);
+    } else {
+      hasUnsavedChanges.value = persistenceDirty.value;
+    }
   };
 
   const resetEditorSessionState = (payload: ScriptEditorSavedSnapshot) => {
     snapshotRevision += 1;
     clearPendingSaveSession(new Error(SNAPSHOT_CHANGED_ERROR));
     pendingRestorePayload = null;
+    editingBaseline = undefined;
+    usesEditingBaseline = false;
+    persistenceDirty.value = false;
     unsavedBlocklyData.value = null;
     LuaCode.value = "";
     JavaScriptCode.value = "";
@@ -446,6 +481,9 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       savedSnapshotPayload.blocklyData;
     return {
       data: safeClone(currentData),
+      ...(editingBaseline === undefined
+        ? {}
+        : { editingBaseline: safeClone(editingBaseline) }),
       code: {
         lua: savedSnapshotPayload.lua,
         js: savedSnapshotPayload.js,
@@ -1475,6 +1513,17 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           if (workspaceRevision !== null) {
             latestWorkspaceRevision = workspaceRevision;
           }
+          // The first trusted frame update may supply the normalized editing
+          // baseline. Never adopt an arbitrary later draft as a clean baseline.
+          if (
+            !editorContentReady.value &&
+            editingBaseline === undefined &&
+            workspaceRevision === 0 &&
+            typeof payload.editorDirty === "boolean" &&
+            isRecord(payload.editingBaseline)
+          ) {
+            editingBaseline = safeClone(payload.editingBaseline);
+          }
           clearEditorInitRetry();
           editorContentReady.value = true;
           const updateData: EditorUpdatePayload = {
@@ -1483,6 +1532,10 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
             blocklyData: payload.blocklyData,
             dirty:
               typeof payload.dirty === "boolean" ? payload.dirty : undefined,
+            editorDirty:
+              typeof payload.editorDirty === "boolean"
+                ? payload.editorDirty
+                : undefined,
             workspaceRevision: workspaceRevision ?? undefined,
           };
           if (pendingRestorePayload) {
@@ -1644,6 +1697,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     codeDialogTitle,
     unsavedBlocklyData,
     hasUnsavedChanges,
+    needsPersistence,
     draftVersions,
     versionDialogVisible,
     autoSaveEnabled,

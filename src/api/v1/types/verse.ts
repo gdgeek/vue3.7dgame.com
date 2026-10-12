@@ -65,7 +65,6 @@ export type MetaInfo = MetaInfoFull;
 export interface VerseTag {
   id: number;
   name: string;
-  type?: string;
 }
 
 /** 场景绑定空间 */

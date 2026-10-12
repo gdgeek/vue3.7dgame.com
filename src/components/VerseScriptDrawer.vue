@@ -10,13 +10,17 @@
     save-label-key="verse.view.script.save"
     @closed="$emit('closed')"
     @saved="$emit('saved', $event)"
+    @state-change="$emit('state-change', $event)"
   ></EditorScriptDrawer>
 </template>
 
 <script setup lang="ts">
 import { defineAsyncComponent, ref } from "vue";
 import EditorScriptDrawer from "./EditorScriptDrawer.vue";
-import type { ScriptDrawerHandle } from "./script-drawer-types";
+import type {
+  ScriptDrawerHandle,
+  ScriptDrawerStateChange,
+} from "./script-drawer-types";
 
 const VerseScriptEditor = defineAsyncComponent(() =>
   import("@/views/verse/script.vue").then((module) => module.default)
@@ -26,9 +30,13 @@ defineProps<{
   verseId: number;
   title: string;
   sceneData?: unknown;
-  beforePublish?: () => Promise<void>;
+  beforePublish?: () => Promise<void | string>;
 }>();
-defineEmits<{ closed: []; saved: [payload: unknown] }>();
+defineEmits<{
+  closed: [];
+  saved: [payload: unknown];
+  "state-change": [payload: ScriptDrawerStateChange];
+}>();
 const drawer = ref<ScriptDrawerHandle>();
 
 defineExpose({

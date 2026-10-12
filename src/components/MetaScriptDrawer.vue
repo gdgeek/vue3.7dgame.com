@@ -10,13 +10,17 @@
     save-label-key="meta.script.save"
     @closed="$emit('closed')"
     @saved="$emit('saved', $event)"
+    @state-change="$emit('state-change', $event)"
   ></EditorScriptDrawer>
 </template>
 
 <script setup lang="ts">
 import { defineAsyncComponent, ref } from "vue";
 import EditorScriptDrawer from "./EditorScriptDrawer.vue";
-import type { ScriptDrawerHandle } from "./script-drawer-types";
+import type {
+  ScriptDrawerHandle,
+  ScriptDrawerStateChange,
+} from "./script-drawer-types";
 
 const MetaScriptEditor = defineAsyncComponent(() =>
   import("@/views/meta/script.vue").then((module) => module.default)
@@ -27,7 +31,11 @@ defineProps<{
   title: string;
   metaData?: unknown;
 }>();
-defineEmits<{ closed: []; saved: [payload: unknown] }>();
+defineEmits<{
+  closed: [];
+  saved: [payload: unknown];
+  "state-change": [payload: ScriptDrawerStateChange];
+}>();
 const drawer = ref<ScriptDrawerHandle>();
 
 defineExpose({

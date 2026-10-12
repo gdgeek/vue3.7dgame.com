@@ -34,6 +34,8 @@ vi.mock("@/views/meta/script.vue", async () => {
           editorContentLoading: false,
           isSaving: false,
           hasUnsavedChanges: false,
+          needsPersistence: false,
+          ownerRevision: "script-revision",
           activeName: "blockly",
         });
         mounts(props, state, emit);
@@ -77,6 +79,7 @@ const cleanups: Array<() => void> = [];
 const createDrawer = () => {
   const closed = vi.fn();
   const saved = vi.fn();
+  const stateChanged = vi.fn();
   const metaData = {
     children: { entities: [{ parameters: { uuid: "live" } }] },
   };
@@ -86,6 +89,7 @@ const createDrawer = () => {
     metaData,
     onClosed: closed,
     onSaved: saved,
+    onStateChange: stateChanged,
   });
   app.component("ElDrawer", Drawer);
   app.component(
@@ -119,7 +123,7 @@ const createDrawer = () => {
     app.unmount();
     element.remove();
   });
-  return { vm, element, metaData, closed, saved };
+  return { vm, element, metaData, closed, saved, stateChanged };
 };
 
 describe("entity script drawer", () => {
@@ -191,6 +195,7 @@ describe("entity script drawer", () => {
       open: true,
       ready: true,
       dirty: true,
+      needsPersistence: false,
       saving: false,
       tab: "script",
     });
@@ -214,6 +219,39 @@ describe("entity script drawer", () => {
     await expect(navigation).resolves.toBe(true);
     expect(mounts).toHaveBeenCalledTimes(2);
     expect(unmounts).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows actual edits in the shared tag while separately reporting persistence requirements", async () => {
+    const { vm, element, stateChanged } = createDrawer();
+    vm.open();
+    await flushPromises();
+    const state = mounts.mock.calls[0][1];
+    state.needsPersistence = true;
+    await nextTick();
+    expect(element.querySelector(".editor-mode-tag__dirty")).toBeNull();
+    expect(stateChanged).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        editorKey: 102,
+        ownerRevision: "script-revision",
+        state: expect.objectContaining({
+          dirty: false,
+          needsPersistence: true,
+          ready: true,
+        }),
+      })
+    );
+    state.hasUnsavedChanges = true;
+    state.isSaving = true;
+    await nextTick();
+    expect(element.querySelector(".editor-mode-tag__dirty")).not.toBeNull();
+    resolveClose.mockResolvedValue(false);
+    await expect(vm.close()).resolves.toBe(false);
+    expect(element.querySelector(".editor-mode-tag__dirty")).not.toBeNull();
+    state.hasUnsavedChanges = false;
+    state.needsPersistence = false;
+    state.isSaving = false;
+    await nextTick();
+    expect(element.querySelector(".editor-mode-tag__dirty")).toBeNull();
   });
 
   it("does not treat an editor close event's MouseEvent as a caller guard", async () => {
