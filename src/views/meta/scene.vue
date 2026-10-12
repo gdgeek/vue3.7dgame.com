@@ -54,6 +54,7 @@
       :meta-data="scriptMetaData"
       @closed="handleScriptDrawerClosed"
       @saved="handleScriptSaved"
+      @state-change="handleScriptStateChange"
     ></MetaScriptDrawer>
     <ScriptDraftDialog
       :model-value="versionDialogVisible"
@@ -72,6 +73,11 @@
 </template>
 
 <script setup lang="ts">
+import {
+  useScriptPersistenceGuard,
+  scriptPersistenceVersion,
+} from "@/composables/useScriptPersistenceGuard";
+import type { ScriptDrawerStateChange } from "@/components/script-drawer-types";
 import {
   createWriteOptions,
   applyWriteRevision,
@@ -379,6 +385,25 @@ const entityTitle = computed(
   () => (metaDetail.value as metaInfo | null)?.title ?? ""
 );
 
+const scriptPersistence = useScriptPersistenceGuard(() => {
+  const entity = metaDetail.value as metaInfo | null;
+  return {
+    id: entity?.id ?? null,
+    revision: entity?.serverRevision ?? null,
+    scriptVersion: scriptPersistenceVersion(entity?.metaCode),
+    session: getHostSessionId(),
+  };
+});
+const handleScriptStateChange = (change: ScriptDrawerStateChange) => {
+  if (
+    !entityViewActive ||
+    !scriptDrawerActive.value ||
+    change.editorKey !== id.value
+  )
+    return;
+  scriptPersistence.update(change);
+};
+
 const handleScriptSaved = (result: unknown) => {
   const entity = metaDetail.value as metaInfo | null;
   if (
@@ -393,6 +418,7 @@ const handleScriptSaved = (result: unknown) => {
     typeof result.serverRevision !== "string"
   )
     return;
+  scriptPersistence.clear();
   // A script write advances the same entity revision without saving its 3D edits.
   entity.serverRevision = result.serverRevision;
   if (
@@ -1094,12 +1120,20 @@ useEntityWorkspaceWebMcp({
         Boolean(pendingRestorePayload.value),
       saving: isSavingVersion.value,
     },
-    script: scriptDrawer.value?.getState() ?? {
-      open: false,
-      ready: false,
-      dirty: false,
-      saving: false,
-      tab: null,
+    script: {
+      ...(scriptDrawer.value?.getState() ?? {
+        open: false,
+        ready: false,
+        dirty: false,
+        saving: false,
+        tab: null,
+      }),
+      needsPersistence:
+        scriptPersistence.needsPersistence.value ||
+        Boolean(
+          scriptDrawer.value?.getState().open &&
+            scriptDrawer.value?.getState().needsPersistence
+        ),
     },
   }),
   openScriptEditor: openScriptDrawerOrThrow,
@@ -2244,6 +2278,7 @@ watch(
 );
 
 watch(id, (newId, oldId) => {
+  scriptPersistence.clear();
   if (!Number.isFinite(newId) || newId === oldId) return;
   resetEditorStateForSceneChange();
 });
@@ -3515,6 +3550,7 @@ onActivated(() => {
 });
 onDeactivated(() => {
   entityViewActive = false;
+  scriptPersistence.clear();
   unregisterToolbar(toolbarOwner);
   webMcpLifecycle?.abort();
   webMcpRpc.cancel();
@@ -3559,6 +3595,7 @@ watch(
 
 onBeforeUnmount(() => {
   entityViewActive = false;
+  scriptPersistence.clear();
   editorInitialization.reset();
   webMcpLifecycle?.abort();
   webMcpLifecycle = null;

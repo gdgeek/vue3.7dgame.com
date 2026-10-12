@@ -63,7 +63,8 @@ const { editorVersionToolbarState } = useEditorVersionToolbar();
 const showUnsavedDot = computed(
   () =>
     editorVersionToolbarState.active &&
-    editorVersionToolbarState.status === "dirty"
+    (editorVersionToolbarState.getUnsavedChanges?.() ??
+      editorVersionToolbarState.status === "dirty")
 );
 
 const getQueryString = (value: unknown): string => {

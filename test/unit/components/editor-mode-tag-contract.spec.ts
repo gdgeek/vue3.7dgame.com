@@ -16,6 +16,14 @@ describe("editor mode tag integration", () => {
     expect(breadcrumb).toContain(':dirty="showUnsavedDot"');
   });
 
+  it("uses the shared tag in the drawer header with its local user edit state", () => {
+    const source = readSource("src/components/EditorScriptDrawer.vue");
+    expect(source).toContain("EditorModeTag");
+    expect(source).toContain(
+      ':dirty="Boolean(scriptEditor?.hasUnsavedChanges)"'
+    );
+  });
+
   it("uses the shared tag in both script editor modal headers", () => {
     const verseModal = readSource("src/components/ScriptEditorModal.vue");
     const metaModal = readSource("src/components/MetaScriptEditorModal.vue");

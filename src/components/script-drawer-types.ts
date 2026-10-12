@@ -2,8 +2,15 @@ export type ScriptDrawerState = {
   open: boolean;
   ready: boolean;
   dirty: boolean;
+  needsPersistence: boolean;
   saving: boolean;
   tab: "blockly" | "script" | null;
+};
+
+export type ScriptDrawerStateChange = {
+  editorKey: number;
+  ownerRevision: string | null;
+  state: ScriptDrawerState;
 };
 
 export type ScriptDrawerHandle = {
@@ -22,5 +29,7 @@ export type ScriptDrawerEditor = {
   isSaving: boolean;
   editorContentLoading: boolean;
   hasUnsavedChanges: boolean;
+  needsPersistence?: boolean;
+  ownerRevision?: string | null;
   activeName: "blockly" | "script";
 };

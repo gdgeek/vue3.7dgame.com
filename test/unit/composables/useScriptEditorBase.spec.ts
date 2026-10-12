@@ -125,9 +125,386 @@ function makeOptions(
   };
 }
 
+function setupEditingBaseline(
+  onPost = vi.fn().mockResolvedValue(undefined),
+  overrides: Partial<UseScriptEditorBaseOptions> = {}
+) {
+  const setup = withSetup(() =>
+    useScriptEditorBase(makeOptions({ ...overrides, onPost }))
+  );
+  const postMessage = vi.fn();
+  const contentWindow = markRaw({ postMessage });
+  setup.result.editor.value = {
+    contentWindow,
+  } as unknown as HTMLIFrameElement;
+  const message = (
+    type: string,
+    payload: Record<string, unknown>,
+    requestId?: string
+  ) =>
+    setup.result.handleMessage({
+      source: contentWindow,
+      origin: "https://blockly.test",
+      data: {
+        type,
+        requestId,
+        payload: {
+          hostSessionId: setup.result.getEditorInitState()!.hostSessionId,
+          ...payload,
+        },
+      },
+    } as unknown as MessageEvent);
+  return { ...setup, onPost, postMessage, message };
+}
+
 describe("useScriptEditorBase", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe("normalized editing baseline", () => {
+    const persisted = {
+      blocklyData: {
+        blocks: { blocks: [{ id: "tween", fields: { Time: 1 } }] },
+      },
+      js: "old();",
+      lua: "old()",
+    };
+    const normalized = {
+      backpack: [],
+      blocks: {
+        blocks: [
+          {
+            id: "tween",
+            inputs: {
+              Time: { shadow: { id: "stable-shadow", type: "math_number" } },
+            },
+          },
+        ],
+      },
+    };
+
+    it("opens migrated scripts clean without advancing persistence and preserves C across frame rebuilds", async () => {
+      const { result, message, onPost, unmount } = setupEditingBaseline();
+      result.beginEditorSession(persisted, "meta:baseline");
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 0,
+        blocklyData: normalized,
+        editingBaseline: normalized,
+        lua: "new()",
+        js: "new();",
+        dirty: true,
+        editorDirty: false,
+      });
+      expect(result.hasUnsavedChanges.value).toBe(false);
+      expect(result.needsPersistence.value).toBe(true);
+      expect(await result.resolveUnsavedChangesBeforeLeave()).toBe(true);
+      const preventDefault = vi.fn();
+      result.handleBeforeUnload({
+        preventDefault,
+        returnValue: "",
+      } as unknown as BeforeUnloadEvent);
+      expect(preventDefault).not.toHaveBeenCalled();
+      expect(onPost).not.toHaveBeenCalled();
+      result.reloadEditorFrame();
+      expect(result.getEditorInitState()).toMatchObject({
+        data: normalized,
+        editingBaseline: normalized,
+        persisted: {
+          data: persisted.blocklyData,
+          code: { js: persisted.js, lua: persisted.lua },
+        },
+      });
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 0,
+        blocklyData: normalized,
+        editingBaseline: { wrong: "new-random-id" },
+        lua: "new()",
+        js: "new();",
+        dirty: true,
+        editorDirty: false,
+      });
+      expect(result.getEditorInitState()!.editingBaseline).toEqual(normalized);
+      expect(result.hasUnsavedChanges.value).toBe(false);
+      unmount();
+    });
+
+    it("retains a real draft and ignores later attempts to replace the clean baseline", async () => {
+      const { result, message, unmount } = setupEditingBaseline();
+      result.beginEditorSession(persisted);
+      const draft = { ...normalized, variables: [{ id: "v", name: "edited" }] };
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 0,
+        blocklyData: draft,
+        editingBaseline: normalized,
+        lua: "draft()",
+        js: "draft();",
+        dirty: true,
+        editorDirty: true,
+      });
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 1,
+        blocklyData: draft,
+        editingBaseline: draft,
+        lua: "draft()",
+        js: "draft();",
+        dirty: true,
+        editorDirty: true,
+      });
+      expect(result.hasUnsavedChanges.value).toBe(true);
+      result.reloadEditorFrame();
+      expect(result.getEditorInitState()!.data).toEqual(draft);
+      expect(result.getEditorInitState()!.editingBaseline).toEqual(normalized);
+      result.discardEditorChanges();
+      expect(result.getEditorInitState()!.editingBaseline).toBeUndefined();
+      expect(result.getEditorInitState()!.data).toEqual(persisted.blocklyData);
+      unmount();
+    });
+
+    it("persists an explicit migration save even without user edits", async () => {
+      const { result, message, postMessage, onPost, unmount } =
+        setupEditingBaseline();
+      result.beginEditorSession(persisted);
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 0,
+        blocklyData: normalized,
+        editingBaseline: normalized,
+        lua: "new()",
+        js: "new();",
+        dirty: true,
+        editorDirty: false,
+      });
+      const pending = result.save();
+      await message(
+        "RESPONSE",
+        {
+          action: "save",
+          saveId: "migration-save",
+          data: normalized,
+          lua: "new()",
+          js: "new();",
+          dirty: true,
+          editorDirty: false,
+        },
+        requestIdFrom(postMessage)
+      );
+      await pending;
+      expect(onPost).toHaveBeenCalledWith(
+        { data: normalized, lua: "new()", js: "new();" },
+        { trigger: "manual" }
+      );
+      expect(result.getEditorInitState()!.persisted.data).toEqual(normalized);
+      expect(result.getEditorInitState()!.editingBaseline).toEqual(normalized);
+      expect(result.needsPersistence.value).toBe(false);
+      expect(result.hasUnsavedChanges.value).toBe(false);
+      expect(postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "SAVE_ACK" }),
+        "https://blockly.test"
+      );
+      unmount();
+    });
+
+    it("ACK advances only the submitted snapshot when editing continues during persistence", async () => {
+      let settle!: () => void;
+      const onPost = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            settle = resolve;
+          })
+      );
+      const { result, message, postMessage, unmount } =
+        setupEditingBaseline(onPost);
+      result.beginEditorSession(persisted);
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 0,
+        blocklyData: normalized,
+        editingBaseline: normalized,
+        lua: "new()",
+        js: "new();",
+        dirty: true,
+        editorDirty: false,
+      });
+      const pending = result.save();
+      const response = message(
+        "RESPONSE",
+        {
+          action: "save",
+          saveId: "earlier",
+          data: normalized,
+          lua: "new()",
+          js: "new();",
+          dirty: true,
+          editorDirty: false,
+        },
+        requestIdFrom(postMessage)
+      );
+      const newer = { ...normalized, variables: [{ id: "v", name: "later" }] };
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 1,
+        blocklyData: newer,
+        lua: "later()",
+        js: "later();",
+        dirty: true,
+        editorDirty: true,
+      });
+      settle();
+      await response;
+      await pending;
+      expect(result.getEditorInitState()!.persisted.data).toEqual(normalized);
+      expect(result.getEditorInitState()!.editingBaseline).toEqual(normalized);
+      expect(result.getEditorInitState()!.data).toEqual(newer);
+      expect(result.hasUnsavedChanges.value).toBe(true);
+      expect(result.needsPersistence.value).toBe(true);
+      unmount();
+    });
+
+    it("failed migration saves retain both baselines and protect uncertain persistence", async () => {
+      const onPost = vi.fn().mockRejectedValue(new Error("network failed"));
+      const { result, message, postMessage, unmount } =
+        setupEditingBaseline(onPost);
+      result.beginEditorSession(persisted);
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 0,
+        blocklyData: normalized,
+        editingBaseline: normalized,
+        lua: "new()",
+        js: "new();",
+        dirty: true,
+        editorDirty: false,
+      });
+      const pending = result.save();
+      const failure = expect(pending).rejects.toThrow("network failed");
+      await message(
+        "RESPONSE",
+        {
+          action: "save",
+          saveId: "failed",
+          data: normalized,
+          lua: "new()",
+          js: "new();",
+          dirty: true,
+          editorDirty: false,
+        },
+        requestIdFrom(postMessage)
+      );
+      await failure;
+      expect(result.getEditorInitState()!.persisted.data).toEqual(
+        persisted.blocklyData
+      );
+      expect(result.getEditorInitState()!.editingBaseline).toEqual(normalized);
+      expect(result.needsPersistence.value).toBe(true);
+      expect(result.hasUnsavedChanges.value).toBe(true);
+      expect(postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "SAVE_NACK" }),
+        "https://blockly.test"
+      );
+      unmount();
+    });
+
+    it("does not auto-save initialization-only migrations", async () => {
+      vi.useFakeTimers();
+      try {
+        const { result, message, postMessage, onPost, unmount } =
+          setupEditingBaseline(vi.fn().mockResolvedValue(undefined), {
+            getDraftStorageKey: () => "normalized-initialization-autosave-test",
+          });
+        result.beginEditorSession(persisted);
+        await message("EVENT", {
+          event: "update",
+          workspaceRevision: 0,
+          blocklyData: normalized,
+          editingBaseline: normalized,
+          lua: "new()",
+          js: "new();",
+          dirty: true,
+          editorDirty: false,
+        });
+        await vi.advanceTimersByTimeAsync(300_000);
+        expect(
+          postMessage.mock.calls.some(
+            ([envelope]) => envelope.type === "REQUEST"
+          )
+        ).toBe(false);
+        expect(onPost).not.toHaveBeenCalled();
+        expect(result.needsPersistence.value).toBe(true);
+        unmount();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("a verified noChange converges C to the exact persisted snapshot", async () => {
+      const { result, message, postMessage, onPost, unmount } =
+        setupEditingBaseline();
+      result.beginEditorSession({
+        blocklyData: normalized,
+        js: "same();",
+        lua: "same()",
+      });
+      await message("EVENT", {
+        event: "update",
+        workspaceRevision: 0,
+        blocklyData: normalized,
+        editingBaseline: {},
+        lua: "same()",
+        js: "same();",
+        dirty: false,
+        editorDirty: true,
+      });
+      const pending = result.save();
+      await message(
+        "RESPONSE",
+        {
+          action: "save",
+          noChange: true,
+          data: normalized,
+          lua: "same()",
+          js: "same();",
+          dirty: false,
+          editorDirty: false,
+        },
+        requestIdFrom(postMessage)
+      );
+      await pending;
+      expect(onPost).not.toHaveBeenCalled();
+      expect(result.getEditorInitState()!.editingBaseline).toEqual(normalized);
+      expect(result.hasUnsavedChanges.value).toBe(false);
+      expect(result.needsPersistence.value).toBe(false);
+      unmount();
+    });
+
+    it("ignores a stale baseline after switching scripts", async () => {
+      const { result, message, unmount } = setupEditingBaseline();
+      result.beginEditorSession(persisted, "meta:old");
+      const staleSession = result.getEditorInitState()!.hostSessionId;
+      result.beginEditorSession(
+        { blocklyData: {}, js: "", lua: "" },
+        "meta:new"
+      );
+      await message("EVENT", {
+        event: "update",
+        hostSessionId: staleSession,
+        workspaceRevision: 0,
+        blocklyData: normalized,
+        editingBaseline: normalized,
+        lua: "new()",
+        js: "new();",
+        dirty: true,
+        editorDirty: false,
+      });
+      expect(result.getEditorInitState()!.editingBaseline).toBeUndefined();
+      expect(result.needsPersistence.value).toBe(false);
+      expect(result.editorContentReady.value).toBe(false);
+      unmount();
+    });
   });
 
   it("lets an embedded host own route protection without adding a duplicate guard", () => {

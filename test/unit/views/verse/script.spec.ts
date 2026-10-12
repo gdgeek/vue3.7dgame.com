@@ -14,6 +14,14 @@ const mocks = vi.hoisted(() => ({
   confirm: vi.fn(),
   success: vi.fn(),
   notice: vi.fn(),
+  failure: vi.fn(),
+  registerToolbar: vi.fn(),
+  updateToolbarStatus: vi.fn(),
+  unregisterToolbar: vi.fn(),
+  runtimeTools: vi.fn(() => []),
+  registerVerseTools: vi.fn(),
+  request: vi.fn(),
+  openPreview: vi.fn(),
 }));
 const route = reactive({ name: "Script", query: { id: "7" } });
 vi.mock("vue-router", () => ({
@@ -45,7 +53,7 @@ vi.mock("element-plus", () => ({
   ElMessage: {
     success: mocks.success,
     info: mocks.notice,
-    error: vi.fn(),
+    error: mocks.failure,
     warning: vi.fn(),
   },
   ElMessageBox: { confirm: mocks.confirm },
@@ -58,9 +66,9 @@ vi.mock("@/components/UnityPreviewDialog.vue", () => ({
 }));
 vi.mock("@/composables/useEditorVersionToolbar", () => ({
   useEditorVersionToolbar: () => ({
-    registerToolbar: vi.fn(),
-    updateToolbarStatus: vi.fn(),
-    unregisterToolbar: vi.fn(),
+    registerToolbar: mocks.registerToolbar,
+    updateToolbarStatus: mocks.updateToolbarStatus,
+    unregisterToolbar: mocks.unregisterToolbar,
   }),
 }));
 vi.mock("@/composables/useScriptEditorBase", () => ({
@@ -75,20 +83,24 @@ vi.mock("@/composables/useUnityPreviewBridge", () => ({
     src: ref(""),
     runtimeState: ref({}),
     close: vi.fn(async () => {}),
+    open: mocks.openPreview,
   }),
 }));
 vi.mock("@/utils/iframeRpc", () => ({
   createIframeRpc: () => ({
-    request: vi.fn(),
+    request: mocks.request,
     handleMessage: vi.fn(),
     cancel: vi.fn(),
   }),
 }));
 vi.mock("@/services/webmcp/verse-script-tools", () => ({
-  registerVerseScriptWebMcpTools: vi.fn(),
+  registerVerseScriptWebMcpTools: mocks.registerVerseTools,
 }));
 vi.mock("@/services/webmcp/script-block-tools", () => ({
   registerScriptBlockWebMcpTools: vi.fn(),
+}));
+vi.mock("@/services/webmcp/scene-runtime-preview-tools", () => ({
+  createSceneRuntimePreviewTools: mocks.runtimeTools,
 }));
 vi.mock("@/services/webmcp/model-context", () => ({
   registerWebMcpTools: vi.fn(),
@@ -130,6 +142,7 @@ function createBase(options: UseScriptEditorBaseOptions) {
     unsavedBlocklyData: ref(null),
     resolveUnsavedChangesBeforeLeave: vi.fn(async () => true),
     hasUnsavedChanges: ref(false),
+    needsPersistence: ref(false),
     draftVersions: ref([]),
     versionDialogVisible: ref(false),
     autoSaveEnabled: ref(false),
@@ -149,6 +162,7 @@ function createBase(options: UseScriptEditorBaseOptions) {
     getEditorInitState: () => ({
       data: {},
       code: { js: "", lua: "" },
+      editingBaseline: { canonical: true },
       persisted: { data: {} },
       hostSessionId: `script-session-${session.value}`,
     }),
@@ -165,11 +179,18 @@ function createBase(options: UseScriptEditorBaseOptions) {
 }
 const bases: Array<ReturnType<typeof createBase>> = [];
 const cleanups: Array<() => void> = [];
-function mountScript(beforePublish?: () => Promise<void>) {
+function mountScript(
+  beforePublish?: () => Promise<void | string>,
+  props: { embedded?: boolean; verseId?: number } = {}
+) {
   const saved = vi.fn();
   const root = document.createElement("div");
   document.body.appendChild(root);
-  const app = createApp(VerseScript, { beforePublish, onSaved: saved });
+  const app = createApp(VerseScript, {
+    ...props,
+    beforePublish,
+    onSaved: saved,
+  });
   app.config.globalProperties.$t = (key: string) => key;
   app.config.warnHandler = () => {};
   app.directive("highlight", {});
@@ -191,7 +212,11 @@ function mountScript(beforePublish?: () => Promise<void>) {
     "FontAwesomeIcon",
   ])
     app.component(name, passthrough);
-  const vm = app.mount(root) as unknown as { save: () => Promise<void> };
+  const vm = app.mount(root) as unknown as {
+    save: () => Promise<void>;
+    needsPersistence: boolean;
+    ownerRevision: string | null;
+  };
   let mounted = true;
   const unmount = () => {
     if (!mounted) return;
@@ -213,6 +238,8 @@ beforeEach(() => {
     data: { serverRevision: nextRevision },
   });
   mocks.takePhoto.mockResolvedValue({ data: { id: 1 } });
+  mocks.request.mockResolvedValue({ ok: true, warnings: [] });
+  mocks.openPreview.mockResolvedValue(undefined);
   mocks.confirm.mockReturnValue(new Promise(() => {}));
   mocks.useBase.mockImplementation((options: UseScriptEditorBaseOptions) => {
     const base = createBase(options);
@@ -248,6 +275,28 @@ describe("scene script save and publication ownership", () => {
     expect(mocks.success).toHaveBeenCalledWith(
       "verse.view.sceneEditor.publishSuccess"
     );
+  });
+
+  it("publishes with the parent 3D save revision after the script save advances it", async () => {
+    const parentRevision = `sha256:${"c".repeat(64)}`;
+    const preparation = deferred<string>();
+    const beforePublish = vi.fn(() => preparation.promise);
+    mocks.confirm.mockResolvedValue(true);
+    const view = mountScript(beforePublish);
+    await flushAsync();
+    await view.vm.save();
+    expect(view.vm.ownerRevision).toBe(nextRevision);
+    expect(beforePublish).toHaveBeenCalledOnce();
+    expect(mocks.takePhoto).not.toHaveBeenCalled();
+    preparation.resolve(parentRevision);
+    await flushAsync();
+    expect(view.vm.ownerRevision).toBe(parentRevision);
+    expect(mocks.takePhoto).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ expectedRevision: parentRevision })
+    );
+    // Advancing the write revision must not reload over the parent's unsaved 3D data.
+    expect(mocks.getVerse).toHaveBeenCalledTimes(2); // initial load + publication read-back
   });
 
   it.each(["target", "session", "unmount"])(
@@ -293,7 +342,7 @@ describe("scene script save and publication ownership", () => {
   it.each(["target", "session", "unmount"])(
     "rechecks the %s after asynchronous preparation before publishing",
     async (change) => {
-      const preparation = deferred<void>();
+      const preparation = deferred<string>();
       const beforePublish = vi.fn(() => preparation.promise);
       mocks.confirm.mockResolvedValue(true);
       const view = mountScript(beforePublish);
@@ -304,11 +353,111 @@ describe("scene script save and publication ownership", () => {
       else if (change === "session") view.base.session.value += 1;
       else view.unmount();
       await flushAsync();
-      preparation.resolve();
+      preparation.resolve(`sha256:${"c".repeat(64)}`);
       await flushAsync();
       expect(mocks.takePhoto).not.toHaveBeenCalled();
     }
   );
+
+  it("forwards editingBaseline and keeps the toolbar edit marker independent of persistence", async () => {
+    const view = mountScript();
+    await flushAsync();
+    expect(view.base.postMessage).toHaveBeenCalledWith(
+      "INIT",
+      expect.objectContaining({
+        config: expect.objectContaining({
+          editingBaseline: { canonical: true },
+        }),
+      })
+    );
+    const toolbar = mocks.registerToolbar.mock.lastCall![1];
+    view.base.needsPersistence.value = true;
+    await nextTick();
+    expect(view.vm.needsPersistence).toBe(true);
+    expect(view.vm.ownerRevision).toBe(revision);
+    expect(toolbar.getUnsavedChanges()).toBe(false);
+    view.base.hasUnsavedChanges.value = true;
+    expect(toolbar.getUnsavedChanges()).toBe(true);
+  });
+
+  it("never replaces the 3D toolbar owner from an embedded scene script", async () => {
+    const view = mountScript(undefined, { embedded: true, verseId: 7 });
+    await flushAsync();
+    view.base.hasUnsavedChanges.value = true;
+    await nextTick();
+    view.unmount();
+    expect(mocks.registerToolbar).not.toHaveBeenCalled();
+    expect(mocks.updateToolbarStatus).not.toHaveBeenCalled();
+    expect(mocks.unregisterToolbar).not.toHaveBeenCalled();
+  });
+
+  it("blocks publication when persistence changes during confirmation", async () => {
+    const confirmation = deferred<boolean>();
+    const beforePublish = vi.fn(async () => {});
+    mocks.confirm.mockReturnValue(confirmation.promise);
+    const view = mountScript(beforePublish);
+    await flushAsync();
+    await view.vm.save();
+    view.base.needsPersistence.value = true;
+    confirmation.resolve(true);
+    await flushAsync();
+    expect(beforePublish).not.toHaveBeenCalled();
+    expect(mocks.takePhoto).not.toHaveBeenCalled();
+    expect(mocks.failure).toHaveBeenCalledWith(
+      "请先保存当前 Blockly 工作区，再发布场景"
+    );
+    expect(mocks.notice).not.toHaveBeenCalledWith(
+      "verse.view.sceneEditor.publishCanceled"
+    );
+  });
+
+  it("rechecks persistence after asynchronous publication preparation", async () => {
+    const preparation = deferred<void>();
+    mocks.confirm.mockResolvedValue(true);
+    const view = mountScript(() => preparation.promise);
+    await flushAsync();
+    await view.vm.save();
+    view.base.needsPersistence.value = true;
+    preparation.resolve();
+    await flushAsync();
+    expect(mocks.takePhoto).not.toHaveBeenCalled();
+  });
+
+  it("requires adapted generated code to be saved before standalone runtime preview", async () => {
+    const view = mountScript();
+    await flushAsync();
+    view.base.editorContentReady.value = true;
+    await flushAsync();
+    const runtime = mocks.runtimeTools.mock.lastCall![0] as {
+      startPreview: () => Promise<unknown>;
+    };
+    view.base.needsPersistence.value = true;
+    await expect(runtime.startPreview()).rejects.toThrow(
+      "请先保存当前 Blockly 工作区"
+    );
+    expect(mocks.request).not.toHaveBeenCalled();
+    expect(mocks.openPreview).not.toHaveBeenCalled();
+    view.base.needsPersistence.value = false;
+    await runtime.startPreview();
+    expect(mocks.openPreview).toHaveBeenCalledOnce();
+  });
+
+  it("rechecks script persistence after asynchronous runtime validation", async () => {
+    const view = mountScript();
+    await flushAsync();
+    view.base.editorContentReady.value = true;
+    await flushAsync();
+    const runtime = mocks.runtimeTools.mock.lastCall![0] as {
+      startPreview: () => Promise<unknown>;
+    };
+    const validation = deferred<{ ok: boolean }>();
+    mocks.request.mockReturnValue(validation.promise);
+    const starting = runtime.startPreview();
+    view.base.needsPersistence.value = true;
+    validation.resolve({ ok: true });
+    await expect(starting).rejects.toThrow("请先保存当前 Blockly 工作区");
+    expect(mocks.openPreview).not.toHaveBeenCalled();
+  });
 
   it("does not show a late publish result in another scene", async () => {
     const publication = deferred<{ data: object }>();
