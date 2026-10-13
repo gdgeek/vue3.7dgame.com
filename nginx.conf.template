@@ -7,6 +7,24 @@
 # the nearest checked-in white-label config and unknown hosts use default.json.
 include /usr/share/nginx/html/config/domains/white-label-nginx-map.conf;
 
+# Only reviewed public asset paths may use the optional read-only previous-build
+# volume. HTML, runtime/configuration JSON, source maps and API paths never do.
+map $uri $previous_web_asset_uri {
+    default "";
+    "~*^/(?:js|css|assets|fonts|img|images|local|resource|media)/(?:[A-Za-z0-9_@()+,-][A-Za-z0-9_@()+,. -]*/)*[A-Za-z0-9_@()+,-][A-Za-z0-9_@()+,. -]*\.(?:js|css|wasm|woff2?|eot|ttf|otf|png|jpe?g|gif|webp|svg|ico|avif|cur|mp3|ogg|wav|mp4|webm|glb|gltf|obj|bin|data|pdf)$" $uri;
+    "~*^/[A-Za-z0-9_@()+,-][A-Za-z0-9_@()+,. -]*\.(?:png|jpe?g|gif|webp|svg|ico|avif|cur)$" $uri;
+}
+
+map $uri $web_asset_expires {
+    default 30d;
+    ~*\.(?:js|css|wasm|woff2?|eot|ttf|otf)$ 1y;
+}
+
+map $uri $web_asset_cache_control {
+    default "public";
+    ~*\.(?:js|css|wasm|woff2?|eot|ttf|otf)$ "public, immutable";
+}
+
 server {
     listen 80;
     server_name localhost;
@@ -36,7 +54,7 @@ server {
         image/x-icon;
 
     # ============ 反向代理 - 文档 API (WordPress) ============
-    location /api-doc/ {
+    location ^~ /api-doc/ {
         proxy_pass ${APP_DOC_API_URL}/;
 
         # HTTPS 上游：启用 SNI
@@ -179,24 +197,27 @@ server {
             =404;
     }
 
-    # JS/CSS 文件带 hash，长期缓存
-    location ~* \.(?:js|css)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-        try_files $uri =404;
+    # New files always win. An absent optional volume simply leaves a 404.
+    # Uncompressed assets also serve ordinary gzip negotiation; encoded .gz
+    # URLs and the separately retained Unity tree are outside this fallback.
+    location ~* \.(?:js|css|wasm|woff2?|eot|ttf|otf|png|jpe?g|gif|webp|svg|ico|avif|cur|mp3|ogg|wav|mp4|webm|glb|gltf|obj|bin|data|pdf)$ {
+        expires $web_asset_expires;
+        add_header Cache-Control $web_asset_cache_control;
+        try_files $uri @previous_web_assets;
     }
 
-    # 字体文件长期缓存
-    location ~* \.(?:woff2?|eot|ttf|otf)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-        try_files $uri =404;
+    location @previous_web_assets {
+        root /opt/identity-previous-web-assets;
+        disable_symlinks on;
+        if ($previous_web_asset_uri = "") { return 404; }
+        expires $web_asset_expires;
+        add_header Cache-Control $web_asset_cache_control;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $previous_web_asset_uri =404;
     }
 
-    # 图片缓存 30 天
-    location ~* \.(?:png|jpg|jpeg|gif|webp|svg|ico)$ {
-        expires 30d;
-        add_header Cache-Control "public";
+    # These derived/source files never use the retained volume or the SPA.
+    location ~* \.(?:gz|map)$ {
         try_files $uri =404;
     }
 

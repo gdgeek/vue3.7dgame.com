@@ -32,7 +32,9 @@ beforeAll(() => {
  * Helper: extract content of a specific location block from the config.
  */
 function extractLocationBlock(config: string, path: string): string {
-  const marker = `location ${path}`;
+  const marker = config.includes(`location ${path}`)
+    ? `location ${path}`
+    : `location ^~ ${path}`;
   const start = config.indexOf(marker);
   if (start === -1) return "";
   let depth = 0;
@@ -120,7 +122,7 @@ describe("nginx.conf.template — static proxy location blocks", () => {
   });
 
   it("contains /api-doc/ location block", () => {
-    expect(nginxConfig).toContain("location /api-doc/");
+    expect(nginxConfig).toContain("location ^~ /api-doc/");
   });
 
   it("serves the built-in WebGL path and rejects the arbitrary URL proxy", () => {
@@ -279,6 +281,28 @@ describe("nginx.conf.template — try_files fallback preserved", () => {
   it("falls back to the SPA without probing colliding asset directories", () => {
     expect(nginxConfig).toContain("try_files $uri /index.html");
     expect(nginxConfig).not.toContain("try_files $uri $uri/ /index.html");
+  });
+
+  it("uses the optional previous-build volume only behind a public asset path gate", () => {
+    const previous = extractLocationBlock(nginxConfig, "@previous_web_assets");
+    expect(previous).toContain("root /opt/identity-previous-web-assets");
+    expect(previous).toContain("disable_symlinks on");
+    expect(previous).toContain(
+      'if ($previous_web_asset_uri = "") { return 404; }'
+    );
+    expect(previous).toContain("try_files $previous_web_asset_uri =404");
+    expect(previous).toContain('X-Content-Type-Options "nosniff"');
+    expect(previous).not.toContain("/index.html");
+    expect(nginxConfig).toContain("try_files $uri @previous_web_assets");
+    expect(nginxConfig).toContain("map $uri $previous_web_asset_uri");
+    expect(nginxConfig).toContain('default ""');
+  });
+
+  it("prevents static regular expressions from taking API proxy requests", () => {
+    expect(entrypointScript.match(/location \^~ \$\{LOC_PATH\}/g)).toHaveLength(
+      2
+    );
+    expect(nginxConfig).toContain("location ^~ /api-doc/");
   });
 });
 

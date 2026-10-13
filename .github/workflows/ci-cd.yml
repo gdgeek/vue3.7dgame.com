@@ -144,6 +144,7 @@ jobs:
         run: |
           image=$(printf '%s\n' "$IMAGE_TAGS" | head -n 1)
           node scripts/unity/container-smoke.mjs "$image"
+          node scripts/static-assets/container-smoke.mjs "$image"
 
       - name: Push only the verified image
         id: publish
