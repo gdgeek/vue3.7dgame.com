@@ -287,6 +287,13 @@
               </el-select>
             </div>
 
+            <SceneProperties
+              v-if="isRoot && currentVerse"
+              :key="`${currentVerse.id}:${currentVerseIsPublic}`"
+              :scene-id="currentVerse.id"
+              @added="handleScenePropertyAdded"
+            ></SceneProperties>
+
             <!-- Visibility Section (Restricted) -->
             <div v-if="canManage" class="info-section">
               <div class="section-header">
@@ -428,6 +435,8 @@ import {
 } from "@/components/StandardPage";
 import TagsSelect from "@/components/TagsSelect.vue";
 import Create from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
+import SceneProperties from "@/components/MrPP/MrPPVerse/SceneProperties.vue";
+import type { SceneProperty } from "@/api/v1/scene-properties";
 import ImportDialog from "@/components/ScenePackage/ImportDialog.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
@@ -493,6 +502,7 @@ const detailVisible = ref(false);
 const detailLoading = ref(false);
 const currentVerse = ref<VerseData | null>(null);
 const ability = useAbility();
+const isRoot = computed(() => ability.can("root", "all"));
 
 const isPublicValue = (value: unknown) => {
   return value === true || value === 1 || value === "1" || value === "true";
@@ -863,6 +873,13 @@ const handleVisibilityChange = async (isPublic: boolean) => {
     refresh();
   } catch (err) {
     Message.error(t("verse.listPage.visibilityUpdateFailed"));
+  }
+};
+
+const handleScenePropertyAdded = (property: SceneProperty) => {
+  if (property.key === "public" && currentVerse.value) {
+    syncVerseVisibility(currentVerse.value.id, true);
+    refresh();
   }
 };
 

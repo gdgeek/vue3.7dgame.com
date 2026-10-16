@@ -1,6 +1,24 @@
 // 场景部分国际化
 export default {
   verse: {
+    properties: {
+      title: "场景 Property",
+      key: "属性键（key）",
+      info: "描述（info）",
+      infoOptional: "描述（info，可选）",
+      keyPlaceholder: "请输入属性键",
+      infoPlaceholder: "请输入属性描述（可选）",
+      add: "新增 Property",
+      added: "Property 已添加",
+      empty: "此场景暂无 Property",
+      noInfo: "暂无描述",
+      loading: "正在加载 Property…",
+      retry: "重试",
+      loadFailed: "无法加载场景 Property，请重试。",
+      addFailed: "添加 Property 失败，输入已保留，请重试。",
+      keyInvalid: "属性键去除首尾空格后须为 1–255 个字符。",
+      infoTooLong: "属性描述不能超过 65,535 字节，请缩短内容。",
+    },
     toolbar: {
       run: "运行",
       versions: "版本",

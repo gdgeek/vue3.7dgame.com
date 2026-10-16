@@ -1,6 +1,26 @@
 // verse translations for en-US
 export default {
   verse: {
+    properties: {
+      title: "Scene Properties",
+      key: "Property key",
+      info: "Description (info)",
+      infoOptional: "Description (info, optional)",
+      keyPlaceholder: "Enter a property key",
+      infoPlaceholder: "Enter a description (optional)",
+      add: "Add Property",
+      added: "Property added",
+      empty: "This scene has no properties yet",
+      noInfo: "No description",
+      loading: "Loading properties…",
+      retry: "Retry",
+      loadFailed: "Unable to load scene properties. Please try again.",
+      addFailed:
+        "Unable to add property. Your input is preserved. Please retry.",
+      keyInvalid: "The trimmed property key must contain 1–255 characters.",
+      infoTooLong:
+        "The description must not exceed 65,535 bytes. Please shorten it.",
+    },
     toolbar: {
       run: "Run",
       versions: "Versions",

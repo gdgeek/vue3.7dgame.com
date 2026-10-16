@@ -89,6 +89,13 @@
           <br />
         </el-card>
 
+        <SceneProperties
+          v-if="verse && isRoot"
+          :key="`${verse.id}:${verse.public}`"
+          :scene-id="verse.id"
+          @added="handleScenePropertyAdded"
+        ></SceneProperties>
+
         <br />
         <br />
       </el-col>
@@ -100,6 +107,8 @@
 import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 import Tags from "@/components/Tags.vue";
+import SceneProperties from "./SceneProperties.vue";
+import type { SceneProperty } from "@/api/v1/scene-properties";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import {
@@ -135,6 +144,10 @@ const verseTagsForComponent = computed<VerseTagLink[]>(
 );
 
 const userStore = useUserStore();
+const isRoot = computed(() => {
+  const _ = userStore.userInfo;
+  return userStore.getRole() === userStore.RoleEnum.Root;
+});
 const isAdmin = computed(() => {
   // 显式引用 userInfo 以确保响应式更新
   const _ = userStore.userInfo;
@@ -284,6 +297,13 @@ const handlePublicChange = async (value: string | number | boolean) => {
     verse.value.public = !isPublic;
     ElMessage.error(t("verse.view.public.error"));
   }
+};
+
+const handleScenePropertyAdded = (property: SceneProperty) => {
+  if (property.key === "public" && verse.value) {
+    verse.value.public = true;
+  }
+  emit("changed");
 };
 
 const comeIn = () => {
