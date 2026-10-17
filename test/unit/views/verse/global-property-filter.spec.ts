@@ -117,7 +117,7 @@ vi.mock("@/components/MrPP/MrPPVerse/ScenePropertiesDialog.vue", () => ({
   default: defineComponent({
     props: { sceneId: Number },
     emits: ["added", "removed", "globally-deleted"],
-    template: `<div class="property-management" :data-id="sceneId"><button class="unlink-filter-property" @click="$emit('removed', {id:31,key:'interactive',info:null})">Unlink</button><button class="create-property" @click="$emit('added', {id:33,key:'new-property',info:null})">Create property</button><button class="delete-filter-property" @click="$emit('globally-deleted', {id:31,key:'interactive',info:null})">Delete property</button></div>`,
+    template: `<div class="property-management" :data-id="sceneId"><button class="unlink-filter-property" @click="$emit('removed', {id:31,key:'interactive',info:null})">Unlink</button><button class="unlink-other-property" @click="$emit('removed', {id:32,key:'public',info:null})">Unlink another property</button><button class="create-property" @click="$emit('added', {id:33,key:'new-property',info:null})">Create property</button><button class="delete-filter-property" @click="$emit('globally-deleted', {id:31,key:'interactive',info:null})">Delete property</button></div>`,
   }),
 }));
 vi.mock("@/components/TransitionWrapper.vue", () => ({
@@ -363,13 +363,75 @@ describe("root global scene filtering by property", () => {
     await flush();
     expect(el.textContent).toContain(mine.name);
   });
-  it("refreshes global matches for a non-public property association change", async () => {
+  it("closes details and removes the scene immediately when unlinking the selected global property", async () => {
     const el = await mount();
     await choose(el, property.key);
     await click(el, '.open-scene[data-id="683"]');
+    const matches = deferred<ReturnType<typeof response>>();
     mocks.getScenesByProperty.mockClear();
+    mocks.getScenesByProperty.mockReturnValueOnce(matches.promise);
     await click(el, ".unlink-filter-property");
     expect(mocks.getScenesByProperty).toHaveBeenCalledTimes(1);
+    expect(el.querySelector(".detail-panel")).toBeNull();
+    expect(el.querySelector('.open-scene[data-id="683"]')).toBeNull();
+    expect(mocks.getSceneByProperty).toHaveBeenCalledTimes(1);
+    expect(mocks.getVerses).toHaveBeenCalledTimes(1);
+    expect(el.querySelector(".scene-property-scope")?.textContent).toContain(
+      "Global scenes · interactive"
+    );
+    matches.resolve(response([mine]));
+    await flush();
+    expect(el.textContent).not.toContain(foreign.name);
+  });
+  it("reloads global scene details through the selected property after unlinking another property", async () => {
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    const editor = el.querySelector(".property-management");
+    mocks.getSceneByProperty.mockResolvedValueOnce({
+      data: { ...foreign, name: "Updated private scene" },
+    });
+    await click(el, ".unlink-other-property");
+    expect(mocks.getSceneByProperty).toHaveBeenLastCalledWith(
+      683,
+      31,
+      "image,author,tags,metas,public"
+    );
+    expect(mocks.getSceneByProperty).toHaveBeenCalledTimes(2);
+    expect(mocks.getVerse).not.toHaveBeenCalled();
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(
+      "Updated private scene"
+    );
+    expect(el.querySelector(".property-management")).toBe(editor);
+  });
+  it("does not restore an unlinked scene from an earlier in-flight detail refresh", async () => {
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    const previous = deferred<{ data: typeof foreign }>();
+    mocks.getSceneByProperty.mockReturnValueOnce(previous.promise);
+    await click(el, ".unlink-other-property");
+    mocks.getScenesByProperty.mockResolvedValueOnce(response([mine]));
+    await click(el, ".unlink-filter-property");
+    previous.resolve({ data: foreign });
+    await flush();
+    expect(el.querySelector(".detail-panel")).toBeNull();
+    expect(el.querySelector(".property-management")).toBeNull();
+    expect(el.textContent).not.toContain(foreign.name);
+  });
+  it("keeps refreshed details closed when the global scope is cleared before the response", async () => {
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    const previous = deferred<{ data: typeof foreign }>();
+    mocks.getSceneByProperty.mockReturnValueOnce(previous.promise);
+    await click(el, ".unlink-other-property");
+    await clear(el);
+    previous.resolve({ data: foreign });
+    await flush();
+    expect(el.querySelector(".detail-panel")).toBeNull();
+    expect(el.textContent).toContain(mine.name);
+    expect(el.textContent).not.toContain(foreign.name);
   });
   it("clears a deleted selected property, closes its details, and returns to my scenes", async () => {
     const el = await mount();

@@ -867,15 +867,19 @@ const handleCoverUpload = async (event: Event) => {
   }
 };
 
-const openDetail = async (item: VerseData) => {
+const loadDetail = async (item: VerseData, preserveCurrent = false) => {
   const request = ++detailRequestVersion;
   const propertyId = isGlobalScope.value ? globalPropertyId.value : undefined;
+  const descriptionAtRequest = editingDescription.value;
+  const hadDescriptionDraft =
+    preserveCurrent && descriptionAtRequest !== (item.description || "");
   detailVisible.value = true;
   detailLoading.value = true;
-  currentVerse.value = null;
+  if (!preserveCurrent) currentVerse.value = null;
   const currentRequest = () =>
     request === detailRequestVersion &&
     detailVisible.value &&
+    (!currentVerse.value || currentVerse.value.id === item.id) &&
     propertyId === (isGlobalScope.value ? globalPropertyId.value : undefined);
   try {
     const response = propertyId
@@ -887,8 +891,18 @@ const openDetail = async (item: VerseData) => {
       : await getVerse(item.id, "image,author,tags,metas");
     if (!currentRequest()) return;
     currentVerse.value = response.data;
-    editingDescription.value = response.data.description || "";
-    if (canManage.value && canEditCurrentScene.value) {
+    const index = (items.value ?? []).findIndex(
+      (verse) => verse.id === item.id
+    );
+    if (index >= 0)
+      items.value![index] = { ...items.value![index], ...response.data };
+    if (
+      !preserveCurrent ||
+      (!hadDescriptionDraft &&
+        editingDescription.value === descriptionAtRequest)
+    )
+      editingDescription.value = response.data.description || "";
+    if (!preserveCurrent && canManage.value && canEditCurrentScene.value) {
       const tagsRes = await getTags();
       if (!currentRequest()) return;
       allTags.value = tagsRes.data.map((tag: { id: number; name: string }) => ({
@@ -901,6 +915,12 @@ const openDetail = async (item: VerseData) => {
   } finally {
     if (currentRequest()) detailLoading.value = false;
   }
+};
+const openDetail = (item: VerseData) => loadDetail(item);
+const refreshSceneDetails = () => {
+  void refresh();
+  if (detailVisible.value && currentVerse.value)
+    void loadDetail(currentVerse.value, true);
 };
 
 const handleDescriptionBlur = async () => {
@@ -970,12 +990,17 @@ const handleScenePropertyAdded = (property: SceneProperty) => {
   }
   if (property.key === "public" && currentVerse.value)
     syncVerseVisibility(currentVerse.value.id, true);
-  if (property.key === "public" || isGlobalScope.value) void refresh();
+  refreshSceneDetails();
 };
 const handleScenePropertyRemoved = (property: SceneProperty) => {
   if (property.key === "public" && currentVerse.value)
     syncVerseVisibility(currentVerse.value.id, false);
-  if (property.key === "public" || isGlobalScope.value) void refresh();
+  if (isGlobalScope.value && globalPropertyId.value === property.id) {
+    const sceneId = currentVerse.value?.id;
+    items.value = (items.value ?? []).filter((item) => item.id !== sceneId);
+    handlePanelClose();
+    void refresh();
+  } else refreshSceneDetails();
 };
 const handleScenePropertyGloballyDeleted = (property: SceneProperty) => {
   if (property.key === "public" && currentVerse.value)
@@ -987,7 +1012,7 @@ const handleScenePropertyGloballyDeleted = (property: SceneProperty) => {
   );
   if (globalPropertyId.value === property.id)
     globalPropertyId.value = undefined;
-  else void refresh();
+  else refreshSceneDetails();
   if (isRoot.value) void loadGlobalProperties();
 };
 const handlePanelClose = () => {

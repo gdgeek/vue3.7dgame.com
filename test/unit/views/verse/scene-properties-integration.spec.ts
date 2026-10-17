@@ -106,9 +106,10 @@ vi.mock("@/components/StandardPage", () => ({
   EmptyState: defineComponent({ template: "<div />" }),
   StandardCard: defineComponent({ template: "<div />" }),
   DetailPanel: defineComponent({
-    props: { modelValue: Boolean },
+    props: { modelValue: Boolean, name: String, loading: Boolean },
     emits: ["close", "update:modelValue"],
     template: `<section v-if="modelValue" class="detail-panel">
+      <h2>{{name}}</h2><span class="detail-loading">{{String(loading)}}</span>
       <slot name="info" />
       <button class="close-detail" @click="$emit('close'); $emit('update:modelValue', false)">Close</button>
     </section>`,
@@ -124,6 +125,7 @@ vi.mock("@/components/MrPP/MrPPVerse/SceneProperties.vue", () => ({
     template: `<section class="scene-properties" :data-scene-id="sceneId">
       <button class="add-public" @click="$emit('added', { id: 7, key: 'public', info: null })">Add public</button>
       <button class="add-custom" @click="$emit('added', { id: 8, key: 'custom', info: null })">Add custom</button>
+      <button class="create-property" @click="$emit('added', { id: 9, key: 'new-property', info: null })">Create and associate</button>
       <button class="remove-public" @click="$emit('removed', { id: 7, key: 'public', info: null })">Remove public</button>
       <button class="remove-custom" @click="$emit('removed', { id: 8, key: 'custom', info: null })">Remove custom</button>
       <button class="delete-public-globally" @click="$emit('globally-deleted', { id: 7, key: 'public', info: null })">Delete public globally</button>
@@ -216,7 +218,14 @@ async function mountView(legacy = false) {
     "ElButton",
     defineComponent({ template: "<button><slot /></button>" })
   );
-  app.component("ElInput", defineComponent({ template: "<textarea />" }));
+  app.component(
+    "ElInput",
+    defineComponent({
+      props: { modelValue: String },
+      emits: ["update:modelValue"],
+      template: `<textarea :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" />`,
+    })
+  );
   app.component("FontAwesomeIcon", defineComponent({ template: "<i />" }));
   app.component(
     "ElDialog",
@@ -262,6 +271,13 @@ async function click(el: HTMLElement, selector: string) {
   button!.click();
   await settle();
 }
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
 
 describe("scene property management in scene details", () => {
   it("opens unified property management for root and clears it independently from scene details", async () => {
@@ -302,6 +318,9 @@ describe("scene property management in scene details", () => {
     );
     await openProperties(el);
     const editor = el.querySelector(".scene-properties");
+    mocks.getVerse.mockResolvedValueOnce({
+      data: { ...scene(), public: true },
+    });
     await click(el, ".add-public");
     expect(el.querySelector(".scene-properties")).toBe(editor);
     expect(el.querySelector(".property-dialog")).not.toBeNull();
@@ -320,8 +339,46 @@ describe("scene property management in scene details", () => {
     expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
       "false"
     );
-    expect(mocks.refresh).not.toHaveBeenCalled();
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    expect(mocks.getVerse).toHaveBeenCalledTimes(2);
   });
+
+  it.each([
+    { legacy: false, mode: "existing association", selector: ".add-custom" },
+    {
+      legacy: false,
+      mode: "create and associate",
+      selector: ".create-property",
+    },
+    {
+      legacy: true,
+      mode: "legacy existing association",
+      selector: ".add-custom",
+    },
+    {
+      legacy: true,
+      mode: "legacy create and associate",
+      selector: ".create-property",
+    },
+  ])(
+    "refreshes authoritative details after $mode",
+    async ({ legacy, selector }) => {
+      const el = await mountView(legacy);
+      if (!legacy) await click(el, ".open-scene");
+      await openProperties(el);
+      const editor = el.querySelector(".scene-properties");
+      mocks.getVerse.mockResolvedValueOnce({
+        data: { ...scene(), name: "Details refreshed after addition" },
+      });
+      await click(el, selector);
+      expect(mocks.getVerse).toHaveBeenCalledTimes(2);
+      expect(el.textContent).toContain("Details refreshed after addition");
+      expect(el.querySelector(".scene-properties")).toBe(editor);
+      expect(el.querySelector(".property-dialog")).not.toBeNull();
+      if (legacy) expect(changedListeners.get(el)).toHaveBeenCalledTimes(1);
+      else expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it("notifies the legacy detail parent after property association without rendering a public switch", async () => {
     const el = await mountView(true);
@@ -365,7 +422,117 @@ describe("scene property management in scene details", () => {
     expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
       "false"
     );
+    expect(mocks.refresh).toHaveBeenCalledTimes(2);
+  });
+
+  it("reloads authoritative scene details after removing a custom property and preserves the property modal", async () => {
+    const el = await mountView();
+    await click(el, ".open-scene");
+    await openProperties(el);
+    const editor = el.querySelector(".scene-properties");
+    mocks.getVerse.mockResolvedValueOnce({
+      data: { ...scene(), name: "Refreshed scene", public: true },
+    });
+    await click(el, ".remove-custom");
+    expect(mocks.getVerse).toHaveBeenCalledTimes(2);
     expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(
+      "Refreshed scene"
+    );
+    expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
+      "true"
+    );
+    expect(el.querySelector(".scene-properties")).toBe(editor);
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
+  });
+
+  it("preserves the current detail and property modal when the post-removal reload fails", async () => {
+    const el = await mountView();
+    mocks.getVerse.mockResolvedValueOnce({
+      data: { ...scene(), public: true },
+    });
+    await click(el, ".open-scene");
+    await openProperties(el);
+    const editor = el.querySelector(".scene-properties");
+    mocks.getVerse.mockRejectedValueOnce(new Error("Reload unavailable"));
+    await click(el, ".remove-public");
+    expect(mocks.getVerse).toHaveBeenCalledTimes(2);
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(
+      scene().name
+    );
+    expect(el.querySelector(".detail-loading")?.textContent).toBe("false");
+    expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
+      "false"
+    );
+    expect(el.querySelector(".scene-properties")).toBe(editor);
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
+  });
+
+  it("ignores a slower post-removal detail response after a newer property change", async () => {
+    const el = await mountView();
+    await click(el, ".open-scene");
+    await openProperties(el);
+    const previous = deferred<{ data: ReturnType<typeof scene> }>();
+    mocks.getVerse
+      .mockReturnValueOnce(previous.promise)
+      .mockResolvedValueOnce({ data: { ...scene(), name: "Latest details" } });
+    await click(el, ".remove-custom");
+    await click(el, ".add-custom");
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(
+      "Latest details"
+    );
+    previous.resolve({ data: { ...scene(), name: "Outdated details" } });
+    await settle();
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(
+      "Latest details"
+    );
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
+  });
+
+  it.each(["before", "during"])(
+    "preserves an unsaved description edited %s the post-removal detail refresh",
+    async (when) => {
+      const el = await mountView();
+      await click(el, ".open-scene");
+      await openProperties(el);
+      const reload = deferred<{ data: ReturnType<typeof scene> }>();
+      mocks.getVerse.mockReturnValueOnce(reload.promise);
+      const input = el.querySelector<HTMLTextAreaElement>(
+        ".detail-panel textarea"
+      )!;
+      const edit = async () => {
+        input.value = "My unsaved description";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        await nextTick();
+      };
+      if (when === "before") await edit();
+      await click(el, ".remove-custom");
+      if (when === "during") await edit();
+      reload.resolve({
+        data: { ...scene(), description: "Authoritative server description" },
+      });
+      await settle();
+      expect(input.value).toBe("My unsaved description");
+      expect(el.querySelector(".property-dialog")).not.toBeNull();
+    }
+  );
+
+  it("reloads legacy scene details after property removal and ignores an older refresh", async () => {
+    const el = await mountView(true);
+    await openProperties(el);
+    const editor = el.querySelector(".scene-properties");
+    const previous = deferred<{ data: ReturnType<typeof scene> }>();
+    mocks.getVerse.mockReturnValueOnce(previous.promise).mockResolvedValueOnce({
+      data: { ...scene(), name: "Latest legacy details" },
+    });
+    await click(el, ".remove-custom");
+    await click(el, ".add-custom");
+    expect(el.textContent).toContain("Latest legacy details");
+    previous.resolve({ data: { ...scene(), name: "Outdated legacy details" } });
+    await settle();
+    expect(el.textContent).toContain("Latest legacy details");
+    expect(el.textContent).not.toContain("Outdated legacy details");
+    expect(el.querySelector(".scene-properties")).toBe(editor);
   });
 
   it("notifies the legacy parent after public removal while preserving the property modal", async () => {

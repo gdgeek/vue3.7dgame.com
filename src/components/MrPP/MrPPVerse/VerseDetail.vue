@@ -101,7 +101,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 import Tags from "@/components/Tags.vue";
 import ScenePropertiesDialog from "./ScenePropertiesDialog.vue";
 import type { SceneProperty } from "@/api/v1/scene-properties";
@@ -147,15 +147,17 @@ const isAdmin = computed(() => {
 
 const saveable = computed(() => (verse.value ? verse.value.editable : false));
 
+let detailRequestVersion = 0;
 const refresh = async () => {
-  if (!props.verseId) return;
+  const request = ++detailRequestVersion;
+  const sceneId = props.verseId;
+  if (!sceneId) return;
   try {
-    const response = await getVerse(
-      props.verseId,
-      "image,author,verseTags,public"
-    );
+    const response = await getVerse(sceneId, "image,author,verseTags,public");
+    if (request !== detailRequestVersion || sceneId !== props.verseId) return;
     verse.value = response.data;
   } catch (error) {
+    if (request !== detailRequestVersion || sceneId !== props.verseId) return;
     logger.error("Failed to fetch verse data:", error);
     return;
   }
@@ -168,6 +170,9 @@ watch(
   },
   { immediate: true }
 );
+onBeforeUnmount(() => {
+  ++detailRequestVersion;
+});
 
 const deleted = () => {
   emit("deleted");
@@ -274,6 +279,7 @@ const handleScenePropertyAdded = (property: SceneProperty) => {
   if (property.key === "public" && verse.value) {
     verse.value.public = true;
   }
+  void refresh();
   emit("changed");
 };
 
@@ -281,6 +287,7 @@ const handleScenePropertyRemoved = (property: SceneProperty) => {
   if (property.key === "public" && verse.value) {
     verse.value.public = false;
   }
+  void refresh();
   emit("changed");
 };
 
