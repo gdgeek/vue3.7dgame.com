@@ -27,13 +27,6 @@
                 @remove="removeTags"
                 :verseTags="verseTagsForComponent"
               ></tags>
-              <el-switch
-                v-if="verse && isAdmin"
-                v-model="verse.public"
-                :active-text="$t('verse.view.public.open')"
-                :inactive-text="$t('verse.view.public.private')"
-                @change="handlePublicChange"
-              ></el-switch>
             </div>
           </template>
 
@@ -89,6 +82,16 @@
           <br />
         </el-card>
 
+        <ScenePropertiesDialog
+          v-if="verse && isAdmin"
+          :key="verse.id"
+          :scene-id="verse.id"
+          :scene-name="verse.name"
+          @added="handleScenePropertyAdded"
+          @removed="handleScenePropertyRemoved"
+          @globally-deleted="handleScenePropertyRemoved"
+        ></ScenePropertiesDialog>
+
         <br />
         <br />
       </el-col>
@@ -98,8 +101,10 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 import Tags from "@/components/Tags.vue";
+import ScenePropertiesDialog from "./ScenePropertiesDialog.vue";
+import type { SceneProperty } from "@/api/v1/scene-properties";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import {
@@ -108,8 +113,6 @@ import {
   VerseData,
   addTag,
   removeTag,
-  addPublic,
-  removePublic,
 } from "@/api/v1/verse";
 import { useUserStore } from "@/store/modules/user";
 import { useRouter } from "vue-router";
@@ -144,15 +147,17 @@ const isAdmin = computed(() => {
 
 const saveable = computed(() => (verse.value ? verse.value.editable : false));
 
+let detailRequestVersion = 0;
 const refresh = async () => {
-  if (!props.verseId) return;
+  const request = ++detailRequestVersion;
+  const sceneId = props.verseId;
+  if (!sceneId) return;
   try {
-    const response = await getVerse(
-      props.verseId,
-      "image,author,verseTags,public"
-    );
+    const response = await getVerse(sceneId, "image,author,verseTags,public");
+    if (request !== detailRequestVersion || sceneId !== props.verseId) return;
     verse.value = response.data;
   } catch (error) {
+    if (request !== detailRequestVersion || sceneId !== props.verseId) return;
     logger.error("Failed to fetch verse data:", error);
     return;
   }
@@ -165,6 +170,9 @@ watch(
   },
   { immediate: true }
 );
+onBeforeUnmount(() => {
+  ++detailRequestVersion;
+});
 
 const deleted = () => {
   emit("deleted");
@@ -267,23 +275,20 @@ const addTags = async (
   }
 };
 
-const handlePublicChange = async (value: string | number | boolean) => {
-  if (!verse.value) return;
-  const isPublic = Boolean(value);
-  try {
-    if (isPublic) {
-      await addPublic(verse.value.id);
-      ElMessage.success(t("verse.view.public.addSuccess"));
-    } else {
-      await removePublic(verse.value.id);
-      ElMessage.success(t("verse.view.public.removeSuccess"));
-    }
-    emit("changed");
-  } catch (error) {
-    // 恢复原值
-    verse.value.public = !isPublic;
-    ElMessage.error(t("verse.view.public.error"));
+const handleScenePropertyAdded = (property: SceneProperty) => {
+  if (property.key === "public" && verse.value) {
+    verse.value.public = true;
   }
+  void refresh();
+  emit("changed");
+};
+
+const handleScenePropertyRemoved = (property: SceneProperty) => {
+  if (property.key === "public" && verse.value) {
+    verse.value.public = false;
+  }
+  void refresh();
+  emit("changed");
 };
 
 const comeIn = () => {

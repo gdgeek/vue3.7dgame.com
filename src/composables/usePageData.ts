@@ -55,7 +55,9 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
   const totalPages = computed(() => pagination.count || 1);
 
   // Fetch
+  let requestVersion = 0;
   const refresh = async () => {
+    const request = ++requestVersion;
     loading.value = true;
     try {
       const params: FetchParams = {
@@ -68,6 +70,7 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
       }
 
       const response = await fetchFn(params);
+      if (request !== requestVersion) return;
 
       // Parse pagination headers
       const currentPageHeader = response.headers["x-pagination-current-page"];
@@ -94,10 +97,11 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
         items.value = rawItems;
       }
     } catch (error) {
+      if (request !== requestVersion) return;
       logger.error("Failed to fetch data:", error);
       items.value = [];
     } finally {
-      loading.value = false;
+      if (request === requestVersion) loading.value = false;
     }
   };
 
