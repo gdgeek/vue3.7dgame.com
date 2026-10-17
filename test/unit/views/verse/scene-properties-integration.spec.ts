@@ -4,8 +4,6 @@ import { createApp, defineComponent, nextTick, ref } from "vue";
 const mocks = vi.hoisted(() => ({
   role: "root",
   getVerse: vi.fn(),
-  addPublic: vi.fn(),
-  removePublic: vi.fn(),
   refresh: vi.fn(),
 }));
 
@@ -25,7 +23,14 @@ vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
 }));
 vi.mock("@casl/vue", () => ({
-  useAbility: () => ({ can: (role: string) => role === mocks.role }),
+  useAbility: () => ({
+    can: (role: string, subject: string) =>
+      subject === "all" &&
+      ((role === "root" && mocks.role === "root") ||
+        (role === "admin" && ["root", "admin"].includes(mocks.role)) ||
+        (role === "manager" &&
+          ["root", "admin", "manager"].includes(mocks.role))),
+  }),
 }));
 vi.mock("@/store/modules/user", () => ({
   useUserStore: () => ({
@@ -36,8 +41,6 @@ vi.mock("@/store/modules/user", () => ({
 }));
 vi.mock("@/api/v1/verse", () => ({
   getVerse: mocks.getVerse,
-  addPublic: mocks.addPublic,
-  removePublic: mocks.removePublic,
   getVerses: vi.fn(),
   postVerse: vi.fn(),
   putVerse: vi.fn(),
@@ -45,6 +48,11 @@ vi.mock("@/api/v1/verse", () => ({
   addTag: vi.fn(),
   removeTag: vi.fn(),
   takePhoto: vi.fn(),
+}));
+vi.mock("@/api/v1/scene-properties", () => ({
+  getGlobalScenePropertyOptions: vi.fn(async () => ({ data: [] })),
+  getScenesByProperty: vi.fn(async () => ({ data: [] })),
+  getSceneByProperty: vi.fn(async () => ({ data: scene() })),
 }));
 vi.mock("@/composables/usePageData", () => ({
   usePageData: () => ({
@@ -108,14 +116,18 @@ vi.mock("@/components/StandardPage", () => ({
 }));
 
 // The property editor has its own API/form tests. Here its public event contract
-// exercises the real pages' authorization and visibility controls.
+// exercises the real pages' authorization and scene-list synchronization.
 vi.mock("@/components/MrPP/MrPPVerse/SceneProperties.vue", () => ({
   default: defineComponent({
     props: { sceneId: Number },
-    emits: ["added"],
+    emits: ["added", "removed", "globally-deleted"],
     template: `<section class="scene-properties" :data-scene-id="sceneId">
       <button class="add-public" @click="$emit('added', { id: 7, key: 'public', info: null })">Add public</button>
       <button class="add-custom" @click="$emit('added', { id: 8, key: 'custom', info: null })">Add custom</button>
+      <button class="remove-public" @click="$emit('removed', { id: 7, key: 'public', info: null })">Remove public</button>
+      <button class="remove-custom" @click="$emit('removed', { id: 8, key: 'custom', info: null })">Remove custom</button>
+      <button class="delete-public-globally" @click="$emit('globally-deleted', { id: 7, key: 'public', info: null })">Delete public globally</button>
+      <button class="delete-custom-globally" @click="$emit('globally-deleted', { id: 8, key: 'custom', info: null })">Delete custom globally</button>
     </section>`,
   }),
 }));
@@ -151,13 +163,12 @@ vi.mock("@/components/ScenePackage/ExportButton.vue", () => ({
 }));
 
 const cleanups: Array<() => void> = [];
+const changedListeners = new WeakMap<HTMLElement, ReturnType<typeof vi.fn>>();
 
 beforeEach(() => {
   mocks.role = "root";
   vi.clearAllMocks();
   mocks.getVerse.mockImplementation(async () => ({ data: scene() }));
-  mocks.addPublic.mockResolvedValue({ data: { success: true } });
-  mocks.removePublic.mockResolvedValue({ data: { success: true } });
 });
 
 afterEach(() => {
@@ -177,7 +188,12 @@ async function mountView(legacy = false) {
     : (await import("@/views/meta-verse/index.vue")).default;
   const el = document.createElement("div");
   document.body.appendChild(el);
-  const app = createApp(component, legacy ? { verseId: 42 } : {});
+  const changed = vi.fn();
+  const app = createApp(
+    component,
+    legacy ? { verseId: 42, onChanged: changed } : {}
+  );
+  changedListeners.set(el, changed);
   const slotStub = defineComponent({
     template: "<div><slot name='header' /><slot /><slot name='footer' /></div>",
   });
@@ -206,7 +222,11 @@ async function mountView(legacy = false) {
     "ElDialog",
     defineComponent({
       props: { modelValue: Boolean },
-      template: "<div v-if='modelValue'><slot /></div>",
+      emits: ["update:modelValue"],
+      template: `<div v-if="modelValue" class="property-dialog" role="dialog">
+        <slot name="header" /><slot /><slot name="footer" />
+        <button class="close-property-dialog" @click="$emit('update:modelValue', false)">Close modal</button>
+      </div>`,
     })
   );
   app.component(
@@ -227,6 +247,15 @@ async function mountView(legacy = false) {
   return el;
 }
 
+async function openProperties(el: HTMLElement) {
+  const trigger = Array.from(el.querySelectorAll("button")).find((button) =>
+    button.textContent?.includes("verse.properties.manage")
+  );
+  expect(trigger).toBeDefined();
+  trigger!.click();
+  await settle();
+}
+
 async function click(el: HTMLElement, selector: string) {
   const button = el.querySelector<HTMLElement>(selector);
   expect(button).not.toBeNull();
@@ -235,88 +264,176 @@ async function click(el: HTMLElement, selector: string) {
 }
 
 describe("scene property management in scene details", () => {
-  it("shows properties for root after a scene is opened and clears them on close", async () => {
+  it("opens unified property management for root and clears it independently from scene details", async () => {
     const el = await mountView();
     expect(el.querySelector(".scene-properties")).toBeNull();
-
     await click(el, ".open-scene");
+    expect(el.querySelectorAll(".vis-btn")).toHaveLength(0);
+    expect(el.querySelector(".scene-properties")).toBeNull();
+    await openProperties(el);
     expect(
       el.querySelector(".scene-properties")?.getAttribute("data-scene-id")
     ).toBe("42");
-
+    await click(el, ".close-property-dialog");
+    expect(el.querySelector(".scene-properties")).toBeNull();
+    expect(el.querySelector(".detail-panel")).not.toBeNull();
+    await openProperties(el);
+    expect(el.querySelector(".scene-properties")).not.toBeNull();
     await click(el, ".close-detail");
     expect(el.querySelector(".scene-properties")).toBeNull();
   });
 
-  it("keeps property management hidden for admin while retaining visibility controls", async () => {
+  it("allows admin to open unified property management with no dedicated visibility controls", async () => {
     mocks.role = "admin";
     const el = await mountView();
     await click(el, ".open-scene");
-
-    expect(el.querySelector(".scene-properties")).toBeNull();
-    expect(el.querySelectorAll(".vis-btn")).toHaveLength(2);
+    expect(el.textContent).toContain("verse.properties.manage");
+    expect(el.querySelectorAll(".vis-btn")).toHaveLength(0);
+    expect(el.querySelector(".visibility-switch")).toBeNull();
+    await openProperties(el);
+    expect(el.querySelector(".scene-properties")).not.toBeNull();
   });
 
-  it("syncs public property additions to detail visibility and the scene list", async () => {
+  it("syncs public property association to the scene list while preserving the modal", async () => {
     const el = await mountView();
     await click(el, ".open-scene");
-    expect(el.querySelector(".vis-btn.active")?.textContent).toContain(
-      "verse.listPage.private"
+    expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
+      "false"
     );
-
+    await openProperties(el);
+    const editor = el.querySelector(".scene-properties");
     await click(el, ".add-public");
-    expect(el.querySelector(".vis-btn.active")?.textContent).toContain(
-      "verse.listPage.public"
-    );
+    expect(el.querySelector(".scene-properties")).toBe(editor);
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
     expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
       "true"
     );
     expect(mocks.refresh).toHaveBeenCalledTimes(1);
-    expect(mocks.addPublic).not.toHaveBeenCalled();
+    expect(el.querySelectorAll(".vis-btn")).toHaveLength(0);
+  });
 
-    await click(el, ".vis-btn");
-    expect(mocks.removePublic).toHaveBeenCalledWith(42);
-    expect(el.querySelector(".vis-btn.active")?.textContent).toContain(
-      "verse.listPage.private"
+  it("keeps custom property association independent from public scene state", async () => {
+    const el = await mountView();
+    await click(el, ".open-scene");
+    await openProperties(el);
+    await click(el, ".add-custom");
+    expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
+      "false"
     );
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+
+  it("notifies the legacy detail parent after property association without rendering a public switch", async () => {
+    const el = await mountView(true);
+    expect(el.querySelector(".visibility-switch")).toBeNull();
+    await openProperties(el);
+    expect(
+      el.querySelector(".scene-properties")?.getAttribute("data-scene-id")
+    ).toBe("42");
+    const editor = el.querySelector(".scene-properties");
+    await click(el, ".add-public");
+    expect(el.querySelector(".scene-properties")).toBe(editor);
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
+    expect(changedListeners.get(el)).toHaveBeenCalledTimes(1);
+    expect(el.querySelector(".visibility-switch")).toBeNull();
+  });
+
+  it("allows admin to open unified property management in legacy scene details", async () => {
+    mocks.role = "admin";
+    const el = await mountView(true);
+    expect(el.textContent).toContain("verse.properties.manage");
+    expect(el.querySelector(".visibility-switch")).toBeNull();
+    await openProperties(el);
+    expect(el.querySelector(".scene-properties")).not.toBeNull();
+  });
+
+  it("syncs public property removal to private scene state without closing the modal", async () => {
+    const el = await mountView();
+    await click(el, ".open-scene");
+    await openProperties(el);
+    await click(el, ".add-public");
+    mocks.refresh.mockClear();
+    const editor = el.querySelector(".scene-properties");
+    await click(el, ".remove-public");
+    expect(el.querySelector(".scene-properties")).toBe(editor);
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
+    expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
+      "false"
+    );
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    await click(el, ".remove-custom");
+    expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
+      "false"
+    );
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("notifies the legacy parent after public removal while preserving the property modal", async () => {
+    const el = await mountView(true);
+    await openProperties(el);
+    await click(el, ".add-public");
+    changedListeners.get(el)!.mockClear();
+    const editor = el.querySelector(".scene-properties");
+    await click(el, ".remove-public");
+    expect(el.querySelector(".scene-properties")).toBe(editor);
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
+    expect(changedListeners.get(el)).toHaveBeenCalledTimes(1);
+    expect(el.querySelector(".visibility-switch")).toBeNull();
+  });
+
+  it("syncs global public deletion to private scene state and refreshes the list without closing the modal", async () => {
+    const el = await mountView();
+    await click(el, ".open-scene");
+    await openProperties(el);
+    await click(el, ".add-public");
+    mocks.refresh.mockClear();
+    const editor = el.querySelector(".scene-properties");
+    await click(el, ".delete-public-globally");
+    expect(el.querySelector(".scene-properties")).toBe(editor);
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
+    expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
+      "false"
+    );
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    await click(el, ".delete-custom-globally");
     expect(el.querySelector(".open-scene")?.getAttribute("data-public")).toBe(
       "false"
     );
   });
 
-  it("keeps custom properties independent from public visibility", async () => {
-    const el = await mountView();
-    await click(el, ".open-scene");
-    await click(el, ".add-custom");
-
-    expect(el.querySelector(".vis-btn.active")?.textContent).toContain(
-      "verse.listPage.private"
-    );
-    expect(mocks.addPublic).not.toHaveBeenCalled();
-    expect(mocks.removePublic).not.toHaveBeenCalled();
-  });
-
-  it("shows legacy detail properties for root and updates its public switch", async () => {
+  it("notifies the legacy parent after global public deletion while preserving the property modal", async () => {
     const el = await mountView(true);
-    expect(
-      el.querySelector(".scene-properties")?.getAttribute("data-scene-id")
-    ).toBe("42");
-    expect(
-      el.querySelector<HTMLInputElement>(".visibility-switch")?.checked
-    ).toBe(false);
-
+    await openProperties(el);
     await click(el, ".add-public");
-    expect(
-      el.querySelector<HTMLInputElement>(".visibility-switch")?.checked
-    ).toBe(true);
-    expect(mocks.addPublic).not.toHaveBeenCalled();
+    changedListeners.get(el)!.mockClear();
+    const editor = el.querySelector(".scene-properties");
+    await click(el, ".delete-public-globally");
+    expect(el.querySelector(".scene-properties")).toBe(editor);
+    expect(el.querySelector(".property-dialog")).not.toBeNull();
+    expect(changedListeners.get(el)).toHaveBeenCalledTimes(1);
+    expect(el.querySelector(".visibility-switch")).toBeNull();
   });
 
-  it("keeps legacy detail property management hidden for admin", async () => {
-    mocks.role = "admin";
-    const el = await mountView(true);
+  it.each(["manager", "user"])(
+    "hides unified scene property management for %s",
+    async (role) => {
+      mocks.role = role;
+      const el = await mountView();
+      await click(el, ".open-scene");
+      expect(el.textContent).not.toContain("verse.properties.manage");
+      expect(el.querySelector(".scene-properties")).toBeNull();
+      expect(el.querySelectorAll(".vis-btn")).toHaveLength(0);
+    }
+  );
 
-    expect(el.querySelector(".scene-properties")).toBeNull();
-    expect(el.querySelector(".visibility-switch")).not.toBeNull();
-  });
+  it.each(["manager", "user"])(
+    "hides unified legacy property management for %s",
+    async (role) => {
+      mocks.role = role;
+      const el = await mountView(true);
+      expect(el.textContent).not.toContain("verse.properties.manage");
+      expect(el.querySelector(".scene-properties")).toBeNull();
+      expect(el.querySelector(".visibility-switch")).toBeNull();
+    }
+  );
 });

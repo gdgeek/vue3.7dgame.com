@@ -11,6 +11,31 @@
         @view-change="handleViewChange"
       >
         <template #filters>
+          <div v-if="isRoot" class="scene-property-filter">
+            <el-select
+              v-model="globalPropertyId"
+              class="scene-property-filter__select"
+              filterable
+              clearable
+              :loading="globalPropertiesLoading"
+              :placeholder="t('verse.listPage.globalPropertyFilter')"
+              v-bind="{
+                'aria-label': t('verse.listPage.globalPropertyFilter'),
+              }"
+            >
+              <el-option
+                v-for="property in globalProperties"
+                :key="property.id"
+                :value="property.id"
+                :label="property.key"
+              ></el-option>
+            </el-select>
+            <el-button
+              v-if="globalPropertiesError"
+              @click="loadGlobalProperties"
+              >{{ t("verse.listPage.retryPropertyOptions") }}</el-button
+            >
+          </div>
           <TagsSelect
             v-if="canViewSceneFilter"
             @tags-change="handleTagsChange"
@@ -33,6 +58,23 @@
           </el-button>
         </template>
       </PageActionBar>
+      <p v-if="isRoot" class="scene-property-scope" role="status">
+        <strong>{{
+          selectedGlobalProperty
+            ? t("verse.listPage.globalPropertyScope", {
+                key: selectedGlobalProperty.key,
+              })
+            : t("verse.listPage.myScenes")
+        }}</strong>
+        <span>{{ t("verse.listPage.globalPropertyHint") }}</span>
+      </p>
+      <p
+        v-if="isRoot && globalPropertiesError"
+        class="scene-property-filter__error"
+        role="alert"
+      >
+        {{ globalPropertiesError }}
+      </p>
 
       <ViewContainer
         class="list-view"
@@ -54,16 +96,18 @@
             @view="openDetail(item)"
           >
             <template #actions>
-              <div class="single-card-actions">
-                <button
-                  class="single-card-action-btn"
-                  @click.stop="goToEditor(item)"
-                >
-                  <font-awesome-icon
-                    :icon="['fas', 'pen-to-square']"
-                  ></font-awesome-icon>
-                  {{ t("route.project.sceneEditor") }}
-                </button>
+              <div class="scene-card-actions">
+                <div v-if="canEditScene(item)" class="single-card-actions">
+                  <button
+                    class="single-card-action-btn"
+                    @click.stop="goToEditor(item)"
+                  >
+                    <font-awesome-icon
+                      :icon="['fas', 'pen-to-square']"
+                    ></font-awesome-icon>
+                    {{ t("route.project.sceneEditor") }}
+                  </button>
+                </div>
               </div>
             </template>
           </StandardCard>
@@ -94,6 +138,7 @@
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
             <el-button
+              v-if="canEditScene(item)"
               class="btn-hover-action"
               type="primary"
               @click.stop="goToEditor(item)"
@@ -116,15 +161,21 @@
                   <el-dropdown-item @click="openDetail(item)">{{
                     t("verse.listPage.viewDetail")
                   }}</el-dropdown-item>
-                  <el-dropdown-item @click="goToEditor(item)">{{
-                    t("verse.listPage.enterEditor")
-                  }}</el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">{{
-                    t("verse.listPage.rename")
-                  }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item)">{{
-                    t("verse.listPage.delete")
-                  }}</el-dropdown-item>
+                  <el-dropdown-item
+                    v-if="canEditScene(item)"
+                    @click="goToEditor(item)"
+                    >{{ t("verse.listPage.enterEditor") }}</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    v-if="canEditScene(item)"
+                    @click="namedWindow(item)"
+                    >{{ t("verse.listPage.rename") }}</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    v-if="canEditScene(item)"
+                    @click="deletedWindow(item)"
+                    >{{ t("verse.listPage.delete") }}</el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -135,7 +186,9 @@
           <EmptyState
             :icon="['fas', 'layer-group']"
             :text="t('verse.listPage.emptyText')"
-            :action-text="t('verse.listPage.createScene')"
+            :action-text="
+              isGlobalScope ? undefined : t('verse.listPage.createScene')
+            "
             @action="createWindow"
           ></EmptyState>
         </template>
@@ -160,13 +213,15 @@
       <!-- Detail Panel -->
       <DetailPanel
         v-model="detailVisible"
+        :close-on-escape="!propertyDialogOpen"
         :title="t('verse.listPage.detailTitle')"
         :name="currentVerse?.name || ''"
         :loading="detailLoading"
         :properties="detailProperties"
         :placeholder-icon="['fas', 'image']"
         width="560px"
-        :show-delete="true"
+        :show-delete="canEditCurrentScene"
+        :editable="canEditCurrentScene"
         action-layout="grid"
         :download-text="t('ui.exportScene')"
         :download-icon="['fas', 'download']"
@@ -177,42 +232,46 @@
         @close="handlePanelClose"
       >
         <template #actions>
-          <button
-            class="btn-pill-primary enter-edit-btn"
-            @click="handleGoToEditor"
-          >
-            <font-awesome-icon
-              :icon="['fas', 'pen-to-square']"
-            ></font-awesome-icon>
-            {{ t("route.project.sceneEditor") }}
-          </button>
-          <button
-            class="btn-pill-primary enter-edit-btn publish-scene-btn"
-            :disabled="isPublishingSnapshot"
-            @click="handlePublishSnapshot"
-          >
-            <font-awesome-icon
-              :icon="[
-                'fas',
-                isPublishingSnapshot ? 'spinner' : 'cloud-arrow-up',
-              ]"
-              :spin="isPublishingSnapshot"
-            ></font-awesome-icon>
-            {{ t("verse.view.sceneEditor.publishScene") }}
-          </button>
-          <div class="actions-row">
-            <button class="btn-pill-secondary" @click="handleExport">
-              <font-awesome-icon
-                :icon="['fas', 'download']"
-              ></font-awesome-icon>
-              {{ t("ui.exportScene") }}
-            </button>
-            <button class="btn-pill-danger" @click="handleDelete">
-              <font-awesome-icon
-                :icon="['fas', 'trash-can']"
-              ></font-awesome-icon>
-              {{ t("verse.listPage.deleteScene") }}
-            </button>
+          <div class="scene-detail-actions">
+            <template v-if="canEditCurrentScene">
+              <button
+                class="btn-pill-primary enter-edit-btn"
+                @click="handleGoToEditor"
+              >
+                <font-awesome-icon
+                  :icon="['fas', 'pen-to-square']"
+                ></font-awesome-icon>
+                {{ t("route.project.sceneEditor") }}
+              </button>
+              <button
+                class="btn-pill-primary enter-edit-btn publish-scene-btn"
+                :disabled="isPublishingSnapshot"
+                @click="handlePublishSnapshot"
+              >
+                <font-awesome-icon
+                  :icon="[
+                    'fas',
+                    isPublishingSnapshot ? 'spinner' : 'cloud-arrow-up',
+                  ]"
+                  :spin="isPublishingSnapshot"
+                ></font-awesome-icon>
+                {{ t("verse.view.sceneEditor.publishScene") }}
+              </button>
+              <div class="actions-row">
+                <button class="btn-pill-secondary" @click="handleExport">
+                  <font-awesome-icon
+                    :icon="['fas', 'download']"
+                  ></font-awesome-icon>
+                  {{ t("ui.exportScene") }}
+                </button>
+                <button class="btn-pill-danger" @click="handleDelete">
+                  <font-awesome-icon
+                    :icon="['fas', 'trash-can']"
+                  ></font-awesome-icon>
+                  {{ t("verse.listPage.deleteScene") }}
+                </button>
+              </div>
+            </template>
           </div>
         </template>
         <template #preview>
@@ -244,6 +303,7 @@
               </div>
               <el-input
                 v-model="editingDescription"
+                :readonly="!canEditCurrentScene"
                 type="textarea"
                 :rows="4"
                 :placeholder="t('verse.listPage.sceneIntroPlaceholder')"
@@ -252,7 +312,7 @@
             </div>
 
             <!-- Tags Section (Restricted) -->
-            <div v-if="canManage" class="info-section">
+            <div v-if="canManage && canEditCurrentScene" class="info-section">
               <div class="section-header">
                 {{ t("verse.listPage.sceneTags") }}
               </div>
@@ -287,46 +347,27 @@
               </el-select>
             </div>
 
-            <SceneProperties
-              v-if="isRoot && currentVerse"
-              :key="`${currentVerse.id}:${currentVerseIsPublic}`"
+            <ScenePropertiesDialog
+              v-if="canManageProperties && currentVerse"
+              :key="currentVerse.id"
               :scene-id="currentVerse.id"
+              :scene-name="currentVerse.name"
+              @open-change="propertyDialogOpen = $event"
               @added="handleScenePropertyAdded"
-            ></SceneProperties>
-
-            <!-- Visibility Section (Restricted) -->
-            <div v-if="canManage" class="info-section">
-              <div class="section-header">
-                {{ t("verse.listPage.visibility") }}
-              </div>
-              <div class="visibility-group">
-                <button
-                  class="vis-btn"
-                  :class="{ active: !currentVerseIsPublic }"
-                  @click="handleVisibilityChange(false)"
-                >
-                  <font-awesome-icon
-                    :icon="['fas', 'lock']"
-                  ></font-awesome-icon>
-                  {{ t("verse.listPage.private") }}
-                </button>
-                <button
-                  class="vis-btn"
-                  :class="{ active: currentVerseIsPublic }"
-                  @click="handleVisibilityChange(true)"
-                >
-                  <font-awesome-icon
-                    :icon="['fas', 'globe']"
-                  ></font-awesome-icon>
-                  {{ t("verse.listPage.public") }}
-                </button>
-              </div>
-            </div>
+              @removed="handleScenePropertyRemoved"
+              @globally-deleted="handleScenePropertyGloballyDeleted"
+            ></ScenePropertiesDialog>
           </div>
         </template>
         <template #property-loaded-entities>
           <div class="loaded-entities-value">
-            <template v-if="loadedEntityOptions.length === 0">
+            <template
+              v-if="!canEditCurrentScene && loadedEntityOptions.length"
+              >{{
+                loadedEntityOptions.map((entity) => entity.name).join(", ")
+              }}</template
+            >
+            <template v-else-if="loadedEntityOptions.length === 0">
               {{ t("verse.listPage.noLoadedEntities") }}
             </template>
             <template v-else>
@@ -420,7 +461,7 @@
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { hasPublishableSceneContent } from "@/utils/versePublish";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
@@ -435,8 +476,13 @@ import {
 } from "@/components/StandardPage";
 import TagsSelect from "@/components/TagsSelect.vue";
 import Create from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
-import SceneProperties from "@/components/MrPP/MrPPVerse/SceneProperties.vue";
-import type { SceneProperty } from "@/api/v1/scene-properties";
+import ScenePropertiesDialog from "@/components/MrPP/MrPPVerse/ScenePropertiesDialog.vue";
+import {
+  getGlobalScenePropertyOptions,
+  getScenesByProperty,
+  getSceneByProperty,
+  type SceneProperty,
+} from "@/api/v1/scene-properties";
 import ImportDialog from "@/components/ScenePackage/ImportDialog.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
@@ -446,8 +492,6 @@ import {
   postVerse,
   putVerse,
   deleteVerse,
-  addPublic,
-  removePublic,
   addTag,
   removeTag,
   takePhoto,
@@ -472,6 +516,46 @@ const { t } = useI18n();
 const router = useRouter();
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
 const isPublishingSnapshot = ref(false);
+const ability = useAbility();
+const isRoot = computed(() => ability.can("root", "all"));
+const globalPropertyId = ref<number>();
+const globalProperties = ref<SceneProperty[]>([]);
+const globalPropertiesLoading = ref(false);
+const globalPropertiesError = ref("");
+let globalCatalogVersion = 0;
+let detailRequestVersion = 0;
+const selectedGlobalProperty = computed(() =>
+  globalProperties.value.find(
+    (property) => property.id === globalPropertyId.value
+  )
+);
+const isGlobalScope = computed(
+  () =>
+    isRoot.value &&
+    Number.isSafeInteger(globalPropertyId.value) &&
+    Number(globalPropertyId.value) > 0
+);
+async function loadGlobalProperties() {
+  if (!isRoot.value) return;
+  const version = ++globalCatalogVersion;
+  globalPropertiesLoading.value = true;
+  globalPropertiesError.value = "";
+  try {
+    const { data } = await getGlobalScenePropertyOptions();
+    if (version !== globalCatalogVersion || !isRoot.value) return;
+    globalProperties.value = data;
+    if (
+      globalPropertyId.value &&
+      !data.some((property) => property.id === globalPropertyId.value)
+    )
+      globalPropertyId.value = undefined;
+  } catch {
+    if (version === globalCatalogVersion && isRoot.value)
+      globalPropertiesError.value = t("verse.listPage.propertyOptionsFailed");
+  } finally {
+    if (version === globalCatalogVersion) globalPropertiesLoading.value = false;
+  }
+}
 
 const {
   items,
@@ -486,30 +570,33 @@ const {
   handleViewChange,
   handleTagsChange,
 } = usePageData({
-  fetchFn: async (params) =>
-    await getVerses({
+  fetchFn: async (params) => {
+    const query = {
       sort: params.sort,
       search: params.search,
       page: params.page,
       perPage: Number(params.pageSize) || 24,
       tags: params.tags,
-      expand: "image,author",
-    }),
+      expand: "image,author,public",
+    };
+    return isGlobalScope.value
+      ? getScenesByProperty(globalPropertyId.value!, query)
+      : getVerses(query);
+  },
   pageSize: 24,
 });
 
 const detailVisible = ref(false);
+const propertyDialogOpen = ref(false);
 const detailLoading = ref(false);
 const currentVerse = ref<VerseData | null>(null);
-const ability = useAbility();
-const isRoot = computed(() => ability.can("root", "all"));
-
-const isPublicValue = (value: unknown) => {
-  return value === true || value === 1 || value === "1" || value === "true";
-};
-
-const currentVerseIsPublic = computed(() =>
-  isPublicValue(currentVerse.value?.public)
+const canEditScene = (item: { editable?: boolean }) =>
+  !isGlobalScope.value || item.editable === true;
+const canEditCurrentScene = computed(
+  () => Boolean(currentVerse.value) && canEditScene(currentVerse.value!)
+);
+const canManageProperties = computed(
+  () => ability.can("admin", "all") || ability.can("root", "all")
 );
 
 const syncVerseVisibility = (verseId: number, isPublic: boolean) => {
@@ -657,6 +744,7 @@ const detailProperties = computed(() => {
 });
 
 const triggerFileSelect = () => {
+  if (!canEditCurrentScene.value) return;
   imageSelectDialogVisible.value = true;
 };
 
@@ -671,6 +759,7 @@ const openResourceDialog = () => {
 };
 
 const onResourceSelected = async (data: CardInfo) => {
+  if (!canEditCurrentScene.value) return;
   // data is CardInfo, but to be sure
   const imageId =
     (data.context as Record<string, unknown>)?.image_id ||
@@ -708,6 +797,7 @@ const onResourceSelected = async (data: CardInfo) => {
 };
 
 const handleCoverUpload = async (event: Event) => {
+  if (!canEditCurrentScene.value) return;
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
   if (!file) return;
@@ -778,31 +868,45 @@ const handleCoverUpload = async (event: Event) => {
 };
 
 const openDetail = async (item: VerseData) => {
+  const request = ++detailRequestVersion;
+  const propertyId = isGlobalScope.value ? globalPropertyId.value : undefined;
   detailVisible.value = true;
   detailLoading.value = true;
-
+  currentVerse.value = null;
+  const currentRequest = () =>
+    request === detailRequestVersion &&
+    detailVisible.value &&
+    propertyId === (isGlobalScope.value ? globalPropertyId.value : undefined);
   try {
-    const response = await getVerse(item.id, "image,author,tags,metas");
+    const response = propertyId
+      ? await getSceneByProperty(
+          item.id,
+          propertyId,
+          "image,author,tags,metas,public"
+        )
+      : await getVerse(item.id, "image,author,tags,metas");
+    if (!currentRequest()) return;
     currentVerse.value = response.data;
     editingDescription.value = response.data.description || "";
-
-    if (canManage.value) {
+    if (canManage.value && canEditCurrentScene.value) {
       const tagsRes = await getTags();
+      if (!currentRequest()) return;
       allTags.value = tagsRes.data.map((tag: { id: number; name: string }) => ({
         label: tag.name,
         value: tag.id,
       }));
     }
   } catch (err) {
-    Message.error(String(err));
+    if (currentRequest()) Message.error(String(err));
   } finally {
-    detailLoading.value = false;
+    if (currentRequest()) detailLoading.value = false;
   }
 };
 
 const handleDescriptionBlur = async () => {
   if (
     !currentVerse.value ||
+    !canEditCurrentScene.value ||
     editingDescription.value === (currentVerse.value.description || "")
   )
     return;
@@ -825,7 +929,8 @@ const isTagSelected = (tagId: number) => {
 };
 
 const handleAddTag = async (tagId: number | undefined) => {
-  if (tagId === undefined || !currentVerse.value) return;
+  if (tagId === undefined || !currentVerse.value || !canEditCurrentScene.value)
+    return;
   try {
     await addTag(currentVerse.value.id, tagId);
     const tag = allTags.value.find((t) => t.value === tagId);
@@ -842,6 +947,7 @@ const handleAddTag = async (tagId: number | undefined) => {
 };
 
 const handleRemoveTag = async (tagId: number) => {
+  if (!canEditCurrentScene.value) return;
   if (!currentVerse.value) return;
   try {
     await removeTag(currentVerse.value.id, tagId);
@@ -854,40 +960,74 @@ const handleRemoveTag = async (tagId: number) => {
   }
 };
 
-const handleVisibilityChange = async (isPublic: boolean) => {
-  if (!currentVerse.value || currentVerseIsPublic.value === isPublic) return;
-
-  try {
-    const verseId = currentVerse.value.id;
-    if (isPublic) {
-      await addPublic(verseId);
-    } else {
-      await removePublic(verseId);
-    }
-    syncVerseVisibility(verseId, isPublic);
-    Message.success(
-      isPublic
-        ? t("verse.view.public.addSuccess")
-        : t("verse.view.public.removeSuccess")
-    );
-    refresh();
-  } catch (err) {
-    Message.error(t("verse.listPage.visibilityUpdateFailed"));
-  }
-};
-
 const handleScenePropertyAdded = (property: SceneProperty) => {
-  if (property.key === "public" && currentVerse.value) {
-    syncVerseVisibility(currentVerse.value.id, true);
-    refresh();
+  if (isRoot.value) {
+    globalProperties.value = [
+      ...globalProperties.value.filter((item) => item.id !== property.id),
+      property,
+    ];
+    void loadGlobalProperties();
   }
+  if (property.key === "public" && currentVerse.value)
+    syncVerseVisibility(currentVerse.value.id, true);
+  if (property.key === "public" || isGlobalScope.value) void refresh();
 };
-
+const handleScenePropertyRemoved = (property: SceneProperty) => {
+  if (property.key === "public" && currentVerse.value)
+    syncVerseVisibility(currentVerse.value.id, false);
+  if (property.key === "public" || isGlobalScope.value) void refresh();
+};
+const handleScenePropertyGloballyDeleted = (property: SceneProperty) => {
+  if (property.key === "public" && currentVerse.value)
+    syncVerseVisibility(currentVerse.value.id, false);
+  ++globalCatalogVersion;
+  globalPropertiesLoading.value = false;
+  globalProperties.value = globalProperties.value.filter(
+    (item) => item.id !== property.id
+  );
+  if (globalPropertyId.value === property.id)
+    globalPropertyId.value = undefined;
+  else void refresh();
+  if (isRoot.value) void loadGlobalProperties();
+};
 const handlePanelClose = () => {
+  ++detailRequestVersion;
+  detailVisible.value = false;
+  detailLoading.value = false;
+  propertyDialogOpen.value = false;
   currentVerse.value = null;
 };
-
+watch(
+  globalPropertyId,
+  () => {
+    handlePanelClose();
+    items.value = [];
+    pagination.current = 1;
+    void refresh();
+  },
+  { flush: "sync" }
+);
+watch(
+  isRoot,
+  (root) => {
+    ++globalCatalogVersion;
+    globalProperties.value = [];
+    globalPropertiesLoading.value = false;
+    globalPropertiesError.value = "";
+    if (!root) {
+      handlePanelClose();
+      if (globalPropertyId.value !== undefined)
+        globalPropertyId.value = undefined;
+    } else void loadGlobalProperties();
+  },
+  { immediate: true, flush: "sync" }
+);
+onBeforeUnmount(() => {
+  ++globalCatalogVersion;
+  ++detailRequestVersion;
+});
 const goToEditor = (item: VerseData) => {
+  if (!canEditScene(item)) return;
   const title = encodeURIComponent(
     t("verse.listPage.editorTitle", {
       name: item.name || t("verse.listPage.unnamed"),
@@ -912,7 +1052,8 @@ const handleGoToEditor = () => {
 };
 
 const handleEnterSelectedEntity = () => {
-  if (selectedLoadedEntityId.value === null) return;
+  if (selectedLoadedEntityId.value === null || !canEditCurrentScene.value)
+    return;
   const selectedEntity = loadedEntityOptions.value.find(
     (entity) => entity.id === selectedLoadedEntityId.value
   );
@@ -973,7 +1114,12 @@ const handleExport = async () => {
 };
 
 const handlePublishSnapshot = async () => {
-  if (!currentVerse.value || isPublishingSnapshot.value) return;
+  if (
+    !currentVerse.value ||
+    !canEditCurrentScene.value ||
+    isPublishingSnapshot.value
+  )
+    return;
 
   if (!hasPublishableSceneContent(currentVerse.value)) {
     Message.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
@@ -999,6 +1145,7 @@ const handlePublishSnapshot = async () => {
 };
 
 const handleRename = async (newName: string) => {
+  if (!canEditCurrentScene.value) return;
   if (!currentVerse.value) return;
   try {
     await putVerse(currentVerse.value.id, { name: newName });
@@ -1011,6 +1158,7 @@ const handleRename = async (newName: string) => {
 };
 
 const handleDelete = async () => {
+  if (!canEditCurrentScene.value) return;
   if (!currentVerse.value) return;
   try {
     await MessageBox.confirm(
@@ -1060,6 +1208,7 @@ const submitCreate = async (
 };
 
 const namedWindow = async (item: VerseData) => {
+  if (!canEditScene(item)) return;
   try {
     const { value } = (await MessageBox.prompt(
       t("meta.prompt2.message1"),
@@ -1079,6 +1228,7 @@ const namedWindow = async (item: VerseData) => {
 };
 
 const deletedWindow = async (item: VerseData) => {
+  if (!canEditScene(item)) return;
   try {
     await MessageBox.confirm(
       t("verse.listPage.deleteConfirmMessage"),
@@ -1107,6 +1257,68 @@ const formatItemDate = (dateStr?: string) => {
 <style scoped lang="scss">
 .verse-index {
   padding: 12px;
+}
+
+.scene-detail-actions,
+.scene-card-actions {
+  display: contents;
+}
+
+:deep(.page-action-bar .controls-left) {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.scene-property-filter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  &__select {
+    width: 240px;
+  }
+
+  &__error {
+    color: var(--el-color-danger);
+  }
+}
+
+.scene-property-scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 0 16px;
+  color: var(--el-text-color-secondary);
+
+  strong {
+    color: var(--el-text-color-primary);
+  }
+}
+
+@media (width <= 767px) {
+  :deep(.controls-left),
+  :deep(.controls-right) {
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 0;
+  }
+
+  :deep(.controls-right) {
+    flex-shrink: 1;
+    gap: 10px;
+  }
+
+  :deep(.controls-right > .el-button) {
+    margin-left: 0;
+  }
+
+  :deep(.search-box) {
+    width: 100%;
+  }
+
+  .scene-property-filter__select {
+    width: 190px;
+  }
 }
 
 .col-name {
@@ -1442,44 +1654,6 @@ const formatItemDate = (dateStr?: string) => {
 
 .tag-select {
   width: 100%;
-}
-
-.visibility-group {
-  display: flex;
-  gap: 12px;
-}
-
-.vis-btn {
-  display: flex;
-  flex: 1;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  height: 44px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary, #64748b);
-  cursor: pointer;
-  background: var(--bg-card, #fff);
-  border: 1.5px solid var(--border-color, #e2e8f0);
-  border-radius: 22px;
-  transition: all 0.2s ease;
-
-  .svg-inline--fa {
-    font-size: 20px;
-  }
-
-  &:hover {
-    color: var(--primary-color, #03a9f4);
-    border-color: var(--primary-color, #03a9f4);
-  }
-
-  &.active {
-    font-weight: 600;
-    color: var(--primary-color, #03a9f4);
-    background: var(--primary-light, rgb(3 169 244 / 10%));
-    border-color: var(--primary-color, #03a9f4);
-  }
 }
 
 :deep(.el-textarea__inner) {

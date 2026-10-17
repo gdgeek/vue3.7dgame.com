@@ -133,7 +133,7 @@ export interface VersesParams {
   tags?: number[]; // 假设tags是数字ID数组，如果是其他类型可以相应调整
 }
 
-const createQueryParams = ({
+export const createVerseQueryParams = ({
   sort,
   search,
   page,
@@ -161,7 +161,7 @@ const createQueryParams = ({
 };
 
 export const getPublic = (params: VersesParams) => {
-  const query = createQueryParams(params);
+  const query = createVerseQueryParams(params);
 
   //expand = "id,name,description,data,metas,resources,code,uuid,code",
   return request<VerseData[]>({
@@ -170,7 +170,7 @@ export const getPublic = (params: VersesParams) => {
   });
 };
 export const getVerses = (params: VersesParams) => {
-  const query = createQueryParams(params);
+  const query = createVerseQueryParams(params);
   return request<VerseData[]>({
     url: `/v1/verses${qs.stringify(query, true)}`,
     method: "get",
@@ -202,28 +202,6 @@ export const putVerse = (
 export const deleteVerse = (id: number | string) => {
   return request({
     url: `/v1/verses/${id}`,
-    method: "delete",
-  });
-};
-
-/**
- * 将 verse 设为公开
- * POST /v1/verse/{id}/public
- */
-export const addPublic = (id: number | string) => {
-  return request({
-    url: `/v1/verses/${id}/public`,
-    method: "post",
-  });
-};
-
-/**
- * 取消 verse 公开状态
- * DELETE /v1/verse/{id}/public
- */
-export const removePublic = (id: number | string) => {
-  return request({
-    url: `/v1/verses/${id}/public`,
     method: "delete",
   });
 };

@@ -27,13 +27,6 @@
                 @remove="removeTags"
                 :verseTags="verseTagsForComponent"
               ></tags>
-              <el-switch
-                v-if="verse && isAdmin"
-                v-model="verse.public"
-                :active-text="$t('verse.view.public.open')"
-                :inactive-text="$t('verse.view.public.private')"
-                @change="handlePublicChange"
-              ></el-switch>
             </div>
           </template>
 
@@ -89,12 +82,15 @@
           <br />
         </el-card>
 
-        <SceneProperties
-          v-if="verse && isRoot"
-          :key="`${verse.id}:${verse.public}`"
+        <ScenePropertiesDialog
+          v-if="verse && isAdmin"
+          :key="verse.id"
           :scene-id="verse.id"
+          :scene-name="verse.name"
           @added="handleScenePropertyAdded"
-        ></SceneProperties>
+          @removed="handleScenePropertyRemoved"
+          @globally-deleted="handleScenePropertyRemoved"
+        ></ScenePropertiesDialog>
 
         <br />
         <br />
@@ -107,7 +103,7 @@
 import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 import Tags from "@/components/Tags.vue";
-import SceneProperties from "./SceneProperties.vue";
+import ScenePropertiesDialog from "./ScenePropertiesDialog.vue";
 import type { SceneProperty } from "@/api/v1/scene-properties";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
@@ -117,8 +113,6 @@ import {
   VerseData,
   addTag,
   removeTag,
-  addPublic,
-  removePublic,
 } from "@/api/v1/verse";
 import { useUserStore } from "@/store/modules/user";
 import { useRouter } from "vue-router";
@@ -144,10 +138,6 @@ const verseTagsForComponent = computed<VerseTagLink[]>(
 );
 
 const userStore = useUserStore();
-const isRoot = computed(() => {
-  const _ = userStore.userInfo;
-  return userStore.getRole() === userStore.RoleEnum.Root;
-});
 const isAdmin = computed(() => {
   // 显式引用 userInfo 以确保响应式更新
   const _ = userStore.userInfo;
@@ -280,28 +270,16 @@ const addTags = async (
   }
 };
 
-const handlePublicChange = async (value: string | number | boolean) => {
-  if (!verse.value) return;
-  const isPublic = Boolean(value);
-  try {
-    if (isPublic) {
-      await addPublic(verse.value.id);
-      ElMessage.success(t("verse.view.public.addSuccess"));
-    } else {
-      await removePublic(verse.value.id);
-      ElMessage.success(t("verse.view.public.removeSuccess"));
-    }
-    emit("changed");
-  } catch (error) {
-    // 恢复原值
-    verse.value.public = !isPublic;
-    ElMessage.error(t("verse.view.public.error"));
-  }
-};
-
 const handleScenePropertyAdded = (property: SceneProperty) => {
   if (property.key === "public" && verse.value) {
     verse.value.public = true;
+  }
+  emit("changed");
+};
+
+const handleScenePropertyRemoved = (property: SceneProperty) => {
+  if (property.key === "public" && verse.value) {
+    verse.value.public = false;
   }
   emit("changed");
 };

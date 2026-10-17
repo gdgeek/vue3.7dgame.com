@@ -213,6 +213,7 @@ interface Props {
   width?: string;
   actionLayout?: "stacked" | "grid";
   zIndex?: number;
+  closeOnEscape?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -233,6 +234,7 @@ const props = withDefaults(defineProps<Props>(), {
   width: "840px",
   actionLayout: "stacked",
   zIndex: 2000,
+  closeOnEscape: true,
 });
 
 const emit = defineEmits<{
@@ -291,7 +293,12 @@ const handleClose = () => {
 
 // Close on Escape key (but not when editing)
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === "Escape" && props.modelValue && !isEditing.value) {
+  if (
+    e.key === "Escape" &&
+    props.modelValue &&
+    props.closeOnEscape &&
+    !isEditing.value
+  ) {
     handleClose();
   }
 };
