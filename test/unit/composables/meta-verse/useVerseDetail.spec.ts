@@ -12,8 +12,6 @@ vi.mock("@/components/Dialog", () => ({
 vi.mock("@/api/v1/verse", () => ({
   getVerse: vi.fn(),
   putVerse: vi.fn(),
-  addPublic: vi.fn(),
-  removePublic: vi.fn(),
   addTag: vi.fn(),
   removeTag: vi.fn(),
 }));

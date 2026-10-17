@@ -1,7 +1,7 @@
 /**
  * Unit tests for src/api/v1/verse.ts
  * Covers: postVerse, getVerse, getVerses, getPublic, putVerse, deleteVerse,
- *         addPublic, removePublic, addTag, removeTag, takePhoto
+ *         addTag, removeTag, takePhoto
  *         and the internal createQueryParams logic (tested indirectly).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -72,12 +72,8 @@ describe("Verse API", () => {
       "",
       "image,public",
     ])("reloads saved visibility with expand=%s", async (expand) => {
-      let isPublic = false;
-      request.mockImplementation(async ({ url, method }) => {
-        if (url.endsWith("/public")) {
-          isPublic = method === "post";
-          return { data: { success: true } };
-        }
+      let isPublic = true;
+      request.mockImplementation(async ({ url }) => {
         const fields =
           new URL(url, "https://example.test").searchParams
             .get("expand")
@@ -90,11 +86,10 @@ describe("Verse API", () => {
         };
       });
 
-      await verseApi.addPublic(42);
       expect((await verseApi.getVerse(42, expand)).data.public).toBe(true);
       // Reopening the panel must still read persisted visibility.
       expect((await verseApi.getVerse(42, expand)).data.public).toBe(true);
-      await verseApi.removePublic(42);
+      isPublic = false;
       expect((await verseApi.getVerse(42, expand)).data.public).toBe(false);
     });
 
@@ -245,33 +240,6 @@ describe("Verse API", () => {
   });
 
   // -----------------------------------------------------------------------
-  // addPublic / removePublic
-  // -----------------------------------------------------------------------
-  describe("addPublic()", () => {
-    it("calls POST /v1/verses/{id}/public", async () => {
-      await verseApi.addPublic(5);
-      expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: "/v1/verses/5/public",
-          method: "post",
-        })
-      );
-    });
-  });
-
-  describe("removePublic()", () => {
-    it("calls DELETE /v1/verses/{id}/public", async () => {
-      await verseApi.removePublic(5);
-      expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: "/v1/verses/5/public",
-          method: "delete",
-        })
-      );
-    });
-  });
-
-  // -----------------------------------------------------------------------
   // addTag / removeTag
   // -----------------------------------------------------------------------
   describe("addTag()", () => {
@@ -333,18 +301,6 @@ describe("Verse API", () => {
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("10");
       expect(url).toContain("tags_id=20");
-    });
-  });
-
-  describe("addPublic() / removePublic() — different IDs", () => {
-    it("addPublic uses correct verse ID", async () => {
-      await verseApi.addPublic(99);
-      expect(request.mock.calls[0][0].url).toContain("/v1/verses/99/public");
-    });
-
-    it("removePublic uses correct verse ID", async () => {
-      await verseApi.removePublic(55);
-      expect(request.mock.calls[0][0].url).toContain("/v1/verses/55/public");
     });
   });
 });

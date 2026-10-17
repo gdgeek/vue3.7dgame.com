@@ -1,14 +1,7 @@
 import { ref, computed, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Message } from "@/components/Dialog";
-import {
-  getVerse,
-  putVerse,
-  addPublic,
-  removePublic,
-  addTag,
-  removeTag,
-} from "@/api/v1/verse";
+import { getVerse, putVerse, addTag, removeTag } from "@/api/v1/verse";
 import { getTags } from "@/api/v1/tags";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import type { VerseData } from "@/api/v1/verse";
@@ -128,26 +121,6 @@ export function useVerseDetail({ refresh, canManage }: Options) {
     }
   };
 
-  const handleVisibilityChange = async (isPublic: boolean) => {
-    if (!currentVerse.value || currentVerse.value.public === isPublic) return;
-    try {
-      if (isPublic) {
-        await addPublic(currentVerse.value.id);
-      } else {
-        await removePublic(currentVerse.value.id);
-      }
-      currentVerse.value.public = isPublic;
-      Message.success(
-        isPublic
-          ? t("verse.view.public.addSuccess")
-          : t("verse.view.public.removeSuccess")
-      );
-      refresh();
-    } catch {
-      Message.error(t("verse.listPage.visibilityUpdateFailed"));
-    }
-  };
-
   return {
     detailVisible,
     detailLoading,
@@ -162,6 +135,5 @@ export function useVerseDetail({ refresh, canManage }: Options) {
     isTagSelected,
     handleAddTag,
     handleRemoveTag,
-    handleVisibilityChange,
   };
 }
