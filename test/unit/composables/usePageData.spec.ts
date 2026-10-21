@@ -37,6 +37,16 @@ function makeFetchResponse<T>(
   };
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((done, fail) => {
+    resolve = done;
+    reject = fail;
+  });
+  return { promise, resolve, reject };
+}
+
 type Item = { id: number; name: string };
 
 describe("usePageData composable", () => {
@@ -201,6 +211,122 @@ describe("usePageData composable", () => {
       expect(calledParams.tags).toBeUndefined();
       unmount();
     });
+  });
+
+  describe("并发 refresh", () => {
+    it("较早的成功响应不能覆盖最新数据和分页", async () => {
+      const earlier = deferred<FetchResponse<Item>>();
+      const latest = deferred<FetchResponse<Item>>();
+      const fetchFn = vi
+        .fn()
+        .mockReturnValueOnce(earlier.promise)
+        .mockReturnValueOnce(latest.promise);
+      const { result, unmount } = withSetup(() =>
+        usePageData<Item>({ fetchFn, immediate: false })
+      );
+      try {
+        const earlierRefresh = result.refresh();
+        const latestRefresh = result.refresh();
+        const currentItems = [{ id: 2, name: "Latest" }];
+        latest.resolve(
+          makeFetchResponse(currentItems, {
+            "x-pagination-current-page": "2",
+            "x-pagination-page-count": "3",
+            "x-pagination-per-page": "10",
+            "x-pagination-total-count": "23",
+          })
+        );
+        await latestRefresh;
+        expect(result.items.value).toEqual(currentItems);
+        expect(result.loading.value).toBe(false);
+        earlier.resolve(
+          makeFetchResponse([{ id: 1, name: "Stale" }], {
+            "x-pagination-current-page": "1",
+            "x-pagination-page-count": "9",
+            "x-pagination-per-page": "50",
+            "x-pagination-total-count": "449",
+          })
+        );
+        await earlierRefresh;
+        expect(result.items.value).toEqual(currentItems);
+        expect(result.pagination).toEqual({
+          current: 2,
+          count: 3,
+          size: 10,
+          total: 23,
+        });
+        expect(result.loading.value).toBe(false);
+      } finally {
+        unmount();
+      }
+    });
+
+    it("较早的失败响应不能清空最新成功结果", async () => {
+      const earlier = deferred<FetchResponse<Item>>();
+      const latest = deferred<FetchResponse<Item>>();
+      const fetchFn = vi
+        .fn()
+        .mockReturnValueOnce(earlier.promise)
+        .mockReturnValueOnce(latest.promise);
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const { result, unmount } = withSetup(() =>
+        usePageData<Item>({ fetchFn, immediate: false })
+      );
+      try {
+        const earlierRefresh = result.refresh();
+        const latestRefresh = result.refresh();
+        const currentItems = [{ id: 2, name: "Latest" }];
+        latest.resolve(
+          makeFetchResponse(currentItems, { "x-pagination-total-count": "1" })
+        );
+        await latestRefresh;
+        earlier.reject(new Error("stale request failed"));
+        await earlierRefresh;
+        expect(result.items.value).toEqual(currentItems);
+        expect(result.pagination.total).toBe(1);
+        expect(result.loading.value).toBe(false);
+      } finally {
+        consoleSpy.mockRestore();
+        unmount();
+      }
+    });
+
+    it.each(["resolve", "reject"])(
+      "旧请求 %s 不能结束仍在等待的最新请求 loading",
+      async (outcome) => {
+        const earlier = deferred<FetchResponse<Item>>();
+        const latest = deferred<FetchResponse<Item>>();
+        const fetchFn = vi
+          .fn()
+          .mockReturnValueOnce(earlier.promise)
+          .mockReturnValueOnce(latest.promise);
+        const consoleSpy = vi
+          .spyOn(console, "error")
+          .mockImplementation(() => {});
+        const { result, unmount } = withSetup(() =>
+          usePageData<Item>({ fetchFn, immediate: false })
+        );
+        try {
+          const earlierRefresh = result.refresh();
+          const latestRefresh = result.refresh();
+          if (outcome === "resolve")
+            earlier.resolve(makeFetchResponse([{ id: 1, name: "Stale" }]));
+          else earlier.reject(new Error("stale request failed"));
+          await earlierRefresh;
+          expect(result.loading.value).toBe(true);
+          expect(result.items.value).toBeNull();
+          latest.resolve(makeFetchResponse([{ id: 2, name: "Latest" }]));
+          await latestRefresh;
+          expect(result.items.value).toEqual([{ id: 2, name: "Latest" }]);
+          expect(result.loading.value).toBe(false);
+        } finally {
+          consoleSpy.mockRestore();
+          unmount();
+        }
+      }
+    );
   });
 
   describe("totalPages 计算属性", () => {
