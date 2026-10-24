@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ref } from "vue";
 
 vi.mock("@/utils/logger", () => ({
@@ -6,7 +6,9 @@ vi.mock("@/utils/logger", () => ({
 }));
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key }),
+  useI18n: () => ({
+    t: (key: string) => (key === "meta.list.copySuffix" ? " - 副本" : key),
+  }),
 }));
 
 const mockPush = vi.fn();
@@ -73,6 +75,10 @@ describe("useMetaDetail", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe("initial state", () => {
@@ -343,7 +349,11 @@ describe("useMetaDetail", () => {
     });
 
     it("calls postMeta on successful copy", async () => {
-      const meta = makeMeta();
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 9, 24, 14, 5, 6));
+      const meta = makeMeta({
+        title: "Test Meta - 副本_2026-06-30_11-00-05",
+      });
       mockGetMeta.mockResolvedValue({ data: meta });
       mockMessageBox.prompt.mockResolvedValue({ value: "Copy of Test" });
       mockPostMeta.mockResolvedValue({ data: { id: 99 } });
@@ -352,6 +362,13 @@ describe("useMetaDetail", () => {
       await openDetail(meta as never);
       await handleCopy();
 
+      expect(mockMessageBox.prompt).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+        expect.objectContaining({
+          defaultValue: "Test Meta_2026-10-24_14-05-06",
+        })
+      );
       expect(mockPostMeta).toHaveBeenCalledWith(
         expect.objectContaining({ title: "Copy of Test" })
       );

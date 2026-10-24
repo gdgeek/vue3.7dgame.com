@@ -5,6 +5,11 @@ import {
 } from "@/api/v1/authoring-create";
 import type { WebMcpTool } from "./model-context";
 import { validRevision, type WriteReceipt } from "@/api/v1/write-contract";
+import {
+  createSceneNameTools,
+  getSceneNamingGuidance,
+  SCENE_NAME_GUIDANCE,
+} from "./scene-name-tools";
 
 export type ObjectKind = "entity" | "scene";
 export const ASSET_TYPES = [
@@ -508,8 +513,10 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
           runtimeAcceptanceIncluded: false,
         },
         coverAdvice,
+        sceneNaming: getSceneNamingGuidance(),
       })
     ),
+    ...createSceneNameTools(now),
     tool(
       "xrugc_search_authoring_objects",
       "按名称查找可访问的场景或实体，分页结果不代表全部对象。",
@@ -552,10 +559,16 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
     ),
     tool(
       "xrugc_stage_authoring_creation",
-      `预览新建场景或实体，不写入。${coverAdvice}`,
+      `预览新建场景或实体，不写入。${SCENE_NAME_GUIDANCE} ${coverAdvice}`,
       {
         kind: fields.kind,
-        name: { type: "string", minLength: 1, maxLength: 200 },
+        name: {
+          type: "string",
+          minLength: 1,
+          maxLength: 200,
+          description:
+            "完整名称。场景需要日期后缀时，使用 xrugc_format_scene_name 返回的 name；普通名称不要求加日期。",
+        },
         description: { type: "string", maxLength: 255 },
         pictureResourceId: fields.id,
       },

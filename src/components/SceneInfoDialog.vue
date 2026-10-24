@@ -23,7 +23,11 @@
             :src="scene.image.url"
             :alt="scene.name"
           />
-          <h3>{{ scene.name || t("verse.listPage.unnamed") }}</h3>
+          <h3>
+            <SceneTitle
+              :name="scene.name || t('verse.listPage.unnamed')"
+            ></SceneTitle>
+          </h3>
         </div>
         <dl class="scene-info-properties">
           <div v-for="property in properties" :key="property.label">
@@ -50,6 +54,7 @@ import { computed, ref, shallowRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { getVerse, type VerseData } from "@/api/v1/verse";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
+import SceneTitle from "@/components/SceneTitle.vue";
 
 const props = defineProps<{
   modelValue: boolean;

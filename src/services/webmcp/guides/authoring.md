@@ -5,10 +5,18 @@
 ## 从零制作
 
 1. 搜索已有素材，使用 `xrugc_get_asset_metadata` 核对类型、文件及动画元数据。`animationSource=unknown` 表示没有可信动画清单，不能编造名称。
-2. `xrugc_stage_authoring_creation` 创建实体／场景草稿，`xrugc_complete_authoring_draft` 请求确认，再查询 `xrugc_get_authoring_operation`。记录 ID、UUID 和操作结果，不把打开确认框当作创建成功。
+2. 场景需要日期后缀时先调用 `xrugc_format_scene_name`，统一使用 `名称_YYYY-MM-DD_HH-mm-ss`，将返回的 `name` 原样交给 `xrugc_stage_authoring_creation`；不需要日期时保留普通名称。创建实体／场景草稿后，`xrugc_complete_authoring_draft` 请求确认，再查询 `xrugc_get_authoring_operation`。记录 ID、UUID 和操作结果，不把打开确认框当作创建成功。
 3. 强烈建议选择清晰贴题的封面。可生图则生成，否则选可用网络图片或实际截图。上传走 `start_authoring_upload`，立即取得 uploadId 和 awaiting_confirmation，再确认页面并选择文件；用 `get_authoring_upload` 的 completedResourceIds 核对资源 ID。opened=false 的等待确认状态不是上传失败；closed 只表示窗口关闭，也不是成功凭据。封面绑定使用图片资源 ID，由工具转换为原图文件 ID；完成后回读关联，另查页面图片实际显示。
 4. 打开实体，等待上下文 ready。查询素材放置工具的 schema，stage→complete→查询保存回执。打开原有脚本抽屉，在真实积木目录中选类型与字段，使用模板预览或批量积木编辑，静态校验后完成保存。
 5. 打开场景，用场景实体放置工具加入已保存实体，核对保存回执。交付对象链接、ID、封面核验结果和保存回执；运行与发布是单独操作。
+
+## 场景日期命名
+
+克隆场景或组件时，把原名称传给 `xrugc_format_scene_name`，并设 `refreshTimestamp:true`；用返回值作为复制名称。工具会替换旧的生成时间，清理重复生成后缀，第二次克隆也只保留本次时间。格式化本身不执行克隆或修改对象。
+
+读取 `naming` 主题了解完整参数和示例。`xrugc_format_scene_name` 只返回规范名称，不创建草稿、不重命名已有场景。`baseName` 使用不带日期后缀的业务名称；省略 `timestamp` 使用当前真实时间，省略 `timeZone` 使用浏览器本地时区，年月日与时分秒始终来自同一时区。显式 `timestamp` 必须是带 `Z` 或偏移量的 RFC3339 时间，例如 `2026-09-21T11:00:05+08:00`；可同时指定 `timeZone:"Asia/Shanghai"`。
+
+已符合规范的名称在未提供 `timestamp` 时保持原样，不重复追加日期；旧标题没有时区信息，此时返回的 `timeZone:null` 不代表 UTC。不要自行拼接 `20260921`、`2026-09-21` 或括号日期，也不要猜测或删除历史标题中有业务含义的日期。仅知道历史日期时不编造时分秒；需要整理已有名称时，先确定基础名称及时间含义，再使用实际可用的重命名入口单独执行并核验。格式化结果不是保存或重命名成功凭据。
 
 ## 依赖与影响
 

@@ -15,7 +15,7 @@
               </el-icon>
             </i>
             <b id="title">{{ $t("verse.view.title") }}</b>
-            <span>{{ verse.name }}</span>
+            <SceneTitle :name="verse.name"></SceneTitle>
           </template>
 
           <template #footer>
@@ -103,6 +103,7 @@
 import { logger } from "@/utils/logger";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import Tags from "@/components/Tags.vue";
+import SceneTitle from "@/components/SceneTitle.vue";
 import ScenePropertiesDialog from "./ScenePropertiesDialog.vue";
 import type { SceneProperty } from "@/api/v1/scene-properties";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";

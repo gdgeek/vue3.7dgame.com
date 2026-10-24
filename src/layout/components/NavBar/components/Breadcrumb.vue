@@ -23,7 +23,16 @@
         }"
         @click="handleNavigate(item)"
       >
-        <span class="crumb-label">{{ item.label }}</span>
+        <span class="crumb-label">
+          <SceneTitle
+            v-if="
+              item.isPrimary &&
+              (route.path === '/verse/scene' || route.path === '/verse/script')
+            "
+            :name="item.label"
+          ></SceneTitle>
+          <template v-else>{{ item.label }}</template>
+        </span>
         <span
           v-if="item.isCurrent && showUnsavedDot"
           class="crumb-unsaved-dot crumb-unsaved-dot--current"
@@ -54,6 +63,7 @@ import { useI18n } from "vue-i18n";
 import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
 import { translateRouteTitle } from "@/utils/i18n";
 import EditorModeTag from "@/components/EditorModeTag.vue";
+import SceneTitle from "@/components/SceneTitle.vue";
 
 const route = useRoute();
 const router = useRouter();

@@ -1,11 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("@/utils/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
 }));
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key }),
+  useI18n: () => ({
+    t: (key: string) => (key === "meta.list.copySuffix" ? " - 副本" : key),
+  }),
 }));
 
 const mockMessage = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
@@ -56,6 +58,10 @@ describe("useMetaActions", () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   describe("addMeta", () => {
     it("creates meta with trimmed name on confirm", async () => {
       mockMessageBox.prompt.mockResolvedValue({ value: "  New Entity  " });
@@ -98,7 +104,11 @@ describe("useMetaActions", () => {
 
   describe("copyWindow", () => {
     it("copies meta with new title on confirm", async () => {
-      const meta = makeMeta();
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 9, 24, 14, 5, 6));
+      const meta = makeMeta({
+        title: "My Meta - 副本_2026-06-30_11-00-05",
+      });
       mockMessageBox.prompt.mockResolvedValue({ value: "Copy of My Meta" });
       mockGetMeta.mockResolvedValue({ data: meta });
       mockPostMeta.mockResolvedValue({ data: { id: 20 } });
@@ -109,6 +119,13 @@ describe("useMetaActions", () => {
       expect(mockGetMeta).toHaveBeenCalledWith(10, {
         expand: "image,author,metaCode",
       });
+      expect(mockMessageBox.prompt).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+        expect.objectContaining({
+          defaultValue: "My Meta_2026-10-24_14-05-06",
+        })
+      );
       expect(mockPostMeta).toHaveBeenCalledWith(
         expect.objectContaining({ title: "Copy of My Meta" })
       );

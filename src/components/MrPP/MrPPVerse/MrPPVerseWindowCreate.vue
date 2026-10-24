@@ -46,6 +46,7 @@ import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import { FormInstance, ElMessage } from "element-plus";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { formatSceneName } from "@/utils/sceneName";
 
 const { t } = useI18n();
 const props = defineProps({
@@ -89,12 +90,8 @@ const rules = computed(() => ({
 
 const formRef = ref<FormInstance>();
 
-const generateDefaultName = () => {
-  const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10);
-  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, "-");
-  return `${t("verse.create.defaultName")}_${dateStr}_${timeStr}`;
-};
+const generateDefaultName = () =>
+  formatSceneName(t("verse.create.defaultName"));
 
 const submitForm = async () => {
   formRef.value?.validate((valid: boolean) => {
