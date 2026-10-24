@@ -267,6 +267,7 @@ defineExpose({
 
 <style scoped lang="scss">
 .page-action-bar {
+  container: resource-toolbar / inline-size;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -348,19 +349,26 @@ defineExpose({
 
 .controls-left {
   display: flex;
+  flex: 1 1 320px;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  min-width: 0;
 }
 
 .controls-right {
   display: flex;
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
 
   // Customize action buttons to be pill-shaped
   :deep(.el-button) {
     padding: 8px 20px; // Ensure enough padding for pill shape
+    margin-left: 0;
     border-radius: var(
       --standard-page-max-radius,
       calc(var(--radius-lg, 24px) / 3)
@@ -374,6 +382,7 @@ defineExpose({
   display: flex;
   align-items: center;
   width: 280px;
+  max-width: 100%;
 }
 
 .search-icon {
@@ -542,5 +551,49 @@ defineExpose({
 // ===== Tabs Row =====
 .tabs-row {
   padding: 8px 0 0;
+}
+
+@container resource-toolbar (width <= 640px) {
+  .controls-row {
+    align-items: stretch;
+  }
+
+  .controls-left,
+  .controls-right {
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .controls-left :deep(.resource-scope-filter) {
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .controls-left :deep(.el-select) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .controls-right {
+    gap: var(--spacing-sm, 8px);
+  }
+
+  .sort-control {
+    gap: 4px;
+    margin-right: 0;
+  }
+
+  .sort-btn {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .vertical-divider {
+    display: none;
+  }
 }
 </style>

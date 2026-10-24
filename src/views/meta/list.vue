@@ -42,33 +42,21 @@
         :view-mode="viewMode"
         :loading="loading"
         :show-empty="!loadingSceneDetail"
-        :breakpoints="denseResourceBreakpoints"
         :card-gutter="denseResourceCardGutter"
+        long-press-enabled
         @row-click="openDetail"
+        @row-long-press="goToEditor"
       >
         <template #grid-card="{ item }">
           <StandardCard
+            v-long-press="() => goToEditor(item)"
             :image="item.image?.url"
             :title="item.title || item.name || t('meta.list.unnamed')"
             :type-icon="['fas', 'puzzle-piece']"
             :placeholder-icon="['fas', 'puzzle-piece']"
             :show-checkbox="false"
             @view="openDetail(item)"
-          >
-            <template #actions>
-              <div class="single-card-actions">
-                <button
-                  class="single-card-action-btn"
-                  @click.stop="goToEditor(item)"
-                >
-                  <font-awesome-icon
-                    :icon="['fas', 'pen-to-square']"
-                  ></font-awesome-icon>
-                  {{ t("route.meta.sceneEditor") }}
-                </button>
-              </div>
-            </template>
-          </StandardCard>
+          ></StandardCard>
         </template>
 
         <template #list-header>
@@ -97,13 +85,6 @@
               </div>
             </div>
             <span class="item-name">{{ item.title || item.name || "—" }}</span>
-            <el-button
-              class="btn-hover-action"
-              type="primary"
-              @click.stop="goToEditor(item)"
-            >
-              {{ t("meta.list.enterEditor") }}
-            </el-button>
           </div>
           <div class="col-author">
             {{ item.author?.nickname || item.author?.username || "—" }}
@@ -119,9 +100,6 @@
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openDetail(item)">{{
                     t("meta.list.viewDetail")
-                  }}</el-dropdown-item>
-                  <el-dropdown-item @click="goToEditor(item)">{{
-                    t("meta.list.enterEditor")
                   }}</el-dropdown-item>
                   <el-dropdown-item @click="copyWindow(item)">{{
                     t("meta.copy")
@@ -310,6 +288,7 @@
 </template>
 
 <script setup lang="ts">
+import { vLongPress } from "@/directive/longPress";
 import { logger } from "@/utils/logger";
 import { ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -346,10 +325,7 @@ import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import SignalInfoPanel from "@/components/Meta/SignalInfoPanel.vue";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import type { CardInfo } from "@/utils/types";
-import {
-  denseResourceBreakpoints,
-  denseResourceCardGutter,
-} from "@/utils/resourceGrid";
+import { denseResourceCardGutter } from "@/utils/resourceGrid";
 import { compareMultilingualText } from "@/utils/multilingualSort";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 
@@ -1526,42 +1502,6 @@ const deletedWindow = async (
 }
 
 .list-view {
-  :deep(.single-card-actions) {
-    display: flex;
-    background: var(--resource-card-action-surface-bg, var(--bg-card, #fff));
-    border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  }
-
-  :deep(.single-card-action-btn) {
-    display: inline-flex;
-    gap: 6px;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 44px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary, #64748b);
-    cursor: pointer;
-    background: var(--resource-card-action-btn-bg, var(--bg-hover, #f8fafc));
-    border: 1px solid
-      var(--resource-card-action-btn-border, var(--border-color, #e2e8f0));
-    transition: all 0.2s ease;
-  }
-
-  :deep(.single-card-action-btn:hover) {
-    color: var(--primary-color, #03a9f4);
-    background: var(
-      --resource-card-action-btn-hover-bg,
-      var(--bg-active, #e2e8f0)
-    );
-  }
-
-  :deep(.standard-card .card-content) {
-    gap: 4px;
-    padding: 10px 14px;
-  }
-
   :deep(.col-checkbox) {
     width: 40px;
   }
@@ -1580,40 +1520,6 @@ const deletedWindow = async (
     text-align: right;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .btn-hover-action {
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 84px;
-    height: 28px;
-    padding: 0;
-    margin-left: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    color: white;
-    visibility: hidden;
-    background: var(--primary-color, #03a9f4);
-    border: none;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgb(3 169 244 / 30%);
-    opacity: 0;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      background: var(--primary-hover, #039be5);
-      box-shadow: 0 6px 16px rgb(3 169 244 / 40%);
-      transform: scale(1.05);
-    }
-  }
-
-  :deep(.list-row:hover) {
-    .btn-hover-action {
-      visibility: visible;
-      opacity: 1;
-    }
   }
 }
 

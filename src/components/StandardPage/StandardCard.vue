@@ -2,6 +2,12 @@
   <div
     class="standard-card"
     :class="{ 'is-selected': isSelected, 'selection-mode': selectionMode }"
+    role="button"
+    tabindex="0"
+    :aria-label="title"
+    @click="$emit('view')"
+    @keydown.enter.self.prevent="$emit('view')"
+    @keydown.space.self.prevent="$emit('view')"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
@@ -30,7 +36,7 @@
     </div>
 
     <!-- Thumbnail Area -->
-    <div class="card-thumbnail" :style="thumbnailStyle" @click="$emit('view')">
+    <div class="card-thumbnail" :style="thumbnailStyle">
       <div class="thumbnail-inner">
         <div v-if="thumbnailVariant === 'audio'" class="audio-thumbnail">
           <div class="audio-thumbnail-badge">
@@ -51,14 +57,6 @@
         </div>
       </div>
 
-      <!-- Hover Overlay -->
-      <div class="thumbnail-overlay">
-        <button class="overlay-btn" @click.stop="$emit('view')">
-          <font-awesome-icon :icon="['fas', 'circle-info']"></font-awesome-icon>
-          <span>{{ t("ui.viewInfo") }}</span>
-        </button>
-      </div>
-
       <!-- Tags on thumbnail -->
       <div v-if="tags && tags.length > 0" class="thumbnail-tags">
         <span v-for="tag in displayTags" :key="tag" class="tag-badge">
@@ -75,25 +73,29 @@
       <h3 class="card-title" :title="title">{{ title }}</h3>
       <p v-if="description" class="card-description">{{ description }}</p>
       <div v-if="meta" class="card-meta">
-        <span v-if="meta.author" class="meta-item">
+        <span v-if="meta.author" class="meta-item" :title="meta.author">
           <font-awesome-icon
             :icon="['fas', 'user']"
             class="meta-icon"
           ></font-awesome-icon>
-          {{ meta.author }}
+          <span class="meta-text">{{ meta.author }}</span>
         </span>
-        <span v-if="meta.date" class="meta-item">
+        <span v-if="meta.date" class="meta-item" :title="meta.date">
           <font-awesome-icon
             :icon="['fas', 'clock']"
             class="meta-icon"
           ></font-awesome-icon>
-          {{ meta.date }}
+          <span class="meta-text">{{ meta.date }}</span>
         </span>
       </div>
     </div>
 
     <!-- Action Footer -->
-    <div v-if="$slots.actions || actionText" class="card-action-group">
+    <div
+      v-if="$slots.actions || actionText"
+      class="card-action-group"
+      @click.stop
+    >
       <slot name="actions">
         <div class="card-action" @click.stop="$emit('action')">
           <font-awesome-icon
@@ -109,9 +111,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
 
 interface CardMeta {
   author?: string;
@@ -216,10 +215,12 @@ const toggleSelect = () => {
 
 <style scoped lang="scss">
 .standard-card {
+  container: resource-card / inline-size;
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  cursor: pointer;
   background: var(--bg-card, #fff);
   border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
   border-radius: var(
@@ -227,6 +228,16 @@ const toggleSelect = () => {
     calc(var(--radius-lg, 24px) / 3)
   );
   transition: all var(--transition-normal, 0.2s ease);
+
+  &.supports-long-press {
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color, #00baff);
+    outline-offset: 2px;
+  }
 
   &:hover {
     box-shadow: var(--shadow-lg);
@@ -328,8 +339,8 @@ const toggleSelect = () => {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
-    background: transparent;
     object-position: center;
+    background: transparent;
     transition: transform var(--transition-slow, 0.3s ease);
   }
 }
@@ -381,56 +392,6 @@ const toggleSelect = () => {
   }
 }
 
-// ===== Hover Overlay =====
-.thumbnail-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-overlay, rgb(0 0 0 / 50%));
-  backdrop-filter: blur(2px);
-  opacity: 0;
-  transition: opacity var(--transition-normal, 0.2s ease);
-}
-
-.standard-card:hover .thumbnail-overlay {
-  opacity: 1;
-}
-
-.overlay-btn {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary, #1e293b);
-  cursor: pointer;
-  background: var(--bg-card, #fff);
-  border: none;
-  border-radius: var(
-    --standard-page-max-radius,
-    calc(var(--radius-lg, 24px) / 3)
-  );
-  box-shadow: var(--shadow-md, 0 4px 12px rgb(0 0 0 / 15%));
-  transition: all var(--transition-fast, 0.15s ease);
-  transform: translateY(10px);
-
-  .svg-inline--fa {
-    font-size: 20px;
-  }
-
-  &:hover {
-    background: var(--bg-hover, #f8fafc);
-    transform: translateY(0) scale(1.05);
-  }
-}
-
-.standard-card:hover .overlay-btn {
-  transform: translateY(0);
-}
-
 // ===== Tags on Thumbnail =====
 .thumbnail-tags {
   position: absolute;
@@ -472,35 +433,34 @@ const toggleSelect = () => {
   flex: 1;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
   padding: 16px;
 }
 
 .card-title {
   margin: 0;
-  overflow: hidden;
   font-size: 16px;
   font-weight: 600;
   line-height: 1.4;
   color: var(--text-primary, #1e293b);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .card-description {
-  display: -webkit-box;
   margin: 0;
-  overflow: hidden;
   font-size: 13px;
   line-height: 1.5;
   color: var(--text-secondary, #64748b);
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .card-meta {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
+  min-width: 0;
   margin-top: auto;
 }
 
@@ -508,12 +468,29 @@ const toggleSelect = () => {
   display: flex;
   gap: 4px;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
   font-size: 12px;
   color: var(--text-muted, #94a3b8);
 }
 
+.meta-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .meta-icon {
+  flex-shrink: 0;
   font-size: 14px;
+}
+
+@container resource-card (width <= 260px) {
+  .card-meta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
 }
 
 // ===== Action Footer =====

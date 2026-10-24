@@ -81,8 +81,11 @@ const emit = defineEmits<{
 <style scoped lang="scss">
 .resource-scope-filter {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .scene-select,
@@ -137,7 +140,10 @@ const emit = defineEmits<{
 
 .scene-select,
 .entity-select {
+  flex: 1 1 160px;
   width: 180px;
+  min-width: 0;
+  max-width: 100%;
 
   :deep(.el-select__selected-item) {
     color: var(--text-primary, #1e293b) !important;

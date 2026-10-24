@@ -48,7 +48,6 @@
         :view-mode="viewMode"
         :loading="loading"
         :show-empty="!scopeFilter.loadingSceneDetail.value"
-        :breakpoints="denseResourceBreakpoints"
         :card-gutter="denseResourceCardGutter"
         @row-click="(item) => openViewDialog(item.id)"
       >
@@ -213,10 +212,7 @@ import { toHttps } from "@/utils/helper";
 import { getDefaultAvatarUrl } from "@/utils/avatar";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
 import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
-import {
-  denseResourceBreakpoints,
-  denseResourceCardGutter,
-} from "@/utils/resourceGrid";
+import { denseResourceCardGutter } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
 

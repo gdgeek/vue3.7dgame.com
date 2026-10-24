@@ -48,7 +48,6 @@
         :view-mode="viewMode"
         :loading="loading"
         :show-empty="!scopeFilter.loadingSceneDetail.value"
-        :breakpoints="denseResourceBreakpoints"
         :card-gutter="denseResourceCardGutter"
         @row-click="(item) => openViewDialog(item.id)"
       >
@@ -210,7 +209,6 @@ import { toHttps } from "@/utils/helper";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
 import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import {
-  denseResourceBreakpoints,
   denseResourceCardGutter,
   getAspectRatioFromInfo,
 } from "@/utils/resourceGrid";
