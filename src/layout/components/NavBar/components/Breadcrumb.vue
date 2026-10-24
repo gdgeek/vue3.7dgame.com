@@ -206,6 +206,11 @@ const resolveMapSegments = (
       { key: "sidebar.scene" },
       { key: "sidebar.systemRecommend" },
     ],
+    "/verse/all": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.scene" },
+      { key: "sidebar.allScenes" },
+    ],
     "/help": [{ key: "breadcrumb.support" }],
     "/help/index": [
       { key: "breadcrumb.support" },
