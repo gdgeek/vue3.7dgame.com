@@ -85,6 +85,8 @@ export default {
       propertyOptionsFailed: "无法加载全局属性，请重试。",
       retryPropertyOptions: "重新加载属性",
       myScenes: "我的场景",
+      allScenes: "所有场景",
+      searchAuthors: "搜索用户名或昵称",
       createScene: "新建场景",
       emptyText: "暂无场景",
       searchScenes: "搜索场景...",

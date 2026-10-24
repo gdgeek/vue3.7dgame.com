@@ -208,6 +208,7 @@ export default {
     aiCreation: "AI 创作",
     scene: "场景",
     selfCreated: "自己创造",
+    allScenes: "所有场景",
     systemRecommend: "系统推荐",
     teacherManagement: "老师管理",
     studentManagement: "学生管理",

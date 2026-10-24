@@ -266,6 +266,20 @@
                 </div>
               </router-link>
               <router-link
+                v-if="ability.can('root', 'all')"
+                to="/verse/all"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.allScenes") }}</span>
+                </div>
+              </router-link>
+              <router-link
                 to="/verse/public"
                 custom
                 v-slot="{ isActive, navigate }"
@@ -296,6 +310,21 @@
                 >
                   <span class="submenu-dot"></span>
                   <span>{{ t("sidebar.selfCreated") }}</span>
+                </div>
+              </router-link>
+              <router-link
+                v-if="ability.can('root', 'all')"
+                to="/verse/all"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="sidebar-subitem"
+                  :class="{ 'sidebar-subitem-active': isActive }"
+                  @click="navigate"
+                >
+                  <span class="submenu-dot"></span>
+                  <span>{{ t("sidebar.allScenes") }}</span>
                 </div>
               </router-link>
               <router-link

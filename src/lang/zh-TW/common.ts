@@ -186,6 +186,7 @@ export default {
     aiCreation: "AI 創作",
     scene: "場景",
     selfCreated: "我的創作",
+    allScenes: "所有場景",
     systemRecommend: "系統推薦",
     teacherManagement: "老師管理",
     studentManagement: "學生管理",

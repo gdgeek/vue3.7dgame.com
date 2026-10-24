@@ -59,6 +59,15 @@ describe("verseRoutes 路由模块", () => {
       expect(r?.name).toBe("VersePublic");
     });
 
+    it("所有场景复用场景列表，并明确限定 root 和 all scope", () => {
+      const r = verseRoutes.children!.find((c) => c.path === "/verse/all");
+      expect(r?.name).toBe("VerseAll");
+      expect(r?.props).toEqual({ scope: "all" });
+      expect(r?.meta?.roles).toEqual(["root"]);
+      expect(r?.meta?.title).toBe("project.allScenes");
+      expect(r?.meta?.private).not.toBe(true);
+    });
+
     it("包含 /verse/view 子路由（private）", () => {
       const r = verseRoutes.children!.find((c) => c.path === "/verse/view");
       expect(r).toBeDefined();

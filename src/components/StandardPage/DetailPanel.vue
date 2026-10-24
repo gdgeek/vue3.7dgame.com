@@ -270,6 +270,13 @@ const cancelEdit = () => {
   editingName.value = "";
 };
 
+watch(
+  () => props.editable,
+  (editable) => {
+    if (!editable) cancelEdit();
+  }
+);
+
 const saveEdit = () => {
   if (editingName.value.trim() && editingName.value !== props.name) {
     emit("rename", editingName.value.trim());

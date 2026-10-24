@@ -8,6 +8,8 @@ import type {
   VerseCode,
   PostVerseData,
   PutVerseData,
+  VersesParams,
+  AllVersesParams,
 } from "./types/verse";
 
 import type { JsonValue } from "./types/common";
@@ -19,6 +21,8 @@ export type {
   VerseCode,
   PostVerseData,
   PutVerseData,
+  VersesParams,
+  AllVersesParams,
 } from "./types/verse";
 
 export type meta = {
@@ -124,15 +128,6 @@ export const getVerseMetasWithJsCode = (
     method: "get",
   });
 };*/
-export interface VersesParams {
-  sort?: string;
-  search?: string;
-  page?: number;
-  perPage?: number;
-  expand?: string;
-  tags?: number[]; // 假设tags是数字ID数组，如果是其他类型可以相应调整
-}
-
 export const createVerseQueryParams = ({
   sort,
   search,
@@ -173,6 +168,34 @@ export const getVerses = (params: VersesParams) => {
   const query = createVerseQueryParams(params);
   return request<VerseData[]>({
     url: `/v1/verses${qs.stringify(query, true)}`,
+    method: "get",
+  });
+};
+
+/** Root-only list of all scenes, including private scenes. */
+export const getAllVerses = (params: AllVersesParams) => {
+  const query = createVerseQueryParams(params);
+  if (params.authorSearch) query.authorSearch = params.authorSearch;
+  if (params.authorId !== undefined) query.authorId = params.authorId;
+  if (params.propertyId !== undefined) query.propertyId = params.propertyId;
+  if (params.public !== undefined) query.public = params.public;
+  return request<VerseData[]>({
+    url: `/v1/verses/all${qs.stringify(query, true)}`,
+    method: "get",
+  });
+};
+
+/** Root detail scope for the all-scenes list; visibility must be expanded. */
+export const getAllVerse = (id: number, expand = "metas,share") => {
+  const fields = new Set(
+    expand
+      .split(",")
+      .map((field) => field.trim())
+      .filter(Boolean)
+  );
+  fields.add("public");
+  return request<VerseData>({
+    url: `/v1/verses/all/${id}${qs.stringify({ expand: [...fields].join(","), cl: "lua" }, true)}`,
     method: "get",
   });
 };

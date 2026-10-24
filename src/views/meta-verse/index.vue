@@ -1,8 +1,12 @@
 <template>
   <TransitionWrapper>
-    <div class="verse-index">
+    <div v-if="!isAllScenes || isRoot" class="verse-index">
       <PageActionBar
-        :title="t('verse.listPage.myScenes')"
+        :title="
+          t(
+            isAllScenes ? 'verse.listPage.allScenes' : 'verse.listPage.myScenes'
+          )
+        "
         :show-title="false"
         :search-placeholder="t('verse.listPage.searchScenes')"
         :show-tags="true"
@@ -11,7 +15,18 @@
         @view-change="handleViewChange"
       >
         <template #filters>
-          <div v-if="isRoot" class="scene-property-filter">
+          <el-input
+            v-if="isAllScenes && isRoot"
+            v-model="authorSearchInput"
+            class="scene-author-filter"
+            :placeholder="t('verse.listPage.searchAuthors')"
+            v-bind="{ 'aria-label': t('verse.listPage.searchAuthors') }"
+            :maxlength="255"
+            clearable
+            @keyup.enter="applyAuthorSearch"
+            @clear="applyAuthorSearch"
+          ></el-input>
+          <div v-if="isAllScenes && isRoot" class="scene-property-filter">
             <el-select
               v-model="globalPropertyId"
               class="scene-property-filter__select"
@@ -42,14 +57,14 @@
           ></TagsSelect>
         </template>
         <template #actions>
-          <el-button type="primary" @click="createWindow">
+          <el-button v-if="!isAllScenes" type="primary" @click="createWindow">
             <font-awesome-icon
               :icon="['fas', 'plus']"
               style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ t("verse.listPage.createScene") }}
           </el-button>
-          <el-button @click="openImportDialog">
+          <el-button v-if="!isAllScenes" @click="openImportDialog">
             <font-awesome-icon
               :icon="['fas', 'upload']"
               style="margin-right: 4px; font-size: 18px"
@@ -59,7 +74,7 @@
         </template>
       </PageActionBar>
       <p
-        v-if="isRoot && globalPropertiesError"
+        v-if="isAllScenes && isRoot && globalPropertiesError"
         class="scene-property-filter__error"
         role="alert"
       >
@@ -84,6 +99,14 @@
             :image="item.image?.url"
             :title="item.name || t('verse.listPage.unnamed')"
             :description="item.description"
+            :meta="
+              isAllScenes
+                ? {
+                    author: item.author?.nickname || item.author?.username,
+                    date: formatItemDate(item.created_at),
+                  }
+                : undefined
+            "
             :type-icon="['fas', 'layer-group']"
             :placeholder-icon="['fas', 'layer-group']"
             :show-checkbox="false"
@@ -160,7 +183,7 @@
             :icon="['fas', 'layer-group']"
             :text="t('verse.listPage.emptyText')"
             :action-text="
-              isGlobalScope ? undefined : t('verse.listPage.createScene')
+              isAllScenes ? undefined : t('verse.listPage.createScene')
             "
             @action="createWindow"
           ></EmptyState>
@@ -194,7 +217,7 @@
         :placeholder-icon="['fas', 'image']"
         width="560px"
         :show-delete="canEditCurrentScene"
-        :editable="canEditCurrentScene"
+        :editable="canEditCurrentMetadata"
         action-layout="grid"
         :download-text="t('ui.exportScene')"
         :download-icon="['fas', 'download']"
@@ -265,7 +288,7 @@
               </div>
               <el-input
                 v-model="editingDescription"
-                :readonly="!canEditCurrentScene"
+                :readonly="!canEditCurrentMetadata"
                 type="textarea"
                 :rows="4"
                 :placeholder="t('verse.listPage.sceneIntroPlaceholder')"
@@ -274,7 +297,10 @@
             </div>
 
             <!-- Tags Section (Restricted) -->
-            <div v-if="canManage && canEditCurrentScene" class="info-section">
+            <div
+              v-if="canManage && canEditCurrentMetadata"
+              class="info-section"
+            >
               <div class="section-header">
                 {{ t("verse.listPage.sceneTags") }}
               </div>
@@ -365,6 +391,7 @@
         </template>
       </DetailPanel>
     </div>
+    <el-empty v-else :description="t('errorPage.noPermission')"></el-empty>
   </TransitionWrapper>
 
   <!-- Selection Method Dialog -->
@@ -443,8 +470,6 @@ import Create from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
 import ScenePropertiesDialog from "@/components/MrPP/MrPPVerse/ScenePropertiesDialog.vue";
 import {
   getGlobalScenePropertyOptions,
-  getScenesByProperty,
-  getSceneByProperty,
   type SceneProperty,
 } from "@/api/v1/scene-properties";
 import ImportDialog from "@/components/ScenePackage/ImportDialog.vue";
@@ -453,6 +478,8 @@ import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import {
   getVerses,
   getVerse,
+  getAllVerses,
+  getAllVerse,
   postVerse,
   putVerse,
   deleteVerse,
@@ -473,6 +500,10 @@ import { useAbility } from "@casl/vue";
 import { denseResourceCardGutter } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
+const props = withDefaults(defineProps<{ scope?: "mine" | "all" }>(), {
+  scope: "mine",
+});
+const isAllScenes = computed(() => props.scope === "all");
 const router = useRouter();
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
 const ability = useAbility();
@@ -481,16 +512,19 @@ const globalPropertyId = ref<number>();
 const globalProperties = ref<SceneProperty[]>([]);
 const globalPropertiesLoading = ref(false);
 const globalPropertiesError = ref("");
+const authorSearchInput = ref("");
+const authorSearch = ref("");
+let authorSearchTimer: ReturnType<typeof setTimeout> | undefined;
+function applyAuthorSearch() {
+  clearTimeout(authorSearchTimer);
+  if (!isAllScenes.value || !isRoot.value) return;
+  authorSearch.value = authorSearchInput.value.trim();
+}
 let globalCatalogVersion = 0;
 let detailRequestVersion = 0;
-const isGlobalScope = computed(
-  () =>
-    isRoot.value &&
-    Number.isSafeInteger(globalPropertyId.value) &&
-    Number(globalPropertyId.value) > 0
-);
+const isGlobalScope = computed(() => isAllScenes.value && isRoot.value);
 async function loadGlobalProperties() {
-  if (!isRoot.value) return;
+  if (!isAllScenes.value || !isRoot.value) return;
   const version = ++globalCatalogVersion;
   globalPropertiesLoading.value = true;
   globalPropertiesError.value = "";
@@ -525,6 +559,7 @@ const {
   handleTagsChange,
 } = usePageData({
   fetchFn: async (params) => {
+    if (isAllScenes.value && !isRoot.value) return { data: [], headers: {} };
     const query = {
       sort: params.sort,
       search: params.search,
@@ -533,8 +568,12 @@ const {
       tags: params.tags,
       expand: "image,author,public",
     };
-    return isGlobalScope.value
-      ? getScenesByProperty(globalPropertyId.value!, query)
+    return isAllScenes.value
+      ? getAllVerses({
+          ...query,
+          authorSearch: authorSearch.value || undefined,
+          propertyId: globalPropertyId.value,
+        })
       : getVerses(query);
   },
   pageSize: 24,
@@ -545,10 +584,20 @@ const propertyDialogOpen = ref(false);
 const detailLoading = ref(false);
 const currentVerse = ref<VerseData | null>(null);
 const canEditScene = (item: { editable?: boolean }) =>
-  !isGlobalScope.value || item.editable === true;
+  !isAllScenes.value || (isRoot.value && item.editable === true);
 const canEditCurrentScene = computed(
   () => Boolean(currentVerse.value) && canEditScene(currentVerse.value!)
 );
+const canEditCurrentMetadata = computed(
+  () =>
+    Boolean(currentVerse.value) &&
+    ((isAllScenes.value && isRoot.value) || canEditCurrentScene.value)
+);
+const metadataRequestIsCurrent = (sceneId: number, request: number) =>
+  request === detailRequestVersion &&
+  detailVisible.value &&
+  currentVerse.value?.id === sceneId &&
+  canEditCurrentMetadata.value;
 const canManageProperties = computed(
   () => ability.can("admin", "all") || ability.can("root", "all")
 );
@@ -698,7 +747,7 @@ const detailProperties = computed(() => {
 });
 
 const triggerFileSelect = () => {
-  if (!canEditCurrentScene.value) return;
+  if (!canEditCurrentMetadata.value) return;
   imageSelectDialogVisible.value = true;
 };
 
@@ -713,13 +762,15 @@ const openResourceDialog = () => {
 };
 
 const onResourceSelected = async (data: CardInfo) => {
-  if (!canEditCurrentScene.value) return;
+  const scene = currentVerse.value;
+  if (!canEditCurrentMetadata.value || !scene) return;
+  const request = detailRequestVersion;
   // data is CardInfo, but to be sure
   const imageId =
     (data.context as Record<string, unknown>)?.image_id ||
     data.image?.id ||
     data.id;
-  if (imageId && currentVerse.value) {
+  if (imageId) {
     detailLoading.value = true;
     try {
       // If the selected resource is a picture resource, we might need to get its file ID or image ID check
@@ -736,22 +787,30 @@ const onResourceSelected = async (data: CardInfo) => {
         finalImageId = response.data.image_id || response.data.file?.id;
       }
 
-      await putVerse(currentVerse.value.id, {
+      if (!metadataRequestIsCurrent(scene.id, request)) return;
+      if (!finalImageId) throw new Error(t("verse.listPage.selectImageFile"));
+      await putVerse(scene.id, {
         image_id: finalImageId as number | undefined,
       });
+      refresh();
+      if (!metadataRequestIsCurrent(scene.id, request)) return;
       Message.success(t("verse.view.image.updateSuccess"));
-      await openDetail(currentVerse.value);
+      await openDetail(scene);
     } catch (error) {
       logger.error("Failed to update verse image:", error);
-      Message.error(t("verse.view.image.updateError"));
+      if (metadataRequestIsCurrent(scene.id, request))
+        Message.error(t("verse.view.image.updateError"));
     } finally {
-      detailLoading.value = false;
+      if (metadataRequestIsCurrent(scene.id, request))
+        detailLoading.value = false;
     }
   }
 };
 
 const handleCoverUpload = async (event: Event) => {
-  if (!canEditCurrentScene.value) return;
+  const scene = currentVerse.value;
+  if (!canEditCurrentMetadata.value || !scene) return;
+  const request = detailRequestVersion;
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
   if (!file) return;
@@ -795,6 +854,7 @@ const handleCoverUpload = async (event: Event) => {
     }
 
     // 4. Register File
+    if (!metadataRequestIsCurrent(scene.id, request)) return;
     const fileData: UploadFileType = {
       filename: file.name,
       md5,
@@ -805,17 +865,21 @@ const handleCoverUpload = async (event: Event) => {
     const imageId = response.data.id;
 
     // 5. Update Verse
-    if (currentVerse.value) {
-      await putVerse(currentVerse.value.id, { image_id: imageId });
+    if (metadataRequestIsCurrent(scene.id, request)) {
+      await putVerse(scene.id, { image_id: imageId });
+      refresh();
+      if (!metadataRequestIsCurrent(scene.id, request)) return;
       Message.success(t("verse.view.image.updateSuccess"));
       // Refresh details
-      await openDetail(currentVerse.value);
+      await openDetail(scene);
     }
   } catch (error) {
     logger.error("Upload failed", error);
-    Message.error(t("verse.view.image.updateError"));
+    if (metadataRequestIsCurrent(scene.id, request))
+      Message.error(t("verse.view.image.updateError"));
   } finally {
-    detailLoading.value = false;
+    if (metadataRequestIsCurrent(scene.id, request))
+      detailLoading.value = false;
     // Reset input
     target.value = "";
   }
@@ -836,12 +900,8 @@ const loadDetail = async (item: VerseData, preserveCurrent = false) => {
     (!currentVerse.value || currentVerse.value.id === item.id) &&
     propertyId === (isGlobalScope.value ? globalPropertyId.value : undefined);
   try {
-    const response = propertyId
-      ? await getSceneByProperty(
-          item.id,
-          propertyId,
-          "image,author,tags,metas,public"
-        )
+    const response = isAllScenes.value
+      ? await getAllVerse(item.id, "image,author,tags,metas,public")
       : await getVerse(item.id, "image,author,tags,metas");
     if (!currentRequest()) return;
     currentVerse.value = response.data;
@@ -856,7 +916,7 @@ const loadDetail = async (item: VerseData, preserveCurrent = false) => {
         editingDescription.value === descriptionAtRequest)
     )
       editingDescription.value = response.data.description || "";
-    if (!preserveCurrent && canManage.value && canEditCurrentScene.value) {
+    if (!preserveCurrent && canManage.value && canEditCurrentMetadata.value) {
       const tagsRes = await getTags();
       if (!currentRequest()) return;
       allTags.value = tagsRes.data.map((tag: { id: number; name: string }) => ({
@@ -880,21 +940,27 @@ const refreshSceneDetails = () => {
 const handleDescriptionBlur = async () => {
   if (
     !currentVerse.value ||
-    !canEditCurrentScene.value ||
+    !canEditCurrentMetadata.value ||
     editingDescription.value === (currentVerse.value.description || "")
   )
     return;
 
+  const scene = currentVerse.value;
+  const request = detailRequestVersion;
+  const description = editingDescription.value;
   try {
-    await putVerse(currentVerse.value.id, {
-      description: editingDescription.value,
+    await putVerse(scene.id, {
+      description,
     });
-    currentVerse.value.description = editingDescription.value;
-    Message.success(t("verse.listPage.descriptionUpdated"));
     refresh();
+    if (!metadataRequestIsCurrent(scene.id, request)) return;
+    scene.description = description;
+    Message.success(t("verse.listPage.descriptionUpdated"));
   } catch (err) {
+    if (!metadataRequestIsCurrent(scene.id, request)) return;
     Message.error(t("verse.listPage.descriptionUpdateFailed"));
-    editingDescription.value = currentVerse.value.description || "";
+    if (editingDescription.value === description)
+      editingDescription.value = scene.description || "";
   }
 };
 
@@ -903,39 +969,51 @@ const isTagSelected = (tagId: number) => {
 };
 
 const handleAddTag = async (tagId: number | undefined) => {
-  if (tagId === undefined || !currentVerse.value || !canEditCurrentScene.value)
+  if (
+    tagId === undefined ||
+    !currentVerse.value ||
+    !canEditCurrentMetadata.value ||
+    !canManage.value
+  )
     return;
+  const scene = currentVerse.value;
+  const request = detailRequestVersion;
   try {
-    await addTag(currentVerse.value.id, tagId);
+    await addTag(scene.id, tagId);
+    refresh();
+    if (!metadataRequestIsCurrent(scene.id, request)) return;
     const tag = allTags.value.find((t) => t.value === tagId);
     if (tag) {
-      if (!currentVerse.value.tags) currentVerse.value.tags = [];
-      currentVerse.value.tags.push({ id: tag.value, name: tag.label });
+      if (!scene.tags) scene.tags = [];
+      scene.tags.push({ id: tag.value, name: tag.label });
     }
     selectedTag.value = undefined;
     Message.success(t("verse.listPage.tagAdded"));
-    refresh();
   } catch (err) {
-    Message.error(t("verse.listPage.tagAddFailed"));
+    if (metadataRequestIsCurrent(scene.id, request))
+      Message.error(t("verse.listPage.tagAddFailed"));
   }
 };
 
 const handleRemoveTag = async (tagId: number) => {
-  if (!canEditCurrentScene.value) return;
+  if (!canEditCurrentMetadata.value || !canManage.value) return;
   if (!currentVerse.value) return;
+  const scene = currentVerse.value;
+  const request = detailRequestVersion;
   try {
-    await removeTag(currentVerse.value.id, tagId);
-    currentVerse.value.tags =
-      currentVerse.value.tags?.filter((t) => t.id !== tagId) ?? [];
-    Message.success(t("verse.listPage.tagRemoved"));
+    await removeTag(scene.id, tagId);
     refresh();
+    if (!metadataRequestIsCurrent(scene.id, request)) return;
+    scene.tags = scene.tags?.filter((t) => t.id !== tagId) ?? [];
+    Message.success(t("verse.listPage.tagRemoved"));
   } catch (err) {
-    Message.error(t("verse.listPage.tagRemoveFailed"));
+    if (metadataRequestIsCurrent(scene.id, request))
+      Message.error(t("verse.listPage.tagRemoveFailed"));
   }
 };
 
 const handleScenePropertyAdded = (property: SceneProperty) => {
-  if (isRoot.value) {
+  if (isAllScenes.value && isRoot.value) {
     globalProperties.value = [
       ...globalProperties.value.filter((item) => item.id !== property.id),
       property,
@@ -977,7 +1055,7 @@ const handlePanelClose = () => {
   currentVerse.value = null;
 };
 watch(
-  globalPropertyId,
+  [globalPropertyId, authorSearch],
   () => {
     handlePanelClose();
     items.value = [];
@@ -986,6 +1064,11 @@ watch(
   },
   { flush: "sync" }
 );
+watch(authorSearchInput, (value) => {
+  clearTimeout(authorSearchTimer);
+  if (!value.trim()) applyAuthorSearch();
+  else authorSearchTimer = setTimeout(applyAuthorSearch, 300);
+});
 watch(
   isRoot,
   (root) => {
@@ -995,6 +1078,12 @@ watch(
     globalPropertiesError.value = "";
     if (!root) {
       handlePanelClose();
+      if (isAllScenes.value) {
+        authorSearchInput.value = "";
+        authorSearch.value = "";
+        items.value = [];
+        void refresh();
+      }
       if (globalPropertyId.value !== undefined)
         globalPropertyId.value = undefined;
     } else void loadGlobalProperties();
@@ -1004,6 +1093,7 @@ watch(
 onBeforeUnmount(() => {
   ++globalCatalogVersion;
   ++detailRequestVersion;
+  clearTimeout(authorSearchTimer);
 });
 const goToEditor = (item: VerseData) => {
   if (!canEditScene(item)) return;
@@ -1096,15 +1186,18 @@ const handleExport = async () => {
 };
 
 const handleRename = async (newName: string) => {
-  if (!canEditCurrentScene.value) return;
+  if (!canEditCurrentMetadata.value) return;
   if (!currentVerse.value) return;
+  const scene = currentVerse.value;
+  const request = detailRequestVersion;
   try {
-    await putVerse(currentVerse.value.id, { name: newName });
-    currentVerse.value.name = newName;
+    await putVerse(scene.id, { name: newName });
     refresh();
+    if (!metadataRequestIsCurrent(scene.id, request)) return;
+    scene.name = newName;
     Message.success(t("verse.listPage.renameSuccess") + newName);
   } catch (err) {
-    Message.error(String(err));
+    if (metadataRequestIsCurrent(scene.id, request)) Message.error(String(err));
   }
 };
 
@@ -1241,6 +1334,11 @@ const formatItemDate = (dateStr?: string) => {
   &__error {
     color: var(--el-color-danger);
   }
+}
+
+.scene-author-filter {
+  width: 240px;
+  max-width: 100%;
 }
 
 @media (width <= 767px) {

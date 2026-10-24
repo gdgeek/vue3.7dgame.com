@@ -15,6 +15,8 @@ export default {
     },
     listPage: {
       myScenes: "ฉากของฉัน",
+      allScenes: "ฉากทั้งหมด",
+      searchAuthors: "ค้นหาชื่อผู้ใช้หรือชื่อเล่น",
       createScene: "สร้างฉาก",
       emptyText: "ยังไม่มีฉาก",
       searchScenes: "ค้นหาฉาก...",
