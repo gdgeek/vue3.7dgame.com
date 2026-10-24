@@ -16,6 +16,8 @@ export default {
     },
     listPage: {
       myScenes: "マイシーン",
+      allScenes: "すべてのシーン",
+      searchAuthors: "ユーザー名またはニックネームを検索",
       createScene: "シーンを作成",
       emptyText: "シーンがありません",
       searchScenes: "シーンを検索...",

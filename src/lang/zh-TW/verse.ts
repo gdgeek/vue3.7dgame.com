@@ -15,6 +15,8 @@ export default {
     },
     listPage: {
       myScenes: "我的場景",
+      allScenes: "所有場景",
+      searchAuthors: "搜尋使用者名稱或暱稱",
       createScene: "創建場景",
       emptyText: "暫無場景",
       searchScenes: "搜尋場景...",

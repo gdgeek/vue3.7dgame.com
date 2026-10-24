@@ -94,6 +94,8 @@ export default {
       propertyOptionsFailed: "Could not load global properties. Please retry.",
       retryPropertyOptions: "Reload properties",
       myScenes: "My Scenes",
+      allScenes: "All Scenes",
+      searchAuthors: "Search username or nickname",
       createScene: "Create Scene",
       emptyText: "No scenes yet",
       searchScenes: "Search scenes...",

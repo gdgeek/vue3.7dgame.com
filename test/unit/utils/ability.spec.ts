@@ -387,6 +387,46 @@ describe("UpdateAbility", () => {
     ).toBe(true);
   });
 
+  it.each(["user", "manager", "admin"])(
+    "keeps ordinary scene navigation for %s without granting all scenes",
+    (role) => {
+      const ability = createMongoAbility();
+      UpdateAbility(ability, [role], 7);
+
+      for (const action of ["open", "goto"]) {
+        for (const path of ["/verse/all", "/verse/all/", "/verse/all/other"]) {
+          expect(ability.can(action, new AbilityRouter(path))).toBe(false);
+        }
+        for (const path of [
+          "/verse",
+          "/verse/index",
+          "/verse/public",
+          "/verse/scene",
+          "/verse/script",
+          "/verse/all-other",
+        ]) {
+          expect(ability.can(action, new AbilityRouter(path))).toBe(true);
+        }
+      }
+    }
+  );
+
+  it("grants all scenes only while root is present", () => {
+    const ability = createMongoAbility();
+    UpdateAbility(ability, ["root"], 7);
+
+    for (const action of ["open", "goto"]) {
+      expect(ability.can(action, new AbilityRouter("/verse/all"))).toBe(true);
+    }
+
+    UpdateAbility(ability, ["admin"], 7);
+
+    for (const action of ["open", "goto"]) {
+      expect(ability.can(action, new AbilityRouter("/verse/all"))).toBe(false);
+      expect(ability.can(action, new AbilityRouter("/verse/index"))).toBe(true);
+    }
+  });
+
   it("adds admin people management rules", () => {
     UpdateAbility(mockAbility, ["admin"], 1);
     const rules: any[] = mockAbility.update.mock.calls[0][0];

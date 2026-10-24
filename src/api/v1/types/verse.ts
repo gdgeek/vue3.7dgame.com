@@ -133,6 +133,24 @@ export interface PutVerseData {
 }
 
 /** 场景列表查询参数 */
+export interface VersesParams {
+  sort?: string;
+  search?: string;
+  page?: number;
+  perPage?: number;
+  expand?: string;
+  tags?: number[];
+}
+
+/** Root 所有场景查询；作者仅作为筛选条件，不修改场景归属。 */
+export interface AllVersesParams extends VersesParams {
+  authorSearch?: string;
+  authorId?: number;
+  propertyId?: number;
+  public?: boolean;
+}
+
+/** 场景列表查询参数（旧列表接口） */
 export interface VerseListParams {
   page?: number;
   pageSize?: number;

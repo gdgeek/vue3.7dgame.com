@@ -123,6 +123,7 @@ export default {
     project: {
       title: "场景",
       selfGenerated: "自作",
+      allScenes: "すべてのシーン",
       systemRecommendation: "システム推薦",
       shareWithFriends: "友達と共有",
       viewTitle: "編集",

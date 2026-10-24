@@ -27,6 +27,18 @@ export const verseRoutes: RouteRecordRaw = {
       },
     },
     {
+      path: "/verse/all",
+      component: () => import("@/views/meta-verse/index.vue"),
+      props: { scope: "all" },
+      name: "VerseAll",
+      meta: {
+        title: "project.allScenes",
+        icon: "cascader",
+        hidden: true,
+        roles: ["root"],
+      },
+    },
+    {
       path: "/verse/public",
       component: () => import("@/views/meta-verse/public.vue"),
       name: "VersePublic",
