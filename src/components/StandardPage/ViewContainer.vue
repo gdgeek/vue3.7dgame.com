@@ -1,12 +1,19 @@
 <template>
   <div class="view-container">
-    <!-- Grid Mode: Waterfall layout -->
-    <div v-if="viewMode === 'grid'" class="grid-view">
+    <!-- Grid Mode -->
+    <div
+      v-if="viewMode === 'grid'"
+      class="grid-view"
+      @load.capture="refreshWaterfall"
+    >
       <Waterfall
         v-if="items && items.length > 0"
+        ref="waterfallRef"
         :list="items"
+        :width="cardWidth"
         :breakpoints="breakpoints"
         :gutter="cardGutter"
+        :has-around-gutter="false"
         backgroundColor="transparent"
       >
         <template #default="{ item }">
@@ -33,6 +40,15 @@
           <div
             v-for="(item, index) in items"
             :key="item.id || index"
+            v-long-press="
+              (
+                typeof longPressEnabled === 'function'
+                  ? longPressEnabled(item)
+                  : longPressEnabled
+              )
+                ? () => emit('row-long-press', item)
+                : undefined
+            "
             class="list-row"
             @click="emit('row-click', item)"
           >
@@ -106,11 +122,12 @@
     } = Record<string, unknown>
   "
 >
-import { computed } from "vue";
+import { computed, nextTick, ref } from "vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import type { ViewMode } from "./types";
 import { toHttps } from "@/utils/helper";
+import { vLongPress } from "@/directive/longPress";
 
 interface Props {
   items: T[] | null;
@@ -121,6 +138,7 @@ interface Props {
   cardWidth?: number;
   cardGutter?: number;
   breakpoints?: Record<number, { rowPerView: number }>;
+  longPressEnabled?: boolean | ((item: NoInfer<T>) => boolean);
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -128,24 +146,32 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   showEmpty: true,
   emptyText: "",
-  cardWidth: 320,
+  cardWidth: 208,
   cardGutter: 20,
+  longPressEnabled: false,
 });
 
 const emit = defineEmits<{
   (e: "row-click", item: T): void;
+  (e: "row-long-press", item: T): void;
 }>();
 
-const defaultBreakpoints = {
-  1800: { rowPerView: 6 },
-  1400: { rowPerView: 5 },
-  1100: { rowPerView: 4 },
-  800: { rowPerView: 3 },
-  500: { rowPerView: 2 },
-  300: { rowPerView: 1 },
+const waterfallRef = ref<{ renderer: () => void } | null>(null);
+const refreshWaterfall = () => {
+  nextTick(() => waterfallRef.value?.renderer?.());
 };
 
-const breakpoints = computed(() => props.breakpoints || defaultBreakpoints);
+const breakpoints = computed(() => {
+  if (props.breakpoints) return props.breakpoints;
+  const result: Record<number, { rowPerView: number }> = {};
+  for (let columns = 1; columns < 6; columns++) {
+    const nextWidth =
+      (columns + 1) * props.cardWidth + columns * props.cardGutter;
+    result[nextWidth - 1] = { rowPerView: columns };
+  }
+  result[Number.MAX_SAFE_INTEGER] = { rowPerView: 6 };
+  return result;
+});
 
 const formatSize = (bytes?: number) => {
   if (!bytes) return "—";
@@ -166,6 +192,8 @@ const formatDate = (dateStr?: string) => {
 
 <style scoped lang="scss">
 .view-container {
+  container: resource-collection / inline-size;
+  min-width: 0;
   min-height: 300px;
 }
 
@@ -210,6 +238,11 @@ const formatDate = (dateStr?: string) => {
   background: var(--bg-card, #fff);
   border-bottom: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
   transition: all var(--transition-fast, 0.15s ease);
+
+  &.supports-long-press {
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
 
   &:last-child {
     border-bottom: none;
@@ -352,6 +385,75 @@ const formatDate = (dateStr?: string) => {
   .item-thumb {
     width: 44px;
     height: 44px;
+  }
+}
+
+@container resource-collection (width <= 640px) {
+  .list-header {
+    display: none;
+  }
+
+  .list-view .list-row {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) 32px;
+    gap: var(--spacing-sm, 8px) 12px;
+    padding: var(--spacing-md, 16px);
+
+    :deep(.col-checkbox) {
+      grid-row: 1;
+      grid-column: 1;
+      width: auto;
+      min-width: 0;
+    }
+
+    :deep(.col-name) {
+      grid-row: 1;
+      grid-column: 2;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    :deep(.col-actions) {
+      grid-row: 1;
+      grid-column: 3;
+      width: auto;
+      min-width: 0;
+    }
+
+    :deep(.actions-icon) {
+      opacity: 1;
+    }
+
+    :deep(.col-size),
+    :deep(.col-date),
+    :deep(.col-author),
+    :deep(.col-resources) {
+      display: block;
+      grid-column: 2 / -1;
+      width: auto;
+      min-width: 0;
+      padding: 0;
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    :deep(.item-thumb) {
+      width: 44px;
+      height: 44px;
+    }
+
+    :deep(.item-name) {
+      display: -webkit-box;
+      min-width: 0;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      white-space: normal;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
   }
 }
 </style>

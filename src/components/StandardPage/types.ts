@@ -38,7 +38,7 @@ export interface ViewContainerProps<T = unknown> {
   loading?: boolean;
   showEmpty?: boolean;
   emptyText?: string;
-  /** 网格模式：卡片固定宽度 */
+  /** 瀑布流中卡片的最小目标宽度，列数随容器宽度自适应 */
   cardWidth?: number;
   /** 网格模式：卡片间距 */
   cardGutter?: number;

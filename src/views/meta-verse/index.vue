@@ -58,16 +58,6 @@
           </el-button>
         </template>
       </PageActionBar>
-      <p v-if="isRoot" class="scene-property-scope" role="status">
-        <strong>{{
-          selectedGlobalProperty
-            ? t("verse.listPage.globalPropertyScope", {
-                key: selectedGlobalProperty.key,
-              })
-            : t("verse.listPage.myScenes")
-        }}</strong>
-        <span>{{ t("verse.listPage.globalPropertyHint") }}</span>
-      </p>
       <p
         v-if="isRoot && globalPropertiesError"
         class="scene-property-filter__error"
@@ -81,12 +71,16 @@
         :items="items"
         :view-mode="viewMode"
         :loading="loading"
-        :breakpoints="denseResourceBreakpoints"
         :card-gutter="denseResourceCardGutter"
+        :long-press-enabled="canEditScene"
         @row-click="openDetail"
+        @row-long-press="goToEditor"
       >
         <template #grid-card="{ item }">
           <StandardCard
+            v-long-press="
+              canEditScene(item) ? () => goToEditor(item) : undefined
+            "
             :image="item.image?.url"
             :title="item.name || t('verse.listPage.unnamed')"
             :description="item.description"
@@ -94,23 +88,7 @@
             :placeholder-icon="['fas', 'layer-group']"
             :show-checkbox="false"
             @view="openDetail(item)"
-          >
-            <template #actions>
-              <div class="scene-card-actions">
-                <div v-if="canEditScene(item)" class="single-card-actions">
-                  <button
-                    class="single-card-action-btn"
-                    @click.stop="goToEditor(item)"
-                  >
-                    <font-awesome-icon
-                      :icon="['fas', 'pen-to-square']"
-                    ></font-awesome-icon>
-                    {{ t("route.project.sceneEditor") }}
-                  </button>
-                </div>
-              </div>
-            </template>
-          </StandardCard>
+          ></StandardCard>
         </template>
 
         <template #list-header>
@@ -137,14 +115,6 @@
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
-            <el-button
-              v-if="canEditScene(item)"
-              class="btn-hover-action"
-              type="primary"
-              @click.stop="goToEditor(item)"
-            >
-              {{ t("verse.listPage.enterEditor") }}
-            </el-button>
           </div>
           <div class="col-author">
             {{ item.author?.nickname || item.author?.username || "—" }}
@@ -161,11 +131,6 @@
                   <el-dropdown-item @click="openDetail(item)">{{
                     t("verse.listPage.viewDetail")
                   }}</el-dropdown-item>
-                  <el-dropdown-item
-                    v-if="canEditScene(item)"
-                    @click="goToEditor(item)"
-                    >{{ t("verse.listPage.enterEditor") }}</el-dropdown-item
-                  >
                   <el-dropdown-item
                     v-if="canEditScene(item)"
                     @click="namedWindow(item)"
@@ -242,20 +207,6 @@
                   :icon="['fas', 'pen-to-square']"
                 ></font-awesome-icon>
                 {{ t("route.project.sceneEditor") }}
-              </button>
-              <button
-                class="btn-pill-primary enter-edit-btn publish-scene-btn"
-                :disabled="isPublishingSnapshot"
-                @click="handlePublishSnapshot"
-              >
-                <font-awesome-icon
-                  :icon="[
-                    'fas',
-                    isPublishingSnapshot ? 'spinner' : 'cloud-arrow-up',
-                  ]"
-                  :spin="isPublishingSnapshot"
-                ></font-awesome-icon>
-                {{ t("verse.view.sceneEditor.publishScene") }}
               </button>
               <div class="actions-row">
                 <button class="btn-pill-secondary" @click="handleExport">
@@ -458,9 +409,9 @@
 </template>
 
 <script setup lang="ts">
+import { vLongPress } from "@/directive/longPress";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
-import { hasPublishableSceneContent } from "@/utils/versePublish";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -494,7 +445,6 @@ import {
   deleteVerse,
   addTag,
   removeTag,
-  takePhoto,
 } from "@/api/v1/verse";
 import { exportScene } from "@/services/scene-package/export-service";
 import { getPicture } from "@/api/v1/resources/index";
@@ -507,15 +457,11 @@ import type { CardInfo } from "@/utils/types";
 import { usePageData } from "@/composables/usePageData";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import { useAbility } from "@casl/vue";
-import {
-  denseResourceBreakpoints,
-  denseResourceCardGutter,
-} from "@/utils/resourceGrid";
+import { denseResourceCardGutter } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
 const router = useRouter();
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
-const isPublishingSnapshot = ref(false);
 const ability = useAbility();
 const isRoot = computed(() => ability.can("root", "all"));
 const globalPropertyId = ref<number>();
@@ -524,11 +470,6 @@ const globalPropertiesLoading = ref(false);
 const globalPropertiesError = ref("");
 let globalCatalogVersion = 0;
 let detailRequestVersion = 0;
-const selectedGlobalProperty = computed(() =>
-  globalProperties.value.find(
-    (property) => property.id === globalPropertyId.value
-  )
-);
 const isGlobalScope = computed(
   () =>
     isRoot.value &&
@@ -1138,37 +1079,6 @@ const handleExport = async () => {
   }
 };
 
-const handlePublishSnapshot = async () => {
-  if (
-    !currentVerse.value ||
-    !canEditCurrentScene.value ||
-    isPublishingSnapshot.value
-  )
-    return;
-
-  if (!hasPublishableSceneContent(currentVerse.value)) {
-    Message.warning(t("verse.view.sceneEditor.emptySceneCannotPublish"));
-    return;
-  }
-
-  isPublishingSnapshot.value = true;
-  try {
-    await takePhoto(currentVerse.value.id);
-    const response = await getVerse(
-      currentVerse.value.id,
-      "image,author,tags,metas"
-    );
-    currentVerse.value = response.data;
-    await refresh();
-    Message.success(t("verse.view.sceneEditor.publishSuccess"));
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    Message.error(message || t("verse.view.sceneEditor.error1"));
-  } finally {
-    isPublishingSnapshot.value = false;
-  }
-};
-
 const handleRename = async (newName: string) => {
   if (!canEditCurrentScene.value) return;
   if (!currentVerse.value) return;
@@ -1284,9 +1194,18 @@ const formatItemDate = (dateStr?: string) => {
   padding: 12px;
 }
 
-.scene-detail-actions,
-.scene-card-actions {
-  display: contents;
+.scene-detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+  width: 100%;
+  min-width: 0;
+
+  .actions-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
 }
 
 :deep(.page-action-bar .controls-left) {
@@ -1305,18 +1224,6 @@ const formatItemDate = (dateStr?: string) => {
 
   &__error {
     color: var(--el-color-danger);
-  }
-}
-
-.scene-property-scope {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  margin: 0 0 16px;
-  color: var(--el-text-color-secondary);
-
-  strong {
-    color: var(--el-text-color-primary);
   }
 }
 
@@ -1696,42 +1603,6 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .list-view {
-  :deep(.single-card-actions) {
-    display: flex;
-    background: var(--resource-card-action-surface-bg, var(--bg-card, #fff));
-    border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  }
-
-  :deep(.single-card-action-btn) {
-    display: inline-flex;
-    gap: 6px;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 44px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary, #64748b);
-    cursor: pointer;
-    background: var(--resource-card-action-btn-bg, var(--bg-hover, #f8fafc));
-    border: 1px solid
-      var(--resource-card-action-btn-border, var(--border-color, #e2e8f0));
-    transition: all 0.2s ease;
-  }
-
-  :deep(.single-card-action-btn:hover) {
-    color: var(--primary-color, #03a9f4);
-    background: var(
-      --resource-card-action-btn-hover-bg,
-      var(--bg-active, #e2e8f0)
-    );
-  }
-
-  :deep(.standard-card .card-content) {
-    gap: 4px;
-    padding: 10px 14px;
-  }
-
   :deep(.col-checkbox) {
     width: 40px;
   }
@@ -1751,40 +1622,6 @@ const formatItemDate = (dateStr?: string) => {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  .btn-hover-action {
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 84px;
-    height: 28px;
-    padding: 0;
-    margin-left: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    color: white;
-    visibility: hidden;
-    background: var(--primary-color, #03a9f4);
-    border: none;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgb(3 169 244 / 30%);
-    opacity: 0;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      background: var(--primary-hover, #039be5);
-      box-shadow: 0 6px 16px rgb(3 169 244 / 40%);
-      transform: scale(1.05);
-    }
-  }
-
-  :deep(.list-row:hover) {
-    .btn-hover-action {
-      visibility: visible;
-      opacity: 1;
-    }
-  }
 }
 
 .enter-edit-btn {
@@ -1802,16 +1639,6 @@ const formatItemDate = (dateStr?: string) => {
     --standard-page-max-radius,
     calc(var(--radius-lg, 24px) / 3)
   ) !important;
-}
-
-.publish-scene-btn {
-  margin-top: 10px;
-}
-
-.publish-scene-btn:disabled {
-  cursor: not-allowed !important;
-  opacity: 0.65;
-  transform: none !important;
 }
 
 :deep(.panel-actions .dual-primary-btn) {

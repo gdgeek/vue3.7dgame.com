@@ -24,7 +24,9 @@
                   :icon="['fas', 'filter']"
                   class="filter-icon"
                 ></font-awesome-icon>
-                {{ t("ui.filter") }} · {{ currentCategoryName }}
+                <span class="filter-label"
+                  >{{ t("ui.filter") }} · {{ currentCategoryName }}</span
+                >
                 <font-awesome-icon
                   :icon="['fas', 'chevron-down']"
                   class="filter-arrow"
@@ -55,12 +57,15 @@
         :items="items"
         :view-mode="viewMode"
         :loading="loading"
-        :breakpoints="denseResourceBreakpoints"
         :card-gutter="denseResourceCardGutter"
+        long-press-enabled
         @row-click="openDetail"
+        @row-long-press="goToScene"
       >
         <template #grid-card="{ item }">
           <StandardCard
+            class="example-card"
+            v-long-press="() => goToScene(item)"
             :image="item.image?.url"
             :title="item.name || t('verse.listPage.unnamed')"
             :description="item.description"
@@ -68,16 +73,11 @@
               author: item.author?.nickname || item.author?.username,
               date: formatItemDate(item.created_at),
             }"
-            :action-text="t('verse.publicPage.viewExample')"
-            :action-icon="['fas', 'eye']"
             :type-icon="['fas', 'layer-group']"
             :placeholder-icon="['fas', 'image']"
             :show-checkbox="false"
-            aspect-ratio="1.6 / 1"
             @view="openDetail(item)"
-            @action="goToScene(item)"
-          >
-          </StandardCard>
+          ></StandardCard>
         </template>
 
         <template #list-header>
@@ -85,7 +85,6 @@
           <div class="col-name">{{ t("verse.listPage.sceneName") }}</div>
           <div class="col-author">{{ t("verse.listPage.author") }}</div>
           <div class="col-date">{{ t("verse.listPage.modifiedDate") }}</div>
-          <div class="col-actions"></div>
         </template>
 
         <template #list-item="{ item }">
@@ -104,23 +103,11 @@
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
-            <el-button
-              class="btn-hover-action"
-              type="primary"
-              @click.stop="openDetail(item)"
-            >
-              {{ $t("common.open") }}
-            </el-button>
           </div>
           <div class="col-author">
             {{ item.author?.nickname || item.author?.username || "—" }}
           </div>
           <div class="col-date">{{ formatItemDate(item.created_at) }}</div>
-          <div class="col-actions" @click.stop>
-            <el-button type="primary" size="small" @click="openDetail(item)">
-              {{ $t("common.open") }}
-            </el-button>
-          </div>
         </template>
       </ViewContainer>
 
@@ -142,6 +129,7 @@
         :placeholder-icon="['fas', 'image']"
         width="560px"
         :show-delete="false"
+        :editable="false"
         action-layout="stacked"
         :secondary-action="false"
         :download-text="t('verse.publicPage.viewExample')"
@@ -206,6 +194,7 @@
 </template>
 
 <script setup lang="ts">
+import { vLongPress } from "@/directive/longPress";
 import { logger } from "@/utils/logger";
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
@@ -224,10 +213,7 @@ import { usePageData } from "@/composables/usePageData";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import { ElMessage } from "element-plus";
 import { toHttps } from "@/utils/helper";
-import {
-  denseResourceBreakpoints,
-  denseResourceCardGutter,
-} from "@/utils/resourceGrid";
+import { denseResourceCardGutter } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -401,38 +387,37 @@ const goToScene = (item: VerseData) => {
 
 <style scoped lang="scss">
 .hero-header {
-  padding: 12px 20px;
-  margin-bottom: 10px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  padding: var(--spacing-md, 16px) 20px;
+  margin-bottom: var(--spacing-sm, 8px);
+  background: var(--bg-card, #fff);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
 
   .toolbar-main {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px;
     align-items: center;
   }
 
   .hero-subtitle {
+    grid-column: 1 / -1;
     margin: 0;
-    overflow: hidden;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.5;
-    color: #64748b;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    color: var(--text-secondary, #64748b);
+    overflow-wrap: anywhere;
   }
 
   .hero-search-box {
     position: relative;
-    flex-shrink: 0;
-    width: 280px;
+    min-width: 0;
 
     .search-icon {
       position: absolute;
       top: 50%;
       left: 16px;
       font-size: 18px;
-      color: #94a3b8;
+      color: var(--text-muted, #94a3b8);
       transform: translateY(-50%);
     }
 
@@ -441,56 +426,72 @@ const goToScene = (item: VerseData) => {
       height: 42px;
       padding: 0 12px 0 44px;
       font-size: 14px;
-      color: #1e293b;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 21px;
+      color: var(--text-primary, #1e293b);
+      background: var(--bg-hover, #f8fafc);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--standard-page-max-radius, 8px);
       outline: none;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
       &::placeholder {
-        color: #94a3b8;
+        color: var(--text-muted, #94a3b8);
       }
 
       &:focus {
-        border-color: #03a9f4;
-        box-shadow: 0 0 0 3px rgb(3 169 244 / 10%);
+        border-color: var(--primary-color, #03a9f4);
+        box-shadow: 0 0 0 3px var(--primary-light, rgb(3 169 244 / 10%));
       }
     }
   }
 
   .category-filter {
-    flex-shrink: 0;
+    min-width: 0;
+    max-width: 240px;
+
+    :deep(.el-dropdown) {
+      width: 100%;
+      min-width: 0;
+    }
 
     .filter-btn {
       display: inline-flex;
       gap: 8px;
       align-items: center;
+      max-width: 100%;
       height: 42px;
       padding: 0 16px;
       font-size: 14px;
       font-weight: 500;
-      color: #334155;
+      color: var(--text-primary, #334155);
       cursor: pointer;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 21px;
+      background: var(--bg-card, #fff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--standard-page-max-radius, 8px);
       transition: all 0.2s ease;
 
       &:hover {
-        background: #f8fafc;
-        border-color: #cbd5e1;
+        background: var(--bg-hover, #f8fafc);
+        border-color: var(--primary-color, #03a9f4);
       }
     }
 
+    .filter-label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .filter-icon {
+      flex-shrink: 0;
       font-size: 14px;
-      color: #64748b;
+      color: var(--text-secondary, #64748b);
     }
 
     .filter-arrow {
+      flex-shrink: 0;
       font-size: 12px;
-      color: #94a3b8;
+      color: var(--text-muted, #94a3b8);
     }
   }
 }
@@ -500,6 +501,14 @@ const goToScene = (item: VerseData) => {
 
   :deep(.col-checkbox) {
     width: 40px;
+  }
+
+  .col-name {
+    display: flex;
+    flex: 1;
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
   }
 
   .item-thumb {
@@ -522,49 +531,52 @@ const goToScene = (item: VerseData) => {
   }
 
   .item-name {
+    min-width: 0;
+    overflow: hidden;
     font-size: 14px;
     font-weight: 500;
-    color: #1e293b;
-  }
-
-  .col-author,
-  .col-date {
-    width: 120px;
-    padding-right: 24px;
-    overflow: hidden;
-    font-size: 13px;
-    color: #64748b;
-    text-align: right;
+    color: var(--text-primary, #1e293b);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .btn-hover-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 28px;
-    padding: 0 16px;
-    margin-left: 8px;
-    font-size: 12px;
-    color: white;
-    visibility: hidden;
-    background: #03a9f4;
-    border: none;
-    border-radius: 14px;
-    opacity: 0;
-    transition: all 0.25s ease;
+  .col-author,
+  .col-date {
+    flex-shrink: 0;
+    width: 120px;
+    padding-right: 24px;
+    overflow: hidden;
+    font-size: 13px;
+    color: var(--text-secondary, #64748b);
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 
-    &:hover {
-      background: #039be5;
+@media (width <= 640px) {
+  .hero-header {
+    padding: var(--spacing-md, 16px);
+
+    .toolbar-main {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .category-filter {
+      max-width: 100%;
+
+      .filter-btn {
+        width: 100%;
+      }
+
+      .filter-arrow {
+        margin-left: auto;
+      }
     }
   }
 
-  :deep(.list-row:hover) {
-    .btn-hover-action {
-      visibility: visible;
-      opacity: 1;
-    }
+  .list-view {
+    padding: 0 var(--spacing-md, 16px) var(--spacing-md, 16px);
   }
 }
 

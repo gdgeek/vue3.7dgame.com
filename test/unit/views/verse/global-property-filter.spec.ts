@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   getSceneByProperty: vi.fn(),
   putVerse: vi.fn(),
   deleteVerse: vi.fn(),
+  routerPush: vi.fn(),
 }));
 const permission = reactive({ role: "root" });
 const property = { id: 31, key: "interactive", info: "Interactive scenes" };
@@ -44,7 +45,9 @@ const response = (data: unknown[], total = data.length) => ({
   },
 });
 
-vi.mock("vue-router", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("vue-router", () => ({
+  useRouter: () => ({ push: mocks.routerPush }),
+}));
 vi.mock("@casl/vue", () => ({
   useAbility: () => ({
     can: (role: string) =>
@@ -100,7 +103,8 @@ vi.mock("@/components/StandardPage", () => ({
   }),
   EmptyState: defineComponent({ template: "<div/>" }),
   StandardCard: defineComponent({
-    template: `<div class="scene-card"><slot name="actions"><button class="fallback-card-edit">Edit scene</button></slot></div>`,
+    emits: ["view"],
+    template: `<div class="scene-card" @click="$emit('view')"><slot name="actions"/></div>`,
   }),
   DetailPanel: defineComponent({
     props: {
@@ -247,9 +251,39 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanups.splice(0).forEach((cleanup) => cleanup());
+  vi.useRealTimers();
 });
 
 describe("root global scene filtering by property", () => {
+  it("long-presses an owned scene into its editor without opening information, and respects read-only scenes", async () => {
+    const el = await mount();
+    await choose(el, property.key);
+    vi.useFakeTimers();
+    for (const id of [673, 683]) {
+      const card = el
+        .querySelector(`.open-scene[data-id="${id}"]`)!
+        .closest(".scene-result")!
+        .querySelector<HTMLElement>(".scene-card")!;
+      card.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+      vi.advanceTimersByTime(1100);
+      card.dispatchEvent(new MouseEvent("pointerup", { bubbles: true }));
+      card.click();
+      if (id === 673) {
+        expect(mocks.routerPush).toHaveBeenCalledTimes(1);
+        expect(mocks.routerPush).toHaveBeenCalledWith({
+          path: "/verse/scene",
+          query: { id: 673, title: expect.any(String) },
+        });
+        expect(mocks.getSceneByProperty).not.toHaveBeenCalled();
+      }
+    }
+    expect(mocks.routerPush).toHaveBeenCalledTimes(1);
+    expect(mocks.getSceneByProperty).toHaveBeenCalledWith(
+      683,
+      31,
+      "image,author,tags,metas,public"
+    );
+  });
   it("starts in my scenes, filters across owners, and clears back to my scenes", async () => {
     const el = await mount();
     expect(mocks.getVerses).toHaveBeenCalledTimes(1);
@@ -263,15 +297,11 @@ describe("root global scene filtering by property", () => {
         expand: "image,author,public",
       })
     );
-    expect(el.querySelector(".scene-property-scope")?.textContent).toContain(
-      "Global scenes · interactive"
-    );
+    expect(el.querySelector(".scene-property-scope")).toBeNull();
     expect(el.textContent).toContain(foreign.name);
     await clear(el);
     expect(mocks.getVerses).toHaveBeenCalledTimes(2);
-    expect(el.querySelector(".scene-property-scope")?.textContent).toContain(
-      "My Scenes"
-    );
+    expect(el.querySelector(".scene-property-scope")).toBeNull();
     expect(el.textContent).not.toContain(foreign.name);
   });
   it.each(["admin", "manager", "user"])(
@@ -333,7 +363,7 @@ describe("root global scene filtering by property", () => {
       el.querySelector<HTMLTextAreaElement>(".detail-panel textarea")?.readOnly
     ).toBe(true);
   });
-  it("suppresses the default card edit action for read-only global scenes while retaining owned-scene editing", async () => {
+  it("keeps editing in owned-scene details and removes card edit actions for all scenes", async () => {
     const el = await mount();
     await choose(el, property.key);
     const foreignCard = el
@@ -343,9 +373,10 @@ describe("root global scene filtering by property", () => {
       .querySelector('.open-scene[data-id="673"]')!
       .closest(".scene-result")!;
     expect(foreignCard.querySelector(".single-card-action-btn")).toBeNull();
-    expect(foreignCard.querySelector(".fallback-card-edit")).toBeNull();
-    expect(ownedCard.querySelector(".single-card-action-btn")).not.toBeNull();
-    expect(ownedCard.querySelector(".fallback-card-edit")).toBeNull();
+    expect(ownedCard.querySelector(".single-card-action-btn")).toBeNull();
+    mocks.getSceneByProperty.mockResolvedValueOnce({ data: mine });
+    await click(el, '.open-scene[data-id="673"]');
+    expect(el.querySelector(".detail-panel .enter-edit-btn")).not.toBeNull();
   });
 
   it("clears global data and details immediately on role loss and ignores the old list response", async () => {
@@ -376,9 +407,7 @@ describe("root global scene filtering by property", () => {
     expect(el.querySelector('.open-scene[data-id="683"]')).toBeNull();
     expect(mocks.getSceneByProperty).toHaveBeenCalledTimes(1);
     expect(mocks.getVerses).toHaveBeenCalledTimes(1);
-    expect(el.querySelector(".scene-property-scope")?.textContent).toContain(
-      "Global scenes · interactive"
-    );
+    expect(el.querySelector(".scene-property-scope")).toBeNull();
     matches.resolve(response([mine]));
     await flush();
     expect(el.textContent).not.toContain(foreign.name);
@@ -442,9 +471,7 @@ describe("root global scene filtering by property", () => {
     });
     await click(el, ".delete-filter-property");
     expect(el.querySelector(".detail-panel")).toBeNull();
-    expect(el.querySelector(".scene-property-scope")?.textContent).toContain(
-      "My Scenes"
-    );
+    expect(el.querySelector(".scene-property-scope")).toBeNull();
     expect(mocks.getVerses).toHaveBeenCalledTimes(2);
   });
   it("retries a failed global property catalog without issuing a global scene query", async () => {
