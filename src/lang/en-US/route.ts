@@ -123,6 +123,7 @@ export default {
     project: {
       title: "Project",
       selfGenerated: "Owned",
+      allScenes: "All Scenes",
       systemRecommendation: "Open",
       shareWithFriends: "Share",
       viewTitle: "Edit",

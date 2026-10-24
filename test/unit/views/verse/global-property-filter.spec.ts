@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createApp, defineComponent, nextTick, reactive } from "vue";
+import { createApp, defineComponent, nextTick, reactive, ref } from "vue";
 import { ElSelect, ElOption } from "element-plus";
 import { createI18n } from "vue-i18n";
 import en from "@/lang/en-US/verse";
@@ -7,11 +7,21 @@ import en from "@/lang/en-US/verse";
 const mocks = vi.hoisted(() => ({
   getVerses: vi.fn(),
   getVerse: vi.fn(),
+  getAllVerses: vi.fn(),
+  getAllVerse: vi.fn(),
   getGlobalScenePropertyOptions: vi.fn(),
-  getScenesByProperty: vi.fn(),
-  getSceneByProperty: vi.fn(),
   putVerse: vi.fn(),
   deleteVerse: vi.fn(),
+  addTag: vi.fn(),
+  removeTag: vi.fn(),
+  getTags: vi.fn(),
+  getPicture: vi.fn(),
+  postFile: vi.fn(),
+  fileMD5: vi.fn(),
+  publicHandler: vi.fn(),
+  fileHas: vi.fn(),
+  fileUpload: vi.fn(),
+  fileUrl: vi.fn(),
   routerPush: vi.fn(),
 }));
 const permission = reactive({ role: "root" });
@@ -19,6 +29,8 @@ const property = { id: 31, key: "interactive", info: "Interactive scenes" };
 const otherProperty = { id: 32, key: "public", info: null };
 const mine = {
   id: 673,
+  author_id: 1,
+  author: { id: 1, username: "root", nickname: "Root author" },
   name: "My scene",
   description: "Mine",
   public: false,
@@ -28,6 +40,8 @@ const mine = {
 };
 const foreign = {
   id: 683,
+  author_id: 99,
+  author: { id: 99, username: "other", nickname: "Other author" },
   name: "Other private scene",
   description: "Private",
   public: false,
@@ -61,17 +75,13 @@ vi.mock("@casl/vue", () => ({
 vi.mock("@/api/v1/verse", () => ({
   ...mocks,
   postVerse: vi.fn(),
-  addTag: vi.fn(),
-  removeTag: vi.fn(),
   takePhoto: vi.fn(),
 }));
 vi.mock("@/api/v1/scene-properties", () => ({
   getGlobalScenePropertyOptions: mocks.getGlobalScenePropertyOptions,
-  getScenesByProperty: mocks.getScenesByProperty,
-  getSceneByProperty: mocks.getSceneByProperty,
 }));
 vi.mock("@/api/v1/tags", () => ({
-  getTags: vi.fn(async () => ({ data: [] })),
+  getTags: mocks.getTags,
 }));
 vi.mock("@/components/Dialog", () => ({
   Message: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -80,9 +90,19 @@ vi.mock("@/components/Dialog", () => ({
 vi.mock("@/services/scene-package/export-service", () => ({
   exportScene: vi.fn(),
 }));
-vi.mock("@/api/v1/resources/index", () => ({ getPicture: vi.fn() }));
-vi.mock("@/store/modules/config", () => ({ useFileStore: () => ({}) }));
-vi.mock("@/api/v1/files", () => ({ postFile: vi.fn() }));
+vi.mock("@/api/v1/resources/index", () => ({ getPicture: mocks.getPicture }));
+vi.mock("@/store/modules/config", () => ({
+  useFileStore: () => ({
+    store: {
+      fileMD5: mocks.fileMD5,
+      publicHandler: mocks.publicHandler,
+      fileHas: mocks.fileHas,
+      fileUpload: mocks.fileUpload,
+      fileUrl: mocks.fileUrl,
+    },
+  }),
+}));
+vi.mock("@/api/v1/files", () => ({ postFile: mocks.postFile }));
 vi.mock("@/utils/utilityFunctions", () => ({
   convertToLocalTime: (value: string) => value,
 }));
@@ -103,8 +123,9 @@ vi.mock("@/components/StandardPage", () => ({
   }),
   EmptyState: defineComponent({ template: "<div/>" }),
   StandardCard: defineComponent({
+    props: { meta: Object },
     emits: ["view"],
-    template: `<div class="scene-card" @click="$emit('view')"><slot name="actions"/></div>`,
+    template: `<div class="scene-card" @click="$emit('view')"><span class="card-author">{{meta?.author}}</span><slot name="actions"/></div>`,
   }),
   DetailPanel: defineComponent({
     props: {
@@ -113,8 +134,8 @@ vi.mock("@/components/StandardPage", () => ({
       showDelete: Boolean,
       name: String,
     },
-    emits: ["close", "update:modelValue"],
-    template: `<section v-if="modelValue" class="detail-panel" :data-editable="String(editable)" :data-delete="String(showDelete)"><h2>{{name}}</h2><slot name="actions"><button class="fallback-export">Export scene</button></slot><slot name="info"/><button class="close-detail" @click="$emit('close'); $emit('update:modelValue',false)">Close</button></section>`,
+    emits: ["close", "update:modelValue", "rename"],
+    template: `<section v-if="modelValue" class="detail-panel" :data-editable="String(editable)" :data-delete="String(showDelete)"><h2>{{name}}</h2><input v-if="editable" class="rename-scene-input" :value="name" @change="$emit('rename', $event.target.value)"/><slot name="preview"/><slot name="actions"><button class="fallback-export">Export scene</button></slot><slot name="info"/><button class="close-detail" @click="$emit('close'); $emit('update:modelValue',false)">Close</button></section>`,
   }),
 }));
 vi.mock("@/components/MrPP/MrPPVerse/ScenePropertiesDialog.vue", () => ({
@@ -140,7 +161,23 @@ vi.mock("@/components/ScenePackage/ImportDialog.vue", () => ({
   default: defineComponent({ template: "<div/>" }),
 }));
 vi.mock("@/components/MrPP/ResourceDialog.vue", () => ({
-  default: defineComponent({ template: "<div/>" }),
+  default: defineComponent({
+    emits: ["selected"],
+    setup(_props, { expose }) {
+      const visible = ref(false);
+      expose({ openIt: () => (visible.value = true) });
+      return {
+        visible,
+        resource: {
+          id: 71,
+          type: "picture",
+          context: { image_id: 501 },
+          image: { id: 501, url: "https://files.test/cover.png" },
+        },
+      };
+    },
+    template: `<button v-if="visible" class="choose-cover-resource" @click="$emit('selected', resource); visible = false">Choose cover</button>`,
+  }),
 }));
 
 const cleanups: Array<() => void> = [];
@@ -159,11 +196,11 @@ function deferred<T>() {
   });
   return { promise, resolve, reject };
 }
-async function mount() {
+async function mount(scope: "mine" | "all" | null = "all") {
   const { default: Index } = await import("@/views/meta-verse/index.vue");
   const el = document.createElement("div");
   document.body.append(el);
-  const app = createApp(Index);
+  const app = createApp(Index, scope ? { scope } : {});
   app.use(
     createI18n({
       legacy: false,
@@ -183,16 +220,25 @@ async function mount() {
     "ElInput",
     defineComponent({
       props: { modelValue: String, readonly: Boolean },
-      template: `<textarea :readonly="readonly">{{modelValue}}</textarea>`,
+      emits: ["update:modelValue"],
+      template: `<textarea :value="modelValue" :readonly="readonly" @input="$emit('update:modelValue', $event.target.value)"/>`,
+    })
+  );
+  app.component(
+    "ElTag",
+    defineComponent({
+      props: { closable: Boolean },
+      emits: ["close"],
+      template: `<span class="scene-tag"><slot/><button v-if="closable" class="remove-scene-tag" @click="$emit('close')">Remove tag</button></span>`,
     })
   );
   for (const name of [
-    "ElTag",
     "ElIcon",
     "ElDropdown",
     "ElDropdownMenu",
     "ElDropdownItem",
     "ElDialog",
+    "ElEmpty",
     "FontAwesomeIcon",
   ])
     app.component(name, defineComponent({ template: "<div><slot/></div>" }));
@@ -232,6 +278,69 @@ async function clear(el: HTMLElement) {
   await flush();
   await click(el, ".scene-property-filter__select .el-select__clear");
 }
+async function renameScene(el: HTMLElement, name: string) {
+  const input = el.querySelector<HTMLInputElement>(".rename-scene-input")!;
+  expect(input).not.toBeNull();
+  input.value = name;
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  await flush();
+}
+async function searchAuthor(el: HTMLElement, author: string, submit = false) {
+  const input = el.querySelector<HTMLTextAreaElement>(".scene-author-filter")!;
+  expect(input).not.toBeNull();
+  input.value = author;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  await flush();
+  if (submit) {
+    input.dispatchEvent(
+      new KeyboardEvent("keyup", { key: "Enter", bubbles: true })
+    );
+    await flush();
+  }
+}
+async function editDescription(
+  el: HTMLElement,
+  description: string,
+  blur = true
+) {
+  const input = el.querySelector<HTMLTextAreaElement>(
+    ".detail-panel textarea"
+  )!;
+  expect(input).not.toBeNull();
+  input.value = description;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  await flush();
+  if (blur) {
+    input.dispatchEvent(new Event("blur", { bubbles: true }));
+    await flush();
+  }
+}
+async function addFeaturedTag(el: HTMLElement) {
+  await click(el, '.tag-select [role="combobox"]');
+  const option = Array.from(
+    document.body.querySelectorAll<HTMLElement>('[role="option"]')
+  ).find((item) => item.textContent?.includes("Featured"));
+  expect(option).toBeDefined();
+  option!.click();
+  await flush();
+}
+async function selectCoverResource(el: HTMLElement) {
+  await click(el, ".detail-panel .verse-preview");
+  await click(el, ".selection-card");
+  await click(el, ".choose-cover-resource");
+}
+async function uploadCover(el: HTMLElement) {
+  const input = el.querySelector<HTMLInputElement>(
+    '.detail-panel input[type="file"]'
+  )!;
+  expect(input).not.toBeNull();
+  Object.defineProperty(input, "files", {
+    configurable: true,
+    value: [new File(["cover"], "cover.png", { type: "image/png" })],
+  });
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  await flush();
+}
 beforeEach(() => {
   permission.role = "root";
   vi.resetAllMocks();
@@ -239,22 +348,78 @@ beforeEach(() => {
     data: [property, otherProperty],
   });
   mocks.getVerses.mockImplementation(async (params) => ({
-    ...response([mine]),
+    ...response([structuredClone(mine)]),
     headers: {
       ...response([mine]).headers,
       "x-pagination-current-page": String(params.page),
     },
   }));
-  mocks.getVerse.mockResolvedValue({ data: mine });
-  mocks.getScenesByProperty.mockResolvedValue(response([mine, foreign]));
-  mocks.getSceneByProperty.mockResolvedValue({ data: foreign });
+  mocks.getVerse.mockImplementation(async () => ({
+    data: structuredClone(mine),
+  }));
+  mocks.getAllVerses.mockImplementation(async (params) => ({
+    ...response([structuredClone(mine), structuredClone(foreign)]),
+    headers: {
+      ...response([mine, foreign]).headers,
+      "x-pagination-current-page": String(params.page),
+    },
+  }));
+  mocks.getAllVerse.mockImplementation(async (id) => ({
+    data: structuredClone(id === mine.id ? mine : foreign),
+  }));
+  mocks.putVerse.mockResolvedValue({ data: {} });
+  mocks.addTag.mockResolvedValue({ data: {} });
+  mocks.removeTag.mockResolvedValue({ data: {} });
+  mocks.getTags.mockResolvedValue({ data: [{ id: 5, name: "Featured" }] });
+  mocks.getPicture.mockResolvedValue({ data: { file: { id: 502 } } });
+  mocks.postFile.mockResolvedValue({ data: { id: 901 } });
+  mocks.fileMD5.mockResolvedValue("cover-md5");
+  mocks.publicHandler.mockResolvedValue("public");
+  mocks.fileHas.mockResolvedValue(false);
+  mocks.fileUpload.mockResolvedValue(undefined);
+  mocks.fileUrl.mockReturnValue("https://files.test/uploaded-cover.png");
 });
 afterEach(() => {
   cleanups.splice(0).forEach((cleanup) => cleanup());
   vi.useRealTimers();
 });
 
-describe("root global scene filtering by property", () => {
+describe("root all-scenes view and property filtering", () => {
+  it.each(["root", "admin", "user"])(
+    "keeps the default personal list isolated from global APIs as %s",
+    async (role) => {
+      permission.role = role;
+      const el = await mount(null);
+      expect(mocks.getVerses).toHaveBeenCalledTimes(1);
+      expect(mocks.getAllVerses).not.toHaveBeenCalled();
+      expect(mocks.getGlobalScenePropertyOptions).not.toHaveBeenCalled();
+      expect(el.querySelector(".scene-property-filter")).toBeNull();
+      expect(el.querySelector(".scene-author-filter")).toBeNull();
+      expect(el.textContent).toContain(mine.name);
+      expect(el.textContent).not.toContain(foreign.name);
+      await click(el, '.open-scene[data-id="673"]');
+      expect(mocks.getVerse).toHaveBeenCalledWith(
+        673,
+        "image,author,tags,metas"
+      );
+      expect(mocks.getAllVerse).not.toHaveBeenCalled();
+      expect(el.querySelector(".detail-panel .enter-edit-btn")).not.toBeNull();
+    }
+  );
+  it("keeps personal search, tags and pagination on the personal API for root", async () => {
+    const el = await mount("mine");
+    const input = el.querySelector<HTMLInputElement>(".scene-search")!;
+    input.value = "my dragon";
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await flush();
+    await click(el, ".filter-tag");
+    await click(el, ".next-page");
+    expect(mocks.getVerses).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: "my dragon", tags: [5], page: 2 })
+    );
+    expect(mocks.getAllVerses).not.toHaveBeenCalled();
+    expect(mocks.getGlobalScenePropertyOptions).not.toHaveBeenCalled();
+  });
   it("long-presses an owned scene into its editor without opening information, and respects read-only scenes", async () => {
     const el = await mount();
     await choose(el, property.key);
@@ -274,24 +439,31 @@ describe("root global scene filtering by property", () => {
           path: "/verse/scene",
           query: { id: 673, title: expect.any(String) },
         });
-        expect(mocks.getSceneByProperty).not.toHaveBeenCalled();
+        expect(mocks.getAllVerse).not.toHaveBeenCalled();
       }
     }
     expect(mocks.routerPush).toHaveBeenCalledTimes(1);
-    expect(mocks.getSceneByProperty).toHaveBeenCalledWith(
+    expect(mocks.getAllVerse).toHaveBeenCalledWith(
       683,
-      31,
       "image,author,tags,metas,public"
     );
   });
-  it("starts in my scenes, filters across owners, and clears back to my scenes", async () => {
+  it("loads scenes from mixed authors and keeps all scenes after clearing a property", async () => {
     const el = await mount();
-    expect(mocks.getVerses).toHaveBeenCalledTimes(1);
-    expect(mocks.getScenesByProperty).not.toHaveBeenCalled();
+    expect(mocks.getVerses).not.toHaveBeenCalled();
+    expect(mocks.getAllVerses).toHaveBeenCalledTimes(1);
+    expect(el.textContent).toContain(mine.name);
+    expect(el.textContent).toContain(foreign.name);
+    expect(el.querySelectorAll(".card-author")[0]?.textContent).toBe(
+      "Root author"
+    );
+    expect(el.querySelectorAll(".card-author")[1]?.textContent).toBe(
+      "Other author"
+    );
     await choose(el, property.key);
-    expect(mocks.getScenesByProperty).toHaveBeenCalledWith(
-      property.id,
+    expect(mocks.getAllVerses).toHaveBeenCalledWith(
       expect.objectContaining({
+        propertyId: property.id,
         page: 1,
         perPage: 24,
         expand: "image,author,public",
@@ -300,20 +472,29 @@ describe("root global scene filtering by property", () => {
     expect(el.querySelector(".scene-property-scope")).toBeNull();
     expect(el.textContent).toContain(foreign.name);
     await clear(el);
-    expect(mocks.getVerses).toHaveBeenCalledTimes(2);
+    expect(mocks.getVerses).not.toHaveBeenCalled();
+    expect(mocks.getAllVerses).toHaveBeenLastCalledWith(
+      expect.objectContaining({ propertyId: undefined, page: 1 })
+    );
     expect(el.querySelector(".scene-property-scope")).toBeNull();
-    expect(el.textContent).not.toContain(foreign.name);
+    expect(el.textContent).toContain(foreign.name);
   });
   it.each(["admin", "manager", "user"])(
-    "does not show or call global property APIs for %s",
+    "does not fetch or expose all-scene metadata when mounted directly as %s",
     async (role) => {
       permission.role = role;
       const el = await mount();
       expect(el.querySelector(".scene-property-filter")).toBeNull();
       expect(mocks.getGlobalScenePropertyOptions).not.toHaveBeenCalled();
-      expect(mocks.getScenesByProperty).not.toHaveBeenCalled();
-      expect(mocks.getSceneByProperty).not.toHaveBeenCalled();
-      expect(mocks.getVerses).toHaveBeenCalledTimes(1);
+      expect(mocks.getAllVerses).not.toHaveBeenCalled();
+      expect(mocks.getAllVerse).not.toHaveBeenCalled();
+      expect(mocks.getVerses).not.toHaveBeenCalled();
+      expect(mocks.getVerse).not.toHaveBeenCalled();
+      expect(mocks.getTags).not.toHaveBeenCalled();
+      expect(el.querySelector(".scene-author-filter")).toBeNull();
+      expect(el.querySelector(".scene-result")).toBeNull();
+      expect(el.querySelector(".property-management")).toBeNull();
+      expect(el.textContent).not.toContain(foreign.name);
     }
   );
   it("preserves search and tag filters and resets pagination when changing property scope", async () => {
@@ -327,29 +508,106 @@ describe("root global scene filtering by property", () => {
     expect(el.querySelector(".current-page")?.textContent).toBe("2");
     await choose(el, property.key);
     expect(el.querySelector(".current-page")?.textContent).toBe("1");
-    expect(mocks.getScenesByProperty).toHaveBeenLastCalledWith(
-      property.id,
-      expect.objectContaining({ search: "dragon", tags: [5], page: 1 })
+    expect(mocks.getAllVerses).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        propertyId: property.id,
+        search: "dragon",
+        tags: [5],
+        page: 1,
+      })
     );
     await click(el, ".sort-scenes");
-    expect(mocks.getScenesByProperty).toHaveBeenLastCalledWith(
-      property.id,
+    expect(mocks.getAllVerses).toHaveBeenLastCalledWith(
       expect.objectContaining({ sort: "name" })
     );
   });
-  it("loads cross-owner private details through the global endpoint with property management and no write controls", async () => {
+  it("debounces author input for 300 ms while preserving independent scene, tag and property searches", async () => {
+    const el = await mount();
+    const input = el.querySelector<HTMLInputElement>(".scene-search")!;
+    input.value = "dragon";
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await flush();
+    await click(el, ".filter-tag");
+    await choose(el, property.key);
+    await click(el, ".next-page");
+    expect(el.querySelector(".current-page")?.textContent).toBe("2");
+    mocks.getAllVerses.mockClear();
+    vi.useFakeTimers();
+
+    await searchAuthor(el, "  张三 author  ");
+    vi.advanceTimersByTime(299);
+    await flush();
+    expect(mocks.getAllVerses).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    await flush();
+    expect(mocks.getAllVerses).toHaveBeenCalledTimes(1);
+    expect(mocks.getAllVerses).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        authorSearch: "张三 author",
+        search: "dragon",
+        propertyId: 31,
+        tags: [5],
+        page: 1,
+      })
+    );
+    expect(el.querySelector(".current-page")?.textContent).toBe("1");
+    expect(mocks.getVerses).not.toHaveBeenCalled();
+  });
+  it("submits author search immediately on Enter without a delayed duplicate, and clear resets pagination", async () => {
     const el = await mount();
     await choose(el, property.key);
+    vi.useFakeTimers();
+    mocks.getAllVerses.mockClear();
+    await searchAuthor(el, "nickname", true);
+    expect(mocks.getAllVerses).toHaveBeenCalledTimes(1);
+    expect(mocks.getAllVerses).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        authorSearch: "nickname",
+        propertyId: 31,
+        page: 1,
+      })
+    );
+    vi.advanceTimersByTime(400);
+    await flush();
+    expect(mocks.getAllVerses).toHaveBeenCalledTimes(1);
+    await click(el, ".next-page");
+    expect(el.querySelector(".current-page")?.textContent).toBe("2");
+    await searchAuthor(el, "");
+    expect(mocks.getAllVerses).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        authorSearch: undefined,
+        propertyId: 31,
+        page: 1,
+      })
+    );
+    expect(el.querySelector(".current-page")?.textContent).toBe("1");
+  });
+  it("ignores the previous author's delayed list after a new author query is applied", async () => {
+    const el = await mount();
+    const previous = deferred<ReturnType<typeof response>>();
+    mocks.getAllVerses.mockReturnValueOnce(previous.promise);
+    await searchAuthor(el, "first author", true);
+    await searchAuthor(el, "second author", true);
+    expect(mocks.getAllVerses).toHaveBeenLastCalledWith(
+      expect.objectContaining({ authorSearch: "second author" })
+    );
+    previous.resolve(response([{ ...foreign, name: "Outdated author match" }]));
+    await flush();
+    expect(el.textContent).not.toContain("Outdated author match");
+    expect(el.textContent).toContain(mine.name);
+    expect(el.textContent).toContain(foreign.name);
+  });
+  it("lets root edit cross-owner metadata and properties without enabling content editing or deletion", async () => {
+    const el = await mount();
     await click(el, '.open-scene[data-id="683"]');
-    expect(mocks.getSceneByProperty).toHaveBeenCalledWith(
+    expect(mocks.getAllVerse).toHaveBeenCalledWith(
       683,
-      31,
       "image,author,tags,metas,public"
     );
     expect(mocks.getVerse).not.toHaveBeenCalled();
     expect(
       el.querySelector(".detail-panel")?.getAttribute("data-editable")
-    ).toBe("false");
+    ).toBe("true");
     expect(el.querySelector(".detail-panel")?.getAttribute("data-delete")).toBe(
       "false"
     );
@@ -361,7 +619,190 @@ describe("root global scene filtering by property", () => {
     expect(el.querySelector(".detail-panel .btn-pill-secondary")).toBeNull();
     expect(
       el.querySelector<HTMLTextAreaElement>(".detail-panel textarea")?.readOnly
-    ).toBe(true);
+    ).toBe(false);
+  });
+  it("saves root cross-owner name, description and tag changes against that scene", async () => {
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+
+    await renameScene(el, "Renamed foreign scene");
+    expect(mocks.putVerse).toHaveBeenLastCalledWith(683, {
+      name: "Renamed foreign scene",
+    });
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(
+      "Renamed foreign scene"
+    );
+
+    await editDescription(el, "Foreign scene metadata updated by root");
+    expect(mocks.putVerse).toHaveBeenLastCalledWith(683, {
+      description: "Foreign scene metadata updated by root",
+    });
+    await addFeaturedTag(el);
+    expect(mocks.addTag).toHaveBeenCalledWith(683, 5);
+    expect(el.querySelector(".detail-panel .scene-tag")?.textContent).toContain(
+      "Featured"
+    );
+    await click(el, ".detail-panel .remove-scene-tag");
+    expect(mocks.removeTag).toHaveBeenCalledWith(683, 5);
+    expect(el.querySelector(".detail-panel .scene-tag")).toBeNull();
+    expect(mocks.deleteVerse).not.toHaveBeenCalled();
+    expect(mocks.routerPush).not.toHaveBeenCalled();
+  });
+  it("saves a root cross-owner cover selected from existing picture resources", async () => {
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await selectCoverResource(el);
+    expect(mocks.getPicture).toHaveBeenCalledWith(71);
+    expect(mocks.putVerse).toHaveBeenCalledWith(683, { image_id: 502 });
+    expect(mocks.putVerse).toHaveBeenCalledTimes(1);
+  });
+  it("does not apply a selected cover to scene B when its picture read started in scene A", async () => {
+    const picture = deferred<{ data: { file: { id: number } } }>();
+    mocks.getPicture.mockReturnValueOnce(picture.promise);
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await selectCoverResource(el);
+    expect(mocks.getPicture).toHaveBeenCalledWith(71);
+    await click(el, '.open-scene[data-id="673"]');
+    picture.resolve({ data: { file: { id: 502 } } });
+    await flush();
+    expect(mocks.putVerse).not.toHaveBeenCalled();
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(mine.name);
+  });
+  it("does not write an uploaded cover after the detail target changed to scene B", async () => {
+    const upload = deferred<void>();
+    mocks.fileUpload.mockReturnValueOnce(upload.promise);
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await uploadCover(el);
+    expect(mocks.fileUpload).toHaveBeenCalledTimes(1);
+    await click(el, '.open-scene[data-id="673"]');
+    upload.resolve();
+    await flush();
+    expect(mocks.putVerse).not.toHaveBeenCalled();
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(mine.name);
+  });
+  it("does not restore scene A or change scene B after a late cover save acknowledgement", async () => {
+    const save = deferred<{ data: object }>();
+    mocks.putVerse.mockReturnValueOnce(save.promise);
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await selectCoverResource(el);
+    expect(mocks.putVerse).toHaveBeenCalledWith(683, { image_id: 502 });
+    await click(el, '.open-scene[data-id="673"]');
+    save.resolve({ data: {} });
+    await flush();
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(mine.name);
+    expect(mocks.getAllVerse).toHaveBeenLastCalledWith(
+      673,
+      "image,author,tags,metas,public"
+    );
+  });
+  it("does not change scene B after a late rename acknowledgement for scene A", async () => {
+    const save = deferred<{ data: object }>();
+    mocks.putVerse.mockReturnValueOnce(save.promise);
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await renameScene(el, "Renamed scene A");
+    expect(mocks.putVerse).toHaveBeenCalledWith(683, {
+      name: "Renamed scene A",
+    });
+    await click(el, '.open-scene[data-id="673"]');
+    save.resolve({ data: {} });
+    await flush();
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(mine.name);
+    expect(mocks.putVerse).toHaveBeenCalledTimes(1);
+  });
+  it("keeps scene B's description draft unsaved after scene A's acknowledgement", async () => {
+    const save = deferred<{ data: object }>();
+    mocks.putVerse.mockReturnValueOnce(save.promise);
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await editDescription(el, "Scene A description");
+    expect(mocks.putVerse).toHaveBeenCalledWith(683, {
+      description: "Scene A description",
+    });
+    await click(el, '.open-scene[data-id="673"]');
+    await editDescription(el, "Scene B draft", false);
+    save.resolve({ data: {} });
+    await flush();
+    expect(
+      el.querySelector<HTMLTextAreaElement>(".detail-panel textarea")?.value
+    ).toBe("Scene B draft");
+    el.querySelector(".detail-panel textarea")!.dispatchEvent(
+      new Event("blur", { bubbles: true })
+    );
+    await flush();
+    expect(mocks.putVerse).toHaveBeenLastCalledWith(673, {
+      description: "Scene B draft",
+    });
+    expect(mocks.putVerse).toHaveBeenCalledTimes(2);
+  });
+  it("does not discard scene B's description draft when scene A's save fails", async () => {
+    const save = deferred<{ data: object }>();
+    mocks.putVerse.mockReturnValueOnce(save.promise);
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await editDescription(el, "Scene A description");
+    await click(el, '.open-scene[data-id="673"]');
+    await editDescription(el, "Scene B draft", false);
+    save.reject(new Error("Scene A unavailable"));
+    await flush();
+    expect(
+      el.querySelector<HTMLTextAreaElement>(".detail-panel textarea")?.value
+    ).toBe("Scene B draft");
+  });
+  it("does not add scene A's pending tag to scene B", async () => {
+    const save = deferred<{ data: object }>();
+    mocks.addTag.mockReturnValueOnce(save.promise);
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await addFeaturedTag(el);
+    expect(mocks.addTag).toHaveBeenCalledWith(683, 5);
+    await click(el, '.open-scene[data-id="673"]');
+    save.resolve({ data: {} });
+    await flush();
+    expect(el.querySelector(".detail-panel .scene-tag")).toBeNull();
+    expect(el.querySelector(".detail-panel h2")?.textContent).toBe(mine.name);
+  });
+  it("does not complete a cross-owner cover selection after root access is revoked", async () => {
+    const picture = deferred<{ data: { file: { id: number } } }>();
+    mocks.getPicture.mockReturnValueOnce(picture.promise);
+    const el = await mount();
+    await choose(el, property.key);
+    await click(el, '.open-scene[data-id="683"]');
+    await selectCoverResource(el);
+    permission.role = "admin";
+    await flush();
+    picture.resolve({ data: { file: { id: 502 } } });
+    await flush();
+    expect(mocks.putVerse).not.toHaveBeenCalled();
+    expect(el.querySelector(".detail-panel")).toBeNull();
+    expect(el.querySelector(".scene-property-filter")).toBeNull();
+  });
+  it("does not reopen a late all-scene detail after root access is revoked and restored", async () => {
+    const detail = deferred<{ data: typeof foreign }>();
+    mocks.getAllVerse.mockReturnValueOnce(detail.promise);
+    const el = await mount();
+    await click(el, '.open-scene[data-id="683"]');
+    permission.role = "admin";
+    await flush();
+    detail.resolve({ data: foreign });
+    await flush();
+    permission.role = "root";
+    await flush();
+    expect(el.querySelector(".detail-panel")).toBeNull();
+    expect(el.querySelector(".property-management")).toBeNull();
+    expect(mocks.getTags).not.toHaveBeenCalled();
   });
   it("keeps editing in owned-scene details and removes card edit actions for all scenes", async () => {
     const el = await mount();
@@ -374,59 +815,58 @@ describe("root global scene filtering by property", () => {
       .closest(".scene-result")!;
     expect(foreignCard.querySelector(".single-card-action-btn")).toBeNull();
     expect(ownedCard.querySelector(".single-card-action-btn")).toBeNull();
-    mocks.getSceneByProperty.mockResolvedValueOnce({ data: mine });
+    mocks.getAllVerse.mockResolvedValueOnce({ data: mine });
     await click(el, '.open-scene[data-id="673"]');
     expect(el.querySelector(".detail-panel .enter-edit-btn")).not.toBeNull();
   });
 
-  it("clears global data and details immediately on role loss and ignores the old list response", async () => {
+  it("clears global data and details immediately on role loss without falling back to personal data", async () => {
     const el = await mount();
     await choose(el, property.key);
     await click(el, '.open-scene[data-id="683"]');
-    const mineLoad = deferred<ReturnType<typeof response>>();
-    mocks.getVerses.mockReturnValueOnce(mineLoad.promise);
+    const previousAllCalls = mocks.getAllVerses.mock.calls.length;
     permission.role = "admin";
     await flush();
     expect(el.querySelector(".scene-property-filter")).toBeNull();
     expect(el.querySelector(".detail-panel")).toBeNull();
     expect(el.textContent).not.toContain(foreign.name);
-    mineLoad.resolve(response([mine]));
-    await flush();
-    expect(el.textContent).toContain(mine.name);
+    expect(el.querySelector(".scene-author-filter")).toBeNull();
+    expect(el.textContent).not.toContain(mine.name);
+    expect(mocks.getVerses).not.toHaveBeenCalled();
+    expect(mocks.getAllVerses).toHaveBeenCalledTimes(previousAllCalls);
   });
   it("closes details and removes the scene immediately when unlinking the selected global property", async () => {
     const el = await mount();
     await choose(el, property.key);
     await click(el, '.open-scene[data-id="683"]');
     const matches = deferred<ReturnType<typeof response>>();
-    mocks.getScenesByProperty.mockClear();
-    mocks.getScenesByProperty.mockReturnValueOnce(matches.promise);
+    mocks.getAllVerses.mockClear();
+    mocks.getAllVerses.mockReturnValueOnce(matches.promise);
     await click(el, ".unlink-filter-property");
-    expect(mocks.getScenesByProperty).toHaveBeenCalledTimes(1);
+    expect(mocks.getAllVerses).toHaveBeenCalledTimes(1);
     expect(el.querySelector(".detail-panel")).toBeNull();
     expect(el.querySelector('.open-scene[data-id="683"]')).toBeNull();
-    expect(mocks.getSceneByProperty).toHaveBeenCalledTimes(1);
-    expect(mocks.getVerses).toHaveBeenCalledTimes(1);
+    expect(mocks.getAllVerse).toHaveBeenCalledTimes(1);
+    expect(mocks.getVerses).not.toHaveBeenCalled();
     expect(el.querySelector(".scene-property-scope")).toBeNull();
     matches.resolve(response([mine]));
     await flush();
     expect(el.textContent).not.toContain(foreign.name);
   });
-  it("reloads global scene details through the selected property after unlinking another property", async () => {
+  it("reloads global scene details in the all-scenes scope after unlinking another property", async () => {
     const el = await mount();
     await choose(el, property.key);
     await click(el, '.open-scene[data-id="683"]');
     const editor = el.querySelector(".property-management");
-    mocks.getSceneByProperty.mockResolvedValueOnce({
+    mocks.getAllVerse.mockResolvedValueOnce({
       data: { ...foreign, name: "Updated private scene" },
     });
     await click(el, ".unlink-other-property");
-    expect(mocks.getSceneByProperty).toHaveBeenLastCalledWith(
+    expect(mocks.getAllVerse).toHaveBeenLastCalledWith(
       683,
-      31,
       "image,author,tags,metas,public"
     );
-    expect(mocks.getSceneByProperty).toHaveBeenCalledTimes(2);
+    expect(mocks.getAllVerse).toHaveBeenCalledTimes(2);
     expect(mocks.getVerse).not.toHaveBeenCalled();
     expect(el.querySelector(".detail-panel h2")?.textContent).toBe(
       "Updated private scene"
@@ -438,9 +878,9 @@ describe("root global scene filtering by property", () => {
     await choose(el, property.key);
     await click(el, '.open-scene[data-id="683"]');
     const previous = deferred<{ data: typeof foreign }>();
-    mocks.getSceneByProperty.mockReturnValueOnce(previous.promise);
+    mocks.getAllVerse.mockReturnValueOnce(previous.promise);
     await click(el, ".unlink-other-property");
-    mocks.getScenesByProperty.mockResolvedValueOnce(response([mine]));
+    mocks.getAllVerses.mockResolvedValueOnce(response([mine]));
     await click(el, ".unlink-filter-property");
     previous.resolve({ data: foreign });
     await flush();
@@ -453,16 +893,16 @@ describe("root global scene filtering by property", () => {
     await choose(el, property.key);
     await click(el, '.open-scene[data-id="683"]');
     const previous = deferred<{ data: typeof foreign }>();
-    mocks.getSceneByProperty.mockReturnValueOnce(previous.promise);
+    mocks.getAllVerse.mockReturnValueOnce(previous.promise);
     await click(el, ".unlink-other-property");
     await clear(el);
     previous.resolve({ data: foreign });
     await flush();
     expect(el.querySelector(".detail-panel")).toBeNull();
     expect(el.textContent).toContain(mine.name);
-    expect(el.textContent).not.toContain(foreign.name);
+    expect(el.textContent).toContain(foreign.name);
   });
-  it("clears a deleted selected property, closes its details, and returns to my scenes", async () => {
+  it("clears a deleted selected property, closes its details, and reloads all scenes", async () => {
     const el = await mount();
     await choose(el, property.key);
     await click(el, '.open-scene[data-id="683"]');
@@ -472,9 +912,12 @@ describe("root global scene filtering by property", () => {
     await click(el, ".delete-filter-property");
     expect(el.querySelector(".detail-panel")).toBeNull();
     expect(el.querySelector(".scene-property-scope")).toBeNull();
-    expect(mocks.getVerses).toHaveBeenCalledTimes(2);
+    expect(mocks.getVerses).not.toHaveBeenCalled();
+    expect(mocks.getAllVerses).toHaveBeenLastCalledWith(
+      expect.objectContaining({ propertyId: undefined, page: 1 })
+    );
   });
-  it("retries a failed global property catalog without issuing a global scene query", async () => {
+  it("retries a failed global property catalog without repeating the all-scenes query", async () => {
     mocks.getGlobalScenePropertyOptions.mockRejectedValueOnce(
       new Error("offline")
     );
@@ -488,11 +931,11 @@ describe("root global scene filtering by property", () => {
     retry.click();
     await flush();
     expect(mocks.getGlobalScenePropertyOptions).toHaveBeenCalledTimes(2);
-    expect(mocks.getScenesByProperty).not.toHaveBeenCalled();
+    expect(mocks.getAllVerses).toHaveBeenCalledTimes(1);
   });
   it("ignores late global details after clearing the scope", async () => {
     const detail = deferred<unknown>();
-    mocks.getSceneByProperty.mockReturnValueOnce(detail.promise);
+    mocks.getAllVerse.mockReturnValueOnce(detail.promise);
     const el = await mount();
     await choose(el, property.key);
     await click(el, '.open-scene[data-id="683"]');
@@ -511,37 +954,37 @@ describe("root global scene filtering by property", () => {
     catalog.resolve({ data: [property] });
     await flush();
     expect(el.querySelector(".scene-property-filter")).toBeNull();
-    expect(mocks.getScenesByProperty).not.toHaveBeenCalled();
+    expect(mocks.getAllVerses).toHaveBeenCalledTimes(1);
   });
-  it("ignores a global list response after clearing back to my scenes", async () => {
+  it("ignores an older property-filtered list response after clearing the property", async () => {
     const globalList = deferred<ReturnType<typeof response>>();
-    mocks.getScenesByProperty.mockReturnValueOnce(globalList.promise);
     const el = await mount();
+    mocks.getAllVerses.mockReturnValueOnce(globalList.promise);
     await choose(el, property.key);
     await clear(el);
     expect(el.textContent).toContain(mine.name);
     globalList.resolve(response([foreign]));
     await flush();
     expect(el.textContent).toContain(mine.name);
-    expect(el.textContent).not.toContain(foreign.name);
+    expect(el.textContent).toContain(foreign.name);
+    expect(el.querySelectorAll(".scene-result")).toHaveLength(2);
   });
 
   it("discards an in-flight global list response after root access is revoked", async () => {
     const globalList = deferred<ReturnType<typeof response>>();
-    const mineList = deferred<ReturnType<typeof response>>();
-    mocks.getScenesByProperty.mockReturnValueOnce(globalList.promise);
     const el = await mount();
+    mocks.getAllVerses.mockReturnValueOnce(globalList.promise);
     await choose(el, property.key);
-    mocks.getVerses.mockReturnValueOnce(mineList.promise);
     permission.role = "admin";
     await flush();
     globalList.resolve(response([foreign]));
     await flush();
     expect(el.textContent).not.toContain(foreign.name);
     expect(el.querySelectorAll(".scene-result")).toHaveLength(0);
-    mineList.resolve(response([mine]));
+    permission.role = "root";
     await flush();
-    expect(el.textContent).toContain(mine.name);
+    expect(el.querySelectorAll(".scene-result")).toHaveLength(0);
+    expect(mocks.getVerses).not.toHaveBeenCalled();
   });
 
   it("keeps a globally deleted property out of a late catalog refresh", async () => {

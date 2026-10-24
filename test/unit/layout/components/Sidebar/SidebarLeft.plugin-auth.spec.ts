@@ -2,6 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, nextTick, reactive } from "vue";
 
 const mockEnsureAllEnabledPluginAccess = vi.fn();
+const mockAbilityCan = vi.fn<
+  (action: string, subject: { path?: string }) => boolean
+>(() => true);
 const mockMenuGroups = reactive<Array<Record<string, unknown>>>([]);
 const mockPluginsByGroup = reactive(
   new Map<string, Array<Record<string, unknown>>>()
@@ -59,7 +62,7 @@ vi.mock("@/store/modules/app", () => ({
 }));
 
 vi.mock("@casl/vue", () => ({
-  useAbility: vi.fn(() => ({ can: vi.fn(() => true) })),
+  useAbility: vi.fn(() => ({ can: mockAbilityCan })),
 }));
 
 vi.mock("@/utils/ability", () => ({
@@ -156,6 +159,7 @@ function showVisiblePluginMenu() {
 
 describe("SidebarLeft plugin auth", () => {
   beforeEach(() => {
+    mockAbilityCan.mockReturnValue(true);
     mockCurrentRoute.path = "/home";
     mockDomainStore.voxelEnabled = false;
     mockPluginStore.initialized = false;
@@ -178,6 +182,33 @@ describe("SidebarLeft plugin auth", () => {
       .forEach((fn) => fn());
     vi.clearAllMocks();
   });
+
+  it.each([false, true])(
+    "shows both all-scenes menu entries only while root is present (collapsed=%s)",
+    async (collapsed) => {
+      const rootAccess = reactive({ value: true });
+      mockAbilityCan.mockImplementation(
+        (action) => action !== "root" || rootAccess.value
+      );
+      mockCurrentRoute.path = "/verse/all";
+      const { el } = await mount(collapsed);
+
+      expect(el.querySelectorAll('[data-to="/verse/all"]')).toHaveLength(2);
+      expect(
+        el.querySelector('.popover-menu [data-to="/verse/all"]')?.textContent
+      ).toContain("sidebar.allScenes");
+      expect(
+        el.querySelector('.submenu [data-to="/verse/all"]')?.textContent
+      ).toContain("sidebar.allScenes");
+
+      rootAccess.value = false;
+      await nextTick();
+
+      expect(el.querySelectorAll('[data-to="/verse/all"]')).toHaveLength(0);
+      expect(el.querySelectorAll('[data-to="/verse/index"]')).toHaveLength(2);
+      expect(el.querySelectorAll('[data-to="/verse/public"]')).toHaveLength(2);
+    }
+  );
 
   it.each([false, true])(
     "updates voxel links in both menus when white-label access changes (collapsed=%s)",

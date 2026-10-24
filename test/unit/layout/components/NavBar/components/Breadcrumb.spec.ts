@@ -186,6 +186,20 @@ describe("layout/components/NavBar/components/Breadcrumb.vue", () => {
     expect(crumb!.textContent).toContain("breadcrumb.workspace");
   });
 
+  it("labels the all-scenes page as its own scene destination", async () => {
+    mockRoute.path = "/verse/all";
+    const { el } = await mount();
+    const crumbs = Array.from(el.querySelectorAll(".crumb-link")).map((node) =>
+      node.textContent?.trim()
+    );
+
+    expect(crumbs).toEqual([
+      "breadcrumb.workspace",
+      "sidebar.scene",
+      "sidebar.allScenes",
+    ]);
+  });
+
   it("navigates when clicking clickable breadcrumb item", async () => {
     mockRoute.path = "/meta/script";
     mockRoute.query = { title: "测试实体" };

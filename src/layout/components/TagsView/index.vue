@@ -3,7 +3,7 @@
     <el-scrollbar class="scroll-container">
       <router-link
         ref="tagRef"
-        v-for="tag in visitedViews"
+        v-for="tag in visibleVisitedViews"
         :key="tag.fullPath"
         :class="'tags-item ' + (isActive(tag) ? 'active' : '')"
         :to="{ path: tag.path, query: tag.query as Record<string, string> }"
@@ -64,6 +64,7 @@ import {
   useTagsViewStore,
   useSettingsStore,
   useAppStore,
+  useUserStore,
 } from "@/store";
 
 type AppRoute = RouteRecordRaw & {
@@ -78,10 +79,17 @@ const route = useRoute();
 const permissionStore = usePermissionStore();
 const tagsViewStore = useTagsViewStore();
 const appStore = useAppStore();
+const userStore = useUserStore();
 
 const { visitedViews } = storeToRefs(tagsViewStore);
 const settingsStore = useSettingsStore();
 const layout = computed(() => settingsStore.layout);
+const isRoot = computed(() => userStore.userInfo?.roles?.includes("root"));
+const canAccessTag = (tag: Pick<TagView, "path">) =>
+  !/^\/verse\/all(\/|$)/i.test(tag.path) || isRoot.value;
+const visibleVisitedViews = computed(() =>
+  visitedViews.value.filter(canAccessTag)
+);
 
 logger.log("visitedViews", visitedViews.value);
 
@@ -110,6 +118,9 @@ watch(
 );
 
 const contentMenuVisible = ref(false); // 右键菜单是否显示
+watch(isRoot, () => {
+  if (!canAccessTag(selectedTag.value)) closeContentMenu();
+});
 watch(contentMenuVisible, (value: boolean) => {
   if (value) {
     document.body.addEventListener("click", closeContentMenu);
@@ -157,7 +168,7 @@ function initTags() {
 }
 
 function addTags() {
-  if (route.meta.title) {
+  if (route.meta.title && canAccessTag(route)) {
     tagsViewStore.addView({
       name: route.name as string,
       title: route.meta.title,
@@ -173,7 +184,7 @@ function addTags() {
 function moveToCurrentTag() {
   // 使用 nextTick() 的目的是确保在更新 tagsView 组件之前，scrollPaneRef 对象已经滚动到了正确的位置。
   nextTick(() => {
-    for (const tag of visitedViews.value) {
+    for (const tag of visibleVisitedViews.value) {
       if (tag.path === route.path) {
         // when query is different then update
         // route.query = { ...route.query, ...tag.query };
@@ -205,7 +216,7 @@ function isFirstView() {
   try {
     return (
       selectedTag.value.path === "/dashboard" ||
-      selectedTag.value.fullPath === tagsViewStore.visitedViews[1].fullPath
+      selectedTag.value.fullPath === visibleVisitedViews.value[1].fullPath
     );
   } catch (err) {
     return false;
@@ -216,7 +227,7 @@ function isLastView() {
   try {
     return (
       selectedTag.value.fullPath ===
-      tagsViewStore.visitedViews[tagsViewStore.visitedViews.length - 1].fullPath
+      visibleVisitedViews.value[visibleVisitedViews.value.length - 1].fullPath
     );
   } catch (err) {
     return false;
@@ -232,7 +243,7 @@ function refreshSelectedTag(view: TagView) {
 }
 
 function toLastView(visitedViews: TagView[], view?: TagView) {
-  const latestView = visitedViews.slice(-1)[0];
+  const latestView = visitedViews.filter(canAccessTag).slice(-1)[0];
 
   if (latestView && latestView.fullPath) {
     router.push(latestView.fullPath);

@@ -102,7 +102,7 @@ export function UpdateAbility(
         "/site/logout",
         "/resource",
         /^\/home(\/|$)/,
-        /^\/verse(\/|$)/,
+        /^\/verse(?!\/all(?:\/|$))(\/|$)/,
         /^\/meta(\/|$)/,
         /^\/resource\/polygen(\/|$)/,
         /^\/resource\/audio(\/|$)/,
@@ -131,7 +131,7 @@ export function UpdateAbility(
       can("root", "all");
       can("people", AbilityRole.name, { role: "admin" }); //超级管理员可以管理管理员
       can("phototype", "all");
-      menu = menu.concat([/^\/phototype(\/|$)/]);
+      menu = menu.concat([/^\/phototype(\/|$)/, /^\/verse\/all(\/|$)/]);
     }
 
     menu.forEach((item) => {

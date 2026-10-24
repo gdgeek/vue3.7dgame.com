@@ -136,6 +136,7 @@ export default {
     aiCreation: "สร้างด้วย AI",
     scene: "ฉาก",
     selfCreated: "สร้างเอง",
+    allScenes: "ฉากทั้งหมด",
     systemRecommend: "แนะนำโดยระบบ",
     teacherManagement: "การจัดการครู",
     studentManagement: "การจัดการนักเรียน",

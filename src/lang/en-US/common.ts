@@ -201,6 +201,7 @@ export default {
     aiCreation: "AI Creation",
     scene: "Scene",
     selfCreated: "My Scenes",
+    allScenes: "All Scenes",
     systemRecommend: "Recommended",
     teacherManagement: "Teacher Management",
     studentManagement: "Student Management",
