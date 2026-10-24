@@ -70,7 +70,9 @@
 
     <!-- Content Area -->
     <div class="card-content">
-      <h3 class="card-title" :title="title">{{ title }}</h3>
+      <h3 class="card-title" :title="title">
+        <slot name="title">{{ title }}</slot>
+      </h3>
       <p v-if="description" class="card-description">{{ description }}</p>
       <div v-if="meta" class="card-meta">
         <span v-if="meta.author" class="meta-item" :title="meta.author">

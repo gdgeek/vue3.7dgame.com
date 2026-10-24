@@ -88,7 +88,13 @@
             :placeholder-icon="['fas', 'layer-group']"
             :show-checkbox="false"
             @view="openDetail(item)"
-          ></StandardCard>
+          >
+            <template #title>
+              <SceneTitle
+                :name="item.name || t('verse.listPage.unnamed')"
+              ></SceneTitle>
+            </template>
+          </StandardCard>
         </template>
 
         <template #list-header>
@@ -114,7 +120,9 @@
                 ></font-awesome-icon>
               </div>
             </div>
-            <span class="item-name">{{ item.name || "—" }}</span>
+            <span class="item-name">
+              <SceneTitle :name="item.name || '—'"></SceneTitle>
+            </span>
           </div>
           <div class="col-author">
             {{ item.author?.nickname || item.author?.username || "—" }}
@@ -196,6 +204,9 @@
         @delete="handleDelete"
         @close="handlePanelClose"
       >
+        <template #name>
+          <SceneTitle :name="currentVerse?.name || ''"></SceneTitle>
+        </template>
         <template #actions>
           <div class="scene-detail-actions">
             <template v-if="canEditCurrentScene">
@@ -409,6 +420,8 @@
 </template>
 
 <script setup lang="ts">
+import SceneTitle from "@/components/SceneTitle.vue";
+import { formatClonedSceneName } from "@/utils/sceneName";
 import { vLongPress } from "@/directive/longPress";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
@@ -1050,7 +1063,10 @@ const _handleCopy = async () => {
       {
         confirmButtonText: t("common.confirm"),
         cancelButtonText: t("common.cancel"),
-        defaultValue: `${currentVerse.value.name}${t("verse.listPage.copySuffix")}`,
+        defaultValue: formatClonedSceneName(
+          currentVerse.value.name,
+          t("verse.listPage.copySuffix")
+        ),
       }
     )) as { value: string };
 

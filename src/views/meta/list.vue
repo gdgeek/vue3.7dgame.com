@@ -328,6 +328,7 @@ import type { CardInfo } from "@/utils/types";
 import { denseResourceCardGutter } from "@/utils/resourceGrid";
 import { compareMultilingualText } from "@/utils/multilingualSort";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
+import { formatClonedSceneName, formatSceneName } from "@/utils/sceneName";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -926,7 +927,10 @@ const handleCopy = async () => {
       {
         confirmButtonText: t("meta.prompt.confirm"),
         cancelButtonText: t("meta.prompt.cancel"),
-        defaultValue: `${currentMeta.value.title}${t("meta.list.copySuffix")}`,
+        defaultValue: formatClonedSceneName(
+          currentMeta.value.title,
+          t("meta.list.copySuffix")
+        ),
       }
     )) as { value: string };
     await copy(currentMeta.value.id, value);
@@ -993,10 +997,7 @@ const handleDelete = async () => {
 };
 
 const generateDefaultName = (prefix: string) => {
-  const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10);
-  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, "-");
-  return `${prefix}_${dateStr}_${timeStr}`;
+  return formatSceneName(prefix);
 };
 
 const addMeta = async () => {
@@ -1028,7 +1029,10 @@ const copyWindow = async (item: { id: number; title?: string }) => {
       {
         confirmButtonText: t("meta.prompt.confirm"),
         cancelButtonText: t("meta.prompt.cancel"),
-        defaultValue: `${item.title}${t("meta.list.copySuffix")}`,
+        defaultValue: formatClonedSceneName(
+          item.title || t("meta.list.unnamed"),
+          t("meta.list.copySuffix")
+        ),
       }
     )) as { value: string };
     await copy(item.id, value);

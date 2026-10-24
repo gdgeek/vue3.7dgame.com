@@ -13,6 +13,7 @@ import {
 const guideLoaders = {
   "editor-authoring": () => import("./guides/editor-authoring.md?raw"),
   authoring: () => import("./guides/authoring.md?raw"),
+  naming: () => import("./guides/naming.md?raw"),
   overview: () => import("./guides/overview.md?raw"),
   assets: () => import("./guides/assets.md?raw"),
   cover: () => import("./guides/cover.md?raw"),
@@ -44,6 +45,13 @@ export const getWorkflowGuideEntry = (page: WorkflowGuidePage) => ({
   input: { topic: "overview" },
   indexUrl: siteUrl(WORKFLOW_GUIDE_INDEX_PATH),
   documentationUrl: siteUrl(workflowGuidePath("overview")),
+  namingGuidance: {
+    formatterTool: "xrugc_format_scene_name",
+    format: "名称_YYYY-MM-DD_HH-mm-ss",
+    cloneInput: { refreshTimestamp: true },
+    input: { topic: "naming" },
+    documentationUrl: siteUrl(workflowGuidePath("naming")),
+  },
   coverGuidance: {
     priority: "strong_recommendation",
     recommendation: coverRecommendation,
@@ -70,7 +78,7 @@ export const withWorkflowGuide = (
     {
       name: WORKFLOW_GUIDE_TOOL_NAME,
       title: "读取 XRUGC 场景制作指南",
-      description: `制作或修改 XRUGC 场景、实体时，先读取 overview，再按需读取 cover 封面、素材、布局、交互、音频、保存发布或排障指南；无需在客户端安装场景制作 Skill。${coverRecommendation} 只返回参考资料，不编辑、上传、安装软件或发布场景。`,
+      description: `制作或修改 XRUGC 场景、实体时，先读取 overview，再按需读取 naming 场景日期命名、cover 封面、素材、布局、交互、音频、保存发布或排障指南；需要日期后缀时使用 xrugc_format_scene_name，不自行拼接多种日期格式。无需在客户端安装场景制作 Skill。${coverRecommendation} 只返回参考资料，不编辑、上传、安装软件或发布场景。`,
       inputSchema: {
         type: "object",
         properties: {

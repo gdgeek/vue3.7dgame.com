@@ -43,6 +43,7 @@
 先调用 `xrugc_get_authoring_capabilities`，以返回的实际工具清单为准。全局创作工具可在列表页、编辑页和脚本抽屉所在页面使用；编辑器专用工具仍依赖对应页面就绪。
 
 - 查找/打开：`xrugc_search_authoring_objects`（kind 为 scene 或 entity），`xrugc_open_authoring_object`。跨页保留未保存内容确认；opened=false 时不要声称已经切换。
+- 场景日期命名：需要日期后缀时先用只读工具 `xrugc_format_scene_name`，统一为 `名称_YYYY-MM-DD_HH-mm-ss`，再把返回的 `name` 原样用于新建；不需要日期时保留普通名称。克隆场景或组件时传 `refreshTimestamp:true`，替换旧时间，重复克隆始终只保留本次时间。省略时间和时区时使用当前真实时间及浏览器本地时区，不自行拼接 `20260921`、连字符日期或括号日期。格式化不会重命名已有对象；参数、时区和历史业务日期边界见 `naming` 主题。
 - 新建：`xrugc_stage_authoring_creation` → `xrugc_complete_authoring_draft` → `xrugc_get_authoring_operation`。新建空对象后，再用目标编辑器已有工具添加内容。
 - 封面：`xrugc_get_object_cover` → `xrugc_stage_object_cover` → 同一完成/状态工具。操作结果明确区分封面关联与页面显示。
 - 素材：`xrugc_search_authoring_assets` / `xrugc_get_asset_metadata`；`xrugc_start_authoring_upload` → 用户选择文件 → `xrugc_get_authoring_upload` 取得真正的资源 ID。跟踪限当前标签页，刷新后不保留。

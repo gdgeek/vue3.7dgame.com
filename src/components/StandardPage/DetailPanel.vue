@@ -40,7 +40,9 @@
                 <!-- Name with inline edit -->
                 <div class="info-name-section">
                   <div v-if="!isEditing" class="info-name-row">
-                    <h4 class="info-name">{{ name }}</h4>
+                    <h4 class="info-name">
+                      <slot name="name">{{ name }}</slot>
+                    </h4>
                     <button
                       v-if="editable"
                       class="btn-icon-only"
