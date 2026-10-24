@@ -1,0 +1,21 @@
+.long-press-hint {
+  position: fixed;
+  z-index: 4000;
+  max-width: calc(100vw - 24px);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--text-primary, #1e293b);
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--standard-page-max-radius, 8px);
+  box-shadow: var(--shadow-md, 0 4px 12px rgb(0 0 0 / 8%));
+
+  strong {
+    font-weight: 700;
+    color: var(--primary-color, #03a9f4);
+  }
+}

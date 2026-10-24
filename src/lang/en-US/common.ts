@@ -259,6 +259,8 @@ export default {
     listView: "List View",
     resourceDetail: "Resource Details",
     viewInfo: "View Info",
+    longPressToEdit: "Hold for 1 second to edit directly",
+    longPressDuration: "1 second",
     save: "Save",
     saveData: "Save Data",
     copy: "Copy",

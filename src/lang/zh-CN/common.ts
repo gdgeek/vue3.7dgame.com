@@ -276,6 +276,8 @@ export default {
     preparing: "准备中...",
     filter: "筛选",
     viewInfo: "查看信息",
+    longPressToEdit: "长按 1 秒直接进入编辑",
+    longPressDuration: "1 秒",
     importScene: "导入场景",
     dragOrSelectScenePackage: "将场景包拖到此处，或点击选择文件",
     onlyZipScenePackage: "仅支持 .zip 格式的场景包文件",

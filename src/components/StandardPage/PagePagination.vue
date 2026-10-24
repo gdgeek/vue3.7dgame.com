@@ -108,9 +108,11 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .page-pagination {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
   padding: 20px 0;
 
   &.sticky {
@@ -134,6 +136,7 @@ onBeforeUnmount(() => {
   // el-button handles most styles. We just ensure alignment if needed.
   display: inline-flex;
   align-items: center;
+  margin-left: 0;
   border-radius: var(
     --standard-page-max-radius,
     calc(var(--radius-lg, 24px) / 3)
@@ -142,8 +145,12 @@ onBeforeUnmount(() => {
 
 .page-info {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  justify-content: center;
+  min-width: 0;
+  max-width: 100%;
   font-size: 14px;
   color: var(--el-text-color-secondary, #909399);
   user-select: none;
