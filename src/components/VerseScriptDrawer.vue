@@ -11,12 +11,17 @@
     @closed="$emit('closed')"
     @saved="$emit('saved', $event)"
     @state-change="$emit('state-change', $event)"
-  ></EditorScriptDrawer>
+  >
+    <template #title="{ title: sceneTitle }">
+      <SceneTitle :name="sceneTitle"></SceneTitle>
+    </template>
+  </EditorScriptDrawer>
 </template>
 
 <script setup lang="ts">
 import { defineAsyncComponent, ref } from "vue";
 import EditorScriptDrawer from "./EditorScriptDrawer.vue";
+import SceneTitle from "./SceneTitle.vue";
 import type {
   ScriptDrawerHandle,
   ScriptDrawerStateChange,

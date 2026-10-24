@@ -77,7 +77,13 @@
             :placeholder-icon="['fas', 'image']"
             :show-checkbox="false"
             @view="openDetail(item)"
-          ></StandardCard>
+          >
+            <template #title>
+              <SceneTitle
+                :name="item.name || t('verse.listPage.unnamed')"
+              ></SceneTitle>
+            </template>
+          </StandardCard>
         </template>
 
         <template #list-header>
@@ -102,7 +108,9 @@
                 ></font-awesome-icon>
               </div>
             </div>
-            <span class="item-name">{{ item.name || "—" }}</span>
+            <span class="item-name">
+              <SceneTitle :name="item.name || '—'"></SceneTitle>
+            </span>
           </div>
           <div class="col-author">
             {{ item.author?.nickname || item.author?.username || "—" }}
@@ -136,6 +144,9 @@
         @download="handleGoToPage"
         @close="handlePanelClose"
       >
+        <template #name>
+          <SceneTitle :name="currentVerse?.name || ''"></SceneTitle>
+        </template>
         <template #preview>
           <div class="verse-preview">
             <img
@@ -194,6 +205,7 @@
 </template>
 
 <script setup lang="ts">
+import SceneTitle from "@/components/SceneTitle.vue";
 import { vLongPress } from "@/directive/longPress";
 import { logger } from "@/utils/logger";
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";

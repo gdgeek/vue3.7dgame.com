@@ -19,7 +19,9 @@
           :label="String($t(editorLabelKey))"
           :dirty="Boolean(scriptEditor?.hasUnsavedChanges)"
         ></EditorModeTag>
-        <span v-if="title" class="script-drawer-title"> · {{ title }}</span>
+        <span v-if="title" class="script-drawer-title">
+          · <slot name="title" :title="title">{{ title }}</slot>
+        </span>
       </h2>
       <EditorActionGroup
         class="script-drawer-actions"

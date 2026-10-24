@@ -1,6 +1,7 @@
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
 import { logger } from "@/utils/logger";
+import { formatClonedSceneName, formatSceneName } from "@/utils/sceneName";
 import { v4 as uuidv4 } from "uuid";
 import {
   getMeta,
@@ -19,10 +20,7 @@ export function useMetaActions({ refresh }: UseMetaActionsOptions) {
   const { t } = useI18n();
 
   const generateDefaultName = (prefix: string): string => {
-    const now = new Date();
-    const dateStr = now.toISOString().slice(0, 10);
-    const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, "-");
-    return `${prefix}_${dateStr}_${timeStr}`;
+    return formatSceneName(prefix);
   };
 
   const copy = async (id: number, newTitle: string): Promise<void> => {
@@ -77,7 +75,10 @@ export function useMetaActions({ refresh }: UseMetaActionsOptions) {
         {
           confirmButtonText: t("meta.prompt.confirm"),
           cancelButtonText: t("meta.prompt.cancel"),
-          defaultValue: `${item.title}${t("meta.list.copySuffix")}`,
+          defaultValue: formatClonedSceneName(
+            item.title,
+            t("meta.list.copySuffix")
+          ),
         }
       )) as { value: string };
       await copy(item.id, value);

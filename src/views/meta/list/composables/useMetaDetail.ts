@@ -5,6 +5,7 @@ import { Message, MessageBox } from "@/components/Dialog";
 import { logger } from "@/utils/logger";
 import { v4 as uuidv4 } from "uuid";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
+import { formatClonedSceneName } from "@/utils/sceneName";
 import {
   getMeta,
   putMeta,
@@ -152,9 +153,10 @@ export function useMetaDetail({
         {
           confirmButtonText: t("meta.prompt.confirm"),
           cancelButtonText: t("meta.prompt.cancel"),
-          defaultValue: `${currentMeta.value.title}${t(
-            "meta.list.copySuffix"
-          )}`,
+          defaultValue: formatClonedSceneName(
+            currentMeta.value.title,
+            t("meta.list.copySuffix")
+          ),
         }
       )) as { value: string };
       await copy(currentMeta.value.id, value);

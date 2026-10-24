@@ -1,4 +1,4 @@
-export const WORKFLOW_GUIDE_VERSION = "1.7.0";
+export const WORKFLOW_GUIDE_VERSION = "1.9.0";
 export const WORKFLOW_GUIDE_ID = "xrugc-scene-studio";
 export const WORKFLOW_GUIDE_TOOL_NAME = "xrugc_get_workflow_guide";
 
@@ -13,6 +13,11 @@ export const WORKFLOW_GUIDE_TOPICS = [
     title: "AI 创作与工程恢复",
     description:
       "对象创建、封面素材、依赖影响、逐步任务、脚本模板和可编辑工程备份恢复",
+  },
+  {
+    id: "naming",
+    title: "场景名称与日期格式",
+    description: "统一日期后缀、显式时区、保留业务日期及格式化与创建的边界",
   },
   {
     id: "editor-authoring",

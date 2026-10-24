@@ -145,6 +145,25 @@ afterEach(() => {
   wrapper.unmount();
 });
 describe("authoring app adapter", () => {
+  it("registers the pure scene formatter on list pages without requiring login", async () => {
+    state.user.userInfo = null;
+    state.token.mockReturnValue("");
+    await flushPromises();
+    expect(state.tools.map((tool) => tool.name)).toContain(
+      "xrugc_format_scene_name"
+    );
+    expect(
+      await call("format_scene_name", {
+        baseName: "本地场景",
+        timestamp: "2026-10-24T13:00:05+08:00",
+        timeZone: "Asia/Shanghai",
+      })
+    ).toMatchObject({ name: "本地场景_2026-10-24_13-00-05" });
+    expect(state.postVerse).not.toHaveBeenCalled();
+    expect(state.postMeta).not.toHaveBeenCalled();
+    expect(state.confirm).not.toHaveBeenCalled();
+  });
+
   it("returns a pollable upload ID before confirmation and guards delayed navigation", async () => {
     let confirm!: () => void;
     state.confirm.mockImplementationOnce(

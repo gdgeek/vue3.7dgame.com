@@ -110,6 +110,40 @@ function setup() {
   };
 }
 describe("global authoring tools", () => {
+  it("provides naming guidance and anonymous formatting without drafts, storage writes or confirmation", async () => {
+    const s = setup();
+    s.changeActor(null);
+    const capabilities = await s.call("get_authoring_capabilities");
+    expect(capabilities.sceneNaming).toMatchObject({
+      formatterTool: "xrugc_format_scene_name",
+      format: "名称_YYYY-MM-DD_HH-mm-ss",
+      dateSuffixRequired: false,
+    });
+    expect(
+      await s.call("format_scene_name", {
+        baseName: "测试场景",
+        timestamp: "2026-10-24T13:00:05+08:00",
+        timeZone: "Asia/Shanghai",
+      })
+    ).toMatchObject({ name: "测试场景_2026-10-24_13-00-05" });
+    expect(s.d.create).not.toHaveBeenCalled();
+    expect(s.d.confirm).not.toHaveBeenCalled();
+    expect(s.saved.size).toBe(0);
+  });
+
+  it("uses a formatted name unchanged in the existing creation preview", async () => {
+    const s = setup();
+    const formatted = await s.call("format_scene_name", {
+      baseName: "测试场景",
+      timestamp: "2026-10-24T13:00:05+08:00",
+      timeZone: "Asia/Shanghai",
+    });
+    const draft = await s.stage({ name: formatted.name });
+    expect(draft.preview.name).toBe("测试场景_2026-10-24_13-00-05");
+    expect(s.d.create).not.toHaveBeenCalled();
+    expect(s.d.confirm).not.toHaveBeenCalled();
+  });
+
   const recoveryId = "8bfe365e-4faf-47b2-a7fd-cc3b7332b77d";
   const recoveryUuid = "f41e25e2-0fe5-48db-a7a5-7bff772a9a99";
   const evidence = () => ({
