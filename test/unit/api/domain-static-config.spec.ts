@@ -10,6 +10,8 @@ import devXrugcConfig from "../../../public/config/domains/dev.xrugc.com.json";
 import xrugcConfig from "../../../public/config/domains/xrugc.com.json";
 import defaultConfig from "../../../public/config/domains/default.json";
 import xiadingConfig from "../../../public/config/domains/xiading.hxgxonline.com.json";
+import xiadingRokidConfig from "../../../public/config/domains/xiading.cc.json";
+import dXiadingRokidConfig from "../../../public/config/domains/d.xiading.cc.json";
 
 function makeFetch(configs: Record<string, unknown>) {
   return vi.fn(async (input: RequestInfo | URL) => {
@@ -451,6 +453,40 @@ describe("domain-static-config", () => {
       },
     });
   });
+
+  it.each([
+    ["d.xiading.hxgxonline.com", "zh-CN", "xiading.hxgxonline.com", false],
+    ["d.xiading.hxgxonline.com", "zh-TW", "xiading.hxgxonline.com", false],
+    ["d.xiading.cc", "zh-CN", "d.xiading.cc", true],
+    ["d.xiading.cc", "zh-TW", "d.xiading.cc", true],
+  ])(
+    "keeps the %s %s white-label title and footer specific to its brand",
+    async (domain, language, actualDomain, usesRokid) => {
+      vi.stubGlobal(
+        "fetch",
+        makeFetch({
+          "/config/domains/xiading.hxgxonline.com.json": xiadingConfig,
+          "/config/domains/xiading.cc.json": xiadingRokidConfig,
+          "/config/domains/d.xiading.cc.json": dXiadingRokidConfig,
+        })
+      );
+
+      const result = await getStaticDomainLanguage(
+        domain as string,
+        language as string
+      );
+
+      expect(result?.actual_domain).toBe(actualDomain);
+      expect(result?.is_domain_fallback).toBe(domain !== actualDomain);
+      expect(result?.data.title).toBe(
+        usesRokid ? "夏鼎 × Rokid AI/AR教育平台" : "夏鼎AI/AR教育平台"
+      );
+      const links = result?.data.links as { name: string; url: string }[];
+      expect(links.some((link) => link.url === "https://www.rokid.com/")).toBe(
+        usesRokid
+      );
+    }
+  );
 
   it("uses VITE_APP_DEV_DOMAIN_FALLBACK for local domains", () => {
     vi.stubEnv("VITE_APP_DEV_DOMAIN_FALLBACK", "example.com");
