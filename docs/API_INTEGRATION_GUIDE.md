@@ -7,8 +7,8 @@ GET https://{前端域名}/white-label/
 Accept: application/json
 ```
 
-例如 `https://d.xiading.cc/white-label/` 会按照请求 Host 匹配
-`xiading.cc`，并直接返回该站点的配置对象。响应不是 API envelope，外层没有
+例如 `https://d.xiading.cc/white-label/` 会按照请求 Host 精确匹配
+`d.xiading.cc.json`，并直接返回该站点的独立配置对象。响应不是 API envelope，外层没有
 `success`、`data` 或 `schemaVersion`。
 
 ## 标准格式
@@ -134,9 +134,10 @@ cyber-tech、`4` edu-friendly、`5` neo-brutalism、`6` minimal-pure。
 2. 从左向右逐级查找父域名；
 3. `default.json`。
 
-例如 `d.xiading.cc` 会先查找 `d.xiading.cc`，再匹配
-`xiading.cc`。这个接口始终返回一份完整的原始配置，不额外返回“实际匹配域名”
-等元数据。
+当前 `d.xiading.cc` 精确匹配独立的 `d.xiading.cc.json`；该文件初始沿用
+`xiading.cc.json` 的联合品牌内容，后续可单独维护。未配置的子域名（如
+`foo.xiading.cc`）会回退匹配 `xiading.cc.json`。这个接口始终返回一份完整的
+原始配置，不额外返回“实际匹配域名”等元数据。
 
 功能开关使用匹配到的整份域名配置，不会逐字段继承父域名或 `default` 的
 开关。例如 `d.xrugc.com` 匹配 `xrugc.com.json`，该配置显式关闭体素；
