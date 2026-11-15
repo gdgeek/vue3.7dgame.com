@@ -124,6 +124,7 @@ export default {
       title: "场景",
       selfGenerated: "自作",
       allScenes: "すべてのシーン",
+      organizationScenes: "組織のシーン",
       systemRecommendation: "システム推薦",
       shareWithFriends: "友達と共有",
       viewTitle: "編集",

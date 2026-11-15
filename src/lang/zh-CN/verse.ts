@@ -136,6 +136,11 @@ export default {
       cancelInfo: "已取消",
       unnamed: "未命名",
     },
+    organizationPage: {
+      subtitle:
+        "查看所在组织成员创建的全部场景，包括私有场景。此入口仅供查看。",
+      viewScene: "查看场景",
+    },
     publicPage: {
       examplesTitle: "场景示例",
       examplesSubtitle:

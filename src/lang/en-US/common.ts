@@ -202,6 +202,7 @@ export default {
     scene: "Scene",
     selfCreated: "My Scenes",
     allScenes: "All Scenes",
+    organizationScenes: "Organization Scenes",
     systemRecommend: "Recommended",
     teacherManagement: "Teacher Management",
     studentManagement: "Student Management",

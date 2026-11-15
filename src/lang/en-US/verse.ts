@@ -145,6 +145,11 @@ export default {
       cancelInfo: "Cancelled",
       unnamed: "Untitled",
     },
+    organizationPage: {
+      subtitle:
+        "View all scenes created by members of your organizations, including private scenes. This view is read-only.",
+      viewScene: "View Scene",
+    },
     publicPage: {
       examplesTitle: "Scene Examples",
       examplesSubtitle:

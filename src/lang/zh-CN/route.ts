@@ -124,6 +124,7 @@ export default {
       title: "场景",
       selfGenerated: "自己创造",
       allScenes: "所有场景",
+      organizationScenes: "组织场景",
       systemRecommendation: "系统推荐",
       shareWithFriends: "朋友分享",
       viewTitle: "编辑",

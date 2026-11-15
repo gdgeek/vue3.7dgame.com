@@ -74,7 +74,11 @@ const mockUpdateRoutes = vi.fn();
 const mockFetchDomainInfo = vi.fn(async () => {});
 const mockGetUserInfo = vi.fn(async () => {});
 const mockUserStore = reactive({
-  userInfo: null as { id: number; roles: string[] } | null,
+  userInfo: null as {
+    id: number;
+    roles: string[];
+    organizations?: { id: number }[];
+  } | null,
   getUserInfo: mockGetUserInfo,
 });
 const mockDomainStore = reactive({
@@ -415,6 +419,7 @@ describe("App.vue route transition key", () => {
 
     expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, ["user"], 7, {
       voxelEnabled: false,
+      organizations: undefined,
     });
     expect(mockUpdateRoutes).toHaveBeenCalledTimes(1);
 
@@ -423,6 +428,7 @@ describe("App.vue route transition key", () => {
 
     expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, ["user"], 7, {
       voxelEnabled: true,
+      organizations: undefined,
     });
     expect(mockUpdateRoutes).toHaveBeenCalledTimes(2);
 
@@ -431,6 +437,7 @@ describe("App.vue route transition key", () => {
 
     expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, ["user"], 7, {
       voxelEnabled: false,
+      organizations: undefined,
     });
     expect(mockUpdateRoutes).toHaveBeenCalledTimes(3);
   });
@@ -441,6 +448,7 @@ describe("App.vue route transition key", () => {
 
     expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, [], 0, {
       voxelEnabled: true,
+      organizations: undefined,
     });
 
     mockUserStore.userInfo = { id: 7, roles: ["user"] };
@@ -448,6 +456,7 @@ describe("App.vue route transition key", () => {
 
     expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, ["user"], 7, {
       voxelEnabled: true,
+      organizations: undefined,
     });
 
     mockUserStore.userInfo = null;
@@ -455,9 +464,30 @@ describe("App.vue route transition key", () => {
 
     expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, [], 0, {
       voxelEnabled: true,
+      organizations: undefined,
     });
     expect(mockUpdateRoutes).toHaveBeenCalledTimes(3);
   });
+
+  it.each(["manager", "admin"])(
+    "recomputes %s organization scene access when membership arrives or is removed",
+    async (role) => {
+      mockUserStore.userInfo = { id: 7, roles: [role], organizations: [] };
+      await mountApp();
+      mockUserStore.userInfo.organizations = [{ id: 3 }];
+      await flushAll();
+      expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, [role], 7, {
+        voxelEnabled: false,
+        organizations: [{ id: 3 }],
+      });
+      mockUserStore.userInfo.organizations = [];
+      await flushAll();
+      expect(mockUpdateAbility).toHaveBeenLastCalledWith({}, [role], 7, {
+        voxelEnabled: false,
+        organizations: [],
+      });
+    }
+  );
 
   it("refreshes an expired access token before requesting user info", async () => {
     mockAuthClient.getAccessToken.mockReturnValue("access-token");

@@ -43,7 +43,7 @@ export const buildVerseEditorInitConfig = ({
   user,
 }: VerseEditorInitConfigInput): VerseEditorInitConfig => ({
   id,
-  data: verse,
+  data: saveable ? verse : { ...verse, editable: false },
   saveable,
   user,
 });

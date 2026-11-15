@@ -39,6 +39,19 @@ export const verseRoutes: RouteRecordRaw = {
       },
     },
     {
+      path: "/verse/organization",
+      component: () => import("@/views/meta-verse/public.vue"),
+      props: { scope: "organization" },
+      name: "VerseOrganization",
+      meta: {
+        title: "project.organizationScenes",
+        icon: "cascader",
+        hidden: true,
+        roles: ["manager", "admin"],
+        requiresOrganization: true,
+      },
+    },
+    {
       path: "/verse/public",
       component: () => import("@/views/meta-verse/public.vue"),
       name: "VersePublic",

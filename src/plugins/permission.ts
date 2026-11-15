@@ -6,11 +6,17 @@ import authClient from "@/services/auth/authClient";
 const router = useRouter();
 import { useUserStore } from "@/store";
 import { useDomainStore } from "@/store/modules/domain";
+import {
+  canViewOrganizationScenes,
+  type OrganizationSceneUser,
+} from "@/utils/organizationSceneAccess";
 
-type RouteAccessUser = {
-  roles?: string[] | null;
-  perms?: string[] | null;
-} | null;
+type RouteAccessUser =
+  | (NonNullable<OrganizationSceneUser> & {
+      roles?: string[] | null;
+      perms?: string[] | null;
+    })
+  | null;
 
 const ROUTE_CAPABILITY_ROLES: Readonly<Record<string, readonly string[]>> = {
   "platform.users.manage": ["admin", "root"],
@@ -120,7 +126,11 @@ export function setupPermission() {
               )
             : [];
 
-          if (requiredCapabilities.length > 0 || requiredRoles.length > 0) {
+          if (
+            requiredCapabilities.length > 0 ||
+            requiredRoles.length > 0 ||
+            to.meta.requiresOrganization === true
+          ) {
             const userStore = useUserStore();
             let userInfo = userStore.userInfo;
 
@@ -140,7 +150,11 @@ export function setupPermission() {
                 ? hasRouteCapabilityAccess(userInfo, requiredCapabilities)
                 : hasRouteRoleAccess(userInfo, requiredRoles);
 
-            if (!hasAccess) {
+            if (
+              !hasAccess ||
+              (to.meta.requiresOrganization === true &&
+                !canViewOrganizationScenes(userInfo))
+            ) {
               next("/401");
               NProgress.done();
               return;

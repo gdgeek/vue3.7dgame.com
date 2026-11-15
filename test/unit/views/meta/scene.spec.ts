@@ -5,6 +5,7 @@ const mockRoute = reactive({
   query: {
     id: "1",
     title: "test-scene",
+    scope: undefined as string | undefined,
   },
 });
 
@@ -541,6 +542,7 @@ describe("views/meta/scene.vue", () => {
     vi.useFakeTimers();
     mockRoute.query.id = "1";
     mockRoute.query.title = "test-scene";
+    mockRoute.query.scope = undefined;
     mockPush.mockReset();
     mockPostStandardMessage.mockReset();
     mockPostStandardMessage.mockReturnValue("init-request");
@@ -791,6 +793,101 @@ describe("views/meta/scene.vue", () => {
       expect.objectContaining({ expectedRevision: scriptRevision })
     );
     expect(mockGetVerse).toHaveBeenCalledOnce(); // initial load; no preparation refetch
+  });
+
+  describe("organization scene viewing", () => {
+    it("initializes an owned scene as read only and blocks script and scene writes", async () => {
+      mockRoute.query.scope = "organization";
+      const registry = registerTools();
+      const view = await mountSceneView("verse");
+      sendReady("organization-document");
+      await flushAsync();
+      await finishEditorLoading();
+
+      expect(initCalls()[0][1].config).toMatchObject({
+        saveable: false,
+        data: { id: 1, editable: false },
+      });
+      expect(view.el.querySelector(".verse-script-drawer-stub")).toBeNull();
+      await expect(
+        registry.get("xrugc_open_scene_script_editor")!.execute({})
+      ).resolves.toMatchObject({ isError: true });
+      await expect(
+        view.persistSceneMutation({ verse: makeMetaResponse(1).data.data })
+      ).rejects.toThrow("当前场景仅供查看");
+      expect(mockDrawerOpen).not.toHaveBeenCalled();
+      expect(mockPutVerse).not.toHaveBeenCalled();
+
+      const toolbar = mockRegisterToolbar.mock.calls.at(-1)![1];
+      toolbar.onSave();
+      expect(toolbar.onOpen).toBeNull();
+      expect(toolbar.onOpenScript).toBeNull();
+      expect(toolbar.onOpenPublications).toBeNull();
+      expect(view.el.querySelector(".history-actions")).toBeNull();
+      expect(mockConfirmEditorSave).not.toHaveBeenCalled();
+
+      for (const event of [
+        "edit-meta",
+        "upload-cover",
+        "release-verse",
+        "goto",
+      ]) {
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: view.el.querySelector("iframe")?.contentWindow,
+            origin: "https://editor.example.test",
+            data: {
+              type: "EVENT",
+              payload: {
+                event,
+                meta_id: 12,
+                target: "blockly.js",
+                imageData: "invalid",
+              },
+            },
+          })
+        );
+      }
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          source: view.el.querySelector("iframe")?.contentWindow,
+          origin: "https://editor.example.test",
+          data: {
+            type: "RESPONSE",
+            payload: {
+              action: "save-before-leave",
+              verse: makeMetaResponse(1).data.data,
+            },
+          },
+        })
+      );
+      await flushAsync();
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockDrawerOpen).not.toHaveBeenCalled();
+      expect(mockPutVerse).not.toHaveBeenCalled();
+      expect(mockDirty.value).toBe(false);
+    });
+
+    it("reloads the same scene when switching between personal and organization views", async () => {
+      const view = await mountSceneView("verse");
+      sendReady("personal-document");
+      await flushAsync();
+      expect(initCalls()[0][1].config.saveable).toBe(true);
+      const personalFrame = view.el.querySelector("iframe");
+
+      mockRoute.query.scope = "organization";
+      await flushAsync();
+      expect(view.el.querySelector("iframe")).not.toBe(personalFrame);
+      sendReady("organization-document");
+      await flushAsync();
+      expect(initCalls().at(-1)![1].config.saveable).toBe(false);
+
+      mockRoute.query.scope = undefined;
+      await flushAsync();
+      sendReady("personal-document-again");
+      await flushAsync();
+      expect(initCalls().at(-1)![1].config.saveable).toBe(true);
+    });
   });
 
   describe("entity script drawer host", () => {

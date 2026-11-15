@@ -137,6 +137,7 @@ export default {
     scene: "ฉาก",
     selfCreated: "สร้างเอง",
     allScenes: "ฉากทั้งหมด",
+    organizationScenes: "ฉากขององค์กร",
     systemRecommend: "แนะนำโดยระบบ",
     teacherManagement: "การจัดการครู",
     studentManagement: "การจัดการนักเรียน",
