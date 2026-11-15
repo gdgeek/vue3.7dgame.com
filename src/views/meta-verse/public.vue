@@ -12,7 +12,13 @@
               v-model="searchValue"
               type="text"
               class="hero-search-input"
-              :placeholder="t('verse.publicPage.searchExamples')"
+              :placeholder="
+                t(
+                  isOrganization
+                    ? 'verse.listPage.searchScenes'
+                    : 'verse.publicPage.searchExamples'
+                )
+              "
               @keyup.enter="handleHeroSearch"
             />
           </div>
@@ -47,7 +53,13 @@
           </div>
 
           <p class="hero-subtitle">
-            {{ t("verse.publicPage.examplesSubtitle") }}
+            {{
+              t(
+                isOrganization
+                  ? "verse.organizationPage.subtitle"
+                  : "verse.publicPage.examplesSubtitle"
+              )
+            }}
           </p>
         </div>
       </div>
@@ -58,14 +70,14 @@
         :view-mode="viewMode"
         :loading="loading"
         :card-gutter="denseResourceCardGutter"
-        long-press-enabled
+        :long-press-enabled="!isOrganization"
         @row-click="openDetail"
         @row-long-press="goToScene"
       >
         <template #grid-card="{ item }">
           <StandardCard
             class="example-card"
-            v-long-press="() => goToScene(item)"
+            v-long-press="isOrganization ? undefined : () => goToScene(item)"
             :image="item.image?.url"
             :title="item.name || t('verse.listPage.unnamed')"
             :description="item.description"
@@ -140,7 +152,13 @@
         :editable="false"
         action-layout="stacked"
         :secondary-action="false"
-        :download-text="t('verse.publicPage.viewExample')"
+        :download-text="
+          t(
+            isOrganization
+              ? 'verse.organizationPage.viewScene'
+              : 'verse.publicPage.viewExample'
+          )
+        "
         @download="handleGoToPage"
         @close="handlePanelClose"
       >
@@ -218,7 +236,12 @@ import {
   DetailPanel,
 } from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { getPublic, getVerse } from "@/api/v1/verse";
+import {
+  getPublic,
+  getVerse,
+  getOrganizationVerses,
+  getOrganizationVerse,
+} from "@/api/v1/verse";
 import type { VerseData } from "@/api/v1/verse";
 import { getTags } from "@/api/v1/tags";
 import { usePageData } from "@/composables/usePageData";
@@ -229,6 +252,13 @@ import { denseResourceCardGutter } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
 const router = useRouter();
+const props = withDefaults(
+  defineProps<{ scope?: "public" | "organization" }>(),
+  {
+    scope: "public",
+  }
+);
+const isOrganization = computed(() => props.scope === "organization");
 
 const searchValue = ref("");
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -266,7 +296,7 @@ const {
   pagination,
   viewMode,
   totalPages,
-  refresh: _refresh,
+  refresh,
   handleSearch,
   handleSortChange: _handleSortChange,
   handlePageChange,
@@ -274,7 +304,7 @@ const {
   handleTagsChange,
 } = usePageData({
   fetchFn: async (params) =>
-    await getPublic({
+    await (isOrganization.value ? getOrganizationVerses : getPublic)({
       sort: params.sort,
       search: params.search,
       page: params.page,
@@ -323,6 +353,7 @@ const formatItemDate = (dateStr?: string) => {
 const detailVisible = ref(false);
 const detailLoading = ref(false);
 const currentVerse = ref<VerseData | null>(null);
+let detailRequest = 0;
 
 const detailProperties = computed(() => {
   if (!currentVerse.value) return [];
@@ -345,21 +376,36 @@ const detailProperties = computed(() => {
 });
 
 const openDetail = async (item: VerseData) => {
+  const request = ++detailRequest;
   detailVisible.value = true;
   detailLoading.value = true;
+  currentVerse.value = null;
   try {
-    const response = await getVerse(item.id, "image,author,tags");
+    const response = await (
+      isOrganization.value ? getOrganizationVerse : getVerse
+    )(item.id, "image,author,tags");
+    if (request !== detailRequest) return;
     currentVerse.value = response.data;
   } catch (err) {
-    ElMessage.error(String(err));
+    if (request === detailRequest) ElMessage.error(String(err));
   } finally {
-    detailLoading.value = false;
+    if (request === detailRequest) detailLoading.value = false;
   }
 };
 
 const handlePanelClose = () => {
+  ++detailRequest;
+  detailVisible.value = false;
+  detailLoading.value = false;
   currentVerse.value = null;
 };
+
+watch(isOrganization, () => {
+  handlePanelClose();
+  items.value = [];
+  pagination.current = 1;
+  void refresh();
+});
 
 const handleGoToPage = () => {
   if (currentVerse.value) {
@@ -381,6 +427,7 @@ watch(searchValue, (value) => {
 });
 
 onBeforeUnmount(() => {
+  ++detailRequest;
   if (searchTimer) {
     clearTimeout(searchTimer);
     searchTimer = null;
@@ -393,7 +440,14 @@ const goToScene = (item: VerseData) => {
       name: item.name || t("verse.listPage.unnamed"),
     })
   );
-  router.push({ path: "/verse/scene", query: { id: item.id, title } });
+  router.push({
+    path: "/verse/scene",
+    query: {
+      id: item.id,
+      title,
+      ...(isOrganization.value ? { scope: "organization" } : {}),
+    },
+  });
 };
 </script>
 

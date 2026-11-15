@@ -67,6 +67,11 @@ export default {
       cancelInfo: "キャンセルしました",
       unnamed: "無題",
     },
+    organizationPage: {
+      subtitle:
+        "所属組織のメンバーが作成したすべてのシーンを、非公開のものも含めて閲覧できます。閲覧専用です。",
+      viewScene: "シーンを見る",
+    },
     publicPage: {
       examplesTitle: "シーン例",
       examplesSubtitle:

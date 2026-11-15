@@ -1,5 +1,9 @@
 // src/utils/ability.ts
 import { defineAbility } from "@casl/ability";
+import {
+  canViewOrganizationScenes,
+  type OrganizationSceneUser,
+} from "./organizationSceneAccess";
 
 export class AbilityRouter {
   constructor(public path: string) {}
@@ -50,7 +54,10 @@ export function UpdateAbility(
   ability: { update: (rules: unknown[]) => void },
   roles: string[] | null,
   userId: number,
-  options: { voxelEnabled?: boolean } = {}
+  options: {
+    voxelEnabled?: boolean;
+    organizations?: NonNullable<OrganizationSceneUser>["organizations"];
+  } = {}
 ) {
   const newAbility = defineAbility((can) => {
     if (!roles) {
@@ -102,7 +109,7 @@ export function UpdateAbility(
         "/site/logout",
         "/resource",
         /^\/home(\/|$)/,
-        /^\/verse(?!\/all(?:\/|$))(\/|$)/,
+        /^\/verse(?!\/(?:all|organization)(?:\/|$))(\/|$)/,
         /^\/meta(\/|$)/,
         /^\/resource\/polygen(\/|$)/,
         /^\/resource\/audio(\/|$)/,
@@ -117,6 +124,12 @@ export function UpdateAbility(
       can("manager", "all");
       // can("phototype", "all");
       // menu = menu.concat([/^\/phototype(\/|$)/]);
+    }
+
+    if (
+      canViewOrganizationScenes({ roles, organizations: options.organizations })
+    ) {
+      menu.push(/^\/verse\/organization(\/|$)/);
     }
 
     if (roles.some((role) => admin.includes(role))) {

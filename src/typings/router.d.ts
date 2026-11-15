@@ -71,6 +71,9 @@ declare module "vue-router" {
      */
     roles?: string[];
 
+    /** Requires manager or admin role and current organization membership. */
+    requiresOrganization?: boolean;
+
     /**
      * 访问路由所需的稳定能力编码；所有能力都必须满足。
      * 角色到能力的映射集中维护在全局路由守卫中。

@@ -66,6 +66,11 @@ export default {
       cancelInfo: "已取消",
       unnamed: "未命名",
     },
+    organizationPage: {
+      subtitle:
+        "查看所屬組織成員建立的所有場景，包括私人場景。此入口僅供檢視。",
+      viewScene: "查看場景",
+    },
     publicPage: {
       examplesTitle: "場景示例",
       examplesSubtitle:

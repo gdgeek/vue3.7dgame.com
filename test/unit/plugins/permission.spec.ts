@@ -3,6 +3,7 @@
  * 覆盖：setupPermission() 导航守卫逻辑、hasAuth() 权限检查
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { verseRoutes } from "@/router/modules/verse";
 
 // ── vi.hoisted 变量（在 vi.mock 工厂函数中引用，必须提前 hoist）──────────
 const mockGetAccessToken = vi.hoisted(() => vi.fn(() => null as string | null));
@@ -44,7 +45,11 @@ vi.mock("@/store/modules/domain", () => ({
 }));
 
 // mockUserInfo 由各 describe 块在 beforeEach 中赋值
-let mockUserInfo: { roles?: string[]; perms?: string[] } | null = null;
+let mockUserInfo: {
+  roles?: string[];
+  perms?: string[];
+  organizations?: { id: number }[];
+} | null = null;
 vi.mock("@/store", () => ({
   useUserStore: () => ({
     userInfo: mockUserInfo,
@@ -406,6 +411,56 @@ describe("beforeEach 守卫 — 有 token 时", () => {
     );
     expect(next).toHaveBeenCalledWith();
   });
+
+  it.each([
+    { roles: ["manager"], organizations: [{ id: 3 }], allowed: true },
+    { roles: ["manager"], organizations: [], allowed: false },
+    { roles: ["manager"], organizations: undefined, allowed: false },
+    { roles: ["admin"], organizations: [{ id: 3 }], allowed: true },
+    { roles: ["admin"], organizations: [], allowed: false },
+    { roles: ["admin"], organizations: undefined, allowed: false },
+    { roles: ["admin"], organizations: [{ id: 0 }], allowed: false },
+    { roles: ["user"], organizations: [{ id: 3 }], allowed: false },
+    { roles: ["root"], organizations: [{ id: 3 }], allowed: false },
+  ])(
+    "checks organization membership for direct scene list access: $roles / $organizations",
+    async ({ roles, organizations, allowed }) => {
+      mockUserInfo = { roles, organizations };
+      const route = verseRoutes.children!.find(
+        (child) => child.path === "/verse/organization"
+      )!;
+      const next = vi.fn();
+      await capturedBeforeEach!(
+        makeTo({ path: route.path, meta: { ...route.meta } }),
+        makeFrom(),
+        next
+      );
+      if (allowed) expect(next).toHaveBeenCalledWith();
+      else expect(next).toHaveBeenCalledWith("/401");
+    }
+  );
+
+  it.each(["manager", "admin"])(
+    "loads %s membership before opening a direct organization URL",
+    async (role) => {
+      mockUserInfo = null;
+      mockGetUserInfo.mockResolvedValue({
+        roles: [role],
+        organizations: [{ id: 3 }],
+      });
+      const route = verseRoutes.children!.find(
+        (child) => child.path === "/verse/organization"
+      )!;
+      const next = vi.fn();
+      await capturedBeforeEach!(
+        makeTo({ path: route.path, meta: { ...route.meta } }),
+        makeFrom(),
+        next
+      );
+      expect(mockGetUserInfo).toHaveBeenCalledOnce();
+      expect(next).toHaveBeenCalledWith();
+    }
+  );
 
   it("用户信息未加载时仅加载身份后再做路由授权", async () => {
     mockUserInfo = null;

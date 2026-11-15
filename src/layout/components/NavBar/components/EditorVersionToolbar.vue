@@ -148,18 +148,24 @@ const actions = computed<EditorAction[]>(() => [
         },
       ]
     : []),
-  {
-    id: "versions",
-    label: t(
-      isSceneEditor.value ? "verse.toolbar.history" : "common.scriptDraft.entry"
-    ),
-    tooltip: t("common.scriptDraft.entry"),
-    icon: faClockRotateLeft,
-    class: "toolbar-entry-btn",
-    onClick: openDialog,
-    loading: loadingState.value.loading,
-    disabled: loadingState.value.blocked,
-  },
+  ...(editorVersionToolbarState.onOpen
+    ? [
+        {
+          id: "versions",
+          label: t(
+            isSceneEditor.value
+              ? "verse.toolbar.history"
+              : "common.scriptDraft.entry"
+          ),
+          tooltip: t("common.scriptDraft.entry"),
+          icon: faClockRotateLeft,
+          class: "toolbar-entry-btn",
+          onClick: openDialog,
+          loading: loadingState.value.loading,
+          disabled: loadingState.value.blocked,
+        },
+      ]
+    : []),
   ...(editorVersionToolbarState.onOpenScript
     ? [
         {

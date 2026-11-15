@@ -184,6 +184,28 @@ describe("SidebarLeft plugin auth", () => {
   });
 
   it.each([false, true])(
+    "shows and revokes organization scenes in both menu layouts, collapsed=%s",
+    async (collapsed) => {
+      const organizationAccess = reactive({ value: true });
+      mockAbilityCan.mockImplementation(
+        (action, subject) =>
+          (subject.path === "/verse/organization" &&
+            organizationAccess.value) ||
+          action === "user"
+      );
+      const { el } = await mount(collapsed);
+      expect(
+        el.querySelectorAll('[data-to="/verse/organization"]')
+      ).toHaveLength(2);
+      organizationAccess.value = false;
+      await nextTick();
+      expect(
+        el.querySelectorAll('[data-to="/verse/organization"]')
+      ).toHaveLength(0);
+    }
+  );
+
+  it.each([false, true])(
     "shows both all-scenes menu entries only while root is present (collapsed=%s)",
     async (collapsed) => {
       const rootAccess = reactive({ value: true });

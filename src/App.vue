@@ -105,6 +105,7 @@ watch(
     const currentUser = userInfo?.id ? userInfo : null;
     UpdateAbility(ability, currentUser?.roles ?? [], currentUser?.id ?? 0, {
       voxelEnabled,
+      organizations: currentUser?.organizations,
     });
     UpdateRoutes(ability);
   },

@@ -29,6 +29,7 @@
       </el-main>
     </el-container>
     <VerseScriptDrawer
+      v-if="!isOrganizationView"
       ref="scriptDrawer"
       :verse-id="id"
       :title="verse?.name || ''"
@@ -39,6 +40,7 @@
       @state-change="handleScriptStateChange"
     ></VerseScriptDrawer>
     <PublicationHistoryDialog
+      v-if="!isOrganizationView"
       v-model="publicationHistoryVisible"
       :scene-id="id"
       :actor-id="userStore.userInfo?.id"
@@ -192,7 +194,10 @@ const route = useRoute();
 const router = useRouter();
 const editor = ref<HTMLIFrameElement>();
 import qs from "querystringify";
-const saveable = ref(false);
+const isOrganizationView = computed(() => route.query.scope === "organization");
+const saveable = computed(
+  () => !isOrganizationView.value && Boolean(verse.value?.editable)
+);
 let unsavedCheckPollingTimer: number | null = null;
 const editorFrameKey = ref(0);
 let webMcpLifecycle: AbortController | null = null;
@@ -220,21 +225,28 @@ const activateToolbar = () => {
   registerToolbar(toolbarOwner, {
     status: toolbarStatus.value,
     getLoadingState: editorLoading.getState,
-    onOpen: () => {
-      if (editorLoading.ready.value) openVersionDialog();
-    },
+    onOpen: isOrganizationView.value
+      ? null
+      : () => {
+          if (editorLoading.ready.value) openVersionDialog();
+        },
     onRunPreview: () => {
       if (editorLoading.ready.value) runSceneRuntimePreview();
     },
     onSave: () => {
-      if (editorLoading.ready.value) void requestManualSceneSave();
+      if (editorLoading.ready.value && saveable.value)
+        void requestManualSceneSave();
     },
-    onOpenScript: () => {
-      if (editorLoading.ready.value) void openScriptDrawer();
-    },
-    onOpenPublications: () => {
-      publicationHistoryVisible.value = true;
-    },
+    onOpenScript: isOrganizationView.value
+      ? null
+      : () => {
+          if (editorLoading.ready.value) void openScriptDrawer();
+        },
+    onOpenPublications: isOrganizationView.value
+      ? null
+      : () => {
+          publicationHistoryVisible.value = true;
+        },
   });
 };
 const toolbarStatus = computed<EditorToolbarStatus>(() => {
@@ -292,6 +304,7 @@ const scriptPersistence = useScriptPersistenceGuard(() => {
 const handleScriptStateChange = (change: ScriptDrawerStateChange) => {
   if (
     !sceneViewActive ||
+    !saveable.value ||
     !scriptDrawerActive.value ||
     change.editorKey !== id.value
   )
@@ -302,6 +315,7 @@ const handleScriptStateChange = (change: ScriptDrawerStateChange) => {
 const handleScriptSaved = (result: unknown) => {
   if (
     !sceneViewActive ||
+    !saveable.value ||
     !scriptDrawerActive.value ||
     verse.value?.id !== id.value
   )
@@ -322,6 +336,7 @@ const assertScriptPersisted = () => {
   }
 };
 const saveSceneBeforeScriptPublish = async () => {
+  if (!saveable.value) throw new Error("当前场景仅供查看");
   const ownerId = id.value;
   const ownerSession = getHostSessionId();
   const assertOwner = () => {
@@ -351,6 +366,7 @@ const openScriptDrawerOrThrow = (assertActive: () => void = () => {}) => {
   const ownerSession = getHostSessionId();
   const assertOwner = () => {
     assertActive();
+    if (isOrganizationView.value) throw new Error("组织场景仅供查看");
     if (
       !sceneViewActive ||
       ownerId !== id.value ||
@@ -585,7 +601,6 @@ const refresh = async () => {
     const response = await getVerse(ticket.owner, VERSE_SCENE_EXPAND);
     if (!editorInitialization.isCurrent(ticket)) return;
     verse.value = response.data;
-    saveable.value = verse.value ? verse.value.editable : false;
     if (verse.value) pushVerseToEditor(verse.value, ticket);
   } catch (error) {
     editorInitialization.fail(ticket);
@@ -892,6 +907,7 @@ const addSceneDraftVersion = (
 };
 
 const openVersionDialog = () => {
+  if (isOrganizationView.value) return;
   versionDialogVisible.value = true;
 };
 
@@ -907,6 +923,7 @@ const clearDraftHistory = () => {
 };
 
 const restoreDraftVersion = (draftId: string) => {
+  if (!saveable.value) return;
   const target = draftVersions.value.find((draft) => draft.id === draftId);
   if (!target || !verse.value) return;
   const payload = isRecord(target.blocklyData)
@@ -945,7 +962,7 @@ const restartAutoSaveTimer = () => {
       return;
     }
     if (isSavingVersion.value || !editorLoading.ready.value) return;
-    if (!verse.value?.editable) return;
+    if (!saveable.value) return;
     try {
       await requestSceneSave("auto");
     } catch (error) {
@@ -1098,6 +1115,7 @@ const setupPrefab = async ({ meta_id, data, uuid }: PrefabSetupPayload) => {
 
 // 添加实体
 const addMeta = () => {
+  if (!saveable.value) return;
   metaDialogRef.value?.open(id.value);
 };
 
@@ -1378,6 +1396,7 @@ const countEntityRootNodes = (data: unknown) => {
 
 const getSceneServerModel = () => verse.value;
 const saveScenePayload = async (sceneData: JsonValue, write?: WriteOptions) => {
+  if (!saveable.value) throw new Error("当前场景仅供查看");
   const scene = verse.value;
   const ownerId = id.value;
   const ownerSession = getHostSessionId();
@@ -1405,6 +1424,7 @@ const persistWebMcpSceneMutation = async (
   messages: { success: string; failure: string },
   preview: object
 ) => {
+  if (!saveable.value) throw new Error("当前场景仅供查看");
   const ownerId = id.value;
   const ownerSession = getHostSessionId();
   const ownerModel = verse.value;
@@ -1626,6 +1646,13 @@ const handleMessage = async (e: MessageEvent) => {
         break;
       }
 
+      if (
+        isOrganizationView.value &&
+        (action === "save" || action === "save-before-leave")
+      ) {
+        resolveLeaveSave(false);
+        break;
+      }
       if (action === "save") {
         // The iframe updates its baseline when emitting save. Keep its snapshot
         // until persistence succeeds, including when confirmation is cancelled.
@@ -1709,6 +1736,7 @@ const handleMessage = async (e: MessageEvent) => {
     }
 
     case "EVENT": {
+      if (isOrganizationView.value) break;
       const event = payload.event as string | undefined;
 
       if (event === "edit-meta") {
@@ -1742,6 +1770,7 @@ const handleMessage = async (e: MessageEvent) => {
 
 // 处理上传封面图片
 const handleUploadCover = async (data: unknown) => {
+  if (!saveable.value) return;
   try {
     if (!isCoverUploadPayload(data)) {
       ElMessage.error(t("verse.view.sceneEditor.coverUploadError"));
@@ -1839,25 +1868,38 @@ watch(
   { flush: "sync" }
 );
 
-watch(id, (nextId, previousId) => {
-  scriptPersistence.clear();
-  if (!Number.isFinite(nextId) || nextId === previousId) return;
-  webMcpRpc.cancel();
-  webMcpLifecycle?.abort();
-  unityPreview.close();
-  verse.value = null;
-  editorContentReady.value = false;
-  pendingRestorePayload.value = null;
-  isRestoringDraft.value = false;
-  resetUnsavedState();
-  isSavingVersion.value = false;
-  verseMetasWithLuaCodeData.value = undefined;
-  verseMetasWithJsCodeData.value = undefined;
-  editorFrameKey.value += 1;
-  loadSceneDraftState();
-  restartAutoSaveTimer();
-  registerPageWebMcpTools();
-});
+watch(
+  [id, isOrganizationView],
+  ([nextId, nextReadOnly], [previousId, previousReadOnly]) => {
+    if (
+      !Number.isFinite(nextId) ||
+      (nextId === previousId && nextReadOnly === previousReadOnly)
+    )
+      return;
+    scriptPersistence.clear();
+    webMcpRpc.cancel();
+    webMcpLifecycle?.abort();
+    unityPreview.close();
+    verse.value = null;
+    scriptDrawerActive.value = false;
+    scriptSceneData.value = undefined;
+    publicationHistoryVisible.value = false;
+    versionDialogVisible.value = false;
+    editorContentReady.value = false;
+    pendingRestorePayload.value = null;
+    isRestoringDraft.value = false;
+    resetUnsavedState();
+    isSavingVersion.value = false;
+    verseMetasWithLuaCodeData.value = undefined;
+    verseMetasWithJsCodeData.value = undefined;
+    editorFrameKey.value += 1;
+    loadSceneDraftState();
+    restartAutoSaveTimer();
+    activateToolbar();
+    registerPageWebMcpTools();
+  },
+  { flush: "sync" }
+);
 
 // 生命周期钩子
 onMounted(() => {
@@ -2644,11 +2686,13 @@ onBeforeRouteLeave(async (_to, _from, next) => {
   next(canLeave);
 });
 onBeforeRouteUpdate(async (to, from) => {
-  if (to.query.id !== from.query.id) await unityPreview.close();
+  if (to.query.id !== from.query.id || to.query.scope !== from.query.scope)
+    await unityPreview.close();
 });
 
 onBeforeRouteUpdate(async (to, from) => {
-  if (to.query.id === from.query.id) return true;
+  if (to.query.id === from.query.id && to.query.scope === from.query.scope)
+    return true;
   if (!((await scriptDrawer.value?.resolveBeforeLeave()) ?? true)) return false;
   if (!(await resolveUnsavedBeforeLeave())) return false;
   await scriptDrawer.value?.closeAfterNavigation();

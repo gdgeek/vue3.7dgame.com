@@ -124,6 +124,7 @@ export default {
       title: "ฉาก",
       selfGenerated: "สร้างเอง",
       allScenes: "ฉากทั้งหมด",
+      organizationScenes: "ฉากขององค์กร",
       systemRecommendation: "แนะนำโดยระบบ",
       shareWithFriends: "แบ่งปันกับเพื่อน",
       viewTitle: "แก้ไข",

@@ -66,6 +66,11 @@ export default {
       cancelInfo: "ยกเลิกแล้ว",
       unnamed: "ไม่มีชื่อ",
     },
+    organizationPage: {
+      subtitle:
+        "ดูฉากทั้งหมดที่สมาชิกในองค์กรของคุณสร้าง รวมถึงฉากส่วนตัว ดูได้อย่างเดียว",
+      viewScene: "ดูฉาก",
+    },
     publicPage: {
       examplesTitle: "ตัวอย่างฉาก",
       examplesSubtitle:

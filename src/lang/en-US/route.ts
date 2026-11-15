@@ -124,6 +124,7 @@ export default {
       title: "Project",
       selfGenerated: "Owned",
       allScenes: "All Scenes",
+      organizationScenes: "Organization Scenes",
       systemRecommendation: "Open",
       shareWithFriends: "Share",
       viewTitle: "Edit",

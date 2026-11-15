@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, nextTick, ref } from "vue";
-import { getVerse } from "@/api/v1/verse";
+import {
+  getVerse,
+  getPublic,
+  getOrganizationVerse,
+  getOrganizationVerses,
+} from "@/api/v1/verse";
+import { usePageData } from "@/composables/usePageData";
 
 const mockPush = vi.fn();
 const mockHandleSearch = vi.fn();
@@ -32,6 +38,8 @@ vi.mock("@/api/v1/tags", () => ({
 vi.mock("@/api/v1/verse", () => ({
   getPublic: vi.fn(),
   getVerse: vi.fn(),
+  getOrganizationVerses: vi.fn(),
+  getOrganizationVerse: vi.fn(),
 }));
 
 vi.mock("@/composables/usePageData", () => ({
@@ -81,9 +89,12 @@ vi.mock("@/components/StandardPage", async () => ({
     props: {
       modelValue: Boolean,
       editable: { type: Boolean, default: true },
+      showDelete: Boolean,
+      secondaryAction: Boolean,
     },
+    emits: ["download"],
     template:
-      "<div v-if='modelValue' class='detail-panel-stub' :data-editable='String(editable)'><button v-if='editable' class='rename-scene'>Rename</button><slot name='preview' /><slot name='info' /></div>",
+      "<div v-if='modelValue' class='detail-panel-stub' :data-editable='String(editable)' :data-delete='String(showDelete)' :data-secondary='String(secondaryAction)'><button v-if='editable' class='rename-scene'>Rename</button><button class='view-scene' @click=\"$emit('download')\">View</button><slot name='preview' /><slot name='info' /></div>",
   }),
 }));
 
@@ -97,6 +108,12 @@ beforeEach(() => {
   vi.mocked(getVerse).mockResolvedValue({ data: example } as Awaited<
     ReturnType<typeof getVerse>
   >);
+  vi.mocked(getOrganizationVerse).mockReset();
+  vi.mocked(getOrganizationVerse).mockResolvedValue({
+    data: example,
+  } as Awaited<ReturnType<typeof getOrganizationVerse>>);
+  vi.mocked(getPublic).mockClear();
+  vi.mocked(getOrganizationVerses).mockClear();
 });
 
 afterEach(() => {
@@ -108,11 +125,11 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-async function mount() {
+async function mount(scope: "public" | "organization" = "public") {
   const { default: PublicView } = await import("@/views/meta-verse/public.vue");
   const el = document.createElement("div");
   document.body.appendChild(el);
-  const app = createApp(PublicView);
+  const app = createApp(PublicView, { scope });
   app.component("FontAwesomeIcon", { template: "<span />" });
   for (const name of [
     "ElDropdown",
@@ -133,6 +150,55 @@ async function mount() {
 }
 
 describe("views/meta-verse/public.vue", () => {
+  it("selects the organization endpoint with search, category and pagination parameters", async () => {
+    const { el } = await mount("organization");
+    const params = { sort: "-id", search: "classroom", page: 2, tags: [3] };
+    await vi.mocked(usePageData).mock.lastCall![0].fetchFn(params);
+    expect(getOrganizationVerses).toHaveBeenCalledWith({
+      ...params,
+      perPage: 24,
+      expand: "image,author,tags",
+    });
+    expect(getPublic).not.toHaveBeenCalled();
+    expect(el.textContent).toContain("verse.organizationPage.subtitle");
+    expect(
+      el.querySelector<HTMLInputElement>(".hero-search-input")?.placeholder
+    ).toBe("verse.listPage.searchScenes");
+  });
+
+  it.each(["grid", "list"] as const)(
+    "opens organization details and carries read-only scope in %s view",
+    async (mode) => {
+      mockViewMode.value = mode;
+      const { el } = await mount("organization");
+      const card = el.querySelector<HTMLElement>(
+        mode === "grid" ? ".standard-card" : ".list-row"
+      )!;
+      card.click();
+      await nextTick();
+      expect(getOrganizationVerse).toHaveBeenCalledWith(
+        example.id,
+        "image,author,tags"
+      );
+      expect(getVerse).not.toHaveBeenCalled();
+      const panel = el.querySelector(".detail-panel-stub")!;
+      expect(panel.getAttribute("data-editable")).toBe("false");
+      expect(panel.getAttribute("data-delete")).toBe("false");
+      expect(panel.getAttribute("data-secondary")).toBe("false");
+      expect(el.querySelector(".rename-scene")).toBeNull();
+      expect(el.querySelector(".card-action-group")).toBeNull();
+      el.querySelector<HTMLButtonElement>(".view-scene")!.click();
+      expect(mockPush).toHaveBeenCalledWith({
+        path: "/verse/scene",
+        query: {
+          id: example.id,
+          title: expect.any(String),
+          scope: "organization",
+        },
+      });
+    }
+  );
+
   it("uses the loaded image's natural proportions and recalculates the waterfall", async () => {
     const { el } = await mount();
     await nextTick();
