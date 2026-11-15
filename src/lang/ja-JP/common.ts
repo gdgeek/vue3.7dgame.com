@@ -137,6 +137,7 @@ export default {
     scene: "シーン",
     selfCreated: "自分の作成",
     allScenes: "すべてのシーン",
+    organizationScenes: "組織のシーン",
     systemRecommend: "おすすめ",
     teacherManagement: "教師管理",
     studentManagement: "学生管理",

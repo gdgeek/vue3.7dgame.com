@@ -144,6 +144,19 @@ describe("sceneSpace", () => {
     );
   });
 
+  it("keeps a read-only editor from inheriting an owner's editable flag", () => {
+    const config = buildVerseEditorInitConfig({
+      id: baseVerse.id,
+      verse: baseVerse,
+      saveable: false,
+      user: { id: 1, role: "manager" },
+    });
+
+    expect(config.saveable).toBe(false);
+    expect(config.data.editable).toBe(false);
+    expect(baseVerse.editable).toBe(true);
+  });
+
   it("builds a space reference visibility request", () => {
     expect(buildSpaceVisibilityRequest(false)).toEqual({
       action: SPACE_REFERENCE_VISIBILITY_ACTION,

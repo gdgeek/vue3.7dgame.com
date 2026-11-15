@@ -177,5 +177,21 @@ describe("local editor loading", () => {
     expect(onRun).toHaveBeenCalledOnce();
     expect(onVersions).toHaveBeenCalledOnce();
     expect(onScript).toHaveBeenCalledOnce();
+
+    toolbar.registerToolbar("local-loading-test", {
+      getLoadingState: () => state,
+      onRunPreview: onRun,
+      onOpen: null,
+      onOpenScript: null,
+      onOpenPublications: null,
+    });
+    await nextTick();
+    expect(button("common.unityPreview.entry")).not.toBeNull();
+    for (const label of [
+      "common.scriptDraft.entry",
+      "route.project.scriptEditor",
+      "common.publicationHistory.title",
+    ])
+      expect(button(label)).toBeNull();
   });
 });

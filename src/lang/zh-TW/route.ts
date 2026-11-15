@@ -124,6 +124,7 @@ export default {
       title: "場景",
       selfGenerated: "自己創造",
       allScenes: "所有場景",
+      organizationScenes: "組織場景",
       systemRecommendation: "系統推薦",
       shareWithFriends: "朋友分享",
       viewTitle: "編輯",

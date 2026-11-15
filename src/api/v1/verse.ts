@@ -164,6 +164,24 @@ export const getPublic = (params: VersesParams) => {
     method: "get",
   });
 };
+
+/** Read-only scenes created by members of the manager's or admin's organizations. */
+export const getOrganizationVerses = (params: VersesParams) => {
+  return request<VerseData[]>({
+    url: `/v1/verses/organization${qs.stringify(createVerseQueryParams(params), true)}`,
+    method: "get",
+  });
+};
+
+export const getOrganizationVerse = (
+  id: number,
+  expand = "image,author,tags"
+) => {
+  return request<VerseData>({
+    url: `/v1/verses/organization/${id}${qs.stringify({ expand }, true)}`,
+    method: "get",
+  });
+};
 export const getVerses = (params: VersesParams) => {
   const query = createVerseQueryParams(params);
   return request<VerseData[]>({
