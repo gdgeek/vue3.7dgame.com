@@ -42,6 +42,10 @@
             @delete="deleteWindow"
           >
           </MrppInfo>
+          <MediaSubtitleBinding
+            v-if="videoData"
+            :resource="videoData"
+          ></MediaSubtitleBinding>
           <br />
         </el-col>
       </el-row>
@@ -50,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import MediaSubtitleBinding from "@/views/subtitle/MediaSubtitleBinding.vue";
 import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { getVideo, putVideo, deleteVideo } from "@/api/v1/resources/index";

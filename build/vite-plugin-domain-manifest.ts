@@ -37,7 +37,7 @@ const DEFAULT_CONFIG_KEYS = new Set([
   "style",
   "features",
 ]);
-const FEATURE_CONFIG_KEYS = new Set(["voxel"]);
+const FEATURE_CONFIG_KEYS = new Set(["voxel", "subtitle"]);
 const LOCALIZED_CONFIG_KEYS = new Set([
   "author",
   "description",
@@ -72,6 +72,7 @@ export interface StaticDomainDefaultConfig {
   blog?: string;
   features?: {
     voxel?: boolean;
+    subtitle?: boolean;
   };
 }
 
@@ -194,14 +195,13 @@ function validateDefaultConfig(
       value.features,
       FEATURE_CONFIG_KEYS
     );
-    if (
-      "voxel" in value.features &&
-      typeof value.features.voxel !== "boolean"
-    ) {
-      validationError(
-        fileName,
-        'field "default_config.features.voxel" must be a boolean'
-      );
+    for (const key of FEATURE_CONFIG_KEYS) {
+      if (key in value.features && typeof value.features[key] !== "boolean") {
+        validationError(
+          fileName,
+          `field "default_config.features.${key}" must be a boolean`
+        );
+      }
     }
   }
 }
@@ -219,6 +219,9 @@ function canonicalizeDefaultConfig(
           features: {
             ...(typeof value.features.voxel === "boolean"
               ? { voxel: value.features.voxel }
+              : {}),
+            ...(typeof value.features.subtitle === "boolean"
+              ? { subtitle: value.features.subtitle }
               : {}),
           },
         }

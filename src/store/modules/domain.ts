@@ -105,6 +105,7 @@ export const useDomainStore = defineStore("domain", {
     /** 域名自定义图标 */
     icon: (state) => state.defaultInfo?.icon || "",
     /** 体素功能必须由当前白牌显式开启。 */
+    subtitleEnabled: (state) => state.defaultInfo?.features?.subtitle === true,
     voxelEnabled: (state) => state.defaultInfo?.features?.voxel === true,
     isLoaded: (state) =>
       state.defaultInfo !== null && state.langInfo !== null && !state.loading,

@@ -11,6 +11,7 @@ export interface DomainDefaultInfo {
   icon: string;
   features?: {
     voxel?: boolean;
+    subtitle?: boolean;
   };
 }
 

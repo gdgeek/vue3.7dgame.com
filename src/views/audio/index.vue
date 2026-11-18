@@ -154,6 +154,12 @@
         @delete="handleDelete"
         @close="handlePanelClose"
       >
+        <template #info>
+          <MediaSubtitleBinding
+            v-if="viewDialogVisible && currentAudio"
+            :resource="currentAudio"
+          ></MediaSubtitleBinding>
+        </template>
         <template #preview>
           <div class="audio-preview">
             <div class="audio-visual">
@@ -176,6 +182,7 @@
 </template>
 
 <script setup lang="ts">
+import MediaSubtitleBinding from "@/views/subtitle/MediaSubtitleBinding.vue";
 import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";

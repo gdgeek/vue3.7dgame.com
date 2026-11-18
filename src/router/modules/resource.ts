@@ -19,6 +19,12 @@ export const resourceRoutes: RouteRecordRaw = {
     params: null,
   },
   children: [
+    {
+      path: "/resource/subtitle/index",
+      name: "SubtitleResources",
+      component: () => import("@/views/subtitle/index.vue"),
+      meta: { title: "sidebar.subtitle", hidden: true },
+    },
     // Voxel 管理
     {
       path: "/resource/voxel",

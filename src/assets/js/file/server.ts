@@ -3,6 +3,7 @@ import { fileMD5, fileOpen, sleep } from './base';
 import env from '@/environment';
 import axios from 'axios';
 import { uploadFile } from '@/api/v1/upload';
+import request from '@/utils/request';
 import path from 'path-browserify';
 import type COS from 'cos-js-sdk-v5';
 
@@ -35,6 +36,15 @@ const fileUrl = (name: string, extension: string, handler: FileHandler | null = 
 
 // 检查文件是否存在
 const fileHas = (name: string, extension: string, handler: FileHandler | null = null, dir: string = ""): Promise<boolean> => {
+  if (handler?.bucket === 'raw') {
+    return request.head('/v1/upload/file', {
+      params: { bucket: handler.bucket, directory: dir, filename: name + extension, md5: name },
+      skipErrorMessage: true,
+    }).then(() => true).catch((error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 404) return false;
+      throw error;
+    });
+  }
   return new Promise((resolve) => {
     axios.head(env.replaceIP(fileUrl(name, extension, handler, dir)))
       .then(() => resolve(true))
