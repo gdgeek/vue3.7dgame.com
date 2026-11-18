@@ -691,7 +691,10 @@ const router = useRouter();
 const userStore = useUserStore();
 const domainStore = useDomainStore();
 const subtitleAccess = computed(
-  () => domainStore.subtitleEnabled && Boolean(userStore.userInfo?.id)
+  () =>
+    domainStore.subtitleEnabled &&
+    Boolean(userStore.userInfo?.id) &&
+    userStore.isUserPermissionGreater("admin")
 );
 const siteTitle = useSiteTitle();
 const ability = useAbility();

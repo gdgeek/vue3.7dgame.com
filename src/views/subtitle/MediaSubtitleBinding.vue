@@ -2,6 +2,7 @@
   <SubtitleBindingEditor
     v-if="
       domain.subtitleEnabled &&
+      user.isUserPermissionGreater('admin') &&
       username &&
       username === resource.author?.username &&
       isMedia

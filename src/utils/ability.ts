@@ -105,7 +105,10 @@ export function UpdateAbility(
         edit.push("voxel");
         menu.push(/^\/resource\/voxel(\/|$)/);
       }
-      if (options.subtitleEnabled === true) {
+      if (
+        options.subtitleEnabled === true &&
+        roles.some((role) => admin.includes(role))
+      ) {
         menu.push(/^\/resource\/subtitle(\/|$)/);
       }
 

@@ -1,6 +1,10 @@
 <template>
   <SubtitleLibrary
-    v-if="domain.subtitleEnabled && user.userInfo?.id"
+    v-if="
+      domain.subtitleEnabled &&
+      user.userInfo?.id &&
+      user.isUserPermissionGreater('admin')
+    "
     :key="user.userInfo?.id ?? undefined"
   ></SubtitleLibrary>
   <el-empty v-else description="当前无法使用字幕资源"></el-empty>
