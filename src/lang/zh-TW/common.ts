@@ -179,6 +179,7 @@ export default {
     resources: "素材庫",
     model: "模型",
     voxel: "體素",
+    subtitle: "字幕資源",
     picture: "圖片",
     audio: "音頻",
     video: "視頻",

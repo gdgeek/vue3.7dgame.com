@@ -93,7 +93,10 @@ export function setupPermission() {
           //   alert(JSON.stringify(to));
           next(from.name ? { name: from.name } : "/404");
         } else {
-          if (/^\/resource\/voxel(\/|$)/i.test(to.path)) {
+          const limitedResource = /^\/resource\/(voxel|subtitle)(\/|$)/i.exec(
+            to.path
+          );
+          if (limitedResource) {
             const domainStore = useDomainStore();
             try {
               // defaultInfo 可能只是 Cookie 品牌缓存，必须等本次配置请求完成。
@@ -103,7 +106,11 @@ export function setupPermission() {
               NProgress.done();
               return;
             }
-            if (!domainStore.voxelEnabled) {
+            const enabled =
+              limitedResource[1].toLowerCase() === "voxel"
+                ? domainStore.voxelEnabled
+                : domainStore.subtitleEnabled;
+            if (!enabled) {
               next("/404");
               NProgress.done();
               return;

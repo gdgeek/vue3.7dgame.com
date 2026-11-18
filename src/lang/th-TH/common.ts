@@ -129,6 +129,7 @@ export default {
     resources: "คลังทรัพยากร",
     model: "โมเดล",
     voxel: "วอกเซล",
+    subtitle: "ทรัพยากรคำบรรยาย",
     picture: "รูปภาพ",
     audio: "เสียง",
     video: "วิดีโอ",

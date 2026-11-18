@@ -59,6 +59,13 @@
             <!-- Popover Content -->
             <div class="popover-menu">
               <router-link
+                v-if="subtitleAccess"
+                to="/resource/subtitle/index"
+                class="popover-item"
+                active-class="active"
+                >{{ t("sidebar.subtitle") }}</router-link
+              >
+              <router-link
                 to="/resource/polygen/index"
                 custom
                 v-slot="{ isActive, navigate }"
@@ -130,6 +137,15 @@
           <!-- Inline Submenu - Click to expand/collapse -->
           <Transition name="submenu-slide">
             <div v-show="!collapsed && menuOpen.resource" class="submenu">
+              <router-link
+                v-if="subtitleAccess"
+                to="/resource/subtitle/index"
+                class="sidebar-subitem"
+                active-class="sidebar-subitem-active"
+              >
+                <span class="submenu-dot"></span
+                ><span>{{ t("sidebar.subtitle") }}</span>
+              </router-link>
               <router-link
                 to="/resource/polygen/index"
                 custom
@@ -674,6 +690,12 @@ defineProps({
 const router = useRouter();
 const userStore = useUserStore();
 const domainStore = useDomainStore();
+const subtitleAccess = computed(
+  () =>
+    domainStore.subtitleEnabled &&
+    Boolean(userStore.userInfo?.id) &&
+    userStore.isUserPermissionGreater("admin")
+);
 const siteTitle = useSiteTitle();
 const ability = useAbility();
 const pluginStore = usePluginSystemStore();

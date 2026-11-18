@@ -85,7 +85,7 @@ import { Message } from "@/components/Dialog";
 import { useFileStore } from "@/store/modules/config";
 import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
-import { FileHandler } from "@/assets/js/file/server";
+import { uploadResourceFile } from "@/services/resource-upload";
 import { processModel } from "@/utils/modelProcessor";
 
 const { t } = useI18n();
@@ -487,40 +487,13 @@ const uploadSingleFile = async (file: File) => {
   try {
     // Stage 1: MD5
     currentStage.value = 1;
-    const md5 = await fileStore.store.fileMD5(file, (p: number) => {
-      stageProgress.value[0] = Math.round(p * 100);
+    const { handler, data } = await uploadResourceFile(file, props.dir, {
+      onHash: (p) => (stageProgress.value[0] = Math.round(p * 100)),
+      onUpload: (p) => {
+        currentStage.value = 2;
+        stageProgress.value[1] = Math.round(p * 100);
+      },
     });
-    stageProgress.value[0] = 100;
-
-    const handler = await fileStore.store.publicHandler();
-    let extension = ".bytes";
-    // Helper to get extension
-    const nameExt = file.name.substring(file.name.lastIndexOf("."));
-    if (nameExt) extension = nameExt;
-
-    // Check if exists
-    const has = await fileStore.store.fileHas(
-      md5,
-      extension,
-      handler,
-      props.dir
-    );
-
-    // Stage 2: Upload
-    currentStage.value = 2;
-    if (!has) {
-      await fileStore.store.fileUpload(
-        md5,
-        extension,
-        file,
-        (p: number) => {
-          stageProgress.value[1] = Math.round(p * 100);
-        },
-        handler,
-        props.dir
-      );
-    }
-    stageProgress.value[1] = 100;
 
     // Handle Metadata (Image/Video/Audio/Model)
     let info: string | undefined;
@@ -602,7 +575,7 @@ const uploadSingleFile = async (file: File) => {
     currentStage.value = 3;
     stageProgress.value[2] = 20;
 
-    await saveFileRecord(md5, extension, file, handler, info, image_id);
+    await saveFileRecord(data, file, info, image_id);
 
     stageProgress.value[2] = 100;
   } catch (err) {
@@ -612,21 +585,11 @@ const uploadSingleFile = async (file: File) => {
 };
 
 const saveFileRecord = async (
-  md5: string,
-  extension: string,
+  data: UploadFileType,
   file: File,
-  handler: FileHandler,
   info?: string,
   image_id?: number
 ) => {
-  const data: UploadFileType = {
-    filename: file.name,
-    md5,
-    key: md5 + extension,
-    url: fileStore.store.fileUrl(md5, extension, handler, props.dir),
-    // particleType logic if needed, but rarely used now
-  };
-
   const response = await postFile(data);
 
   // Now trigger the parent's save logic (postAudio, postVideo, etc.)

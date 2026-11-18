@@ -5,7 +5,8 @@
     "icon": "/config/domains/xingkou-logo.webp",
     "blog": "",
     "features": {
-      "voxel": false
+      "voxel": false,
+      "subtitle": true
     }
   },
   "configs": {

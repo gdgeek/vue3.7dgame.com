@@ -54,12 +54,12 @@ const fileHandler = async (bucket: string, region: string): Promise<FileHandler>
         // 获取授权信息
         getAuthorization: async (options, callback) => {
           try {
-            const response = await token(bucket, region);
+            const response = await token(bucket, region, options.Key);
             const data = response.data;
             const credentials = data?.Credentials;
 
             if (!data || !credentials) {
-              reject('credentials invalid');
+              callback('');
               return;
             }
 
@@ -70,9 +70,10 @@ const fileHandler = async (bucket: string, region: string): Promise<FileHandler>
               SecurityToken: credentials.Token,
               StartTime: data.StartTime,
               ExpiredTime: data.ExpiredTime,
+              ScopeLimit: options.Key?.startsWith('subtitles/') === true,
             });
-          } catch (error) {
-            reject(error);
+          } catch {
+            callback('');
           }
         },
       });
@@ -216,7 +217,7 @@ const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: Fil
 };
 
 // 文件 URL
-const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = ''): string => {
+const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = '', signed = true): string => {
   if (!handler.cos) return '';
   const ext = extension.startsWith('.') ? extension : `.${extension}`;
   const filename = path.join(dir, md5 + ext);
@@ -227,7 +228,7 @@ const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = '')
       Region: handler.region!,
       Key: filename,
       Expires: 60,
-      Sign: true,
+      Sign: signed,
     },
     (_err, data) => {
       logger.log(data?.Url);

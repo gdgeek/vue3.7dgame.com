@@ -3,6 +3,7 @@
  * 覆盖：setupPermission() 导航守卫逻辑、hasAuth() 权限检查
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { resourceRoutes } from "@/router/modules/resource";
 import { verseRoutes } from "@/router/modules/verse";
 
 // ── vi.hoisted 变量（在 vi.mock 工厂函数中引用，必须提前 hoist）──────────
@@ -11,6 +12,7 @@ const mockGetUserInfo = vi.hoisted(() => vi.fn());
 const mockDomainStore = vi.hoisted(() => ({
   defaultInfo: null as Record<string, unknown> | null,
   voxelEnabled: false,
+  subtitleEnabled: false,
   fetchDefaultInfo: vi.fn(),
 }));
 const mockUseDomainStore = vi.hoisted(() => vi.fn(() => mockDomainStore));
@@ -91,6 +93,7 @@ beforeEach(() => {
   mockGetUserInfo.mockReset();
   mockDomainStore.defaultInfo = null;
   mockDomainStore.voxelEnabled = false;
+  mockDomainStore.subtitleEnabled = false;
   mockDomainStore.fetchDefaultInfo.mockReset();
   mockDomainStore.fetchDefaultInfo.mockResolvedValue(undefined);
 
@@ -396,6 +399,30 @@ describe("beforeEach 守卫 — 有 token 时", () => {
       next
     );
     expect(next).toHaveBeenCalledWith("/401");
+  });
+
+  it.each([
+    ["admin", true],
+    ["root", true],
+    ["manager", false],
+    ["user", false],
+  ])("checks %s on the subtitle library route", async (role, allowed) => {
+    mockDomainStore.subtitleEnabled = true;
+    mockUserInfo = { roles: [role] };
+    const route = resourceRoutes.children!.find(
+      (child) => child.path === "/resource/subtitle/index"
+    )!;
+    const next = vi.fn();
+
+    await capturedBeforeEach!(
+      makeTo({ path: route.path, meta: { ...route.meta } }),
+      makeFrom(),
+      next
+    );
+
+    expect(next).toHaveBeenCalledOnce();
+    if (allowed) expect(next).toHaveBeenCalledWith();
+    else expect(next).toHaveBeenCalledWith("/401");
   });
 
   it("root 可直接访问受保护路由", async () => {
