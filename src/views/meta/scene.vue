@@ -47,6 +47,7 @@
         ></iframe>
       </el-main>
     </el-container>
+
     <MetaScriptDrawer
       ref="scriptDrawer"
       :meta-id="id"

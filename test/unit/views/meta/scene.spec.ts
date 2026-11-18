@@ -234,6 +234,7 @@ vi.mock("@/composables/useSceneSaveGuard", async (importOriginal) => {
   };
 });
 
+
 vi.mock("@/components/MrPP/ResourceDialog.vue", () => ({
   default: defineComponent({
     name: "ResourceDialogStub",
@@ -600,6 +601,26 @@ describe("views/meta/scene.vue", () => {
     delete (document as Document & { modelContext?: unknown }).modelContext;
     vi.resetModules();
   });
+
+  it.each(["edit-audio-subtitles", "edit-media-subtitles"])(
+    "ignores the removed node subtitle editing event %s",
+    async (event) => {
+      const page = await mountSceneView();
+      sendReady("subtitle-editor-document");
+      await flushAsync();
+      (page.metaDetail.resources as unknown[]).push({ id: 22, type: "audio" });
+      window.dispatchEvent(new MessageEvent("message", {
+        source: document.querySelector("iframe")?.contentWindow,
+        origin: "https://editor.example.test",
+        data: { type: "EVENT", payload: { event, resourceId: 22 } },
+      }));
+      await flushAsync();
+      expect(document.querySelector(".subtitle-dialog-stub")).toBeNull();
+      expect(page.subtitleDialogVisible).toBeUndefined();
+      expect(mockPutMeta).not.toHaveBeenCalled();
+      expect(mockSendRequest).not.toHaveBeenCalledWith("media-subtitles-updated", expect.anything());
+    }
+  );
 
   describe.each(["meta", "verse"] as const)(
     "%s script persistence ownership",

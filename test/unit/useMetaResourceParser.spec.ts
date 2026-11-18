@@ -454,3 +454,69 @@ describe("buildMetaResourceIndex — recursive tree walking", () => {
     ]);
   });
 });
+
+describe("sound subtitle metadata for Blockly", () => {
+  it("looks up the linked resource for each nested sound node", () => {
+    const meta = makeMeta(
+      makeNode(
+        "entity",
+        "root",
+        {},
+        {
+          entities: [
+            makeNode("sound", "narration", { resource: "11" }),
+            makeNode("sound", "effect", { resource: 12 }),
+            makeNode("sound", "missing", { resource: 99 }),
+          ],
+        }
+      )
+    );
+    meta.resources = [
+      {
+        id: 11,
+        info: JSON.stringify({
+          subtitles: [{ start: 0, end: 3, text: "讲解" }],
+        }),
+      },
+      { id: 12, info: JSON.stringify({ length: 17 }) },
+    ];
+    expect(
+      buildMetaResourceIndex(meta).sound.map((sound) => sound.hasSubtitles)
+    ).toEqual([true, false, false]);
+  });
+});
+
+describe("video subtitle availability", () => {
+  it("marks video nodes using their resource metadata and leaves old/no-caption videos unchanged", () => {
+    const meta = makeMeta(
+      makeNode(
+        "Entity",
+        "root",
+        {},
+        {
+          nodes: [
+            makeNode("Video", "captioned", { resource: 91 }),
+            makeNode("Video", "plain", { resource: 92 }),
+            makeNode("Video", "missing", { resource: 93 }),
+          ],
+        }
+      )
+    );
+    meta.resources = [
+      {
+        id: 91,
+        info: JSON.stringify({
+          size: { x: 1920, y: 1080 },
+          subtitles: [{ start: 0, end: 3, text: "视频字幕" }],
+        }),
+      },
+      { id: 92, info: '{"length":3}' },
+    ];
+    const index = buildMetaResourceIndex(meta);
+    expect(index.video.map((item) => [item.uuid, item.hasSubtitles])).toEqual([
+      ["captioned", true],
+      ["plain", false],
+      ["missing", false],
+    ]);
+  });
+});
