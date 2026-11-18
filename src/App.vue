@@ -100,11 +100,16 @@ async function ensureBootToken() {
 }
 
 watch(
-  [() => userStore.userInfo, () => domainStore.voxelEnabled],
-  ([userInfo, voxelEnabled]) => {
+  [
+    () => userStore.userInfo,
+    () => domainStore.voxelEnabled,
+    () => domainStore.subtitleEnabled,
+  ],
+  ([userInfo, voxelEnabled, subtitleEnabled]) => {
     const currentUser = userInfo?.id ? userInfo : null;
     UpdateAbility(ability, currentUser?.roles ?? [], currentUser?.id ?? 0, {
       voxelEnabled,
+      ...(currentUser && subtitleEnabled ? { subtitleEnabled } : {}),
       organizations: currentUser?.organizations,
     });
     UpdateRoutes(ability);

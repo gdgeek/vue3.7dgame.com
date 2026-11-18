@@ -160,6 +160,12 @@
         @delete="handleDelete"
         @close="handlePanelClose"
       >
+        <template #info>
+          <MediaSubtitleBinding
+            v-if="viewDialogVisible && currentVideo"
+            :resource="currentVideo"
+          ></MediaSubtitleBinding>
+        </template>
         <template #preview>
           <video
             v-if="currentVideo?.file?.url"
@@ -174,6 +180,7 @@
 </template>
 
 <script setup lang="ts">
+import MediaSubtitleBinding from "@/views/subtitle/MediaSubtitleBinding.vue";
 import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";

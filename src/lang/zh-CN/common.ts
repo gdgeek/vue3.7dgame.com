@@ -201,6 +201,7 @@ export default {
     resources: "素材库",
     model: "模型",
     voxel: "体素",
+    subtitle: "字幕资源",
     picture: "图片",
     audio: "音频",
     video: "视频",

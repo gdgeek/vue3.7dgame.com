@@ -57,6 +57,10 @@
             @delete="deleteWindow"
           >
           </MrppInfo>
+          <MediaSubtitleBinding
+            v-if="audioData"
+            :resource="audioData"
+          ></MediaSubtitleBinding>
           <br />
         </el-col>
       </el-row>
@@ -65,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import MediaSubtitleBinding from "@/views/subtitle/MediaSubtitleBinding.vue";
 import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { getAudio, putAudio, deleteAudio } from "@/api/v1/resources";

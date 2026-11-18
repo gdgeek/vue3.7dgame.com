@@ -194,6 +194,7 @@ export default {
     resources: "Resources",
     model: "Model",
     voxel: "Voxel",
+    subtitle: "Subtitles",
     picture: "Picture",
     audio: "Audio",
     video: "Video",

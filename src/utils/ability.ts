@@ -56,6 +56,7 @@ export function UpdateAbility(
   userId: number,
   options: {
     voxelEnabled?: boolean;
+    subtitleEnabled?: boolean;
     organizations?: NonNullable<OrganizationSceneUser>["organizations"];
   } = {}
 ) {
@@ -103,6 +104,12 @@ export function UpdateAbility(
       if (options.voxelEnabled === true) {
         edit.push("voxel");
         menu.push(/^\/resource\/voxel(\/|$)/);
+      }
+      if (
+        options.subtitleEnabled === true &&
+        roles.some((role) => admin.includes(role))
+      ) {
+        menu.push(/^\/resource\/subtitle(\/|$)/);
       }
 
       menu = menu.concat([

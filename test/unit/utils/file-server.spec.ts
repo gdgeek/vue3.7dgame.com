@@ -21,6 +21,7 @@ vi.mock("@/environment", () => ({
 vi.mock("axios", () => ({
   default: { head: vi.fn(), get: vi.fn() },
 }));
+vi.mock("@/utils/request", () => ({ default: { head: vi.fn() } }));
 vi.mock("@/api/v1/upload", () => ({ uploadFile: vi.fn() }));
 vi.mock("path-browserify", () => ({
   default: {

@@ -129,6 +129,7 @@ export default {
     resources: "素材ライブラリ",
     model: "モデル",
     voxel: "ボクセル",
+    subtitle: "字幕素材",
     picture: "画像",
     audio: "音声",
     video: "動画",

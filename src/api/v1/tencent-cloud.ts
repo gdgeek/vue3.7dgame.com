@@ -1,9 +1,13 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 
-export const token = (bucket: string, region: string = "ap-nanjing") => {
+export const token = (
+  bucket: string,
+  region: string = "ap-nanjing",
+  key?: string
+) => {
   return request({
-    url: `/v1/tencent-clouds/token${qs.stringify({ bucket, region }, true)}`,
+    url: `/v1/tencent-clouds/token${qs.stringify({ bucket, region, key }, true)}`,
     method: "get",
   });
 };

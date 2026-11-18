@@ -292,6 +292,23 @@ describe("UpdateAbility", () => {
     ).toBe(true);
   });
 
+  it.each([
+    ["admin", true],
+    ["root", true],
+    ["manager", false],
+    ["user", false],
+  ])(
+    "grants subtitle navigation to %s only when authorized",
+    (role, allowed) => {
+      UpdateAbility(mockAbility, [role], 7, { subtitleEnabled: true });
+      const ability = createMongoAbility(mockAbility.update.mock.calls[0][0]);
+      const subtitles = new AbilityRouter("/resource/subtitle/index");
+
+      expect(ability.can("open", subtitles)).toBe(allowed);
+      expect(ability.can("goto", subtitles)).toBe(allowed);
+    }
+  );
+
   it.each(["user", "manager", "admin", "root"])(
     "allows %s to open and edit voxel resources without matching other prefixes",
     (role) => {
