@@ -131,12 +131,54 @@
       <StandardUploadDialog
         v-model="uploadDialogVisible"
         dir="audio"
-        :file-type="fileType"
+        file-type=".mp3,.wav"
         :max-size="5"
         :title="$t('audio.uploadAudio')"
+        :multiple="!canAuthorSubtitles || !uploadSubtitles.length"
+        :preparing="readingSubtitle"
         @save-resource="saveAudio"
         @success="handleUploadSuccess"
       >
+        <template #before-upload="{ busy }">
+          <div v-if="canAuthorSubtitles" class="subtitle-upload">
+            <div class="subtitle-file-row">
+              <span>绑定字幕（可选）</span>
+              <input
+                ref="uploadSubtitleInput"
+                type="file"
+                accept=".srt,.vtt,.json"
+                hidden
+                :disabled="busy || readingSubtitle"
+                @change="importUploadSubtitles($event)"
+              />
+              <el-button
+                type="primary"
+                round
+                :loading="readingSubtitle"
+                :disabled="busy"
+                @click="uploadSubtitleInput?.click()"
+              >
+                选择字幕文件
+              </el-button>
+              <span v-if="!uploadSubtitles.length" class="subtitle-formats"
+                >SRT、VTT、JSON</span
+              >
+            </div>
+            <div v-if="uploadSubtitles.length" class="subtitle-file-row">
+              <span
+                >已绑定
+                {{ uploadSubtitles.length }} 条字幕，请选择对应的音频。</span
+              >
+              <el-button
+                link
+                :disabled="busy || readingSubtitle"
+                @click="uploadSubtitles = []"
+              >
+                取消绑定
+              </el-button>
+            </div>
+          </div>
+        </template>
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
@@ -172,11 +214,47 @@
               ref="audioRef"
               :src="toHttps(currentAudio.file.url)"
               controls
+              @timeupdate="previewTime = audioRef?.currentTime ?? 0"
+              @seeking="previewTime = audioRef?.currentTime ?? 0"
+              @ended="previewTime = -1"
+              @pause="previewTime = -1"
               class="audio-player"
             ></audio>
+            <div class="subtitle-preview-region">
+              <Transition name="subtitle-fade" mode="out-in"
+                ><p v-if="previewLines.length" class="subtitle-preview">
+                  <span
+                    v-for="(line, i) in previewLines"
+                    :key="i"
+                    :class="{
+                      translation:
+                        previewSettings.display === 'bilingual' && i === 1,
+                    }"
+                    >{{ line }}</span
+                  >
+                </p></Transition
+              >
+            </div>
+          </div>
+        </template>
+        <template #info>
+          <div
+            v-if="currentAudio && canAuthorSubtitles"
+            class="subtitle-file-row subtitle-editor-entry"
+          >
+            <span>字幕（{{ detailSubtitles.length }} 条）</span>
+            <el-button size="small" round @click="openSubtitleDialog"
+              >编辑字幕</el-button
+            >
           </div>
         </template>
       </DetailPanel>
+      <AudioSubtitleDialog
+        v-if="canAuthorSubtitles"
+        v-model="subtitleDialogVisible"
+        :resource-id="currentAudio?.id ?? null"
+        @saved="handleSubtitlesSaved"
+      />
     </div>
   </TransitionWrapper>
 </template>
@@ -184,8 +262,19 @@
 <script setup lang="ts">
 import MediaSubtitleBinding from "@/views/subtitle/MediaSubtitleBinding.vue";
 import { logger } from "@/utils/logger";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
+import {
+  audioMetadata,
+  mergeAdjacentSubtitles,
+  parseSubtitleFile,
+  readAudioSubtitles,
+  subtitleLinesAt,
+  readSubtitleSettings,
+  type SubtitleCue,
+} from "@/utils/audioSubtitles";
+import AudioSubtitleDialog from "@/components/subtitles/AudioSubtitleDialog.vue";
 import { useI18n } from "vue-i18n";
+import { useUserStore } from "@/store/modules/user";
 // import { ElMessage, ElMessageBox } from "element-plus";
 import { Message, MessageBox } from "@/components/Dialog";
 import {
@@ -222,6 +311,10 @@ import { useWebMcpUploadIntent } from "@/composables/useWebMcpUploadIntent";
 import { denseResourceCardGutter } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
+const userStore = useUserStore();
+const canAuthorSubtitles = computed(() =>
+  userStore.isUserPermissionGreater("admin"),
+);
 
 const {
   items,
@@ -315,19 +408,76 @@ const handleCancelSelectAllPage = () => {
 };
 
 const uploadDialogVisible = ref(false);
-const fileType = ref("audio/mp3, audio/wav");
 const viewDialogVisible = ref(false);
 const audioRef = ref<HTMLAudioElement | null>(null);
+const uploadSubtitleInput = ref<HTMLInputElement | null>(null);
+const subtitleDialogVisible = ref(false);
 
 // Detail panel state
 const currentAudio = ref<ResourceInfo | null>(null);
 const detailLoading = ref(false);
+const uploadSubtitles = ref<SubtitleCue[]>([]);
+const detailSubtitles = ref<SubtitleCue[]>([]);
+const previewTime = ref(-1);
+const previewSettings = computed(() =>
+  readSubtitleSettings(currentAudio.value?.info)
+);
+const previewLines = computed(() =>
+  subtitleLinesAt(
+    detailSubtitles.value,
+    previewTime.value,
+    previewSettings.value.display
+  )
+);
+const readingSubtitle = ref(false);
+function openSubtitleDialog() {
+  if (!canAuthorSubtitles.value) return;
+  audioRef.value?.pause();
+  previewTime.value = -1;
+  subtitleDialogVisible.value = true;
+}
+function handleSubtitlesSaved(audio: ResourceInfo) {
+  if (currentAudio.value?.id === audio.id) {
+    currentAudio.value = audio;
+    detailSubtitles.value = readAudioSubtitles(audio.info);
+  }
+}
+
+watch(uploadDialogVisible, (visible) => {
+  if (!visible) uploadSubtitles.value = [];
+});
+watch(currentAudio, (audio) => {
+  detailSubtitles.value = readAudioSubtitles(audio?.info);
+  previewTime.value = -1;
+});
+
+const importUploadSubtitles = async (event: Event) => {
+  if (!canAuthorSubtitles.value) return;
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = "";
+  if (!file) return;
+  readingSubtitle.value = true;
+  try {
+    if (file.size > 512 * 1024) throw new Error("字幕文件不能超过 512 KB");
+    const imported = parseSubtitleFile(await file.text());
+    if (uploadDialogVisible.value) {
+      uploadSubtitles.value = mergeAdjacentSubtitles(imported);
+      if (uploadSubtitles.value.length < imported.length)
+        Message.success(
+          `已导入 ${uploadSubtitles.value.length} 条字幕，自动合并了 ${imported.length - uploadSubtitles.value.length} 个相邻片段`
+        );
+    }
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : String(error));
+  } finally {
+    readingSubtitle.value = false;
+  }
+};
 
 const detailProperties = computed(() => {
   if (!currentAudio.value) return [];
-  const info = currentAudio.value.info
-    ? JSON.parse(currentAudio.value.info)
-    : null;
+  const info = audioMetadata(currentAudio.value.info);
   const props = [
     {
       label: t("ui.format"),
@@ -339,7 +489,7 @@ const detailProperties = computed(() => {
       value: convertToLocalTime(currentAudio.value.created_at),
     },
   ];
-  if (info?.length)
+  if (typeof info.length === "number")
     props.push({
       label: t("video.view.info.item6"),
       value: info.length.toFixed(2) + "s",
@@ -442,9 +592,14 @@ const saveAudio = async (
       name,
       file_id,
     };
-    if (info) data.info = info;
+    if (canAuthorSubtitles.value && totalFiles === 1 && uploadSubtitles.value.length) {
+      data.info = JSON.stringify({
+        ...audioMetadata(info),
+        subtitles: uploadSubtitles.value,
+      });
+    } else if (info) data.info = info;
     const response = await trackWebMcpUpload(() => postAudio(data));
-    if (response.data.id) callback(response.data.id);
+    callback(response.data?.id ?? -1);
   } catch (err) {
     logger.error("Failed to save audio:", err);
     callback(-1);
@@ -670,18 +825,21 @@ const formatItemDate = (dateStr?: string) => {
 
 // Audio preview in detail panel
 .audio-preview {
+  position: relative;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  padding: 24px;
+  padding: 16px 24px 64px;
 }
 
 .audio-visual {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 120px;
@@ -701,6 +859,7 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .audio-player {
+  flex-shrink: 0;
   width: 100%;
   max-width: 320px;
   height: 48px;
@@ -709,5 +868,54 @@ const formatItemDate = (dateStr?: string) => {
   &::-webkit-media-controls-panel {
     background: var(--bg-hover, #f1f5f9);
   }
+}
+</style>
+
+<style scoped>
+.subtitle-upload,
+.subtitle-editor-entry {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+}
+.subtitle-file-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.subtitle-formats {
+  color: var(--text-muted, #64748b);
+  font-size: 12px;
+}
+.subtitle-preview span {
+  display: block;
+}
+.subtitle-preview .translation {
+  font-size: 0.85em;
+}
+.subtitle-preview-region {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+}
+.subtitle-preview {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+  text-align: center;
+  color: white;
+  background: #242424;
+  padding: 4px 8px;
+  margin: 0;
+  border-radius: 4px;
 }
 </style>

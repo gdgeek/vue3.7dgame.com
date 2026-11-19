@@ -140,9 +140,51 @@
         display-formats="MP4 (H.264)"
         :max-size="80"
         :title="$t('video.uploadVideo')"
+        :multiple="!canAuthorSubtitles || !uploadSubtitles.length"
+        :preparing="readingSubtitle"
         @save-resource="saveVideo"
         @success="handleUploadSuccess"
       >
+        <template #before-upload="{ busy }">
+          <div v-if="canAuthorSubtitles" class="subtitle-upload">
+            <div class="subtitle-file-row">
+              <span>绑定字幕（可选）</span>
+              <input
+                ref="uploadSubtitleInput"
+                type="file"
+                accept=".srt,.vtt,.json"
+                hidden
+                :disabled="busy || readingSubtitle"
+                @change="importUploadSubtitles($event)"
+              />
+              <el-button
+                type="primary"
+                round
+                :loading="readingSubtitle"
+                :disabled="busy"
+                @click="uploadSubtitleInput?.click()"
+              >
+                选择字幕文件
+              </el-button>
+              <span v-if="!uploadSubtitles.length" class="subtitle-formats"
+                >SRT、VTT、JSON</span
+              >
+            </div>
+            <div v-if="uploadSubtitles.length" class="subtitle-file-row">
+              <span
+                >已绑定
+                {{ uploadSubtitles.length }} 条字幕，请选择对应的视频。</span
+              >
+              <el-button
+                link
+                :disabled="busy || readingSubtitle"
+                @click="uploadSubtitles = []"
+              >
+                取消绑定
+              </el-button>
+            </div>
+          </div>
+        </template>
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
@@ -167,14 +209,50 @@
           ></MediaSubtitleBinding>
         </template>
         <template #preview>
-          <video
-            v-if="currentVideo?.file?.url"
-            :src="toHttps(currentVideo.file.url)"
-            controls
-            class="video-preview"
-          ></video>
+          <div class="video-preview-container">
+            <video
+              v-if="currentVideo?.file?.url"
+              ref="videoRef"
+              :src="toHttps(currentVideo.file.url)"
+              @timeupdate="previewTime = videoRef?.currentTime ?? -1"
+              @seeking="previewTime = videoRef?.currentTime ?? -1"
+              @ended="previewTime = -1"
+              controls
+              class="video-preview"
+            ></video>
+            <div class="subtitle-preview-region">
+              <Transition name="subtitle-fade" mode="out-in">
+                <p v-if="previewLines.length" class="subtitle-preview">
+                  <span
+                    v-for="(line, i) in previewLines"
+                    :key="i"
+                    :class="{ translation: i === 1 }"
+                    >{{ line }}</span
+                  >
+                </p>
+              </Transition>
+            </div>
+          </div>
+        </template>
+        <template #info>
+          <div
+            v-if="currentVideo && canAuthorSubtitles"
+            class="subtitle-file-row subtitle-editor-entry"
+          >
+            <span>字幕（{{ detailSubtitles.length }} 条）</span>
+            <el-button size="small" round @click="openSubtitleDialog"
+              >编辑字幕</el-button
+            >
+          </div>
         </template>
       </DetailPanel>
+      <AudioSubtitleDialog
+        v-if="canAuthorSubtitles"
+        v-model="subtitleDialogVisible"
+        :resource-id="currentVideo?.id ?? null"
+        media-type="video"
+        @saved="handleSubtitlesSaved"
+      />
     </div>
   </TransitionWrapper>
 </template>
@@ -182,8 +260,19 @@
 <script setup lang="ts">
 import MediaSubtitleBinding from "@/views/subtitle/MediaSubtitleBinding.vue";
 import { logger } from "@/utils/logger";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
+import {
+  audioMetadata,
+  mergeAdjacentSubtitles,
+  parseSubtitleFile,
+  readAudioSubtitles,
+  subtitleLinesAt,
+  readSubtitleSettings,
+  type SubtitleCue,
+} from "@/utils/audioSubtitles";
+import AudioSubtitleDialog from "@/components/subtitles/AudioSubtitleDialog.vue";
 import { useI18n } from "vue-i18n";
+import { useUserStore } from "@/store/modules/user";
 // import { ElMessage, ElMessageBox } from "element-plus";
 import { Message, MessageBox } from "@/components/Dialog";
 import {
@@ -224,6 +313,10 @@ import {
 } from "@/utils/resourceGrid";
 
 const { t } = useI18n();
+const userStore = useUserStore();
+const canAuthorSubtitles = computed(() =>
+  userStore.isUserPermissionGreater("admin"),
+);
 
 type Vector2 = { x: number; y: number };
 type VideoInfo = { size?: Vector2; length?: number };
@@ -341,6 +434,69 @@ const currentVideoId = ref<number | null>(null);
 // Detail panel state
 const currentVideo = ref<ResourceInfo | null>(null);
 const detailLoading = ref(false);
+
+const videoRef = ref<HTMLVideoElement | null>(null);
+const uploadSubtitleInput = ref<HTMLInputElement | null>(null);
+const subtitleDialogVisible = ref(false);
+
+const uploadSubtitles = ref<SubtitleCue[]>([]);
+const detailSubtitles = ref<SubtitleCue[]>([]);
+const previewTime = ref(-1);
+const previewSettings = computed(() =>
+  readSubtitleSettings(currentVideo.value?.info)
+);
+const previewLines = computed(() =>
+  subtitleLinesAt(
+    detailSubtitles.value,
+    previewTime.value,
+    previewSettings.value.display
+  )
+);
+const readingSubtitle = ref(false);
+function openSubtitleDialog() {
+  if (!canAuthorSubtitles.value) return;
+  videoRef.value?.pause();
+  previewTime.value = -1;
+  subtitleDialogVisible.value = true;
+}
+function handleSubtitlesSaved(video: ResourceInfo) {
+  if (currentVideo.value?.id === video.id) {
+    currentVideo.value = video;
+    detailSubtitles.value = readAudioSubtitles(video.info);
+  }
+}
+
+watch(uploadDialogVisible, (visible) => {
+  if (!visible) uploadSubtitles.value = [];
+});
+watch(currentVideo, (video) => {
+  detailSubtitles.value = readAudioSubtitles(video?.info);
+  previewTime.value = -1;
+});
+
+const importUploadSubtitles = async (event: Event) => {
+  if (!canAuthorSubtitles.value) return;
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = "";
+  if (!file) return;
+  readingSubtitle.value = true;
+  try {
+    if (file.size > 512 * 1024) throw new Error("字幕文件不能超过 512 KB");
+    const imported = parseSubtitleFile(await file.text());
+    if (uploadDialogVisible.value) {
+      uploadSubtitles.value = mergeAdjacentSubtitles(imported);
+      if (uploadSubtitles.value.length < imported.length)
+        Message.success(
+          `已导入 ${uploadSubtitles.value.length} 条字幕，自动合并了 ${imported.length - uploadSubtitles.value.length} 个相邻片段`
+        );
+    }
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : String(error));
+  } finally {
+    readingSubtitle.value = false;
+  }
+};
 
 const detailProperties = computed(() => {
   if (!currentVideo.value) return [];
@@ -460,11 +616,16 @@ const saveVideo = async (
       info?: string;
       image_id?: number;
     } = { name, file_id };
-    if (info) data.info = info;
+    if (canAuthorSubtitles.value && totalFiles === 1 && uploadSubtitles.value.length) {
+      data.info = JSON.stringify({
+        ...audioMetadata(info),
+        subtitles: uploadSubtitles.value,
+      });
+    } else if (info) data.info = info;
     if (image_id) data.image_id = image_id;
     else data.image_id = file_id;
     const response = await trackWebMcpUpload(() => postVideo(data));
-    if (response.data.id) callback(response.data.id);
+    callback(response.data?.id ?? -1);
   } catch (err) {
     logger.error("Failed to save video:", err);
     callback(-1);
@@ -678,5 +839,52 @@ const formatItemDate = (dateStr?: string) => {
   object-fit: contain;
   background: var(--bg-hover, #000);
   border-radius: var(--radius-lg, 16px);
+}
+.subtitle-upload,
+.subtitle-editor-entry {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+}
+.subtitle-file-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.subtitle-formats {
+  color: var(--text-muted, #64748b);
+  font-size: 12px;
+}
+.subtitle-preview span {
+  display: block;
+}
+.subtitle-preview .translation {
+  font-size: 0.85em;
+}
+.video-preview-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.subtitle-preview-region {
+  position: absolute;
+  bottom: 48px;
+  left: 6%;
+  right: 6%;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+.subtitle-preview {
+  margin: 0;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: rgb(0 0 0 / 75%);
+  color: #fff;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.4;
 }
 </style>

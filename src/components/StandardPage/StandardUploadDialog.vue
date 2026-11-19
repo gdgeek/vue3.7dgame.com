@@ -9,9 +9,19 @@
     :close-on-click-modal="false"
     @closed="handleDialogClose"
   >
+    <slot name="before-upload" :busy="isDisabled"></slot>
+    <input
+      ref="fileInput"
+      type="file"
+      hidden
+      :accept="fileType === '*' ? undefined : fileType"
+      :multiple="multiple"
+      :disabled="isDisabled || preparing"
+      @change="onFileSelected"
+    />
     <div
       class="upload-area"
-      :class="{ 'is-dragover': isDragOver, 'is-disabled': isDisabled }"
+      :class="{ 'is-dragover': isDragOver, 'is-disabled': isDisabled || preparing }"
       @dragover.prevent="onDragOver"
       @dragleave.prevent="onDragLeave"
       @drop.prevent="onDrop"
@@ -25,12 +35,13 @@
         </div>
         <div class="upload-text">
           <h3>拖拽文件到此处，或点击浏览</h3>
-          <p>支持多个文件同时上传</p>
+          <p>{{ multiple ? "支持多个文件同时上传" : "每次选择一个文件" }}</p>
         </div>
         <el-button
           type="primary"
-          class="browse-btn"
+          class="resource-file-picker-button"
           :loading="isDisabled"
+          :disabled="preparing"
           @click.stop="triggerFileSelect"
         >
           浏览文件
@@ -100,6 +111,7 @@ const props = withDefaults(
     dir: string;
     maxSize?: number; // MB
     multiple?: boolean;
+    preparing?: boolean;
     showEffectTypeSelect?: boolean;
     compatibilityTitle?: string;
     compatibilityNotes?: string[];
@@ -126,6 +138,7 @@ const dialogVisible = computed({
 
 const isDragOver = ref(false);
 const isDisabled = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
 const selectedFiles = ref<File[]>([]);
 const uploadedCount = ref(0);
 const totalFilesCount = ref(0);
@@ -406,7 +419,7 @@ const onDragLeave = (_e: DragEvent) => {
 
 const onDrop = (e: DragEvent) => {
   isDragOver.value = false;
-  if (isDisabled.value) return;
+  if (isDisabled.value || props.preparing) return;
 
   const files = Array.from(e.dataTransfer?.files || []);
   if (files.length > 0) {
@@ -417,22 +430,20 @@ const onDrop = (e: DragEvent) => {
   }
 };
 
-const triggerFileSelect = async () => {
-  if (isDisabled.value) return;
-  try {
-    const files = await fileStore.store.fileOpen(
-      props.fileType,
-      props.multiple
-    );
-    if (files.length > 0) {
-      processFiles(files);
-    }
-  } catch (err) {
-    logger.error("File selection failed:", err);
-  }
+const triggerFileSelect = () => {
+  if (isDisabled.value || props.preparing) return;
+  fileInput.value?.click();
+};
+
+const onFileSelected = (event: Event) => {
+  const input = event.currentTarget as HTMLInputElement;
+  const files = Array.from(input.files ?? []);
+  input.value = "";
+  if (files.length) void processFiles(files);
 };
 
 const processFiles = async (files: File[]) => {
+  if (isDisabled.value || props.preparing) return;
   if (props.dir === "polygen") {
     rejectedModelFiles.value = [];
     uploadedModelFiles.value = [];
@@ -465,6 +476,11 @@ const processFiles = async (files: File[]) => {
 
   if (files.length === 0) {
     await showModelUploadSummary();
+    return;
+  }
+
+  if (!props.multiple && files.length > 1) {
+    Message.error("请一次选择一个文件");
     return;
   }
 
@@ -743,13 +759,6 @@ const handleDialogClose = () => {
     font-size: 14px;
     color: var(--text-muted, #94a3b8);
   }
-}
-
-.browse-btn {
-  height: auto;
-  padding: 12px 32px;
-  font-size: 14px;
-  border-radius: 20px;
 }
 
 .upload-progress-overlay {
