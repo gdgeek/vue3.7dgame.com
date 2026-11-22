@@ -2,8 +2,14 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   createAuthoringTools,
+  type AuthoringAsset,
   type AuthoringDependencies,
 } from "@/services/webmcp/authoring-tools";
+import {
+  createWebMcpDevFacade,
+  type WebMcpDevResult,
+} from "@/services/webmcp/dev-facade";
+import { WebMcpToolRegistry } from "@/services/webmcp/tool-registry";
 
 const revision = `sha256:${"a".repeat(64)}`;
 const deferred = <T>() => {
@@ -109,6 +115,185 @@ function setup() {
     },
   };
 }
+describe("small exhibit blueprint", () => {
+  const input = {
+    projectName: "小型展品讲解",
+    entities: [
+      { name: "陶罐", modelName: "陶罐模型", narrationName: "陶罐讲解" },
+    ],
+  };
+  const asset = (
+    type: AuthoringAsset["type"],
+    id: number,
+    name: string
+  ): AuthoringAsset => ({
+    type,
+    id,
+    name,
+    fileId: id + 100,
+    imageId: null,
+    mimeType: null,
+    size: null,
+    metadata: { internalData: "excluded" },
+  });
+
+  it("generates a read-only blueprint for click-to-play narration using exact names and types", async () => {
+    const s = setup();
+    vi.mocked(s.d.searchAssets).mockImplementation(async (type) =>
+      type === "audio"
+        ? [
+            asset("audio", 1, "陶罐讲解（旧）"),
+            asset("video", 2, "陶罐讲解"),
+            asset("audio", 3, "陶罐讲解"),
+          ]
+        : [asset("polygen", 4, "陶罐模型")]
+    );
+
+    expect(await s.call("preview_exhibit_blueprint", input)).toMatchObject({
+      status: "awaiting_blueprint_confirmation",
+      assetMatchComplete: true,
+      blueprint: {
+        projectName: "小型展品讲解",
+        entities: [
+          {
+            name: "陶罐",
+            interaction: { trigger: "click", action: "play_narration" },
+            narration: {
+              status: "matched",
+              asset: { id: 3, type: "audio", name: "陶罐讲解", fileId: 103 },
+            },
+            model: {
+              status: "matched",
+              asset: { id: 4, type: "polygen", name: "陶罐模型", fileId: 104 },
+            },
+          },
+        ],
+      },
+    });
+    expect(s.d.searchAssets).toHaveBeenCalledWith("audio", "陶罐讲解", 1, 50);
+    expect(s.d.confirm).not.toHaveBeenCalled();
+    expect(s.d.create).not.toHaveBeenCalled();
+    expect(s.d.startUpload).not.toHaveBeenCalled();
+    expect(s.saved.size).toBe(0);
+  });
+
+  it("reports duplicate and missing assets without choosing either", async () => {
+    const s = setup();
+    vi.mocked(s.d.searchAssets).mockImplementation(async (type) =>
+      type === "audio"
+        ? [asset("audio", 3, "陶罐讲解"), asset("audio", 5, "陶罐讲解")]
+        : []
+    );
+
+    const result = await s.call("preview_exhibit_blueprint", input);
+
+    expect(result.assetMatchComplete).toBe(false);
+    expect(result.blueprint.entities[0]).toMatchObject({
+      narration: { status: "ambiguous", candidates: [{ id: 3 }, { id: 5 }] },
+      model: { status: "missing" },
+    });
+    expect(result.blueprint.entities[0].narration).not.toHaveProperty("asset");
+    expect(
+      result.blueprint.entities[0].narration.candidates[0]
+    ).not.toHaveProperty("metadata");
+  });
+
+  it("shares matching through desktop discovery and flags a missing file link", async () => {
+    const s = setup();
+    vi.mocked(s.d.searchAssets).mockResolvedValue([
+      { ...asset("audio", 3, "陶罐讲解"), fileId: null },
+    ]);
+    const registry = new WebMcpToolRegistry();
+    const owner = new AbortController();
+    registry.register(createAuthoringTools(s.d), owner);
+    const [list, call] = createWebMcpDevFacade(registry);
+    const toolName = "xrugc_preview_exhibit_blueprint";
+    const unpack = (result: unknown) =>
+      JSON.parse((result as WebMcpDevResult).content[0].text);
+    const discovery = unpack(await list.execute({}));
+    expect(discovery.tools).toEqual(
+      expect.arrayContaining([expect.objectContaining({ name: toolName })])
+    );
+    const args = {
+      ...input,
+      entities: [{ name: "陶罐", narrationName: "陶罐讲解" }],
+    };
+    const result = unpack(
+      await call.execute({
+        contextToken: discovery.contextToken,
+        toolName,
+        arguments: args,
+      })
+    );
+    expect(result).toEqual(await s.call("preview_exhibit_blueprint", args));
+    expect(result).toMatchObject({
+      status: "awaiting_blueprint_confirmation",
+      assetMatchComplete: false,
+      blueprint: {
+        entities: [
+          { narration: { status: "missing_file", candidate: { id: 3 } } },
+        ],
+      },
+    });
+    owner.abort();
+  });
+
+  it("does not auto-match a single observed result when the search window is full", async () => {
+    const s = setup();
+    vi.mocked(s.d.searchAssets).mockImplementation(async (type, _query, page) =>
+      Array.from({ length: 50 }, (_, index) =>
+        asset(
+          type,
+          page * 50 + index,
+          page === 1 && index === 0 ? "陶罐讲解" : `同主题 ${page}-${index}`
+        )
+      )
+    );
+
+    const result = await s.call("preview_exhibit_blueprint", {
+      ...input,
+      entities: [{ name: "陶罐", narrationName: "陶罐讲解" }],
+    });
+
+    expect(result.assetMatchComplete).toBe(false);
+    expect(result.blueprint.entities[0]).toMatchObject({
+      narration: { status: "search_incomplete", candidates: [{ id: 50 }] },
+      model: null,
+    });
+    expect(result.blueprint.entities[0].narration).not.toHaveProperty("asset");
+    expect(s.d.searchAssets).toHaveBeenCalledTimes(3);
+  });
+
+  it("validates the whole small blueprint before reading assets", async () => {
+    const s = setup();
+    await expect(
+      s.call("preview_exhibit_blueprint", {
+        ...input,
+        entities: Array(4).fill(input.entities[0]),
+      })
+    ).rejects.toThrow("1–3");
+    await expect(
+      s.call("preview_exhibit_blueprint", {
+        ...input,
+        entities: [...input.entities, { name: "说明牌", narrationName: " " }],
+      })
+    ).rejects.toThrow("Expected text");
+    expect(s.d.searchAssets).not.toHaveBeenCalled();
+  });
+
+  it("discards in-flight asset matches when the account changes", async () => {
+    const s = setup();
+    const pending = deferred<AuthoringAsset[]>();
+    vi.mocked(s.d.searchAssets).mockReturnValue(pending.promise);
+    const review = s.call("preview_exhibit_blueprint", input);
+    s.changeActor("4");
+    pending.resolve([asset("audio", 3, "陶罐讲解")]);
+
+    await expect(review).rejects.toThrow("账号已改变");
+    expect(s.d.create).not.toHaveBeenCalled();
+  });
+});
+
 describe("global authoring tools", () => {
   it("provides naming guidance and anonymous formatting without drafts, storage writes or confirmation", async () => {
     const s = setup();

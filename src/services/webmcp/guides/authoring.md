@@ -10,6 +10,13 @@
 4. 打开实体，等待上下文 ready。查询素材放置工具的 schema，stage→complete→查询保存回执。打开原有脚本抽屉，在真实积木目录中选类型与字段，使用模板预览或批量积木编辑，静态校验后完成保存。
 5. 打开场景，用场景实体放置工具加入已保存实体，核对保存回执。交付对象链接、ID、封面核验结果和保存回执；运行与发布是单独操作。
 
+## 小型 AR 展品讲解
+
+1. 使用 `xrugc_preview_exhibit_blueprint` 预览 1–3 个展品。输入 `projectName` 和 `entities`，每项填写展品 `name`、素材库中讲解音频的精确名称 `narrationName`，并可填写模型名称 `modelName`。展示返回的蓝图、点击行为和逐项匹配结果。先处理重名、缺失、缺少关联文件或未能确认唯一的素材，再请用户确认蓝图。`awaiting_blueprint_confirmation` 表示等待蓝图确认，此时尚未创建场景或保存对象。
+2. 按确认后的蓝图使用现有场景和实体创作工具。把选定的 `audio` 资源通过 `xrugc_stage_node_creation_batch` 放入目标实体，保存后从实体树读取 Sound 节点 UUID。为可见、支持交互的展品节点配置点击 Action，保存后用 `xrugc_get_node_components` 核对 Action 组件 UUID。使用声音节点属性确认初始 `play=false`，确保讲解由点击触发。
+3. 打开实体脚本抽屉，确认 `script.ready`，重新发现工具并读取真实积木目录及现有结构。以 `xrugc_stage_script_block_batch` 暂存讲解动作。`action_trigger` 的 `Action` 字段使用点击组件 UUID，`content` 语句输入连接 `play_sound`。后者的 `sound` 值输入连接 `sound_entity`，其 `Sound` 字段填写声音节点 UUID。只在对应动作尚无入口时新增触发器，已有入口沿用并检查输出。草稿须经 Blockly 校验，核对 `canSave`、警告及引用。
+4. 调用一次 `xrugc_complete_script_block_batch`，保留 `operationId` 并等待用户在网页确认。用 `xrugc_get_operation_status` 查询原回执，核对 `completed`、`server_acknowledged`、目标实体及版本。刷新后重新发现工具并回读脚本连接与声音节点。把已保存实体加入场景并核对场景保存回执，随后启动 Unity 网页预览，等到 `phase=running` 后实际点击展品，确认播放了选定的讲解。运行结果与保存证据分别记录。
+
 ## 场景日期命名
 
 克隆场景或组件时，把原名称传给 `xrugc_format_scene_name`，并设 `refreshTimestamp:true`；用返回值作为复制名称。工具会替换旧的生成时间，清理重复生成后缀，第二次克隆也只保留本次时间。格式化本身不执行克隆或修改对象。

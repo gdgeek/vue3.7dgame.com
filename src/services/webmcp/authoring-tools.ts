@@ -178,6 +178,9 @@ const queryFields = {
   page: { type: "integer", minimum: 1 },
   pageSize: { type: "integer", minimum: 1, maximum: 50 },
 };
+const exhibitNameField = { type: "string", minLength: 1, maxLength: 200 };
+const exhibitAssetPageSize = 50;
+const exhibitAssetMaxPages = 3;
 const coverAdvice =
   "强烈建议配清晰且符合内容的封面：AI 能生成则生成，否则合法网络图片或真实编辑器截图。上传素材后再绑定封面；不得假装已生图或已显示。";
 
@@ -456,7 +459,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
     properties: Record<string, unknown>,
     required: string[],
     readOnly: boolean,
-    execute: (input: Record<string, unknown>) => unknown
+    execute: (input: Record<string, unknown>, signal?: AbortSignal) => unknown
   ): WebMcpTool => ({
     name,
     description,
@@ -467,7 +470,7 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
       additionalProperties: false,
     },
     annotations: { readOnlyHint: readOnly, untrustedContentHint: true },
-    execute: (input) => execute(record(input)),
+    execute: (input, execution) => execute(record(input), execution?.signal),
   });
   const paging = (input: Record<string, unknown>) => ({
     query:
@@ -880,6 +883,136 @@ export function createAuthoringTools(d: AuthoringDependencies): WebMcpTool[] {
           ...p,
           items,
           hasMorePossible: items.length === p.pageSize,
+        };
+      }
+    ),
+    tool(
+      "xrugc_preview_exhibit_blueprint",
+      "预览包含 1–3 个展品的小型 AR 讲解蓝图。按当前账号可访问的资源名称和类型匹配展品模型与点击播放的讲解音频。向用户展示蓝图和匹配结果并等待确认。此工具不上传、创建或保存对象。",
+      {
+        projectName: exhibitNameField,
+        entities: {
+          type: "array",
+          minItems: 1,
+          maxItems: 3,
+          items: {
+            type: "object",
+            properties: {
+              name: exhibitNameField,
+              narrationName: {
+                ...exhibitNameField,
+                description: "资源管理中已经上传的讲解音频显示名称。",
+              },
+              modelName: {
+                ...exhibitNameField,
+                description: "可选的模型资源显示名称；省略时先确定展示方式。",
+              },
+            },
+            required: ["name", "narrationName"],
+            additionalProperties: false,
+          },
+        },
+      },
+      ["projectName", "entities"],
+      true,
+      async (input, signal) => {
+        const owner = actor();
+        const context = d.context();
+        const projectName = string(input.projectName);
+        if (
+          !Array.isArray(input.entities) ||
+          input.entities.length < 1 ||
+          input.entities.length > 3
+        )
+          throw new Error("小型展品讲解蓝图需要 1–3 个展品");
+        const exhibits = input.entities.map((value: unknown) => {
+          const exhibit = record(value);
+          return {
+            name: string(exhibit.name),
+            narrationName: string(exhibit.narrationName),
+            modelName:
+              exhibit.modelName === undefined
+                ? undefined
+                : string(exhibit.modelName),
+          };
+        });
+        const assertCurrent = () => {
+          signal?.throwIfAborted();
+          assertActor(owner);
+          if (d.context() !== context)
+            throw new Error("编辑上下文已改变，请重新预览蓝图");
+        };
+        const matchAsset = async (type: "audio" | "polygen", name: string) => {
+          const matches = new Map<
+            number,
+            Pick<AuthoringAsset, "id" | "type" | "name" | "fileId">
+          >();
+          const exactName = name.normalize("NFC");
+          let exhausted = false;
+          for (let page = 1; page <= exhibitAssetMaxPages; page += 1) {
+            assertCurrent();
+            const items = await d.searchAssets(
+              type,
+              name,
+              page,
+              exhibitAssetPageSize
+            );
+            assertCurrent();
+            for (const item of items) {
+              if (
+                item.type === type &&
+                item.name.trim().normalize("NFC") === exactName
+              ) {
+                const { id, name: matchName, fileId } = item;
+                matches.set(id, { id, type, name: matchName, fileId });
+              }
+            }
+            if (items.length < exhibitAssetPageSize) {
+              exhausted = true;
+              break;
+            }
+          }
+          const candidates = [...matches.values()].slice(0, 10);
+          const query = { resourceType: type, name };
+          if (matches.size > 1)
+            return { ...query, status: "ambiguous", candidates } as const;
+          if (!exhausted)
+            return {
+              ...query,
+              status: "search_incomplete",
+              candidates,
+            } as const;
+          const candidate = candidates[0];
+          if (!candidate) return { ...query, status: "missing" } as const;
+          if (!candidate.fileId)
+            return { ...query, status: "missing_file", candidate } as const;
+          return { ...query, status: "matched", asset: candidate } as const;
+        };
+        const entities = await Promise.all(
+          exhibits.map(async ({ name, narrationName, modelName }) => {
+            const [narration, model] = await Promise.all([
+              matchAsset("audio", narrationName),
+              modelName ? matchAsset("polygen", modelName) : null,
+            ]);
+            return {
+              name,
+              interaction: { trigger: "click", action: "play_narration" },
+              narration,
+              model,
+            };
+          })
+        );
+        assertCurrent();
+        return {
+          status: "awaiting_blueprint_confirmation",
+          blueprint: { projectName, entities },
+          assetMatchComplete: entities.every(
+            ({ narration, model }) =>
+              narration.status === "matched" &&
+              (!model || model.status === "matched")
+          ),
+          nextStep:
+            "展示蓝图并等待用户确认。素材重名、缺失、缺少关联文件或搜索未完成时先核对资源；确认后沿用编辑器的暂存、网页人工确认和原操作回执查询。",
         };
       }
     ),
