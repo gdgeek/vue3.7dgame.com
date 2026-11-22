@@ -1,5 +1,9 @@
 <template>
-  <div class="news-section" :class="{ 'dark-theme': isDark }">
+  <div
+    v-if="!newsUnavailable"
+    class="news-section"
+    :class="{ 'dark-theme': isDark }"
+  >
     <div class="container">
       <div class="section-header" data-aos="fade-up">
         <h2 class="section-title">{{ item?.label }}</h2>
@@ -30,9 +34,6 @@
                 animated
                 style="margin-top: 20px"
               ></el-skeleton>
-            </div>
-            <div v-else-if="error" class="news-error">
-              <el-empty :description="$t('web.news.loadFailed')"></el-empty>
             </div>
             <div v-else class="news-timeline">
               <el-timeline>
@@ -128,7 +129,7 @@
 
               <div
                 class="news-more"
-                v-if="newsData.length > 2 && !showAllNews"
+                v-if="newsData.length > 2 && !showAllNews && !expandUnavailable"
                 data-aos="fade-up"
               >
                 <el-button
@@ -307,7 +308,9 @@ interface ArticleDetail {
 // 新闻数据
 const newsData = ref<PostSummary[]>([]);
 const loading = ref(false);
-const error = ref(false);
+const newsUnavailable = ref(false);
+const expandUnavailable = ref(false);
+let latestRequest = 0;
 
 // 文章详情
 const dialogVisible = ref(false);
@@ -375,8 +378,8 @@ const sanitizeText = (html: string) => {
 
 // 加载新闻数据
 const loadNewsData = async () => {
+  const request = ++latestRequest;
   loading.value = true;
-  error.value = false;
 
   try {
     const categoryId = item.value!.id;
@@ -385,8 +388,11 @@ const loadNewsData = async () => {
       pagination.value.size,
       pagination.value.current
     );
+    if (request !== latestRequest) return;
 
     newsData.value = response.data;
+    newsUnavailable.value = false;
+    expandUnavailable.value = false;
 
     // 更新分页信息
     pagination.value = {
@@ -396,10 +402,11 @@ const loadNewsData = async () => {
       total: parseInt(response.headers["x-wp-total"] || "0"),
     };
   } catch (err) {
-    logger.error("Failed to load news data:", err);
-    error.value = true;
+    if (request !== latestRequest) return;
+    logger.warn("Failed to load news data:", err);
+    newsUnavailable.value = true;
   } finally {
-    loading.value = false;
+    if (request === latestRequest) loading.value = false;
   }
 };
 
@@ -524,6 +531,7 @@ const shareArticle = () => {
 const showAllContent = async () => {
   // 如果数据不足，先加载全部数据
   if (newsData.value.length < pagination.value.total) {
+    const request = ++latestRequest;
     loading.value = true;
     try {
       const categoryId = item.value!.id;
@@ -534,13 +542,17 @@ const showAllContent = async () => {
         pagination.value.total, // 请求全部数据
         1
       );
+      if (request !== latestRequest) return;
 
       newsData.value = response.data;
     } catch (err) {
-      logger.error("Failed to load all news data:", err);
-      ElMessage.error(t("web.news.loadAllFailed"));
+      if (request === latestRequest) {
+        logger.warn("Failed to load all news data:", err);
+        expandUnavailable.value = true;
+      }
+      return;
     } finally {
-      loading.value = false;
+      if (request === latestRequest) loading.value = false;
     }
   }
 
@@ -569,7 +581,7 @@ const hideAllContent = () => {
 
 // 在组件卸载时
 onUnmounted(() => {
-  // 任何需要清理的内容
+  latestRequest += 1;
 });
 
 // 组件选项
@@ -1003,7 +1015,6 @@ defineOptions({
 
 // 加载和错误状态
 .news-loading,
-.news-error,
 .article-loading,
 .article-error {
   display: flex;

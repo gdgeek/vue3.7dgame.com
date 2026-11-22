@@ -1,15 +1,7 @@
 <template>
-  <div class="document-wrapper">
+  <div v-if="state !== 'error'" class="document-wrapper">
     <!-- 文章不存在 -->
     <el-empty v-if="state === 'not-found'" description="文章不存在"></el-empty>
-
-    <!-- 通用错误 + 重试按钮 -->
-    <el-empty
-      v-else-if="state === 'error'"
-      :description="errorMessage || '加载失败，请重试'"
-    >
-      <el-button type="primary" @click="retry">重试</el-button>
-    </el-empty>
 
     <!-- 正常内容 -->
     <el-card v-else-if="data" shadow="never" class="document-card">
@@ -76,7 +68,6 @@ const props = defineProps<{
 
 const data = ref<Data | null>(null);
 const state = ref<LoadState>("loading");
-const errorMessage = ref<string | null>(null);
 const categoryPath = computed(() => props.categoryPath ?? "/home/category");
 const category = computed(() => props.category ?? true);
 
@@ -97,7 +88,6 @@ function isNotFoundError(error: unknown): boolean {
 // 获取文章数据
 const refresh = async () => {
   state.value = "loading";
-  errorMessage.value = null;
   data.value = null;
 
   try {
@@ -105,18 +95,8 @@ const refresh = async () => {
     data.value = res.data;
     state.value = "success";
   } catch (error: unknown) {
-    if (isNotFoundError(error)) {
-      state.value = "not-found";
-    } else {
-      state.value = "error";
-      errorMessage.value = "加载失败，请重试";
-    }
+    state.value = isNotFoundError(error) ? "not-found" : "error";
   }
-};
-
-// 重试
-const retry = () => {
-  refresh();
 };
 
 onMounted(() => {

@@ -1,32 +1,19 @@
 <template>
-  <div class="document-list-wrapper">
+  <div
+    v-if="categoryState !== 'error' && postsState !== 'error'"
+    class="document-list-wrapper"
+  >
     <!-- 分类不存在 -->
     <el-empty
       v-if="categoryState === 'not-found'"
       description="分类不存在"
     ></el-empty>
 
-    <!-- 分类加载错误 -->
-    <el-empty
-      v-else-if="categoryState === 'error'"
-      :description="errorMessage || '加载失败，请重试'"
-    >
-      <el-button type="primary" @click="retry">重试</el-button>
-    </el-empty>
-
     <!-- 文章列表为空（404） -->
     <el-empty
       v-else-if="postsState === 'not-found'"
       description="暂无文章"
     ></el-empty>
-
-    <!-- 文章加载错误 -->
-    <el-empty
-      v-else-if="postsState === 'error'"
-      :description="errorMessage || '加载失败，请重试'"
-    >
-      <el-button type="primary" @click="retry">重试</el-button>
-    </el-empty>
 
     <!-- 正常内容 -->
     <template v-else>
@@ -137,7 +124,6 @@ const props = withDefaults(
 // 状态管理
 const categoryState = ref<LoadState>("loading");
 const postsState = ref<LoadState>("loading");
-const errorMessage = ref<string | null>(null);
 
 // 初始化响应式数据
 
@@ -169,7 +155,6 @@ function isNotFoundError(error: unknown): boolean {
 const refresh = async () => {
   categoryState.value = "loading";
   postsState.value = "loading";
-  errorMessage.value = null;
   data.value = null;
   category.value = null;
 
@@ -179,12 +164,7 @@ const refresh = async () => {
     category.value = categoryResponse.data;
     categoryState.value = "success";
   } catch (error: unknown) {
-    if (isNotFoundError(error)) {
-      categoryState.value = "not-found";
-    } else {
-      categoryState.value = "error";
-      errorMessage.value = "加载失败，请重试";
-    }
+    categoryState.value = isNotFoundError(error) ? "not-found" : "error";
     return; // 分类失败则不继续加载文章
   }
 
@@ -205,19 +185,8 @@ const refresh = async () => {
     };
     postsState.value = "success";
   } catch (error: unknown) {
-    if (isNotFoundError(error)) {
-      postsState.value = "not-found";
-    } else {
-      postsState.value = "error";
-      errorMessage.value = "加载失败，请重试";
-    }
+    postsState.value = isNotFoundError(error) ? "not-found" : "error";
   }
-};
-
-// 重试
-const retry = () => {
-  pagination.value.current = 1;
-  refresh();
 };
 
 onMounted(() => {

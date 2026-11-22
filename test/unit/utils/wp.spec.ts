@@ -40,15 +40,6 @@ vi.mock("vue-router", () => ({
   useRouter: vi.fn(() => ({ push: mockPush })),
 }));
 
-vi.mock("vue", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("vue")>();
-  return {
-    ...actual,
-    ref: vi.fn((v) => ({ value: v })),
-    watch: vi.fn(),
-  };
-});
-
 describe("wp axios instance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -164,110 +155,31 @@ describe("wp response interceptor - error handling", () => {
     vi.unstubAllGlobals();
   });
 
-  it("shows networkError message when response is absent and message is 'Network Error'", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = { message: "Network Error", response: undefined };
-    await errFn(error).catch(() => {});
-    expect(mockElMessage.error).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "request.networkError" })
-    );
-  });
+  it.each(["Network Error", "timeout"])(
+    "rejects %s without opening a global notification",
+    async (message) => {
+      await import("@/utils/wp");
+      const reject =
+        mockAxiosInstance.interceptors.response.use.mock.calls[0][1];
+      const error = new Error(message);
+      await expect(reject(error)).rejects.toBe(error);
+      expect(mockElMessage.error).not.toHaveBeenCalled();
+      expect(mockPush).not.toHaveBeenCalled();
+    }
+  );
 
-  it("shows custom error message when response is absent and message is not 'Network Error'", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = { message: "Custom timeout error", response: undefined };
-    await errFn(error).catch(() => {});
-    expect(mockElMessage.error).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Custom timeout error" })
-    );
-  });
-
-  it("rejects with the original error when response is absent", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = { message: "Network Error", response: undefined };
-    await expect(errFn(error)).rejects.toBe(error);
-  });
-
-  it("shows loginExpired message and navigates to login for 401 responses", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = {
-      message: "Unauthorized",
-      response: { status: 401, data: {} },
-    };
-    await errFn(error).catch(() => {});
-    expect(mockElMessage.error).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "request.loginExpired" })
-    );
-    expect(mockPush).toHaveBeenCalledWith({ path: "/site/login" });
-  });
-
-  it("rejects with empty string for 401 responses", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = {
-      message: "Unauthorized",
-      response: { status: 401, data: {} },
-    };
-    await expect(errFn(error)).rejects.toBe("");
-  });
-
-  it("shows serverError message for 5xx responses", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = {
-      message: "Server error",
-      response: { status: 500, data: {} },
-    };
-    await errFn(error).catch(() => {});
-    expect(mockElMessage.error).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "request.serverError" })
-    );
-  });
-
-  it("shows response.data.message for other error statuses when present", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = {
-      message: "Fallback",
-      response: { status: 400, data: { message: "Validation failed" } },
-    };
-    await errFn(error).catch(() => {});
-    expect(mockElMessage.error).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Validation failed" })
-    );
-  });
-
-  it("falls back to error.message when response.data.message is absent", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const error = {
-      message: "Forbidden",
-      response: { status: 403, data: {} },
-    };
-    await errFn(error).catch(() => {});
-    expect(mockElMessage.error).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Forbidden" })
-    );
-  });
-
-  it("rejects with the response object for non-401 error responses", async () => {
-    await import("@/utils/wp");
-    const errFn =
-      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
-    const response = { status: 500, data: {} };
-    const error = { message: "Server error", response };
-    await expect(errFn(error)).rejects.toBe(response);
-  });
+  it.each([401, 403, 404, 500, 502])(
+    "passes HTTP %i to the feature without a toast or login redirect",
+    async (status) => {
+      await import("@/utils/wp");
+      const reject =
+        mockAxiosInstance.interceptors.response.use.mock.calls[0][1];
+      const response = { status, data: "proxy response" };
+      await expect(reject({ message: "HTTP error", response })).rejects.toBe(
+        response
+      );
+      expect(mockElMessage.error).not.toHaveBeenCalled();
+      expect(mockPush).not.toHaveBeenCalled();
+    }
+  );
 });
