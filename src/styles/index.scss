@@ -3,6 +3,13 @@
 @use "./themes/theme-styles";
 @use "./ar-platform";
 
+.el-button.resource-file-picker-button {
+  height: auto;
+  padding: 12px 32px;
+  font-size: 14px;
+  border-radius: 20px;
+}
+
 .app-container {
   padding: 15px;
 }
@@ -27,5 +34,23 @@
 
   &:hover {
     color: rgb(32 160 255);
+  }
+}
+
+// Subtitle previews keep their fixed region while fading as one bilingual group.
+.subtitle-fade-enter-active {
+  transition: opacity 0.12s ease-out;
+}
+.subtitle-fade-leave-active {
+  transition: opacity 0.16s ease-in;
+}
+.subtitle-fade-enter-from,
+.subtitle-fade-leave-to {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .subtitle-fade-enter-active,
+  .subtitle-fade-leave-active {
+    transition: none;
   }
 }

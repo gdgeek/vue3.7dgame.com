@@ -1,4 +1,5 @@
 import type { metaInfo } from "@/api/v1/meta";
+import { readAudioSubtitles } from "@/utils/audioSubtitles";
 
 /** 场景节点参数（来自后端 JSON，字段可变） */
 interface MetaNodeParameters {
@@ -39,6 +40,7 @@ export interface EntityInfo {
   moved?: boolean;
   rotate?: boolean;
   hasTooltips?: boolean;
+  hasSubtitles?: boolean;
 }
 
 export interface MetaResourceIndex {
@@ -179,7 +181,11 @@ function parsePoint(
   };
 }
 
-function walk(node: MetaNode | undefined, acc: MetaResourceIndex) {
+function walk(
+  node: MetaNode | undefined,
+  acc: MetaResourceIndex,
+  resourceInfo: Map<string, unknown>
+) {
   if (!node) return;
   const action = parseAction(node);
   if (action) acc.action.push(action);
@@ -200,11 +206,21 @@ function walk(node: MetaNode | undefined, acc: MetaResourceIndex) {
   const polygen = parsePoint(node, ["polygen"]);
   if (polygen) acc.polygen.push(polygen);
   const video = parsePoint(node, ["video"]);
-  if (video) acc.video.push(video);
+  if (video) {
+    video.hasSubtitles =
+      readAudioSubtitles(resourceInfo.get(String(node.parameters.resource)))
+        .length > 0;
+    acc.video.push(video);
+  }
   const picture = parsePoint(node, ["picture"]);
   if (picture) acc.picture.push(picture);
   const sound = parsePoint(node, ["sound"]);
-  if (sound) acc.sound.push(sound);
+  if (sound) {
+    sound.hasSubtitles =
+      readAudioSubtitles(resourceInfo.get(String(node.parameters.resource)))
+        .length > 0;
+    acc.sound.push(sound);
+  }
   const text = parsePoint(node, ["text"]);
   if (text) acc.text.push(text);
   const voxel = parsePoint(node, ["voxel"]);
@@ -224,7 +240,8 @@ function walk(node: MetaNode | undefined, acc: MetaResourceIndex) {
     Object.keys(children).forEach((key) => {
       if (key === "components") return;
       const arr = children[key];
-      if (Array.isArray(arr)) arr.forEach((child) => walk(child, acc));
+      if (Array.isArray(arr))
+        arr.forEach((child) => walk(child, acc, resourceInfo));
     });
   }
 }
@@ -249,6 +266,14 @@ export function buildMetaResourceIndex(meta: metaInfo): MetaResourceIndex {
         }
       : { inputs: [], outputs: [] },
   };
-  if (data) walk(data, index);
+  if (data) {
+    const resourceInfo = new Map(
+      (meta.resources ?? []).map((resource) => [
+        String(resource.id),
+        resource.info,
+      ])
+    );
+    walk(data, index, resourceInfo);
+  }
   return index;
 }
