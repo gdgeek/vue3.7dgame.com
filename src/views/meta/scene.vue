@@ -2081,6 +2081,8 @@ const handleMessage = async (e: MessageEvent) => {
           meta: MetaPayload;
           events: unknown;
         };
+        // A failed save must not leave an older cancelled snapshot available.
+        pendingRestorePayload.value = saveData;
         const result = await saveMeta(saveData, currentSaveTrigger);
         if (!isCurrentResponse()) break;
         if (result) {
@@ -2096,7 +2098,7 @@ const handleMessage = async (e: MessageEvent) => {
         isSavingVersion.value = false;
         resolveLeaveSave(result);
       } else if (action === "save-before-leave" && payload.noChange) {
-        if (hasUnconfirmedPersistence.value && !pendingRestorePayload.value) {
+        if (hasUnconfirmedPersistence.value) {
           isSavingVersion.value = false;
           resolveLeaveSave(false);
           ElMessage.error(t("common.editorSave.pending"));

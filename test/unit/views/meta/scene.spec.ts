@@ -1461,6 +1461,110 @@ describe("views/meta/scene.vue", () => {
     }
   );
 
+  it.each([409, "lost response"] as const)(
+    "never saves a cancelled voice snapshot after newer pinyin fails with %s",
+    async (failure) => {
+      mockUseActualSaveGuard = true;
+      mockRoute.query.id = "1101";
+      const errorMessage = vi.fn();
+      vi.stubGlobal("ElMessage", { error: errorMessage, info: vi.fn() });
+      const voiceSnapshot = (pinyin: string) => ({
+        meta: {
+          ...makeMetaResponse(1101).data.data,
+          children: {
+            entities: [
+              {
+                type: "Entity",
+                parameters: { uuid: "voice-node", name: "Model" },
+                children: {
+                  commands: [
+                    {
+                      type: "Voice",
+                      parameters: {
+                        uuid: "voice-command",
+                        phrase: "测试一下吧",
+                        pinyin,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        events: null,
+      });
+      const cancelled = voiceSnapshot("da kai mo xing");
+      const current = voiceSnapshot("ce shi yi xia ba");
+      await mountSceneView();
+      sendReady("voice-save-retry");
+      await flushAsync();
+      await finishEditorLoading();
+      const { Message } = await import("@/components/Dialog");
+      vi.mocked(Message.success).mockClear();
+      const respond = (payload: object) =>
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: document.querySelector("iframe")?.contentWindow,
+            origin: "https://editor.example.test",
+            data: { type: "RESPONSE", payload },
+          })
+        );
+      const saveFromToolbar = () =>
+        mockRegisterToolbar.mock.calls.at(-1)![1].onSave();
+
+      // The iframe menu advances its baseline and sends A before the host asks
+      // for confirmation. Cancelling leaves A pending, without an HTTP write.
+      mockConfirmEditorSave.mockRejectedValueOnce("cancel");
+      respond({ action: "save", ...cancelled });
+      await flushAsync();
+      expect(mockPutMeta).not.toHaveBeenCalled();
+
+      // The user confirms the corrected pinyin B, then saves from the toolbar.
+      saveFromToolbar();
+      await flushAsync();
+      expect(mockSendRequest).toHaveBeenLastCalledWith("save-before-leave");
+      mockPutMeta.mockRejectedValueOnce(
+        failure === 409
+          ? { isAxiosError: true, response: { status: 409 } }
+          : new Error("connection lost")
+      );
+      respond({ action: "save-before-leave", ...current });
+      await flushAsync();
+      expect(mockPutMeta).toHaveBeenCalledOnce();
+      expect(mockPutMeta).toHaveBeenLastCalledWith(
+        1101,
+        { data: current.meta, events: null },
+        expect.objectContaining({
+          expectedRevision: `sha256:${"a".repeat(64)}`,
+        })
+      );
+
+      // The iframe has already moved its baseline to B. Retrying must keep
+      // the rejected/unverified state, never write the cancelled A snapshot.
+      saveFromToolbar();
+      await flushAsync();
+      respond({ action: "save-before-leave", noChange: true });
+      await flushAsync();
+      expect
+        .soft(
+          mockPutMeta.mock.calls.map(
+            ([, body]) =>
+              body.data.children.entities[0].children.commands[0].parameters
+                .pinyin
+          )
+        )
+        .toEqual(["ce shi yi xia ba"]);
+      expect.soft(Message.success).not.toHaveBeenCalled();
+      expect
+        .soft(errorMessage)
+        .toHaveBeenLastCalledWith("common.editorSave.pending");
+      expect
+        .soft(mockUpdateToolbarStatus)
+        .toHaveBeenLastCalledWith(expect.anything(), "dirty");
+    }
+  );
+
   describe.each(["meta", "verse"] as const)(
     "%s manual save failures",
     (kind) => {
