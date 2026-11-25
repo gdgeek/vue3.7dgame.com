@@ -164,6 +164,173 @@ describe("buildMetaResourceIndex", () => {
     expect(result.action).toEqual([]);
   });
 
+  it("preserves a legacy Voice action and its original scene data", () => {
+    const voice = makeNode("Voice", "voice-legacy", {
+      action: "nextStep",
+      parameter: { target: "existing-target" },
+      existingField: { enabled: true },
+    });
+    const before = JSON.stringify(voice);
+
+    expect(buildMetaResourceIndex(makeMeta(voice)).action).toEqual([
+      {
+        uuid: "voice-legacy",
+        name: "nextStep",
+        parameter: { target: "existing-target" },
+        type: "Voice",
+      },
+    ]);
+    expect(JSON.stringify(voice)).toBe(before);
+  });
+
+  it("projects Voice phrase and pinyin without replacing its action or UUID", () => {
+    const scene = makeNode(
+      "Meta",
+      "meta-1",
+      {},
+      {
+        commands: [
+          makeNode("Voice", "voice-custom", {
+            action: "nextStep",
+            parameter: "original-parameter",
+            phrase: "打开灯光",
+            pinyin: "da kai deng guang",
+            existingField: "keep",
+          }),
+        ],
+      }
+    );
+    const before = JSON.stringify(scene);
+
+    expect(buildMetaResourceIndex(makeMeta(scene)).action).toEqual([
+      {
+        uuid: "voice-custom",
+        name: "nextStep",
+        parameter: "original-parameter",
+        type: "Voice",
+        phrase: "打开灯光",
+        pinyin: "da kai deng guang",
+      },
+    ]);
+    expect(JSON.stringify(scene)).toBe(before);
+  });
+
+  it.each([undefined, ""])(
+    "indexes a custom Voice with action=%s and a valid phrase",
+    (action) => {
+      const voice = makeNode("Voice", "voice-custom", {
+        ...(action === undefined ? {} : { action }),
+        phrase: "关闭灯光",
+        pinyin: "guan bi deng guang",
+      });
+      const before = JSON.stringify(voice);
+      expect(buildMetaResourceIndex(makeMeta(voice)).action).toEqual([
+        {
+          uuid: "voice-custom",
+          name: action ?? null,
+          parameter: null,
+          type: "Voice",
+          phrase: "关闭灯光",
+          pinyin: "guan bi deng guang",
+        },
+      ]);
+      expect(JSON.stringify(voice)).toBe(before);
+    }
+  );
+
+  it("projects canonical action+pinyin without rewriting scene data", () => {
+    const voice = makeNode("Voice", "voice-canonical", {
+      action: "打开灯光",
+      pinyin: "da kai deng guang",
+      parameter: { target: "light" },
+    });
+    const before = JSON.stringify(voice);
+    const restored = JSON.parse(before);
+    expect(buildMetaResourceIndex(makeMeta(restored)).action).toEqual([
+      {
+        uuid: "voice-canonical",
+        name: "打开灯光",
+        phrase: "打开灯光",
+        pinyin: "da kai deng guang",
+        parameter: { target: "light" },
+        type: "Voice",
+      },
+    ]);
+    expect(JSON.stringify(restored)).toBe(before);
+    expect(restored.parameters).not.toHaveProperty("phrase");
+  });
+
+  it.each([undefined, null, "", "   ", 42])(
+    "preserves custom-field presence for invalid phrase=%s instead of using an old action",
+    (phrase) => {
+      const voice = makeNode("Voice", "voice-invalid", {
+        action: "nextStep",
+        phrase,
+        pinyin: "xia yi bu",
+      });
+      expect(buildMetaResourceIndex(makeMeta(voice)).action).toEqual([
+        {
+          uuid: "voice-invalid",
+          name: "nextStep",
+          type: "Voice",
+          parameter: null,
+          phrase: typeof phrase === "string" ? phrase : "",
+          pinyin: "xia yi bu",
+        },
+      ]);
+    }
+  );
+
+  it.each([undefined, null, "", 42])(
+    "does not reinterpret present invalid pinyin=%s as an action-only command",
+    (pinyin) => {
+      const voice = makeNode("Voice", "voice-invalid", {
+        action: "scaleUp",
+        pinyin,
+      });
+      const action = buildMetaResourceIndex(makeMeta(voice)).action[0];
+      expect(action).toMatchObject({
+        name: "scaleUp",
+        phrase: "scaleUp",
+        pinyin: "",
+      });
+    }
+  );
+
+  it("preserves an incomplete custom command's UUID without inventing a legacy action", () => {
+    const voice = makeNode("Voice", "voice-incomplete", { phrase: "" });
+    expect(buildMetaResourceIndex(makeMeta(voice)).action).toEqual([
+      {
+        uuid: "voice-incomplete",
+        name: null,
+        phrase: "",
+        pinyin: "",
+        parameter: null,
+        type: "Voice",
+      },
+    ]);
+  });
+
+  it.each(["Button", "Action", "Gesture"])(
+    "does not change %s action projection when voice fields are present",
+    (type) => {
+      const button = makeNode(type, "button-1", {
+        action: "click",
+        phrase: "打开灯光",
+        pinyin: "da kai deng guang",
+      });
+      expect(buildMetaResourceIndex(makeMeta(button)).action).toEqual([
+        { uuid: "button-1", name: "click", parameter: null, type },
+      ]);
+      const withoutAction = makeNode(type, "button-2", {
+        phrase: "打开灯光",
+      });
+      expect(buildMetaResourceIndex(makeMeta(withoutAction)).action).toEqual(
+        []
+      );
+    }
+  );
+
   it("sets parentUuid on Tooltip component action", () => {
     const parent = {
       type: "Polygen",

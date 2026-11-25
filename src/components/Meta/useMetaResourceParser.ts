@@ -4,6 +4,8 @@ import type { metaInfo } from "@/api/v1/meta";
 interface MetaNodeParameters {
   uuid: string;
   action?: string;
+  phrase?: unknown;
+  pinyin?: unknown;
   parameter?: unknown;
   name?: string;
   animations?: unknown;
@@ -27,6 +29,8 @@ interface MetaNode {
 export interface ActionInfo {
   uuid: string;
   name: string | null;
+  phrase?: string;
+  pinyin?: string;
   parameter: unknown;
   type: string | null;
   parentUuid?: string | null;
@@ -125,17 +129,34 @@ function parseAction(
   node: MetaNode | undefined,
   parentUuid?: string
 ): ActionInfo | null {
-  if (
-    !node ||
-    !node.parameters ||
-    typeof node.parameters.action === "undefined"
-  )
+  if (!node || !node.parameters) return null;
+  const hasPhrase = Object.prototype.hasOwnProperty.call(
+    node.parameters,
+    "phrase"
+  );
+  const isCustomVoice =
+    node.type === "Voice" &&
+    (hasPhrase ||
+      Object.prototype.hasOwnProperty.call(node.parameters, "pinyin"));
+  const phrase = hasPhrase ? node.parameters.phrase : node.parameters.action;
+  if (typeof node.parameters.action === "undefined" && !isCustomVoice)
     return null;
   return {
     uuid: node.parameters.uuid,
     name: node.parameters.action ?? null,
     parameter: node.parameters.parameter ?? null,
     type: node.type ?? null,
+    // This is a display index only. Preserve custom-field presence, including
+    // invalid values, so Blockly never reinterprets them as an old action key.
+    ...(isCustomVoice
+      ? {
+          phrase: typeof phrase === "string" ? phrase : "",
+          pinyin:
+            typeof node.parameters.pinyin === "string"
+              ? node.parameters.pinyin
+              : "",
+        }
+      : {}),
     ...(node.type === "Tooltip" ? { parentUuid: parentUuid ?? null } : {}),
   };
 }
